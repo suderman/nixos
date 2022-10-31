@@ -124,6 +124,7 @@ in {
      inetutils
      mtr
      sysstat
+     gnumake
      #vim 
      #neovim
      # tmux
