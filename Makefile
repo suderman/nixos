@@ -1,16 +1,18 @@
+HOSTNAME := $(shell hostname)
+
 all: switch
 
 # if sudo, switch_host; else, switch_home
 switch:
-	@[ "$(shell id -u)" = 0 ] && make --no-print-directory switch_host || make --no-print-directory switch_home
+	@if [ "$(shell id -u)" = 0 ]; then make --no-print-directory switch_host; else make --no-print-directory switch_home; fi
 
 # rebuild the whole system with nixos-rebuild
 switch_host:
-	nixos-rebuild switch --flake '.'
+	nixos-rebuild switch --flake '$(PWD)#$(HOSTNAME)'
 
 # rebuild the home directory with home-manager
 switch_home:
-	home-manager switch --flake '.#me'
+	home-manager switch --flake '$(PWD)#me'
 
 update:
 	nix flake update
