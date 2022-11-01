@@ -1,0 +1,59 @@
+# Shortcuts
+set {
+  $scripts        ~/.config/sway/scripts
+  $wallpapers     ~/.config/sway/wallpapers
+  $wayland        --enable-features=UseOzonePlatform --ozone-platform=wayland
+  $wayland_scale  $wayland --force-device-scale-factor=1.5
+}
+
+# Keys
+set {
+
+  # Key Symbols
+  $Super      Mod4
+  $Alt        Mod1
+  $mod Mod4
+  $alt Mod1
+
+  # Key Codes
+  # $Caps_Lock  66
+  # $Shift_L    50
+  # $Shift_R    62
+  # $Super_L    37
+  # $Alt_L      133
+  # $Control_L  64
+  # $Control_R  108
+  # $Super_R    105
+  $Caps_Lock  66
+  $Shift_L    50
+  $Shift_R    62
+  $Control_L  37
+  $Super_L    133
+  $Alt_L      64
+  $Alt_R      108
+  $Super_R    105
+
+}
+
+# set {
+#   $term exec alacritty
+#   $editor exec nvim
+#   $browser exec chromium
+# }
+# bindsym $Super+Return $term
+# bindsym $Super+Backslash $browser
+# bindsym $Super+Space exec wofi --show drun,run
+# bindsym $Super+r reload
+# bindsym $Super+h focus left
+# bindsym $Super+j focus down
+# bindsym $Super+k focus up
+# bindsym $Super+l focus right
+
+include ~/.config/sway/config.d/*
+# include ~/.config/sway/config.d/apps
+# include ~/.config/sway/config.d/autostart
+# include ~/.config/sway/config.d/input
+
+
+include /etc/sway/config.d/*
+exec_always "systemctl --user import-environment; systemctl --user start sway-session.target"

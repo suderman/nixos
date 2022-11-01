@@ -44,7 +44,7 @@
         inherit system;
         pkgs = mkPkgs inputs.nixpkgs system;
         specialArgs = { inherit inputs; };
-        modules = [ ./hosts/${hostname}/configuration.nix ];
+        modules = [ ./hosts/${hostname} ];
       };
 
       # Make a Home Manager configuration

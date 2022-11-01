@@ -27,14 +27,21 @@
   ];
 
 
-  home.file = { 
-    ".emacs.d/init.el".source = config.lib.file.mkOutOfStoreSymlink ./init.el;
-    ".emacs.d/early-init.el".source = config.lib.file.mkOutOfStoreSymlink ./early-init.el; 
-  };
+  # home.file = { 
+  #   ".emacs.d/init.el".source = config.lib.file.mkOutOfStoreSymlink ./init.el;
+  #   ".emacs.d/early-init.el".source = config.lib.file.mkOutOfStoreSymlink ./early-init.el; 
+  # };
+
+  xdg.configFile."btop/btop.conf".source = ./config/btop/btop.conf;
+  # home.file.".config/"
+  # xdg.configFile."i3blocks/config".source = ./i3blocks.conf;
+  # home.file.".gdbinit".text = ''
+  #     set auto-load safe-path /nix/store
+  # '';
 
   # Enable home-manager and git
   programs.home-manager.enable = true;
-  programs.git.enable = true;
+  # programs.git.enable = true;
 
   # Nicely reload system units when changing configs
   systemd.user.startServices = "sd-switch";

@@ -1,0 +1,78 @@
+set $amount 50px
+mode $MODE_RESIZE {
+
+  # Switch to FOCUS mode
+  # bindcode $Control_R mode $MODE_FOCUS
+  bindcode $Control_R mode $MODE_MOVE
+
+  # [m] switch to MOVE mode
+  bindsym m mode $MODE_MOVE
+
+  # [hjkl] resize container
+  bindsym h     resize grow   width  $amount
+  bindsym j     resize shrink height $amount
+  bindsym k     resize grow   height $amount
+  bindsym l     resize shrink width  $amount
+  bindsym Left  resize grow   width  $amount
+  bindsym Down  resize shrink height $amount
+  bindsym Up    resize grow   height $amount
+  bindsym Right resize shrink width  $amount
+
+  # [<] prev or [>] next window
+  bindsym Period exec swayr prev-window all-workspaces
+  bindsym Comma  exec swayr next-window all-workspaces
+
+  # Last window
+  bindsym Slash  exec swayr switch-to-urgent-or-lru-window
+
+  # [0-9] focus workspace
+  bindsym 1 workspace number 1
+  bindsym 2 workspace number 2
+  bindsym 3 workspace number 3
+  bindsym 4 workspace number 4
+  bindsym 5 workspace number 5
+  bindsym 6 workspace number 6
+  bindsym 7 workspace number 7
+  bindsym 8 workspace number 8
+  bindsym 9 workspace number 9
+  bindsym 0 workspace number 10
+  bindsym bracketleft workspace prev_on_output
+  bindsym bracketright workspace next_on_output
+
+  # Escape mode
+  bindsym  Escape     mode $MODE_FOCUS
+  bindsym  i          mode $MODE_FOCUS
+  bindcode $Super_L   mode $MODE_FOCUS
+  bindcode $Super_R   mode $MODE_FOCUS
+  bindcode $Caps_Lock mode $MODE_FOCUS
+  bindcode $Alt_L     mode $MODE_FOCUS
+  bindcode $Control_L mode $MODE_FOCUS
+
+
+  # [Return] new term
+  bindsym Return exec $term
+
+  # [\] new browser
+  bindsym Backslash exec $browser
+
+  # [q]uit window
+  bindsym q kill
+
+  # toggle la[y]out
+  bindsym y layout toggle split
+
+  # [t]abbed or stacking layout
+  bindsym t layout tabbed
+  bindsym Shift+t layout stacking
+
+  # toggle fullscreen
+  bindsym z fullscreen
+
+  # toggle floating
+  bindsym o floating toggle
+  bindsym Shift+o focus mode_toggle
+
+  # [p]arent focus
+  bindsym p focus parent
+  
+}

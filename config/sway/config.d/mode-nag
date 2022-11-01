@@ -1,0 +1,27 @@
+mode "nag" {
+  bindsym {
+    Ctrl+d    mode "default"
+
+    Ctrl+c    exec swaynagmode --exit
+    q         exec swaynagmode --exit
+    Escape    exec swaynagmode --exit
+
+    Return    exec swaynagmode --confirm
+
+    Tab       exec swaynagmode --select prev
+    Shift+Tab exec swaynagmode --select next
+
+    Left      exec swaynagmode --select next
+    Right     exec swaynagmode --select prev
+
+    Up        exec swaynagmode --select next
+    Down      exec swaynagmode --select prev
+
+    j         exec swaynagmode --select next
+    k         exec swaynagmode --select prev
+  }
+}
+
+# Exit sway (logs you out of your Wayland session)
+bindsym $Super+Shift+q exec swaynagmode -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'
+swaynag_command swaynagmode

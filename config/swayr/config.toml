@@ -1,0 +1,79 @@
+[menu]
+executable = 'wofi'
+args = [
+    '--show=dmenu',
+    '--allow-markup',
+    '--allow-images',
+    '--insensitive',
+    '--cache-file=/dev/null',
+    '--parse-search',
+    '--prompt={prompt}',
+]
+
+# [menu]
+# executable = 'rofi'
+# args = [
+#     '-show=run',
+#     '--allow-markup',
+#     '--allow-images',
+#     '--insensitive',
+#     '--cache-file=/dev/null',
+#     '--parse-search',
+#     '--prompt={prompt}',
+# ]
+
+[format]
+# window_format = 'img:{app_icon}:text:{urgency_start}<b>{title}</b>{urgency_end} — <i>{app_name}</i> on workspace {workspace_name}   <span alpha="20000">({id})</span>'
+window_format = 'img:{app_icon}:text:{urgency_start}{title}{urgency_end}<span alpha="20000"> — <i>{app_name}</i> ({id})</span>'
+workspace_format = '<b>Workspace {name}</b>   <span alpha="20000">({id})</span>'
+urgency_start = '<span background="darkred" foreground="yellow">'
+urgency_end = '</span>'
+html_escape = true
+icon_dirs = [
+    '/usr/share/icons/Zafiro/apps',
+    '/usr/share/icons/Adwaita/48x48/apps',
+    '/usr/share/icons/hicolor/scalable/apps',
+    '/usr/share/icons/hicolor/48x48/apps',
+    '/usr/share/pixmaps',
+]
+
+[layout]
+auto_tile = true
+auto_tile_min_window_width_per_output_width = [
+    [
+    1024,
+    500,
+],
+    [
+    1280,
+    600,
+],
+    [
+    1400,
+    680,
+],
+    [
+    1440,
+    700,
+],
+    [
+    1600,
+    780,
+],
+    [
+    1920,
+    920,
+],
+    [
+    2560,
+    1000,
+],
+    [
+    3440,
+    1000,
+],
+    [
+    4096,
+    1200,
+],
+]

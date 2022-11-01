@@ -1,0 +1,15 @@
+[Unit]
+Description=An urgent-first/LRU window switcher for sway
+Documentation=https://sr.ht/~tsdh/swayr/
+BindsTo=sway-session.target
+StartLimitIntervalSec=500
+StartLimitBurst=5
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/swayrd
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=sway-session.target

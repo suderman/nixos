@@ -1,0 +1,15 @@
+[Unit]
+Description=Swayest Workstyle
+Documentation=https://github.com/Lyr-7D1h/swayest_workstyle
+BindsTo=sway-session.target
+StartLimitIntervalSec=500
+StartLimitBurst=5
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/sworkstyle
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=sway-session.target

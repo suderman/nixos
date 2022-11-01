@@ -1,0 +1,15 @@
+[Unit]
+Description=Generic command-line automation tool (no X!)
+Documentation=https://github.com/ReimuNotMoe/ydotool/
+BindsTo=sway-session.target
+StartLimitIntervalSec=500
+StartLimitBurst=5
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/ydotoold
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=default.target

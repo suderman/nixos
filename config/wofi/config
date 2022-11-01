@@ -1,0 +1,29 @@
+mode=drun
+filter_rate=50
+insensitive=true
+allow-markup=true
+# term=alacritty
+layer=overlay
+
+# Theme
+# Also check ./style.css
+colors=colors
+# image_size=50
+image_size=30
+allow_images=true
+columns=3
+
+# Position
+# width=1600
+width=1000
+# height=810
+height=500
+halign=fill
+orientation=vertical
+content_halign=fill
+
+# This hide executable actions
+no_actions=true
+
+# drun-print_command=true
+# drun-display_generic=true

@@ -1,0 +1,15 @@
+[Unit]
+Description=Autotiling
+Documentation=https://github.com/nwg-piotr/autotiling
+BindsTo=sway-session.target
+StartLimitIntervalSec=500
+StartLimitBurst=5
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/autotiling
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=sway-session.target

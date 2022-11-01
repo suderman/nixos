@@ -1,0 +1,20 @@
+#!/usr/bin/bash
+
+yad \
+	--title="Sway-WM keybindings" \
+	--no-buttons \
+	--geometry=500x445-15-400 \
+	--list \
+	--column=KEY --column=DESCRIPTION --column=COMMAND \
+		"ESC" "close this app" "" \
+		"=" "modkey" "(set mod Mod4)" \
+		"+enter" "Terminal" "(alacritty)" \
+		"+d" "Application Menu" "(wofi)" \
+		"+p" "Activities" "(wofi)" \
+		"+o" "" "Open Broswer" \
+		"+n" "" "Open Files" \
+		"+q" "close focused app" "(kill)" \
+		"[Shift]+Print-key" "screenshot" "(grim)" \
+		"+Shift+e" "power-menu" "(wofi)" \
+		"+Shift+p" "open keybinding helper" \
+		"full list"

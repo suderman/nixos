@@ -1,0 +1,20 @@
+#!/usr/bin/env zsh
+
+# Increase volume
+if [ "$1" = "up" ]; then
+  pactl set-sink-volume @DEFAULT_SINK@ +5%
+
+# Decrease volume
+elif [ "$1" = "down" ]; then
+  pactl set-sink-volume @DEFAULT_SINK@ -5%
+
+# Toggle mute
+elif [ "$1" = "mute" ]; then
+  pactl set-sink-mute @DEFAULT_SINK@ toggle
+fi
+
+# Get volume
+val=$(pactl get-sink-volume @DEFAULT_SINK@ | grep -o '[^ ]*%' | tr -d '%' | head -n1)
+
+# Send to wob
+echo $val > $SWAYSOCK.wob

@@ -1,0 +1,41 @@
+#!/usr/bin/env zsh
+
+# Get the current scale (rounded to 1 decimal)
+scale=$(swaymsg -t get_outputs | jq '.[].scale' | awk '{printf "%.1f\n", $1}')
+
+# Toggle scale
+if [ "$1" = "toggle" ]; then
+  if [ "$scale" = "1.5" ]; then
+    scale=1.0
+  else
+    scale=1.5
+  fi
+  percent=$(echo $scale | awk '{ print (($1 - 1) * 100) }')
+
+# Increase scale
+elif [ "$1" = "up" ]; then
+  scale=$(echo $scale | awk '{ print ($1 + .1) }')
+  percent=$(echo $scale | awk '{ print (($1 - 1) * 100) }')
+  if [ "$percent" -gt 100 ]; then
+    scale=2.0
+    percent=100
+  fi
+
+# Decrease scale
+elif [ "$1" = "down" ]; then
+  scale=$(echo $scale | awk '{ print ($1 - .1) }')
+  percent=$(echo $scale | awk '{ print (($1 - 1) * 100) }')
+  if [ "$percent" -lt 10 ]; then
+    scale=1.0
+    percent=0
+  fi
+fi
+
+# Change the scale
+swaymsg output eDP-1 scale $scale
+
+# Send to wob
+echo $percent > $SWAYSOCK.wob
+
+# echo $scale
+# echo $percent

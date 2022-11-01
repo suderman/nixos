@@ -1,0 +1,73 @@
+mode $MODE_MOVE {
+
+  # Switch to FOCUS mode
+  # bindcode $Control_R mode $MODE_FOCUS
+  bindcode $Control_R mode default
+
+  # Switch to RESIZE mode
+  bindsym m mode $MODE_RESIZE
+
+  # [hjkl] move container
+  bindsym h     move left
+  bindsym j     move down
+  bindsym k     move up
+  bindsym l     move right
+  bindsym Left  move left
+  bindsym Down  move down
+  bindsym Up    move up
+  bindsym Right move right
+
+  # [`] move container to next empty workspace
+  bindsym Grave exec $scripts/empty --move next 1
+
+  # [-] move container to scratchpad
+  bindsym Minus move scratchpad
+
+  # [0-9] move container to workspace
+  bindsym 1 move container to workspace number 1,  workspace number 1
+  bindsym 2 move container to workspace number 2,  workspace number 2
+  bindsym 3 move container to workspace number 3,  workspace number 3
+  bindsym 4 move container to workspace number 4,  workspace number 4
+  bindsym 5 move container to workspace number 5,  workspace number 5
+  bindsym 6 move container to workspace number 6,  workspace number 6
+  bindsym 7 move container to workspace number 7,  workspace number 7
+  bindsym 8 move container to workspace number 8,  workspace number 8
+  bindsym 9 move container to workspace number 9,  workspace number 9
+  bindsym 0 move container to workspace number 10, workspace number 10
+
+  # Escape mode
+  bindsym  Escape     mode $MODE_FOCUS
+  bindsym  i          mode $MODE_FOCUS
+  bindcode $Super_L   mode $MODE_FOCUS
+  bindcode $Super_R   mode $MODE_FOCUS
+  bindcode $Caps_Lock mode $MODE_FOCUS
+  bindcode $Alt_L     mode $MODE_FOCUS
+  bindcode $Control_L mode $MODE_FOCUS
+
+  # [Return] new term
+  bindsym Return exec $term
+
+  # [\] new browser
+  bindsym Backslash exec $browser
+
+  # [q]uit window
+  bindsym q kill
+
+  # toggle la[y]out
+  bindsym y layout toggle split
+
+  # [t]abbed or stacking layout
+  bindsym t layout tabbed
+  bindsym Shift+t layout stacking
+
+  # toggle fullscreen
+  bindsym z fullscreen
+
+  # toggle floating
+  bindsym o floating toggle
+  bindsym Shift+o focus mode_toggle
+
+  # [p]arent focus
+  bindsym p focus parent
+  
+}

@@ -1,0 +1,10 @@
+#!/usr/bin/env zsh
+
+if [ -e /tmp/switcher.lock ]; then
+  rm /tmp/switcher.lock
+  ydotool key KEY_ESC
+
+else
+  swaymsg exec swayr switch-workspace-or-window
+  touch /tmp/switcher.lock
+fi

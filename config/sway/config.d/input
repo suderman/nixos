@@ -1,0 +1,82 @@
+# Trackpad
+input type:touchpad {
+  # click_method button_areas
+  click_method clickfinger
+  drag enabled
+  dwt enabled
+  tap enabled
+  middle_emulation enabled
+  accel_profile adaptive
+  pointer_accel 0.5
+  scroll_factor 0.5
+  scroll_method two_finger
+  natural_scroll enabled
+}
+
+# input type:touchpad {
+#   events disabled_on_external_mouse
+# }
+
+
+floating_modifier         $Super normal
+# floating_modifier         $Super inverse
+
+
+# Mouse
+input type:pointer {
+  natural_scroll enabled
+}
+
+# Keyboard
+#
+# Printed keys -> mapped keys
+# [ctrl]  [fn] [win] [alt]  [spacebar] [alt]  [ctrl]  
+# [super] [fn] [alt] [ctrl] [spacebar] [ctrl] [super]
+#
+# caps:ctrl_modifier	       - Caps Lock is also a Ctrl
+# ctrl:swap_lalt_lctl_lwin	 - Left Alt as Ctrl, Left Ctrl as Win, Left Win as Left Alt
+# ctrl:swap_rwin_rctl	       - Swap Right Win with Right Ctrl
+# altwin:ctrl_alt_win	       - Ctrl is mapped to Alt; Alt is mapped to Win
+# shift:both_capslock_cancel -	Both Shift together enable Caps Lock; one Shift key disables it
+input type:keyboard {
+  # xkb_options caps:ctrl_modifier,ctrl:swap_lalt_lctl_lwin,ctrl:swap_rwin_rctl,altwin:ctrl_alt_win,shift:both_capslock_cancel
+  # xkb_options caps:ctrl_modifier,ctrl:swap_rwin_rctl,shift:both_capslock_cancel
+  # xkb_options ctrl:swap_rwin_rctl,shift:both_capslock_cancel
+}
+
+#   Key Symbols
+#   -----------
+#   $Super
+#   $Alt
+#
+#   Key Codes
+#   -----------
+#   $Caps_Lock
+#   $Shift_L  
+#   $Shift_R  
+#   $Super_L  
+#   $Alt_L    
+#   $Control_L
+#   $Control_R
+#   $Super_R  
+
+#   Key     Name
+#   ------  -----------
+#   (       parenleft
+#   )       parenright
+#   <       less
+#   >       greater
+#   [       bracketleft
+#   ]       bracketright
+#   /       slash
+#   \       backslash
+#   |       bar
+#   {       braceleft
+#   }       braceright
+#   ,       comma
+#   .       period
+#   ;       semicolon
+#   '       apostrophe
+#   =       equal
+#   -       minus
+#   PRTSCR  Print

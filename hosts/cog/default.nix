@@ -16,27 +16,15 @@ in {
       # ./unstable.nix
       # ./keyd.nix
       ../../modules/vim.nix
-      # import (builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-22.05.tar.gz") 
 
       # inputs.home-manager.nixosModules.home-manager {              # Home-Manager module that is used.
       home-manager {              # Home-Manager module that is used.
         home-manager.useGlobalPkgs = true;
         home-manager.useUserPackages = true;
         # home-manager.extraSpecialArgs = { inherit user doom-emacs; };  # Pass flake variable
-        # home-manager.users.me = { imports = (import ./home.nix) };
         home-manager.users.me = import ../../home.nix;
-      }
-    ];
+      } ];
 
-  # nixpkgs.config.allowUnfree = true; 
-  # nixpkgs.config.packageOverrides = pkgs: {
-  #   nur = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") {
-  #     inherit pkgs;
-  #   };
-  # };
-
-
-  # nix.package = pkgs.nixFlakes;
   nix = {
     extraOptions = "experimental-features = nix-command flakes";
     settings = {

@@ -1,0 +1,15 @@
+[Unit]
+Description=Dynamic output configuration for Wayland compositors
+Documentation=https://github.com/emersion/kanshi
+BindsTo=sway-session.target
+StartLimitIntervalSec=500
+StartLimitBurst=5
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/kanshi
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=sway-session.target

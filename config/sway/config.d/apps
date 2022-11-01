@@ -1,0 +1,88 @@
+# Apps
+set {
+
+  # $term exec alacritty
+  # $term exec wezterm
+  $term exec foot
+  $editor exec nvim
+  # $browser exec firefox-developer-edition
+  # $browser exec chromium
+  $browser exec firefox
+  $menu exec $term --class=launcher -e sway-launcher-desktop
+
+}
+
+
+
+for_window {
+  [shell="xwayland"] title_format "%title [XWayland]"
+  #[app_id="firefox"] in--enable-features=UseOzonePlatform --ozone-platform=waylandhibit_idle fullscreen
+  [app_id="mpv"] inhibit_idle fullscreen
+  [app_id="Vivaldi-stable"] inhibit_idle fullscreen
+  [app_id="ulauncher"] floating enable, border none
+  [window_role="pop-up"] floating enable
+  [window_role="bubble"] floating enable
+  [window_role="dialog"] floating enable
+  [title="Picture in picture"] floating enable, sticky enable
+  # [app_id="1Password"] floating enable
+  # [class="Spotify"] floating enable
+  # terminal
+  # [app_id=$term_id] move to scratchpad, scratchpad show, $t_pos
+  # [app_id=$other_term_id] move to scratchpad, scratchpad show, t_pos
+
+  [app_id="Plexamp"] floating enable, sticky enable
+}
+
+
+assign [class="1Password"] workspace number 1
+assign [class="Slack"] workspace number 2
+assign [app_id="appimagekit_3a48058ef277d45ae2228089429c0259-Telegram_Desktop"] workspace number 2
+assign [class="discord"] workspace number 2
+assign [app_id="brave-browser"] workspace number 4
+# assign [app_id="plexamp"] workspace number 5
+assign [app_id="tv.plex.plexmediaplayer"] workspace number 6
+
+for_window [app_id="^launcher$"] floating enable, sticky enable, resize set 30 ppt 60 ppt, border pixel 10
+
+bindsym $Super+Question exec $scripts/yad-keybindings
+for_window [app_id="yad"] floating enable
+
+# set floating (nontiling)for apps needing it:
+for_window [class="Yad" instance="yad"] floating enable
+for_window [app_id="thunar"] floating enable
+# for_window [app_id="org.gnome.Nautilus"] floating enable
+for_window [app_id="yad"] floating enable
+for_window [app_id="blueman-manager"] floating enable,  resize set width 40 ppt height 30 ppt
+
+# set floating (nontiling) for special apps:
+for_window [class="Xsane" instance="xsane"] floating enable
+for_window [app_id="pavucontrol" ] floating enable, resize set width 40 ppt height 30 ppt
+for_window [class="qt5ct" instance="qt5ct"] floating enable, resize set width 60 ppt height 50 ppt
+for_window [class="Bluetooth-sendto" instance="bluetooth-sendto"] floating enable
+for_window [app_id="pamac-manager"] floating enable, resize set width 80 ppt height 70 ppt
+for_window [class="Lxappearance"] floating enable, resize set width 60 ppt height 50 ppt
+
+# set floating for window roles
+# for_window [window_role="pop-up"] floating enable
+# for_window [window_role="bubble"] floating enable
+# for_window [window_role="task_dialog"] floating enable
+# for_window [window_role="Preferences"] floating enable
+# for_window [window_type="dialog"] floating enable
+# for_window [window_type="menu"] floating enable
+# for_window [window_role="About"] floating enable
+# for_window [title="File Operation Progress"] floating enable, border pixel 1, sticky enable, resize set width 40 ppt height 30 ppt
+# for_window [app_id="firedragon" title="Library"] floating enable, border pixel 1, sticky enable, resize set width 40 ppt height 30 ppt
+# for_window [app_id="floating_shell_portrait"] floating enable, border pixel 1, sticky enable, resize set width 30 ppt height 40 ppt
+# for_window [title="Picture in picture"] floating enable, sticky enable
+# for_window [title="nmtui"] floating enable,  resize set width 50 ppt height 70 ppt
+# for_window [title="htop"] floating enable, resize set width 50 ppt height 70 ppt
+# for_window [app_id="xsensors"] floating enable
+# for_window [title="Save File"] floating enable
+# for_window [app_id="firedragon" title="firedragon — Sharing Indicator"] kill
+
+# Inhibit idle
+for_window [app_id="firedragon"] inhibit_idle fullscreen
+for_window [app_id="Chromium"] inhibit_idle fullscreen
+
+# Configure Firefox
+exec_always ~/.config/firefox/install-profile.sh
