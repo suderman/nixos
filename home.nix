@@ -32,6 +32,10 @@
   #   ".emacs.d/early-init.el".source = config.lib.file.mkOutOfStoreSymlink ./early-init.el; 
   # };
 
+  xdg.configFile."nix/nix.conf".text = ''
+    experimental-features = nix-command flakes
+  '';
+
   xdg.configFile."btop/btop.conf".source = ./config/btop/btop.conf;
   # home.file.".config/"
   # xdg.configFile."i3blocks/config".source = ./i3blocks.conf;
