@@ -18,5 +18,5 @@ update:
 	nix flake update
 
 install_home_manager:
-	nix build --no-link .#homeConfigurations.$(HOSTNAME).activationPackage
-	"$$(nix path-info .#homeConfigurations.$(HOSTNAME).activationPackage)"/activate
+	nix --extra-experimental-features 'nix-command flakes' build --no-link .#homeConfigurations.$(HOSTNAME).activationPackage
+	"$$(nix --extra-experimental-features 'nix-command flakes' path-info .#homeConfigurations.$(HOSTNAME).activationPackage)"/activate
