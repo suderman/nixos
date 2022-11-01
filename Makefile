@@ -12,7 +12,7 @@ switch_host:
 
 # rebuild the home directory with home-manager
 switch_home:
-	home-manager switch --flake '$(PWD)#me'
+	home-manager switch --flake '$(PWD)#$(HOSTNAME)'
 
 update:
 	nix flake update

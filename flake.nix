@@ -58,14 +58,17 @@
 
       # My NixOS configurations - look in the hosts directory for more
       nixosConfigurations = {
-        nimbus = mkHost "nimbus" "x86_64-linux";
         cog = mkHost "cog" "x86_64-linux";
         lux = mkHost "lux" "x86_64-linux";
+        nimbus = mkHost "nimbus" "x86_64-linux";
       };
 
       # My Home Manager configuraiton - look in home.nix for more
       homeConfigurations = {
-        me = mkHome "x86_64-linux";
+        cog = mkHome "x86_64-linux";
+        lux = mkHome "x86_64-linux";
+        umbra = mkHome "x86_64-darwin";
+        nimbus = mkHome "x86_64-linux";
       };
 
     };

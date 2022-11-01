@@ -26,6 +26,12 @@
     # neovim
   ];
 
+
+  home.file = { 
+    ".emacs.d/init.el".source = config.lib.file.mkOutOfStoreSymlink ./init.el;
+    ".emacs.d/early-init.el".source = config.lib.file.mkOutOfStoreSymlink ./early-init.el; 
+  };
+
   # Enable home-manager and git
   programs.home-manager.enable = true;
   programs.git.enable = true;
