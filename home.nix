@@ -22,6 +22,8 @@
     nnn 
     lf 
     fzf 
+    owncloud-client
+    _1password-gui
     nur.repos.mic92.hello-nur
     # neovim
   ];
