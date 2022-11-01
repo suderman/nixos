@@ -8,11 +8,11 @@ switch:
 
 # rebuild the whole system with nixos-rebuild
 switch_host:
-	nixos-rebuild switch --flake '$(PWD)#$(HOSTNAME)'
+	nixos-rebuild switch --experimental-features 'nix-command flakes' --flake '$(PWD)#$(HOSTNAME)'
 
 # rebuild the home directory with home-manager
 switch_home:
-	home-manager switch --flake '$(PWD)#$(HOSTNAME)'
+	home-manager switch --extra-experimental-features 'nix-command flakes' --flake '$(PWD)#$(HOSTNAME)'
 
 update:
 	nix flake update
