@@ -25,10 +25,55 @@
     let 
 
       # Make a nixpkgs configuration
+      # mkPkgs = nixpkgs: system: import nixpkgs {
+      #   inherit system;
+      #   config.allowUnfree = true;
+      #   config.joypixels.acceptLicense = true;
+      # };
       mkPkgs = nixpkgs: system: import nixpkgs {
         inherit system;
+
+        # Accept agreements for unfree software
         config.allowUnfree = true;
+        config.joypixels.acceptLicense = true;
+
+        # Include NIX User Repositories
+        # https://nur.nix-community.org/
+        config.packageOverrides = pkgs: {
+          nur = import inputs.nur { pkgs = pkgs; nurpkgs = pkgs; };
+        };
       };
+
+      # mkPkgs = nixpkgs: system: 
+      #   let 
+      #     pkgs = import nixpkgs {
+      #       inherit system;
+      #       config.allowUnfree = true;
+      #       config.joypixels.acceptLicense = true;
+      #       config.packageOverrides = pkgs: {
+      #         nur = import nur { 
+      #           pkgs = pkgs;
+      #           nurpkgs = pkgs; 
+      #         };
+      #       };
+      #     };  
+      #     nurpkgs = pkgs;
+      #     pkgs.config.packageOverrides = pkgs: {
+      #       nur = import nur { inherit pkgs nurpkgs; };
+      #     };
+      #   in pkgs;
+
+      # in nixpkgs: system: import nixpkgs {
+      #   inherit system;
+      #   config.allowUnfree = true;
+      #   config.joypixels.acceptLicense = true;
+      #   overlays = [(final: prev: { 
+      #     nur = import inputs.nur {
+      #
+      #     }
+      #     nur = inputs.nur { inherit system; };
+      #   })];
+      # };
 
       # Make a NixOS host configuration
       mkHost = hostname: system: inputs.nixpkgs.lib.nixosSystem {

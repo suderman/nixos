@@ -135,6 +135,8 @@ in {
      nano
      micro
      cached-nix-shell
+     nerdfonts
+     joypixels
      # keyd
      # unstable.keyd
    ];

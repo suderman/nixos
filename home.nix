@@ -22,6 +22,7 @@
     nnn 
     lf 
     fzf 
+    nur.repos.mic92.hello-nur
     # neovim
   ];
 
