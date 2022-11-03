@@ -48,16 +48,7 @@
         inherit system;
         pkgs = mkPkgs inputs.nixpkgs system;
         specialArgs = { inherit inputs outputs hostname; };
-        modules = [ 
-          ./hosts/configuration.nix
-          # ./hosts/${hostname}/configuration.nix 
-          # inputs.home-manager.nixosModules.home-manager {
-          #   home-manager.useGlobalPkgs = true;
-          #   home-manager.useUserPackages = true;
-          #   home-manager.extraSpecialArgs = { inherit inputs outputs hostname; };
-          #   home-manager.users.me = import ./hosts/${hostname}/home.nix;
-          # }
-        ];
+        modules = [ ./hosts/configuration.nix ];
       };
 
       # Make a Home Manager configuration
@@ -65,8 +56,6 @@
         pkgs = mkPkgs inputs.nixpkgs system;
         extraSpecialArgs = { inherit inputs outputs hostname; };
         modules = [ ./hosts/home.nix ];
-        # modules = [ ./hosts/${hostname}/home.nix ];
-        # modules = [ ./hosts/shared/home.nix ./hosts/${hostname}/home.nix ];
       };
 
     in 
@@ -74,6 +63,7 @@
 
       # My NixOS configurations
       nixosConfigurations = {
+        cog    = mkHost "cog" "x86_64-linux";
         cog    = mkHost "cog" "x86_64-linux";
         lux    = mkHost "lux" "x86_64-linux";
         nimbus = mkHost "nimbus" "x86_64-linux";
