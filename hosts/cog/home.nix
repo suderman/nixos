@@ -1,10 +1,7 @@
 # This is your home-manager configuration file
 { inputs, outputs, hostname, lib, config, pkgs, ... }: {
-  imports = [
-    # ../shared/home.nix
-  ];
+  imports = [];
 
-  # TODO: Set your username
   home = {
     username = "me";
     homeDirectory = "/home/me";

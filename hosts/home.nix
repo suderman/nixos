@@ -14,6 +14,15 @@
     bat 
     lf 
     fzf 
+    wget
+    git
+    zsh
+    fish
+    nano
+    micro
+    cached-nix-shell
+    nerdfonts
+    joypixels
     # nnn 
     # owncloud-client
     # _1password-gui

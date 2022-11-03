@@ -1,12 +1,8 @@
 # This is your home-manager configuration file
-# Use this to configure your home environment (it replaces ~/.config/nixpkgs/home.nix)
+{ inputs, outputs, hostname, lib, config, pkgs, ... }: {
 
-{ inputs, lib, config, pkgs, ... }: {
   imports = [
-    # If you want to use home-manager modules from other flakes (such as nix-colors), use something like:
-    # inputs.nix-colors.homeManagerModule
-
-    # Feel free to split up your configuration and import pieces of it here.
+    # ../shared/home.nix
   ];
 
   # TODO: Set your username
@@ -22,8 +18,7 @@
     nnn 
     lf 
     fzf 
-    owncloud-client
-    _1password-gui
+    sl
     nur.repos.mic92.hello-nur
     # neovim
   ];
@@ -34,24 +29,9 @@
   #   ".emacs.d/early-init.el".source = config.lib.file.mkOutOfStoreSymlink ./early-init.el; 
   # };
 
-  xdg.configFile."nix/nix.conf".text = ''
-    experimental-features = nix-command flakes
-  '';
-
-  xdg.configFile."btop/btop.conf".source = ./config/btop/btop.conf;
   # home.file.".config/"
   # xdg.configFile."i3blocks/config".source = ./i3blocks.conf;
   # home.file.".gdbinit".text = ''
   #     set auto-load safe-path /nix/store
   # '';
-
-  # Enable home-manager and git
-  programs.home-manager.enable = true;
-  # programs.git.enable = true;
-
-  # Nicely reload system units when changing configs
-  systemd.user.startServices = "sd-switch";
-
-  # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
-  home.stateVersion = "22.05";
 }
