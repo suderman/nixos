@@ -1,4 +1,4 @@
-HOSTNAME := $(shell hostname)
+FLAKE := $(shell hostname)
 
 all: switch
 
@@ -8,15 +8,15 @@ switch:
 
 # rebuild the whole system with nixos-rebuild
 switch_host:
-	nixos-rebuild switch --flake '$(PWD)#$(HOSTNAME)'
+	nixos-rebuild switch --flake '$(PWD)#$(FLAKE)'
 
 # rebuild the home directory with home-manager
 switch_home:
-	home-manager switch --extra-experimental-features 'nix-command flakes' --flake '$(PWD)#$(HOSTNAME)'
+	home-manager switch --extra-experimental-features 'nix-command flakes' --flake '$(PWD)#$(FLAKE)'
 
 update:
 	nix flake update
 
 install_home_manager:
-	nix --extra-experimental-features 'nix-command flakes' build --no-link .#homeConfigurations.$(HOSTNAME).activationPackage
-	"$$(nix --extra-experimental-features 'nix-command flakes' path-info .#homeConfigurations.$(HOSTNAME).activationPackage)"/activate
+	nix --extra-experimental-features 'nix-command flakes' build --no-link .#homeConfigurations.$(FLAKE).activationPackage
+	"$$(nix --extra-experimental-features 'nix-command flakes' path-info .#homeConfigurations.$(FLAKE).activationPackage)"/activate

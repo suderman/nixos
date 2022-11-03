@@ -44,37 +44,35 @@
       };
 
       # Make a NixOS host configuration
-      mkHost = hostname: system: inputs.nixpkgs.lib.nixosSystem {
-        inherit system;
-        pkgs = mkPkgs inputs.nixpkgs system;
-        specialArgs = { inherit inputs outputs hostname; };
+      mkHost = host: inputs.nixpkgs.lib.nixosSystem {
+        system = host.system;
+        pkgs = mkPkgs inputs.nixpkgs host.system;
+        specialArgs = { inherit inputs outputs host; };
         modules = [ ./hosts/configuration.nix ];
       };
 
       # Make a Home Manager configuration
-      mkHome = hostname: system: inputs.home-manager.lib.homeManagerConfiguration {
-        pkgs = mkPkgs inputs.nixpkgs system;
-        extraSpecialArgs = { inherit inputs outputs hostname; };
+      mkHome = host: inputs.home-manager.lib.homeManagerConfiguration {
+        pkgs = mkPkgs inputs.nixpkgs host.system;
+        extraSpecialArgs = { inherit inputs outputs host; };
         modules = [ ./hosts/home.nix ];
       };
 
-    in 
-    rec {
+    in {
 
       # My NixOS configurations
       nixosConfigurations = {
-        cog    = mkHost "cog" "x86_64-linux";
-        cog    = mkHost "cog" "x86_64-linux";
-        lux    = mkHost "lux" "x86_64-linux";
-        nimbus = mkHost "nimbus" "x86_64-linux";
+        cog    = mkHost { username = "me"; hostname = "cog"; system = "x86_64-linux"; };
+        lux    = mkHost { username = "me"; hostname = "lux"; system = "x86_64-linux"; };
+        nimbus = mkHost { username = "me"; hostname = "nimbus"; system = "x86_64-linux"; };
       };
 
       # My Home Manager configurations
       homeConfigurations = {
-        cog    = mkHome "cog" "x86_64-linux";
-        lux    = mkHome "lux" "x86_64-linux";
-        umbra  = mkHome "umbra" "x86_64-darwin";
-        nimbus = mkHome "nimbus" "x86_64-linux";
+        cog    = mkHome { username = "me"; hostname = "cog"; system = "x86_64-linux"; };
+        lux    = mkHome { username = "me"; hostname = "lux"; system = "x86_64-linux"; };
+        umbra  = mkHome { username = "me"; hostname = "umbra"; system = "x86_64-darwin"; };
+        nimbus = mkHome { username = "me"; hostname = "nimbus"; system = "x86_64-linux"; };
       };
 
     };

@@ -1,6 +1,8 @@
-{ inputs, outputs, hostname, pkgs, lib, ... }:
+{ inputs, outputs, host, config, pkgs, lib, ... }:
 
-{
+let inherit (host) hostname user system;
+in {
+
   imports =
     [ 
       ./hardware-configuration.nix

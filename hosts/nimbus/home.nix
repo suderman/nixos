@@ -1,5 +1,5 @@
 # This is your home-manager configuration file
-{ inputs, outputs, hostname, lib, config, pkgs, ... }: {
+{ inputs, outputs, host, lib, config, pkgs, ... }: {
 
   imports = [
     # ../shared/home.nix

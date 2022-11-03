@@ -1,12 +1,20 @@
 # This is your home-manager configuration file
 # Use this to configure your home environment (it replaces ~/.config/nixpkgs/home.nix)
 
-{ inputs, outputs, hostname, lib, config, pkgs, ... }: {
+{ inputs, outputs, host, lib, config, pkgs, ... }: 
+
+let 
+  inherit (host) hostname username system;
+
+in {
 
   imports = [
     ./${hostname}/home.nix
     # ./shared/vim.nix
   ];
+
+  home.username = username;
+  home.homeDirectory = (import ./shared/homedir.nix) { inherit host lib; }; 
 
   # Add stuff for your user as you see fit:
   # programs.neovim.enable = true;
