@@ -18,11 +18,15 @@
     # Nix User Repository
     nur.url = "github:nix-community/NUR";                                   
 
+    # Save state
+    impermanence.url = "github:nix-community/impermanence";
+
   };
 
-  outputs = inputs: 
+  outputs = { self, ... }@inputs: 
 
     let 
+      inherit (self) outputs;
 
       # Make a nixpkgs configuration
       mkPkgs = nixpkgs: system: import nixpkgs {
@@ -43,32 +47,44 @@
       mkHost = hostname: system: inputs.nixpkgs.lib.nixosSystem {
         inherit system;
         pkgs = mkPkgs inputs.nixpkgs system;
-        specialArgs = { inherit inputs; };
-        modules = [ ./hosts/${hostname} ];
+        specialArgs = { inherit inputs outputs hostname; };
+        modules = [ 
+          ./hosts/configuration.nix
+          # ./hosts/${hostname}/configuration.nix 
+          # inputs.home-manager.nixosModules.home-manager {
+          #   home-manager.useGlobalPkgs = true;
+          #   home-manager.useUserPackages = true;
+          #   home-manager.extraSpecialArgs = { inherit inputs outputs hostname; };
+          #   home-manager.users.me = import ./hosts/${hostname}/home.nix;
+          # }
+        ];
       };
 
       # Make a Home Manager configuration
-      mkHome = system: inputs.home-manager.lib.homeManagerConfiguration {
+      mkHome = hostname: system: inputs.home-manager.lib.homeManagerConfiguration {
         pkgs = mkPkgs inputs.nixpkgs system;
-        modules = [ ./home.nix ];
+        extraSpecialArgs = { inherit inputs outputs hostname; };
+        modules = [ ./hosts/home.nix ];
+        # modules = [ ./hosts/${hostname}/home.nix ];
+        # modules = [ ./hosts/shared/home.nix ./hosts/${hostname}/home.nix ];
       };
 
     in 
-    {
+    rec {
 
-      # My NixOS configurations - look in the hosts directory for more
+      # My NixOS configurations
       nixosConfigurations = {
-        cog = mkHost "cog" "x86_64-linux";
-        lux = mkHost "lux" "x86_64-linux";
+        cog    = mkHost "cog" "x86_64-linux";
+        lux    = mkHost "lux" "x86_64-linux";
         nimbus = mkHost "nimbus" "x86_64-linux";
       };
 
-      # My Home Manager configuraiton - look in home.nix for more
+      # My Home Manager configurations
       homeConfigurations = {
-        cog = mkHome "x86_64-linux";
-        lux = mkHome "x86_64-linux";
-        umbra = mkHome "x86_64-darwin";
-        nimbus = mkHome "x86_64-linux";
+        cog    = mkHome "cog" "x86_64-linux";
+        lux    = mkHome "lux" "x86_64-linux";
+        umbra  = mkHome "umbra" "x86_64-darwin";
+        nimbus = mkHome "nimbus" "x86_64-linux";
       };
 
     };
