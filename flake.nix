@@ -23,11 +23,10 @@
 
   };
 
-  outputs = { self, ... }@inputs: 
+  outputs = { self, ... }: 
     
     with builtins;
-    let inherit (self) outputs;
-      # inherit (inputs.nixpkgs) lib;
+    let inherit (self) inputs outputs;
 
       # Make a nixpkgs configuration
       mkPkgs = nixpkgs: system: import nixpkgs {
@@ -49,7 +48,7 @@
         let inherit ({ system = "x86_64-linux"; username = "me"; } // override) system hostname username;
         in {
           inherit system hostname username;
-          userdir = if (toString (tail (split "-" system))) == "darwin" then "/Users/${username}" else "/home/${username}";
+          userdir = "/${if (toString (tail (split "-" system))) == "darwin" then "Users" else "home"}/${username}";
         };
 
       # Make a NixOS host configuration
