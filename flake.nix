@@ -44,8 +44,13 @@
         };
       };
 
-      # Determine user directory from system
-      dir = system: if (toString (tail (split "-" system))) == "darwin" then "/Users" else "/home";
+      # Defaults for host, determine user directory from system
+      host = override: 
+        let inherit ({ system = "x86_64-linux"; username = "me"; } // override) system hostname username;
+        in {
+          inherit system hostname username;
+          userdir = if (toString (tail (split "-" system))) == "darwin" then "/Users/${username}" else "/home/${username}";
+        };
 
       # Make a NixOS host configuration
       mkHost = { hostname, system ? "x86_64-linux", username ? "me", userdir ? "${dir system}/${username}" }: 
@@ -70,17 +75,17 @@
 
       # My NixOS configurations
       nixosConfigurations = {
-        cog    = mkHost { hostname = "cog"; };
-        lux    = mkHost { hostname = "lux"; };
-        nimbus = mkHost { hostname = "nimbus"; };
+        cog    = mkHost (host { hostname = "cog"; });
+        lux    = mkHost (host { hostname = "lux"; });
+        nimbus = mkHost (host { hostname = "nimbus"; });
       };
 
       # My Home Manager configurations
       homeConfigurations = {
-        cog    = mkHome { hostname = "cog"; };
-        lux    = mkHome { hostname = "lux"; };
-        nimbus = mkHome { hostname = "nimbus"; };
-        umbra  = mkHome { hostname = "umbra"; system = "x86_64-darwin"; };
+        cog    = mkHome (host { hostname = "cog"; });
+        lux    = mkHome (host { hostname = "lux"; });
+        nimbus = mkHome (host { hostname = "nimbus"; });
+        umbra  = mkHome (host { hostname = "umbra"; system = "x86_64-darwin"; });
       };
 
     };

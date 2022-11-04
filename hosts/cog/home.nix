@@ -9,7 +9,9 @@
     nnn 
     owncloud-client
     _1password-gui
+    _1password
     nur.repos.mic92.hello-nur
+    owofetch
     # neovim
   ];
 
