@@ -2,14 +2,8 @@
 { inputs, outputs, host, lib, config, pkgs, ... }: {
 
   imports = [
-    # ../shared/home.nix
+    ../shared/tmux
   ];
-
-  # TODO: Set your username
-  home = {
-    username = "me";
-    homeDirectory = "/home/me";
-  };
 
   # Add stuff for your user as you see fit:
   # programs.neovim.enable = true;
@@ -19,10 +13,12 @@
     lf 
     fzf 
     sl
+    # tmux
     nur.repos.mic92.hello-nur
     # neovim
   ];
 
+  # programs.tmux.enable
 
   # home.file = { 
   #   ".emacs.d/init.el".source = config.lib.file.mkOutOfStoreSymlink ./init.el;

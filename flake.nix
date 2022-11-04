@@ -45,9 +45,12 @@
 
       # Defaults for host, determine user directory from system
       host = override: 
-        let inherit ({ system = "x86_64-linux"; username = "me"; } // override) system hostname username;
+        let inherit ({ 
+          system = "x86_64-linux"; # default system
+          username = "me";         # default username
+        } // override) system hostname username;
         in {
-          inherit system hostname username;
+          inherit system hostname username; # inherit attributes and determine userdir from system 
           userdir = "/${if (toString (tail (split "-" system))) == "darwin" then "Users" else "home"}/${username}";
         };
 

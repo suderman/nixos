@@ -1,6 +1,9 @@
 # This is your home-manager configuration file
 { inputs, outputs, host, lib, config, pkgs, ... }: {
-  imports = [];
+
+  imports = [
+    ../shared/tmux
+  ];
 
   # Add stuff for your user as you see fit:
   # programs.neovim.enable = true;
