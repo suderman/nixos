@@ -4,8 +4,7 @@
 { inputs, outputs, host, lib, config, pkgs, ... }: 
 
 let 
-  inherit (host) hostname username system;
-
+  inherit (host) hostname username userdir system;
 in {
 
   imports = [
@@ -14,7 +13,7 @@ in {
   ];
 
   home.username = username;
-  home.homeDirectory = (import ./shared/homedir.nix) { inherit host lib; }; 
+  home.homeDirectory = userdir; 
 
   # Add stuff for your user as you see fit:
   # programs.neovim.enable = true;
