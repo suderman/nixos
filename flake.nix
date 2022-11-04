@@ -53,23 +53,19 @@
         };
 
       # Make a NixOS host configuration
-      mkHost = { hostname, system ? "x86_64-linux", username ? "me", userdir ? "${dir system}/${username}" }: 
-        let host = { inherit hostname system username userdir; };
-        in inputs.nixpkgs.lib.nixosSystem {
-          system = system;
-          pkgs = mkPkgs inputs.nixpkgs system;
-          specialArgs = { inherit inputs outputs host; };
-          modules = [ ./hosts/configuration.nix ];
-        };
+      mkHost = host: inputs.nixpkgs.lib.nixosSystem {
+        system = system;
+        pkgs = mkPkgs inputs.nixpkgs host.system;
+        specialArgs = { inherit inputs outputs host; };
+        modules = [ ./hosts/configuration.nix ];
+      };
 
       # Make a Home Manager configuration
-      mkHome = { hostname, system ? "x86_64-linux", username ? "me", userdir ? "${dir system}/${username}" }: 
-        let host = { inherit hostname system username userdir; };
-        in inputs.home-manager.lib.homeManagerConfiguration {
-          pkgs = mkPkgs inputs.nixpkgs system;
-          extraSpecialArgs = { inherit inputs outputs host; };
-          modules = [ ./hosts/home.nix ];
-        };
+      mkHome = host: inputs.home-manager.lib.homeManagerConfiguration {
+        pkgs = mkPkgs inputs.nixpkgs host.system;
+        extraSpecialArgs = { inherit inputs outputs host; };
+        modules = [ ./hosts/home.nix ];
+      };
 
     in {
 
