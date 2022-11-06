@@ -8,6 +8,7 @@
     ../../home/wayland.nix
     ../../home/zsh.nix
     ../../home/xdg.nix
+    ../../home/wezterm.nix
   ];
 
   # Add stuff for your user as you see fit:
@@ -21,6 +22,8 @@
     nur.repos.mic92.hello-nur
     owofetch
     firefox-wayland
+    junction
+
     # neovim
   ];
 
