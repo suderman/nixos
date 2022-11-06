@@ -3,12 +3,8 @@
 
   imports = [
     ../../home
-    ../../home/tmux
-    ../../home/git.nix
-    ../../home/wayland.nix
-    ../../home/zsh.nix
-    ../../home/xdg.nix
-    ../../home/wezterm.nix
+    ../../home/cli
+    ../../home/gui
   ];
 
   # Add stuff for your user as you see fit:

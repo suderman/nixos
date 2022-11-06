@@ -28,6 +28,7 @@ in
       # resizeAmount = 10;
       # historyLimit = 10000;
       plugins = with pkgs.tmuxPlugins; [
+        sensible
         copycat
         jump
         dracula
