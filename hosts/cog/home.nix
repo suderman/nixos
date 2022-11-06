@@ -4,6 +4,10 @@
   imports = [
     ../../home
     ../../home/tmux
+    ../../home/git.nix
+    ../../home/wayland.nix
+    ../../home/zsh.nix
+    ../../home/xdg.nix
   ];
 
   # Add stuff for your user as you see fit:
@@ -16,6 +20,7 @@
     _1password
     nur.repos.mic92.hello-nur
     owofetch
+    firefox
     # neovim
   ];
 
