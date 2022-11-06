@@ -12,13 +12,13 @@
     videos = "${config.home.homeDirectory}/data/videos";
   };
 
-  xdg.portal = {
-    enable = true;
-    extraPortals = with pkgs; [
-      xdg-desktop-portal-wlr
-      xdg-desktop-portal-gtk
-    ];
-    gtkUsePortal = true;
-  };
+  # xdg.portal = {
+  #   enable = true;
+  #   extraPortals = with pkgs; [
+  #     xdg-desktop-portal-wlr
+  #     xdg-desktop-portal-gtk
+  #   ];
+  #   gtkUsePortal = true;
+  # };
 
 }
