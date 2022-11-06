@@ -1,4 +1,4 @@
-{ config, ... }: 
+{ config, pkgs, ... }: 
 {
   xdg.userDirs = {
     enable = true;
@@ -11,4 +11,14 @@
     publicShare = "${config.home.homeDirectory}/public";
     videos = "${config.home.homeDirectory}/data/videos";
   };
+
+  xdg.portal = {
+    enable = true;
+    extraPortals = with pkgs; [
+      xdg-desktop-portal-wlr
+      xdg-desktop-portal-gtk
+    ];
+    gtkUsePortal = true;
+  };
+
 }
