@@ -1,25 +1,39 @@
-{ inputs, outputs, host, pkgs, lib, ... }:
+{ inputs, outputs, host, config, pkgs, lib, ... }:
 
-{
-  imports =
-    [ 
-      ./hardware-configuration.nix
-    ];
+let inherit (host) hostname user system;
+in {
 
-  boot.loader.grub.enable = true;
-  boot.loader.grub.version = 2;
-  networking.usePredictableInterfaceNames = false;
-  networking.useDHCP = false;
-  networking.interfaces.eth0.useDHCP = true;
+  imports = [ ./hardware-configuration.nix ] ++ [
+    ../../nixos
+    ../../nixos/vim
+    ../../nixos/keyd.nix
+  ];
+
+  # Use the systemd-boot EFI boot loader.
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+  services.fprintd.enable = true;
+
+  # Enable the X11 windowing system.
+  services.xserver.enable = true;
+
+  # Enable sound.
+  sound.enable = true;
+  hardware.pulseaudio.enable = true;
+
+  # Enable touchpad support (enabled default in most desktopManager).
+  services.xserver.libinput.enable = true;
+
+  # Enable the GNOME Desktop Environment.
+  services.xserver.displayManager.gdm.enable = true;
+  services.xserver.desktopManager.gnome.enable = true;
 
   environment.systemPackages = with pkgs; [
-     #vim 
-     #neovim
-     # tmux
    ];
 
   virtualisation.docker.enable = true;
-
   programs.nix-ld.enable = true;
 
 }

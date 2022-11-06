@@ -5,7 +5,7 @@ let
 in {
 
   users = {
-    mutableUsers = false;
+    # mutableUsers = false;
     users."${username}" = {
       isNormalUser = true;
       shell = pkgs.zsh;

@@ -5,42 +5,29 @@
 
 {
   imports =
-    [ (modulesPath + "/profiles/qemu-guest.nix")
+    [ (modulesPath + "/installer/scan/not-detected.nix")
     ];
 
-  boot.initrd.availableKernelModules = [ "virtio_pci" "virtio_scsi" "ahci" "sd_mod" ];
+  boot.initrd.availableKernelModules = [ "xhci_pci" "thunderbolt" "nvme" "uas" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ ];
+  boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
-  boot.kernelParams = [ "console=ttyS0;19200n8" ];
-  boot.loader.grub.extraConfig = ''
-    serial --speed=19200 --unit=0 --word=8 --parity=non --stop=1;
-    terminal_input serial;
-    terminal_output serial
-  '';
-
-  boot.loader.grub.forceInstall = true;
-  boot.loader.grub.device = "nodev";
-  boot.loader.timeout = 10;
-
   fileSystems."/" =
-    { device = "/dev/sda";
+    { device = "/dev/disk/by-uuid/8030c3d0-3be2-46e5-a6e2-a3d179521d82";
       fsType = "ext4";
     };
 
+  fileSystems."/boot" =
+    { device = "/dev/disk/by-uuid/4244-2305";
+      fsType = "vfat";
+    };
+
   swapDevices =
-    [ { device = "/dev/sdb"; }
+    [ { device = "/dev/disk/by-uuid/9a9b19fb-12f4-4e98-9d88-9388c209fce2"; }
     ];
 
-  # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
-  # (the default) this is the recommended approach. When using systemd-networkd it's
-  # still possible to use this option, but it's recommended to use it in conjunction
-  # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
-  networking.useDHCP = lib.mkDefault true;
-  # networking.interfaces.docker0.useDHCP = lib.mkDefault true;
-  # networking.interfaces.eth0.useDHCP = lib.mkDefault true;
-
-  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+  powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
+  # high-resolution display
+  hardware.video.hidpi.enable = lib.mkDefault true;
 }

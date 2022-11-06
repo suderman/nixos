@@ -2,7 +2,8 @@
 { inputs, outputs, host, lib, config, pkgs, ... }: {
 
   imports = [
-    ../shared/tmux
+    ../../home
+    ../../home/tmux
   ];
 
   # Add stuff for your user as you see fit:
@@ -23,8 +24,8 @@
   #   ".emacs.d/init.el".source = config.lib.file.mkOutOfStoreSymlink ./init.el;
   #   ".emacs.d/early-init.el".source = config.lib.file.mkOutOfStoreSymlink ./early-init.el; 
   # };
-  xdg.configFile."btop/btop.conf".source = ../../config/btop/btop.conf;
-  xdg.configFile."hostname.txt".text = "The hostname is ${host.hostname}";
+  # xdg.configFile."btop/btop.conf".source = ../../config/btop/btop.conf;
+  # xdg.configFile."hostname.txt".text = "The hostname is ${host.hostname}";
 
   # home.file.".config/"
   # xdg.configFile."i3blocks/config".source = ./i3blocks.conf;
