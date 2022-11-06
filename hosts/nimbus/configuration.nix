@@ -3,10 +3,11 @@
 let inherit (host) hostname user system;
 in {
 
-  imports =
-    [ 
-      ./hardware-configuration.nix
-    ];
+  imports = [ ./hardware-configuration.nix ] ++ [
+    ../../nixos
+    ../../nixos/vim
+    ../../nixos/keyd.nix
+  ];
 
   boot.loader.grub.enable = true;
   boot.loader.grub.version = 2;

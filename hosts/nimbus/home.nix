@@ -2,7 +2,8 @@
 { inputs, outputs, host, lib, config, pkgs, ... }: {
 
   imports = [
-    ../shared/tmux
+    ../../home
+    ../../home/tmux
   ];
 
   # Add stuff for your user as you see fit:
@@ -13,6 +14,7 @@
     lf 
     fzf 
     sl
+    neo-cowsay
     # tmux
     nur.repos.mic92.hello-nur
     # neovim

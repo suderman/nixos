@@ -55,18 +55,25 @@
         };
 
       # Make a NixOS host configuration
-      mkHost = host: inputs.nixpkgs.lib.nixosSystem {
+      mkHost = host@{ system, hostname, username, ... }: inputs.nixpkgs.lib.nixosSystem {
         system = system;
-        pkgs = mkPkgs inputs.nixpkgs host.system;
+        pkgs = mkPkgs inputs.nixpkgs system;
         specialArgs = { inherit inputs outputs host; };
-        modules = [ ./hosts/configuration.nix ];
+        modules = [ ./hosts/${hostname}/configuration.nix 
+          inputs.home-manager.nixosModules.home-manager {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.extraSpecialArgs = { inherit inputs outputs host; };
+            home-manager.users.${username} = import ./hosts/${hostname}/home.nix;
+          }
+        ];
       };
 
       # Make a Home Manager configuration
-      mkHome = host: inputs.home-manager.lib.homeManagerConfiguration {
-        pkgs = mkPkgs inputs.nixpkgs host.system;
+      mkHome = host@{ system, hostname, ... }: inputs.home-manager.lib.homeManagerConfiguration {
+        pkgs = mkPkgs inputs.nixpkgs system;
         extraSpecialArgs = { inherit inputs outputs host; };
-        modules = [ ./hosts/home.nix ];
+        modules = [ ./hosts/${hostname}/home.nix ];
       };
 
     in {

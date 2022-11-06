@@ -8,9 +8,23 @@ let
 in {
 
   imports = [
-    ./${hostname}/home.nix
+    # ./${hostname}/home.nix
     # ./shared/vim.nix
   ];
+
+  # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
+  home.stateVersion = "22.05";
+
+  xdg.configFile."nix/nix.conf".text = ''
+    experimental-features = nix-command flakes
+  '';
+
+  # Enable home-manager and git
+  programs.home-manager.enable = true;
+  # programs.git.enable = true;
+
+  # Nicely reload system units when changing configs
+  systemd.user.startServices = "sd-switch";
 
   home.username = username;
   home.homeDirectory = userdir; 
@@ -20,6 +34,8 @@ in {
   home.packages = with pkgs; [ 
     bat 
     lf 
+    lsd
+    exa
     fzf 
     wget
     git
@@ -37,17 +53,5 @@ in {
     # neovim
   ];
 
-  xdg.configFile."nix/nix.conf".text = ''
-    experimental-features = nix-command flakes
-  '';
 
-  # Enable home-manager and git
-  programs.home-manager.enable = true;
-  # programs.git.enable = true;
-
-  # Nicely reload system units when changing configs
-  systemd.user.startServices = "sd-switch";
-
-  # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
-  home.stateVersion = "22.05";
 }
