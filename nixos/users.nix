@@ -8,7 +8,7 @@ in {
     # mutableUsers = false;
     users."${username}" = {
       isNormalUser = true;
-      shell = pkgs.fish;
+      shell = pkgs.zsh;
       home = userdir;
       description = username;
       extraGroups = [ 

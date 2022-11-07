@@ -14,7 +14,7 @@ in {
     ./openssh.nix
     ./security.nix
     ./tailscale.nix
-    # ./pipewire.nix
+    ./pipewire.nix
     # ./quiet-boot.nix
     # ./systemd-boot.nix
     # ./keyd.nix
@@ -30,10 +30,10 @@ in {
 
   environment = {
 
-    # Activate home-manager environment, if not already
-    loginShellInit = ''
-      [ -d "$HOME/.nix-profile" ] || /nix/var/nix/profiles/per-user/$USER/home-manager/activate &> /dev/null
-    '';
+    # # Activate home-manager environment, if not already
+    # loginShellInit = ''
+    #   [ -d "$HOME/.nix-profile" ] || /nix/var/nix/profiles/per-user/$USER/home-manager/activate &> /dev/null
+    # '';
 
     # List packages installed in system profile
     systemPackages = with pkgs; [ inetutils mtr sysstat gnumake ];

@@ -2,7 +2,7 @@
 
 {
 
-  home.sessionVariables = {
+  environment.variables = {
 
     MOZ_ENABLE_WAYLAND = "1";
     MOZ_USE_XINPUT2 = "1";
@@ -20,6 +20,7 @@
     # SAL_USE_VCLPLUGIN = "gtk3";
     
     NIXOS_OZONE_WL = "1";
+
   };
 
 }
