@@ -18,9 +18,16 @@
     _1password
     nur.repos.mic92.hello-nur
     owofetch
+    # firefox
     firefox-wayland
     junction
-
+    chromium
+    element
+    plexamp
+    element-desktop
+    obsidian
+    discord
+    xorg.xeyes
     # neovim
   ];
 

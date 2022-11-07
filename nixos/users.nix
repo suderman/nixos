@@ -24,4 +24,8 @@ in {
 
   };
 
+  environment.systemPackages = [
+    pkgs.home-manager
+  ];
+
 }

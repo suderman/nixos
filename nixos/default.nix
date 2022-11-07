@@ -14,6 +14,7 @@ in {
     ./openssh.nix
     ./security.nix
     ./tailscale.nix
+    ./flatpak.nix
     ./pipewire.nix
     # ./quiet-boot.nix
     # ./systemd-boot.nix

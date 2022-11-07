@@ -1,4 +1,4 @@
-{ outputs, lib, config, ... }:
+{ outputs, pkgs, lib, config, ... }:
 
 {
   services = {
@@ -12,6 +12,10 @@
     geoclue2.enable = true;
     gnome.games.enable = true;
   };
+
+  environment.systemPackages = [
+    pkgs.gnome.gnome-software
+  ];
 
   # Fix broken stuff
   # services.avahi.enable = false;
