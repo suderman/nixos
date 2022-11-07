@@ -16,6 +16,8 @@
     # QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
 
     # SAL_USE_VCLPLUGIN = "gtk3";
-
+    
+    NIXOS_OZONE_WL = "1";
   };
+
 }

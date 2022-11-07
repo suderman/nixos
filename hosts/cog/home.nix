@@ -13,6 +13,7 @@
     sl
     nnn 
     owncloud-client
+    slack
     _1password-gui
     _1password
     nur.repos.mic92.hello-nur

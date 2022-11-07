@@ -32,18 +32,6 @@ in {
   # Add stuff for your user as you see fit:
   # programs.neovim.enable = true;
   home.packages = with pkgs; [ 
-    bat 
-    lf 
-    lsd
-    exa
-    fzf 
-    wget
-    git
-    zsh
-    fish
-    nano
-    micro
-    cached-nix-shell
     nerdfonts
     joypixels
     # nnn 
