@@ -3,65 +3,39 @@
 
   imports = [
     ../../home
-    # ../../home/cli
-    # ../../home/gui
-    # ../../home/gui/hello.nix
+    ../../home/cli
+    ../../home/gui
   ];
 
-  # Add stuff for your user as you see fit:
-  # programs.neovim.enable = true;
-  # home.packages = with pkgs; [ 
-  #   sl
-  #   signal-desktop
-  #   # nnn 
-  #   # owncloud-client
-  #   # slack
-  #   # _1password-gui
-  #   # _1password
-  #   # nur.repos.mic92.hello-nur
-  #   # owofetch
-  #   # # firefox
-  #   # firefox-wayland
-  #   # junction
-  #   # chromium
-  #   # element
-  #   # plexamp
-  #   # element-desktop
-  #   # obsidian
-  #   # discord
-  #   # xorg.xeyes
-  #   # # neovim
-  #
-  # ];
+  xdg.desktopEntries = {
+    code = {
+      name = "Visual Studio Code";
+      genericName = "Text Editor";
+      terminal = false;
+      categories = [ "Utility" "TextEditor" "Development" "IDE" ];
+      mimeType = [ "text/plain" "inode/directory" ];
+      icon = "code";
+      exec = "code --enable-features=UseOzonePlatform,WaylandWindowDecorations --ozone-platform=wayland";
+    };
 
-  # xdg.desktopEntries = {
-  #   code = {
-  #     name = "Visual Studio Code";
-  #     genericName = "Text Editor";
-  #     terminal = false;
-  #     categories = [ "Utility" "TextEditor" "Development" "IDE" ];
-  #     mimeType = [ "text/plain" "inode/directory" ];
-  #     icon = "code";
-  #     exec = "code --enable-features=UseOzonePlatform,WaylandWindowDecorations --ozone-platform=wayland";
-  #   };
-  #
-  #   webcord = {
-  #     name = "Webcord";
-  #     genericName = "Discord and Fosscord client";
-  #     terminal = false;
-  #     categories = [ "Network" "InstantMessaging" ];
-  #     mimeType = [ "x-scheme-handler/discord" ];
-  #     icon = "webcord";
-  #     exec = "webcord --enable-features=UseOzonePlatform,WaylandWindowDecorations --ozone-platform=wayland";
-  #   };
-  # };
+    webcord = {
+      name = "Webcord";
+      genericName = "Discord and Fosscord client";
+      terminal = false;
+      categories = [ "Network" "InstantMessaging" ];
+      mimeType = [ "x-scheme-handler/discord" ];
+      icon = "webcord";
+      exec = "webcord --enable-features=UseOzonePlatform,WaylandWindowDecorations --ozone-platform=wayland";
+    };
+  };
   
-  # programs = {
-  #   chromium = {
-  #     enable = true;
-  #     commandLineArgs = [ "--enable-features=UseOzonePlatform" "-ozone-platform=wayland" "--gtk-version=4" ];
-  #   };
-  # };
+  programs = {
+    neovim.enable = true;
+    chromium = {
+      enable = true;
+      commandLineArgs = [ "--enable-features=UseOzonePlatform" "-ozone-platform=wayland" "--gtk-version=4" ];
+    };
+  };
 
 
 
@@ -104,14 +78,14 @@
         # Desktop signal client
         (me.enableWayland signal-desktop "signal-desktop")
         # Desktop telegram client
-        # tdesktop
+        tdesktop
         # # Desktop mastodon client
         # # tootle
         # # zulip
         # zulip
         # zulipWayland
         # # Zoom (for work, sadly)
-        # zoom-us
+        zoom-us
         # # Teams (also for work)
         # teams
         # # Cinny for pretty matrix
@@ -126,6 +100,27 @@
         (me.enableWayland slack "slack")
         # (me.enableWayland vscodium "codiuim")
         # vscodium
+        sl
+        
+        # signal-desktop
+        nnn 
+        owncloud-client
+        # slack
+        _1password
+        (me.enableWayland _1password-gui "1password")
+        # nur.repos.mic92.hello-nur
+        # owofetch
+        # firefox
+        firefox-wayland
+        # junction
+        # # chromium
+        # # element
+        # # plexamp
+        # # element-desktop
+        # obsidian
+        # discord
+        xorg.xeyes
+        # # neovim
       ];
 
 

@@ -37,7 +37,7 @@ in {
     # '';
 
     # List packages installed in system profile
-    systemPackages = with pkgs; [ inetutils mtr sysstat gnumake ];
+    systemPackages = with pkgs; [ inetutils mtr sysstat gnumake git ];
 
     # # Persist logs, timers, etc
     # persistence = {

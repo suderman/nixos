@@ -13,7 +13,6 @@
     exa
     fzf 
     wget
-    git
     zsh
     fish
     nano
