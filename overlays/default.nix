@@ -12,7 +12,8 @@
       postFixup = (old.postFixup or "") + ''
         wrapProgram $out/bin/${bin} \
         --add-flags "--enable-features=UseOzonePlatform" \
-        --add-flags "--ozone-platform=wayland"
+        --add-flags "--ozone-platform=wayland" \
+        --add-flags "--force-device-scale-factor=2"
       '';
     });
 

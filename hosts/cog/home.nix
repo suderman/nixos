@@ -118,7 +118,8 @@
         # junction
         # # chromium
         # # element
-        # # plexamp
+        # plexamp
+        (me.enableWayland plexamp "plexamp")
         # # element-desktop
         # obsidian
         # discord
