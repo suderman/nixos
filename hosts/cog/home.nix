@@ -102,6 +102,9 @@
         # vscodium
         sl
         
+        # my script
+        yo
+
         # signal-desktop
         nnn 
         owncloud-client

@@ -36,7 +36,8 @@
         config.allowUnfree = true;
         config.joypixels.acceptLicense = true;
 
-        overlays = [(import ./overlays)];
+        # Include personal scripts and package modifications
+        overlays = with (import ./overlays); [ additions modifications ];
 
         # Include NIX User Repositories
         # https://nur.nix-community.org/

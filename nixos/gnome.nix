@@ -15,6 +15,7 @@
 
   environment.systemPackages = [
     pkgs.gnome.gnome-software
+    pkgs.gnome.gnome-tweaks
   ];
 
   # Fix broken stuff
