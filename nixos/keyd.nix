@@ -172,6 +172,15 @@
 
 }
 
+# 644 /usr/share/libinput/30-keyd.quirks
+# [keyd]
+# MatchUdevType=keyboard
+# MatchVendor=0xFAC
+# AttrKeyboardIntegration=internal
+
+
+
+
 # { config, pkgs, lib, ... }:
 # let cfg = config.own.keyd; in
 # with lib; with types;
