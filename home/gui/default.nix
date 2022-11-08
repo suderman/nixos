@@ -4,6 +4,7 @@
     ./wayland.nix
     ./wezterm.nix
     ./xdg.nix
+    ./gtk.nix
   ];
 
 }
