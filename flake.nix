@@ -26,15 +26,17 @@
   outputs = { self, ... }: 
     
     with builtins;
-    let inherit (self) inputs outputs;
+    let inherit (self) outputs inputs;
 
       # Make a nixpkgs configuration
-      mkPkgs = nixpkgs: system: import nixpkgs {
+      mkPkgs = nixpkgs': system: import nixpkgs' {
         inherit system;
 
         # Accept agreements for unfree software
         config.allowUnfree = true;
         config.joypixels.acceptLicense = true;
+
+        overlays = [(import ./overlays)];
 
         # Include NIX User Repositories
         # https://nur.nix-community.org/

@@ -7,10 +7,7 @@ let
   inherit (host) hostname username userdir system;
 in {
 
-  imports = [
-    # ./${hostname}/home.nix
-    # ./shared/vim.nix
-  ];
+  imports = [ ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   home.stateVersion = "22.05";
@@ -32,13 +29,8 @@ in {
   # Add stuff for your user as you see fit:
   # programs.neovim.enable = true;
   home.packages = with pkgs; [ 
-    nerdfonts
-    joypixels
-    # nnn 
-    # owncloud-client
-    # _1password-gui
-    # nur.repos.mic92.hello-nur
-    # neovim
+    # nerdfonts
+    # joypixels
   ];
 
 
