@@ -134,6 +134,21 @@
   # xdg.configFile."btop/btop.conf".source = ../../config/btop/btop.conf;
   # xdg.configFile."hostname.txt".text = "The hostname is ${host.hostname}";
 
+
+  xdg.configFile = let flags = ''
+    --enable-features=UseOzonePlatform 
+    --ozone-platform=wayland
+    '';
+  in {
+    "chromium-flags.conf".text = flags;
+    "electron-flags.conf".text = flags;
+    "electron-flags16.conf".text = flags;
+    "electron-flags17.conf".text = flags;
+    "electron-flags18.conf".text = flags;
+    "electron-flags19.conf".text = flags;
+  };
+
+
   # home.file.".config/"
   # xdg.configFile."i3blocks/config".source = ./i3blocks.conf;
   # home.file.".gdbinit".text = ''
