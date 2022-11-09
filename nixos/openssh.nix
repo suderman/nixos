@@ -27,6 +27,8 @@ in {
     }];
   };
 
+  programs.mosh.enable = true;
+
   # programs.ssh = {
   #   # Each hosts public key
   #   knownHosts = builtins.mapAttrs (name: _: {

@@ -4,12 +4,12 @@
 
   environment.variables = {
 
+    WAYLAND_DISPLAY = "wayland-0";
+
     MOZ_ENABLE_WAYLAND = "1";
     MOZ_USE_XINPUT2 = "1";
 
-    # WAYLAND_DISPLAY = "wayland-1"; # crashes electron on nix
-    WAYLAND_DISPLAY = "wayland-0";
-    # GDK_DPI_SCALE = "1.22";
+    GDK_BACKEND = "wayland";
 
     QT_QPA_PLATFORM = "wayland";
     QT_AUTO_SCREEN_SCALE_FACTOR = "1";

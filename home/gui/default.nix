@@ -5,6 +5,7 @@
     ./wezterm.nix
     ./xdg.nix
     ./gtk.nix
+    ./photo.nix
   ];
 
 }

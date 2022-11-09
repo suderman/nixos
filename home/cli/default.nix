@@ -18,6 +18,7 @@
     nano
     micro
     killall
+    mosh
   ];
 
 }
