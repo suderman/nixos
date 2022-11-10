@@ -38,36 +38,16 @@
     let inherit (self) outputs inputs;
 
       # Get configured pkgs for a given system with overlays, nur and unstable baked in
-      mkPkgs = system: 
+      mkPkgs = system: import inputs.nixpkgs rec {
+        inherit system;
 
-        # Create the attributes to pass to nixpkgs
-        let attr = {
-          inherit system;
+        # Accept agreements for unfree software
+        config.allowUnfree = true;
+        config.joypixels.acceptLicense = true;
 
-          # Accept agreements for unfree software
-          config.allowUnfree = true;
-          config.joypixels.acceptLicense = true;
-
-          # Include personal scripts and package modifications
-          overlays = with (import ./overlays); [ additions modifications ];
-
-        # Now import nixpkgs with these attr
-        }; in import inputs.nixpkgs rec {
-          inherit (attr) system overlays;
-
-          # Add some package overrides to include nur and unstable
-          config = attr.config // { 
-            packageOverrides = pkgs: {
-
-              # Include NIX User Repositories 
-              nur = import inputs.nur { pkgs = pkgs; nurpkgs = pkgs; };
-
-              # Include unstable nixpkgs channel with same attr from above
-              unstable = import inputs.unstable { inherit system overlays config; };
-
-            }; 
-          };
-        };
+        # Include personal scripts and package modifications
+        overlays = with (import ./overlays { inherit inputs system config; } ); [ additions modifications nur unstable ];
+      };
 
       # Defaults for host, determine user directory from system
       host = override: 

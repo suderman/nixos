@@ -73,6 +73,7 @@
     in
       [
         nur.repos.mic92.hello-nur
+        # nurburger.repos.mic92.hello-nur
         # Desktop matrix client
         # (lib.enableWayland element-desktop "element-desktop")
         (me.enableWayland element-desktop "element-desktop")
@@ -108,7 +109,8 @@
         yo
 
         # signal-desktop
-        nnn 
+        unstable.nnn 
+        unstable.exa
         owncloud-client
         # slack
         _1password
@@ -126,7 +128,7 @@
         # obsidian
         # discord
         xorg.xeyes
-        nur.repos.arc.packages.mpd-youtube-dl
+        # nurrr.repos.arc.packages.mpd-youtube-dl
         # # neovim
       ];
 
