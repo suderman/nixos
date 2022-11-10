@@ -18,7 +18,9 @@
     };
 
     initExtra = ''
-      source /etc/profiles/per-user/$USER/etc/profile.d/hm-session-vars.sh
+      # source /etc/profiles/per-user/$USER/etc/profile.d/hm-session-vars.sh
+      # source /home/$USER/.nix-profile/etc/profile.d/hm-session-vars.sh
+      source ~/.nix-profile/etc/profile.d/hm-session-vars.sh
     '';
 
     oh-my-zsh = {

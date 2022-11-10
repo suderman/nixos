@@ -1,4 +1,4 @@
-{ config, inputs, lib, pkgs, username, me, ... }: with me;
+{ config, inputs, lib, pkgs, username, aux, ... }: with aux;
 let 
   ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
   # inherit (host) hostname username userdir system;

@@ -1,7 +1,7 @@
 { final, prev, ... }: {
 
   # obsidian = (prev.me.enableWayland prev.pkgs.obsidian "obsidian");
-  me.enableWayland = drv: bin: drv.overrideAttrs (old: {
+  aux.enableWayland = drv: bin: drv.overrideAttrs (old: {
     nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ prev.pkgs.makeWrapper ];
     postFixup = (old.postFixup or "") + ''
       wrapProgram $out/bin/${bin} \
@@ -11,6 +11,6 @@
     '';
   });
 
-  me.userdir = username: "/${if (prev.pkgs.stdenv.isLinux) then "home" else "Users"}/${username}/";
+  aux.userdir = username: "/${if (prev.pkgs.stdenv.isLinux) then "home" else "Users"}/${username}/";
 
 }

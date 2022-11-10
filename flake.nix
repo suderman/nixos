@@ -46,7 +46,7 @@
         config.joypixels.acceptLicense = true;
 
         # Include personal scripts and package modifications
-        overlays = with (import ./overlays { inherit inputs system config; } ); [ additions modifications nur unstable ];
+        overlays = with (import ./overlays { inherit inputs system config; } ); [ aux overrides pkgs nur unstable ];
       };
 
       # Defaults for host, determine user directory from system
@@ -64,14 +64,14 @@
       mkHost = host@{ system, hostname, username, ... }: inputs.nixpkgs.lib.nixosSystem rec {
         inherit system;
         pkgs = mkPkgs system;
-        specialArgs = { inherit inputs outputs host; username = "me"; me = pkgs.me; };
+        specialArgs = { inherit inputs outputs host; username = "me"; aux = pkgs.aux; };
         modules = [ ./nixos/${hostname} ];
       };
 
       # Make a Home Manager configuration
       mkHome = host@{ system, hostname, ... }: inputs.home-manager.lib.homeManagerConfiguration rec {
         pkgs = mkPkgs system;
-        extraSpecialArgs = { inherit inputs outputs host; username = "me"; me = pkgs.me; };
+        extraSpecialArgs = { inherit inputs outputs host; username = "me"; aux = pkgs.aux; };
         modules = [ ./home ];
       };
 
