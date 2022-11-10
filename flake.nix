@@ -66,12 +66,12 @@
         pkgs = mkPkgs system;
         specialArgs = { inherit inputs outputs host; };
         modules = [ ./hosts/${hostname}/configuration.nix 
-          inputs.home-manager.nixosModules.home-manager {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.extraSpecialArgs = { inherit inputs outputs host; };
-            home-manager.users.${username} = import ./hosts/${hostname}/home.nix;
-          }
+          # inputs.home-manager.nixosModules.home-manager {
+          #   home-manager.useGlobalPkgs = true;
+          #   home-manager.useUserPackages = true;
+          #   home-manager.extraSpecialArgs = { inherit inputs outputs host; };
+          #   home-manager.users.${username} = import ./hosts/${hostname}/home.nix;
+          # }
         ];
       };
 

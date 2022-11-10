@@ -1,4 +1,4 @@
-{ inputs, final, prev }: {
+{ final, prev, ... }: {
 
   # obsidian = (prev.me.enableWayland prev.pkgs.obsidian "obsidian");
   me.enableWayland = drv: bin: drv.overrideAttrs (old: {
