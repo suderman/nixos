@@ -7,14 +7,28 @@ let
   inherit (host) hostname username userdir system;
 in {
 
-  imports = [ ];
+  imports = [
+    ./cli
+    ./gui
+  ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   home.stateVersion = "22.05";
 
-  xdg.configFile."nix/nix.conf".text = ''
-    experimental-features = nix-command flakes
-  '';
+  xdg.configFile = let flags = ''
+    --enable-features=UseOzonePlatform 
+    --ozone-platform=wayland
+    '';
+  in {
+    "chromium-flags.conf".text = flags;
+    "electron-flags.conf".text = flags;
+    "electron-flags16.conf".text = flags;
+    "electron-flags17.conf".text = flags;
+    "electron-flags18.conf".text = flags;
+    "electron-flags19.conf".text = flags;
+    "nix/nix.conf".text = "experimental-features = nix-command flakes";
+  };
+
 
   # Enable home-manager and git
   programs.home-manager.enable = true;
@@ -44,7 +58,31 @@ in {
   home.packages = with pkgs; [ 
     # nerdfonts
     # joypixels
+    nur.repos.mic92.hello-nur
+    (me.enableWayland element-desktop "element-desktop")
+    (me.enableWayland signal-desktop "signal-desktop")
+    (me.enableWayland slack "slack")
+    tdesktop
+    newsflash
+    unstable.sl
+    yo
+    unstable.nnn 
+    unstable.exa
+    owncloud-client
+    _1password
+    (me.enableWayland _1password-gui "1password")
+    owofetch
+    firefox-wayland
+    (me.enableWayland plexamp "plexamp")
+    xorg.xeyes
   ];
 
+  programs = {
+    neovim.enable = true;
+    chromium = {
+      enable = true;
+      commandLineArgs = [ "--enable-features=UseOzonePlatform" "-ozone-platform=wayland" "--gtk-version=4" ];
+    };
+  };
 
 }
