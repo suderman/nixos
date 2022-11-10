@@ -65,14 +65,14 @@
         system = system;
         pkgs = mkPkgs system;
         specialArgs = { inherit inputs outputs host; };
-        modules = [ ./hosts/${hostname}/configuration.nix ];
+        modules = [ ./nixos/${hostname} ];
       };
 
       # Make a Home Manager configuration
       mkHome = host@{ system, hostname, ... }: inputs.home-manager.lib.homeManagerConfiguration {
         pkgs = mkPkgs system;
         extraSpecialArgs = { inherit inputs outputs host; };
-        modules = [ ./hosts/${hostname}/home.nix ];
+        modules = [ ./home ];
       };
 
     in {
