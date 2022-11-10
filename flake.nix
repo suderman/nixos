@@ -38,7 +38,7 @@
     let inherit (self) outputs inputs;
 
       # Get configured pkgs for a given system with overlays, nur and unstable baked in
-      mkPkgs = nixpkgs: system: 
+      mkPkgs = system: 
 
         # Create the attributes to pass to nixpkgs
         let attr = {
@@ -52,7 +52,7 @@
           overlays = with (import ./overlays); [ additions modifications ];
 
         # Now import nixpkgs with these attr
-        }; in import nixpkgs rec {
+        }; in import inputs.nixpkgs rec {
           inherit (attr) system overlays;
 
           # Add some package overrides to include nur and unstable
@@ -83,7 +83,7 @@
       # Make a NixOS host configuration
       mkHost = host@{ system, hostname, username, ... }: inputs.nixpkgs.lib.nixosSystem {
         system = system;
-        pkgs = mkPkgs inputs.nixpkgs system;
+        pkgs = mkPkgs system;
         specialArgs = { inherit inputs outputs host; };
         modules = [ ./hosts/${hostname}/configuration.nix 
           inputs.home-manager.nixosModules.home-manager {
@@ -97,7 +97,7 @@
 
       # Make a Home Manager configuration
       mkHome = host@{ system, hostname, ... }: inputs.home-manager.lib.homeManagerConfiguration {
-        pkgs = mkPkgs inputs.nixpkgs system;
+        pkgs = mkPkgs system;
         extraSpecialArgs = { inherit inputs outputs host; };
         modules = [ ./hosts/${hostname}/home.nix ];
       };

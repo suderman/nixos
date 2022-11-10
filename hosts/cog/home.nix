@@ -86,7 +86,8 @@
         # zulip
         # zulipWayland
         # # Zoom (for work, sadly)
-        zoom-us
+        # zoom-us
+        # (me.enableWayland zoom-us "zoom")
         # # Teams (also for work)
         # teams
         # # Cinny for pretty matrix
