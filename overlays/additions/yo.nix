@@ -4,7 +4,8 @@
 
   text = /* bash */ ''
     # comment
-    echo "Yo this is bash"
+    echo "Yo this is a shell script"
+    pwd
   '';
 }) // {
   meta = with lib; {
