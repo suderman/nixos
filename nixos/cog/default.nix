@@ -1,15 +1,17 @@
 { inputs, pkgs, lib, ... }: {
 
-  imports = [ 
+  imports = [ ../.
     ./hardware-configuration.nix 
     inputs.hardware.nixosModules.framework
   ] ++ [
-    ../nixos
-    ../nixos/keyd.nix
-    ../nixos/wayland.nix
-    ../nixos/gnome.nix
-    ../nixos/vim.nix
+    ../keyd.nix
+    ../wayland.nix
+    ../gnome.nix
+    ../vim.nix
   ];
+
+  networking.hostName = "cog"; 
+  # networking.domain = "example.com";
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;

@@ -26,7 +26,7 @@ in {
   time.timeZone = "America/Edmonton";
 
   # Hostname passed as argument from flake
-  networking.hostName = hostname; 
+  # networking.hostName = hostname; 
   # networking.domain = "example.com";
 
   environment = {

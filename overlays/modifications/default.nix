@@ -11,4 +11,6 @@
     '';
   });
 
+  me.userdir = username: "/${if (prev.pkgs.stdenv.isLinux) then "home" else "Users"}/${username}/";
+
 }

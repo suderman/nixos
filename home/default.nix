@@ -1,10 +1,9 @@
 # This is your home-manager configuration file
 # Use this to configure your home environment (it replaces ~/.config/nixpkgs/home.nix)
 
-{ inputs, outputs, host, lib, config, pkgs, ... }: 
-
+{ inputs, outputs, lib, config, username, me, pkgs, ... }: with me;
 let 
-  inherit (host) hostname username userdir system;
+  # inherit (host) hostname username userdir system;
 in {
 
   imports = [
@@ -38,7 +37,8 @@ in {
   systemd.user.startServices = "sd-switch";
 
   home.username = username;
-  home.homeDirectory = userdir; 
+  # home.homeDirectory = userdir; 
+  home.homeDirectory = userdir username; 
 
   # https://github.com/nix-community/home-manager/issues/1439#issuecomment-1106208294
   home.activation = {
@@ -59,9 +59,9 @@ in {
     # nerdfonts
     # joypixels
     nur.repos.mic92.hello-nur
-    (me.enableWayland element-desktop "element-desktop")
-    (me.enableWayland signal-desktop "signal-desktop")
-    (me.enableWayland slack "slack")
+    (enableWayland element-desktop "element-desktop")
+    (enableWayland signal-desktop "signal-desktop")
+    (enableWayland slack "slack")
     tdesktop
     newsflash
     unstable.sl
@@ -70,10 +70,10 @@ in {
     unstable.exa
     owncloud-client
     _1password
-    (me.enableWayland _1password-gui "1password")
+    (enableWayland _1password-gui "1password")
     owofetch
     firefox-wayland
-    (me.enableWayland plexamp "plexamp")
+    (enableWayland plexamp "plexamp")
     xorg.xeyes
   ];
 

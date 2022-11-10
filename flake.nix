@@ -61,17 +61,17 @@
         };
 
       # Make a NixOS host configuration
-      mkHost = host@{ system, hostname, username, ... }: inputs.nixpkgs.lib.nixosSystem {
-        system = system;
+      mkHost = host@{ system, hostname, username, ... }: inputs.nixpkgs.lib.nixosSystem rec {
+        inherit system;
         pkgs = mkPkgs system;
-        specialArgs = { inherit inputs outputs host; };
+        specialArgs = { inherit inputs outputs host; username = "me"; me = pkgs.me; };
         modules = [ ./nixos/${hostname} ];
       };
 
       # Make a Home Manager configuration
-      mkHome = host@{ system, hostname, ... }: inputs.home-manager.lib.homeManagerConfiguration {
+      mkHome = host@{ system, hostname, ... }: inputs.home-manager.lib.homeManagerConfiguration rec {
         pkgs = mkPkgs system;
-        extraSpecialArgs = { inherit inputs outputs host; };
+        extraSpecialArgs = { inherit inputs outputs host; username = "me"; me = pkgs.me; };
         modules = [ ./home ];
       };
 

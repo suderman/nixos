@@ -1,7 +1,7 @@
-{ config, inputs, lib, pkgs, host, ... }:
+{ config, inputs, lib, pkgs, username, me, ... }: with me;
 let 
   ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
-  inherit (host) hostname username userdir system;
+  # inherit (host) hostname username userdir system;
 in {
 
   users = {
@@ -9,7 +9,7 @@ in {
     users."${username}" = {
       isNormalUser = true;
       shell = pkgs.zsh;
-      home = userdir;
+      home = userdir username;
       description = username;
       extraGroups = [ 
         "wheel" 
@@ -24,8 +24,8 @@ in {
 
   };
 
-  environment.systemPackages = [
-    pkgs.home-manager
+  environment.systemPackages = with pkgs; [
+    home-manager
   ];
 
 }
