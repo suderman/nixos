@@ -110,7 +110,24 @@
         "home-manager": "home-manager",
         "impermanence": "impermanence",
         "nixpkgs": "nixpkgs",
-        "nur": "nur"
+        "nur": "nur",
+        "unstable": "unstable"
+      }
+    },
+    "unstable": {
+      "locked": {
+        "lastModified": 1667998476,
+        "narHash": "sha256-sfzNpES6BNMfEUEELoEOJ7lgkNogJ2Q9bRAfckjtSHo=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "59f6a93082032f9053e69dd0477368bcf63a680b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
       }
     },
     "utils": {

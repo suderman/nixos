@@ -3,22 +3,31 @@
 
   inputs = {
 
-    # Nix Packages
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    hardware.url = "github:nixos/nixos-hardware";
+    # Nix Packages 
+    # <https://search.nixos.org/packages>
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable"; # change to nixos-22.11 when available
+    unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+
+    # Nix User Repository
+    # <https://nur.nix-community.org>
+    nur.url = "github:nix-community/NUR";                                   
 
     # Home manager
+    # <https://mipmip.github.io/home-manager-option-search>
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
-    # macOS Package Management
+    # macOS configuration
+    # <https://daiderd.com/nix-darwin/manual>
     darwin.url = "github:lnl7/nix-darwin/master";                              
     darwin.inputs.nixpkgs.follows = "nixpkgs";
 
-    # Nix User Repository
-    nur.url = "github:nix-community/NUR";                                   
+    # NixOS profiles for different hardware
+    # <https://github.com/NixOS/nixos-hardware>
+    hardware.url = "github:nixos/nixos-hardware";
 
     # Save state
+    # <https://github.com/nix-community/impermanence>
     impermanence.url = "github:nix-community/impermanence";
 
   };
@@ -28,23 +37,37 @@
     with builtins;
     let inherit (self) outputs inputs;
 
-      # Make a nixpkgs configuration
-      mkPkgs = nixpkgs': system: import nixpkgs' {
-        inherit system;
+      # Get configured pkgs for a given system with overlays, nur and unstable baked in
+      mkPkgs = nixpkgs: system: 
 
-        # Accept agreements for unfree software
-        config.allowUnfree = true;
-        config.joypixels.acceptLicense = true;
+        # Create the attributes to pass to nixpkgs
+        let attr = {
+          inherit system;
 
-        # Include personal scripts and package modifications
-        overlays = with (import ./overlays); [ additions modifications ];
+          # Accept agreements for unfree software
+          config.allowUnfree = true;
+          config.joypixels.acceptLicense = true;
 
-        # Include NIX User Repositories
-        # https://nur.nix-community.org/
-        config.packageOverrides = pkgs: {
-          nur = import inputs.nur { pkgs = pkgs; nurpkgs = pkgs; };
+          # Include personal scripts and package modifications
+          overlays = with (import ./overlays); [ additions modifications ];
+
+        # Now import nixpkgs with these attr
+        }; in import nixpkgs rec {
+          inherit (attr) system overlays;
+
+          # Add some package overrides to include nur and unstable
+          config = attr.config // { 
+            packageOverrides = pkgs: {
+
+              # Include NIX User Repositories 
+              nur = import inputs.nur { pkgs = pkgs; nurpkgs = pkgs; };
+
+              # Include unstable nixpkgs channel with same attr from above
+              unstable = import inputs.unstable { inherit system overlays config; };
+
+            }; 
+          };
         };
-      };
 
       # Defaults for host, determine user directory from system
       host = override: 

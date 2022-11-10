@@ -72,6 +72,7 @@
       };
     in
       [
+        nur.repos.mic92.hello-nur
         # Desktop matrix client
         # (lib.enableWayland element-desktop "element-desktop")
         (me.enableWayland element-desktop "element-desktop")
@@ -100,7 +101,7 @@
         (me.enableWayland slack "slack")
         # (me.enableWayland vscodium "codiuim")
         # vscodium
-        sl
+        unstable.sl
         
         # my script
         yo
@@ -124,6 +125,7 @@
         # obsidian
         # discord
         xorg.xeyes
+        nur.repos.arc.packages.mpd-youtube-dl
         # # neovim
       ];
 
