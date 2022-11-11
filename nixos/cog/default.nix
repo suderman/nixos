@@ -1,4 +1,4 @@
-{ inputs, pkgs, lib, ... }: {
+{ inputs, config, pkgs, lib, ... }: {
 
   imports = [ ../.
     ./hardware-configuration.nix 
@@ -9,9 +9,6 @@
     ../gnome.nix
     ../vim.nix
   ];
-
-  networking.hostName = "cog"; 
-  # networking.domain = "example.com";
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -30,13 +27,13 @@
   # Enable touchpad support (enabled default in most desktopManager).
   services.xserver.libinput.enable = true;
 
-  # Enable the GNOME Desktop Environment.
-  # services.xserver.displayManager.gdm.enable = true;
-  # services.xserver.desktopManager.gnome.enable = true;
-
+  # Packages
   environment.systemPackages = with pkgs; [];
 
+  # Docker
   virtualisation.docker.enable = true;
-  programs.nix-ld.enable = true;
+
+  # Other
+  # programs.nix-ld.enable = true;
 
 }

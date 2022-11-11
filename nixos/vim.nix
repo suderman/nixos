@@ -1,6 +1,4 @@
-# { config, pkgs, ... }:
-{ pkgs, ... }:
-{
+{ pkgs, ... }: {
   environment.variables = { EDITOR = "vim"; };
 
   environment.systemPackages = with pkgs; [

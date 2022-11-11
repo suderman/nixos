@@ -1,6 +1,4 @@
-{ config, inputs, lib, ... }:
-
-{
+{ config, inputs, lib, ... }: {
 
   nix.settings = {
 
@@ -28,6 +26,7 @@
   nix.gc = {
     automatic = true;
     dates = "weekly";
+    options = "--delete-older-than 30d";
   };
 
   # Add each flake input as a registry

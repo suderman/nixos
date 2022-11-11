@@ -2,11 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ inputs, outputs, host, config, pkgs, lib, ... }:
-
-let 
-  inherit (host) hostname username userdir system;
-in {
+{ inputs, outputs, config, pkgs, lib, hostname, ... }: {
 
   imports = [
     ./nix.nix
@@ -26,35 +22,31 @@ in {
   time.timeZone = "America/Edmonton";
 
   # Hostname passed as argument from flake
-  # networking.hostName = hostname; 
-  # networking.domain = "example.com";
+  networking.hostName = hostname; 
+  networking.domain = "example.com";
 
   environment = {
+
+    # List packages installed in system profile
+    systemPackages = with pkgs; [ inetutils mtr sysstat gnumake git ];
+
+    # Add terminfo files
+    enableAllTerminfo = true;
 
     # # Activate home-manager environment, if not already
     # loginShellInit = ''
     #   [ -d "$HOME/.nix-profile" ] || /nix/var/nix/profiles/per-user/$USER/home-manager/activate &> /dev/null
     # '';
 
-    # List packages installed in system profile
-    systemPackages = with pkgs; [ inetutils mtr sysstat gnumake git ];
-
     # # Persist logs, timers, etc
     # persistence = {
     #   "/persist".directories = [ "/var/lib/systemd" "/var/log" "/srv" ];
     # };
 
-    # Add terminfo files
-    enableAllTerminfo = true;
-
   };
 
   # Allows users to allow others on their binds
   programs.fuse.userAllowOther = true;
-
-  # hardware.enableAllFirmware = true;
-  # hardware.enableRedistributableFirmware = true;
-
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

@@ -1,10 +1,7 @@
 # This is your home-manager configuration file
 # Use this to configure your home environment (it replaces ~/.config/nixpkgs/home.nix)
 
-{ inputs, outputs, lib, config, username, aux, pkgs, ... }: with aux;
-let 
-  # inherit (host) hostname username userdir system;
-in {
+{ inputs, outputs, lib, config, username, aux, pkgs, ... }: with aux; {
 
   imports = [
     ./cli
@@ -28,7 +25,6 @@ in {
     "nix/nix.conf".text = "experimental-features = nix-command flakes";
   };
 
-
   # Enable home-manager and git
   programs.home-manager.enable = true;
   # programs.git.enable = true;
@@ -36,9 +32,9 @@ in {
   # Nicely reload system units when changing configs
   systemd.user.startServices = "sd-switch";
 
+  # Get username from flake
   home.username = username;
-  # home.homeDirectory = userdir; 
-  home.homeDirectory = userdir username; 
+  home.homeDirectory = userdir(username);
 
   # https://github.com/nix-community/home-manager/issues/1439#issuecomment-1106208294
   home.activation = {
@@ -56,8 +52,8 @@ in {
   # Add stuff for your user as you see fit:
   # programs.neovim.enable = true;
   home.packages = with pkgs; [ 
-    # nerdfonts
-    # joypixels
+    nerdfonts
+    joypixels
     nur.repos.mic92.hello-nur
     (enableWayland element-desktop "element-desktop")
     (enableWayland signal-desktop "signal-desktop")
@@ -72,6 +68,7 @@ in {
     _1password
     (enableWayland _1password-gui "1password")
     owofetch
+    neofetch
     firefox-wayland
     (enableWayland plexamp "plexamp")
     xorg.xeyes

@@ -1,5 +1,3 @@
-{ outputs, pkgs, lib, config, ... }:
-
 {
   services.flatpak.enable = true;
   xdg.portal.enable = true;

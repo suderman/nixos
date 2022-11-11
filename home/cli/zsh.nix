@@ -1,5 +1,5 @@
-{ config, lib, pkgs, ... }:
-{
+{ config, lib, pkgs, ... }: {
+
   programs.zsh = {
     autocd = true;
     enable = true;
@@ -20,7 +20,8 @@
     initExtra = ''
       # source /etc/profiles/per-user/$USER/etc/profile.d/hm-session-vars.sh
       # source /home/$USER/.nix-profile/etc/profile.d/hm-session-vars.sh
-      source ~/.nix-profile/etc/profile.d/hm-session-vars.sh
+      # source ~/.nix-profile/etc/profile.d/hm-session-vars.sh
+      source $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh
     '';
 
     oh-my-zsh = {

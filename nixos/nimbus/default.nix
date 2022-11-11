@@ -1,28 +1,25 @@
-{ inputs, outputs, host, config, pkgs, lib, ... }:
+{ inputs, config, pkgs, lib, ... }: {
 
-let inherit (host) hostname user system;
-in {
-
-  imports = [ ./hardware-configuration.nix ] ++ [
-    ../nixos
-    ../nixos/vim
-    ../nixos/keyd.nix
+  imports = [ ../.
+    ./hardware-configuration.nix 
+  ] ++ [
+    ../vim.nix
   ];
 
+  # Linode
   boot.loader.grub.enable = true;
   boot.loader.grub.version = 2;
   networking.usePredictableInterfaceNames = false;
   networking.useDHCP = false;
   networking.interfaces.eth0.useDHCP = true;
 
-  environment.systemPackages = with pkgs; [
-     #vim 
-     #neovim
-     # tmux
-   ];
+  # Packages
+  environment.systemPackages = with pkgs; [];
 
+  # Docker
   virtualisation.docker.enable = true;
 
-  programs.nix-ld.enable = true;
+  # Other
+  # programs.nix-ld.enable = true;
 
 }

@@ -1,5 +1,5 @@
-{ lib, ... }:
-{
+{ lib, ... }: {
+
   services.tailscale.enable = true;
   networking.firewall = {
     checkReversePath = "loose";
@@ -9,4 +9,5 @@
   # environment.persistence = {
   #   "/persist".directories = [ "/var/lib/tailscale" ];
   # };
+
 }

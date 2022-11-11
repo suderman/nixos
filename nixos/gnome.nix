@@ -1,6 +1,5 @@
-{ outputs, pkgs, lib, config, ... }:
+{ config, lib, pkgs, ... }: {
 
-{
   services = {
     xserver = {
       desktopManager.gnome.enable = true;
@@ -13,12 +12,13 @@
     gnome.games.enable = true;
   };
 
-  environment.systemPackages = [
-    pkgs.gnome.gnome-software
-    pkgs.gnome.gnome-tweaks
+  environment.systemPackages = with pkgs; [
+    gnome.gnome-software
+    gnome.gnome-tweaks
   ];
 
   # Fix broken stuff
   # services.avahi.enable = false;
   # networking.networkmanager.enable = false;
+
 }

@@ -1,8 +1,7 @@
-{ pkgs, ... }:
-{
+{ pkgs, ... }: with pkgs; {
 
   # Install keyd package
-  environment.systemPackages = [ pkgs.keyd ];
+  environment.systemPackages = [ keyd ];
 
   # Create keyd group
   users.groups.keyd.name = "keyd";
@@ -15,7 +14,7 @@
     wantedBy = [ "sysinit.target" ];
     serviceConfig = {
       Type = "simple";
-      ExecStart = "${pkgs.keyd}/bin/keyd";
+      ExecStart = "${keyd}/bin/keyd";
       # Restart = "on-failure";
     };
   };
