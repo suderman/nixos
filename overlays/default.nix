@@ -1,18 +1,15 @@
 { inputs, system, config }: {
 
   # Auxiliary helper functions
-  aux = final: prev: import ./aux { inherit inputs final prev; };
+  aux = self: super: import ./aux { inherit inputs self super; };
 
-  # Override existing packages with modifications
-  overrides = final: prev: import ./overrides { inherit inputs final prev; };
-
-  # Personal packages
-  pkgs = final: prev: import ./pkgs { inherit inputs; pkgs = final; };
+  # Personal packages and overrides
+  pkgs = self: super: import ./pkgs { inherit inputs self super; };
 
   # NIX User Repositories 
-  nur = final: prev: { nur = ( import inputs.nur { pkgs = final; nurpkgs = final; } ); };
+  nur = self: super: { nur = ( import inputs.nur { pkgs = self; nurpkgs = self; } ); };
 
   # Unstable nixpkgs channel with same system & config
-  unstable = final: prev: { unstable = ( import inputs.unstable { inherit system config; } ); };
+  unstable = self: super: { unstable = ( import inputs.unstable { inherit system config; } ); };
 
 }

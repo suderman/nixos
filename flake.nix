@@ -46,7 +46,7 @@
         config.joypixels.acceptLicense = true;
 
         # Include personal scripts and package modifications
-        overlays = with (import ./overlays { inherit inputs system config; } ); [ aux overrides pkgs nur unstable ];
+        overlays = with (import ./overlays { inherit inputs system config; } ); [ aux pkgs nur unstable ];
       };
 
       # Defaults for host, determine user directory from system
