@@ -36,7 +36,7 @@
     gnomeExtensions.clipboard-history
     gnomeExtensions.tray-icons-reloaded
     gnomeExtensions.sound-output-device-chooser
-    gnomeExtensions.pano
+    # gnomeExtensions.pano gsound libgda
   ];
 
   # Fix broken stuff
