@@ -1,6 +1,10 @@
 { self, super, ... }: {
 
-  aux.enableWayland = { type, pkg, bin }: 
+
+  # Force package to run in Wayland
+  # example:
+  # owncloud-client = enableWayland { type = "qt"; pkg = pkgs.owncloud-client; bin = "owncloud"; };
+  support.enableWayland = { type, pkg, bin }: 
     let args = {
       qt = "--set QT_QPA_PLATFORM wayland";
       electron = ''
@@ -17,6 +21,10 @@
       '';
     };
 
-  aux.userdir = username: "/${if (super.stdenv.isLinux) then "home" else "Users"}/${username}/";
+
+  # Determine home directory from system type
+  # example:
+  # home.homeDirectory = userdir("me");
+  support.userdir = username: "/${if (super.stdenv.isLinux) then "home" else "Users"}/${username}/";
 
 }

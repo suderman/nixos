@@ -46,21 +46,21 @@
         config.joypixels.acceptLicense = true;
 
         # Include personal scripts and package modifications
-        overlays = with (import ./overlays { inherit inputs system config; } ); [ aux pkgs nur unstable ];
+        overlays = with (import ./overlays { inherit inputs system config; } ); [ support pkgs nur unstable ];
       };
 
       # Make a NixOS host configuration
       mkHost = args@{ system ? "x86_64-linux", username ? "me", hostname, ... }: inputs.nixpkgs.lib.nixosSystem rec {
         inherit system;
         pkgs = mkPkgs system;
-        specialArgs = args // { inherit inputs outputs username; aux = pkgs.aux; };
+        specialArgs = args // { inherit inputs outputs username; support = pkgs.support; };
         modules = [ ./nixos/${hostname} ];
       };
 
       # Make a Home Manager configuration
       mkHome = args@{ system ? "x86_64-linux", username ? "me", ... }: inputs.home-manager.lib.homeManagerConfiguration rec {
         pkgs = mkPkgs system;
-        extraSpecialArgs = args // { inherit inputs outputs username; aux = pkgs.aux; };
+        extraSpecialArgs = args // { inherit inputs outputs username; support = pkgs.support; };
         modules = [ ./home ];
       };
 

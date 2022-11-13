@@ -1,7 +1,7 @@
 { inputs, system, config }: {
 
-  # Auxiliary helper functions
-  aux = self: super: import ./aux { inherit inputs self super; };
+  # Personal support functions
+  support = self: super: import ./support { inherit inputs self super; };
 
   # Personal packages and overrides
   pkgs = self: super: import ./pkgs { inherit inputs self super; };

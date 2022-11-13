@@ -1,7 +1,7 @@
 # This is your home-manager configuration file
 # Use this to configure your home environment (it replaces ~/.config/nixpkgs/home.nix)
 
-{ inputs, outputs, lib, config, username, aux, pkgs, ... }: with aux; {
+{ inputs, outputs, lib, config, username, support, pkgs, ... }: with support; {
 
   imports = [
     ./cli
@@ -35,19 +35,20 @@
   # Get username from flake
   home.username = username;
   home.homeDirectory = userdir(username);
+  # home.homeDirectory = "/home/me";
 
-  # https://github.com/nix-community/home-manager/issues/1439#issuecomment-1106208294
-  home.activation = {
-    linkDesktopApplications = {
-      after = [ "writeBoundary" "createXdgUserDirectories" ];
-      before = [ ];
-      data = ''
-        rm -rf ${config.xdg.dataHome}/"applications/home-manager"
-        mkdir -p ${config.xdg.dataHome}/"applications/home-manager"
-        # cp -Lr ${config.home.homeDirectory}/.nix-profile/share/applications/* ${config.xdg.dataHome}/"applications/home-manager/"
-      '';
-    };
-  };
+  # # https://github.com/nix-community/home-manager/issues/1439#issuecomment-1106208294
+  # home.activation = {
+  #   linkDesktopApplications = {
+  #     after = [ "writeBoundary" "createXdgUserDirectories" ];
+  #     before = [ ];
+  #     data = ''
+  #       rm -rf ${config.xdg.dataHome}/"applications/home-manager"
+  #       mkdir -p ${config.xdg.dataHome}/"applications/home-manager"
+  #       cp -Lr ${config.home.homeDirectory}/.nix-profile/share/applications/* ${config.xdg.dataHome}/"applications/home-manager/"
+  #     '';
+  #   };
+  # };
 
   # Add stuff for your user as you see fit:
   # programs.neovim.enable = true;
@@ -79,10 +80,10 @@
 
   programs = {
     neovim.enable = true;
-    chromium = {
-      enable = true;
-      commandLineArgs = [ "--enable-features=UseOzonePlatform" "-ozone-platform=wayland" "--gtk-version=4" ];
-    };
+    # chromium = {
+    #   enable = true;
+    #   commandLineArgs = [ "--enable-features=UseOzonePlatform" "-ozone-platform=wayland" "--gtk-version=4" ];
+    # };
   };
 
 }
