@@ -35,7 +35,7 @@
     gnomeExtensions.gtk-title-bar
     gnomeExtensions.clipboard-history
     gnomeExtensions.tray-icons-reloaded
-    gnomeExtensions.sound-output-device-chooser
+    # gnomeExtensions.sound-output-device-chooser
     # gnomeExtensions.pano gsound libgda
   ];
 

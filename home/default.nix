@@ -55,24 +55,27 @@
     nerdfonts
     joypixels
     nur.repos.mic92.hello-nur
-    (enableWayland element-desktop "element-desktop")
-    (enableWayland signal-desktop "signal-desktop")
-    (enableWayland slack "slack")
     tdesktop
     newsflash
     unstable.sl
     yo
     unstable.nnn 
     unstable.exa
-    owncloud-client
     _1password
-    (enableWayland _1password-gui "1password")
     owofetch
-    neofetch
+    dolphin
+    _1password-gui
+    owncloud-client
+    element-desktop
+    signal-desktop
+    slack
     firefox-wayland
-    (enableWayland plexamp "plexamp")
     xorg.xeyes
+    plexamp
+
+
   ];
+
 
   programs = {
     neovim.enable = true;
