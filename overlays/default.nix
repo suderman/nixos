@@ -1,8 +1,5 @@
 { inputs, system, config }: {
 
-  # Personal support functions
-  support = self: super: import ./support { inherit inputs self super; };
-
   # Personal packages and overrides
   pkgs = self: super: import ./pkgs { inherit inputs self super; };
 

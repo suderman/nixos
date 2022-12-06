@@ -1,4 +1,4 @@
-{ config, inputs, lib, pkgs, username, aux, ... }: with builtins; with aux;
+{ config, inputs, lib, pkgs, username, aux, ... }: with builtins; 
 let ifTheyExist = groups: filter (group: hasAttr group config.users.groups) groups;
 in {
 
@@ -6,7 +6,7 @@ in {
     users."${username}" = with pkgs; {
       isNormalUser = true;
       shell = zsh;
-      home = userdir(username);
+      home = "/home/${username}";
       description = username;
       extraGroups = [ 
         "wheel" 

@@ -5,7 +5,7 @@
 
     # Nix Packages 
     # <https://search.nixos.org/packages>
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable"; # change to nixos-22.11 when available
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-22.11";
     unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
     # Nix User Repository
@@ -46,21 +46,21 @@
         config.joypixels.acceptLicense = true;
 
         # Include personal scripts and package modifications
-        overlays = with (import ./overlays { inherit inputs system config; } ); [ support pkgs nur unstable ];
+        overlays = with (import ./overlays { inherit inputs system config; } ); [ pkgs nur unstable ];
       };
 
       # Make a NixOS host configuration
       mkHost = args@{ system ? "x86_64-linux", username ? "me", hostname, ... }: inputs.nixpkgs.lib.nixosSystem rec {
         inherit system;
         pkgs = mkPkgs system;
-        specialArgs = args // { inherit inputs outputs username; support = pkgs.support; };
+        specialArgs = args // { inherit inputs outputs username; };
         modules = [ ./nixos/${hostname} ];
       };
 
       # Make a Home Manager configuration
       mkHome = args@{ system ? "x86_64-linux", username ? "me", ... }: inputs.home-manager.lib.homeManagerConfiguration rec {
         pkgs = mkPkgs system;
-        extraSpecialArgs = args // { inherit inputs outputs username; support = pkgs.support; };
+        extraSpecialArgs = args // { inherit inputs outputs username; };
         modules = [ ./home ];
       };
 

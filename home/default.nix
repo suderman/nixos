@@ -1,7 +1,7 @@
 # This is your home-manager configuration file
 # Use this to configure your home environment (it replaces ~/.config/nixpkgs/home.nix)
 
-{ inputs, outputs, lib, config, username, support, pkgs, ... }: with support; {
+{ inputs, outputs, lib, config, username, support, pkgs, ... }: {
 
   imports = [
     ./cli
@@ -34,8 +34,7 @@
 
   # Get username from flake
   home.username = username;
-  home.homeDirectory = userdir(username);
-  # home.homeDirectory = "/home/me";
+  home.homeDirectory = "/${if (pkgs.stdenv.isLinux) then "home" else "Users"}/${username}";
 
   # # https://github.com/nix-community/home-manager/issues/1439#issuecomment-1106208294
   # home.activation = {
@@ -61,7 +60,7 @@
     unstable.sl
     yo
     unstable.nnn 
-    unstable.exa
+    # unstable.exa
     _1password
     owofetch
     dolphin
@@ -74,16 +73,15 @@
     xorg.xeyes
     plexamp
 
-
   ];
 
 
   programs = {
     neovim.enable = true;
-    # chromium = {
-    #   enable = true;
-    #   commandLineArgs = [ "--enable-features=UseOzonePlatform" "-ozone-platform=wayland" "--gtk-version=4" ];
-    # };
+    chromium = {
+      enable = true;
+      commandLineArgs = [ "--enable-features=UseOzonePlatform" "-ozone-platform=wayland" "--gtk-version=4" ];
+    };
   };
 
 }
