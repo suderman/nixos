@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ inputs, outputs, config, pkgs, lib, hostname, ... }: {
+{ inputs, outputs, config, pkgs, lib, hostname, domain, ... }: {
 
   age.secrets = {
     domain.file = ../secrets/domain.age;
@@ -17,6 +17,7 @@
     ./tailscale.nix
     ./flatpak.nix
     ./pipewire.nix
+    ./docker.nix
     # ./quiet-boot.nix
     # ./systemd-boot.nix
     # ./keyd.nix
@@ -28,7 +29,7 @@
 
   # Hostname passed as argument from flake
   networking.hostName = hostname; 
-  # networking.domain = "example.com";
+  networking.domain = domain;
 
   networking.firewall = {
     enable = true;

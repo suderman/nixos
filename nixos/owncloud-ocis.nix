@@ -1,13 +1,19 @@
-{ inputs, config, pkgs, lib, ... }: {
+{ inputs, config, pkgs, lib, ... }:
+
+let 
+  localDomain = "local.${config.networking.domain}";
+  hostDomain = "${config.networking.hostName}.${config.networking.domain}";
+
+in {
 
   # https://github.com/owncloud/ocis/blob/master/deployments/examples/ocis_traefik/docker-compose.yml
   virtualisation.oci-containers.containers."owncloud-ocis" = {
     image = "owncloud/ocis:2";
     entrypoint = "/bin/sh";
     cmd = [ "-c" "ocis init || true; ocis server" ];
-    # extraOptions = [ "--pod=ocis" ];
+    extraOptions = [ "--network=host" ];
     environment = {
-      OCIS_URL = "https://ocis.cog";
+      OCIS_URL = "https://ocis.${hostDomain}";
       OCIS_LOG_LEVEL = "debug";
       PROXY_TLS = "false"; 
       OCIS_INSECURE = "false";
@@ -29,14 +35,18 @@
     ];
   };
 
-  services.traefik.dynamicConfigOptions.http.routers."ocis" = {
+  services.traefik.dynamicConfigOptions.http.routers."owncloud-ocis" = {
     entrypoints = "websecure";
-    rule = "Host(`ocis.cog`)";
-    tls = true;
-    service = "ocis";
+    rule = "Host(`ocis.${localDomain}`) || Host(`ocis.${hostDomain}`)";
+    service = "owncloud-ocis";
+    tls.certresolver = "resolver-dns";
+    tls.domains = [
+      { main = "${localDomain}"; sans = "*.${localDomain}"; }
+      { main = "${hostDomain}"; sans = "*.${hostDomain}"; }
+    ];
   };
-  services.traefik.dynamicConfigOptions.http.services."ocis" = {
-    loadBalancer.servers = [{ url = "http://localhost:9200"; }];
+  services.traefik.dynamicConfigOptions.http.services."owncloud-ocis" = {
+    loadBalancer.servers = [{ url = "http://127.0.0.1:9200"; }];
   };
 
   # systemd.services.create-ocis-pod = with config.virtualisation.oci-containers; {

@@ -1,16 +1,13 @@
 { inputs, config, pkgs, lib, ... }: 
 
 let 
-  # config.age.secrets.domain.file = "${inputs.self}/secrets/domain.age";
-  # secret-domain.file = ../secrets/domain.age;
-  # domain = builtins.readFile config.age.secrets.domain.path;
-  domain = "example.com";
-
+  email = "dns@${config.networking.domain}";
+  domain = "${config.networking.domain}";
+  localDomain = "local.${config.networking.domain}";
+  hostDomain = "${config.networking.hostName}.${config.networking.domain}";
 in {
 
   # age.secrets.cf_dns_api_token.file = "${inputs.self}/secrets/cf_dns_api_token.age";
-  # age.secrets.cf_dns_api_token.file = ../secrets/cf_dns_api_token.age;
-
   networking.firewall.allowedTCPPorts = [ 80 443 ];
   systemd.services.traefik = {
     serviceConfig.EnvironmentFile = config.age.secrets.cf_dns_api_token.path;
@@ -18,6 +15,7 @@ in {
 
   services.traefik = {
     enable = true;
+    group = "docker"; # required so traefik is permitted to watch docker events
 
     staticConfigOptions = {
 
@@ -26,6 +24,11 @@ in {
       pilot.dashboard = false;
       serversTransport.insecureSkipVerify = true;
 
+      providers.docker = {
+        endpoint = "unix:///var/run/docker.sock";
+        exposedByDefault = false;
+      };
+
       entryPoints.web = {
         address = ":80";
         http.redirections.entrypoint = {
@@ -33,6 +36,7 @@ in {
           scheme = "https";
         };
       };
+
       entryPoints.websecure = {
         address = ":443";
       };
@@ -44,7 +48,7 @@ in {
           delaybeforecheck = "0";
         };
         storage = "/var/lib/traefik/cert.json";
-        email = "dns@${domain}";
+        email = "${email}";
       };
 
       global = {
@@ -65,12 +69,12 @@ in {
       http.routers = {
         traefik = {
           entrypoints = "websecure";
-          rule = "Host(`traefik.local.${domain}`) || Host(`traefik.cog.${domain}`)";
+          rule = "Host(`traefik.${localDomain}`) || Host(`traefik.${hostDomain}`)";
           service = "api@internal";
           tls.certresolver = "resolver-dns";
           tls.domains = [
-            { main = "local.${domain}"; sans = "*.local.${domain}"; }
-            { main = "cog.${domain}"; sans = "*.cog.${domain}"; }
+            { main = "${localDomain}"; sans = "*.${localDomain}"; }
+            { main = "${hostDomain}"; sans = "*.${hostDomain}"; }
           ];
         };
 

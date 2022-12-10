@@ -47,9 +47,6 @@
   services.gitea.enable = true;
   services.gitea.database.type = "mysql";
 
-  # virtualisation.oci-containers.backend = "podman";
-  virtualisation.oci-containers.backend = "docker";
-
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -69,9 +66,6 @@
 
   # Packages
   # environment.systemPackages = with pkgs; [];
-
-  # Docker
-  virtualisation.docker.enable = true;
 
   # Other
   # programs.nix-ld.enable = true;

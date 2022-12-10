@@ -55,11 +55,11 @@
       };
 
       # Make a NixOS host configuration
-      mkHost = args@{ system ? "x86_64-linux", username ? "me", hostname, ... }: inputs.nixpkgs.lib.nixosSystem rec {
+      mkHost = args@{ system ? "x86_64-linux", username ? "me", domain ? "lan", hostname, ... }: inputs.nixpkgs.lib.nixosSystem rec {
         inherit system;
         pkgs = mkPkgs system;
         specialArgs = args // { inherit inputs outputs username; };
-        modules = [ inputs.agenix.nixosModule ./nixos/${hostname} ];
+        modules = [ ./nixos/${hostname} inputs.agenix.nixosModule ];
       };
 
       # Make a Home Manager configuration
@@ -72,7 +72,7 @@
     in {
 
       # Framework Laptop
-      nixosConfigurations.cog = mkHost { hostname = "cog"; };
+      nixosConfigurations.cog = mkHost { hostname = "cog"; domain = "jons.ca"; };
       homeConfigurations.cog = mkHome {};
 
       # Linode VPS
