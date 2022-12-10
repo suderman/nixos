@@ -4,6 +4,11 @@
 
 { inputs, outputs, config, pkgs, lib, hostname, ... }: {
 
+  age.secrets = {
+    domain.file = ../secrets/domain.age;
+    cf_dns_api_token.file = ../secrets/cf_dns_api_token.age;
+  };
+
   imports = [
     ./nix.nix
     ./users.nix
@@ -23,12 +28,24 @@
 
   # Hostname passed as argument from flake
   networking.hostName = hostname; 
-  networking.domain = "example.com";
+  # networking.domain = "example.com";
+
+  networking.firewall = {
+    enable = true;
+    allowedTCPPorts = [ 80 443 ];
+    allowedUDPPortRanges = [
+      { from = 4000; to = 4007; }
+      { from = 8000; to = 8010; }
+    ];
+  };
 
   environment = {
 
     # List packages installed in system profile
-    systemPackages = with pkgs; [ inetutils mtr sysstat gnumake git ];
+    systemPackages = with pkgs; [ 
+      inetutils mtr sysstat gnumake git # basics
+      inputs.agenix.defaultPackage."${stdenv.system}" # also include agenix command
+    ];
 
     # Add terminfo files
     enableAllTerminfo = true;

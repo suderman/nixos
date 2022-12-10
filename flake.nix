@@ -30,6 +30,11 @@
     # <https://github.com/nix-community/impermanence>
     impermanence.url = "github:nix-community/impermanence";
 
+    # Secrets
+    # <https://github.com/ryantm/agenix>
+    agenix.url = "github:ryantm/agenix";
+    agenix.inputs.nixpkgs.follows = "nixpkgs";
+
   };
 
   outputs = { self, ... }: 
@@ -54,7 +59,7 @@
         inherit system;
         pkgs = mkPkgs system;
         specialArgs = args // { inherit inputs outputs username; };
-        modules = [ ./nixos/${hostname} ];
+        modules = [ inputs.agenix.nixosModule ./nixos/${hostname} ];
       };
 
       # Make a Home Manager configuration
