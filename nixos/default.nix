@@ -1,15 +1,7 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
-
 { inputs, outputs, config, pkgs, lib, hostname, domain, ... }: {
 
-  age.secrets = {
-    domain.file = ../secrets/domain.age;
-    cf_dns_api_token.file = ../secrets/cf_dns_api_token.age;
-  };
-
-  imports = [
+  imports = [ 
+    ../secrets
     ./nix.nix
     ./users.nix
     ./openssh.nix
