@@ -11,9 +11,14 @@
 
     ../traefik.nix
     ../owncloud-ocis.nix
-    ../whoogle-search.nix
+    ../whoogle.nix
+    ../whoami.nix
 
   ];
+
+
+  services.whoogle.enable = true;
+  services.whoami.enable = true;
 
   # services.nextdns = {
   #   enable = true;
