@@ -1,6 +1,8 @@
 let keys = import ./keys.nix; in {
 
-  # To add a secret:
+  # ---------------------------------------------------------------------------
+  # How to manage secrets
+  # ---------------------------------------------------------------------------
   #
   # Add a new line (like below): 
   # > "my-password.age".publicKeys = all;
@@ -9,11 +11,24 @@ let keys = import ./keys.nix; in {
   # > agenix -e "my-password.age"
   #
   # Edit ./secrets/default.nix and add this attribute:
-  # > "my-password".file = ./my-password.age;
+  # > my-password = ./my-password.age;
   #
   # You can now refer to the secret later in the config like so:
-  # > serviceConfig.EnvironmentFile = config.age.secrets."my-password".path;
+  # > nixos (agenix)
+  # age.secrets = with config.secrets; {
+  #   my-password.file = my-password;
+  #   my-password.owner = "me";
+  # };
+  # > home-manager (homeage)
+  # homeage.file = with config.secrets; {
+  #   my-password.source = my-password;
+  #   my-password.symlinks = [ "${config.xdg.configHome}/my-password.txt" ];
+  # };
 
+
+  # ---------------------------------------------------------------------------
+  # List of secrets
+  # ---------------------------------------------------------------------------
 
   # Long secret with characters constrained to alphabet and digits
   # > tr -cd '[:alnum:]' < /dev/urandom | fold -w "64" | head -n 1 | tr -d '\n' ; echo

@@ -1,5 +1,7 @@
 { config, lib, pkgs, ... }:
 
+with config.secrets;
+
 let
   cfg = config.services.traefik;
 
@@ -101,8 +103,15 @@ in {
   networking.firewall.allowedTCPPorts = lib.mkIf cfg.enable [ 80 443 ];
 
   # Import the env file containing the CloudFlare token for cert renewal
+  # age.secrets.cloudflare-env.file = lib.mkIf cfg.enable config.secrets.cloudflare-env;
   systemd.services.traefik = lib.mkIf cfg.enable {
     serviceConfig.EnvironmentFile = config.age.secrets.cloudflare-env.path;
+  };
+
+  # agenix
+  age.secrets = with config.secrets; {
+    cloudflare-env.file = cloudflare-env;
+    basic-auth = { file = basic-auth; owner = "traefik"; };
   };
 
 }

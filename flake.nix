@@ -12,7 +12,7 @@
     # <https://nur.nix-community.org>
     nur.url = "github:nix-community/NUR";                                   
 
-    # Home manager
+    # Home Manager
     # <https://mipmip.github.io/home-manager-option-search>
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
@@ -30,10 +30,15 @@
     # <https://github.com/nix-community/impermanence>
     impermanence.url = "github:nix-community/impermanence";
 
-    # Secrets
+    # NixOS Secrets
     # <https://github.com/ryantm/agenix>
     agenix.url = "github:ryantm/agenix";
     agenix.inputs.nixpkgs.follows = "nixpkgs";
+
+    # Home Manager Secrets
+    # <https://github.com/jordanisaacs/homeage>
+    homeage.url = "github:jordanisaacs/homeage";
+    homeage.inputs.nixpkgs.follows = "nixpkgs";
 
   };
 
@@ -66,7 +71,7 @@
       mkHome = args@{ system ? "x86_64-linux", username ? "me", ... }: inputs.home-manager.lib.homeManagerConfiguration rec {
         pkgs = mkPkgs system;
         extraSpecialArgs = args // { inherit inputs outputs username; };
-        modules = [ ./home ];
+        modules = [ ./home/home.nix ];
       };
 
     in {

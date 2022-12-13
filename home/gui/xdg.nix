@@ -21,4 +21,10 @@
   #   gtkUsePortal = true;
   # };
 
+  # agenix
+  homeage.file = with config.secrets; {
+    super-secret.source = self-env;
+    super-secret.symlinks = [ "${config.xdg.configHome}/super-secret.txt" ];
+  };
+
 }

@@ -28,6 +28,12 @@ in {
       };
     };
 
+    # agenix
+    age.secrets = with config.secrets; {
+      self-env.file = self-env;
+    };
+
   }; 
+
 
 }
