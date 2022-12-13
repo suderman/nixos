@@ -40,7 +40,7 @@ in {
   ];
 
   programs = {
-    neovim.enable = true;
+    # neovim.enable = true;
     chromium = {
       enable = true;
       commandLineArgs = [ "--enable-features=UseOzonePlatform" "-ozone-platform=wayland" "--gtk-version=4" ];
