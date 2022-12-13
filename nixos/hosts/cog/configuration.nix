@@ -1,44 +1,30 @@
-{ inputs, config, pkgs, lib, ... }: {
+{ inputs, config, lib, pkgs, ... }: {
 
-  imports = [ ../.
+  imports = [ 
+    ../../. 
     ./hardware-configuration.nix 
-    inputs.hardware.nixosModules.framework
-  ] ++ [
-    ../keyd.nix
-    ../wayland.nix
-    ../gnome.nix
-    ../vim.nix
-
-    ../traefik.nix
-    ../owncloud-ocis.nix
-    ../whoogle.nix
-    ../whoami.nix
-
+    inputs.hardware.nixosModules.framework 
+    inputs.agenix.nixosModule
   ];
 
+  desktops.gnome.enable = true;
 
+  services.tailscale.enable = true;
+  services.openssh.enable = true;
+  programs.mosh.enable = true;
+
+  services.keyd.enable = true;
+  
+  services.traefik.enable = true;
   services.whoogle.enable = true;
   services.whoami.enable = true;
 
-  # services.nextdns = {
-  #   enable = true;
-  #   # arguments = [ "-config" "e46da3" "-listen" "0.0.0.0:53" ];
-  #   arguments = [ "-config" "10.0.3.0/24=e46da3" "-cache-size" "10MB" ];
-  # };
-  # environment.systemPackages = with pkgs; [ nextdns ];
-  # networking = {
-  #   firewall.allowedTCPPorts = [ 53 ];
-  #   firewall.allowedUDPPorts = [ 53 ];
-  #   nameservers = [ "45.90.28.239" "45.90.30.239" ];
-  # };
+  programs.neovim.enable = true;
 
-  # services.dnsmasq.enable = true;
-  # services.dnsmasq.extraConfig = ''
-  #   address=/.local.lan/127.0.0.1
-  #   address=/.cog.lan/100.113.50.123
-  #   address=/.lux.lan/100.103.189.54
-  #   address=/.graphene.lan/100.101.42.9
-  # '';
+  # Flatpak
+  services.flatpak.enable = true;
+  xdg.portal.enable = true;
+  # xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
 
   # services.sabnzbd.enable = true;
   # services.sabnzbd.user = "me";
@@ -64,10 +50,13 @@
 
   # Enable sound.
   sound.enable = true;
-  # hardware.pulseaudio.enable = true;
+  services.pipewire.enable = true;
 
   # Enable touchpad support (enabled default in most desktopManager).
   services.xserver.libinput.enable = true;
+
+  # Steam
+  programs.steam.enable = false;
 
   # Packages
   # environment.systemPackages = with pkgs; [];

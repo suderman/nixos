@@ -14,6 +14,15 @@ nix-shell '<home-manager>' -A install
 source $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh
 ```
 
+## Browse config
+
+```
+nix repl
+:lf .
+nixosConfigurations.<tab>
+```
+
+## Env
 
 ```
 PUID

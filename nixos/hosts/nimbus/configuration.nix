@@ -1,9 +1,9 @@
 { inputs, config, pkgs, lib, ... }: {
 
-  imports = [ ../.
+  imports = [ 
+    ../../. 
     ./hardware-configuration.nix 
-  ] ++ [
-    ../vim.nix
+    inputs.agenix.nixosModule
   ];
 
   # Linode

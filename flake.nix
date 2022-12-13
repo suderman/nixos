@@ -59,7 +59,7 @@
         inherit system;
         pkgs = mkPkgs system;
         specialArgs = args // { inherit inputs outputs username; };
-        modules = [ ./nixos/${hostname} inputs.agenix.nixosModule ];
+        modules = [ ./nixos/hosts/${hostname}/configuration.nix ];
       };
 
       # Make a Home Manager configuration

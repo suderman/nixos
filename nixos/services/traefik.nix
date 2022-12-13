@@ -1,25 +1,15 @@
-{ inputs, config, pkgs, lib, ... }: 
+{ config, lib, pkgs, ... }:
 
-let 
-  email = "dns@${config.networking.domain}";
-  domain = "${config.networking.domain}";
-  localDomain = "local.${config.networking.domain}";
-  hostDomain = "${config.networking.hostName}.${config.networking.domain}";
+let
+  cfg = config.services.traefik;
 
 in {
 
-  # Open up the firewall for http and https
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
+  # services.traefik.enable = true;
+  services.traefik = with config.networking; {
 
-  # Import the env file containing the CloudFlare token for cert renewal
-  systemd.services.traefik = {
-    serviceConfig.EnvironmentFile = config.age.secrets.cloudflare-env.path;
-  };
-
-  # Configure the Nix traefik service
-  services.traefik = {
-    enable = true;
-    group = "docker"; # required so traefik is permitted to watch docker events
+    # Required so traefik is permitted to watch docker events
+    group = "docker"; 
 
     # Static configuration
     staticConfigOptions = {
@@ -59,7 +49,7 @@ in {
           delaybeforecheck = "0";
         };
         storage = "/var/lib/traefik/cert.json";
-        email = "${email}";
+        email = "dns@${domain}";
       };
 
       global = {
@@ -88,12 +78,12 @@ in {
       http.routers = {
         traefik = {
           entrypoints = "websecure";
-          rule = "Host(`traefik.${localDomain}`) || Host(`traefik.${hostDomain}`)";
+          rule = "Host(`traefik.local.${domain}`) || Host(`traefik.${hostName}.${domain}`)";
           service = "api@internal";
           tls.certresolver = "resolver-dns";
           tls.domains = [
-            { main = "${localDomain}"; sans = "*.${localDomain}"; }
-            { main = "${hostDomain}"; sans = "*.${hostDomain}"; }
+            { main = "local.${domain}"; sans = "*.local.${domain}"; }
+            { main = "${hostName}.${domain}"; sans = "*.${hostName}.${domain}"; }
           ];
         };
       };
@@ -101,9 +91,18 @@ in {
     };
   };
 
+  # Enable Docker and set to backend (over podman default)
+  virtualisation = lib.mkIf cfg.enable {
+    docker.enable = true;
+    oci-containers.backend = "docker";
+  };
 
-  # networking.extraHosts = ''
-  #   127.0.0.1 traefik.cog
-  # '';
+  # Open up the firewall for http and https
+  networking.firewall.allowedTCPPorts = lib.mkIf cfg.enable [ 80 443 ];
+
+  # Import the env file containing the CloudFlare token for cert renewal
+  systemd.services.traefik = lib.mkIf cfg.enable {
+    serviceConfig.EnvironmentFile = config.age.secrets.cloudflare-env.path;
+  };
 
 }
