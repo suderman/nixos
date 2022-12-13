@@ -1,7 +1,7 @@
 { inputs, config, pkgs, lib, ... }: {
 
   imports = [ 
-    ../../. 
+    ../. 
     ./hardware-configuration.nix 
     inputs.agenix.nixosModule
   ];
