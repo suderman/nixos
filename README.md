@@ -6,10 +6,10 @@ Jon's dotfiles and system configuration
 
 ```
 # rebuild the whole system with nixos-rebuild
-sudo echo nixos-rebuild switch --flake .#$(hostname)'
+sudo echo nixos-rebuild switch --flake .#$(hostname)
 
 # rebuild the home directory with home-manager
-home-manager switch --extra-experimental-features 'nix-command flakes' --flake '.#$(hostname)'
+home-manager switch --extra-experimental-features 'nix-command flakes' --flake .#$(hostname)
 
 # update
 nix flake update
