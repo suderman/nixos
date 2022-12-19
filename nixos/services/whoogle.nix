@@ -20,6 +20,7 @@ in {
         "--label=traefik.enable=true"
         "--label=traefik.http.routers.${name}.rule=Host(`${sub}.${hostName}.${domain}`) || Host(`${sub}.local.${domain}`)"
         "--label=traefik.http.routers.${name}.tls.certresolver=resolver-dns"
+        "--stop-signal=SIGKILL"
       ];
     };
 

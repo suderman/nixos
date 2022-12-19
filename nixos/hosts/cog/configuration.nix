@@ -16,7 +16,7 @@
   services.keyd.enable = true;
   
   services.traefik.enable = true;
-  services.whoogle.enable = true;
+  # services.whoogle.enable = true;
   services.whoami.enable = true;
 
   programs.neovim.enable = true;
@@ -32,7 +32,6 @@
 
   # https://search.nixos.org/options?show=services.tandoor-recipes.enable&query=services.tandoor-recipes
   services.tandoor-recipes.enable = true;
-  services.tandoor-recipes.port = 8081;
 
   # https://search.nixos.org/options?show=services.gitea.enable&query=services.gitea
   services.gitea.enable = true;

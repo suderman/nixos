@@ -37,6 +37,8 @@ in {
     xorg.xeyes
     plexamp
 
+    webex
+
   ];
 
   programs = {

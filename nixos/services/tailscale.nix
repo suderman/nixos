@@ -25,4 +25,7 @@ in {
   #   "/persist".directories = [ "/var/lib/tailscale" ];
   # };
 
+  systemd.extraConfig = ''
+    DefaultTimeoutStopSec=30s
+  '';
 }
