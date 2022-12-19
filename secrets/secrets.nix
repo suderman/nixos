@@ -50,4 +50,9 @@ let keys = import ./keys.nix; in {
   # > agenix -e self-env.age
   "self-env.age".publicKeys = keys.all;
 
+  # Encrypted password for NixOS user account
+  # > mkpasswd -m sha-512 mySecr3tpa$$w0rd!
+  # > agenix -e password.age
+  "password.age".publicKeys = keys.all;
+
 }

@@ -11,6 +11,7 @@
     basic-auth          = ./basic-auth.age;
     cloudflare-env      = ./cloudflare-env.age;
     self-env            = ./self-env.age;
+    password            = ./password.age;
   };
 
 }

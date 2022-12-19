@@ -69,11 +69,23 @@ in {
   # ---------------------------------------------------------------------------
 
   users = {
-    users."${username}" = with pkgs; {
+
+    mutableUsers = true;
+
+    # root user
+    users.root = {
+      shell = pkgs.zsh;
+      passwordFile = config.age.secrets.password.path;
+      openssh.authorizedKeys.keys = [ config.keys."${username}" ];
+    };
+
+    # personal user
+    users."${username}" = {
       isNormalUser = true;
-      shell = zsh;
+      shell = pkgs.zsh;
       home = "/home/${username}";
       description = username;
+      passwordFile = config.age.secrets.password.path;
       extraGroups = [ 
         "wheel" 
       ] ++ ifTheyExist [
@@ -84,7 +96,30 @@ in {
       ]; 
       openssh.authorizedKeys.keys = [ config.keys."${username}" ];
     };
-    mutableUsers = true;
+
+    # test user
+    users."test" = {
+      isNormalUser = true;
+      shell = pkgs.zsh;
+      home = "/home/test";
+      description = "test";
+      passwordFile = config.age.secrets.password.path;
+      extraGroups = [ 
+        "wheel" 
+      ] ++ ifTheyExist [
+        "networkmanager" 
+        "docker" 
+        "input" 
+        "keyd" 
+      ]; 
+      openssh.authorizedKeys.keys = [ config.keys."${username}" ];
+    };
+
+  };
+
+  # agenix
+  age.secrets = with config.secrets; {
+    password.file = password;
   };
 
   # Increase open file limit for sudoers
