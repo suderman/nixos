@@ -5,6 +5,7 @@
     ./ocis.nix
     ./openssh.nix
     ./pipewire.nix
+    ./sabnzbd.nix
     ./tailscale.nix
     ./tandoor-recipes.nix
     ./traefik.nix

@@ -23,12 +23,8 @@
 
   # Flatpak
   services.flatpak.enable = true;
-  xdg.portal.enable = true;
-  # xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
 
-  # services.sabnzbd.enable = true;
-  # services.sabnzbd.user = "me";
-  # services.sabnzbd.group = "users";
+  services.sabnzbd.enable = true;
 
   # https://search.nixos.org/options?show=services.tandoor-recipes.enable&query=services.tandoor-recipes
   services.tandoor-recipes.enable = true;
@@ -43,16 +39,6 @@
 
   boot.kernelPackages = pkgs.linuxPackages_latest;
   services.fprintd.enable = true;
-
-  # Enable the X11 windowing system.
-  services.xserver.enable = true;
-
-  # Enable sound.
-  sound.enable = true;
-  services.pipewire.enable = true;
-
-  # Enable touchpad support (enabled default in most desktopManager).
-  services.xserver.libinput.enable = true;
 
   # Steam
   programs.steam.enable = false;
