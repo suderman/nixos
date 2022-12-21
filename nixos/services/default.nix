@@ -1,6 +1,7 @@
 { ... }: 
 {
   imports = [
+    ./docker.nix
     ./keyd.nix
     ./ocis.nix
     ./openssh.nix

@@ -7,6 +7,22 @@
     inputs.agenix.nixosModule
   ];
 
+
+  # noatime,compress=zstd,space_cache=v2,discard=async,subvol=@nix
+  # fileSystems."/nix" = { 
+  #   device = "/dev/disk/by-uuid/f73c53b7-ae6c-4240-89c3-511ad918edcc";
+  #   fsType = "btrfs";
+  #   options = [ "subvol=nix" "compress=zstd" "noatime" "space_cache=v2" "discard=async" ];
+  # };
+
+  # mount /dev/sda1 /mnt
+  # btrfs subvolume create /mnt/nix
+  # btrfs subvolume create /mnt/nix/data
+  # btrfs subvolume create /mnt/nix/state
+  # mkdir -p /mnt/nix/state/var
+  # btrfs subvolume create /mnt/nix/state/var/log
+
+
   desktops.gnome.enable = true;
 
   services.tailscale.enable = true;
@@ -24,6 +40,7 @@
   # Flatpak
   services.flatpak.enable = true;
 
+  # SabNZBd
   services.sabnzbd.enable = true;
 
   # https://search.nixos.org/options?show=services.tandoor-recipes.enable&query=services.tandoor-recipes

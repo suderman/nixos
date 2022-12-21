@@ -14,10 +14,9 @@ in {
 
   services.traefik.dynamicConfigOptions.http = lib.mkIf cfg.enable {
     routers.tandoor = {
-      entrypoints = "websecure";
       rule = "Host(`${sub}.${hostName}.${domain}`) || Host(`${sub}.local.${domain}`)";
-      service = "tandoor";
       tls.certresolver = "resolver-dns";
+      service = "tandoor";
     };
     services.tandoor.loadBalancer.servers = [{ url = "http://127.0.0.1:${port}"; }];
   };
