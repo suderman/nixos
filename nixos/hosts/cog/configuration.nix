@@ -67,8 +67,6 @@
   # Other
   # programs.nix-ld.enable = true;
 
-  # state.files = [ "/example.txt" ];
-  
-  # data.user.dirs = [ "Downloads" "Documents" ];
+  # persist.files = [ "/example.txt" ];
 
 }

@@ -11,11 +11,11 @@ in {
   options = with types; {
 
     # Persist in /nix
-    state = {
+    persist = {
 
       # Files relative to / root
       files = mkOption {
-        description = "Additional system state files to preserve";
+        description = "System files to preserve";
         type = listOf (either str attrs);
         default = [];
         example = [ "/etc/machine-id" ];
@@ -23,7 +23,7 @@ in {
 
       # Directories relative to / root
       dirs = mkOption {
-        description = "Additional system state directories to preserve";
+        description = "System directories to preserve";
         type = listOf (either str attrs);
         default = [];
         example = [ "/etc/nixos" ];
@@ -41,12 +41,12 @@ in {
       # State stored on subvolume
       "${dir}" = {
         hideMounts = true;
-        files = config.state.files;
+        files = config.persist.files;
         directories = [
-          "/etc/nixos"                # default: nixos configuration
-          "/var/log"                  # default: logs
-          "/var/lib/systemd"          # default: systemd
-        ] ++ config.state.dirs;
+          "/etc/nixos"        # nixos configuration
+          "/var/log"          # logs
+          "/var/lib/systemd"  # systemd
+        ] ++ config.persist.dirs;
       };
 
     };

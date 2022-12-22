@@ -78,9 +78,7 @@ in {
     # services.avahi.enable = false;
     # networking.networkmanager.enable = false;
 
-    state.dirs = [
-      "/var/lib/AccountsService"
-    ];
+    persist.dirs = [ "/var/lib/AccountsService" ];
 
   };
 

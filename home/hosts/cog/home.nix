@@ -31,7 +31,7 @@
 
   ];
 
-  state.files = [
+  persist.files = [
     # ".nix-channels"
     ".zsh_history"
     ".bash_history"
@@ -39,7 +39,7 @@
     ".screenrc"
   ];
 
-  state.dirs = [ 
+  persist.dirs = [ 
     # "Downloads" 
     # "Desktop"
     # ".local/share/Trash"

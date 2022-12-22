@@ -11,11 +11,11 @@ in {
   options = with types; {
 
     # Persist in /nix
-    state = {
+    persist = {
 
       # Files relative to ~ home
       files = mkOption {
-        description = "Additional user state files to preserve";
+        description = "Home files to preserve";
         type = listOf (either str attrs);
         default = [];
         example = [ ".bash_history" ];
@@ -23,7 +23,7 @@ in {
 
       # Directories relative to ~ home
       dirs = mkOption {
-        description = "Additional user state directories to preserve";
+        description = "Home directories to preserve";
         type = listOf (either str attrs);
         default = [];
         example = [ ".var" ];
@@ -41,8 +41,8 @@ in {
       # State stored on subvolume
       "${dir}" = {
         allowOther = true;
-        files = config.state.files;
-        directories = config.state.dirs;
+        files = config.persist.files;
+        directories = config.persist.dirs;
       };
 
     };

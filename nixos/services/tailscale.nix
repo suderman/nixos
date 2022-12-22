@@ -21,11 +21,10 @@ in {
     address=/.graphene.${domain}/100.101.42.9
   '';
 
-  # environment.persistence = lib.mkIf cfg.enable {
-  #   "/persist".directories = [ "/var/lib/tailscale" ];
-  # };
-
   systemd.extraConfig = ''
     DefaultTimeoutStopSec=30s
   '';
+
+  persist.dirs = lib.mkIf cfg.enable [ "/var/lib/tailscale" ];
+
 }
