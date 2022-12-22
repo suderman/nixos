@@ -66,4 +66,8 @@
   # Other
   # programs.nix-ld.enable = true;
 
+  # state.user.files = [ ".zsh_history" ];
+  #
+  # data.user.dirs = [ "Downloads" "Documents" ];
+
 }

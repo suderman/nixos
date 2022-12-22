@@ -2,8 +2,7 @@
 
 let
   cfg = config.services.openssh;
-  # prefix = "/persist";
-  prefix = "";
+  prefix = "/nix/state";
 
 in {
 

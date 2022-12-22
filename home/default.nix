@@ -4,5 +4,6 @@
     ../secrets
     ./cli
     ./gui
+    ./persist.nix
   ];
 }
