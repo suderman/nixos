@@ -35,6 +35,8 @@
     # ".nix-channels"
     # ".zsh_history"
     ".bash_history"
+    "myfile.txt"
+    ".screenrc"
   ];
 
   state.dirs = [ 
@@ -43,8 +45,12 @@
     # ".local/share/Trash"
     # ".local/share/keyrings"
     "test-four" 
+    "test-five" 
   ];
 
+  home.persistence."/nix/data".files = [
+    "mydoc.txt"
+  ];
 
   programs = {
     # neovim.enable = true;
