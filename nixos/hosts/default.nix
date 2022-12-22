@@ -4,19 +4,13 @@ with builtins;
 
 let
   ifTheyExist = groups: filter (group: hasAttr group config.users.groups) groups;
-  # home.home-manager = {
-  #   useGlobalPkgs = true;
-  #   useUserPackages = true;
-  #   extraSpecialArgs = { inherit inputs outputs username; };
-  #   users."${username}" = import ../../home/home.nix;
-  # }; 
 
 in {
 
   # ---------------------------------------------------------------------------
   # COMMON CONFIGURATION FOR ALL NIXOS HOSTS
   # ---------------------------------------------------------------------------
-  imports = [ ../. inputs.agenix.nixosModule ];
+  imports = [ ../. ];
 
   # Set your time zone.
   time.timeZone = "America/Edmonton";
@@ -49,7 +43,6 @@ in {
     # List packages installed in system profile
     systemPackages = with pkgs; [ 
       inetutils mtr sysstat gnumake git # basics
-      inputs.agenix.defaultPackage."${stdenv.system}" # include agenix command
       home-manager # include home-manager command
     ];
 

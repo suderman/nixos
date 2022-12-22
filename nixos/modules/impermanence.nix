@@ -47,6 +47,7 @@ in {
         directories = [
           "/etc/nixos"                # default: nixos configuration
           "/var/log"                  # default: logs
+          "/var/lib/systemd"          # default: systemd
           # "/var/lib/AccountsService"  # possibly move this to gnome.nix?
         ] ++ config.state.dirs;
 
