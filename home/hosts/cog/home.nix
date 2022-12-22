@@ -33,7 +33,7 @@
 
   state.files = [
     # ".nix-channels"
-    # ".zsh_history"
+    ".zsh_history"
     ".bash_history"
     "myfile.txt"
     ".screenrc"
@@ -48,9 +48,9 @@
     "test-five" 
   ];
 
-  home.persistence."/nix/data".files = [
-    "mydoc.txt"
-  ];
+  # home.persistence."/nix/home".files = [
+  #   "awesome.txt"
+  # ];
 
   programs = {
     # neovim.enable = true;
