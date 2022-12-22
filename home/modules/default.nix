@@ -3,7 +3,7 @@
   imports = [
     ./gtk.nix
     ./homeage.nix
-    ./persist.nix
+    ./impermanence.nix
     ./wayland.nix
     ./xdg.nix
   ];

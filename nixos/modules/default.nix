@@ -1,6 +1,6 @@
 { ... }: 
 {
   imports = [
-    ./persist.nix
+    ./impermanence.nix
   ];
 }

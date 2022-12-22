@@ -2,6 +2,7 @@
 
 let 
   inherit (lib) mkOption types;
+  dir = "/nix/state";
 
 in {
   
@@ -9,7 +10,7 @@ in {
 
   options = with types; {
 
-    # Persist in /nix/state
+    # Persist in dir
     state = {
 
       # Files relative to / root
@@ -38,16 +39,14 @@ in {
     environment.persistence = {
 
       # State stored on subvolume
-      "/nix/state" = {
+      "${dir}" = {
         hideMounts = true;
 
-        files = [ 
-          # "/etc/machine-id"           # default: machine identification
-        ] ++ config.state.files;
+        files = config.state.files;
 
         directories = [
-          # "/etc/nixos"                # default: nixos configuration
-          # "/var/log"                  # default: logs
+          "/etc/nixos"                # default: nixos configuration
+          "/var/log"                  # default: logs
           # "/var/lib/AccountsService"  # possibly move this to gnome.nix?
         ] ++ config.state.dirs;
 
@@ -58,7 +57,21 @@ in {
     # Allows users to allow others on their binds
     programs.fuse.userAllowOther = true;
 
-  };
+    # Maintain machine identification
+    environment.etc."machine-id".source = "${dir}/etc/machine-id";
 
+    # Maintain ssh host keys
+    services.openssh = lib.mkIf config.services.openssh.enable {
+      hostKeys = [{
+        path = "${dir}/etc/ssh/ssh_host_ed25519_key";
+        type = "ed25519";
+      } {
+        path = "${dir}/etc/ssh/ssh_host_rsa_key";
+        type = "rsa";
+        bits = 4096;
+      }];
+    };
+
+  };
 
 }
