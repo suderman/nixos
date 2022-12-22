@@ -1,8 +1,7 @@
-{ config, lib, pkgs, ... }: {
+{ config, hostname, lib, pkgs, ... }: {
 
   programs.zsh = {
     autocd = true;
-    enable = true;
     enableAutosuggestions = true;
     enableCompletion = true;
     defaultKeymap = "viins"; # emacs, vicmd, or viins
@@ -21,8 +20,12 @@
       # source /etc/profiles/per-user/$USER/etc/profile.d/hm-session-vars.sh
       # source /home/$USER/.nix-profile/etc/profile.d/hm-session-vars.sh
       # source ~/.nix-profile/etc/profile.d/hm-session-vars.sh
-      source $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh
+      # source $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh
     '';
+
+    shellAliases = {
+      switch = "echo nixos-rebuild switch --flake ${config.home.homeDirectory}/system#$(hostname) && sudo nixos-rebuild switch --flake ${config.home.homeDirectory}/system#$(hostname)";
+    };
 
     oh-my-zsh = {
       enable = true;

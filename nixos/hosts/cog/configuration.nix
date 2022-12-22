@@ -4,7 +4,6 @@
     ../. 
     ./hardware-configuration.nix 
     inputs.hardware.nixosModules.framework 
-    inputs.agenix.nixosModule
   ];
 
 

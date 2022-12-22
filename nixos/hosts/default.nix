@@ -1,17 +1,22 @@
-{ inputs, config, lib, pkgs, username, hostname, domain, ... }: 
+{ inputs, outputs, config, lib, pkgs, username, hostname, domain, ... }: 
 
 with builtins;
 
 let
   ifTheyExist = groups: filter (group: hasAttr group config.users.groups) groups;
+  # home.home-manager = {
+  #   useGlobalPkgs = true;
+  #   useUserPackages = true;
+  #   extraSpecialArgs = { inherit inputs outputs username; };
+  #   users."${username}" = import ../../home/home.nix;
+  # }; 
 
 in {
 
   # ---------------------------------------------------------------------------
   # COMMON CONFIGURATION FOR ALL NIXOS HOSTS
   # ---------------------------------------------------------------------------
-  imports = [ ../. ];
-
+  imports = [ ../. inputs.agenix.nixosModule ];
 
   # Set your time zone.
   time.timeZone = "America/Edmonton";
@@ -128,8 +133,6 @@ in {
     { domain = "@wheel"; item = "nofile"; type = "hard"; value = "1048576"; }
   ];
 
-  # Allows users to allow others on their binds
-  programs.fuse.userAllowOther = true;
 
 
   # ---------------------------------------------------------------------------

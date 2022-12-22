@@ -13,6 +13,7 @@
     micro
     killall
     mosh
+    cowsay
   ];
 
 }

@@ -64,32 +64,40 @@
         inherit system;
         pkgs = mkPkgs system;
         specialArgs = args // { inherit inputs outputs username; };
-        modules = [ ./nixos/hosts/${hostname}/configuration.nix ];
+        modules = [ 
+          ./nixos/hosts/${hostname}/configuration.nix 
+          inputs.home-manager.nixosModules.home-manager { home-manager = {
+            useGlobalPkgs = true; useUserPackages = true;
+            extraSpecialArgs = { inherit inputs outputs username; };
+            users."${username}" = import ./home/hosts/${hostname}/home.nix;
+          }; } 
+        ];
+
       };
 
       # Make a Home Manager configuration
-      mkHome = args@{ system ? "x86_64-linux", username ? "me", ... }: inputs.home-manager.lib.homeManagerConfiguration rec {
+      mkHome = args@{ system ? "x86_64-linux", username ? "me", hostname, ... }: inputs.home-manager.lib.homeManagerConfiguration rec {
         pkgs = mkPkgs system;
         extraSpecialArgs = args // { inherit inputs outputs username; };
-        modules = [ ./home/home.nix ];
+        modules = [ ./home/hosts/${hostname}/home.nix ];
       };
 
     in {
 
       # Framework Laptop
       nixosConfigurations.cog = mkHost { hostname = "cog"; domain = "jons.ca"; };
-      homeConfigurations.cog = mkHome {};
+      homeConfigurations.cog = mkHome { hostname = "cog"; };
 
       # Linode VPS
       nixosConfigurations.nimbus = mkHost { hostname = "nimbus"; };
-      homeConfigurations.nimbus = mkHome {};
+      # homeConfigurations.nimbus = mkHome {};
 
       # Intel NUC home server
       nixosConfigurations.lux = mkHost { hostname = "lux"; };
       homeConfigurations.lux = mkHome {};
 
       # MacPro
-      homeConfigurations.umbra = mkHome { system = "x86_64-darwin"; };
+      homeConfigurations.umbra = mkHome { hostname = "umbra"; system = "x86_64-darwin"; };
 
     };
 }
