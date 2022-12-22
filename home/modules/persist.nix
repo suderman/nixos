@@ -9,7 +9,7 @@ in {
 
   options = with types; {
 
-    # Persist in /nix/state
+    # Persist in /nix/home
     state = {
 
       # Files relative to ~ home
@@ -30,42 +30,18 @@ in {
 
     };
 
-
-    # Persist in /nix/data
-    data = {
-
-      # Files relative to ~ home
-      files = mkOption {
-        description = "Additional user data files to preserve";
-        type = listOf (either str attrs);
-        default = [];
-        example = [ "hello-world.txt" ];
-      };
-
-      # Directories relative to ~ home
-      dirs = mkOption {
-        description = "Additional user data directories to preserve";
-        type = listOf (either str attrs);
-        default = [];
-        example = [ "Downloads" ];
-      };
-
-    };
-
   };
 
   config = {
 
-    # state.dirs = [ ".var" ];
     # state.files = [ ".bash_history" ];
-    # data.dirs = [ "Downloads" "Desktop" ];
-    data.dirs = [ "test" "test2" ];
+    # state.dirs = [ "Downloads" "Desktop" ];
 
     # Configuration impermanence module
     home.persistence = {
 
       # State stored on subvolume
-      "/nix/state" = {
+      "/nix/home" = {
         allowOther = true;
 
         files = [
@@ -79,13 +55,6 @@ in {
           # ".local/share/keyrings"
         ] ++ config.state.dirs;
 
-      };
-
-      # Data stored on subvolume
-      "/nix/data" = {
-        allowOther = true;
-        files = config.data.files;
-        directories = config.data.dirs;
       };
 
     };

@@ -5,7 +5,6 @@
     ./keyd.nix
     ./ocis.nix
     ./openssh.nix
-    ./persist.nix
     ./pipewire.nix
     ./sabnzbd.nix
     ./tailscale.nix

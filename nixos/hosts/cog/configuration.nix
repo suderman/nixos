@@ -17,7 +17,9 @@
 
   # mount /dev/sda1 /mnt
   # btrfs subvolume create /mnt/nix
-  # btrfs subvolume create /mnt/nix/data
+  # btrfs subvolume create /mnt/nix/home
+  # chown root:users /mnt/nix/home
+  # chmod g+w /mnt/nix/home
   # btrfs subvolume create /mnt/nix/state
   # mkdir -p /mnt/nix/state/var
   # btrfs subvolume create /mnt/nix/state/var/log

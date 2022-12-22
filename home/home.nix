@@ -41,6 +41,8 @@ in {
 
   ];
 
+  state.dirs = [ "test-three" ];
+
   programs = {
     # neovim.enable = true;
     chromium = {

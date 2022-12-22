@@ -1,11 +1,5 @@
 { pkgs, ... }: {
 
-  imports = [
-    ./git.nix
-    ./tmux.nix
-    ./zsh.nix
-  ];
-
   home.packages = with pkgs; [ 
     bat 
     lf 
