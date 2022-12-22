@@ -10,7 +10,7 @@ in {
 
   options = with types; {
 
-    # Persist in dir
+    # Persist in /nix
     state = {
 
       # Files relative to / root
@@ -41,16 +41,12 @@ in {
       # State stored on subvolume
       "${dir}" = {
         hideMounts = true;
-
         files = config.state.files;
-
         directories = [
           "/etc/nixos"                # default: nixos configuration
           "/var/log"                  # default: logs
           "/var/lib/systemd"          # default: systemd
-          # "/var/lib/AccountsService"  # possibly move this to gnome.nix?
         ] ++ config.state.dirs;
-
       };
 
     };

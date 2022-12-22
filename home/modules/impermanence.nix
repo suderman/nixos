@@ -2,6 +2,7 @@
 
 let 
   inherit (lib) mkOption types;
+  dir = "/nix/home";
 
 in {
   
@@ -9,7 +10,7 @@ in {
 
   options = with types; {
 
-    # Persist in /nix/home
+    # Persist in /nix
     state = {
 
       # Files relative to ~ home
@@ -34,27 +35,14 @@ in {
 
   config = {
 
-    # state.files = [ ".bash_history" ];
-    # state.dirs = [ "Downloads" "Desktop" ];
-
     # Configuration impermanence module
     home.persistence = {
 
       # State stored on subvolume
-      "/nix/home" = {
+      "${dir}" = {
         allowOther = true;
-
-        files = [
-          # ".nix-channels"
-          # ".bash_history"
-          # ".zsh_history"
-        ] ++ config.state.files;
-
-        directories = [
-          # ".local/share/Trash"
-          # ".local/share/keyrings"
-        ] ++ config.state.dirs;
-
+        files = config.state.files;
+        directories = config.state.dirs;
       };
 
     };

@@ -31,7 +31,20 @@
 
   ];
 
-  state.dirs = [ "test-four" ];
+  state.files = [
+    # ".nix-channels"
+    # ".zsh_history"
+    ".bash_history"
+  ];
+
+  state.dirs = [ 
+    # "Downloads" 
+    # "Desktop"
+    # ".local/share/Trash"
+    # ".local/share/keyrings"
+    "test-four" 
+  ];
+
 
   programs = {
     # neovim.enable = true;
