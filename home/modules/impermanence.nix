@@ -1,3 +1,9 @@
+# Add directories or files to persist list
+#
+# > Add a home directory or file (relative from $HOME)
+# persist.dirs = [ ".local/share/keyrings" ];
+# persist.files = [ ".nix-channels" ];
+
 { inputs, config, lib, nixos, ... }: 
 
 let 

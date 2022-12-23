@@ -31,23 +31,12 @@
 
   ];
 
-  persist.files = [
-    ".zsh_history"
-    ".bash_history"
-  ];
-
   persist.dirs = [ 
     "Desktop"
     "Downloads" 
     "Documents" 
-    ".local/share/Trash"
-    ".local/share/keyrings"
     ".docker"
   ];
-
-  # home.persistence."/nix/home".files = [
-  #   "awesome.txt"
-  # ];
 
   programs = {
     # neovim.enable = true;
