@@ -1,4 +1,4 @@
-{ inputs, config, lib, pkgs, username, ... }: 
+{ inputs, config, lib, pkgs, username, nixos, ... }: 
 
 with builtins;
 

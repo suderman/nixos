@@ -27,4 +27,14 @@ in {
 
   persist.dirs = lib.mkIf cfg.enable [ "/var/lib/tailscale" ];
 
+  age.secrets = with config.secrets; {
+    tailscale-cloudflare = {
+      file = tailscale-cloudflare;
+      owner = "me";
+      group = "users";
+    };
+  };
+
+  # environment.etc."tscf.env".source = config.age.secrets.tailscale-cloudflare.path;
+
 }

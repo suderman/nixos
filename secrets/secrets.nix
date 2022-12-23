@@ -55,4 +55,12 @@ let keys = import ./keys.nix; in {
   # > agenix -e password.age
   "password.age".publicKeys = keys.all;
 
+  # .env for tailscale-cloudflare-dnssync
+  # > agenix -e cloudflare-tailscale.age
+  # cf-key=<https://dash.cloudflare.com/profile/api-tokens>
+  # cf-domain=example.com
+  # ts-key=<https://login.tailscale.com/admin/settings/keys>
+  # ts-tailnet=example.github
+  "tailscale-cloudflare.age".publicKeys = keys.all;
+
 }

@@ -7,11 +7,12 @@
   # Secret files
   options.secrets = mkOption { type = types.attrs; };
   config.secrets = {
-    alphanumeric-secret = ./alphanumeric-secret.age;
-    basic-auth          = ./basic-auth.age;
-    cloudflare-env      = ./cloudflare-env.age;
-    self-env            = ./self-env.age;
-    password            = ./password.age;
+    alphanumeric-secret  = ./alphanumeric-secret.age;
+    basic-auth           = ./basic-auth.age;
+    cloudflare-env       = ./cloudflare-env.age;
+    password             = ./password.age;
+    self-env             = ./self-env.age;
+    tailscale-cloudflare = ./tailscale-cloudflare.age;
   };
 
 }

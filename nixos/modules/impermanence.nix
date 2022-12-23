@@ -1,4 +1,4 @@
-{ inputs, config, lib, ... }: 
+{ inputs, config, lib, username, ... }: 
 
 let 
   inherit (lib) mkOption types;
@@ -39,16 +39,32 @@ in {
     environment.persistence = {
 
       # State stored on subvolume
-      "${dir}" = {
+      "${dir}" = with config; {
         hideMounts = true;
-        files = config.persist.files;
+
+        # System files
+        files = persist.files;
+
+        # System directories
         directories = [
           "/etc/nixos"        # nixos configuration
-          "/var/log"          # logs
           "/var/lib/systemd"  # systemd
-        ] ++ config.persist.dirs;
-      };
+          "/var/log"          # logs
+        ] ++ persist.dirs;
 
+        # Also persist user data
+        users."${username}" = with config.home-manager.users."${username}"; {
+
+          # Home files
+          files = [
+            ".nix-channels" # nix configuration
+          ] ++ persist.files;
+
+          # Home directories
+          directories = persist.dirs;
+
+        };
+      };
     };
 
     # Allows users to allow others on their binds

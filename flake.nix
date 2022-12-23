@@ -85,7 +85,7 @@
     in {
 
       # Framework Laptop
-      nixosConfigurations.cog = mkHost { hostname = "cog"; domain = "jons.ca"; };
+      nixosConfigurations.cog = mkHost { hostname = "cog"; domain = "suderman.org"; };
       homeConfigurations.cog = mkHome { hostname = "cog"; };
 
       # Linode VPS
@@ -94,7 +94,7 @@
 
       # Intel NUC home server
       nixosConfigurations.lux = mkHost { hostname = "lux"; };
-      homeConfigurations.lux = mkHome {};
+      # homeConfigurations.lux = mkHome {};
 
       # MacPro
       homeConfigurations.umbra = mkHome { hostname = "umbra"; system = "x86_64-darwin"; };

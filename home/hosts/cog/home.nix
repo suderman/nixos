@@ -32,20 +32,17 @@
   ];
 
   persist.files = [
-    # ".nix-channels"
     ".zsh_history"
     ".bash_history"
-    "myfile.txt"
-    ".screenrc"
   ];
 
   persist.dirs = [ 
-    # "Downloads" 
-    # "Desktop"
-    # ".local/share/Trash"
-    # ".local/share/keyrings"
-    "test-four" 
-    "test-five" 
+    "Desktop"
+    "Downloads" 
+    "Documents" 
+    ".local/share/Trash"
+    ".local/share/keyrings"
+    ".docker"
   ];
 
   # home.persistence."/nix/home".files = [
