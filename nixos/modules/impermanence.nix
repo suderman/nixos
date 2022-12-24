@@ -1,18 +1,12 @@
 # Add directories or files to persist list
 #
-# > Add a system directory or file
 # persist.dirs = [ "/var/lib/systemd" ];
 # persist.files = [ "/etc/machine-id" ];
-#
-# > Add a home directory or file (relative from $HOME)
-# persist.home.dirs = [ ".local/share/keyrings" ];
-# persist.home.files = [ ".nix-channels" ];
 
 { inputs, config, lib, username, ... }: 
 
 let 
   inherit (lib) mkOption types;
-  hm-config = config.home-manager.users."${username}";
   dir = "/nix/state";
 
 in {
@@ -40,22 +34,6 @@ in {
         example = [ "/etc/nixos" ];
       };
 
-      # Files relative to ~/ home
-      home.files = mkOption {
-        description = "Home files to preserve";
-        type = listOf (either str attrs);
-        default = [];
-        example = [ ".bash_history" ];
-      };
-
-      # Directories relative to ~/ home
-      home.dirs = mkOption {
-        description = "Home directories to preserve";
-        type = listOf (either str attrs);
-        default = [];
-        example = [ ".var" ];
-      };
-
     };
 
   };
@@ -74,23 +52,12 @@ in {
 
         # System directories
         directories = [
-          "/etc/nixos"        # nixos configuration
-          "/var/lib/systemd"  # systemd
-          "/var/log"          # logs
+          "/home"  
+          "/var/lib"  
+          "/var/log"  
+          "/etc/nixos"
         ] ++ config.persist.dirs;
 
-        # Also persist user data
-        users."${username}" = {
-
-          # Home files
-          files = [
-            ".nix-channels" # nix configuration
-          ] ++ config.persist.home.files ++ hm-config.persist.files;
-
-          # Home directories
-          directories = config.persist.home.dirs ++ hm-config.persist.dirs;
-
-        };
       };
     };
 
