@@ -68,7 +68,7 @@ in {
 
   users = {
 
-    mutableUsers = true;
+    mutableUsers = false;
 
     # root user
     users.root = {
