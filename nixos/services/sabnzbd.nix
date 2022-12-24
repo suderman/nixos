@@ -23,6 +23,4 @@ in {
     services.sabnzbd.loadBalancer.servers = [{ url = "http://127.0.0.1:${port}"; }];
   };
 
-  persist.dirs = lib.mkIf cfg.enable [ "/var/lib/sabnzbd" ];
-
 }

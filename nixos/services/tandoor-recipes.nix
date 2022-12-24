@@ -21,6 +21,6 @@ in {
     services.tandoor.loadBalancer.servers = [{ url = "http://127.0.0.1:${port}"; }];
   };
 
-  persist.dirs = lib.mkIf cfg.enable [ "/var/lib/private/tandoor-recipes" ];
+  # persist.dirs = lib.mkIf cfg.enable [ "/var/lib/private/tandoor-recipes" ];
 
 }

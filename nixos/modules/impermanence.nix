@@ -55,6 +55,7 @@ in {
           "/home"  
           "/var/lib"  
           "/var/log"  
+          "/etc/NetworkManager/system-connections"
           "/etc/nixos"
         ] ++ config.persist.dirs;
 

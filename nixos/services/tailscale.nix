@@ -25,7 +25,7 @@ in {
     DefaultTimeoutStopSec=30s
   '';
 
-  persist.dirs = lib.mkIf cfg.enable [ "/var/lib/tailscale" ];
+  # persist.dirs = lib.mkIf cfg.enable [ "/var/lib/tailscale" ];
 
   age.secrets = with config.secrets; {
     tailscale-cloudflare = {

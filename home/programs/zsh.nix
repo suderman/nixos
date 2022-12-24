@@ -24,7 +24,7 @@
     '';
 
     shellAliases = {
-      switch = "echo nixos-rebuild switch --flake ${config.home.homeDirectory}/system#$(hostname) && sudo nixos-rebuild switch --flake ${config.home.homeDirectory}/system#$(hostname)";
+      switch = "echo nixos-rebuild switch --flake /nix/system#$(hostname) && sudo nixos-rebuild switch --flake /nix/system#$(hostname)";
     };
 
     oh-my-zsh = {
