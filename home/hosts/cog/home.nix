@@ -31,12 +31,12 @@
 
   ];
 
-  persist.dirs = [ 
-    "Desktop"
-    "Downloads" 
-    "Documents" 
-    ".docker"
-  ];
+  # persist.dirs = [ 
+  #   "Desktop"
+  #   "Downloads" 
+  #   "Documents" 
+  #   ".docker"
+  # ];
 
   programs = {
     # neovim.enable = true;

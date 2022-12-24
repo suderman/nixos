@@ -33,10 +33,10 @@ in {
   #   };
   # };
 
-  persist.files = [
-    ".zsh_history"
-    ".bash_history"
-  ];
+  # persist.files = [
+  #   ".zsh_history"
+  #   ".bash_history"
+  # ];
 
   # Enable home-manager, git & zsh
   programs.home-manager.enable = true;
