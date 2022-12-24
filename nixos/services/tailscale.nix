@@ -16,7 +16,7 @@ in {
   services.dnsmasq.enable = lib.mkIf cfg.enable true;
   services.dnsmasq.extraConfig = with config.networking; lib.mkIf cfg.enable ''
     address=/.local.${domain}/127.0.0.1
-    address=/.cog.${domain}/100.113.50.123
+    address=/.cog.${domain}/100.67.140.102
     address=/.lux.${domain}/100.103.189.54
     address=/.graphene.${domain}/100.101.42.9
   '';

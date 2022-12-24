@@ -60,5 +60,12 @@
     "nix/nix.conf".text = "experimental-features = nix-command flakes";
   };
 
+  
+  dconf.settings = {
+    "org/gnome/mutter" = {
+      experimental-features = [ "scale-monitor-framebuffer" ];
+    };
+  };
+
 
 }
