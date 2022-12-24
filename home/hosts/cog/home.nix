@@ -46,6 +46,8 @@
     };
   };
 
+  # home.file.".ssh/id_ed25519".source = "/nix/keys/id_ed25519";
+
   xdg.configFile = let flags = ''
     --enable-features=UseOzonePlatform 
     --ozone-platform=wayland

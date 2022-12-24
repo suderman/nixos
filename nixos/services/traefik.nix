@@ -80,7 +80,7 @@ in {
       http.routers = {
         traefik = {
           entrypoints = "websecure";
-          rule = "Host(`traefik.local.${domain}`) || Host(`traefik.${hostName}.${domain}`)";
+          rule = "Host(`local.${domain}`) || Host(`${hostName}.${domain}`)";
           service = "api@internal";
           tls.certresolver = "resolver-dns";
           tls.domains = [
