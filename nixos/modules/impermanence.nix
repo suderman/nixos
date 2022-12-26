@@ -52,11 +52,11 @@ in {
 
         # System directories
         directories = [
-          "/home"  
+          "/etc/nixos"
+          "/etc/NetworkManager/system-connections"
           "/var/lib"  
           "/var/log"  
-          "/etc/NetworkManager/system-connections"
-          "/etc/nixos"
+          "/home"  
         ] ++ config.persist.dirs;
 
       };
