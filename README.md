@@ -1,6 +1,6 @@
-# Dotfiles
+# NixOS
 
-Jon's dotfiles and system configuration
+![nixos](https://socialify.git.ci/suderman/nixos/image?description=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2Fsuderman%2Fnixos%2Fnix.svg&name=1&owner=1&pattern=Charlie%20Brown&theme=Dark)
 
 ## Commands 
 
