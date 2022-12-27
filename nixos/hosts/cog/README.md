@@ -8,7 +8,7 @@ To access encrypted secrets, each host needs an SSH Host key's public key
 included in [secrets/keys.nix](https://github.com/suderman/nixos/blob/main/secrets/keys.nix). 
 To update a host key, generate a new key from existing host in the network.
 
-```bash
+```zsh
 # Generate private key (this will be transfered to new host later)
 ssh-keygen -q -N "" -t ed25519 -f ssh_host_ed25519_key
 
@@ -19,7 +19,7 @@ cat ssh_host_ed25519_key.pub | wl-copy
 Update the line with `cog = "ssh-ed25519 AAA...` using the new public key on the clipboard. 
 Then rekey all the secrets, commit and push the git repo.
 
-```bash
+```zsh
 # Rekey the secrets/*.age files to include the new host key
 RULES=/etc/nixos/secrets/secrets.nix agenix --rekey
 
@@ -27,9 +27,9 @@ RULES=/etc/nixos/secrets/secrets.nix agenix --rekey
 cd /etc/nixos && git commit -am "Updated host key" && git push
 ```
 
-Prepare to transfer private key to host, either via USB or Magic Wormhole.
+Prepare to transfer private key to host, either via USB or [Magic Wormhole](https://search.nixos.org/packages?channel=22.11&show=magic-wormhole-rs&from=0&size=50&sort=relevance&type=packages&query=magic+wormhole).
 
-```bash
+```zsh
 # Create shell with (rust version of) Magic Wormhole available
 nix-shell -p magic-wormhole-rs
 
@@ -49,7 +49,7 @@ Prepare internal drive (using GParted or `cgdisk /dev/nvme0n1`) and make 3 parti
 | swap  | 38G     | 8200 |
 | nix   | default | 8300 |
 
-```bash
+```zsh
 # Do everything as root
 sudo -s
 
@@ -69,7 +69,7 @@ mkfs.btrfs -L nix /dev/nvme0n1p3
 
 Mount tmpfs root and create expected directory structure. Mount the paritions we just created.
 
-```bash
+```zsh
 # Mount root as temporary file system on /mnt
 mount -t tmpfs -o mode=755 none /mnt
 
@@ -85,7 +85,7 @@ mount -o subvol=nix,compress-force=zstd,noatime /dev/nvme0n1p3 /mnt/nix
 
 Create nested subvolumes in /mnt/nix to manage state.
 
-```bash
+```zsh
 # Create nested subvolume tree like so:
 # nix
 # ├── snaps
@@ -100,9 +100,9 @@ btrfs subvolume create /mnt/nix/state/home
 mkdir -p /mnt/nix/state/{etc,var}
 btrfs subvolume create /mnt/nix/state/var/log
 ```
-Copy ssh host key (from previous step) into `/mnt/nix/state/etc/ssh/ssh_host_ed25519_key` via USB or Magic Wormhole:
+Copy ssh host key (from previous step) into `/mnt/nix/state/etc/ssh/ssh_host_ed25519_key` via USB or [Magic Wormhole](https://search.nixos.org/packages?channel=22.11&show=magic-wormhole-rs&from=0&size=50&sort=relevance&type=packages&query=magic+wormhole):
 
-```bash
+```zsh
 # Create shell with (rust version of) Magic Wormhole available
 nix-shell -p magic-wormhole-rs
 
@@ -110,15 +110,15 @@ nix-shell -p magic-wormhole-rs
 cd /mnt/nix/state/etc/ssh && wormhole-rs receive
 ```
 
-Clone git repo into `/mnt/nix/state/etc/nixos` and add generated `hardware-configuration.nix`. Finally, run installer.
+Clone git repo into `/mnt/nix/state/etc/nixos` and add generated `hardware-configuration.nix`. Finally, run the nixos installer.
 
-```bash
+```zsh
 # Clone git repo
 git clone https://github.com/suderman/nixos /mnt/nix/state/etc/nixos 
 
-# Generate config and copy `hardware-configuration.nix` to `/mnt/nix/state/etc/nixos/nixos/hosts/cog/`.
+# Generate config and copy hardware-configuration.nix to /mnt/nix/state/etc/nixos/nixos/hosts/cog/hardware-configuration.nix
 nixos-generate-config --root /mnt
 
-# Run installer
+# Run nixos installer
 nixos-install --flake /mnt/nix/state/etc/nixos#cog
 ```
