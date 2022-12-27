@@ -52,6 +52,8 @@ in {
         gnomeExtensions.tray-icons-reloaded
         # gnomeExtensions.sound-output-device-chooser
         # gnomeExtensions.pano gsound libgda
+
+        wl-clipboard
       ];
 
       variables = {
