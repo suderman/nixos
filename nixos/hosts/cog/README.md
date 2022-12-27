@@ -97,7 +97,7 @@ Create nested subvolumes in /mnt/nix to manage state.
 btrfs subvolume create /mnt/nix/snaps
 btrfs subvolume create /mnt/nix/state
 btrfs subvolume create /mnt/nix/state/home
-mkdir -p /mnt/nix/state/{etc,var}
+mkdir -p /mnt/nix/state/{var,etc/ssh}
 btrfs subvolume create /mnt/nix/state/var/log
 ```
 Copy ssh host key (from previous step) into `/mnt/nix/state/etc/ssh/ssh_host_ed25519_key` via USB or [Magic Wormhole](https://search.nixos.org/packages?channel=22.11&show=magic-wormhole-rs&from=0&size=50&sort=relevance&type=packages&query=magic+wormhole):
