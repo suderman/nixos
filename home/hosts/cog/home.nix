@@ -7,61 +7,39 @@
   # ---------------------------------------------------------------------------
 
   home.packages = with pkgs; [ 
-    nerdfonts
-    joypixels
-    nur.repos.mic92.hello-nur
-    tdesktop
-    newsflash
-    unstable.sl
-    yo
-    unstable.nnn 
+    # dolphin
+    # signal-desktop
+    # webex
     _1password
-    owofetch
-    dolphin
     _1password-gui
-    owncloud-client
     element-desktop
-    signal-desktop
-    slack
     firefox-wayland
-    xorg.xeyes
+    joypixels
+    libreoffice 
+    nerdfonts
+    newsflash
+    nur.repos.mic92.hello-nur
+    owncloud-client
+    owofetch
     plexamp
-
-    webex
-
+    slack
+    tdesktop
+    unstable.nnn 
+    unstable.sl
+    xorg.xeyes
+    yo
   ];
-
-  # persist.dirs = [ 
-  #   "Desktop"
-  #   "Downloads" 
-  #   "Documents" 
-  #   ".docker"
-  # ];
 
   programs = {
     # neovim.enable = true;
-    chromium = {
-      enable = true;
-      commandLineArgs = [ "--enable-features=UseOzonePlatform" "-ozone-platform=wayland" "--gtk-version=4" ];
-    };
+    chromium.enable = true;
+    git.enable = true;
+    tmux.enable = true;
+    wezterm.enable = true;
+    zsh.enable = true;
   };
 
   # home.file.".ssh/id_ed25519".source = "/nix/keys/id_ed25519";
-
-  xdg.configFile = let flags = ''
-    --enable-features=UseOzonePlatform 
-    --ozone-platform=wayland
-    '';
-  in {
-    "chromium-flags.conf".text = flags;
-    "electron-flags.conf".text = flags;
-    "electron-flags16.conf".text = flags;
-    "electron-flags17.conf".text = flags;
-    "electron-flags18.conf".text = flags;
-    "electron-flags19.conf".text = flags;
-    "nix/nix.conf".text = "experimental-features = nix-command flakes";
-  };
-
   
   dconf.settings = {
     "org/gnome/mutter" = {

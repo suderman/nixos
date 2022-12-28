@@ -6,17 +6,10 @@ let
   # zshrcBeforeCompInit = (import ./zshrc-BeforeCompInit.nix pkgs).zshrcBeforeCompInit;
   # zshrcExtra = (import ./zshrc-extra.nix pkgs).zshrcExtra;
   # tmuxConf = (import ./tmux-conf.nix { inherit lib config; }).tmuxConf;
-in
-{
+in {
 
-    home.packages = with pkgs; [
-      # (writeScriptBin "tmux-popup" (builtins.readFile ./tmux-popup))
-      # (writeScriptBin "tmux-cleanup" (builtins.readFile ./tmux-cleanup))
-      # (writeScriptBin "yank" (builtins.readFile ./yank))
-    ];
-
+    # programs.tmux.enable = true;
     programs.tmux = {
-      enable = true;
       # prefix = "M-z";
       # aggressiveResize = true;
       # baseIndex = 1;
@@ -161,6 +154,12 @@ in
         bind-key -T copy-mode-vi M-o select-pane -l
       '';
     };
+
+    home.packages = with pkgs; [
+      # (writeScriptBin "tmux-popup" (builtins.readFile ./tmux-popup))
+      # (writeScriptBin "tmux-cleanup" (builtins.readFile ./tmux-cleanup))
+      # (writeScriptBin "yank" (builtins.readFile ./yank))
+    ];
 
     # Adding helper functions to improve zsh and tmux
     # programs.zsh.initExtraBeforeCompInit = zshrcBeforeCompInit;

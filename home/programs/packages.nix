@@ -14,6 +14,9 @@
     killall
     mosh
     cowsay
+    inkscape
+    nsxiv
+    darktable
   ];
 
 }

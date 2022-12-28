@@ -1,5 +1,6 @@
 { config, hostname, lib, pkgs, ... }: {
 
+  # programs.zsh.enable = true;
   programs.zsh = {
     autocd = true;
     enableAutosuggestions = true;

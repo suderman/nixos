@@ -1,7 +1,7 @@
 { config, pkgs, ... }: 
 {
+  # programs.wezterm.enable = true;
   programs.wezterm = {
-    enable = true;
     extraConfig = ''
       local wezterm = require 'wezterm';
       return {

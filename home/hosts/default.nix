@@ -46,6 +46,11 @@ in {
   # Nicely reload system units when changing configs
   systemd.user.startServices = "sd-switch";
 
+  # Enable flakes
+  xdg.configFile = {
+    "nix/nix.conf".text = "experimental-features = nix-command flakes";
+  };
+
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   home.stateVersion = "22.05";
 

@@ -1,6 +1,7 @@
 { ... }: 
 {
   imports = [
+    ./chromium.nix
     ./git.nix
     ./packages.nix
     ./photo.nix

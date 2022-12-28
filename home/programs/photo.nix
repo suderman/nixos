@@ -1,20 +1,20 @@
 { lib, config, pkgs, ... }: {
   home.packages = [
-    pkgs.nsxiv
-
-    # (pkgs.gimp-with-plugins.override {
-    #   plugins = [
-    #     pkgs.gimpPlugins.gmic
-    #     pkgs.gimpPlugins.lqrPlugin
-    #     pkgs.gimpPlugins.texturize
-    #     pkgs.gimpPlugins.resynthesizer
-    #     pkgs.gimpPlugins.waveletSharpen
-    #   ];
-    # })
-
-    pkgs.inkscape
-
-    pkgs.darktable
+    # pkgs.nsxiv
+    #
+    # # (pkgs.gimp-with-plugins.override {
+    # #   plugins = [
+    # #     pkgs.gimpPlugins.gmic
+    # #     pkgs.gimpPlugins.lqrPlugin
+    # #     pkgs.gimpPlugins.texturize
+    # #     pkgs.gimpPlugins.resynthesizer
+    # #     pkgs.gimpPlugins.waveletSharpen
+    # #   ];
+    # # })
+    #
+    # pkgs.inkscape
+    #
+    # pkgs.darktable
   ];
 
   # home.persistence."/persist${config.home.homeDirectory}".directories = [

@@ -1,7 +1,6 @@
-{ ... }: 
-{
+{ ... }: {
+  # programs.git.enable = true;
   programs.git = {
-    enable = true;
     ignores = [ "*~" "*.swp" ];
     extraConfig = {
       user = {
