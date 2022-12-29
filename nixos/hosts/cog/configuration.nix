@@ -50,6 +50,10 @@
   # Steam
   programs.steam.enable = false;
 
+  # programs._1password.enable = true;
+  # programs._1password-gui.polkitPolicyOwners = [ "me" ];
+  # programs._1password-gui.enable = true;
+
   # Packages
   # environment.systemPackages = with pkgs; [];
 
