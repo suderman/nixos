@@ -33,6 +33,7 @@ in {
         gnome.dconf-editor
         chrome-gnome-shell
         wl-clipboard
+        shairplay
 
         gnomeExtensions.appindicator
         gnomeExtensions.bluetooth-quick-connect
@@ -46,6 +47,7 @@ in {
         gnomeExtensions.no-titlebar-when-maximized
         gnomeExtensions.runcat
         gnomeExtensions.gsconnect
+        gnomeExtensions.sound-output-device-chooser
 
         # gnomeExtensions.vitals
         # gnomeExtensions.tray-icons-reloaded
@@ -54,7 +56,6 @@ in {
         # gnomeExtensions.custom-hot-corners-extended
         # gnomeExtensions.espresso
         # gnomeExtensions.x11-gestures
-        # gnomeExtensions.sound-output-device-chooser
         # gnomeExtensions.pano gsound libgda
 
       ];

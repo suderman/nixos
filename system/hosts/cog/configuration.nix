@@ -13,6 +13,9 @@
   #   options = [ "subvol=nix" "compress=zstd" "noatime" "space_cache=v2" "discard=async" ];
   # };
 
+  fileSystems."/" = { options = [ "size=3G" "mode=755" ]; };
+  fileSystems."/nix" = { options = [ "compress-force=zstd" "noatime" ]; neededForBoot = true; };
+
   desktops.gnome.enable = true;
 
   services.tailscale.enable = true;

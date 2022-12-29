@@ -16,7 +16,6 @@
   fileSystems."/" =
     { device = "none";
       fsType = "tmpfs";
-      options = [ "size=3G" "mode=755" ];
     };
 
   fileSystems."/boot" =
@@ -27,7 +26,6 @@
   fileSystems."/nix" =
     { device = "/dev/disk/by-uuid/e3591e1c-e091-4e16-b55f-088ab195fec4";
       fsType = "btrfs";
-      options = [ "compress-force=zstd" "noatime" ];
     };
 
   swapDevices =
