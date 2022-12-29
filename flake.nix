@@ -59,45 +59,52 @@
         overlays = with (import ./overlays { inherit inputs system config; } ); [ pkgs nur unstable ];
       };
 
-      # Make a NixOS host configuration
-      mkHost = args@{ system ? "x86_64-linux", username ? "me", domain ? "lan", hostname, ... }: inputs.nixpkgs.lib.nixosSystem rec {
+      # Make a NixOS system configuration
+      mkSystem = args@{ system ? "x86_64-linux", username ? "me", domain ? "lan", hostname, ... }: inputs.nixpkgs.lib.nixosSystem rec {
         inherit system;
         pkgs = mkPkgs system;
         specialArgs = args // { inherit inputs outputs username; };
         modules = [ 
-          ./nixos/hosts/${hostname}/configuration.nix 
+          ./system/hosts/${hostname}/configuration.nix 
           inputs.home-manager.nixosModules.home-manager { home-manager = {
             useGlobalPkgs = true; useUserPackages = true;
             extraSpecialArgs = { inherit inputs outputs username; };
-            users."${username}" = import ./home/hosts/${hostname}/home.nix;
+            users."${username}" = import ./user/hosts/${hostname}/home.nix;
           }; } 
         ];
 
       };
 
       # Make a Home Manager configuration
-      mkHome = args@{ system ? "x86_64-linux", username ? "me", hostname, ... }: inputs.home-manager.lib.homeManagerConfiguration rec {
+      mkUser = args@{ system ? "x86_64-linux", username ? "me", hostname, ... }: inputs.home-manager.lib.homeManagerConfiguration rec {
         pkgs = mkPkgs system;
         extraSpecialArgs = args // { inherit inputs outputs username; };
-        modules = [ ./home/hosts/${hostname}/home.nix ];
+        modules = [ ./user/hosts/${hostname}/home.nix ];
       };
 
     in {
 
-      # Framework Laptop
-      nixosConfigurations.cog = mkHost { hostname = "cog"; domain = "suderman.org"; };
-      homeConfigurations.cog = mkHome { hostname = "cog"; };
+      # System configurations on NixOS
+      nixosConfigurations = {
 
-      # Linode VPS
-      nixosConfigurations.nimbus = mkHost { hostname = "nimbus"; };
-      # homeConfigurations.nimbus = mkHome {};
+        # Framework Laptop
+        cog = mkSystem { hostname = "cog"; domain = "suderman.org"; };
 
-      # Intel NUC home server
-      nixosConfigurations.lux = mkHost { hostname = "lux"; };
-      # homeConfigurations.lux = mkHome {};
+        # Linode VPS
+        nimbus = mkSystem { hostname = "nimbus"; };
 
-      # MacPro
-      homeConfigurations.umbra = mkHome { hostname = "umbra"; system = "x86_64-darwin"; };
+        # Intel NUC home server
+        lux = mkSystem { hostname = "lux"; };
+
+      };
+
+      # Home configurations on other systems
+      homeConfigurations = {
+
+        # MacPro
+        umbra = mkUser { hostname = "umbra"; system = "x86_64-darwin"; };
+
+      };
 
     };
 }
