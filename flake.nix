@@ -56,7 +56,7 @@
         config.joypixels.acceptLicense = true;
 
         # Include personal scripts and package modifications
-        overlays = with (import ./overlays { inherit inputs system config; } ); [ pkgs nur unstable ];
+        overlays = with (import ./overlays { inherit inputs system config; } ); [ lib pkgs nur unstable ];
       };
 
       # Make a NixOS system configuration

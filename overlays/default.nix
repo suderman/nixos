@@ -1,5 +1,8 @@
 { inputs, system, config }: {
 
+  # Personal lib functions
+  lib = self: super: { lib = super.lib // ( import ./lib { inherit inputs self super; } ); };
+
   # Personal packages and overrides
   pkgs = self: super: import ./pkgs { inherit inputs self super; };
 

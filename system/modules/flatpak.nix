@@ -6,13 +6,18 @@ let
 
 in {
 
-  # services.flatpak.enable = true;
-  systemd.services.flatpak = lib.mkIf cfg.enable {
-    wantedBy = [ "multi-user.target" ];
-    serviceConfig.Type = "oneshot";
-    script = ''
-      ${flatpak} remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-    '';
-  };
+  # # services.flatpak.enable = true;
+  # systemd.services.flatpak = lib.mkIf cfg.enable {
+  #   wantedBy = [ "multi-user.target" ];
+  #   # wantedBy = [ "network-online.target" ];
+  #   serviceConfig = {
+  #     Type = "oneshot";
+  #     Restart = "on-failure";
+  #     RestartSec = "5";
+  #   };
+  #   script = ''
+  #     ${flatpak} remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+  #   '';
+  # };
 
 }
