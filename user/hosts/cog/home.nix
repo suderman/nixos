@@ -21,6 +21,7 @@
     nur.repos.mic92.hello-nur
     owncloud-client
     owofetch
+    neofetch
     plexamp
     slack
     tdesktop
@@ -40,12 +41,5 @@
   };
 
   # home.file.".ssh/id_ed25519".source = "/nix/keys/id_ed25519";
-  
-  dconf.settings = {
-    "org/gnome/mutter" = {
-      experimental-features = [ "scale-monitor-framebuffer" ];
-    };
-  };
-
 
 }

@@ -4,7 +4,7 @@
 
   text = /* bash */ ''
     # comment
-    echo "Yo this is a shell script"
+    echo "Yo this is a shell script" "$@" "<end-of-line>"
     pwd
   '';
 }) // {

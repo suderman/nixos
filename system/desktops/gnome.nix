@@ -32,28 +32,31 @@ in {
         gnome.gnome-tweaks
         gnome.dconf-editor
         chrome-gnome-shell
+        wl-clipboard
+
         gnomeExtensions.appindicator
         gnomeExtensions.bluetooth-quick-connect
-        gnomeExtensions.just-perfection
-        gnomeExtensions.gnome-40-ui-improvements
         gnomeExtensions.blur-my-shell
-        gnomeExtensions.clipboard-indicator
-        # gnomeExtensions.custom-hot-corners-extended
-        gnomeExtensions.hot-edge
-        gnomeExtensions.vitals
+        gnomeExtensions.browser-tabs
         gnomeExtensions.caffeine
-        gnomeExtensions.runcat
-        # gnomeExtensions.espresso
-        # gnomeExtensions.gsconnect
-        # gnomeExtensions.x11-gestures
-        gnomeExtensions.no-titlebar-when-maximized
+        gnomeExtensions.gnome-40-ui-improvements
         gnomeExtensions.gtk-title-bar
-        gnomeExtensions.clipboard-history
-        gnomeExtensions.tray-icons-reloaded
+        gnomeExtensions.hot-edge
+        gnomeExtensions.just-perfection
+        gnomeExtensions.no-titlebar-when-maximized
+        gnomeExtensions.runcat
+        gnomeExtensions.gsconnect
+
+        # gnomeExtensions.vitals
+        # gnomeExtensions.tray-icons-reloaded
+        # gnomeExtensions.clipboard-history
+        # gnomeExtensions.clipboard-indicator
+        # gnomeExtensions.custom-hot-corners-extended
+        # gnomeExtensions.espresso
+        # gnomeExtensions.x11-gestures
         # gnomeExtensions.sound-output-device-chooser
         # gnomeExtensions.pano gsound libgda
 
-        wl-clipboard
       ];
 
       variables = {

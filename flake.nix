@@ -63,7 +63,7 @@
       mkSystem = args@{ system ? "x86_64-linux", username ? "me", domain ? "lan", hostname, ... }: inputs.nixpkgs.lib.nixosSystem rec {
         inherit system;
         pkgs = mkPkgs system;
-        specialArgs = args // { inherit inputs outputs username; };
+        specialArgs = args // { inherit inputs outputs username hostname domain; };
         modules = [ 
           ./system/hosts/${hostname}/configuration.nix 
           inputs.home-manager.nixosModules.home-manager { home-manager = {
