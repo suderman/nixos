@@ -11,10 +11,6 @@
       update_check_interval = 0;
     };
 
-    font.package = {
-      pkgs.dejavu_fonts
-    };
-
     environment = {
       "LS_COLORS" = "1";
     };

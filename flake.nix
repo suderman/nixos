@@ -68,7 +68,7 @@
           ./system/hosts/${host}/configuration.nix 
           inputs.home-manager.nixosModules.home-manager { home-manager = {
             useGlobalPkgs = true; useUserPackages = true;
-            extraSpecialArgs = { inherit inputs outputs username; };
+            extraSpecialArgs = { inherit inputs outputs user; };
             users."${user}" = import ./user/hosts/${host}/home.nix;
           }; } 
         ];

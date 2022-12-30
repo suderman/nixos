@@ -6,16 +6,6 @@
     inputs.hardware.nixosModules.framework 
   ];
 
-  # noatime,compress=zstd,space_cache=v2,discard=async,subvol=@nix
-  # fileSystems."/nix" = { 
-  #   device = "/dev/disk/by-uuid/f73c53b7-ae6c-4240-89c3-511ad918edcc";
-  #   fsType = "btrfs";
-  #   options = [ "subvol=nix" "compress=zstd" "noatime" "space_cache=v2" "discard=async" ];
-  # };
-
-  fileSystems."/" = { options = [ "size=3G" "mode=755" ]; };
-  fileSystems."/nix" = { options = [ "compress-force=zstd" "noatime" ]; neededForBoot = true; };
-
   # root is tmpfs
   fileSystems."/" = { 
     # device = "none"; fsType = "tmpfs";
@@ -26,6 +16,7 @@
   fileSystems."/nix" = { 
     # device = "/dev/disk/by-uuid/xxx"; fsType = "btrfs";
     options = [ "compress-force=zstd" "noatime" ]; # btrfs mount options
+    # options = [ "compress=zstd" "noatime" "space_cache=v2" "discard=async" "subvol=nix" ];
     neededForBoot = true; 
   };
 
