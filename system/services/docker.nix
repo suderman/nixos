@@ -10,6 +10,4 @@ in {
     storageDriver = "overlay2";
   };
 
-  # persist.dirs = lib.mkIf cfg.enable [ "/var/lib/docker" ];
-
 }

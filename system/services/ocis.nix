@@ -17,7 +17,7 @@ in {
       entrypoint = "/bin/sh";
       cmd = [ "-c" "ocis init || true; ocis server" ];
       environment = {
-        OCIS_URL = "https://ocis.${hostDomain}";
+        OCIS_URL = "https://ocis.${hostName}.${domain}";
         OCIS_LOG_LEVEL = "debug";
         PROXY_TLS = "false"; 
         OCIS_INSECURE = "false";

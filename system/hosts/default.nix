@@ -1,4 +1,4 @@
-{ inputs, outputs, config, lib, pkgs, username, hostname, domain, ... }: 
+{ inputs, outputs, config, lib, pkgs, user, host, domain, ... }: 
 
 with builtins;
 
@@ -21,7 +21,7 @@ in {
   # ---------------------------------------------------------------------------
 
   # Hostname passed as argument from flake
-  networking.hostName = hostname; 
+  networking.hostName = host; 
   networking.domain = domain;
 
   # Firewall
@@ -78,15 +78,15 @@ in {
     users.root = {
       shell = pkgs.zsh;
       passwordFile = config.age.secrets.password.path;
-      openssh.authorizedKeys.keys = [ config.keys."${username}" ];
+      openssh.authorizedKeys.keys = [ config.keys."${user}" ];
     };
 
     # personal user
-    users."${username}" = {
+    users."${user}" = {
       isNormalUser = true;
       shell = pkgs.zsh;
-      home = "/home/${username}";
-      description = username;
+      home = "/home/${user}";
+      description = user;
       passwordFile = config.age.secrets.password.path;
       extraGroups = [ 
         "wheel" 
@@ -96,7 +96,7 @@ in {
         "input" 
         "keyd" 
       ]; 
-      openssh.authorizedKeys.keys = [ config.keys."${username}" ];
+      openssh.authorizedKeys.keys = [ config.keys."${user}" ];
     };
 
     # test user
@@ -114,7 +114,7 @@ in {
         "input" 
         "keyd" 
       ]; 
-      openssh.authorizedKeys.keys = [ config.keys."${username}" ];
+      openssh.authorizedKeys.keys = [ config.keys."${user}" ];
     };
 
   };

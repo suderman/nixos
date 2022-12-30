@@ -1,11 +1,11 @@
-{ config, lib, pkgs, username, ... }: {
+{ config, lib, pkgs, user, ... }: {
 
   # gtk.enable = true;
   gtk = {
   
     gtk3.bookmarks = [
-      "file:///home/${username}/ home"
-      "sftp://lux/home/${username} lux"
+      "file:///home/${user}/ home"
+      "sftp://lux/home/${user} lux"
     ];
 
     gtk3.extraCss = ''

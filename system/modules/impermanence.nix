@@ -3,7 +3,7 @@
 # persist.dirs = [ "/var/lib/systemd" ];
 # persist.files = [ "/etc/machine-id" ];
 
-{ inputs, config, lib, username, ... }: 
+{ inputs, config, lib, user, ... }: 
 
 let 
   inherit (lib) mkOption types;

@@ -1,4 +1,4 @@
-{ inputs, config, lib, pkgs, username, nixos, ... }: 
+{ inputs, config, lib, pkgs, user, ... }: 
 
 with builtins;
 
@@ -13,8 +13,8 @@ in {
   # User Configuration
   # ---------------------------------------------------------------------------
 
-  home.username = username;
-  home.homeDirectory = "/${if (stdenv.isLinux) then "home" else "Users"}/${username}";
+  home.username = user;
+  home.homeDirectory = "/${if (stdenv.isLinux) then "home" else "Users"}/${user}";
 
   # ---------------------------------------------------------------------------
   # Home Settings
@@ -32,11 +32,6 @@ in {
   #     '';
   #   };
   # };
-
-  # persist.files = [
-  #   ".zsh_history"
-  #   ".bash_history"
-  # ];
 
   # Enable home-manager, git & zsh
   programs.home-manager.enable = true;

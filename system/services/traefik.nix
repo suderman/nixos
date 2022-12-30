@@ -114,6 +114,4 @@ in {
     basic-auth = { file = basic-auth; owner = "traefik"; };
   };
 
-  # persist.dirs = lib.mkIf cfg.enable [ "/var/lib/traefik" ];
-
 }

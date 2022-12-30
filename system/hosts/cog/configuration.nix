@@ -16,6 +16,19 @@
   fileSystems."/" = { options = [ "size=3G" "mode=755" ]; };
   fileSystems."/nix" = { options = [ "compress-force=zstd" "noatime" ]; neededForBoot = true; };
 
+  # root is tmpfs
+  fileSystems."/" = { 
+    # device = "none"; fsType = "tmpfs";
+    options = [ "size=3G" "mode=755" ]; # limit to 3GB and only writable by root
+  };
+
+  # /nix is btrfs
+  fileSystems."/nix" = { 
+    # device = "/dev/disk/by-uuid/xxx"; fsType = "btrfs";
+    options = [ "compress-force=zstd" "noatime" ]; # btrfs mount options
+    neededForBoot = true; 
+  };
+
   desktops.gnome.enable = true;
 
   services.tailscale.enable = true;
@@ -62,7 +75,5 @@
 
   # Other
   # programs.nix-ld.enable = true;
-
-  # persist.files = [ "/example.txt" ];
 
 }

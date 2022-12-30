@@ -84,12 +84,6 @@ in {
     # services.avahi.enable = false;
     # networking.networkmanager.enable = false;
 
-    # persist.dirs = [ "/var/lib/AccountsService" ];
-    # persist.home.dirs = [ 
-    #   ".local/share/Trash"
-    #   ".local/share/keyrings" 
-    # ];
-
   };
 
 }

@@ -37,6 +37,7 @@
     git.enable = true;
     tmux.enable = true;
     wezterm.enable = true;
+    kitty.enable = true;
     zsh.enable = true;
   };
 

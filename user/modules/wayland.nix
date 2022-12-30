@@ -1,6 +1,4 @@
-{ config, lib, pkgs, ... }: 
-
-{
+{ config, lib, pkgs, ... }: {
 
   home.sessionVariables = {
     NIXOS_OZONE_WL = "1";

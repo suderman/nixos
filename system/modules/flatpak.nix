@@ -1,4 +1,4 @@
-{ config, pkgs, lib, username, ... }:
+{ config, pkgs, lib, ... }:
 
 let
   cfg = config.services.flatpak;
