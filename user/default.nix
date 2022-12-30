@@ -4,5 +4,6 @@
     ../secrets
     ./modules
     ./programs
+    ./services
   ];
 }

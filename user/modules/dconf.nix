@@ -14,6 +14,11 @@
       show-battery-percentage = true;
     };
 
+    # Resize windows while holding super
+    "org/gnome/desktop/wm/preferences" = {
+      resize-with-right-button = true;
+    };
+
     # Touchpad preferences
     "org/gnome/desktop/peripherals/touchpad" = {
       disable-while-typing = true;

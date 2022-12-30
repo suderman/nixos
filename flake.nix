@@ -88,13 +88,13 @@
       nixosConfigurations = {
 
         # Framework Laptop
-        cog = mkSystem { host= "cog"; domain = "suderman.org"; };
+        cog = mkSystem { host = "cog"; domain = "suderman.org"; };
 
         # Linode VPS
-        nimbus = mkSystem { host= "nimbus"; };
+        nimbus = mkSystem { host = "nimbus"; };
 
         # Intel NUC home server
-        lux = mkSystem { host= "lux"; };
+        lux = mkSystem { host = "lux"; };
 
       };
 
@@ -102,7 +102,7 @@
       homeConfigurations = {
 
         # MacPro
-        umbra = mkUser { host= "umbra"; system = "x86_64-darwin"; };
+        umbra = mkUser { host = "umbra"; system = "x86_64-darwin"; };
 
       };
 
