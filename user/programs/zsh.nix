@@ -1,4 +1,4 @@
-{ config, hostname, lib, pkgs, ... }: {
+{ config, lib, pkgs, ... }: {
 
   # programs.zsh.enable = true;
   programs.zsh = {
@@ -25,8 +25,7 @@
     '';
 
     shellAliases = {
-      # switch = "echo nixos-rebuild switch --flake /nix/system#$(hostname) && sudo nixos-rebuild switch --flake /nix/system#$(hostname)";
-      switch = "echo nixos-rebuild switch --flake /etc/nixos#$(hostname) && sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)";
+      switch = "echo nixos-rebuild switch /etc/nixos#$(hostname) && sudo nixos-rebuild switch /etc/nixos#$(hostname)";
     };
 
     oh-my-zsh = {

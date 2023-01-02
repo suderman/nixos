@@ -2,6 +2,7 @@
 {
   imports = [
     ./chromium.nix
+    ./fzf.nix
     ./git.nix
     ./kitty.nix
     ./packages.nix
