@@ -9,7 +9,7 @@
   # root is tmpfs
   fileSystems."/" = { 
     # device = "none"; fsType = "tmpfs";
-    options = [ "size=3G" "mode=755" ]; # limit to 3GB and only writable by root
+    options = [ "size=8G" "mode=755" ]; # limit to 8GB and only writable by root
   };
 
   # /nix is btrfs

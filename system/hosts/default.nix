@@ -124,6 +124,9 @@ in {
     password.file = password;
   };
 
+  # Skip password for sudo
+  security.sudo.wheelNeedsPassword = false;
+
   # Increase open file limit for sudoers
   security.pam.loginLimits = [
     { domain = "@wheel"; item = "nofile"; type = "soft"; value = "524288"; }

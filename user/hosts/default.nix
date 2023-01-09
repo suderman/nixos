@@ -32,6 +32,11 @@ in {
     nano
     ripgrep
     wget
+    python39
+    python39Packages.pip
+    python39Packages.virtualenv
+    nodejs
+    cargo
   ];
 
   home.shellAliases = with pkgs; rec {
@@ -59,6 +64,10 @@ in {
   };
 
   programs.fzf.enable = true;
+  programs.neovim.enable = true;
+
+  # Add support for ~/.local/bin
+  home.sessionPath = [ "$HOME/.local/bin" ];
 
   # ---------------------------------------------------------------------------
   # Home Settings
