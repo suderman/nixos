@@ -9,7 +9,7 @@ in {
   yo = self.callPackage ./yo.nix { };
 
   # These packages support Wayland but sometimes need to be persuaded
-  _1password-gui  = enableWayland { type = "electron"; pkg = super._1password-gui; bin = "1password"; };
+  # _1password-gui  = enableWayland { type = "electron"; pkg = super._1password-gui; bin = "1password"; };
   dolphin         = enableWayland { type = "qt"; pkg = super.dolphin; bin = "dolphin"; };
   element-desktop = enableWayland { type = "electron"; pkg = super.element-desktop; bin = "element-desktop"; };
   owncloud-client = enableWayland { type = "qt"; pkg = super.owncloud-client; bin = "owncloud"; };

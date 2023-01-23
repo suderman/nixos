@@ -13,7 +13,8 @@ rec {
   # System keys /etc/ssh/ssh_host_ed25519_key.pub
   cog = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPm+/Hq+sZM78OZnWY8DT/7O3RGXb0j1+mYElwquD4LJ";
   lux = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfPrHGL3ZkParCHImTtMnxphq3O0UF/L25RDRz28Xeo";
-  systems = [ cog lux ];
+  sol = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEZNXgo4T/cyY/QyI1j3lNVzwg0+U3c7NclpNzY9wH22";
+  systems = [ cog lux sol ];
 
   # All public keys
   all = users ++ systems;

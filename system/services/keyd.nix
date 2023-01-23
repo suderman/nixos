@@ -177,7 +177,8 @@ in {
       capslock = overload(control, esc)
       leftcontrol = layer(meta)
       leftmeta = layer(alt)
-      leftalt = overload(control_cmd, macro(leftmeta))
+      # leftalt = overload(control_cmd, macro(leftmeta))
+      leftalt = overload(control_cmd, esc)
       rightalt = layer(meta)
       f12 = toggle(main_meta)
 

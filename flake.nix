@@ -92,6 +92,7 @@
 
         # Linode VPS
         nimbus = mkSystem { host = "nimbus"; };
+        sol = mkSystem { host = "sol"; };
 
         # Intel NUC home server
         lux = mkSystem { host = "lux"; };

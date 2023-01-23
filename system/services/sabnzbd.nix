@@ -5,7 +5,7 @@ with config.networking;
 let
   cfg = config.services.sabnzbd;
   sub = "sab";
-  port = "8008";
+  port = "8008"; # default is 8080, must be updated in /var/lib/sabnzbd/sabnzbd.ini
 
 in {
 
@@ -16,7 +16,7 @@ in {
   services.traefik.dynamicConfigOptions.http = lib.mkIf cfg.enable {
     routers.sabnzbd = {
       entrypoints = "websecure";
-      rule = "Host(`${sub}.${hostName}.${domain}`) || Host(`${sub}.local.${domain}`)";
+      rule = "Host(`${sub}.${hostName}.${domain}`) || Host(`${sub}.local.${domain} || Host(`${sub}.${domain}`)";
       service = "sabnzbd";
       tls.certresolver = "resolver-dns";
     };
