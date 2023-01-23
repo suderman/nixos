@@ -27,6 +27,7 @@
   programs.mosh.enable = true;
 
   services.keyd.enable = true;
+  services.ydotool.enable = true;
   
   services.traefik.enable = true;
   # services.whoogle.enable = true;

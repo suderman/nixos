@@ -95,6 +95,7 @@ in {
         "docker" 
         "input" 
         "keyd" 
+        "uinput" 
       ]; 
       openssh.authorizedKeys.keys = [ config.keys."${user}" ];
     };

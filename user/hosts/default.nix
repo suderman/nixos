@@ -61,6 +61,9 @@ in {
     tree = "tree -a --dirsfirst -I .git";
     tl = "tldr";
     less = "less -R";
+    type-clipboard = ''
+      sh -c 'sudo sleep 5.0; sudo ydotool type -- "$(wl-paste)"'
+    '';
   };
 
   programs.fzf.enable = true;

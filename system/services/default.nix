@@ -13,5 +13,6 @@
     ./traefik.nix
     ./whoami.nix
     ./whoogle.nix
+    ./ydotool.nix
   ];
 }
