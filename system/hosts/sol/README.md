@@ -60,11 +60,12 @@ export EDITOR=vim
 # List devices
 lsblk -f
 
-# Enable swap partition
-swapon /dev/sdb
-
 # Format nix partition
-mkfs.btrfs -L nix /dev/sdc
+mkfs.btrfs -L nix /dev/sdb
+
+# Enable swap partition
+swapon /dev/sdc
+
 ```
 
 Mount tmpfs root and create expected directory structure. Mount the paritions we just created.
@@ -77,7 +78,7 @@ mount -t tmpfs -o size=1024m,mode=755 none /mnt
 mkdir -p /mnt/nix
  
 # Mount btrfs on /mnt/nix
-mount -o compress-force=zstd,noatime /dev/sdc /mnt/nix
+mount -o compress-force=zstd,noatime /dev/sdb /mnt/nix
 ```
 
 Create nested subvolumes in /mnt/nix to manage state.
