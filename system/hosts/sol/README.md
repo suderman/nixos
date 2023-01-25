@@ -45,17 +45,12 @@ Prepare internal drive (using GParted or `cgdisk /dev/nvme0n1`) and make 3 parti
 
 Prepare disks under Storage tab:
 
-installer	ext4	1024 MB	2023-01-23 19:45	
-boot	ext4	512 MB	2023-01-25 21:51	
-swap	swap	2048 MB	2023-01-25 21:53	
-nix	raw	47616 MB
-
 | Label     | Type    | Size  |
 | --------- | ------- | ----- |
-| installer | ext4    | 1024M |
-| boot      | ext4    | 512M |
-| swap      | swap    | 2048Mcd  |
-| nix       | default | 8300 |
+| installer | ext4    | 2048M |
+| boot      | ext4    | 512M  |
+| swap      | swap    | 2048M |
+| nix       | raw     | -     |
 
 ```zsh
 # Do everything as root
