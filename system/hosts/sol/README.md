@@ -16,7 +16,7 @@ ssh-keygen -q -N "" -t ed25519 -f ssh_host_ed25519_key
 cat ssh_host_ed25519_key.pub | wl-copy 
 ```
 
-Update the line with `cog = "ssh-ed25519 AAA...` using the new public key on the clipboard. 
+Update the line with `sol = "ssh-ed25519 AAA...` using the new public key on the clipboard. 
 Then rekey all the secrets, commit and push the git repo.
 
 ```zsh
@@ -40,8 +40,6 @@ wormhole-rs send ssh_host_ed25519_key
 ## Boot NixOS installer
 
 <https://nixos.org/download.html>
-
-Prepare internal drive (using GParted or `cgdisk /dev/nvme0n1`) and make 3 partitions:
 
 Prepare disks under Storage tab:
 
