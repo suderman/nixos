@@ -91,7 +91,7 @@ export DEV_SWAP=/dev/sdb
 export DEV_NIX=/dev/sdc 
 export TMPFS_SIZE=1024m
 export LONGVIEW_KEY=<https://cloud.linode.com/longview>
-curl -L https://github.com/suderman/nixos/blob/main/system/hosts/bootstrap.sh | sh
+curl -L https://github.com/suderman/nixos/raw/main/system/hosts/bootstrap.sh | sh
 ```
 
 Copy ssh host key (from previous step) into `/mnt/nix/state/etc/ssh/ssh_host_ed25519_key` via clipboard, USB or [Magic Wormhole](https://search.nixos.org/packages?channel=22.11&show=magic-wormhole-rs&from=0&size=50&sort=relevance&type=packages&query=magic+wormhole):
