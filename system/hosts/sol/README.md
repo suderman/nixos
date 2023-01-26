@@ -27,7 +27,7 @@ RULES=/etc/nixos/secrets/secrets.nix agenix --rekey
 cd /etc/nixos && git commit -am "Updated host key" && git push
 ```
 
-Prepare to transfer private key to host, either via USB or [Magic Wormhole](https://search.nixos.org/packages?channel=22.11&show=magic-wormhole-rs&from=0&size=50&sort=relevance&type=packages&query=magic+wormhole).
+Prepare to transfer private key to host, either via clipboard, USB or [Magic Wormhole](https://search.nixos.org/packages?channel=22.11&show=magic-wormhole-rs&from=0&size=50&sort=relevance&type=packages&query=magic+wormhole).
 
 ```zsh
 # Create shell with (rust version of) Magic Wormhole available
@@ -37,18 +37,46 @@ nix-shell -p magic-wormhole-rs
 wormhole-rs send ssh_host_ed25519_key
 ```
 
-## Boot NixOS installer
+## Prepare Storage and Configuration Profiles
 
 <https://nixos.org/download.html>
 
 Prepare disks under Storage tab:
 
-| Label     | Type    | Size  |
-| --------- | ------- | ----- |
-| installer | ext4    | 2048M |
-| boot      | ext4    | 512M  |
-| swap      | swap    | 2048M |
-| nix       | raw     | -     |
+| Label  | Type    | Size  | Device   |
+| ------ | ------- | ----- | -------- |
+| iso    | ext4    | 1536M | /dev/sdd |
+| root   | ext4    | 512M  | /dev/sda |
+| swap   | swap    | 2048M | /dev/sdb |
+| nix    | raw     | -     | /dev/sdc |
+
+Prepare two configurations under Configurations tab:
+
+| Label     | Kernel      | /dev/sda | /dev/sdb | /dev/sdc | /dev/sdd | Root Device |
+| --------- | ----------- | -------- | -------- | -------- | -------- | ----------- |
+| installer | Direct Disk | root     | swap     | nix      | iso      | /dev/sdd    |
+| nixos     | GRUB 2      | root     | swap     | nix      | -        | /dev/sda    |
+
+Disable all Filesystem/Boot Helpers at the bottom.
+
+## Create NixOS installer
+
+Boot node into Rescue Mode with ios mounted at /dev/sda. Then launch a console:
+
+```zsh
+# Update SSL certificates to allow HTTPS connections:
+update-ca-certificates
+
+# set the iso url to a variable
+iso=https://channels.nixos.org/nixos-22.11/latest-nixos-minimal-x86_64-linux.iso
+
+# Download the ISO, write it to the installer disk, and verify the checksum:
+curl -L $iso | tee >(dd of=/dev/sda) | sha256sum
+```
+
+## Customize NixOS installer
+
+After the installer disk is created, boot the node with the installer profile. Then launch a console:
 
 ```zsh
 # Do everything as root
@@ -60,85 +88,33 @@ export EDITOR=vim
 # List devices
 lsblk -f
 
-# Format nix partition
-mkfs.btrfs -L nix /dev/sdb
-
-# Enable swap partition
-swapon /dev/sdc
-
+# When setting up a linode VPS:
+export DEV_SWAP=/dev/sdb 
+export DEV_NIX=/dev/sdc 
+export TMPFS_SIZE=1024m
+export LONGVIEW_KEY=<https://cloud.linode.com/longview>
+curl -L https://github.com/suderman/nixos/blob/main/system/hosts/bootstrap.sh | sh
 ```
 
-Mount tmpfs root and create expected directory structure. Mount the paritions we just created.
+Copy ssh host key (from previous step) into `/mnt/nix/state/etc/ssh/ssh_host_ed25519_key` via clipboard, USB or [Magic Wormhole](https://search.nixos.org/packages?channel=22.11&show=magic-wormhole-rs&from=0&size=50&sort=relevance&type=packages&query=magic+wormhole):
 
 ```zsh
-# Mount root as temporary file system on /mnt
-mount -t tmpfs -o size=1024m,mode=755 none /mnt
 
-# Prepare mount point
-mkdir -p /mnt/nix
- 
-# Mount btrfs on /mnt/nix
-mount -o compress-force=zstd,noatime /dev/sdb /mnt/nix
-```
+# If transfering key via USB or key, create new file with contents:
+vi /mnt/nix/state/etc/ssh/ssh_host_ed25519_key
 
-Create nested subvolumes in /mnt/nix to manage state.
-
-```zsh
-# Create nested subvolume tree like so:
-# nix
-# ├── snaps
-# └── state
-#     ├── home
-#     ├── etc
-#     └── var
-#         └── log
-btrfs subvolume create /mnt/nix/snaps
-btrfs subvolume create /mnt/nix/state
-btrfs subvolume create /mnt/nix/state/home
-mkdir -p /mnt/nix/state/{var,etc/ssh}
-btrfs subvolume create /mnt/nix/state/var/log
-```
-Copy ssh host key (from previous step) into `/mnt/nix/state/etc/ssh/ssh_host_ed25519_key` via USB or [Magic Wormhole](https://search.nixos.org/packages?channel=22.11&show=magic-wormhole-rs&from=0&size=50&sort=relevance&type=packages&query=magic+wormhole):
-
-```zsh
-# Create shell with (rust version of) Magic Wormhole available
-nix-shell -p magic-wormhole-rs
-
-# Complete transfer
+# OR, if transfering key via wormhole, receive the file:
 cd /mnt/nix/state/etc/ssh && wormhole-rs receive
 
-mkdir -p /nix/state/etc/ssh && cp /mnt/nix/state/etc/ssh/ssh_host_ed25519_key /nix/state/etc/ssh
+# Copy this key to where the installer can use it as well:
+cp /mnt/nix/state/etc/ssh/ssh_host_ed25519_key /etc/ssh/ssh_host_ed25519_key
 ```
 
-Install dependencies.
+## Install NixOS
+
+Finally, run the nixos installer.
 
 ```zsh
-
-# Add agenix module /etc/nixos/configuration.nix
-vi /etc/nixos/configuration.nix
-
-# Replace imports with:
-# imports = [ <nixpkgs/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix> <agenix/modules/age.nix> ];
-
-# Add change and update
-nix-channel --add https://github.com/ryantm/agenix/archive/main.tar.gz agenix
-nix-channel --update
-
-#mkdir -p /mnt/nix/tmp
-#mount --bind /mnt/nix/tmp /tmp
-
-nixos-rebuild switch
-
-# Install agenix CLI and git
-nix-env -iA agenix.agenix nixos.git
-```
-
-Clone git repo into `/mnt/nix/state/etc/nixos` and add generated `hardware-configuration.nix`. Finally, run the nixos installer.
-
-```zsh
-
-# Clone git repo
-git clone https://github.com/suderman/nixos /mnt/nix/state/etc/nixos 
 
 # Generate config and copy hardware-configuration.nix to /mnt/nix/state/etc/nixos/nixos/hosts/sol/hardware-configuration.nix
 nixos-generate-config --root /mnt --dir /mnt/nix/state/etc/nixos/scratch

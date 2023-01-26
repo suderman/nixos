@@ -33,12 +33,12 @@ in {
         gnome.dconf-editor
         chrome-gnome-shell
         wl-clipboard
-        shairplay
+        # shairplay
 
         gnomeExtensions.appindicator
         gnomeExtensions.bluetooth-quick-connect
         gnomeExtensions.blur-my-shell
-        gnomeExtensions.browser-tabs
+        # gnomeExtensions.browser-tabs
         gnomeExtensions.caffeine
         gnomeExtensions.gnome-40-ui-improvements
         gnomeExtensions.gtk-title-bar
@@ -47,7 +47,9 @@ in {
         gnomeExtensions.no-titlebar-when-maximized
         gnomeExtensions.runcat
         gnomeExtensions.gsconnect
-        gnomeExtensions.sound-output-device-chooser
+        # gnomeExtensions.sound-output-device-chooser
+        gnomeExtensions.another-window-session-manager
+        gnomeExtensions.zoom-wayland-extension
 
         # gnomeExtensions.vitals
         # gnomeExtensions.tray-icons-reloaded

@@ -2,7 +2,7 @@
 
   imports = [ 
     ../. 
-    ./hardware-configuration.nix 
+    ../linode.nix
   ];
 
   # root is tmpfs
@@ -68,11 +68,5 @@
 
   # Other
   # programs.nix-ld.enable = true;
-
-  networking.extraHosts =
-  ''
-    # 174.138.112.193 redarrow.ca www.redarrow.ca
-    # 174.138.112.193 myebus.ca www.myebus.ca
-  '';
 
 }
