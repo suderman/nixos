@@ -13,7 +13,7 @@
 # export DEV_NIX=/dev/sdc 
 # export LONGVIEW_KEY=01234567-89AB-CDEF-0123456789ABCDEF
 #
-# curl -L https://github.com/suderman/nixos/blob/main/system/hosts/bootstrap.sh | sh
+# curl -L https://github.com/suderman/nixos/raw/main/system/hosts/bootstrap.sh | sh
 
 
 # DEV_NIX=/dev/nvme0n1p3 or DEV_SWAP=/dev/sdc
@@ -75,7 +75,7 @@ btrfs subvolume create /mnt/nix/state/var/log
 # Add Longview API key if provided
 if [ ! -z "$LONGVIEW_KEY" ]; then
   mkdir -p /mnt/nix/state/var/lib/longview
-  echo $LONGVIEW_KEY > /var/lib/longview/apiKeyFile | sudo tee /var/lib/longview/apiKeyFile
+  echo $LONGVIEW_KEY > /mnt/nix/state/var/lib/longview/apiKeyFile | sudo tee /mnt/nix/state/var/lib/longview/apiKeyFile
 fi
 
 # Add agenix channel
