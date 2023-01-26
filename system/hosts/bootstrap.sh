@@ -75,7 +75,7 @@ btrfs subvolume create /mnt/nix/state/var/log
 # Add Longview API key if provided
 if [ ! -z "$LONGVIEW_KEY" ]; then
   mkdir -p /mnt/nix/state/var/lib/longview
-  echo $LONGVIEW_KEY > /mnt/nix/state/var/lib/longview/apiKeyFile | sudo tee /mnt/nix/state/var/lib/longview/apiKeyFile
+  echo $LONGVIEW_KEY > /mnt/nix/state/var/lib/longview/apiKeyFile
 fi
 
 # Add agenix channel
