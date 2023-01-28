@@ -2,19 +2,21 @@
 
 let
   cfg = config.services.tailscale;
+  inherit (config) secrets;
+  inherit (lib) mkIf;
 
 in {
 
   # services.tailscale.enable = true;
-  networking.firewall = lib.mkIf cfg.enable {
+  networking.firewall = mkIf cfg.enable {
     checkReversePath = "loose";
     allowedUDPPorts = [ 41641 ]; # Facilitate firewall punching
   };
 
   # If tailscale is enabled, provide convenient hostnames to each IP address
   # These records also exist in Cloudflare DNS, so it's a duplicated effort here.
-  services.dnsmasq.enable = lib.mkIf cfg.enable true;
-  services.dnsmasq.extraConfig = with config.networking; lib.mkIf cfg.enable ''
+  services.dnsmasq.enable = mkIf cfg.enable true;
+  services.dnsmasq.extraConfig = with config.networking; mkIf cfg.enable ''
     address=/.local.${domain}/127.0.0.1
     address=/.cog.${domain}/100.67.140.102
     address=/.lux.${domain}/100.103.189.54
@@ -25,14 +27,12 @@ in {
     DefaultTimeoutStopSec=30s
   '';
 
-  age.secrets = with config.secrets; {
+  age.secrets = with secrets; mkIf secrets.enable {
     tailscale-cloudflare = {
       file = tailscale-cloudflare;
       owner = "me";
       group = "users";
     };
   };
-
-  # environment.etc."tscf.env".source = config.age.secrets.tailscale-cloudflare.path;
 
 }

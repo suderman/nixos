@@ -1,9 +1,9 @@
 { config, lib, pkgs, ... }:
 
-with config.secrets;
-
 let
   cfg = config.services.traefik;
+  inherit (config) secrets;
+  inherit (lib) mkIf;
 
 in {
 
@@ -66,7 +66,7 @@ in {
 
       # Basic Authentication is available. User/passwords are encrypted by agenix.
       http.middlewares = {
-        basicauth.basicAuth.usersFile = config.age.secrets.basic-auth.path;
+        basicauth.basicAuth.usersFile = mkIf secrets.enable config.age.secrets.basic-auth.path;
       };
 
       # Traefik dashboard
@@ -94,23 +94,22 @@ in {
   };
 
   # Enable Docker and set to backend (over podman default)
-  virtualisation = lib.mkIf cfg.enable {
+  virtualisation = mkIf cfg.enable {
     docker.enable = true;
     oci-containers.backend = "docker";
   };
 
   # Open up the firewall for http and https
-  networking.firewall.allowedTCPPorts = lib.mkIf cfg.enable [ 80 443 ];
+  networking.firewall.allowedTCPPorts = mkIf cfg.enable [ 80 443 ];
 
   # Import the env file containing the CloudFlare token for cert renewal
-  # age.secrets.cloudflare-env.file = lib.mkIf cfg.enable config.secrets.cloudflare-env;
-  systemd.services.traefik = lib.mkIf cfg.enable {
-    serviceConfig.EnvironmentFile = config.age.secrets.cloudflare-env.path;
+  systemd.services.traefik = mkIf cfg.enable {
+    serviceConfig.EnvironmentFile = mkIf secrets.enable config.age.secrets.cloudflare-env.path;
   };
 
   # agenix
-  age.secrets = with config.secrets; {
-    cloudflare-env.file = cloudflare-env;
+  age.secrets = with secrets; mkIf secrets.enable {
+    cloudflare-env = { file = cloudflare-env; };
     basic-auth = { file = basic-auth; owner = "traefik"; };
   };
 

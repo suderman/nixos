@@ -2,8 +2,10 @@
   
 let 
   name = "whoami";
-  sub = "${name}";
-  cfg = config.services."${name}";
+  sub = "whoami";
+  cfg = config.services.whoami;
+  inherit (config) secrets;
+  inherit (lib) mkIf;
 
 in {
   options = {
@@ -11,7 +13,7 @@ in {
   };
 
   # services.whoami.enable = true;
-  config = with config.networking; lib.mkIf cfg.enable {
+  config = with config.networking; mkIf cfg.enable {
 
     virtualisation.oci-containers.containers."${name}" = {
       image = "traefik/whoami";
@@ -21,7 +23,7 @@ in {
         "--label=traefik.http.routers.${name}.tls.certresolver=resolver-dns"
         "--label=traefik.http.routers.${name}.middlewares=basicauth@file"
       ];
-      environmentFiles = [ config.age.secrets.self-env.path ];
+      environmentFiles = mkIf secrets.enable [ config.age.secrets.self-env.path ];
       environment = {
         JONNY = "super awesome";
         MYPORT = "$SELF_SMTP_PORT";
@@ -29,7 +31,7 @@ in {
     };
 
     # agenix
-    age.secrets = with config.secrets; {
+    age.secrets = with secrets; mkIf secrets.enable {
       self-env.file = self-env;
     };
 

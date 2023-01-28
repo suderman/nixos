@@ -41,6 +41,9 @@
     zsh.enable = true;
   };
 
+  # Enable secrets
+  secrets.enable = true;
+
   # home.file.".ssh/id_ed25519".source = "/nix/keys/id_ed25519";
 
 }

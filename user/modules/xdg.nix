@@ -1,5 +1,10 @@
-{ config, pkgs, ... }: 
-{
+{ config, pkgs, lib, ... }: 
+
+let
+  inherit (config) secrets xdg;
+  inherit (lib) mkIf;
+
+in {
   xdg.userDirs = {
     enable = true;
     createDirectories = false;
@@ -22,9 +27,9 @@
   # };
 
   # agenix
-  homeage.file = with config.secrets; {
+  homeage.file = with secrets; mkIf secrets.enable {
     super-secret.source = self-env;
-    super-secret.symlinks = [ "${config.xdg.configHome}/super-secret.txt" ];
+    super-secret.symlinks = [ "${xdg.configHome}/super-secret.txt" "${xdg.configHome}/super-duper-secret.txt" ];
   };
 
 }

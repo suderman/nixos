@@ -1,7 +1,6 @@
 { inputs, config, lib, pkgs, ... }: {
 
-  imports = [ 
-    ../. 
+  imports = [ ../. 
     ./hardware-configuration.nix 
     inputs.hardware.nixosModules.framework 
   ];
@@ -19,6 +18,9 @@
     # options = [ "compress=zstd" "noatime" "space_cache=v2" "discard=async" "subvol=nix" ];
     neededForBoot = true; 
   };
+
+  # Enable secrets
+  secrets.enable = true;
 
   desktops.gnome.enable = true;
 

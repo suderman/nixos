@@ -3,6 +3,8 @@
 let 
   cfg = config.services.ocis;
   name = "ocis";
+  inherit (config) secrets;
+  inherit (lib) mkIf;
 
 in {
   options = {
@@ -32,7 +34,7 @@ in {
         # NOTIFICATIONS_SMTP_SENDER: ${SELF_SMTP_NAME}
         # NOTIFICATIONS_SMTP_PASSWORD: ${SELF_SMTP_PASSWORD}
       };
-      environmentFiles = [ config.age.secrets.self-env.path ];
+      environmentFiles = mkIf secrets.enable [ config.age.secrets.self-env.path ];
       ports = [ "9200:9200" ]; #server locahost : docker localhost
       volumes = [
         "my_config:/etc/ocis"
@@ -52,6 +54,11 @@ in {
       script = with pkgs; ''
         ${docker}/bin/docker ps | grep ocis
       '';
+    };
+
+    # agenix
+    age.secrets = with secrets; mkIf secrets.enable {
+      self-env.file = self-env;
     };
 
   }; 

@@ -1,8 +1,7 @@
 { inputs, config, lib, pkgs, ... }: {
 
-  imports = [ 
-    ../. 
-    ../linode.nix
+  imports = [ ../. 
+    ../shared/linode.nix
   ];
 
   # root is tmpfs
