@@ -1,14 +1,23 @@
 { config, lib, pkgs, ... }: {
 
   # ---------------------------------------------------------------------------
-  # COMMON CONFIGURATION FOR ALL NIXOS HOSTS
+  # Common Configuration for all NixOS hosts
   # ---------------------------------------------------------------------------
-  imports = [ ../. 
-    ./shared/network.nix 
-    ./shared/nix.nix 
-    ./shared/packages.nix 
-    ./shared/sudo.nix 
-    ./shared/users.nix 
+  imports = [ 
+    
+    # System modules
+    ../../../modules/system 
+
+    # Secrets and keys
+    ../../../secrets 
+
+    # Shared configuration
+    ./network.nix 
+    ./nix.nix 
+    ./packages.nix 
+    ./sudo.nix 
+    ./users.nix 
+
   ];
 
   # Set your time zone.
@@ -20,6 +29,6 @@
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "22.05"; # Did you read the comment?
+  system.stateVersion = "22.11"; # Did you read the comment?
 
 }

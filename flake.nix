@@ -65,11 +65,11 @@
         pkgs = mkPkgs system;
         specialArgs = args // { inherit inputs outputs user host domain; };
         modules = [ 
-          ./system/hosts/${host}/configuration.nix 
+          ./hosts/${host}/configuration.nix 
           inputs.home-manager.nixosModules.home-manager { home-manager = {
             useGlobalPkgs = true; useUserPackages = true;
             extraSpecialArgs = { inherit inputs outputs user; };
-            users."${user}" = import ./user/hosts/${host}/home.nix;
+            users."${user}" = import ./hosts/${host}/home.nix;
           }; } 
         ];
 
@@ -79,7 +79,7 @@
       mkUser = args@{ system ? "x86_64-linux", user? "me", host, ... }: inputs.home-manager.lib.homeManagerConfiguration rec {
         pkgs = mkPkgs system;
         extraSpecialArgs = args // { inherit inputs outputs user; };
-        modules = [ ./user/hosts/${host}/home.nix ];
+        modules = [ ./hosts/${host}/home.nix ];
       };
 
     in {

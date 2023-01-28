@@ -10,7 +10,7 @@
   config.secrets = {
 
     # Host should have to opt into secrets
-    enable  = false; 
+    enable = false; 
 
     # Each encrypted file in this directory
     alphanumeric-secret  = ./alphanumeric-secret.age;

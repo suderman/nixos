@@ -1,14 +1,17 @@
 { inputs, config, lib, pkgs, ... }: {
 
-  imports = [ ../. 
+  imports = [ 
     ./hardware-configuration.nix 
-    inputs.hardware.nixosModules.framework 
+    ../shared/system 
   ];
+
+  # Enable linode config
+  linode.enable = true;
 
   # root is tmpfs
   fileSystems."/" = { 
     # device = "none"; fsType = "tmpfs";
-    options = [ "size=8G" "mode=755" ]; # limit to 8GB and only writable by root
+    options = [ "size=2G" "mode=755" ]; # limit to 2GB and only writable by root
   };
 
   # /nix is btrfs
@@ -19,32 +22,28 @@
     neededForBoot = true; 
   };
 
-  # Enable secrets
-  secrets.enable = true;
-
-  desktops.gnome.enable = true;
+  # desktops.gnome.enable = true;
 
   services.tailscale.enable = true;
   services.openssh.enable = true;
   programs.mosh.enable = true;
 
-  services.keyd.enable = true;
-  services.ydotool.enable = true;
+  # services.keyd.enable = true;
   
-  services.traefik.enable = true;
-  # services.whoogle.enable = true;
-  services.whoami.enable = true;
+  # services.traefik.enable = true;
+  # # services.whoogle.enable = true;
+  # services.whoami.enable = true;
 
   programs.neovim.enable = true;
 
-  # Flatpak
-  services.flatpak.enable = true;
-
-  # SabNZBd
-  services.sabnzbd.enable = true;
-
-  # https://search.nixos.org/options?show=services.tandoor-recipes.enable&query=services.tandoor-recipes
-  services.tandoor-recipes.enable = true;
+  # # Flatpak
+  # services.flatpak.enable = true;
+  #
+  # # SabNZBd
+  # services.sabnzbd.enable = true;
+  #
+  # # https://search.nixos.org/options?show=services.tandoor-recipes.enable&query=services.tandoor-recipes
+  # services.tandoor-recipes.enable = true;
 
   # https://search.nixos.org/options?show=services.gitea.enable&query=services.gitea
   # services.gitea.enable = true;
@@ -57,10 +56,10 @@
   boot.kernelPackages = pkgs.linuxPackages_latest;
   services.fprintd.enable = true;
 
-  # Steam
-  programs.steam.enable = false;
-
-  services.mysql.enable = true;
+  # # Steam
+  # programs.steam.enable = false;
+  #
+  # services.mysql.enable = true;
   # services.postgresql.enable = true;
 
   # programs._1password.enable = true;
@@ -72,11 +71,5 @@
 
   # Other
   # programs.nix-ld.enable = true;
-
-  networking.extraHosts =
-  ''
-    # 174.138.112.193 redarrow.ca www.redarrow.ca
-    # 174.138.112.193 myebus.ca www.myebus.ca
-  '';
 
 }

@@ -2,8 +2,11 @@
 
   imports = [ 
     ./hardware-configuration.nix 
-    ../shared/linode.nix
+    ../shared/system 
   ];
+
+  # Enable linode config
+  linode.enable = true;
 
   # Configure GRUB
   boot.loader.grub.enable = true;
@@ -19,5 +22,4 @@
   programs.neovim.enable = true;
   programs.mosh.enable = true;
 
-  system.stateVersion = "22.11";
 }
