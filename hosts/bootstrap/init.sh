@@ -76,10 +76,11 @@ btrfs subvolume create /mnt/nix/state/var/log
 # Add Longview API key if provided
 if [ ! -z "$LONGVIEW_KEY" ]; then
   mkdir -p /mnt/nix/state/var/lib/longview
-  echo $LONGVIEW_KEY > /var/lib/longview/apiKeyFile
+  echo $LONGVIEW_KEY > /mnt/nix/state/var/lib/longview/apiKeyFile
 fi
 
 # Clone git repo into persistant directory
+nix-env -iA nixos.git
 git clone https://github.com/suderman/nixos /mnt/nix/state/etc/nixos 
 
 # # Generate config and copy hardware-configuration.nix to /mnt/nix/state/etc/nixos/nixos/hosts/sol/hardware-configuration.nix
