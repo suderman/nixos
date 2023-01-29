@@ -65,8 +65,8 @@ Finally, run the nixos installer.
 
 ```zsh
 
-# Generate config and copy hardware-configuration.nix to /mnt/nix/state/etc/nixos/nixos/hosts/sol/hardware-configuration.nix
-nixos-generate-config --root /mnt --dir /mnt/nix/state/etc/nixos/system/hosts/bootstrap
+# Generate config and copy hardware-configuration.nix to /mnt/nix/state/etc/nixos/hosts/bootstrap/hardware-configuration.nix
+nixos-generate-config --root /mnt --dir /mnt/nix/state/etc/nixos/hosts/bootstrap
 
 # Run nixos installer
 nixos-install --flake /mnt/nix/state/etc/nixos#bootstrap

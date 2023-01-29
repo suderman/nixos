@@ -87,6 +87,9 @@
       # System configurations on NixOS
       nixosConfigurations = {
 
+        # Bootstrap
+        bootstrap = mkSystem { host = "bootstrap"; };
+
         # Framework Laptop
         cog = mkSystem { host = "cog"; domain = "suderman.org"; };
 
