@@ -78,24 +78,11 @@ if [ ! -z "$LONGVIEW_KEY" ]; then
   echo $LONGVIEW_KEY > /var/lib/longview/apiKeyFile | sudo tee /var/lib/longview/apiKeyFile
 fi
 
-# Add agenix channel
-nix-channel --add https://github.com/ryantm/agenix/archive/main.tar.gz agenix
-nix-channel --update
-
-# Update installer's configuration to include agenix module and other packages
-echo "{ config, pkgs, ... }: { " > /etc/nixos/configuration.nix 
-echo "  imports = [ <nixpkgs/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix> <agenix/modules/age.nix> ];" >> /etc/nixos/configuration.nix 
-echo "  environment.systemPackages = [ pkgs.git pkgs.magic-wormhole-rs (pkgs.callPackage <agenix/pkgs/agenix.nix> {}) ];" >> /etc/nixos/configuration.nix 
-echo "}" >> /etc/nixos/configuration.nix 
-
-# Enable new configuration
-nixos-rebuild switch
-
 # Clone git repo into persistant directory
 git clone https://github.com/suderman/nixos /mnt/nix/state/etc/nixos 
 
 # # Generate config and copy hardware-configuration.nix to /mnt/nix/state/etc/nixos/nixos/hosts/sol/hardware-configuration.nix
-# nixos-generate-config --root /mnt --dir /mnt/nix/state/etc/nixos/scratch
+nixos-generate-config --root /mnt --dir /mnt/nix/state/etc/nixos/hosts/bootstrap
 #
 # # Run nixos installer
-# nixos-install --flake /mnt/nix/state/etc/nixos#sol
+# nixos-install --flake /mnt/nix/state/etc/nixos#bootstrap

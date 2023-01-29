@@ -17,8 +17,8 @@
     enable = true;
     permitRootLogin = "yes";
   };
-
   services.keyd.enable = true;
+
   programs.neovim.enable = true;
   programs.mosh.enable = true;
 
