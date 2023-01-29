@@ -49,8 +49,9 @@ fi
 
 # Mount root as temporary file system on /mnt
 mkdir -p /mnt
-[ -z "$TMPFS_SIZE" ] && TMPFS_SIZE=1024m
-mount -t tmpfs -o size=$TMPFS_SIZE,mode=755 none /mnt
+# [ -z "$TMPFS_SIZE" ] && TMPFS_SIZE=1024m
+# mount -t tmpfs -o size=$TMPFS_SIZE,mode=755 none /mnt
+mount -t tmpfs none /mnt
 
 # Prepare mount point
 mkdir -p /mnt/nix
@@ -75,7 +76,7 @@ btrfs subvolume create /mnt/nix/state/var/log
 # Add Longview API key if provided
 if [ ! -z "$LONGVIEW_KEY" ]; then
   mkdir -p /mnt/nix/state/var/lib/longview
-  echo $LONGVIEW_KEY > /var/lib/longview/apiKeyFile | sudo tee /var/lib/longview/apiKeyFile
+  echo $LONGVIEW_KEY > /var/lib/longview/apiKeyFile
 fi
 
 # Clone git repo into persistant directory

@@ -15,7 +15,7 @@
   # Configure the SSH daemon
   services.openssh = {
     enable = true;
-    permitRootLogin = "yes";
+    # permitRootLogin = "yes";
   };
   services.keyd.enable = true;
 
