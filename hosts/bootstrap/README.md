@@ -52,11 +52,13 @@ export EDITOR=vim
 lsblk -f
 
 # When setting up a linode VPS:
-export DEV_SWAP=/dev/sdb 
-export DEV_NIX=/dev/sdc 
-export TMPFS_SIZE=1024m
-export LONGVIEW_KEY=<https://cloud.linode.com/longview>
-curl -L https://github.com/suderman/nixos/raw/main/hosts/bootstrap/init.sh | sh
+# export DEV_SWAP=/dev/sdb 
+# export DEV_NIX=/dev/sdc 
+# export TMPFS_SIZE=1024m
+# export LONGVIEW_KEY=<https://cloud.linode.com/longview>
+# curl -L https://github.com/suderman/nixos/raw/main/hosts/bootstrap/init.sh | sh
+
+bash <(curl -sL https://github.com/suderman/nixos/raw/main/hosts/bootstrap/install.sh)
 ```
 
 ## Install NixOS
