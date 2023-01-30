@@ -56,7 +56,7 @@ export DEV_SWAP=/dev/sdb
 export DEV_NIX=/dev/sdc 
 export TMPFS_SIZE=1024m
 export LONGVIEW_KEY=<https://cloud.linode.com/longview>
-curl -L https://github.com/suderman/nixos/blob/main/system/hosts/bootstrap.sh | sh
+curl -L https://github.com/suderman/nixos/raw/main/hosts/bootstrap/init.sh | sh
 ```
 
 ## Install NixOS
