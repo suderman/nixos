@@ -96,7 +96,7 @@ function install {
   if [ "$ROOT_FS" = "ext4" ]; then
 
     msg "Formating $ROOT_DEV as $ROOT_FS for the root partition"
-    cmd "mkfs.ext4 -L root $ROOT_DEV"
+    cmd "mkfs.ext4 -F -L root $ROOT_DEV"
     mkfs.ext4 -L root $ROOT_DEV
     echo
 
@@ -202,7 +202,7 @@ function install {
   fi
 
   # Ensure git is installed
-  command -v git >/dev/null 2>&1 || ( cmd "nix-env -iA nixos.git" && nix-env -iA nixos.git echo )
+  command -v git >/dev/null 2>&1 || ( cmd "nix-env -iA nixos.git" && nix-env -iA nixos.git && echo )
 
   # Clone git repo into persistant directory
   msg "Cloning nixos git repo"
