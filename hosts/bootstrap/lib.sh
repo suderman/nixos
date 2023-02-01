@@ -20,14 +20,14 @@ export MSG_PROMPT="$_green_=> $_reset_"
 msg() { printf "$MSG_PROMPT$MSG_COLOR$1$_reset_\n"; }
 
 # Color functions
-black()  { echo "$_black_$1$MSG_COLOR"; }
-red()    { echo "$_red_$1$MSG_COLOR"; }
-green()  { echo "$_green_$1$MSG_COLOR"; }
-yellow() { echo "$_yellow_$1$MSG_COLOR"; }
-blue()   { echo "$_blue_$1$MSG_COLOR"; }
-purple() { echo "$_purple_$1$MSG_COLOR"; }
-cyan()   { echo "$_cyan_$1$MSG_COLOR"; }
-white()  { echo "$_white_$1$MSG_COLOR"; }
+black()  { printf "$_black_$1$MSG_COLOR"; }
+red()    { printf "$_red_$1$MSG_COLOR"; }
+green()  { printf "$_green_$1$MSG_COLOR"; }
+yellow() { printf "$_yellow_$1$MSG_COLOR"; }
+blue()   { printf "$_blue_$1$MSG_COLOR"; }
+purple() { printf "$_purple_$1$MSG_COLOR"; }
+cyan()   { printf "$_cyan_$1$MSG_COLOR"; }
+white()  { printf "$_white_$1$MSG_COLOR"; }
 
 # If $answer is "y", then we don't bother with user input
 ask() { 
@@ -39,6 +39,10 @@ ask() {
   if [ ! $? -ne 0 ]; then return 0; else return 1; fi
 }
 
+function pad {
+  local padding=$1
+  printf "%-${padding}s%s" "$2"
+}
 
 # https://github.com/the0neWhoKnocks/shell-menu-select
 CHAR__GREEN='\033[0;32m'
