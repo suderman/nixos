@@ -41,5 +41,6 @@ curl -L $iso | tee >(dd of=/dev/sdb) | sha256sum
 After the installer disk is created, boot the node with the installer profile. Then launch a console:
 
 ```zsh
-sudo bash <(curl -sL https://github.com/suderman/nixos/raw/main/hosts/bootstrap/install.sh)
+sudo -s
+bash <(curl -sL https://github.com/suderman/nixos/raw/main/hosts/bootstrap/install.sh)
 ```
