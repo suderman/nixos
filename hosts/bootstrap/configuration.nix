@@ -8,16 +8,16 @@
   # Enable linode config
   linode.enable = true;
 
-  # root is tmpfs
-  fileSystems."/" = { 
-    options = [ "mode=755" ];
-  };
-
-  # /nix is btrfs
-  fileSystems."/nix" = { 
-    options = [ "compress-force=zstd" "noatime" ];
-    neededForBoot = true; 
-  };
+  # # root is tmpfs
+  # fileSystems."/" = { 
+  #   options = [ "mode=755" ];
+  # };
+  #
+  # # /nix is btrfs
+  # fileSystems."/nix" = { 
+  #   options = [ "compress-force=zstd" "noatime" ];
+  #   neededForBoot = true; 
+  # };
 
   # Configure GRUB
   # boot.loader.grub.enable = true;

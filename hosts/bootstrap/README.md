@@ -2,7 +2,7 @@
 
 ## Prepare Storage and Configuration Profiles
 
-Prepare disks under Storage tab:
+Prepare disks under the Storage tab:
 
 | Label  | Type    | Size  | Device   |
 | ------ | ------- | ----- | -------- |
@@ -12,18 +12,18 @@ Prepare disks under Storage tab:
 | nix    | raw     | -     | /dev/sdd |
 
 
-Prepare two configurations under Configurations tab:
+Prepare two configurations under the Configurations tab:
 
 | Label     | Kernel      | /dev/sda | /dev/sdb | /dev/sdc | /dev/sdd | Root Device |
 | --------- | ----------- | -------- | -------- | -------- | -------- | ----------- |
 | installer | Direct Disk | root     | iso      | swap     | nix      | /dev/sdb    |
 | nixos     | GRUB 2      | root     | -        | swap     | nix      | /dev/sda    |
 
-Disable all Filesystem/Boot Helpers at the bottom.
+*Disable all Filesystem/Boot Helpers at the bottom!*
 
 ## Create NixOS installer
 
-Boot node into Rescue Mode with iso mounted at /dev/sdb. Then launch a console:
+Boot node into Rescue Mode with `iso` mounted at `/dev/sdb`. Then launch a console:
 
 ```zsh
 # Update SSL certificates to allow HTTPS connections:
@@ -38,7 +38,8 @@ curl -L $iso | tee >(dd of=/dev/sdb) | sha256sum
 
 ## Install NixOS
 
-After the installer disk is created, boot the node with the installer profile. Then launch a console:
+After the installer disk is created, boot the node with the `installer` profile. 
+Then launch a console to install NixOS:
 
 ```zsh
 sudo -s

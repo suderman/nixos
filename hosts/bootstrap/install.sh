@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 # Install script
-# sudo bash <(curl -sL https://github.com/suderman/nixos/raw/main/hosts/bootstrap/install.sh)
+# sudo -s
+# bash <(curl -sL https://github.com/suderman/nixos/raw/main/hosts/bootstrap/install.sh)
 function install {
 
   if [ "$(id -u)" != "0" ]; then
@@ -11,7 +12,7 @@ function install {
 
   # Banner
   yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ \n"
-  yellow "┃           Jon's NixOS Installer           ┃ \n"
+  yellow "┃        Suderman's NixOS Installer         ┃ \n"
   yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ \n"
 
   # Double check we wanna do this
@@ -201,12 +202,17 @@ function install {
   fi
 
   # Ensure git is installed
-  command -v git >/dev/null 2>&1 || ( cmd "nix-env -iA nixos.git" && nix-env -iA nixos.git )
+  command -v git >/dev/null 2>&1 || ( cmd "nix-env -iA nixos.git" && nix-env -iA nixos.git echo )
 
   # Clone git repo into persistant directory
   msg "Cloning nixos git repo"
-  cmd "git clone https://github.com/suderman/nixos $NIX_MNT/state/etc/nixos"
-  git clone https://github.com/suderman/nixos $NIX_MNT/state/etc/nixos 
+  if [ -d $NIX_MNT/state/etc/nixos ]; then
+    cmd "cd $NIX_MNT/state/etc/nixos && git pull"
+    cd $NIX_MNT/state/etc/nixos && git pull
+  else
+    cmd "git clone https://github.com/suderman/nixos $NIX_MNT/state/etc/nixos"
+    git clone https://github.com/suderman/nixos $NIX_MNT/state/etc/nixos 
+  fi
   echo
 
   # Generate config and copy hardware-configuration.nix
