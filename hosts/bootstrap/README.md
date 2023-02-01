@@ -2,8 +2,6 @@
 
 ## Prepare Storage and Configuration Profiles
 
-<https://nixos.org/download.html>
-
 Prepare disks under Storage tab:
 
 | Label  | Type    | Size  | Device   |
@@ -31,7 +29,7 @@ Boot node into Rescue Mode with iso mounted at /dev/sdb. Then launch a console:
 # Update SSL certificates to allow HTTPS connections:
 update-ca-certificates
 
-# set the iso url to a variable
+# https://nixos.org/download.html
 iso=https://channels.nixos.org/nixos-22.11/latest-nixos-minimal-x86_64-linux.iso
 
 # Download the ISO, write it to the installer disk, and verify the checksum:
