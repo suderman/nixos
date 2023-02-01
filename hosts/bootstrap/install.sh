@@ -217,9 +217,9 @@ function install {
   
   # Run nixos installer
   msg "Installing NixOS in 5 seconds..."
-  cmd "nixos-install --flake $NIX_MNT/state/etc/nixos\#bootstrap"
+  cmd "nixos-install --flake $NIX_MNT/state/etc/nixos\#bootstrap --no-root-password"
   sleep 5
-  nixos-install --flake $NIX_MNT/state/etc/nixos\#bootstrap
+  nixos-install --flake $NIX_MNT/state/etc/nixos\#bootstrap --no-root-password
   echo
 
   msg "...install is complete. \nReboot without installer media and check if it actually worked. ;-)"
