@@ -73,7 +73,14 @@ green  "┃ Nix  ┃ $_D1_____ ┃ $_D2_ ┃ $_D3__________ ┃ \n"
 green  "┗━━━━━━┻━━━━━━━━━━━┻━━━━━━━┻━━━━━━━━━━━━━━━━┛ \n"
 echo
 
-ask "Proceed to format and prepare partitions for install?"
+if [ "$NIX_DEV" = "-" ]; then
+  msg "Exiting, no NIX device selected"
+  exit
+fi
+
+if ! ask "Proceed to format and prepare partitions for install?"; then
+  exit
+fi
 
 # Prepare root mount point
 mkdir -p $ROOT_MNT
