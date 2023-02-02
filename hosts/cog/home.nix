@@ -39,6 +39,7 @@
     wezterm.enable = true;
     kitty.enable = true;
     zsh.enable = true;
+    dconf.enable = true;
   };
 
   # Enable secrets
