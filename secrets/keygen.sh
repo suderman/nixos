@@ -11,10 +11,10 @@ function keygen {
   if [ ! -z "$1" ]; then
     if [ -e $dir/secrets/keys/$1.pub ]; then
       if ask "Overwrite existing \"$1\" key?"; then
-        ssh_keygen $1
+        add_host $1
       fi
     else
-      ssh_keygen $1
+      add_host $1
     fi
   fi
 
@@ -33,21 +33,25 @@ function keygen {
 
 
 # Generate new ssh host key
-function ssh_keygen {
+function add_host {
 
   msg "Generating ssh host key \"root@$1\" at $dir/keys"
 
+  # Enter keys directory
+  cmd "mkdir -p $dir/keys && cd $dir/keys"
+  mkdir -p $dir/keys && cd $dir/keys
+
   # Clear out any existing keys
-  cmd "rm -f $dir/keys/ssh_host_ed25519_key*"
-  rm -f $dir/keys/ssh_host_ed25519_key*
+  cmd "rm -f ssh_host_ed25519_key*"
+  rm -f ssh_host_ed25519_key*
 
   # Generate a new host key
-  cmd "$dir/keys && ssh-keygen -q -N \"\" -C \"root@$1\" -t ed25519 -f ssh_host_ed25519_key"
-  cd $dir/keys && ssh-keygen -q -N "" -C "root@$1" -t ed25519 -f ssh_host_ed25519_key
+  cmd "ssh-keygen -q -N \"\" -C \"root@$1\" -t ed25519 -f ssh_host_ed25519_key"
+  ssh-keygen -q -N "" -C "root@$1" -t ed25519 -f ssh_host_ed25519_key
 
   # Copy the public key to the secrets directory
-  cmd "cp -f $dir/keys/ssh_host_ed25519_key.pub $dir/secrets/keys/$1.pub"
-  cp -f $dir/keys/ssh_host_ed25519_key.pub $dir/secrets/keys/$1.pub
+  cmd "cp -f ssh_host_ed25519_key.pub ../secrets/keys/$1.pub"
+  cp -f ssh_host_ed25519_key.pub ../secrets/keys/$1.pub
 
   echo
 
@@ -106,8 +110,8 @@ function rekey_secrets {
   echo
 
   msg "Staging secrets directory on git"
-  cmd "git add $dir/secrets"
-  git add $dir/secrets
+  cmd "git add ."
+  git add .
   echo
 
 }
