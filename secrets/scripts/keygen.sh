@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
-dir="/etc/nixos"
+
+# This script's directory
+scripts="$(dirname $(readlink -f $0))"
+
+# This repo's directory
+dir="$(dirname $(readlink -f $scripts/..))"
 
 # Main function
 # First agument is name of host for whom to generate ssh key.
@@ -7,8 +12,14 @@ dir="/etc/nixos"
 # No arguments will skip those two steps, but will still agenix rekey for existing hosts.
 function keygen {
 
+  # If no argument passed, show usage and exit
+  if [ -z "$1" ]; then
+    [ -z "$cmd" ] && cmd="$0"
+    echo "Usage: $cmd HOSTNAME [IP ADDRESS]"
+    return
+
   # If an argument was passed, generate a new host key with this name
-  if [ ! -z "$1" ]; then
+  else
     if [ -e $dir/secrets/keys/$1.pub ]; then
       if ask "Overwrite existing \"$1\" key?"; then
         add_host $1
