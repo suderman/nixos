@@ -97,16 +97,11 @@ function rekey_secrets {
   # Rekey and add any new secrets
   msg "Rekeying secrets with agenix"
 
+  cmd "cd $dir/secrets && agenix --rekey"
+  cd $dir/secrets && agenix --rekey
+  echo
+
   msg "Staging secrets directory on git"
-  cmd "git add $dir/secrets"
-  git add $dir/secrets
-  echo
-
-  cmd "RULES=$dir/secrets/secrets.nix agenix --rekey"
-  RULES=$dir/secrets/secrets.nix agenix --rekey
-  echo
-
-  msg "Staging secrets directory on git, again"
   cmd "git add $dir/secrets"
   git add $dir/secrets
   echo
