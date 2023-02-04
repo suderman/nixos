@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 dir="/etc/nixos"
 
+# Main function
+# First agument is name of host name to generate ssh key for
+# Second argmument is IP address to send this private key to
+# No arguments will skip those step, but still agenix rekey with existing keys
 function keygen {
 
   # If an argument was passed, generate a new host key with this name
