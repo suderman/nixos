@@ -178,7 +178,8 @@ in {
       leftcontrol = layer(meta)
       leftmeta = layer(alt)
       # leftalt = overload(control_cmd, macro(leftmeta))
-      leftalt = overload(control_cmd, esc)
+      # leftalt = overload(control_cmd, esc)
+      leftalt = layer(control_cmd)
       rightalt = layer(meta)
       f12 = toggle(main_meta)
 

@@ -1,4 +1,5 @@
-let keys = import ./keys.nix; in {
+# let keys = import ./keys.nix; in {
+let keys = import ./keys; in {
 
   # ---------------------------------------------------------------------------
   # How to manage secrets
