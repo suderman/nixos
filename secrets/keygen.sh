@@ -2,9 +2,9 @@
 dir="/etc/nixos"
 
 # Main function
-# First agument is name of host name to generate ssh key for
-# Second argmument is IP address to send this private key to
-# No arguments will skip those step, but still agenix rekey with existing keys
+# First agument is name of host for whom to generate ssh key.
+# Second argmument is IP address for whome to send this private key.
+# No arguments will skip those two steps, but will still agenix rekey for existing hosts.
 function keygen {
 
   # If an argument was passed, generate a new host key with this name
