@@ -2,7 +2,6 @@
 
   # Public keys
   options.keys = mkOption { type = types.attrs; };
-  # config.keys = import ./keys.nix;
   config.keys = import ./keys;
 
   
