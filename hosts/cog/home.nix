@@ -29,6 +29,7 @@
     unstable.sl
     xorg.xeyes
     yo
+    # keygen
   ];
 
   programs = {

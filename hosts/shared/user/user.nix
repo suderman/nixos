@@ -36,6 +36,7 @@
     type-clipboard = ''
       sh -c 'sudo sleep 5.0; sudo ydotool type -- "$(wl-paste)"'
     '';
+    nixos-keygen = "/etc/nixos/secrets/keygen.sh";
   };
 
 }
