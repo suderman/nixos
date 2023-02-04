@@ -8,9 +8,6 @@
 # rebuild the whole system with nixos-rebuild
 sudo nixos-rebuild switch
 
-# rebuild the home directory with home-manager
-home-manager switch --extra-experimental-features 'nix-command flakes' --flake .#$(hostname)
-
 # update
 nix flake update
 ```
