@@ -37,9 +37,9 @@
       sh -c 'sudo sleep 5.0; sudo ydotool type -- "$(wl-paste)"'
     '';
 
-    nixos-keygen = "cmd=nixos-keygen /etc/nixos/secrets/scripts/keygen.sh";
-    nixos-rekey  = "cmd=nixos-rekey  /etc/nixos/secrets/scripts/rekey.sh";
-    nixos-secret = "cmd=nixos-secret /etc/nixos/secrets/scripts/secret.sh";
+    secrets-keyscan = "/etc/nixos/secrets/bin/secrets-keyscan";
+    secrets-rekey = "/etc/nixos/secrets/bin/secrets-rekey";
+    secrets-set = "/etc/nixos/secrets/bin/secrets-set";
 
   };
 

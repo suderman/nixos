@@ -22,7 +22,7 @@ in {
       shell = pkgs.zsh;
       passwordFile = mkIf (secrets.enable) config.age.secrets.password.path;
       password = mkIf (!secrets.enable) "${user}";
-      openssh.authorizedKeys.keys = [ config.keys."${user}" ];
+      openssh.authorizedKeys.keys = [ config.keys.users."${user}" ];
     };
 
     # personal user
@@ -42,7 +42,7 @@ in {
         "keyd" 
         "uinput" 
       ]; 
-      openssh.authorizedKeys.keys = [ config.keys."${user}" ];
+      openssh.authorizedKeys.keys = [ config.keys.users."${user}" ];
     };
 
     # test user
@@ -62,7 +62,7 @@ in {
         "keyd" 
         "uinput" 
       ]; 
-      openssh.authorizedKeys.keys = [ config.keys."${user}" ];
+      openssh.authorizedKeys.keys = [ config.keys.users."${user}" ];
     };
 
   };
