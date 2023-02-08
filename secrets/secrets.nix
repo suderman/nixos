@@ -63,4 +63,6 @@ let keys = import ./pub; in {
   # ts-tailnet=example.github
   "age/tailscale-cloudflare.age".publicKeys = keys.all;
 
+  "age/token.age".publicKeys = keys.all;
+
 }

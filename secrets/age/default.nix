@@ -9,6 +9,7 @@
   password = ./password.age;
   self-env = ./self-env.age;
   tailscale-cloudflare = ./tailscale-cloudflare.age;
+  token = ./token.age;
 
   # Host should have to opt into secrets
   enable = false;
