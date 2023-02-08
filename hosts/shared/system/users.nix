@@ -4,8 +4,16 @@ with builtins;
 
 let
   ifTheyExist = groups: filter (group: hasAttr group config.users.groups) groups;
-  inherit (config) secrets;
   inherit (lib) mkIf;
+
+  # public keys from the secrets dir
+  keys = config.secrets.keys;
+
+  # agenix secrets combined with age files paths
+  age = config.age // { 
+    files = config.secrets.files; 
+    enable = config.secrets.enable; 
+  };
 
 in {
 
@@ -20,9 +28,9 @@ in {
     # root user
     users.root = {
       shell = pkgs.zsh;
-      passwordFile = mkIf (secrets.enable) config.age.secrets.password.path;
-      password = mkIf (!secrets.enable) "${user}";
-      openssh.authorizedKeys.keys = [ config.keys.users."${user}" ];
+      passwordFile = mkIf (age.enable) age.secrets.password.path;
+      password = mkIf (!age.enable) "${user}";
+      openssh.authorizedKeys.keys = [ keys.users."${user}" ];
     };
 
     # personal user
@@ -31,8 +39,8 @@ in {
       shell = pkgs.zsh;
       home = "/home/${user}";
       description = user;
-      passwordFile = mkIf (secrets.enable) config.age.secrets.password.path;
-      password = mkIf (!secrets.enable) "${user}";
+      passwordFile = mkIf (age.enable) age.secrets.password.path;
+      password = mkIf (!age.enable) "${user}";
       extraGroups = [ 
         "wheel" 
       ] ++ ifTheyExist [
@@ -42,7 +50,7 @@ in {
         "keyd" 
         "uinput" 
       ]; 
-      openssh.authorizedKeys.keys = [ config.keys.users."${user}" ];
+      openssh.authorizedKeys.keys = [ keys.users."${user}" ];
     };
 
     # test user
@@ -51,8 +59,8 @@ in {
       shell = pkgs.zsh;
       home = "/home/test";
       description = "test";
-      passwordFile = mkIf (secrets.enable) config.age.secrets.password.path;
-      password = mkIf (!secrets.enable) "test";
+      passwordFile = mkIf (age.enable) age.secrets.password.path;
+      password = mkIf (!age.enable) "test";
       extraGroups = [ 
         "wheel" 
       ] ++ ifTheyExist [
@@ -62,14 +70,14 @@ in {
         "keyd" 
         "uinput" 
       ]; 
-      openssh.authorizedKeys.keys = [ config.keys.users."${user}" ];
+      openssh.authorizedKeys.keys = [ keys.users."${user}" ];
     };
 
   };
 
   # agenix
-  age.secrets = with secrets; mkIf secrets.enable {
-    password.file = password;
+  age.secrets = mkIf age.enable {
+    password.file = age.files.password;
   };
 
 

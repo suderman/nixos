@@ -2,8 +2,13 @@
 
 let
   cfg = config.services.traefik;
-  inherit (config) secrets;
   inherit (lib) mkIf;
+
+  # agenix secrets combined with age files paths
+  age = config.age // { 
+    files = config.secrets.files; 
+    enable = config.secrets.enable; 
+  };
 
 in {
 
@@ -66,7 +71,7 @@ in {
 
       # Basic Authentication is available. User/passwords are encrypted by agenix.
       http.middlewares = {
-        basicauth.basicAuth.usersFile = mkIf secrets.enable config.age.secrets.basic-auth.path;
+        basicauth.basicAuth.usersFile = mkIf age.enable age.secrets.basic-auth.path;
       };
 
       # Traefik dashboard
@@ -104,13 +109,13 @@ in {
 
   # Import the env file containing the CloudFlare token for cert renewal
   systemd.services.traefik = mkIf cfg.enable {
-    serviceConfig.EnvironmentFile = mkIf secrets.enable config.age.secrets.cloudflare-env.path;
+    serviceConfig.EnvironmentFile = mkIf age.enable age.secrets.cloudflare-env.path;
   };
 
   # agenix
-  age.secrets = with secrets; mkIf secrets.enable {
-    cloudflare-env = { file = cloudflare-env; };
-    basic-auth = { file = basic-auth; owner = "traefik"; };
+  age.secrets = mkIf age.enable {
+    cloudflare-env = { file = age.files.cloudflare-env; };
+    basic-auth = { file = age.files.basic-auth; owner = "traefik"; };
   };
 
 }

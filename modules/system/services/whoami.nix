@@ -4,8 +4,13 @@ let
   name = "whoami";
   sub = "whoami";
   cfg = config.services.whoami;
-  inherit (config) secrets;
   inherit (lib) mkIf;
+
+  # agenix secrets combined with age files paths
+  age = config.age // { 
+    files = config.secrets.files; 
+    enable = config.secrets.enable; 
+  };
 
 in {
   options = {
@@ -23,7 +28,7 @@ in {
         "--label=traefik.http.routers.${name}.tls.certresolver=resolver-dns"
         "--label=traefik.http.routers.${name}.middlewares=basicauth@file"
       ];
-      environmentFiles = mkIf secrets.enable [ config.age.secrets.self-env.path ];
+      environmentFiles = mkIf age.enable [ age.secrets.self-env.path ];
       environment = {
         JONNY = "super awesome";
         MYPORT = "$SELF_SMTP_PORT";
@@ -31,8 +36,8 @@ in {
     };
 
     # agenix
-    age.secrets = with secrets; mkIf secrets.enable {
-      self-env.file = self-env;
+    age.secrets = mkIf age.enable {
+      self-env.file = age.files.self-env;
     };
 
   }; 

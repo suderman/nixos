@@ -1,8 +1,14 @@
 { config, pkgs, lib, ... }: 
 
 let
-  inherit (config) secrets xdg;
+  inherit (config) xdg;
   inherit (lib) mkIf;
+
+  # homeage secrets combined with age files paths
+  homeage = config.homeage // { 
+    files = config.secrets.files; 
+    enable = config.secrets.enable; 
+  };
 
 in {
   xdg.userDirs = {
@@ -27,8 +33,8 @@ in {
   # };
 
   # agenix
-  homeage.file = with secrets; mkIf secrets.enable {
-    super-secret.source = self-env;
+  homeage.file = mkIf homeage.enable {
+    super-secret.source = homeage.files.self-env;
     super-secret.symlinks = [ "${xdg.configHome}/super-secret.txt" "${xdg.configHome}/super-duper-secret.txt" ];
   };
 

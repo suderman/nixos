@@ -37,9 +37,9 @@
       sh -c 'sudo sleep 5.0; sudo ydotool type -- "$(wl-paste)"'
     '';
 
-    secrets-keyscan = "/etc/nixos/secrets/bin/secrets-keyscan";
-    secrets-rekey = "/etc/nixos/secrets/bin/secrets-rekey";
-    secrets-set = "/etc/nixos/secrets/bin/secrets-set";
+    secrets-keyscan = "/etc/nixos/secrets/scripts/secrets-keyscan";
+    secrets-rekey = "/etc/nixos/secrets/scripts/secrets-rekey";
+    secrets = "/etc/nixos/secrets/scripts/secrets";
 
   };
 

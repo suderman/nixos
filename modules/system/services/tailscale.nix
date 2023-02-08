@@ -2,8 +2,13 @@
 
 let
   cfg = config.services.tailscale;
-  inherit (config) secrets;
   inherit (lib) mkIf;
+
+  # agenix secrets combined with age files paths
+  age = config.age // { 
+    files = config.secrets.files; 
+    enable = config.secrets.enable; 
+  };
 
 in {
 
@@ -27,9 +32,9 @@ in {
     DefaultTimeoutStopSec=30s
   '';
 
-  age.secrets = with secrets; mkIf secrets.enable {
+  age.secrets = mkIf age.enable {
     tailscale-cloudflare = {
-      file = tailscale-cloudflare;
+      file = age.files.tailscale-cloudflare;
       owner = "me";
       group = "users";
     };
