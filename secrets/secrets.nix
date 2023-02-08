@@ -1,4 +1,4 @@
-let keys = import ./keys; in {
+let keys = import ./pub; in {
 
   # ---------------------------------------------------------------------------
   # How to manage secrets
@@ -33,27 +33,27 @@ let keys = import ./keys; in {
   # Long secret with characters constrained to alphabet and digits
   # > tr -cd '[:alnum:]' < /dev/urandom | fold -w "64" | head -n 1 | tr -d '\n' ; echo
   # > agenix -e alphanumeric-secret.age
-  "alphanumeric-secret.age".publicKeys = keys.all;
+  "age/alphanumeric-secret.age".publicKeys = keys.all;
 
   # Basic Auth for traefik
   # > nix shell nixpkgs#apacheHttpd -c htpasswd -nb USERNAME PASSWORD
   # > USERNAME:$apr1$9GXtleUd$Bc0cNYaR42mIUvys6zJfB/
   # > agenix -e basic-auth.age
-  "basic-auth.age".publicKeys = keys.all;
+  "age/basic-auth.age".publicKeys = keys.all;
 
   # CloudFlare DNS API Token used by Traefik & Let's Encrypt
   # > agenix -e cloudflare-env.age
   # > CF_DNS_API_TOKEN=xxxxxx
-  "cloudflare-env.age".publicKeys = keys.all;
+  "age/cloudflare-env.age".publicKeys = keys.all;
 
   # .env for most of my self-hosted services 
   # > agenix -e self-env.age
-  "self-env.age".publicKeys = keys.all;
+  "age/self-env.age".publicKeys = keys.all;
 
   # Encrypted password for NixOS user account
   # > mkpasswd -m sha-512 mySecr3tpa$$w0rd!
   # > agenix -e password.age
-  "password.age".publicKeys = keys.all;
+  "age/password.age".publicKeys = keys.all;
 
   # .env for tailscale-cloudflare-dnssync
   # > agenix -e cloudflare-tailscale.age
@@ -61,6 +61,6 @@ let keys = import ./keys; in {
   # cf-domain=example.com
   # ts-key=<https://login.tailscale.com/admin/settings/keys>
   # ts-tailnet=example.github
-  "tailscale-cloudflare.age".publicKeys = keys.all;
+  "age/tailscale-cloudflare.age".publicKeys = keys.all;
 
 }
