@@ -15,12 +15,4 @@
 
   };
 
-  # # Public keys
-  # options.keys = mkOption { type = types.attrs; };
-  # config.keys = import ./keys;
-  #
-  # # Secret files
-  # options.secrets = mkOption { type = types.attrs; };
-  # config.secrets = import ./age;
-
 }
