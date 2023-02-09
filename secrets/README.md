@@ -30,7 +30,7 @@ process when using the `agenix` CLI alone:
 This script is a wrapper around `ssh-keyscan` which discovers SSH host public
 keys. When invoked, the host (or IP address) is asked to return an
 `ssh-ed25519` public key, which gets saved as `NAME.pub` in the `keys`
-directory. Lastly, the `secrets-rekey` script is run, which is explained next. 
+directory. Then, the `secrets-rekey` script is run, which is explained next. 
 
 ### `secrets-rekey [--force]`
 
@@ -57,7 +57,7 @@ and run the following command:
 
     secrets-keyscan 123.123.123.123 foo
 
-To add a user key named `bar`, manually add the user's public key as `bar.pub`
+To add a user key named `bar`, manually add the user's public key as `@bar.pub`
 to the `secrets/keys` directory. Then run the following command:
 
     secrets-rekey
