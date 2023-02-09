@@ -7,6 +7,17 @@ and decrypted by that module using SSH public
 [secrets.nix](https://github.com/suderman/nixos/blob/main/secrets/secrets.nix)
 file is not imported into my NixOS configuration, but strictly used by the `agenix` CLI.
 
+By default, secrets are not enabled for a host configuration. This is to avoid 
+problems installing this repo onto a new system that hasn't yet been authenticated 
+(had their host key added). To have access to these secrets, the host configuration 
+should include the following:
+
+    { config, ... }: {
+    
+        # Enable secrets
+        secrets.enable = true;
+    }
+
 ## Commands
 
 A few helper
