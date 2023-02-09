@@ -22,8 +22,8 @@ should include the following:
 }
 ```
 
-Inside a services or programs module, a good usage pattern is to combine
-`secrets` attributes with `age` in the `let` block:
+Inside a module, a helpful usage pattern is to combine `secrets.files` and 
+`secrets.enable` attributes with `age` in the `let` block:
 
 ```nix
 { config, pkgs, lib, ... }:
@@ -47,8 +47,8 @@ condition of secrets being enabled and also using the path to the encrypted file
 given above:
 
 ```nix
+{ config, pkgs, lib, ... }: {
   # ...
-
   config = lib.mkIf cfg.enable {
 
     # agenix
@@ -64,6 +64,7 @@ given above:
 
     # ...
   };
+}
 ```
 
 ## CLI Commands
@@ -73,14 +74,14 @@ A few helper
 included to streamline the management of secrets, which is a bit of a manual
 process when using the `agenix` CLI alone:
 
-### `secrets-keyscan HOST [NAME]`
+#### `secrets-keyscan HOST [NAME]`
 
 This script is a wrapper around `ssh-keyscan` which discovers SSH host public
 keys. When invoked, the host (or IP address) is asked to return an
 `ssh-ed25519` public key, which gets saved as `NAME.pub` in the `keys`
 directory. Then, the `secrets-rekey` script is run, which is explained next. 
 
-### `secrets-rekey [--force]`
+#### `secrets-rekey [--force]`
 
 This script is wrapper around `agenix --rekey`. First, the `keys/default.nix`
 file gets regenerated to include all keys found in that directory. If any
@@ -88,7 +89,7 @@ changes are detected (or the `--force` flag is used), `agenix --rekey` is run,
 which re-encrypts all `age` files with the rules found in `secrets.nix` and
 keys available. Lastly, the `secrets` folder is staged on `git`.
 
-### `secrets [NAME]`
+#### `secrets [NAME]`
 
 This script is wrapper around `agenix --edit`. First, a list of existing
 secrets (found in `secrets.nix`) is presented, unless a secret's `name` is
