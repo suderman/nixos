@@ -47,23 +47,19 @@ condition of secrets being enabled and also using the path to the encrypted file
 given above:
 
 ```nix
-{ config, pkgs, lib, ... }: {
-  # ...
-  config = lib.mkIf cfg.enable {
+{ #...
 
-    # agenix
-    age.secrets = lib.mkIf age.enable {
-      example-env.file = age.files.example-env;
-    };
+  # agenix
+  age.secrets = lib.mkIf age.enable {
+    example-env.file = age.files.example-env;
+  };
 
-    # service
-    virtualisation.oci-containers.containers."example" = {
-      environmentFiles = lib.mkIf age.enable [ age.secrets.example-env.path ];
-      # ...
-    };
-
+  # service
+  virtualisation.oci-containers.containers."example" = {
+    environmentFiles = lib.mkIf age.enable [ age.secrets.example-env.path ];
     # ...
   };
+
 }
 ```
 
