@@ -7,18 +7,66 @@ and decrypted by that module using SSH public
 [secrets.nix](https://github.com/suderman/nixos/blob/main/secrets/secrets.nix)
 file is not imported into my NixOS configuration, but strictly used by the `agenix` CLI.
 
+## Module Usage
+
 By default, secrets are not enabled for a host configuration. This is to avoid 
 problems installing this repo onto a new system that hasn't yet been authenticated 
 (had their host key added). To have access to these secrets, the host configuration 
 should include the following:
 
-    { config, ... }: {
-    
-        # Enable secrets
-        secrets.enable = true;
-    }
+```nix
+{ config, ... }: {
 
-## Commands
+    # Enable secrets
+    secrets.enable = true;
+}
+```
+
+Inside a services or programs module, a good usage pattern is to combine
+`secrets` attributes with `age` in the `let` block:
+
+```nix
+{ config, pkgs, lib, ... }:
+  
+let 
+
+  # agenix secrets combined with age files paths
+  age = config.age // { 
+    files = config.secrets.files; 
+    enable = config.secrets.enable; 
+  };
+  
+in {
+  # ...
+```
+
+Then, in the config section of this module, set the `age.secrets` attribute as
+described in the [agenix
+documentation](https://github.com/ryantm/agenix#reference), but as an
+condition of secrets being enabled and also using the path to the encrypted file
+given above:
+
+```nix
+  # ...
+
+  config = lib.mkIf cfg.enable {
+
+    # agenix
+    age.secrets = lib.mkIf age.enable {
+      example-env.file = age.files.example-env;
+    };
+
+    # service
+    virtualisation.oci-containers.containers."example" = {
+      environmentFiles = lib.mkIf age.enable [ age.secrets.example-env.path ];
+      # ...
+    };
+
+    # ...
+  };
+```
+
+## CLI Commands
 
 A few helper
 [scripts](https://github.com/suderman/nixos/tree/main/secrets/scripts) are
@@ -50,7 +98,7 @@ the secret. After saving any changes, the `files/default.nix` file gets
 regenerated in case there is a new `age` file to include in the list. Lastly,
 the `secrets` folder is staged on `git`.
 
-## Usage
+## CLI Usage
 
 To add a system key from a host named `foo`, first get that host's IP address
 and run the following command:

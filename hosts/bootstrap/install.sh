@@ -219,6 +219,10 @@ function install {
   msg "Generating hardware-configuration.nix"
   cmd "nixos-generate-config --root $ROOT_MNT --dir $NIX_MNT/state/etc/nixos/hosts/bootstrap"
   nixos-generate-config --root $ROOT_MNT --dir $NIX_MNT/state/etc/nixos/hosts/bootstrap
+  cmd "cp -f $NIX_MNT/state/etc/nixos/hosts/bootstrap/hardware-configuration.nix $NIX_MNT/state/etc/nixos/"
+  cp -f $NIX_MNT/state/etc/nixos/hosts/bootstrap/hardware-configuration.nix $NIX_MNT/state/etc/nixos/
+  cmd "chown -R 1000:100 $NIX_MNT/state/etc/nixos"
+  chown -R 1000:100 $NIX_MNT/state/etc/nixos
   echo
   
   # Run nixos installer

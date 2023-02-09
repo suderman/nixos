@@ -1,8 +1,6 @@
 { inputs, config, pkgs, lib, ... }:
   
 let 
-  name = "whoami";
-  sub = "whoami";
   cfg = config.services.whoami;
   inherit (lib) mkIf;
 
@@ -14,30 +12,31 @@ let
 
 in {
   options = {
-    services."${name}".enable = lib.options.mkEnableOption "${name}"; 
+    services.whoami.enable = lib.options.mkEnableOption "whoami"; 
   };
 
   # services.whoami.enable = true;
   config = with config.networking; mkIf cfg.enable {
 
-    virtualisation.oci-containers.containers."${name}" = {
+    # agenix
+    age.secrets = mkIf age.enable {
+      self-env.file = age.files.self-env;
+    };
+
+    # service
+    virtualisation.oci-containers.containers."whoami" = {
       image = "traefik/whoami";
       extraOptions = [
         "--label=traefik.enable=true"
-        "--label=traefik.http.routers.${name}.rule=Host(`${sub}.${hostName}.${domain}`) || Host(`${sub}.local.${domain}`)"
-        "--label=traefik.http.routers.${name}.tls.certresolver=resolver-dns"
-        "--label=traefik.http.routers.${name}.middlewares=basicauth@file"
+        "--label=traefik.http.routers.whoami.rule=Host(`whoami.${hostName}.${domain}`) || Host(`whoami.local.${domain}`)"
+        "--label=traefik.http.routers.whoami.tls.certresolver=resolver-dns"
+        "--label=traefik.http.routers.whoami.middlewares=basicauth@file"
       ];
       environmentFiles = mkIf age.enable [ age.secrets.self-env.path ];
       environment = {
         JONNY = "super awesome";
         MYPORT = "$SELF_SMTP_PORT";
       };
-    };
-
-    # agenix
-    age.secrets = mkIf age.enable {
-      self-env.file = age.files.self-env;
     };
 
   }; 
