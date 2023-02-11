@@ -10,6 +10,7 @@
     # dolphin
     # signal-desktop
     # webex
+    linode-cli
     _1password
     _1password-gui
     element-desktop
