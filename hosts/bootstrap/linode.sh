@@ -170,7 +170,7 @@ function linode {
   echo "sudo -s"
   echo "bash <(curl -sL https://github.com/suderman/nixos/raw/main/hosts/bootstrap/install.sh)"
   echo
-  msg "in the installer, make the following selections:"
+  msg "In the NixOS installer, make the following selections:"
   echo "ROOT: sda"
   echo "BOOT: none"
   echo "SWAP: sdb"
