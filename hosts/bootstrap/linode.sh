@@ -142,7 +142,6 @@ function linode {
   args="$(config-create nixos "$ROOT_DEV $SWAP_DEV $NIX_DEV --kernel linode/grub2 --root_device /dev/sda")"
   cmd "linode-cli $args"
   NIXOS_ID="$(linode-cli $args | awk '{print $1}')"
-  linode-cli $args
   sleep 10
   echo
 
@@ -170,6 +169,12 @@ function linode {
   msg "Paste the following to install NixOS:"
   echo "sudo -s"
   echo "bash <(curl -sL https://github.com/suderman/nixos/raw/main/hosts/bootstrap/install.sh)"
+  echo
+  msg "in the installer, make the following selections:"
+  echo "ROOT: sda"
+  echo "BOOT: none"
+  echo "SWAP: sdb"
+  echo "NIX: sdc"
   echo
   msg "When finished, reboot the system into the NIXOS config with this command:"
   echo "linode-cli linodes reboot $LINODE_ID --config_id $NIXOS_ID"
