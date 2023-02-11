@@ -30,11 +30,11 @@ in {
     networking.useDHCP = false; # Disable DHCP globally as we will not need it.
     networking.interfaces.eth0.useDHCP = true;
 
-    # Enable Longview Agent for Linode
-    services.longview = {
-      enable = true;
-      apiKeyFile = "/var/lib/longview/apiKeyFile";
-    };
+    # # Enable Longview Agent for Linode
+    # services.longview = {
+    #   enable = true;
+    #   apiKeyFile = "/var/lib/longview/apiKeyFile";
+    # };
 
     # Install Diagnostic Tools
     environment.systemPackages = with pkgs; [
