@@ -203,17 +203,9 @@ function linode {
   cmd "linode-cli $args"
   linode-cli $args
   echo
-  sleep 20
+  sleep 30
 
-  # Update secrets keys
-  msg "While that's booting, add host key to secrets:"
-  ip="$(linode-cli linodes view $LINODE_ID --format ipv4 --no-header --text)"
-  cmd "$dir/secrets/scripts/secrets-keyscan $ip bootstrap"
-  $dir/secrets/scripts/secrets-keyscan $ip bootstrap
-  msg "Commit and push changes to git so they can be pulled on the new linode at /etc/nixos"
-  sleep 10
-  
-  # Final instructions
+  # Test login
   msg "Opening a Weblish console:"
   url "https://cloud.linode.com/linodes/$LINODE_ID/lish/weblish"
   echo
@@ -222,6 +214,18 @@ function linode {
   cmd "$line"
   echo "$line" | wl-copy
   echo
+
+  # Update secrets keys
+  echo
+  msg "Wait until the linode is online before we scan host SSH key"
+  echo -n "Press y to continue: "; c=; while [[ "$c" != "y" ]]; do read -n 1 c; done
+  echo
+  ip="$(linode-cli linodes view $LINODE_ID --format ipv4 --no-header --text)"
+  cmd "$dir/secrets/scripts/secrets-keyscan $ip bootstrap"
+  $dir/secrets/scripts/secrets-keyscan $ip bootstrap
+  msg "Commit and push to git so changes can be pulled on the new linode at /etc/nixos"
+  sleep 10
+  
 }
 
 # /end of linode script
