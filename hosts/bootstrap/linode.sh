@@ -169,6 +169,7 @@ function linode {
   msg "Wait until it's finished before we reboot with the INSTALLER config"
   echo -n "Press y to continue: "; c=; while [[ "$c" != "y" ]]; do read -n 1 c; done
   echo
+  echo
 
   # Installer config
   msg "Rebooting the linode..."
@@ -193,6 +194,7 @@ function linode {
   echo
   msg "Wait until it's finished before we reboot with NIXOS config"
   echo -n "Press y to continue: "; c=; while [[ "$c" != "y" ]]; do read -n 1 c; done
+  echo
   echo
 
   # NixOS config
