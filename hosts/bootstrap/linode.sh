@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+bootstrap="$(dirname $(readlink -f $0))"
+dir="$(dirname $(dirname $bootstrap))"
+
 # Main function
 function linode {
 
@@ -152,7 +155,7 @@ function linode {
   linode-cli $args
   echo
 
-  # Final instructions
+  # Create ISO disk
   msg "Opening a Weblish console:"
   url "https://cloud.linode.com/linodes/$LINODE_ID/lish/weblish"
   echo
@@ -161,18 +164,19 @@ function linode {
   line2="curl -L \$iso | tee >(dd of=/dev/sdd) | sha256sum"
   echo $line1
   echo $line2
-  echo "$line1 $line2" | wl-copy
+  echo "$line1; $line2" | wl-copy
   echo
-  msg "Wait until it's finished before we reboot the linode."
+  msg "Wait until it's finished before we reboot with the INSTALLER config"
   echo -n "Press y to continue: "; c=; while [[ "$c" != "y" ]]; do read -n 1 c; done
+  echo
 
   # Installer config
-  msg "Rebooting the linode with INSTALLER config"
+  msg "Rebooting the linode..."
   args="linodes reboot $LINODE_ID --config_id $INSTALLER_ID"
   cmd "linode-cli $args"
   linode-cli $args
   echo
-  sleep 20
+  sleep 30
 
   msg "Opening a Glish console:"
   url "https://cloud.linode.com/linodes/$LINODE_ID/lish/glish"
@@ -187,16 +191,35 @@ function linode {
   cmd "SWAP: sdb"
   cmd "NIX: sdc"
   echo
-  msg "Wait until it's finished before we reboot the linode into the NIXOS config"
+  msg "Wait until it's finished before we reboot with NIXOS config"
   echo -n "Press y to continue: "; c=; while [[ "$c" != "y" ]]; do read -n 1 c; done
+  echo
 
   # NixOS config
-  msg "Rebooting the linode with NIXOS config"
+  msg "Rebooting the linode..."
   args="linodes reboot $LINODE_ID --config_id $NIXOS_ID"
   cmd "linode-cli $args"
   linode-cli $args
   echo
+  sleep 20
+
+  # Update secrets keys
+  msg "While that's booting, add host key to secrets:"
+  ip="$(linode-cli linodes view $LINODE_ID --format ipv4 --no-header --text)"
+  cmd "$dir/secrets/scripts/secrets-keyscan $ip bootstrap"
+  $dir/secrets/scripts/secrets-keyscan $ip bootstrap
+  msg "Commit and push changes to git so they can be pulled on the new linode at /etc/nixos"
+  sleep 10
   
+  # Final instructions
+  msg "Opening a Weblish console:"
+  url "https://cloud.linode.com/linodes/$LINODE_ID/lish/weblish"
+  echo
+  echo "Login as root and rebuild config (copied to clipboard):"
+  line="nixos-rebuild switch"
+  cmd "$line"
+  echo "$line" | wl-copy
+  echo
 }
 
 # /end of linode script
