@@ -92,14 +92,18 @@ function install {
   # Prepare root mount point (gonna be /mnt)
   mkdir -p $ROOT_MNT
 
-  # If root's device is ext4, first attempt to format it
+  # If root's device is ext4, check format and mount
   if [ "$ROOT_FS" = "ext4" ]; then
 
-    msg "Formating $ROOT_DEV as $ROOT_FS for the root partition"
-    cmd "mkfs.ext4 -F -L root $ROOT_DEV"
-    mkfs.ext4 -L root $ROOT_DEV
-    echo
+    # Format this device if required
+    if [ "$(lsblk $ROOT_DEV -no FSTYPE)" != "$ROOT_FS" ]; then
+      msg "Formating $ROOT_DEV as $ROOT_FS for the root partition"
+      cmd "mkfs.ext4 -F -L root $ROOT_DEV"
+      mkfs.ext4 -L root $ROOT_DEV
+      echo
+    fi
 
+    # Mount this device
     msg "Mounting $ROOT_DEV to $ROOT_MNT"
     cmd "mount $ROOT_DEV $ROOT_MNT"
     mount $ROOT_DEV $ROOT_MNT
@@ -132,14 +136,18 @@ function install {
   fi
 
 
-  # Enable swap partition
+  # Check swap format and mount
   if [ "$SWAP_FS" = "swap" ]; then
 
-    msg "Formating $SWAP_DEV as $SWAP_FS"
-    cmd "mkswap $SWAP_DEV"
-    mkswap $SWAP_DEV
-    echo
+    # Format this device if required
+    if [ "$(lsblk $SWAP_DEV -no FSTYPE)" != "$SWAP_FS" ]; then
+      msg "Formating $SWAP_DEV as $SWAP_FS"
+      cmd "mkswap $SWAP_DEV"
+      mkswap $SWAP_DEV
+      echo
+    fi
 
+    # Enable swap partition
     msg "Enabling $SWAP_FS"
     cmd "swapon $SWAP_DEV"
     swapon $SWAP_DEV
@@ -154,11 +162,13 @@ function install {
   # Prepare nix btrfs and subvolumes
   if [ "$NIX_FS" = "btrfs" ]; then
 
-    # Format nix partition
-    msg "Formating $NIX_DEV as $NIX_FS for the nix partition"
-    cmd "mkfs.btrfs -L nix $NIX_DEV"
-    mkfs.btrfs -L nix $NIX_DEV
-    echo
+    # Format this device if required
+    if [ "$(lsblk $NIX_DEV -no FSTYPE)" != "$NIX_FS" ]; then
+      msg "Formating $NIX_DEV as $NIX_FS for the nix partition"
+      cmd "mkfs.btrfs -L nix $NIX_DEV"
+      mkfs.btrfs -L nix $NIX_DEV
+      echo
+    fi
 
     # Mount nix btrfs
     msg "Mounting $NIX_DEV to $NIX_MNT"
@@ -190,7 +200,7 @@ function install {
     echo
    
     msg "Creating state var/etc directory structure"
-    cmd "mkdir -p $NIX_MNT/state/{var,etc/ssh}"
+    cmd "mkdir -p $NIX_MNT/state/{var/lib,etc/{ssh,NetworkManager/system-connections}}"
     mkdir -p $NIX_MNT/state/{var,etc/ssh}
     echo
 

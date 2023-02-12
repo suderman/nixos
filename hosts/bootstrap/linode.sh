@@ -153,31 +153,48 @@ function linode {
   echo
 
   # Final instructions
-  msg "Open a Weblish console:"
-  echo "https://cloud.linode.com/linodes/$LINODE_ID/lish/weblish"
+  msg "Opening a Weblish console:"
+  url "https://cloud.linode.com/linodes/$LINODE_ID/lish/weblish"
   echo
-  msg "From the console, download the NixOS installer onto /dev/sdd:"
-  echo "iso=https://channels.nixos.org/nixos-22.11/latest-nixos-minimal-x86_64-linux.iso"
-  echo "curl -L \$iso | tee >(dd of=/dev/sdd) | sha256sum"
+  msg "Paste the following to download the NixOS installer (copied to clipboard):"
+  line1="iso=https://channels.nixos.org/nixos-22.11/latest-nixos-minimal-x86_64-linux.iso"
+  line2="curl -L \$iso | tee >(dd of=/dev/sdd) | sha256sum"
+  echo $line1
+  echo $line2
+  echo "$line1 $line2" | wl-copy
   echo
-  msg "Reboot the linode into the INSTALLER config with this command:"
-  echo "linode-cli linodes reboot $LINODE_ID --config_id $INSTALLER_ID"
+  msg "Wait until it's finished before we reboot the linode."
+  echo -n "Press y to continue: "; c=; while [[ "$c" != "y" ]]; do read -n 1 c; done
+
+  # Installer config
+  msg "Rebooting the linode with INSTALLER config"
+  args="linodes reboot $LINODE_ID --config_id $INSTALLER_ID"
+  cmd "linode-cli $args"
+  linode-cli $args
   echo
-  msg "Open a Glish console:"
-  echo "https://cloud.linode.com/linodes/$LINODE_ID/lish/glish"
+  sleep 20
+
+  msg "Opening a Glish console:"
+  url "https://cloud.linode.com/linodes/$LINODE_ID/lish/glish"
   echo
-  msg "Paste the following to install NixOS:"
+  msg "Paste the following to install NixOS (second line copied to clipboard):"
   echo "sudo -s"
-  echo "bash <(curl -sL https://github.com/suderman/nixos/raw/main/hosts/bootstrap/install.sh)"
+  echo "bash <(curl -sL https://github.com/suderman/nixos/raw/main/hosts/bootstrap/install.sh)" | tee >(wl-copy)
   echo
   msg "In the NixOS installer, make the following selections:"
-  echo "ROOT: sda"
-  echo "BOOT: none"
-  echo "SWAP: sdb"
-  echo "NIX: sdc"
+  cmd "ROOT: sda"
+  cmd "BOOT: none"
+  cmd "SWAP: sdb"
+  cmd "NIX: sdc"
   echo
-  msg "When finished, reboot the system into the NIXOS config with this command:"
-  echo "linode-cli linodes reboot $LINODE_ID --config_id $NIXOS_ID"
+  msg "Wait until it's finished before we reboot the linode into the NIXOS config"
+  echo -n "Press y to continue: "; c=; while [[ "$c" != "y" ]]; do read -n 1 c; done
+
+  # NixOS config
+  msg "Rebooting the linode with NIXOS config"
+  args="linodes reboot $LINODE_ID --config_id $NIXOS_ID"
+  cmd "linode-cli $args"
+  linode-cli $args
   echo
   
 }
@@ -208,6 +225,7 @@ export MSG_PROMPT="$_green_=> $_reset_"
 # Pretty messages
 msg() { printf "$MSG_PROMPT$MSG_COLOR$1$_reset_\n"; }
 cmd() { printf "$_cyan_> $1$_reset_\n"; }
+url() { echo $1 | wl-copy; xdg-open $1; cmd $1; }
 
 # Color functions
 black()  { printf "$_black_$1$MSG_COLOR"; }
