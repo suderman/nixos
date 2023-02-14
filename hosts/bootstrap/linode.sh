@@ -81,7 +81,6 @@ function linode {
     while [ "$(linode-cli linodes disk-view $id $disk_id --text --no-header --format status 2>/dev/null)" == "deleting" ]; do
       sleep 5
     done
-    echo
   done
   echo
 
