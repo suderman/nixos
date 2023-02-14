@@ -23,164 +23,159 @@ function linode {
     return
   fi
 
+  # Look up details about this linode
+  local id="$LINODE_ID" 
+  local label="$(linode-cli linodes view $id --format label --no-header --text)"
+  local linode_type=$(linode-cli linodes view $id --no-header --text --format type) # example: g6-standard-1
+  local linode_size=$(linode-cli linodes type-view $linode_type --no-header --text --format disk) # example: 51200
+  local iso_size=1024  # reserve 1GB for installer
+  local root_size=1024 # reserve 1GB for root
+  local swap_size=2048 # reserve 2GB for swap
+  local nix_size=$((linode_size - iso_size - root_size - swap_size)) # nix uses remaining available disk
+  local flags iso_flag iso_flag swap_flag nix_flag nixos_flag installer_flag
+
+
   # Final warning
-  if ! ask "$(red "DANGER! Last chance to bail!") \nRe-create all disks and configurations for Linode ID ${LINODE_ID}?"; then
+  if ! ask "$(red "DANGER! Last chance to bail!") \nRe-create all disks and configurations for linode \"${label}\"?"; then
     return
   fi
+  echo
+
+  function wait_for_linode {
+    printf "   "
+    while [ "$(linode-cli linodes view $id --text --no-header --format status)" != "$1" ]; do
+      yellow "."
+      sleep 5
+    done
+    echo
+  }
+
+  function wait_for_disk {
+    printf "   "
+    while [ "$(linode-cli linodes disk-view $id $1 --text --no-header --format status 2>/dev/null)" != "ready" ]; do
+      yellow "."
+      sleep 5
+    done
+    echo
+  }
 
   # Power down
-  echo
-  red "OK! Powering off linode. Waiting 30 seconds..."
-  echo
-  args="linodes shutdown $LINODE_ID"
-  cmd "linode-cli $args"
-  linode-cli $args
-  sleep 30
-
-  function status {
-    linode-cli linodes view $LINODE_ID --format status --text --no-header
-  }
-
-  while [ "$(status)" != "offline" ]; do
-    echo "...waiting another 30 seconds..."
-    sleep 30
-  done
-
-  echo
-  msg "Linode is now powered off"
+  msg "OK! Powering off linode \"${label}\". Please wait..."
+  run linode-cli linodes shutdown $id
+  wait_for_linode "offline"
   echo
 
-  # Disk sizes
-  LINODE_TYPE=$(linode-cli linodes view $LINODE_ID --no-header --text --format type) # g6-standard-1
-  DISK_SIZE=$(linode-cli linodes type-view $LINODE_TYPE --no-header --text --format disk) # 51200
-  ISO_SIZE=1024
-  ROOT_SIZE=1024
-  SWAP_SIZE=2048
-  NIX_SIZE=$((DISK_SIZE - ISO_SIZE - ROOT_SIZE - SWAP_SIZE))
-
-  function config-delete {
-    echo "linodes config-delete $LINODE_ID $1"
-  }
 
   # Delete all configurations
   msg "Deleting any existing configurations"
-  configs=($(linode-cli linodes configs-list $LINODE_ID --text | awk 'NR > 1 {print $1}'))
+  configs=($(linode-cli linodes configs-list $id --text | awk 'NR > 1 {print $1}'))
   for config_id in "${configs[@]}"; do
-    args="$(config-delete $config_id)"
-    cmd "linode-cli $args"
-    linode-cli $args
+    run linode-cli linodes config-delete $id $config_id
     sleep 5
   done
   echo
 
-  function disk-delete {
-    echo "linodes disk-delete $LINODE_ID $1"
-  }
-
   # Delete all disks
   msg "Deleting any existing disks"
-  disks=($(linode-cli linodes disks-list $LINODE_ID --text | awk 'NR > 1 {print $1}'))
+  disks=($(linode-cli linodes disks-list $id --text | awk 'NR > 1 {print $1}'))
   for disk_id in "${disks[@]}"; do
-    args="$(disk-delete $disk_id)"
-    cmd "linode-cli $args"
-    linode-cli $args
-    sleep 30
+    run linode-cli linodes disk-delete $id $disk_id
+    printf "   "
+    while [ "$(linode-cli linodes disk-view $id $disk_id --text --no-header --format status 2>/dev/null)" == "deleting" ]; do
+      yellow "."
+      sleep 5
+    done
+    echo
   done
   echo
 
 
-  function disk-create {
-    echo "linodes disk-create $LINODE_ID --label $1 --filesystem $2 --size $3 --text --no-header"
-  }
+  # Shared flags
+  flags="--text --no-header"
 
-  # Create the disks
   msg "Creating ISO disk"
-  args="$(disk-create iso ext4 $ISO_SIZE)"
-  cmd "linode-cli $args"
-  ISO_ID=$(linode-cli $args | awk '{print $1}')
-  ISO_DEV="--devices.sdd.disk_id $ISO_ID"
-  sleep 30
+  run linode-cli linodes disk-create $id $flags --label iso --filesystem ext4 --size $iso_size
+  disk_id="$(cat /tmp/run | awk '{print $1}')"
+  iso_flag="--devices.sdd.disk_id $disk_id"
+  wait_for_disk $disk_id
+  # sleep 30
   echo
 
   msg "Creating ROOT disk"
-  args="$(disk-create root ext4 $ROOT_SIZE)"
-  cmd "linode-cli $args"
-  ROOT_ID=$(linode-cli $args | awk '{print $1}')
-  ROOT_DEV="--devices.sda.disk_id $ROOT_ID"
-  sleep 30
+  run linode-cli linodes disk-create $id $flags --label root --filesystem ext4 --size $root_size
+  disk_id="$(cat /tmp/run | awk '{print $1}')"
+  root_flag="--devices.sda.disk_id $disk_id"
+  wait_for_disk $disk_id
+  # sleep 30
   echo
 
   msg "Creating SWAP disk"
-  args="$(disk-create swap swap $SWAP_SIZE)"
-  cmd "linode-cli $args"
-  SWAP_ID=$(linode-cli $args | awk '{print $1}')
-  SWAP_DEV="--devices.sdb.disk_id $SWAP_ID"
-  sleep 30
+  run linode-cli linodes disk-create $id $flags --label swap --filesystem swap --size $swap_size
+  disk_id="$(cat /tmp/run | awk '{print $1}')"
+  swap_flag="--devices.sdb.disk_id $disk_id"
+  wait_for_disk $disk_id
+  # sleep 30
   echo
 
   msg "Creating NIX disk"
-  args="$(disk-create nix raw $NIX_SIZE)"
-  cmd "linode-cli $args"
-  NIX_ID=$(linode-cli $args | awk '{print $1}')
-  NIX_DEV="--devices.sdc.disk_id $NIX_ID"
-  sleep 30
+  run linode-cli linodes disk-create $id $flags --label nix --filesystem raw --size $nix_size
+  disk_id="$(cat /tmp/run | awk '{print $1}')"
+  nix_flag="--devices.sdc.disk_id $disk_id"
+  wait_for_disk $disk_id
+  # sleep 30
   echo
 
 
-  function config-create {
-    local helpers="--helpers.updatedb_disabled=0 --helpers.distro=0 --helpers.modules_dep=0 --helpers.network=0 --helpers.devtmpfs_automount=0"
-    echo "linodes config-create $LINODE_ID --label $1 $helpers --text --no-header $2"
-  }
+  # Shared flags
+  flags="--text --no-header"
+  flags="$flags --helpers.updatedb_disabled=0 --helpers.distro=0 --helpers.modules_dep=0 --helpers.network=0 --helpers.devtmpfs_automount=0"
+  flags="$flags $root_flag $swap_flag $nix_flag"
 
-  # Create the first configuration
-  msg "Creating INSTALLER configuration"
-  args="$(config-create installer "$ROOT_DEV $SWAP_DEV $NIX_DEV $ISO_DEV --kernel linode/direct-disk --root_device /dev/sdd")"
-  cmd "linode-cli $args"
-  INSTALLER_ID="$(linode-cli $args | awk '{print $1}')"
+  # Create the main configuration
+  msg "Creating NIXOS configuration"
+  run linode-cli linodes config-create $LINODE_ID $flags --label nixos --kernel linode/grub2 --root_device /dev/sda
+  nixos_flag="--config_id $(cat /tmp/run | awk '{print $1}')"
   sleep 10
   echo
 
-  # Create the second configuration
-  msg "Creating NIXOS configuration"
-  args="$(config-create nixos "$ROOT_DEV $SWAP_DEV $NIX_DEV --kernel linode/grub2 --root_device /dev/sda")"
-  cmd "linode-cli $args"
-  NIXOS_ID="$(linode-cli $args | awk '{print $1}')"
+  # Create the installer configuration
+  msg "Creating INSTALLER configuration"
+  run linode-cli linodes config-create $LINODE_ID $flags $iso_flag --label installer --kernel linode/direct-disk --root_device /dev/sdd
+  installer_flag="--config_id $(cat /tmp/run | awk '{print $1}')"
   sleep 10
   echo
 
   # Rescue mode
   msg "Rebooting the linode in RESCUE mode"
-  args="linodes rescue $LINODE_ID $ISO_DEV"
-  cmd "linode-cli $args"
-  linode-cli $args
+  run linode-cli linodes rescue $id $iso_flag
+  sleep 5
+  wait_for_linode "running"
   echo
 
   # Create ISO disk
   msg "Opening a Weblish console:"
-  url "https://cloud.linode.com/linodes/$LINODE_ID/lish/weblish"
+  url "https://cloud.linode.com/linodes/$id/lish/weblish"
   echo
   msg "Paste the following to download the NixOS installer (copied to clipboard):"
   line1="iso=https://channels.nixos.org/nixos-22.11/latest-nixos-minimal-x86_64-linux.iso"
   line2="curl -L \$iso | tee >(dd of=/dev/sdd) | sha256sum"
-  echo $line1
-  echo $line2
+  out $line1
+  out $line2
   echo "$line1; $line2" | wl-copy
   echo
   msg "Wait until it's finished before we reboot with the INSTALLER config"
-  echo -n "Press y to continue: "; c=; while [[ "$c" != "y" ]]; do read -n 1 c; done
-  echo
+  pause
   echo
 
   # Installer config
   msg "Rebooting the linode..."
-  args="linodes reboot $LINODE_ID --config_id $INSTALLER_ID"
-  cmd "linode-cli $args"
-  linode-cli $args
+  run linode-cli linodes reboot $id $installer_flag
+  sleep 5
+  wait_for_linode "running"
   echo
-  sleep 30
 
   msg "Opening a Glish console:"
-  url "https://cloud.linode.com/linodes/$LINODE_ID/lish/glish"
+  url "https://cloud.linode.com/linodes/$id/lish/glish"
   echo
   msg "Paste the following to install NixOS (second line copied to clipboard):"
   echo "sudo -s"
@@ -193,21 +188,19 @@ function linode {
   cmd "NIX: sdc"
   echo
   msg "Wait until it's finished before we reboot with NIXOS config"
-  echo -n "Press y to continue: "; c=; while [[ "$c" != "y" ]]; do read -n 1 c; done
-  echo
+  pause
   echo
 
   # NixOS config
   msg "Rebooting the linode..."
-  args="linodes reboot $LINODE_ID --config_id $NIXOS_ID"
-  cmd "linode-cli $args"
-  linode-cli $args
+  run linode-cli linodes reboot $id $nixos_flag
   echo
-  sleep 30
+  sleep 5
+  wait_for_linode "running"
 
   # Test login
   msg "Opening a Weblish console:"
-  url "https://cloud.linode.com/linodes/$LINODE_ID/lish/weblish"
+  url "https://cloud.linode.com/linodes/$id/lish/weblish"
   echo
   echo "Login as root and rebuild config (copied to clipboard):"
   line="nixos-rebuild switch"
@@ -218,11 +211,9 @@ function linode {
   # Update secrets keys
   echo
   msg "Wait until the linode is online before we scan host SSH key"
-  echo -n "Press y to continue: "; c=; while [[ "$c" != "y" ]]; do read -n 1 c; done
-  echo
-  ip="$(linode-cli linodes view $LINODE_ID --format ipv4 --no-header --text)"
-  cmd "$dir/secrets/scripts/secrets-keyscan $ip bootstrap"
-  $dir/secrets/scripts/secrets-keyscan $ip bootstrap
+  pause
+  local ip="$(linode-cli linodes view $id --no-header --text --format ipv4)"
+  run $dir/secrets/scripts/secrets-keyscan $ip $label
   msg "Commit and push to git so changes can be pulled on the new linode at /etc/nixos"
   sleep 10
   
@@ -249,12 +240,18 @@ _white_='\e[0;37m';   _underline_white_='\e[4;37m';   _on_white_='\e[47m';
 
 # These can be overridden
 export MSG_COLOR="$_white_"
-export MSG_PROMPT="$_green_=> $_reset_"
+export MSG_PROMPT="$_green_:: $_reset_"
+export CMD_PROMPT="$_purple_ > $_reset_"
+export CMD_COLOR="$_cyan_"
+export URL_PROMPT="$_purple_ > $_reset_"
+export URL_COLOR="$_underline_cyan_"
 
 # Pretty messages
-msg() { printf "$MSG_PROMPT$MSG_COLOR$1$_reset_\n"; }
-cmd() { printf "$_cyan_> $1$_reset_\n"; }
-url() { echo $1 | wl-copy; xdg-open $1; cmd $1; }
+msg() { printf "$MSG_PROMPT$MSG_COLOR$(echo $@)$_reset_\n"; }
+out() { printf "$MSG_COLOR$(echo $@)$_reset_\n"; }
+cmd() { printf "$CMD_PROMPT$CMD_COLOR$(echo $@)$_reset_\n"; }
+url() { echo $1 | wl-copy; xdg-open $1; printf "$URL_PROMPT$URL_COLOR$1$_reset_\n"; }
+run() { cmd "$@"; $@>/tmp/run; }
 
 # Color functions
 black()  { printf "$_black_$1$MSG_COLOR"; }
@@ -274,6 +271,15 @@ ask() {
   echo
   [[ $REPLY =~ ^[Yy]$ ]]
   if [ ! $? -ne 0 ]; then return 0; else return 1; fi
+}
+
+pause() {
+  echo -n "Press y to continue: "
+  local continue=""
+  while [[ "$continue" != "y" ]]; do 
+    read -n 1 continue; 
+  done
+  echo
 }
 
 # https://github.com/the0neWhoKnocks/shell-menu-select
