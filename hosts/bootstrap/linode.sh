@@ -194,12 +194,12 @@ function linode {
   # NixOS config
   msg "Rebooting the linode..."
   run linode-cli linodes reboot $id $nixos_flag
-  echo
   sleep 5
   wait_for_linode "running"
 
   # Update secrets keys
-  sleep 5
+  msg "Scanning new host key in 30 seconds..."
+  sleep 30
   local ip="$(linode-cli linodes view $id --no-header --text --format ipv4)"
   run $dir/secrets/scripts/secrets-keyscan $ip $label --force
   msg "Commit and push to git so changes can be pulled on the new linode at /etc/nixos"
