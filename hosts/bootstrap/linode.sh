@@ -198,24 +198,24 @@ function linode {
   sleep 5
   wait_for_linode "running"
 
+  # Update secrets keys
+  sleep 5
+  local ip="$(linode-cli linodes view $id --no-header --text --format ipv4)"
+  run $dir/secrets/scripts/secrets-keyscan $ip $label --force
+  msg "Commit and push to git so changes can be pulled on the new linode at /etc/nixos"
+  sleep 5
+
   # Test login
   msg "Opening a Weblish console:"
   url "https://cloud.linode.com/linodes/$id/lish/weblish"
   echo
-  echo "Login as root and rebuild config (copied to clipboard):"
-  line="nixos-rebuild switch"
-  cmd "$line"
-  echo "$line" | wl-copy
+  echo "Login as root, pull from git, and rebuild config (copied to clipboard):"
+  line1="cd /etc/nixos && git pull"
+  line2="nixos-rebuild switch"
+  cmd "$line1"
+  cmd "$line2"
+  echo "$line1; $line2" | wl-copy
   echo
-
-  # Update secrets keys
-  echo
-  msg "Wait until the linode is online before we scan host SSH key"
-  pause
-  local ip="$(linode-cli linodes view $id --no-header --text --format ipv4)"
-  run $dir/secrets/scripts/secrets-keyscan $ip $label
-  msg "Commit and push to git so changes can be pulled on the new linode at /etc/nixos"
-  sleep 10
   
 }
 
