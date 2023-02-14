@@ -192,7 +192,8 @@ function linode {
   run $dir/secrets/scripts/secrets-keyscan $ip $label --force
   echo
   msg "Commit and push to git so changes can be pulled on the new linode at /etc/nixos"
-  run "cd $dir; git status"
+  cmd "cd $dir && git status"
+  cd $dir && git status
   sleep 5
 
   # Test login
@@ -201,7 +202,7 @@ function linode {
   echo
   echo "Login as root, pull from git, and rebuild config (copied to clipboard):"
   line1="cd /etc/nixos; git pull"
-  line2="nixos-rebuild switch"
+  line2="sudo nixos-rebuild switch"
   cmd "$line1"
   cmd "$line2"
   echo "$line1; $line2" | wl-copy
