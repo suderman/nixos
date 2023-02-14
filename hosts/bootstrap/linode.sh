@@ -93,28 +93,24 @@ function linode {
   disk_id="$(cat /tmp/run | awk '{print $1}')"
   iso_flag="--devices.sdd.disk_id $disk_id"
   wait_for_disk $disk_id
-  echo
 
   msg "Creating ROOT disk"
   run linode-cli linodes disk-create $id $flags --label root --filesystem ext4 --size $root_size
   disk_id="$(cat /tmp/run | awk '{print $1}')"
   root_flag="--devices.sda.disk_id $disk_id"
   wait_for_disk $disk_id
-  echo
 
   msg "Creating SWAP disk"
   run linode-cli linodes disk-create $id $flags --label swap --filesystem swap --size $swap_size
   disk_id="$(cat /tmp/run | awk '{print $1}')"
   swap_flag="--devices.sdb.disk_id $disk_id"
   wait_for_disk $disk_id
-  echo
 
   msg "Creating NIX disk"
   run linode-cli linodes disk-create $id $flags --label nix --filesystem raw --size $nix_size
   disk_id="$(cat /tmp/run | awk '{print $1}')"
   nix_flag="--devices.sdc.disk_id $disk_id"
   wait_for_disk $disk_id
-  echo
 
 
   # Shared flags
