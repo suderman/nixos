@@ -82,6 +82,8 @@
         modules = [ ./hosts/${host}/home.nix ];
       };
 
+      domain = "suderman.org";
+
     in {
 
       # System configurations on NixOS
@@ -91,14 +93,13 @@
         bootstrap = mkSystem { host = "bootstrap"; };
 
         # Framework Laptop
-        cog = mkSystem { host = "cog"; domain = "suderman.org"; };
+        cog = mkSystem { host = "cog"; inherit domain; };
 
         # Linode VPS
-        nimbus = mkSystem { host = "nimbus"; };
-        sol = mkSystem { host = "sol"; };
+        sol = mkSystem { host = "sol"; inherit domain; };
 
         # Intel NUC home server
-        lux = mkSystem { host = "lux"; };
+        lux = mkSystem { host = "lux"; inherit domain; };
 
       };
 
