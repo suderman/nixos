@@ -200,7 +200,7 @@ function linode {
   msg "Opening a Weblish console:"
   url "https://cloud.linode.com/linodes/$id/lish/weblish"
   echo
-  echo "Login as root, pull from git, and rebuild config (copied to clipboard):"
+  msg "Login as root, pull from git, and rebuild config (copied to clipboard):"
   line1="cd /etc/nixos; git pull"
   line2="sudo nixos-rebuild switch"
   cmd "$line1"
