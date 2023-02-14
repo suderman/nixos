@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }: {
 
-  imports = [ ../. ];
+  imports = [ ../shared/user ];
 
   # ---------------------------------------------------------------------------
   # Home Enviroment & Packages
