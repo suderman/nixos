@@ -51,9 +51,7 @@ function linode {
   }
 
   function wait_for_disk {
-    printf "   "
     while [ "$(linode-cli linodes disk-view $id $1 --text --no-header --format status 2>/dev/null)" != "ready" ]; do
-      yellow "."
       sleep 5
     done
     echo
@@ -80,9 +78,7 @@ function linode {
   disks=($(linode-cli linodes disks-list $id --text | awk 'NR > 1 {print $1}'))
   for disk_id in "${disks[@]}"; do
     run linode-cli linodes disk-delete $id $disk_id
-    printf "   "
     while [ "$(linode-cli linodes disk-view $id $disk_id --text --no-header --format status 2>/dev/null)" == "deleting" ]; do
-      yellow "."
       sleep 5
     done
     echo
@@ -98,7 +94,6 @@ function linode {
   disk_id="$(cat /tmp/run | awk '{print $1}')"
   iso_flag="--devices.sdd.disk_id $disk_id"
   wait_for_disk $disk_id
-  # sleep 30
   echo
 
   msg "Creating ROOT disk"
@@ -106,7 +101,6 @@ function linode {
   disk_id="$(cat /tmp/run | awk '{print $1}')"
   root_flag="--devices.sda.disk_id $disk_id"
   wait_for_disk $disk_id
-  # sleep 30
   echo
 
   msg "Creating SWAP disk"
@@ -114,7 +108,6 @@ function linode {
   disk_id="$(cat /tmp/run | awk '{print $1}')"
   swap_flag="--devices.sdb.disk_id $disk_id"
   wait_for_disk $disk_id
-  # sleep 30
   echo
 
   msg "Creating NIX disk"
@@ -122,7 +115,6 @@ function linode {
   disk_id="$(cat /tmp/run | awk '{print $1}')"
   nix_flag="--devices.sdc.disk_id $disk_id"
   wait_for_disk $disk_id
-  # sleep 30
   echo
 
 
@@ -196,13 +188,16 @@ function linode {
   run linode-cli linodes reboot $id $nixos_flag
   sleep 5
   wait_for_linode "running"
+  echo
 
   # Update secrets keys
   msg "Scanning new host key in 30 seconds..."
   sleep 30
   local ip="$(linode-cli linodes view $id --no-header --text --format ipv4)"
   run $dir/secrets/scripts/secrets-keyscan $ip $label --force
+  echo
   msg "Commit and push to git so changes can be pulled on the new linode at /etc/nixos"
+  run "cd $dir; git status"
   sleep 5
 
   # Test login
@@ -210,7 +205,7 @@ function linode {
   url "https://cloud.linode.com/linodes/$id/lish/weblish"
   echo
   echo "Login as root, pull from git, and rebuild config (copied to clipboard):"
-  line1="cd /etc/nixos && git pull"
+  line1="cd /etc/nixos; git pull"
   line2="nixos-rebuild switch"
   cmd "$line1"
   cmd "$line2"
@@ -220,7 +215,7 @@ function linode {
 }
 
 # /end of linode script
-# ------------------------
+# ---------------------
 
 
 
