@@ -5,6 +5,7 @@
 
   alphanumeric-secret = ./alphanumeric-secret.age;
   basic-auth = ./basic-auth.age;
+  baz = ./baz.age;
   cloudflare-env = ./cloudflare-env.age;
   foo = ./foo.age;
   password = ./password.age;

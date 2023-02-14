@@ -65,4 +65,6 @@ let keys = import ./keys; in {
 
   "files/foo.age".publicKeys = keys.all;
 
+  "files/baz.age".publicKeys = keys.all;
+
 }

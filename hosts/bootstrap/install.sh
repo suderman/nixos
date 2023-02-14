@@ -267,11 +267,18 @@ _white_='\e[0;37m';   _underline_white_='\e[4;37m';   _on_white_='\e[47m';
 
 # These can be overridden
 export MSG_COLOR="$_white_"
-export MSG_PROMPT="$_green_=> $_reset_"
+export MSG_PROMPT="$_green_:: $_reset_"
+export CMD_PROMPT="$_purple_ > $_reset_"
+export CMD_COLOR="$_cyan_"
+export URL_PROMPT="$_purple_ > $_reset_"
+export URL_COLOR="$_underline_cyan_"
 
 # Pretty messages
-msg() { printf "$MSG_PROMPT$MSG_COLOR$1$_reset_\n"; }
-cmd() { printf "$_cyan_> $1$_reset_\n"; }
+msg() { printf "$MSG_PROMPT$MSG_COLOR$(echo $@)$_reset_\n"; }
+out() { printf "$MSG_COLOR$(echo $@)$_reset_\n"; }
+cmd() { printf "$CMD_PROMPT$CMD_COLOR$(echo $@)$_reset_\n"; }
+url() { echo $1 | wl-copy; xdg-open $1; printf "$URL_PROMPT$URL_COLOR$1$_reset_\n"; }
+run() { cmd "$@"; $@>/tmp/run; }
 
 # Color functions
 black()  { printf "$_black_$1$MSG_COLOR"; }
@@ -291,6 +298,15 @@ ask() {
   echo
   [[ $REPLY =~ ^[Yy]$ ]]
   if [ ! $? -ne 0 ]; then return 0; else return 1; fi
+}
+
+pause() {
+  echo -n "Press y to continue: "
+  local continue=""
+  while [[ "$continue" != "y" ]]; do 
+    read -n 1 continue; 
+  done
+  echo
 }
 
 # https://github.com/the0neWhoKnocks/shell-menu-select
