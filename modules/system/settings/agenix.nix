@@ -1,11 +1,11 @@
 { inputs, config, pkgs, lib, ... }: {
 
   # Import agenix module
-  imports = [ inputs.agenix.nixosModule ];
+  imports = [ inputs.agenix.nixosModules.default ];
 
   # Include agenix command
   config.environment.systemPackages = [
-    inputs.agenix.defaultPackage."${pkgs.stdenv.system}" 
+    inputs.agenix.packages."${pkgs.stdenv.system}".default
   ];
 
 }
