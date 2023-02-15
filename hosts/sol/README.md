@@ -25,14 +25,14 @@ Prepare two configuration profiles under Configurations tab:
 
 ## Create NixOS installer
 
-Boot node into Rescue Mode with `iso` mounted at `/dev/sdb`. Then launch a console:
+Boot node into Rescue Mode with `iso` mounted at `/dev/sdd`. Then launch a console:
 
 ```zsh
 # https://nixos.org/download.html
 iso=https://channels.nixos.org/nixos-22.11/latest-nixos-minimal-x86_64-linux.iso
 
 # Download the ISO, write it to the installer disk, and verify the checksum:
-curl -L $iso | tee >(dd of=/dev/sdb) | sha256sum
+curl -L $iso | tee >(dd of=/dev/sdd) | sha256sum
 ```
 
 ## Install NixOS
