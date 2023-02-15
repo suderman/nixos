@@ -9,7 +9,7 @@
     systemPackages = with pkgs; [ 
       inetutils mtr sysstat gnumake git # basics
       curl htop tmux rsync vim nix-index
-      usbutils pciutils zip unzip nmap arp-scan   
+      usbutils pciutils zip unzip nmap arp-scan dig   
       nix-zsh-completions zsh-completions 
       nix-bash-completions bash-completion
       home-manager # include home-manager command

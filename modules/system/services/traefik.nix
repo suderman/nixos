@@ -64,13 +64,14 @@ in {
 
         # Let's Encrypt will check CloudFlare's DNS
         certificatesResolvers.resolver-dns.acme = {
-          dnsChallenge = {
-            provider = "cloudflare";
-            resolvers = "1.1.1.1:53,8.8.8.8:53";
-            delaybeforecheck = "0";
-          };
+          # dnsChallenge = {
+          #   provider = "cloudflare";
+          #   resolvers = "1.1.1.1:53,8.8.8.8:53";
+          #   delaybeforecheck = 0;
+          # };
+          dnsChallenge.provider = "cloudflare";
           storage = "/var/lib/traefik/cert.json";
-          email = "dns@${domain}";
+          email = "${hostName}@${domain}";
         };
 
         global = {
@@ -99,13 +100,13 @@ in {
         http.routers = {
           traefik = {
             entrypoints = "websecure";
-            rule = "Host(`local.${domain}`) || Host(`${hostName}.${domain}`)";
+            rule = "Host(`${hostName}.${domain}`) || Host(`local.${domain}`)";
             service = "api@internal";
             tls.certresolver = "resolver-dns";
-            tls.domains = [
-              { main = "local.${domain}"; sans = "*.local.${domain}"; }
-              { main = "${hostName}.${domain}"; sans = "*.${hostName}.${domain}"; }
-            ];
+            tls.domains = [{
+              main = "${hostName}.${domain}"; 
+              sans = "*.${hostName}.${domain},local.${domain},*.local.${domain}"; 
+            }];
           };
         };
 

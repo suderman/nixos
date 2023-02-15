@@ -17,9 +17,8 @@
   programs.neovim.enable = true;
 
   services.traefik.enable = true;
-  # services.whoogle.enable = true;
   services.whoami.enable = true;
-
+  services.whoogle.enable = false;
 
   # # Flatpak
   # services.flatpak.enable = true;

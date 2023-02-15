@@ -30,11 +30,8 @@ in {
     networking.useDHCP = false; # Disable DHCP globally as we will not need it.
     networking.interfaces.eth0.useDHCP = true;
 
-    # # Enable Longview Agent for Linode
-    # services.longview = {
-    #   enable = true;
-    #   apiKeyFile = "/var/lib/longview/apiKeyFile";
-    # };
+    # IPv6 is broken when trying to reach CloudFlare DNS
+    networking.enableIPv6 = false;
 
     # Install Diagnostic Tools
     environment.systemPackages = with pkgs; [
@@ -42,6 +39,12 @@ in {
       mtr
       sysstat
     ];
+
+    # # Enable Longview Agent for Linode
+    # services.longview = {
+    #   enable = true;
+    #   apiKeyFile = "/var/lib/longview/apiKeyFile";
+    # };
 
   };
 
