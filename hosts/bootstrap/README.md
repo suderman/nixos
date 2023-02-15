@@ -26,9 +26,6 @@ Prepare two configurations under the Configurations tab:
 Boot node into Rescue Mode with `iso` mounted at `/dev/sdb`. Then launch a console:
 
 ```zsh
-# Update SSL certificates to allow HTTPS connections:
-update-ca-certificates
-
 # https://nixos.org/download.html
 iso=https://channels.nixos.org/nixos-22.11/latest-nixos-minimal-x86_64-linux.iso
 

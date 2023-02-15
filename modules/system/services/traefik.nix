@@ -64,11 +64,6 @@ in {
 
         # Let's Encrypt will check CloudFlare's DNS
         certificatesResolvers.resolver-dns.acme = {
-          # dnsChallenge = {
-          #   provider = "cloudflare";
-          #   resolvers = "1.1.1.1:53,8.8.8.8:53";
-          #   delaybeforecheck = 0;
-          # };
           dnsChallenge.provider = "cloudflare";
           storage = "/var/lib/traefik/cert.json";
           email = "${hostName}@${domain}";
