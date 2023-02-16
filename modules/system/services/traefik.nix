@@ -81,7 +81,8 @@ in {
 
         # Basic Authentication is available. User/passwords are encrypted by agenix.
         http.middlewares = {
-          basicauth.basicAuth.usersFile = mkIf age.enable age.secrets.basic-auth.path;
+          login.basicAuth.usersFile = mkIf age.enable age.secrets.basic-auth.path;
+          tailnet.ipWhiteList.sourceRange = "100.64.0.0/10";
         };
 
         # Traefik dashboard
@@ -97,6 +98,7 @@ in {
             entrypoints = "websecure";
             rule = "Host(`${hostName}.${domain}`) || Host(`local.${domain}`)";
             service = "api@internal";
+            middlewares = "tailnet@file";
             tls.certresolver = "resolver-dns";
             tls.domains = [{
               main = "${hostName}.${domain}"; 
