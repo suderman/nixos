@@ -8,6 +8,9 @@
   networking.hostName = host; 
   networking.domain = domain;
 
+  # Fewer IP addresses, please
+  networking.enableIPv6 = false;
+
   # Firewall
   networking.firewall = {
     enable = true;

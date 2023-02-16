@@ -82,7 +82,7 @@ in {
         # Basic Authentication is available. User/passwords are encrypted by agenix.
         http.middlewares = {
           login.basicAuth.usersFile = mkIf age.enable age.secrets.basic-auth.path;
-          tailnet.ipWhiteList.sourceRange = "100.64.0.0/10";
+          tailnet.ipWhiteList.sourceRange = [ "127.0.0.1/32" "100.64.0.0/10" ];
         };
 
         # Traefik dashboard
