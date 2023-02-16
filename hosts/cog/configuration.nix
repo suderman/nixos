@@ -42,10 +42,10 @@
   services.flatpak.enable = true;
 
   # SabNZBd
-  services.sabnzbd.enable = true;
+  services.sabnzbd.enable = false;
 
   # https://search.nixos.org/options?show=services.tandoor-recipes.enable&query=services.tandoor-recipes
-  services.tandoor-recipes.enable = true;
+  services.tandoor-recipes.enable = false;
 
   # https://search.nixos.org/options?show=services.gitea.enable&query=services.gitea
   # services.gitea.enable = true;

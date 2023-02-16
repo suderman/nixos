@@ -30,7 +30,7 @@ in {
         "--label=traefik.enable=true"
         "--label=traefik.http.routers.whoami.rule=Host(`whoami.${hostName}.${domain}`) || Host(`whoami.local.${domain}`)"
         "--label=traefik.http.routers.whoami.tls.certresolver=resolver-dns"
-        "--label=traefik.http.routers.whoami.middlewares=basicauth@file"
+        "--label=traefik.http.routers.whoami.middlewares=local@file"
       ];
       environmentFiles = mkIf age.enable [ age.secrets.self-env.path ];
       environment = {
