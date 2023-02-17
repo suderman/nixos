@@ -24,9 +24,7 @@
     l = "${ls} -Alho";
     map = "xargs -n1";
     maplines = "xargs -n1 -0";
-    mongo = "mongo --norc";
     dmesg = "dmesg -H";
-    cloc = "tokei";
     rg = "rg --glob '!package-lock.json' --glob '!.git/*' --glob '!yarn.lock' --glob '!.yarn/*' --smart-case --hidden";
     grep = rg;
     tg = "tree-grepper";
@@ -36,11 +34,6 @@
     type-clipboard = ''
       sh -c 'sudo sleep 5.0; sudo ydotool type -- "$(wl-paste)"'
     '';
-
-    secrets-keyscan = "/etc/nixos/secrets/scripts/secrets-keyscan";
-    secrets-rekey = "/etc/nixos/secrets/scripts/secrets-rekey";
-    secrets = "/etc/nixos/secrets/scripts/secrets";
-
   };
 
 }

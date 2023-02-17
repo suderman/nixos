@@ -6,6 +6,7 @@
 
   home.packages = with pkgs; [ 
     bat 
+    cargo
     cowsay
     exa
     killall
@@ -14,13 +15,14 @@
     micro
     mosh
     nano
-    ripgrep
-    wget
+    nodejs
     python39
     python39Packages.pip
     python39Packages.virtualenv
-    nodejs
-    cargo
+    ripgrep
+    sysz
+    tealdeer
+    wget
   ];
 
   # Enable home-manager, git & zsh
