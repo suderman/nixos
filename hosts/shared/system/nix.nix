@@ -38,12 +38,20 @@
   # Very useful when using legacy commands
   nix.nixPath = lib.mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry;
 
-  # Automatically upgrade this system
+  # Automatically upgrade this system while I sleep
   system.autoUpgrade = {
     enable = true;
     dates = "04:00";
     flake = "/etc/nixos#${config.networking.hostName}";
-    flags = [ "--update-input" "nixpkgs" ];
+    flags = [ 
+      "--update-input" "nixpkgs"
+      "--update-input" "unstable"
+      "--update-input" "nur"
+      "--update-input" "home-manager"
+      "--update-input" "agenix"
+      "--update-input" "impermanence"
+      "--commit-lock-file" 
+    ];
     allowReboot = true;
   };
 

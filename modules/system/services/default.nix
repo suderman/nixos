@@ -3,6 +3,7 @@
   imports = [
     ./ddns.nix
     ./docker.nix
+    ./earlyoom.nix
     ./keyd.nix
     ./mysql.nix
     ./ocis.nix

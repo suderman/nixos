@@ -17,6 +17,8 @@
   programs.mosh.enable = true;
   programs.neovim.enable = true;
 
+  services.earlyoom.enable = true;
+
   services.traefik.enable = true;
   services.whoami.enable = true;
   services.whoogle.enable = false;

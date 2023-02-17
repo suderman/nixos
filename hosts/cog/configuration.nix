@@ -33,6 +33,7 @@
   services.keyd.enable = true;
   services.ydotool.enable = true;
 
+  services.earlyoom.enable = true;
   
   services.traefik.enable = true;
   # services.whoogle.enable = true;
