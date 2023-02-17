@@ -11,6 +11,7 @@
   # Services
   services.tailscale.enable = true;
   services.openssh.enable = true;
+  services.ddns.enable = true;
 
   # Programs
   programs.mosh.enable = true;

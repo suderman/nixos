@@ -26,11 +26,13 @@
   desktops.gnome.enable = true;
 
   services.tailscale.enable = true;
+  services.ddns.enable = true;
   services.openssh.enable = true;
   programs.mosh.enable = true;
 
   services.keyd.enable = true;
   services.ydotool.enable = true;
+
   
   services.traefik.enable = true;
   # services.whoogle.enable = true;

@@ -1,3 +1,0 @@
-# nimbus
-
-Linode server (WIP)

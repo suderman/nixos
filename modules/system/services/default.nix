@@ -1,6 +1,7 @@
 { ... }: 
 {
   imports = [
+    ./ddns.nix
     ./docker.nix
     ./keyd.nix
     ./mysql.nix

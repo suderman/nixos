@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 
 let
-  cfg = config.services.tailscale;
+  cfg = config.services.ddns;
   inherit (lib) mkIf;
 
   # agenix secrets combined with age files paths
@@ -11,39 +11,26 @@ let
   };
 
 in {
+  options = {
+    services.ddns.enable = lib.options.mkEnableOption "ddns"; 
+  };
 
-  # services.tailscale.enable = true;
+  # services.ddns.enable = true;
   config = mkIf cfg.enable {
-
-    networking.firewall = {
-      checkReversePath = "loose";  # https://github.com/tailscale/tailscale/issues/4432
-      allowedUDPPorts = [ 41641 ]; # Facilitate firewall punching
-    };
 
     # agenix
     age.secrets = mkIf age.enable {
       cloudflare-env = { file = age.files.cloudflare-env; };
     };
 
-    # I want all my tailscale machines to have DNS records in Cloudflare
-    #
-    # If I have a machine named foo with IP address 100.65.1.1, and another
-    # named bar with IP address 100.65.1.2, this will create four records: 
-    #     foo.mydomain.org -> A     -> 100.65.1.1
-    #     bar.mydomain.org -> A     -> 100.65.1.2
-    #   *.foo.mydomain.org -> CNAME -> foo.mydomain.org
-    #   *.bar.mydomain.org -> CNAME -> bar.mydomain.org
-    # 
-    # This is true for all my tailscale machines, and two localhost records: 
-    #     local.mydomain.org -> A     -> 127.0.0.1
-    #   *.local.mydomain.org -> CNAME -> local.mydomain.org
-    #
-    systemd.services."tailscale-dns" = {
+    # Create DNS record of this machine's public IP
+    # ddns.mymachine.mydomain.org -> 184.65.200.230 
+    systemd.services."ddns" = {
       serviceConfig = {
         Type = "oneshot";
         EnvironmentFile = mkIf age.enable age.secrets.cloudflare-env.path;
       };
-      path = with pkgs; [ coreutils curl gawk jq tailscale ];
+      path = with pkgs; [ coreutils curl dig gawk jq ];
       script = with config.networking; ''
 
         API="https://api.cloudflare.com/client/v4";
@@ -58,45 +45,23 @@ in {
             return 1
           fi
 
-          # tmp directory cached values
-          local cache=/tmp/tailscale-dns
+          # tmp file of cached ip
+          local cache=/tmp/ddns
+          touch $cache
 
-          # Check if the cache directory doesn't exist
-          if [ ! -d $cache ]; then
+          # Get public IP address from Cloudflare
+          ip="$(dig +short txt ch whoami.cloudflare @1.0.0.1 | tr -d \")"
+          
+          # Check if public IP doesn't match the cached IP
+          if [ "$(cat $cache)" != "$ip" ]; then
 
-            # Create this directory
-            mkdir -p $cache
+            # Create/update A record
+            record A "ddns.${hostName}" $ip
 
-            # Assume this is a fresh boot, so also 
-            # create/update two records for localhost
-            record A "local" "127.0.0.1"
-            record CNAME "*.local" "local.${domain}"
+            # Save the IP to the cache
+            echo $ip > $cache
 
           fi
-            
-          # Get all tailscale machines
-          tailscale status | while read line; do
-
-            # Extract ip address and machine name from each line
-            ip="$(echo $line | awk '{print $1}')"
-            name="$(echo $line | awk '{print $2}')"
-
-            # Ensure a cache file exists
-            touch $cache/$name
-
-            # Check if tailscale's IP doesn't match the cached IP
-            if [ "$(cat $cache/$name)" != "$ip" ]; then
-
-              # Create/update two records for each machine
-              record A $name $ip
-              record CNAME "*.$name" $name.${domain}
-
-              # Save the record to the cache
-              echo $ip > $cache/$name
-
-            fi
-
-          done
 
           # All done
           clean
@@ -105,9 +70,6 @@ in {
 
         # Create or update a record
         function record {
-
-          # Require token
-          [ -z "$TOKEN" ] && return 1
 
           # Require three args
           local TYPE="$1" NAME="$2" CONTENTS="$3"
@@ -129,7 +91,7 @@ in {
                   "content": "'$CONTENTS'",
                   "ttl": 300,
                   "proxied": false,
-                  "comment": "tailscale-dns"
+                  "comment": "ddns"
                 }' >/dev/null 2>&1
 
           # Record already exists
@@ -145,7 +107,7 @@ in {
                 "content": "'$CONTENTS'",
                 "ttl": 300,
                 "proxied": false,
-                "comment": "tailscale-dns"
+                "comment": "ddns"
               }' >/dev/null 2>&1
 
           fi
@@ -154,9 +116,6 @@ in {
 
         # Get the record_id of the provided type and name
         function record_id {
-
-          # Require token
-          [ -z "$TOKEN" ] && return 1
 
           # Require two args
           local TYPE="$1" NAME="$2"
@@ -171,9 +130,6 @@ in {
 
         # Get the zone_id for the host's domain
         function zone_id {
-
-          # Require token
-          [ -z "$TOKEN" ] && return 1
 
           # Check if zone_id has been cached on disk
           if [ ! -e /tmp/zone_id ]; then
@@ -201,29 +157,15 @@ in {
       '';
     };
 
-    # Run this script every day
-    systemd.timers."tailscale-dns" = {
+    # Run this script every 15 minutes
+    systemd.timers."ddns" = {
       wantedBy = [ "timers.target" ];
-      partOf = [ "tailscale-dns.service" ];
+      partOf = [ "ddns.service" ];
       timerConfig = {
-        OnCalendar = "daily";
-        Unit = "tailscale-dns.service";
+        OnCalendar = "*:0/15";
+        Unit = "ddns.service";
       };
     };
-
-    systemd.extraConfig = ''
-      DefaultTimeoutStopSec=30s
-    '';
-
-    # # If tailscale is enabled, provide convenient hostnames to each IP address
-    # # These records also exist in Cloudflare DNS, so it's a duplicated effort here.
-    # services.dnsmasq.enable = mkIf cfg.enable true;
-    # services.dnsmasq.extraConfig = with config.networking; mkIf cfg.enable ''
-    #   address=/.local.${domain}/127.0.0.1
-    #   address=/.cog.${domain}/100.67.140.102
-    #   address=/.lux.${domain}/100.103.189.54
-    #   address=/.graphene.${domain}/100.101.42.9
-    # '';
 
   };
 
