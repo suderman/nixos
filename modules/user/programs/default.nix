@@ -3,6 +3,7 @@
   imports = [
     ./chromium.nix
     ./dconf.nix
+    ./direnv.nix
     ./fzf.nix
     ./git.nix
     ./kitty.nix

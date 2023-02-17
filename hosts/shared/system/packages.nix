@@ -10,6 +10,7 @@
       inetutils mtr sysstat gnumake git # basics
       curl htop tmux rsync vim nix-index jq
       usbutils pciutils zip unzip nmap arp-scan dig   
+      sysz
       nix-zsh-completions zsh-completions 
       nix-bash-completions bash-completion
       home-manager # include home-manager command
