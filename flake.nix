@@ -60,10 +60,10 @@
       };
 
       # Make a NixOS system configuration
-      mkSystem = args@{ system ? "x86_64-linux", user ? "me", domain ? "lan", host, ... }: inputs.nixpkgs.lib.nixosSystem rec {
+      mkSystem = args@{ system ? "x86_64-linux", user ? "me", domain ? "lan", publicDomain ? "", host, ... }: inputs.nixpkgs.lib.nixosSystem rec {
         inherit system;
         pkgs = mkPkgs system;
-        specialArgs = args // { inherit inputs outputs user host domain; };
+        specialArgs = args // { inherit inputs outputs user host domain publicDomain; };
         modules = [ 
           ./hosts/${host}/configuration.nix 
           inputs.home-manager.nixosModules.home-manager { home-manager = {
@@ -83,6 +83,7 @@
       };
 
       domain = "suderman.org";
+      publicDomain = "suderman.net";
 
     in {
 
@@ -96,10 +97,10 @@
         cog = mkSystem { host = "cog"; inherit domain; };
 
         # Linode VPS
-        sol = mkSystem { host = "sol"; inherit domain; };
+        sol = mkSystem { host = "sol"; inherit domain publicDomain; };
 
         # Intel NUC home server
-        lux = mkSystem { host = "lux"; inherit domain; };
+        lux = mkSystem { host = "lux"; inherit domain publicDomain; };
 
       };
 

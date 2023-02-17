@@ -88,7 +88,7 @@ in {
           local.ipWhiteList.sourceRange = [ 
             "127.0.0.1/32"   # local host
             "192.168.0.0/16" # local network
-            "10.0.0.0/8"     # local nework
+            "10.0.0.0/8"     # local network
             "172.16.0.0/12"  # local network
             "100.64.0.0/10"  # vpn network
           ];
@@ -115,6 +115,7 @@ in {
               sans = "*.${hostName}.${domain},local.${domain},*.local.${domain}"; 
             }];
           };
+          
         };
 
       };
