@@ -17,11 +17,6 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
-    # macOS configuration
-    # <https://daiderd.com/nix-darwin/manual>
-    darwin.url = "github:lnl7/nix-darwin/master";                              
-    darwin.inputs.nixpkgs.follows = "nixpkgs";
-
     # NixOS profiles for different hardware
     # <https://github.com/NixOS/nixos-hardware>
     hardware.url = "github:nixos/nixos-hardware";

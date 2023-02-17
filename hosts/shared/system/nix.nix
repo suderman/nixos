@@ -1,9 +1,6 @@
 { inputs, config, lib, pkgs, ... }: {
 
-  # ---------------------------------------------------------------------------
   # Nix Settings
-  # ---------------------------------------------------------------------------
-
   nix.settings = {
 
     # Enable flakes and new 'nix' command
@@ -41,6 +38,13 @@
   # Very useful when using legacy commands
   nix.nixPath = lib.mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry;
 
-
+  # Automatically upgrade this system
+  system.autoUpgrade = {
+    enable = true;
+    dates = "04:00";
+    flake = "/etc/nixos#${config.networking.hostName}";
+    flags = [ "--update-input" "nixpkgs" ];
+    allowReboot = true;
+  };
 
 }
