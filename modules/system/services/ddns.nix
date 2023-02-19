@@ -45,9 +45,15 @@ in {
             return 1
           fi
 
-          # tmp file of cached ip
+          # tmp file of cached IP
           local cache=/tmp/ddns
-          touch $cache
+
+          # Remove the cached IP if older than 1 hour
+          if [ -e $cache ]; then
+            test $(find $cache -mmin +60 | head -n 1) && rm -f $cache && touch $cache
+          else
+            touch $cache
+          fi
 
           # Get public IP address from Cloudflare
           ip="$(dig +short txt ch whoami.cloudflare @1.0.0.1 | tr -d \")"
