@@ -1,6 +1,9 @@
 { inputs, config, lib, pkgs, ... }: {
 
-  imports = [ ../shared/system ];
+  imports = [ 
+    ./hardware-configuration.nix 
+    ../shared/system 
+  ];
 
   # Hardware configuration
   hardware.linode.enable = true;
