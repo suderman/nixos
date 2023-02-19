@@ -42,5 +42,5 @@ Then launch a console to install NixOS:
 
 ```zsh
 sudo -s
-bash <(curl -sL https://github.com/suderman/nixos/raw/main/hosts/bootstrap/install.sh)
+bash <(curl -sL https://github.com/suderman/nixos/raw/main/configurations/bootstrap/install.sh)
 ```
