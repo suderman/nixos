@@ -1,25 +1,22 @@
 # Handcrafted alternative to hardware-configuration
 # Uses linode's device mappings instead of device ids 
 # https://www.linode.com/docs/guides/install-nixos-on-linode/
-{ config, lib, pkgs, modulesPath, ... }: 
+{ config, lib, pkgs, modulesPath, ... }: with lib;
 
 let 
   cfg = config.hardware.linode;
+  qemu = import (modulesPath + "/profiles/qemu-guest.nix") { inherit config lib; };
 
 in {
   options = {
-    hardware.linode.enable = lib.options.mkEnableOption "linode"; 
+    hardware.linode.enable = options.mkEnableOption "linode"; 
   };
 
-  # linode.enable = true;
-  config = lib.mkIf cfg.enable ({
-
-    boot.initrd.availableKernelModules = [ "virtio_pci" "virtio_scsi" "ahci" "sd_mod" ];
-    boot.initrd.kernelModules = [ ];
-    boot.kernelModules = [ ];
-    boot.extraModulePackages = [ ];
+  # hardware.linode.enable = true;
+  config = mkIf cfg.enable (recursiveUpdate qemu {
 
     # Enable LISH for Linode
+    boot.initrd.availableKernelModules = [ "ahci" "sd_mod" ];
     boot.kernelParams = [ "console=ttyS0;19200n8" ];
     boot.loader.grub.extraConfig = ''
       serial --speed=19200 --unit=0 --word=8 --parity=non --stop=1;
@@ -47,8 +44,8 @@ in {
       sysstat
     ];
 
-    nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-    hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+    nixpkgs.hostPlatform = mkDefault "x86_64-linux";
+    hardware.cpu.amd.updateMicrocode = mkDefault config.hardware.enableRedistributableFirmware;
 
     # root is ext4
     fileSystems."/" = { 
@@ -69,7 +66,6 @@ in {
       neededForBoot = true; 
     };
 
-  # https://www.reddit.com/r/NixOS/comments/q2t69g/comment/izud6ii/
-  } // import (modulesPath + "/profiles/qemu-guest.nix") { inherit config lib; }); 
+  });
 
 }
