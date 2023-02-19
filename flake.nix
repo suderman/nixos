@@ -40,7 +40,7 @@
   outputs = { self, ... }: 
     
     with builtins;
-    let inherit (self) outputs inputs;
+    let inherit (self) outputs inputs; 
 
       # Get configured pkgs for a given system with overlays, nur and unstable baked in
       mkPkgs = system: import inputs.nixpkgs rec {
@@ -52,6 +52,7 @@
 
         # Include personal scripts and package modifications
         overlays = with (import ./overlays { inherit inputs system config; } ); [ lib pkgs nur unstable ];
+
       };
 
       # Make a NixOS system configuration

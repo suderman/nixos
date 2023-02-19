@@ -12,6 +12,7 @@
     ../../../secrets 
 
     # Shared configuration
+    ./linode.nix
     ./network.nix 
     ./nix.nix 
     ./packages.nix 

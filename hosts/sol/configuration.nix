@@ -1,9 +1,11 @@
 { inputs, config, lib, pkgs, ... }: {
 
   imports = [ 
-    ./linode-configuration.nix 
     ../shared/system 
   ];
+
+  # Hardware configuration
+  hardware.linode.enable = true;
 
   # Enable secrets
   secrets.enable = true;
