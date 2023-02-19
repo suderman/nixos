@@ -61,11 +61,11 @@
         pkgs = mkPkgs system;
         specialArgs = args // { inherit inputs outputs user host domain publicDomain; };
         modules = [ 
-          ./hosts/${host}/configuration.nix 
+          ./configurations/${host}/configuration.nix 
           inputs.home-manager.nixosModules.home-manager { home-manager = {
             useGlobalPkgs = true; useUserPackages = true;
             extraSpecialArgs = { inherit inputs outputs user; };
-            users."${user}" = import ./hosts/${host}/home.nix;
+            users."${user}" = import ./configurations/${host}/home.nix;
           }; } 
         ];
 
@@ -75,7 +75,7 @@
       mkUser = args@{ system ? "x86_64-linux", user? "me", host, ... }: inputs.home-manager.lib.homeManagerConfiguration rec {
         pkgs = mkPkgs system;
         extraSpecialArgs = args // { inherit inputs outputs user; };
-        modules = [ ./hosts/${host}/home.nix ];
+        modules = [ ./configurations/${host}/home.nix ];
       };
 
       domain = "suderman.org";
