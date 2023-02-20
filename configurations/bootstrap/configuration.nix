@@ -1,12 +1,12 @@
 { config, pkgs, ... }: {
 
   imports = [ 
-    ./hardware-configuration.nix 
+    ./hardware-configuration.nix
     ../shared/system 
   ];
 
   # Enable linode config
-  linode.enable = true;
+  linode.enable = false;
 
   # Configure the SSH daemon
   services.openssh.enable = true;
