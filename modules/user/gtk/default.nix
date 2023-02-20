@@ -10,7 +10,7 @@ in {
 
     gtk = {
 
-      gtk3.bookmarks = with home; [
+      gtk3.bookmarks = with config.home; [
         "file://${homeDirectory} home"
         "sftp://lux${homeDirectory} lux"
       ];

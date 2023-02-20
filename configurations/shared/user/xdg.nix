@@ -10,14 +10,14 @@ let
 
 in {
 
-  # secrets
-  homeage.file = lib.mkIf homeage.enable {
-    super-secret.source = homeage.files.self-env;
-    super-secret.symlinks = with config.xdg [ 
-      "${configHome}/super-secret.txt" 
-      "${configHome}/super-duper-secret.txt" 
-    ];
-  };
+  # # secrets
+  # homeage.file = lib.mkIf homeage.enable {
+  #   super-secret.source = homeage.files.self-env;
+  #   super-secret.symlinks = with config.xdg [ 
+  #     "${configHome}/super-secret.txt" 
+  #     "${configHome}/super-duper-secret.txt" 
+  #   ];
+  # };
 
   xdg.userDirs = {
     enable = true;
@@ -39,6 +39,5 @@ in {
   #   ];
   #   gtkUsePortal = true;
   # };
-
 
 }
