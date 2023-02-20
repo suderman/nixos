@@ -1,8 +1,6 @@
 { config, pkgs, lib, ... }: 
 
 let
-  inherit (config) xdg;
-  inherit (lib) mkIf;
 
   # homeage secrets combined with age files paths
   homeage = config.homeage // { 
@@ -11,6 +9,16 @@ let
   };
 
 in {
+
+  # secrets
+  homeage.file = lib.mkIf homeage.enable {
+    super-secret.source = homeage.files.self-env;
+    super-secret.symlinks = with config.xdg [ 
+      "${configHome}/super-secret.txt" 
+      "${configHome}/super-duper-secret.txt" 
+    ];
+  };
+
   xdg.userDirs = {
     enable = true;
     createDirectories = false;
@@ -32,10 +40,5 @@ in {
   #   gtkUsePortal = true;
   # };
 
-  # agenix
-  homeage.file = mkIf homeage.enable {
-    super-secret.source = homeage.files.self-env;
-    super-secret.symlinks = [ "${xdg.configHome}/super-secret.txt" "${xdg.configHome}/super-duper-secret.txt" ];
-  };
 
 }

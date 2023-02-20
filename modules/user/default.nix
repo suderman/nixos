@@ -1,8 +1,18 @@
-{ ... }: 
+{ ... }:
 {
   imports = [
-    ./programs
-    ./services
-    ./settings
+    ./chromium
+    ./dconf
+    ./direnv
+    ./fzf
+    ./git
+    ./gtk
+    ./keyd
+    ./kitty
+    ./neovim
+    ./secrets
+    ./tmux
+    ./wezterm
+    ./zsh
   ];
 }

@@ -23,6 +23,13 @@
     sysz
     tealdeer
     wget
+
+    darktable
+    fish
+    inkscape
+    nsxiv
+    zsh
+
   ];
 
   # Enable home-manager, git & zsh

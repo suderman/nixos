@@ -1,3 +1,4 @@
+# services.ocis.enable = true;
 { config, lib, pkgs, ... }:
   
 let 
@@ -11,7 +12,6 @@ in {
     services.ocis.enable = lib.options.mkEnableOption name; 
   };
 
-  # services.ocis.enable = true;
   config = with config.networking; lib.mkIf cfg.enable {
 
     virtualisation.oci-containers.containers.ocis = {

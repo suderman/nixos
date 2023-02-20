@@ -1,12 +1,14 @@
-{ config, lib, pkgs, ... }:
+# programs.tmux.enable = true;
+{ config, lib, pkgs, ... }: 
 
 with lib;
+
 let
-  # cfg = config.hurricane.configs.tmux;
-  # zshrcBeforeCompInit = (import ./zshrc-BeforeCompInit.nix pkgs).zshrcBeforeCompInit;
-  # zshrcExtra = (import ./zshrc-extra.nix pkgs).zshrcExtra;
-  # tmuxConf = (import ./tmux-conf.nix { inherit lib config; }).tmuxConf;
+  cfg = config.programs.tmux;
+
 in {
+
+  config = lib.mkIf cfg.enable {
 
     # programs.tmux.enable = true;
     programs.tmux = {
@@ -164,4 +166,7 @@ in {
     # Adding helper functions to improve zsh and tmux
     # programs.zsh.initExtraBeforeCompInit = zshrcBeforeCompInit;
     # programs.zsh.initExtra = zshrcExtra;
+
+  };
+
 }

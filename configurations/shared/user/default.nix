@@ -15,6 +15,8 @@
     ./nix.nix 
     ./packages.nix 
     ./user.nix 
+    ./wayland.nix 
+    ./xdg.nix 
 
   ];
 

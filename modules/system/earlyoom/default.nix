@@ -1,11 +1,11 @@
-{ config, lib, pkgs, user, ... }:
+# services.earlyoom.enable = true;
+{ config, lib, ... }:
 
 let
   cfg = config.services.earlyoom;
 
 in {
 
-  # services.earlyoom.enable = true;
   config = lib.mkIf cfg.enable {
 
     services.earlyoom = {

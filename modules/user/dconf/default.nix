@@ -1,4 +1,5 @@
-{ config, pkgs, lib, ... }:
+# programs.dconf.enable = true;
+{ config, lib, pkgs, ... }:
 
 let 
   cfg = config.programs.dconf;
@@ -9,7 +10,6 @@ in {
     programs.dconf.enable = lib.options.mkEnableOption "dconf"; 
   };
 
-  # programs.dconf.enable = true;
   config = lib.mkIf cfg.enable {
 
     # Install dconf

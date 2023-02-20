@@ -1,3 +1,4 @@
+# services.keyd.enable = true;
 { config, lib, pkgs, ... }: 
 
 with pkgs; 
@@ -10,7 +11,6 @@ in {
     services.keyd.enable = lib.options.mkEnableOption "keyd"; 
   };
 
-  # services.keyd.enable = true;
   config = lib.mkIf cfg.enable {
 
     # Install keyd package

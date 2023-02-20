@@ -1,3 +1,4 @@
+# services.mysql.enable = true;
 { config, lib, pkgs, user, ... }:
 
 let
@@ -5,7 +6,6 @@ let
 
 in {
 
-  # services.mysql.enable = true;
   config = lib.mkIf cfg.enable {
 
     services.mysql.package = pkgs.mysql80;

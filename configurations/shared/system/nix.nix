@@ -50,7 +50,7 @@
       "--update-input" "home-manager"
       "--update-input" "agenix"
       "--update-input" "impermanence"
-      "--commit-lock-file" 
+      # "--commit-lock-file" 
     ];
     allowReboot = true;
   };

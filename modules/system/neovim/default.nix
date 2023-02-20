@@ -1,3 +1,4 @@
+# programs.neovim.enable = true;
 { config, lib, pkgs, ... }: 
 
 let
@@ -5,7 +6,6 @@ let
 
 in {
 
-  # programs.neovim.enable = true;
   programs.neovim = {
     viAlias = true;
     vimAlias = true;

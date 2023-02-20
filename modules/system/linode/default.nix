@@ -1,3 +1,5 @@
+# hardware.linode.enable = true;
+#
 # https://www.linode.com/docs/guides/install-nixos-on-linode/
 { config, lib, pkgs, ... }:
 
@@ -9,7 +11,6 @@ in {
     hardware.linode.enable = lib.options.mkEnableOption "linode"; 
   };
 
-  # hardware.linode.enable = true;
   config = lib.mkIf cfg.enable {
 
     # Enable LISH for Linode

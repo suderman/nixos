@@ -7,6 +7,7 @@
     ./flatpak
     ./gnome
     ./keyd
+    ./linode
     ./mysql
     ./neovim
     ./ocis

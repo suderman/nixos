@@ -1,3 +1,4 @@
+# programs.zsh.enable = true;
 { config, lib, pkgs, ... }:
 
 let 
@@ -5,7 +6,6 @@ let
 
 in {
 
-  # programs.zsh.enable = true;
   config = lib.mkIf cfg.enable {
 
     programs.zsh = {

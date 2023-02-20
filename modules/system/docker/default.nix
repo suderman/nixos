@@ -1,3 +1,4 @@
+# virtualization.docker.enable = true;
 { config, lib, pkgs, ... }:
 
 let
@@ -5,13 +6,10 @@ let
 
 in {
 
-  # virtualization.docker.enable = true;
   config = lib.mkIf cfg.enable {
-
     virtualisation.docker = {
       storageDriver = "overlay2";
     };
-
   };
 
 }

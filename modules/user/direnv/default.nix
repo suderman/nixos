@@ -1,3 +1,4 @@
+# programs.direnv.enable = true;
 { config, lib, pkgs, ... }:
 
 let 
@@ -5,7 +6,6 @@ let
 
 in {
 
-  # programs.direnv.enable = true;
   config = lib.mkIf cfg.enable {
 
     programs.direnv.nix-direnv.enable = true;
