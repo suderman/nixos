@@ -16,9 +16,6 @@
 
   config = mkIf config.base.enable {
 
-    # Persist state in /nix/state
-    state.enable = true;
-
     # Set your time zone.
     time.timeZone = "America/Edmonton";
 

@@ -12,7 +12,10 @@
       # Deduplicate and optimize nix store
       auto-optimise-store = true;
 
+      # Root and sudo users
       trusted-users = [ "root" "@wheel" ];
+
+      # Supress annoying warning
       warn-dirty = false;
 
       # substituters = [
