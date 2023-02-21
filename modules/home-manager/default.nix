@@ -1,6 +1,7 @@
 { ... }:
 {
   imports = [
+    ./base
     ./chromium
     ./dconf
     ./direnv

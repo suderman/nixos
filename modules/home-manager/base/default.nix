@@ -4,20 +4,11 @@
   # Common configuration for all Home Manager hosts
   # ---------------------------------------------------------------------------
   imports = [ 
-    
-    # User modules
-    ../../../modules/user 
-
-    # Secrets and keys
-    ../../../secrets 
-
-    # Shared configuration
     ./nix.nix 
     ./packages.nix 
     ./user.nix 
     ./wayland.nix 
     ./xdg.nix 
-
   ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion

@@ -62,20 +62,35 @@
         specialArgs = args // { inherit inputs outputs user host domain publicDomain; };
         modules = [ 
           ./configurations/${host}/configuration.nix 
-          inputs.home-manager.nixosModules.home-manager { home-manager = {
-            useGlobalPkgs = true; useUserPackages = true;
-            extraSpecialArgs = { inherit inputs outputs user; };
-            users."${user}" = import ./configurations/${host}/home.nix;
-          }; } 
+          ./modules/nixos 
+          ./secrets 
+          inputs.home-manager.nixosModules.home-manager { 
+            home-manager = {
+              useGlobalPkgs = true; 
+              useUserPackages = true;
+              extraSpecialArgs = { inherit inputs outputs user; };
+              users."${user}" = let home = { imports }: { inherit imports; };
+              in home { 
+                imports = [
+                  ./configurations/${host}/home.nix 
+                  ./modules/home-manager 
+                  ./secrets 
+                ]; 
+              };
+            }; 
+          } 
         ];
-
       };
 
       # Make a Home Manager configuration
-      mkUser = args@{ system ? "x86_64-linux", user? "me", host, ... }: inputs.home-manager.lib.homeManagerConfiguration rec {
+      mkUser = args@{ system ? "x86_64-linux", user ? "me", host, ... }: inputs.home-manager.lib.homeManagerConfiguration rec {
         pkgs = mkPkgs system;
         extraSpecialArgs = args // { inherit inputs outputs user; };
-        modules = [ ./configurations/${host}/home.nix ];
+        modules = [ 
+          ./configurations/${host}/home.nix 
+          ./modules/home-manager 
+          ./secrets 
+        ];
       };
 
       domain = "suderman.org";

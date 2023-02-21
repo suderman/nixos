@@ -1,6 +1,7 @@
 { ... }:
 {
   imports = [
+    ./base
     ./ddns
     ./docker
     ./earlyoom

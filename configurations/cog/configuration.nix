@@ -3,7 +3,6 @@
   imports = [ 
     ./hardware-configuration.nix 
     inputs.hardware.nixosModules.framework 
-    ../shared/system 
   ];
 
   # root is tmpfs

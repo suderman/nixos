@@ -4,20 +4,11 @@
   # Common Configuration for all NixOS hosts
   # ---------------------------------------------------------------------------
   imports = [ 
-    
-    # System modules
-    ../../../modules/system 
-
-    # Secrets and keys
-    ../../../secrets 
-
-    # Shared configuration
     ./network.nix 
     ./nix.nix 
     ./packages.nix 
     ./sudo.nix 
     ./users.nix 
-
   ];
 
   # Persist state in /nix/state
