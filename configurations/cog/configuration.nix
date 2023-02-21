@@ -19,7 +19,8 @@
     neededForBoot = true; 
   };
 
-  # Enable secrets
+  base.enable = true;
+  state.enable = true;
   secrets.enable = true;
 
   desktops.gnome.enable = true;

@@ -2,14 +2,14 @@
 
   imports = [ 
     ./hardware-configuration.nix 
-    ../shared/system 
   ];
+
+  base.enable = true;
+  state.enable = true;
+  secrets.enable = true;
 
   # Hardware configuration
   hardware.linode.enable = true;
-
-  # Enable secrets
-  secrets.enable = true;
 
   # Services
   services.tailscale.enable = true;

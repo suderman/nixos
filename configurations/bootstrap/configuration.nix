@@ -2,11 +2,14 @@
 
   imports = [ 
     ./hardware-configuration.nix
-    ../shared/system 
   ];
 
+  base.enable = true;
+  state.enable = true;
+  secrets.enable = false;
+
   # Enable linode config
-  linode.enable = false;
+  hardware.linode.enable = false;
 
   # Configure the SSH daemon
   services.openssh.enable = true;

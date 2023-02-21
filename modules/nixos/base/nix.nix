@@ -1,58 +1,63 @@
-{ inputs, config, lib, pkgs, ... }: {
+# base.enable = true;
+{ config, lib, inputs, ... }: with lib; {
 
-  # Nix Settings
-  nix.settings = {
+  config = mkIf config.base.enable {
 
-    # Enable flakes and new 'nix' command
-    experimental-features = [ "nix-command" "flakes" "repl-flake" ];
+    # Nix Settings
+    nix.settings = {
 
-    # Deduplicate and optimize nix store
-    auto-optimise-store = true;
+      # Enable flakes and new 'nix' command
+      experimental-features = [ "nix-command" "flakes" "repl-flake" ];
 
-    trusted-users = [ "root" "@wheel" ];
-    warn-dirty = false;
+      # Deduplicate and optimize nix store
+      auto-optimise-store = true;
 
-    # substituters = [
-    #   "https://hyprland.cachix.org"
-    #   "https://nix-community.cachix.org"
-    # ];
-    # trusted-public-keys = [
-    #   "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
-    #   "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-    # ];
+      trusted-users = [ "root" "@wheel" ];
+      warn-dirty = false;
 
-  };
+      # substituters = [
+      #   "https://hyprland.cachix.org"
+      #   "https://nix-community.cachix.org"
+      # ];
+      # trusted-public-keys = [
+      #   "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
+      #   "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      # ];
 
-  # Automatic garbage collection
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 30d";
-  };
+    };
 
-  # Add each flake input as a registry
-  # To make nix3 commands consistent with the flake
-  nix.registry = lib.mapAttrs (_: value: { flake = value; }) inputs;
+    # Automatic garbage collection
+    nix.gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 30d";
+    };
 
-  # Map registries to channels
-  # Very useful when using legacy commands
-  nix.nixPath = lib.mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry;
+    # Add each flake input as a registry
+    # To make nix3 commands consistent with the flake
+    nix.registry = mapAttrs (_: value: { flake = value; }) inputs;
 
-  # Automatically upgrade this system while I sleep
-  system.autoUpgrade = {
-    enable = true;
-    dates = "04:00";
-    flake = "/etc/nixos#${config.networking.hostName}";
-    flags = [ 
-      "--update-input" "nixpkgs"
-      "--update-input" "unstable"
-      "--update-input" "nur"
-      "--update-input" "home-manager"
-      "--update-input" "agenix"
-      "--update-input" "impermanence"
-      # "--commit-lock-file" 
-    ];
-    allowReboot = true;
+    # Map registries to channels
+    # Very useful when using legacy commands
+    nix.nixPath = mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry;
+
+    # Automatically upgrade this system while I sleep
+    system.autoUpgrade = {
+      enable = true;
+      dates = "04:00";
+      flake = "/etc/nixos#${config.networking.hostName}";
+      flags = [ 
+        "--update-input" "nixpkgs"
+        "--update-input" "unstable"
+        "--update-input" "nur"
+        "--update-input" "home-manager"
+        "--update-input" "agenix"
+        "--update-input" "impermanence"
+        # "--commit-lock-file" 
+      ];
+      allowReboot = true;
+    };
+
   };
 
 }

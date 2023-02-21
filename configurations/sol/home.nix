@@ -1,6 +1,7 @@
 { config, lib, pkgs, ... }: {
 
-  imports = [ ../shared/user ];
+  base.enable = true;
+  secrets.enable = false;
 
   # ---------------------------------------------------------------------------
   # Home Enviroment & Packages
