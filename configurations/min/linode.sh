@@ -1,253 +1,222 @@
 #!/usr/bin/env bash
 
-# Install script
-# sudo -s
-# bash <(curl -sL https://github.com/suderman/nixos/raw/main/configurations/bootstrap/install.sh)
-function install {
+min="$(dirname $(readlink -f $0))"
+dir="$(dirname $(dirname $min))"
 
-  if [ "$(id -u)" != "0" ]; then
-    msg "Exiting, run as root."
-    return
-  fi
+# Main function
+function main {
 
   # Banner
   yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ \n"
-  yellow "┃        Suderman's NixOS Installer         ┃ \n"
+  yellow "┃         Suderman's Linode Setup           ┃ \n"
   yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ \n"
 
-  # Double check we wanna do this
-  if ! ask "This script is to be used on freshly partitioned disks without data worth saving.\n...onward?"; then
+  if [ -z "$LINODE_ID" ]; then
+    linodes=($(linode-cli linodes list --text --no-header | awk '{print $1"_"$2}'))
+    choose -q "Choose which existing linode to prepare" -o linodes -m 8 -v "linode"
+    LINODE_ID="${linode%_*}"
+  fi
+
+  # Bail if no ID was selected
+  if [ -z "$LINODE_ID" ]; then
+    msg "Exiting, no LINODE_ID provided"
     return
   fi
 
-  # List disks and partitions for reference
-  echo
-  blue "Disks & Partitions                            \n"
-  blue "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ \n"
-  lsblk -o NAME,FSTYPE,SIZE
-  blue "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ \n"
+  # Look up details about this linode
+  local id="$LINODE_ID" 
+  local label="$(linode-cli linodes view $id --format label --no-header --text)"
+  local linode_type=$(linode-cli linodes view $id --no-header --text --format type) # example: g6-standard-1
+  local linode_size=$(linode-cli linodes type-view $linode_type --no-header --text --format disk) # example: 51200
+  local iso_size=1024  # reserve 1GB for installer
+  local root_size=1024 # reserve 1GB for root
+  local swap_size=2048 # reserve 2GB for swap
+  local nix_size=$((linode_size - iso_size - root_size - swap_size)) # nix uses remaining available disk
+  local flags iso_flag iso_flag swap_flag nix_flag nixos_flag installer_flag
 
-  # Choose a root device (or tmpfs)
-  devices=$(lsblk -o NAME -nir | xargs)
-  choices=("tmpfs" $devices)
-  choose -q "1.  Choose the $(yellow ROOT) device" -o choices -m 8 -v "device"
-  ROOT_MNT="/mnt" ROOT_FS="tmpfs" ROOT_DEV="-"
-  [ -b /dev/${device} ] && ROOT_FS="ext4" ROOT_DEV="/dev/${device}"
-
-  # Choose a boot device (or none)
-  devices=$(echo " $devices " | sed s/"\s${device}\s"/" "/g | xargs)
-  choices=("none" $devices)
-  choose -q "2. Choose the $(yellow BOOT) device" -o choices -m 8 -v "device"
-  BOOT_MNT="-" BOOT_FS="-" BOOT_DEV="-"
-  [ -b /dev/${device} ] && BOOT_MNT="/mnt/boot" BOOT_FS="vfat" BOOT_DEV="/dev/${device}"
-
-  # Choose a swap device (or none)
-  devices=$(echo " $devices " | sed s/"\s${device}\s"/" "/g | xargs)
-  choices=("none" $devices)
-  choose -q "3. Choose the $(yellow SWAP) device" -o choices -m 8 -v "device"
-  SWAP_MNT="-" SWAP_FS="-" SWAP_DEV="-"
-  [ -b /dev/${device} ] && SWAP_FS="swap" SWAP_DEV="/dev/${device}" 
-
-  # Choose a nix device (required)
-  devices=$(echo " $devices " | sed s/"\s${device}\s"/" "/g | xargs)
-  choices=($devices)
-  choose -q "4. Choose the $(yellow NIX) device" -o choices -m 8 -v "device"
-  NIX_MNT="-" NIX_FS="-" NIX_DEV="-"
-  [ -b /dev/${device} ] && NIX_MNT="/mnt/nix" NIX_FS="btrfs" NIX_DEV="/dev/${device}" 
-
-  # Prepare padded values for table display
-  _A1_____="$(printf "%-9s%s" $ROOT_MNT)" _A2_="$(printf "%-5s%s" $ROOT_FS)" _A3__________="$(printf "%-14s%s" $ROOT_DEV)"
-  _B1_____="$(printf "%-9s%s" $BOOT_MNT)" _B2_="$(printf "%-5s%s" $BOOT_FS)" _B3__________="$(printf "%-14s%s" $BOOT_DEV)"
-  _C1_____="$(printf "%-9s%s" $SWAP_MNT)" _C2_="$(printf "%-5s%s" $SWAP_FS)" _C3__________="$(printf "%-14s%s" $SWAP_DEV)"
-  _D1_____="$(printf "%-9s%s"  $NIX_MNT)" _D2_="$(printf "%-5s%s"  $NIX_FS)" _D3__________="$(printf "%-14s%s"  $NIX_DEV)"
-
-  # Print a delightful table summarizing what's about to happen
-  echo
-  purple "┏━━━━━━┳━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━┓ \n"
-  purple "┃ ROLE ┃ MOUNT     ┃ TYPE  ┃ DEVICE         ┃ \n"
-  purple "┣━━━━━━╋━━━━━━━━━━━╋━━━━━━━╋━━━━━━━━━━━━━━━━┫ \n"
-  purple "┃ Root ┃ $_A1_____ ┃ $_A2_ ┃ $_A3__________ ┃ \n"
-  purple "┃ Boot ┃ $_B1_____ ┃ $_B2_ ┃ $_B3__________ ┃ \n"
-  purple "┃ Swap ┃ $_C1_____ ┃ $_C2_ ┃ $_C3__________ ┃ \n"
-  purple "┃ Nix  ┃ $_D1_____ ┃ $_D2_ ┃ $_D3__________ ┃ \n"
-  purple "┗━━━━━━┻━━━━━━━━━━━┻━━━━━━━┻━━━━━━━━━━━━━━━━┛ \n"
-  echo
-
-  # Bail if no nix device was selected
-  if [ "$NIX_DEV" = "-" ]; then
-    msg "Exiting, no NIX device selected"
-    return
-  fi
 
   # Final warning
-  if ! ask "$(red "DANGER! Last chance to bail!") \nFormat & prepare partitions for NixOS install?"; then
+  if ! ask "$(red "DANGER! Last chance to bail!") \nRe-create all disks and configurations for linode \"${label}\"?"; then
     return
   fi
+  echo
 
-  red "OK! Proceeding in 5 seconds..."
+  function wait_for_linode {
+    printf "   "
+    while [ "$(linode-cli linodes view $id --text --no-header --format status)" != "$1" ]; do
+      yellow "."
+      sleep 5
+    done
+    echo
+  }
+
+  function wait_for_disk {
+    while [ "$(linode-cli linodes disk-view $id $1 --text --no-header --format status 2>/dev/null)" != "ready" ]; do
+      sleep 5
+    done
+    echo
+  }
+
+  # Power down
+  msg "OK! Powering off linode \"${label}\". Please wait..."
+  run linode-cli linodes shutdown $id
+  wait_for_linode "offline"
+  echo
+
+
+  # Delete all configurations
+  msg "Deleting any existing configurations"
+  configs=($(linode-cli linodes configs-list $id --text | awk 'NR > 1 {print $1}'))
+  for config_id in "${configs[@]}"; do
+    run linode-cli linodes config-delete $id $config_id
+    sleep 5
+  done
+  echo
+
+  # Delete all disks
+  msg "Deleting any existing disks"
+  disks=($(linode-cli linodes disks-list $id --text | awk 'NR > 1 {print $1}'))
+  for disk_id in "${disks[@]}"; do
+    run linode-cli linodes disk-delete $id $disk_id
+    while [ "$(linode-cli linodes disk-view $id $disk_id --text --no-header --format status 2>/dev/null)" == "deleting" ]; do
+      sleep 5
+    done
+  done
+  echo
+
+
+  # Shared flags
+  flags="--text --no-header"
+
+  msg "Creating ISO disk"
+  run linode-cli linodes disk-create $id $flags --label iso --filesystem ext4 --size $iso_size
+  disk_id="$(cat /tmp/run | awk '{print $1}')"
+  iso_flag="--devices.sdd.disk_id $disk_id"
+  wait_for_disk $disk_id
+
+  msg "Creating ROOT disk"
+  run linode-cli linodes disk-create $id $flags --label root --filesystem ext4 --size $root_size
+  disk_id="$(cat /tmp/run | awk '{print $1}')"
+  root_flag="--devices.sda.disk_id $disk_id"
+  wait_for_disk $disk_id
+
+  msg "Creating SWAP disk"
+  run linode-cli linodes disk-create $id $flags --label swap --filesystem swap --size $swap_size
+  disk_id="$(cat /tmp/run | awk '{print $1}')"
+  swap_flag="--devices.sdb.disk_id $disk_id"
+  wait_for_disk $disk_id
+
+  msg "Creating NIX disk"
+  run linode-cli linodes disk-create $id $flags --label nix --filesystem raw --size $nix_size
+  disk_id="$(cat /tmp/run | awk '{print $1}')"
+  nix_flag="--devices.sdc.disk_id $disk_id"
+  wait_for_disk $disk_id
+
+
+  # Shared flags
+  flags="--text --no-header"
+  flags="$flags --helpers.updatedb_disabled=0 --helpers.distro=0 --helpers.modules_dep=0 --helpers.network=0 --helpers.devtmpfs_automount=0"
+  flags="$flags $root_flag $swap_flag $nix_flag"
+
+  # Create the main configuration
+  msg "Creating NIXOS configuration"
+  run linode-cli linodes config-create $LINODE_ID $flags --label nixos --kernel linode/grub2 --root_device /dev/sda
+  nixos_flag="--config_id $(cat /tmp/run | awk '{print $1}')"
+  sleep 10
+  echo
+
+  # Create the installer configuration
+  msg "Creating INSTALLER configuration"
+  run linode-cli linodes config-create $LINODE_ID $flags $iso_flag --label installer --kernel linode/direct-disk --root_device /dev/sdd
+  installer_flag="--config_id $(cat /tmp/run | awk '{print $1}')"
+  sleep 10
+  echo
+
+  # Rescue mode
+  msg "Rebooting the linode in RESCUE mode"
+  run linode-cli linodes rescue $id $iso_flag
   sleep 5
-  echo
-  echo
-
-  # Prepare root mount point (gonna be /mnt)
-  mkdir -p $ROOT_MNT
-
-  # If root's device is ext4, check format and mount
-  if [ "$ROOT_FS" = "ext4" ]; then
-
-    # Format this device if required
-    if [ "$(lsblk $ROOT_DEV -no FSTYPE)" != "$ROOT_FS" ]; then
-      msg "Formating $ROOT_DEV as $ROOT_FS for the root partition"
-      cmd "mkfs.ext4 -F -L root $ROOT_DEV"
-      mkfs.ext4 -L root $ROOT_DEV
-      echo
-    fi
-
-    # Mount this device
-    msg "Mounting $ROOT_DEV to $ROOT_MNT"
-    cmd "mount $ROOT_DEV $ROOT_MNT"
-    mount $ROOT_DEV $ROOT_MNT
-    echo
-
-  # Mount tmpfs at /mnt
-  elif [ "$ROOT_FS" = "tmpfs" ]; then
-    msg "Mounting $ROOT_FS to $ROOT_MNT"
-    cmd "mount -t $ROOT_FS none $ROOT_MNT"
-    mount -t tmpfs none $ROOT_MNT
-    echo
-  fi
-
-  # Prepare boot mount point
-  mkdir -p $BOOT_MNT
-
-  # Format boot partition
-  if [ "$BOOT_FS" = "vfat" ]; then
-
-    msg "Formating $BOOT_DEV as $BOOT_FS for the boot partition"
-    cmd "mkfs.fat -F32 $BOOT_DEV"
-    mkfs.fat -F32 $BOOT_DEV
-    echo
-
-    msg "Mounting $BOOT_DEV to $BOOT_MNT"
-    cmd "mount $BOOT_DEV $BOOT_MNT"
-    mount $BOOT_DEV $BOOT_MNT
-    echo
-
-  fi
-
-
-  # Check swap format and mount
-  if [ "$SWAP_FS" = "swap" ]; then
-
-    # Format this device if required
-    if [ "$(lsblk $SWAP_DEV -no FSTYPE)" != "$SWAP_FS" ]; then
-      msg "Formating $SWAP_DEV as $SWAP_FS"
-      cmd "mkswap $SWAP_DEV"
-      mkswap $SWAP_DEV
-      echo
-    fi
-
-    # Enable swap partition
-    msg "Enabling $SWAP_FS"
-    cmd "swapon $SWAP_DEV"
-    swapon $SWAP_DEV
-    echo
-
-  fi
-
-
-  # Prepare nix mount point
-  mkdir -p $NIX_MNT
-
-  # Prepare nix btrfs and subvolumes
-  if [ "$NIX_FS" = "btrfs" ]; then
-
-    # Format this device if required
-    if [ "$(lsblk $NIX_DEV -no FSTYPE)" != "$NIX_FS" ]; then
-      msg "Formating $NIX_DEV as $NIX_FS for the nix partition"
-      cmd "mkfs.btrfs -L nix $NIX_DEV"
-      mkfs.btrfs -L nix $NIX_DEV
-      echo
-    fi
-
-    # Mount nix btrfs
-    msg "Mounting $NIX_DEV to $NIX_MNT"
-    cmd "mount -o compress-force=zstd,noatime $NIX_DEV $NIX_MNT"
-    mount -o compress-force=zstd,noatime $NIX_DEV $NIX_MNT
-    echo
-
-    # Create nested subvolume tree like so:
-    # nix
-    # ├── snaps
-    # └── state
-    #     ├── home
-    #     ├── etc
-    #     └── var
-    #         └── log
-    msg "Creating snaps subvolume"
-    cmd "btrfs subvolume create $NIX_MNT/snaps"
-    [ -d $NIX_MNT/snaps ] || btrfs subvolume create $NIX_MNT/snaps
-    echo
-
-    msg "Creating state subvolume"
-    cmd "btrfs subvolume create $NIX_MNT/state"
-    [ -d $NIX_MNT/state ] || btrfs subvolume create $NIX_MNT/state
-    echo
-
-    msg "Creating home subvolume"
-    cmd "btrfs subvolume create $NIX_MNT/state/home"
-    [ -d $NIX_MNT/state/home ] || btrfs subvolume create $NIX_MNT/state/home
-    echo
-   
-    msg "Creating state var/etc directory structure"
-    cmd "mkdir -p $NIX_MNT/state/{var/lib,etc/{ssh,NetworkManager/system-connections}}"
-    mkdir -p $NIX_MNT/state/{var,etc/ssh}
-    echo
-
-    msg "Creating log subvolume"
-    cmd "btrfs subvolume create $NIX_MNT/state/var/log"
-    [ -d $NIX_MNT/state/var/log ] || btrfs subvolume create $NIX_MNT/state/var/log
-    echo
-
-  fi
-
-  # Ensure git is installed
-  command -v git >/dev/null 2>&1 || ( cmd "nix-env -iA nixos.git" && nix-env -iA nixos.git && echo )
-
-  # Clone git repo into persistant directory
-  msg "Cloning nixos git repo"
-  if [ -d $NIX_MNT/state/etc/nixos ]; then
-    cmd "cd $NIX_MNT/state/etc/nixos && git pull"
-    cd $NIX_MNT/state/etc/nixos && git pull
-  else
-    cmd "git clone https://github.com/suderman/nixos $NIX_MNT/state/etc/nixos"
-    git clone https://github.com/suderman/nixos $NIX_MNT/state/etc/nixos 
-  fi
+  wait_for_linode "running"
   echo
 
-  # Generate config and copy hardware-configuration.nix
-  msg "Generating hardware-configuration.nix"
-  cmd "nixos-generate-config --root $ROOT_MNT --dir $NIX_MNT/state/etc/nixos/configurations/bootstrap"
-  nixos-generate-config --root $ROOT_MNT --dir $NIX_MNT/state/etc/nixos/configurations/bootstrap
-  cmd "cp -f $NIX_MNT/state/etc/nixos/configurations/bootstrap/hardware-configuration.nix $NIX_MNT/state/etc/nixos/"
-  cp -f $NIX_MNT/state/etc/nixos/configurations/bootstrap/hardware-configuration.nix $NIX_MNT/state/etc/nixos/
-  cmd "chown -R 1000:100 $NIX_MNT/state/etc/nixos"
-  chown -R 1000:100 $NIX_MNT/state/etc/nixos
+  # Create ISO disk
+  msg "Opening a Weblish console:"
+  url "https://cloud.linode.com/linodes/$id/lish/weblish"
   echo
-  
-  # Run nixos installer
-  msg "Installing NixOS in 5 seconds..."
-  cmd "nixos-install --flake $NIX_MNT/state/etc/nixos\#bootstrap --no-root-password"
+  msg "Paste the following to download the NixOS installer (copied to clipboard):"
+  line1="iso=https://channels.nixos.org/nixos-22.11/latest-nixos-minimal-x86_64-linux.iso"
+  line2="curl -L \$iso | tee >(dd of=/dev/sdd) | sha256sum"
+  out $line1
+  out $line2
+  echo "$line1; $line2" | wl-copy
+  echo
+  msg "Wait until it's finished before we reboot with the INSTALLER config"
+  pause
+  echo
+
+  # Installer config
+  msg "Rebooting the linode..."
+  run linode-cli linodes reboot $id $installer_flag
   sleep 5
-  nixos-install --flake $NIX_MNT/state/etc/nixos\#bootstrap --no-root-password
+  wait_for_linode "running"
   echo
 
-  msg "...install is complete. \nReboot without installer media and check if it actually worked. ;-)"
+  msg "Opening a Glish console:"
+  url "https://cloud.linode.com/linodes/$id/lish/glish"
+  echo
+  msg "Paste the following to install NixOS (second line copied to clipboard):"
+  echo "sudo -s"
+  echo "LINODE=1 bash <(curl -sL https://github.com/suderman/nixos/raw/main/configurations/min/install.sh)" | tee >(wl-copy)
+  echo
+  msg "In the NixOS installer, make the following selections:"
+  purple "┏━━━━━━┳━━━━━━━━┓ \n"
+  purple "┃ ROLE ┃ DEVICE ┃ \n"
+  purple "┣━━━━━━╋━━━━━━━━┫ \n"
+  purple "┃ Root ┃ sda    ┃ \n"
+  purple "┃ Boot ┃ none   ┃ \n"
+  purple "┃ Swap ┃ sdb    ┃ \n"
+  purple "┃ Nix  ┃ sdc    ┃ \n"
+  purple "┗━━━━━━┻━━━━━━━━┛ \n"
+  echo
+
+  msg "Wait until it's finished before we reboot with NIXOS config"
+  pause
+  echo
+
+  # NixOS config
+  msg "Rebooting the linode..."
+  run linode-cli linodes reboot $id $nixos_flag
+  sleep 5
+  wait_for_linode "running"
+  echo
+
+  # Update secrets keys
+  msg "Scanning new host key in 30 seconds..."
+  sleep 30
+  local ip="$(linode-cli linodes view $id --no-header --text --format ipv4)"
+  run $dir/secrets/scripts/secrets-keyscan $ip $label --force
+  echo
+  msg "Commit and push to git so changes can be pulled on the new linode at /etc/nixos"
+  cmd "cd $dir && git status"
+  cd $dir && git status
+  sleep 5
+
+  # Test login
+  msg "Opening a Weblish console:"
+  url "https://cloud.linode.com/linodes/$id/lish/weblish"
+  echo
+  msg "Login as user, pull from git, and rebuild config (copied to clipboard):"
+  line1="cd /etc/nixos; git pull"
+  line2="sudo nixos-rebuild switch"
+  cmd "$line1"
+  cmd "$line2"
+  echo "$line1; $line2" | wl-copy
+  echo
   
 }
 
-# /end of installer script
-# ------------------------
+# /end of linode script
+# ---------------------
 
 
 
@@ -538,4 +507,4 @@ function choose {
 
 # DO IT
 # -----
-install 
+main 

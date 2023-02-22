@@ -1,12 +1,7 @@
 # programs.fzf.enable = true;
-{ config, lib, ... }: 
+{ config, lib, ... }: with lib; {
 
-let
-  cfg = config.programs.fzf;
-
-in {
-
-  config = lib.mkIf cfg.enable {
+  config = mkIf config.programs.fzf.enable {
 
     programs.fzf.enableZshIntegration = true;
     home.sessionVariables = {

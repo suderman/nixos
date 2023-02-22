@@ -101,8 +101,8 @@
       # System configurations on NixOS
       nixosConfigurations = {
 
-        # Bootstrap
-        bootstrap = mkSystem { host = "bootstrap"; };
+        # Minimal system
+        min = mkSystem { host = "min"; };
 
         # Framework Laptop
         cog = mkSystem { host = "cog"; inherit domain; };
