@@ -11,19 +11,31 @@
   # Hardware configuration
   hardware.linode.enable = true;
 
-  # Services
+  # Network
   services.tailscale.enable = true;
-  services.openssh.enable = true;
   services.ddns.enable = true;
+  services.openssh.enable = true;
+  networking.extraHosts = "";
 
-  # Programs
-  programs.mosh.enable = true;
-  programs.neovim.enable = true;
-
+  # Memory management
   services.earlyoom.enable = true;
 
+  # Database services
+  services.mysql.enable = true;
+  services.postgresql.enable = false;
+  
+  # Web services
   services.traefik.enable = true;
-  services.whoami.enable = true;
   services.whoogle.enable = false;
+  services.whoami.enable = true;
+  services.sabnzbd.enable = false;
+  services.tandoor-recipes.enable = false;
+  # services.gitea.enable = true;
+  # services.gitea.database.type = "mysql";
+
+  # Apps
+  programs.mosh.enable = true;
+  programs.neovim.enable = true;
+  programs.tmux.enable = true;
 
 }
