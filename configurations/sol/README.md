@@ -84,7 +84,7 @@ When finished, type `y` on the other computer to continue.
 
 Next, the wizard will launch a Weblish console with the Linode booted using the `nixos` profile. Login as a regular user (with matching password).
 
-On the other computer, the repo's secrets will be updated with Linode's public key and all the secrets rekeyed. Commit these changes to and `git push`:
+On the other computer, the repo's secrets will be updated with Linode's public key and all the secrets rekeyed. Commit these changes and `git push`:
 
 ```bash
  cd /etc/nixos
