@@ -42,5 +42,5 @@ Then launch a console to install NixOS:
 
 ```zsh
 sudo -s
-LINODE=1 bash <(curl -sL https://github.com/suderman/nixos/raw/main/configurations/bare/install.sh)
+LINODE=1 bash <(curl -sL https://github.com/suderman/nixos/raw/main/configurations/min/install.sh)
 ```
