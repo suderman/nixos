@@ -113,4 +113,16 @@ sudo nixos-rebuild switch --flake /etc/nixos#sol
 ```
 
 Reboot to ensure everything worked. Commit the generated `hardware-configuration.nix` and `git push` to the repo.
+
+</details>
+<details>
+
+<summary><b>6. Configure Tailscale</b></summary>
+
+If this machine previously existed in the Tailnet, first login to [Tailscale](https://login.tailscale.com/admin/machines) and remove the old entry. Then enter the following commands to login to Tailscale and update our DNS records:
+
+```bash
+sudo tailscale up
+sudo systemctl start tailscale-dns
+```
 </details>
