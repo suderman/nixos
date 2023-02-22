@@ -101,7 +101,7 @@ On the Linode Weblish console, `git pull` changes in this repo and run the `nixo
  exit
 ```
 
-Head back into `/etc/nixos` repo and move the generated `hardware-configuration.nix` into this configuration's directory. Then restore the [min](https://github.com/suderman/nixos/tree/main/configurations/min) configuration to how it was before. Finally, run `nixos-rebuild switch` to change into this configuration:
+Head back into `/etc/nixos` repo and move the generated `hardware-configuration.nix` into this configuration's directory. Then `git restore` the [min](https://github.com/suderman/nixos/tree/main/configurations/min) configuration to how it was before. Finally, run `nixos-rebuild switch` to change into this configuration:
 
 ```bash
 cd /etc/nixos
