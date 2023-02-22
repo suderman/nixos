@@ -1,12 +1,12 @@
 # sol
 
-Linode VPS for public web services.
+Linode VPS for public web services. This instance is running the Linode 2 GB plan in the Toronto, ON region.
 
 ## Installation
 
 <details>
 
-<summary><b>1. Create server via Linode dashboard</b></summary>
+<summary><b>1. Provision server</b></summary>
 
 Create new server named `sol` via [Linode dashboard](https://cloud.linode.com/linodes). Also, ensure the `linode-cli` command is available and logged in on the other computer. Run the command a provide a [Personal Access Token](https://cloud.linode.com/profile/tokens) if prompted.
 
