@@ -17,7 +17,7 @@ linode-cli
 </details>
 <details>
 
-<summary><b>2. Run linode.sh script</b></summary>
+<summary><b>2. Create disks & profiles</b></summary>
 
 We need to install the [min](https://github.com/suderman/nixos/tree/main/configurations/min) configuration as a starting point. Using the other computer, run the [linode.sh](https://github.com/suderman/nixos/blob/main/configurations/min/linode.sh) script found in this repo:
 
