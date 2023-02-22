@@ -170,12 +170,12 @@ function main {
   echo
   msg "In the NixOS installer, make the following selections:"
   purple "┏━━━━━━┳━━━━━━━━┓ \n"
-  purple "┃ ROLE ┃ DEVICE ┃ \n"
+  purple "┃ DISK ┃ DEVICE ┃ \n"
   purple "┣━━━━━━╋━━━━━━━━┫ \n"
-  purple "┃ Root ┃ sda    ┃ \n"
-  purple "┃ Boot ┃ none   ┃ \n"
-  purple "┃ Swap ┃ sdb    ┃ \n"
-  purple "┃ Nix  ┃ sdc    ┃ \n"
+  purple "┃ ROOT ┃ sda    ┃ \n"
+  purple "┃ BOOT ┃ none   ┃ \n"
+  purple "┃ SWAP ┃ sdb    ┃ \n"
+  purple "┃ NIX  ┃ sdc    ┃ \n"
   purple "┗━━━━━━┻━━━━━━━━┛ \n"
   echo
 

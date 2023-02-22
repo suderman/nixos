@@ -235,11 +235,11 @@ function main {
   msg "Generating hardware-configuration.nix"
   cmd "nixos-generate-config --root $ROOT_MNT --dir $min"
   nixos-generate-config --root $ROOT_MNT --dir $min
-  cmd "cp -f $MIN/hardware-configuration.nix $nixos/"
-  cp -f $MIN/hardware-configuration.nix $nixos/
+  cmd "cp -f $min/hardware-configuration.nix $nixos/"
+  cp -f $min/hardware-configuration.nix $nixos/
 
   # If linode install detected, set config.hardware.linode.enable = true;
-  if [ ! -z "$LINODE" ]; then
+  if [ "$LINODE" == "1" ]; then
     sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix
   fi
 
