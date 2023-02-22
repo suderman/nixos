@@ -168,7 +168,7 @@ function main {
   echo "sudo -s"
   echo "bash <(curl -sL https://github.com/suderman/nixos/raw/main/configurations/min/install.sh) LINODE" | tee >(wl-copy)
   echo
-  msg "In the NixOS installer, make the following selections:"
+  msg "The installer should automatically make the following selections:"
   purple "┏━━━━━━┳━━━━━━━━┓ \n"
   purple "┃ DISK ┃ DEVICE ┃ \n"
   purple "┣━━━━━━╋━━━━━━━━┫ \n"

@@ -28,13 +28,14 @@ function main {
   lsblk -o NAME,FSTYPE,SIZE
   blue "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ \n"
 
-  local devices=$(lsblk -o NAME -nir | xargs) device choices
+  local devices device choices
   local ROOT_MNT="/mnt" ROOT_FS="tmpfs" ROOT_DEV="-"
   local BOOT_MNT="-"    BOOT_FS="-"     BOOT_DEV="-"
   local SWAP_MNT="-"    SWAP_FS="-"     SWAP_DEV="-"
   local NIX_MNT="-"     NIX_FS="-"      NIX_DEV="-"
 
   # Choose a root device (or tmpfs)
+  devices=$(lsblk -o NAME -nir | xargs)
   choices=("tmpfs" $devices)
   is_linode && device=sda || choose -q "1.  Choose the $(yellow ROOT) device" -o choices -m 8 -v "device"
   [ -b /dev/${device} ] && ROOT_FS="ext4" ROOT_DEV="/dev/${device}"
@@ -241,9 +242,14 @@ function main {
   cp -f $min/hardware-configuration.nix $nixos/
 
   # If linode install detected, set config.hardware.linode.enable = true;
-  is_linode && sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix
+  if is_linode; then
+    msg "Enabling linode in configuration.nix"
+    cmd "sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix"
+    sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix
+  fi
 
   # Personal user owns /etc/nixos 
+  msg "Updating configuration permissions"
   cmd "chown -R 1000:100 $nixos"
   chown -R 1000:100 $nixos
   echo
