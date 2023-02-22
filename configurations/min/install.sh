@@ -240,12 +240,14 @@ function main {
   nixos-generate-config --root $ROOT_MNT --dir $min
   cmd "cp -f $min/hardware-configuration.nix $nixos/"
   cp -f $min/hardware-configuration.nix $nixos/
+  echo
 
   # If linode install detected, set config.hardware.linode.enable = true;
   if is_linode; then
     msg "Enabling linode in configuration.nix"
     cmd "sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix"
     sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix
+    echo
   fi
 
   # Personal user owns /etc/nixos 

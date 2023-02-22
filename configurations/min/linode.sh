@@ -213,6 +213,9 @@ function main {
   echo "$line1; $line2" | wl-copy
   echo
   
+  # After switching to intended configuration, clean the changes made to min
+  # cd /etc/nixos; git restore configurations/min
+  
 }
 
 # /end of linode script
