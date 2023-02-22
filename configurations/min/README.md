@@ -40,5 +40,10 @@ Then launch a console to install NixOS:
 
 ```zsh
 sudo -s
+
+# Personal computer
 bash <(curl -sL https://github.com/suderman/nixos/raw/main/hosts/min/install.sh)
+
+# Linode VPS
+bash <(curl -sL https://github.com/suderman/nixos/raw/main/hosts/min/install.sh) LINODE
 ```

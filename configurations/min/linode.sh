@@ -166,7 +166,7 @@ function main {
   echo
   msg "Paste the following to install NixOS (second line copied to clipboard):"
   echo "sudo -s"
-  echo "LINODE=1 bash <(curl -sL https://github.com/suderman/nixos/raw/main/configurations/min/install.sh)" | tee >(wl-copy)
+  echo "bash <(curl -sL https://github.com/suderman/nixos/raw/main/configurations/min/install.sh) LINODE" | tee >(wl-copy)
   echo
   msg "In the NixOS installer, make the following selections:"
   purple "┏━━━━━━┳━━━━━━━━┓ \n"

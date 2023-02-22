@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+arg="$1"
 
 # Install script
 # sudo -s
@@ -27,39 +28,40 @@ function main {
   lsblk -o NAME,FSTYPE,SIZE
   blue "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ \n"
 
+  local devices=$(lsblk -o NAME -nir | xargs) device choices
+  local ROOT_MNT="/mnt" ROOT_FS="tmpfs" ROOT_DEV="-"
+  local BOOT_MNT="-"    BOOT_FS="-"     BOOT_DEV="-"
+  local SWAP_MNT="-"    SWAP_FS="-"     SWAP_DEV="-"
+  local NIX_MNT="-"     NIX_FS="-"      NIX_DEV="-"
+
   # Choose a root device (or tmpfs)
-  devices=$(lsblk -o NAME -nir | xargs)
   choices=("tmpfs" $devices)
-  choose -q "1.  Choose the $(yellow ROOT) device" -o choices -m 8 -v "device"
-  ROOT_MNT="/mnt" ROOT_FS="tmpfs" ROOT_DEV="-"
+  is_linode && device=sda || choose -q "1.  Choose the $(yellow ROOT) device" -o choices -m 8 -v "device"
   [ -b /dev/${device} ] && ROOT_FS="ext4" ROOT_DEV="/dev/${device}"
 
   # Choose a boot device (or none)
   devices=$(echo " $devices " | sed s/"\s${device}\s"/" "/g | xargs)
   choices=("none" $devices)
-  choose -q "2. Choose the $(yellow BOOT) device" -o choices -m 8 -v "device"
-  BOOT_MNT="-" BOOT_FS="-" BOOT_DEV="-"
+  is_linode && device=none || choose -q "2. Choose the $(yellow BOOT) device" -o choices -m 8 -v "device"
   [ -b /dev/${device} ] && BOOT_MNT="/mnt/boot" BOOT_FS="vfat" BOOT_DEV="/dev/${device}"
 
   # Choose a swap device (or none)
   devices=$(echo " $devices " | sed s/"\s${device}\s"/" "/g | xargs)
   choices=("none" $devices)
-  choose -q "3. Choose the $(yellow SWAP) device" -o choices -m 8 -v "device"
-  SWAP_MNT="-" SWAP_FS="-" SWAP_DEV="-"
+  is_linode && device=sdb || choose -q "3. Choose the $(yellow SWAP) device" -o choices -m 8 -v "device"
   [ -b /dev/${device} ] && SWAP_FS="swap" SWAP_DEV="/dev/${device}" 
 
   # Choose a nix device (required)
   devices=$(echo " $devices " | sed s/"\s${device}\s"/" "/g | xargs)
   choices=($devices)
-  choose -q "4. Choose the $(yellow NIX) device" -o choices -m 8 -v "device"
-  NIX_MNT="-" NIX_FS="-" NIX_DEV="-"
+  is_linode && device=sdc || choose -q "4. Choose the $(yellow NIX) device" -o choices -m 8 -v "device"
   [ -b /dev/${device} ] && NIX_MNT="/mnt/nix" NIX_FS="btrfs" NIX_DEV="/dev/${device}" 
 
   # Prepare padded values for table display
-  _A1_____="$(printf "%-9s%s" $ROOT_MNT)" _A2_="$(printf "%-5s%s" $ROOT_FS)" _A3__________="$(printf "%-14s%s" $ROOT_DEV)"
-  _B1_____="$(printf "%-9s%s" $BOOT_MNT)" _B2_="$(printf "%-5s%s" $BOOT_FS)" _B3__________="$(printf "%-14s%s" $BOOT_DEV)"
-  _C1_____="$(printf "%-9s%s" $SWAP_MNT)" _C2_="$(printf "%-5s%s" $SWAP_FS)" _C3__________="$(printf "%-14s%s" $SWAP_DEV)"
-  _D1_____="$(printf "%-9s%s"  $NIX_MNT)" _D2_="$(printf "%-5s%s"  $NIX_FS)" _D3__________="$(printf "%-14s%s"  $NIX_DEV)"
+  local _A1_____="$(printf "%-9s%s" $ROOT_MNT)" _A2_="$(printf "%-5s%s" $ROOT_FS)" _A3__________="$(printf "%-14s%s" $ROOT_DEV)"
+  local _B1_____="$(printf "%-9s%s" $BOOT_MNT)" _B2_="$(printf "%-5s%s" $BOOT_FS)" _B3__________="$(printf "%-14s%s" $BOOT_DEV)"
+  local _C1_____="$(printf "%-9s%s" $SWAP_MNT)" _C2_="$(printf "%-5s%s" $SWAP_FS)" _C3__________="$(printf "%-14s%s" $SWAP_DEV)"
+  local _D1_____="$(printf "%-9s%s"  $NIX_MNT)" _D2_="$(printf "%-5s%s"  $NIX_FS)" _D3__________="$(printf "%-14s%s"  $NIX_DEV)"
 
   # Print a delightful table summarizing what's about to happen
   echo
@@ -239,9 +241,7 @@ function main {
   cp -f $min/hardware-configuration.nix $nixos/
 
   # If linode install detected, set config.hardware.linode.enable = true;
-  if [ "$LINODE" == "1" ]; then
-    sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix
-  fi
+  is_linode && sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix
 
   # Personal user owns /etc/nixos 
   cmd "chown -R 1000:100 $nixos"
@@ -257,6 +257,10 @@ function main {
 
   msg "...install is complete. \nReboot without installer media and check if it actually worked. ;-)"
   
+}
+
+function is_linode {
+  [ "$arg" = "LINODE" ] && return 0 || return 1
 }
 
 # /end of installer script
