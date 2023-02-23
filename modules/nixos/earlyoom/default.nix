@@ -6,10 +6,6 @@ let
 
 in {
 
-  options = {
-    services.earlyoom.enable = lib.options.mkEnableOption "earlyoom"; 
-  };
-
   config = lib.mkIf cfg.enable {
 
     services.earlyoom = {

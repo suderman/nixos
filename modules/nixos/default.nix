@@ -4,7 +4,7 @@
     ./base
     ./ddns
     ./docker
-    # ./earlyoom
+    ./earlyoom
     ./flatpak
     ./gnome
     ./keyd
