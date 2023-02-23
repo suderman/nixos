@@ -4,7 +4,7 @@
     ./base
     ./ddns
     ./docker
-    ./earlyoom
+    # ./earlyoom
     ./flatpak
     ./gnome
     ./keyd
@@ -18,6 +18,7 @@
     ./secrets
     ./state
     ./steam
+    # ./sunshine
     ./tailscale
     ./tandoor-recipes
     ./traefik

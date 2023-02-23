@@ -39,8 +39,11 @@
   services.openssh.enable = true;
   networking.extraHosts = "";
 
+  # Broken? Prevents boot.
+  # services.sunshine.enable = false;
+
   # Memory management
-  services.earlyoom.enable = true;
+  # services.earlyoom.enable = true;
 
   # Fingerprint reader
   services.fprintd.enable = true;
