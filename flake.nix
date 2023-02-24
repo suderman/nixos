@@ -113,6 +113,9 @@
         # Intel NUC home server
         lux = mkSystem { host = "lux"; inherit domain publicDomain; };
 
+        # Retired Intel NUC for testing ideas
+        lab = mkSystem { host = "lab"; inherit domain publicDomain; };
+
       };
 
       # Home configurations on other systems
