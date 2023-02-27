@@ -46,15 +46,7 @@ in {
         description = user;
         passwordFile = mkIf (age.enable) age.secrets.password.path;
         password = mkIf (!age.enable) "${user}";
-        extraGroups = [ 
-          "wheel" 
-        ] ++ ifTheyExist [
-          "networkmanager" 
-          "docker" 
-          "input" 
-          "keyd" 
-          "uinput" 
-        ]; 
+        extraGroups = [ "wheel" ] ++ ifTheyExist [ "networkmanager" "docker" ]; 
         openssh.authorizedKeys.keys = [ keys.users."${user}" ];
       };
 
@@ -66,15 +58,7 @@ in {
         description = "test";
         passwordFile = mkIf (age.enable) age.secrets.password.path;
         password = mkIf (!age.enable) "test";
-        extraGroups = [ 
-          "wheel" 
-        ] ++ ifTheyExist [
-          "networkmanager" 
-          "docker" 
-          "input" 
-          "keyd" 
-          "uinput" 
-        ]; 
+        extraGroups = [ "wheel" ] ++ ifTheyExist [ "networkmanager" "docker" ]; 
         openssh.authorizedKeys.keys = [ keys.users."${user}" ];
       };
 

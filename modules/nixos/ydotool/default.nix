@@ -1,5 +1,5 @@
 # services.ydotool.enable = true;
-{ config, lib, pkgs, ... }: 
+{ config, lib, pkgs, user, ... }: 
 
 with pkgs; 
 
@@ -17,6 +17,16 @@ in {
     # Install ydotool package
     environment.systemPackages = [ ydotool ];
 
+    # Add user to the input group
+    users.users."${user}".extraGroups = [ "input" ]; 
+
+    # Give the input group write access to the uinput device
+    services.udev.extraRules = lib.mkAfter ''
+      # Give ydotoold access to the uinput device
+      KERNEL=="uinput", GROUP="input", MODE="0660", OPTIONS+="static_node=uinput"
+    '';
+
+    # Create service for daemon process
     systemd.services.ydotool = {
       description = "starts ydotoold service";
       requires = [ "multi-user.target" ];
