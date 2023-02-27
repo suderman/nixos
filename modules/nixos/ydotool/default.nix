@@ -34,6 +34,8 @@ in {
       wantedBy = [ "sysinit.target" ];
       serviceConfig = {
         Type = "simple";
+        User = user;
+        Group = "users";
         ExecStart = "${pkgs.ydotool}/bin/ydotoold";
         ExecReload = "${pkgs.util-linux}/bin/kill -HUP $MAINPID";
         Restart = "on-failure";
