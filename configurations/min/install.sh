@@ -31,7 +31,7 @@ function main {
   choose -q "Choose the $(yellow disk) to partition for NixOS" -o disks -m 8 -v "disk"
 
   # Bail if no disk selected
-  if [ ! -b $dev ]; then
+  if [ ! -e $disk ]; then
     msg "Exiting, no disk selected"
     return
   fi
@@ -91,7 +91,7 @@ function main {
   run "swapon /dev/$swap"
 
   msg "Create btrfs partition ($butter)"
-  run "parted -s /dev/$disk mkpart Butter btrfs 5GiB 100%"
+  run "parted -s /dev/$disk mkpart Butter btrfs 5GiB 100\%"
 
   msg "Format btrfs partition"
   run "mkfs.btrfs -L Butter /dev/$butter"
@@ -129,7 +129,8 @@ function main {
   command -v git >/dev/null 2>&1 || ( cmd "nix-env -iA nixos.git" && nix-env -iA nixos.git && echo )
 
   # Path to nixos flake and minimal configuration
-  local nixos="/mnt/nix/state/etc/nixos" min="$nixos/configurations/min"
+  local nixos="/mnt/nix/state/etc/nixos" 
+  local min="$nixos/configurations/min"
 
   # Clone git repo into persistant directory
   msg "Cloning nixos git repo"
@@ -149,7 +150,8 @@ function main {
   # If linode install detected, set config.hardware.linode.enable = true;
   if is_linode; then
     msg "Enabling linode in configuration.nix"
-    run "sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix"
+    cmd "sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix"
+    sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix
     echo
   fi
 
@@ -211,7 +213,7 @@ export URL_COLOR="$_underline_cyan_"
 # Pretty messages
 msg() { printf "$MSG_PROMPT$MSG_COLOR$(echo $@)$_reset_\n"; }
 out() { printf "$MSG_COLOR$(echo $@)$_reset_\n"; }
-cmd() { printf "$CMD_PROMPT$CMD_COLOR$(echo $@)$_reset_\n"; }
+cmd() { printf "$CMD_PROMPT$CMD_COLOR$(echo ${@//\%/%%})$_reset_\n"; }
 url() { echo $1 | wl-copy; xdg-open $1; printf "$URL_PROMPT$URL_COLOR$1$_reset_\n"; }
 run() { cmd "$@"; $@>/tmp/run; }
 
