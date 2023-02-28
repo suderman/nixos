@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-arg="$1"
+ARG="$1" # GTP, BIOS, LINODE
+SWAP="$2" # MIN, MAX, <NUMBER OF GB>
 
 # Install script
 # sudo -s
@@ -67,7 +68,7 @@ function main {
     run parted -s /dev/$disk set 2 esp on
 
     msg "Create swap partition ($swap)"
-    run parted -s /dev/$disk mkpart Swap linux-swap 1GiB 5GiB
+    run parted -s /dev/$disk mkpart Swap linux-swap 1GiB $(swap_size)GiB
     run parted -s /dev/$disk set 3 swap on
 
   # Booting with UEFI, the ESP partition alone is fine
@@ -83,13 +84,13 @@ function main {
     run parted -s /dev/$disk set 1 esp on
 
     msg "Create swap partition ($swap)"
-    run parted -s /dev/$disk mkpart Swap linux-swap 1GiB 5GiB
+    run parted -s /dev/$disk mkpart Swap linux-swap 1GiB $(swap_size)GiB
     run parted -s /dev/$disk set 2 swap on
 
   fi
 
   msg "Create btrfs partition ($butter)"
-  run parted -s /dev/$disk mkpart Butter btrfs 5GiB 100%
+  run parted -s /dev/$disk mkpart Butter btrfs $(swap_size)GiB 100%
 
   msg "Format EFI system partition"
   run mkfs.fat -F32 -n ESP /dev/$esp
@@ -176,15 +177,57 @@ function main {
 }
 
 function is_linode {
-  [ "$arg" = "LINODE" ] && return 0 || return 1
+  [ "$ARG" = "LINODE" ] && return 0 || return 1
 }
 
 function is_bios {
-  if [ "$arg" = "LINODE" ] || [ "$arg" = "BIOS" ]; then
+  if [ "$ARG" = "LINODE" ] || [ "$ARG" = "BIOS" ]; then
     return 0
   else 
     return 1
   fi
+}
+
+# Total memory available in GB
+function mem_total {
+  free -b | awk '/Mem/ { printf "%.0f\n", $2/1024/1024/1024 + 0.5 }'
+}
+
+# Total memory availble squared in GB
+function mem_squared {
+  mem_total | awk '{printf("%d\n", sqrt($1)+0.5)}'
+}
+
+# Memory squared, minimal value 2
+function swap_min {
+  local mem="$(mem_squared)"
+  [ "$mem" -lt "2" ] && mem="2"
+  echo $mem
+}
+
+# Total memory + memory squared, minimal value 2
+function swap_max {
+  local mem="$(echo $(mem_total) $(mem_squared) | awk '{printf "%d", $1 + $2}')"
+  [ "$mem" -lt "2" ] && mem="2"
+  echo $mem
+}
+
+# Swap is set to second argument
+# - if MIN, swap is memory squared (at least 2)
+# - if MAX, swap is memory total + memory squared (at least 2)
+# - if empty, swap is MIN if linode, MAX otherwise
+# - if any other value, swap is set to that
+function swap_size {
+  local swap="$SWAP"
+  if [ "$swap" = "MIN" ]; then
+    swap="$(swap_min)"
+  elif [ "$swap" = "MAX" ]; then
+    swap="$(swap_max)"
+  elif [ "$swap" = "" ]; then
+    is_linode && swap="$(swap_min)" || swap="$(swap_max)"
+  fi
+  # Add 1 since this value will be used in parted and starts at the 1GB position
+  echo $swap | awk '{printf "%d", $1 + 1}'
 }
 
 # /end of installer script
