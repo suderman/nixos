@@ -94,7 +94,7 @@ function main {
   run "parted -s /dev/$disk mkpart Butter btrfs 5GiB 100%"
 
   msg "Format btrfs partition"
-  run "mkfs.btrfs -L Butter /dev/$butter"
+  run "mkfs.btrfs -fL Butter /dev/$butter"
 
   msg "Create btrfs subvolume structure"
   # nix
@@ -105,15 +105,14 @@ function main {
   #     ├── etc
   #     └── var
   #         └── log
-  cmd "mkdir -p /mnt && mount /dev/$butter /mnt"
-  mkdir -p /mnt && mount /dev/$butter /mnt
+  mkdir -p /mnt
+  run "mount /dev/$butter /mnt"
   run "btrfs subvolume create /mnt/root"
   run "btrfs subvolume create /mnt/snaps"
   run "btrfs subvolume snapshot -r /mnt/root /mnt/snaps/root"
-  run "mkdir -p /mnt/root/{boot,nix}"
   run "btrfs subvolume create /mnt/state"
   run "btrfs subvolume create /mnt/state/home"
-  run "mkdir -p /mnt/state/{var/lib,etc/{ssh,NetworkManager/system-connections}}"
+  mkdir -p /mnt/state/{var/lib,etc/{ssh,NetworkManager/system-connections}}
   run "btrfs subvolume create /mnt/state/var/log"
   run "umount /mnt"
 
@@ -121,9 +120,11 @@ function main {
   run "mount -o subvol=root /dev/$butter /mnt"
 
   msg "Mount nix"
-  run "mount /dev/$butter /mnt/nix"
+  mkdir -p /mnt/nix
+  cmd "mount /dev/$butter /mnt/nix"
 
   msg "Mount boot"
+  mkdir -p /mnt/boot
   run "mount /dev/$esp /mnt/boot"
 
   # Ensure git is installed
