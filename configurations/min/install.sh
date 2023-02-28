@@ -105,7 +105,8 @@ function main {
   #     ├── etc
   #     └── var
   #         └── log
-  run "mkdir -p /mnt && mount /dev/$butter /mnt"
+  cmd "mkdir -p /mnt && mount /dev/$butter /mnt"
+  mkdir -p /mnt && mount /dev/$butter /mnt
   run "btrfs subvolume create /mnt/root"
   run "btrfs subvolume create /mnt/snaps"
   run "btrfs subvolume snapshot -r /mnt/root /mnt/snaps/root"
@@ -135,9 +136,11 @@ function main {
   # Clone git repo into persistant directory
   msg "Cloning nixos git repo"
   if [ -d $nixos ]; then
-    run "cd $nixos && git pull"
+    cmd "cd $nixos && git pull"
+    cd $nixos && git pull
   else
-    run "git clone https://github.com/suderman/nixos $nixos"
+    cmd "git clone https://github.com/suderman/nixos $nixos"
+    git clone https://github.com/suderman/nixos $nixos
   fi
   echo
 
