@@ -129,7 +129,7 @@ function main {
   run mkdir -p /mnt/boot && mount /dev/$esp /mnt/boot
 
   # Ensure git is installed
-  command -v git >/dev/null 2>&1 || ( cmd "nix-env -iA nixos.git" && nix-env -iA nixos.git && echo )
+  command -v git >/dev/null 2>&1 || ( run nix-env -iA nixos.git && echo )
 
   # Path to nixos flake and minimal configuration
   local nixos="/mnt/nix/state/etc/nixos" 
@@ -153,7 +153,8 @@ function main {
   # If linode install detected, set config.hardware.linode.enable = true;
   if is_linode; then
     msg "Enabling linode in configuration.nix"
-    run sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix
+    cmd "run sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix"
+    sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix
     echo
   fi
 
