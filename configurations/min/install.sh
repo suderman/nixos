@@ -49,11 +49,11 @@ function main {
   msg "Create GPT partition table"
   run parted -s /dev/$disk mklabel gpt
 
-
-  # Booting GPT from bios requires BBP with ESP
+  # Booting with legacy BIOS requires BBP and ESP partitions
   if is_bios; then
 
-    bbp="$disk}1"
+    # /dev/sda1-4
+    bbp="${disk}1"
     esp="${disk}2"
     swap="${disk}3"
     butter="${disk}4"
@@ -70,9 +70,10 @@ function main {
     run parted -s /dev/$disk mkpart Swap linux-swap 1GiB 5GiB
     run parted -s /dev/$disk set 3 swap on
 
-  # Otherwise, the ESP alone is fine
+  # Booting with UEFI, the ESP partition alone is fine
   else
 
+    # /dev/sda1-3
     esp="${disk}1"
     swap="${disk}2"
     butter="${disk}3"
