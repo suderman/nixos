@@ -47,24 +47,28 @@ function main {
   echo
  
   msg "Create GPT partition table"
-  run "parted -s /dev/$disk mklabel gpt"
+  run parted -s /dev/$disk mklabel gpt
 
 
   # Booting GPT from bios requires BBP with ESP
   if is_bios; then
 
-    bbp="${disk}1"
+    bbp="$disk}1"
     esp="${disk}2"
     swap="${disk}3"
     butter="${disk}4"
 
     msg "Create BIOS boot partition ($bbp)"
-    run "parted -s /dev/$disk mkpart BBP 1MiB 3MiB"
-    run "parted -s /dev/$disk set 1 bios_grub on"
+    run parted -s /dev/$disk mkpart BBP 1MiB 3MiB
+    run parted -s /dev/$disk set 1 bios_grub on
 
     msg "Create EFI system partition ($esp)"
-    run "parted -s /dev/$disk mkpart ESP FAT32 3MiB 1GiB"
-    run "parted -s /dev/$disk set 2 esp on"
+    run parted -s /dev/$disk mkpart ESP FAT32 3MiB 1GiB
+    run parted -s /dev/$disk set 2 esp on
+
+    msg "Create swap partition ($swap)"
+    run parted -s /dev/$disk mkpart Swap linux-swap 1GiB 5GiB
+    run parted -s /dev/$disk set 3 swap on
 
   # Otherwise, the ESP alone is fine
   else
@@ -74,27 +78,27 @@ function main {
     butter="${disk}3"
 
     msg "Create EFI system partition ($esp)"
-    run "parted -s /dev/$disk mkpart ESP FAT32 1MiB 1GiB"
-    run "parted -s /dev/$disk set 2 esp on"
+    run parted -s /dev/$disk mkpart ESP FAT32 1MiB 1GiB
+    run parted -s /dev/$disk set 1 esp on
+
+    msg "Create swap partition ($swap)"
+    run parted -s /dev/$disk mkpart Swap linux-swap 1GiB 5GiB
+    run parted -s /dev/$disk set 2 swap on
 
   fi
 
-  msg "Format EFI system partition"
-  run "mkfs.fat -F32 -n ESP /dev/$esp"
+  msg "Create btrfs partition ($butter)"
+  run parted -s /dev/$disk mkpart Butter btrfs 5GiB 100%
 
-  msg "Create swap partition ($swap)"
-  run "parted -s /dev/$disk mkpart Swap linux-swap 1GiB 5GiB"
-  run "parted -s /dev/$disk set 3 swap on"
+  msg "Format EFI system partition"
+  run mkfs.fat -F32 -n ESP /dev/$esp
 
   msg "Enable swap partition"
-  run "mkswap /dev/$swap"
-  run "swapon /dev/$swap"
-
-  msg "Create btrfs partition ($butter)"
-  run "parted -s /dev/$disk mkpart Butter btrfs 5GiB 100%"
+  run mkswap /dev/$swap
+  run swapon /dev/$swap
 
   msg "Format btrfs partition"
-  run "mkfs.btrfs -fL Butter /dev/$butter"
+  run mkfs.btrfs -fL Butter /dev/$butter
 
   msg "Create btrfs subvolume structure"
   # nix
@@ -105,31 +109,24 @@ function main {
   #     ├── etc
   #     └── var
   #         └── log
-  cmd "mkdir -p /mnt"
-  mkdir -p /mnt
-  run "mount /dev/$butter /mnt"
-  run "btrfs subvolume create /mnt/root"
-  run "btrfs subvolume create /mnt/snaps"
-  run "btrfs subvolume snapshot -r /mnt/root /mnt/snaps/root"
-  run "btrfs subvolume create /mnt/state"
-  run "btrfs subvolume create /mnt/state/home"
-  cmd "-p /mnt/state/{var/lib,etc/{ssh,NetworkManager/system-connections}}"
-  mkdir -p /mnt/state/{var/lib,etc/{ssh,NetworkManager/system-connections}}
-  run "btrfs subvolume create /mnt/state/var/log"
-  run "umount /mnt"
+  run mkdir -p /mnt && mount /dev/$butter /mnt
+  run btrfs subvolume create /mnt/root
+  run btrfs subvolume create /mnt/snaps
+  run btrfs subvolume snapshot -r /mnt/root /mnt/snaps/root
+  run btrfs subvolume create /mnt/state
+  run btrfs subvolume create /mnt/state/home
+  run mkdir -p /mnt/state/{var/lib,etc/{ssh,NetworkManager/system-connections}}
+  run btrfs subvolume create /mnt/state/var/log
+  run umount /mnt
 
   msg "Mount root"
-  run "mount -o subvol=root /dev/$butter /mnt"
+  run mount -o subvol=root /dev/$butter /mnt
 
   msg "Mount nix"
-  cmd "mkdir -p /mnt/nix"
-  mkdir -p /mnt/nix
-  run "mount /dev/$butter /mnt/nix"
+  run mkdir -p /mnt/nix && mount /dev/$butter /mnt/nix
 
   msg "Mount boot"
-  cmd "mkdir -p /mnt/boot"
-  mkdir -p /mnt/boot
-  run "mount /dev/$esp /mnt/boot"
+  run mkdir -p /mnt/boot && mount /dev/$esp /mnt/boot
 
   # Ensure git is installed
   command -v git >/dev/null 2>&1 || ( cmd "nix-env -iA nixos.git" && nix-env -iA nixos.git && echo )
@@ -141,31 +138,28 @@ function main {
   # Clone git repo into persistant directory
   msg "Cloning nixos git repo"
   if [ -d $nixos ]; then
-    cmd "cd $nixos && git pull"
-    cd $nixos && git pull
+    run cd $nixos && git pull
   else
-    cmd "git clone https://github.com/suderman/nixos $nixos"
-    git clone https://github.com/suderman/nixos $nixos
+    run git clone https://github.com/suderman/nixos $nixos
   fi
   echo
 
   # Generate config and copy hardware-configuration.nix
   msg "Generating hardware-configuration.nix"
-  run "nixos-generate-config --root /mnt --dir $min"
-  run "cp -f $min/hardware-configuration.nix $nixos/"
+  run nixos-generate-config --root /mnt --dir $min
+  run cp -f $min/hardware-configuration.nix $nixos/
   echo
 
   # If linode install detected, set config.hardware.linode.enable = true;
   if is_linode; then
     msg "Enabling linode in configuration.nix"
-    cmd "sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix"
-    sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix
+    run sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix
     echo
   fi
 
   # Personal user owns /etc/nixos 
   msg "Updating configuration permissions"
-  run "chown -R 1000:100 $nixos"
+  run chown -R 1000:100 $nixos
   echo
   
   # Run nixos installer
