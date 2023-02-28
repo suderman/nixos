@@ -29,10 +29,9 @@ function main {
   local bbp esp swap butter
   disks=($(lsblk -nirdo NAME | xargs))
   choose -q "Choose the $(yellow disk) to partition for NixOS" -o disks -m 8 -v "disk"
-  echo $disk
 
   # Bail if no disk selected
-  if [ ! -e $disk ]; then
+  if [ ! -e /dev/$disk ]; then
     msg "Exiting, no disk selected"
     return
   fi
