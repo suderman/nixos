@@ -29,14 +29,15 @@ function main {
   local linode_type=$(linode-cli linodes view $id --no-header --text --format type) # example: g6-standard-1
   local linode_size=$(linode-cli linodes type-view $linode_type --no-header --text --format disk) # example: 51200
   local iso_size=1024  # reserve 1GB for installer
-  local root_size=1024 # reserve 1GB for root
-  local swap_size=2048 # reserve 2GB for swap
-  local nix_size=$((linode_size - iso_size - root_size - swap_size)) # nix uses remaining available disk
+  # local root_size=1024 # reserve 1GB for root
+  # local swap_size=2048 # reserve 2GB for swap
+  # local nix_size=$((linode_size - iso_size - root_size - swap_size)) # nix uses remaining available disk
+  local nix_size=$((linode_size - iso_size)) # nix uses remaining available disk
   local flags iso_flag iso_flag swap_flag nix_flag nixos_flag installer_flag
 
 
   # Final warning
-  if ! ask "$(red "DANGER! Last chance to bail!") \nRe-create all disks and configurations for linode \"${label}\"?"; then
+  if ! ask "$(red "DANGER! Last chance to bail!") \nRe-create all disks and configurations for linode $(yellow \"${label}\")?"; then
     return
   fi
   echo
@@ -91,44 +92,49 @@ function main {
   msg "Creating ISO disk"
   run linode-cli linodes disk-create $id $flags --label iso --filesystem ext4 --size $iso_size
   disk_id="$(cat /tmp/run | awk '{print $1}')"
-  iso_flag="--devices.sdd.disk_id $disk_id"
+  # iso_flag="--devices.sdd.disk_id $disk_id"
+  iso_flag="--devices.sdb.disk_id $disk_id"
   wait_for_disk $disk_id
 
-  msg "Creating ROOT disk"
-  run linode-cli linodes disk-create $id $flags --label root --filesystem ext4 --size $root_size
-  disk_id="$(cat /tmp/run | awk '{print $1}')"
-  root_flag="--devices.sda.disk_id $disk_id"
-  wait_for_disk $disk_id
-
-  msg "Creating SWAP disk"
-  run linode-cli linodes disk-create $id $flags --label swap --filesystem swap --size $swap_size
-  disk_id="$(cat /tmp/run | awk '{print $1}')"
-  swap_flag="--devices.sdb.disk_id $disk_id"
-  wait_for_disk $disk_id
+  # msg "Creating ROOT disk"
+  # run linode-cli linodes disk-create $id $flags --label root --filesystem ext4 --size $root_size
+  # disk_id="$(cat /tmp/run | awk '{print $1}')"
+  # root_flag="--devices.sda.disk_id $disk_id"
+  # wait_for_disk $disk_id
+  #
+  # msg "Creating SWAP disk"
+  # run linode-cli linodes disk-create $id $flags --label swap --filesystem swap --size $swap_size
+  # disk_id="$(cat /tmp/run | awk '{print $1}')"
+  # swap_flag="--devices.sdb.disk_id $disk_id"
+  # wait_for_disk $disk_id
 
   msg "Creating NIX disk"
   run linode-cli linodes disk-create $id $flags --label nix --filesystem raw --size $nix_size
   disk_id="$(cat /tmp/run | awk '{print $1}')"
-  nix_flag="--devices.sdc.disk_id $disk_id"
+  # nix_flag="--devices.sdc.disk_id $disk_id"
+  nix_flag="--devices.sda.disk_id $disk_id"
   wait_for_disk $disk_id
 
 
   # Shared flags
   flags="--text --no-header"
+  flags="$flags --kernel linode/direct-disk"
   flags="$flags --helpers.updatedb_disabled=0 --helpers.distro=0 --helpers.modules_dep=0 --helpers.network=0 --helpers.devtmpfs_automount=0"
-  flags="$flags $root_flag $swap_flag $nix_flag"
-
-  # Create the main configuration
-  msg "Creating NIXOS configuration"
-  run linode-cli linodes config-create $LINODE_ID $flags --label nixos --kernel linode/grub2 --root_device /dev/sda
-  nixos_flag="--config_id $(cat /tmp/run | awk '{print $1}')"
+  # flags="$flags $root_flag $swap_flag $nix_flag"
+  # flags="$flags $nix_flag"
+  
+  # Create the installer configuration
+  msg "Creating INSTALLER configuration"
+  run linode-cli linodes config-create $LINODE_ID $flags $nix_flag $iso_flag --label installer --kernel linode/direct-disk --root_device /dev/sdb
+  installer_flag="--config_id $(cat /tmp/run | awk '{print $1}')"
   sleep 10
   echo
 
-  # Create the installer configuration
-  msg "Creating INSTALLER configuration"
-  run linode-cli linodes config-create $LINODE_ID $flags $iso_flag --label installer --kernel linode/direct-disk --root_device /dev/sdd
-  installer_flag="--config_id $(cat /tmp/run | awk '{print $1}')"
+  # Create the main configuration
+  msg "Creating NIXOS configuration"
+  # run linode-cli linodes config-create $LINODE_ID $flags --label nixos --kernel linode/grub2 --root_device /dev/sda
+  run linode-cli linodes config-create $LINODE_ID $flags $nix_flag --label nixos --root_device /dev/sda
+  nixos_flag="--config_id $(cat /tmp/run | awk '{print $1}')"
   sleep 10
   echo
 
@@ -145,7 +151,7 @@ function main {
   echo
   msg "Paste the following to download the NixOS installer (copied to clipboard):"
   line1="iso=https://channels.nixos.org/nixos-22.11/latest-nixos-minimal-x86_64-linux.iso"
-  line2="curl -L \$iso | tee >(dd of=/dev/sdd) | sha256sum"
+  line2="curl -L \$iso | tee >(dd of=/dev/sdb) | sha256sum"
   out $line1
   out $line2
   echo "$line1; $line2" | wl-copy
@@ -172,10 +178,11 @@ function main {
   purple "┏━━━━━━┳━━━━━━━━┓ \n"
   purple "┃ DISK ┃ DEVICE ┃ \n"
   purple "┣━━━━━━╋━━━━━━━━┫ \n"
-  purple "┃ ROOT ┃ sda    ┃ \n"
-  purple "┃ BOOT ┃ none   ┃ \n"
-  purple "┃ SWAP ┃ sdb    ┃ \n"
-  purple "┃ NIX  ┃ sdc    ┃ \n"
+  # purple "┃ ROOT ┃ sda    ┃ \n"
+  # purple "┃ BOOT ┃ none   ┃ \n"
+  # purple "┃ SWAP ┃ sdb    ┃ \n"
+  # purple "┃ NIX  ┃ sdc    ┃ \n"
+  purple "┃ NIX  ┃ sda    ┃ \n"
   purple "┗━━━━━━┻━━━━━━━━┛ \n"
   echo
 

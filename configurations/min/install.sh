@@ -16,10 +16,6 @@ function main {
   yellow "┃        Suderman's NixOS Installer         ┃ \n"
   yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ \n"
 
-  # Double check we wanna do this
-  if ! ask "This script is to be used on freshly partitioned disks without data worth saving.\n...onward?"; then
-    return
-  fi
 
   # List disks and partitions for reference
   echo
@@ -28,62 +24,20 @@ function main {
   lsblk -o NAME,FSTYPE,SIZE
   blue "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ \n"
 
-  local devices device choices
-  local ROOT_MNT="/mnt" ROOT_FS="tmpfs" ROOT_DEV="-"
-  local BOOT_MNT="-"    BOOT_FS="-"     BOOT_DEV="-"
-  local SWAP_MNT="-"    SWAP_FS="-"     SWAP_DEV="-"
-  local NIX_MNT="-"     NIX_FS="-"      NIX_DEV="-"
+  # Choose a disk to partition
+  local disks disk
+  local bbp esp swap butter
+  disks=($(lsblk -nirdo NAME | xargs))
+  choose -q "Choose the $(yellow disk) to partition for NixOS" -o disks -m 8 -v "disk"
 
-  # Choose a root device (or tmpfs)
-  devices=$(lsblk -o NAME -nir | xargs)
-  choices=("tmpfs" $devices)
-  is_linode && device=sda || choose -q "1.  Choose the $(yellow ROOT) device" -o choices -m 8 -v "device"
-  [ -b /dev/${device} ] && ROOT_FS="ext4" ROOT_DEV="/dev/${device}"
-
-  # Choose a boot device (or none)
-  devices=$(echo " $devices " | sed s/"\s${device}\s"/" "/g | xargs)
-  choices=("none" $devices)
-  is_linode && device=none || choose -q "2. Choose the $(yellow BOOT) device" -o choices -m 8 -v "device"
-  [ -b /dev/${device} ] && BOOT_MNT="/mnt/boot" BOOT_FS="vfat" BOOT_DEV="/dev/${device}"
-
-  # Choose a swap device (or none)
-  devices=$(echo " $devices " | sed s/"\s${device}\s"/" "/g | xargs)
-  choices=("none" $devices)
-  is_linode && device=sdb || choose -q "3. Choose the $(yellow SWAP) device" -o choices -m 8 -v "device"
-  [ -b /dev/${device} ] && SWAP_FS="swap" SWAP_DEV="/dev/${device}" 
-
-  # Choose a nix device (required)
-  devices=$(echo " $devices " | sed s/"\s${device}\s"/" "/g | xargs)
-  choices=($devices)
-  is_linode && device=sdc || choose -q "4. Choose the $(yellow NIX) device" -o choices -m 8 -v "device"
-  [ -b /dev/${device} ] && NIX_MNT="/mnt/nix" NIX_FS="btrfs" NIX_DEV="/dev/${device}" 
-
-  # Prepare padded values for table display
-  local _A1_____="$(printf "%-9s%s" $ROOT_MNT)" _A2_="$(printf "%-5s%s" $ROOT_FS)" _A3__________="$(printf "%-14s%s" $ROOT_DEV)"
-  local _B1_____="$(printf "%-9s%s" $BOOT_MNT)" _B2_="$(printf "%-5s%s" $BOOT_FS)" _B3__________="$(printf "%-14s%s" $BOOT_DEV)"
-  local _C1_____="$(printf "%-9s%s" $SWAP_MNT)" _C2_="$(printf "%-5s%s" $SWAP_FS)" _C3__________="$(printf "%-14s%s" $SWAP_DEV)"
-  local _D1_____="$(printf "%-9s%s"  $NIX_MNT)" _D2_="$(printf "%-5s%s"  $NIX_FS)" _D3__________="$(printf "%-14s%s"  $NIX_DEV)"
-
-  # Print a delightful table summarizing what's about to happen
-  echo
-  purple "┏━━━━━━┳━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━┓ \n"
-  purple "┃ ROLE ┃ MOUNT     ┃ TYPE  ┃ DEVICE         ┃ \n"
-  purple "┣━━━━━━╋━━━━━━━━━━━╋━━━━━━━╋━━━━━━━━━━━━━━━━┫ \n"
-  purple "┃ Root ┃ $_A1_____ ┃ $_A2_ ┃ $_A3__________ ┃ \n"
-  purple "┃ Boot ┃ $_B1_____ ┃ $_B2_ ┃ $_B3__________ ┃ \n"
-  purple "┃ Swap ┃ $_C1_____ ┃ $_C2_ ┃ $_C3__________ ┃ \n"
-  purple "┃ Nix  ┃ $_D1_____ ┃ $_D2_ ┃ $_D3__________ ┃ \n"
-  purple "┗━━━━━━┻━━━━━━━━━━━┻━━━━━━━┻━━━━━━━━━━━━━━━━┛ \n"
-  echo
-
-  # Bail if no nix device was selected
-  if [ "$NIX_DEV" = "-" ]; then
-    msg "Exiting, no NIX device selected"
+  # Bail if no disk selected
+  if [ ! -b $dev ]; then
+    msg "Exiting, no disk selected"
     return
   fi
 
   # Final warning
-  if ! ask "$(red "DANGER! Last chance to bail!") \nFormat & prepare partitions for NixOS install?"; then
+  if ! ask "$(red "DANGER! This script will destroy any existing data on the \"$disk\" disk.")\nProceed?"; then
     return
   fi
 
@@ -91,169 +45,117 @@ function main {
   sleep 5
   echo
   echo
+ 
+  msg "Create GPT partition table"
+  run "parted -s /dev/$disk mklabel gpt"
 
-  # Prepare root mount point (gonna be /mnt)
-  mkdir -p $ROOT_MNT
 
-  # If root's device is ext4, check format and mount
-  if [ "$ROOT_FS" = "ext4" ]; then
+  # Booting GPT from bios requires BBP with ESP
+  if is_bios; then
 
-    # Format this device if required
-    if [ "$(lsblk $ROOT_DEV -no FSTYPE)" != "$ROOT_FS" ]; then
-      msg "Formating $ROOT_DEV as $ROOT_FS for the root partition"
-      cmd "mkfs.ext4 -F -L root $ROOT_DEV"
-      mkfs.ext4 -L root $ROOT_DEV
-      echo
-    fi
+    bbp="${disk}1"
+    esp="${disk}2"
+    swap="${disk}3"
+    butter="${disk}4"
 
-    # Mount this device
-    msg "Mounting $ROOT_DEV to $ROOT_MNT"
-    cmd "mount $ROOT_DEV $ROOT_MNT"
-    mount $ROOT_DEV $ROOT_MNT
-    echo
+    msg "Create BIOS boot partition ($bbp)"
+    run "parted -s /dev/$disk mkpart BBP 1MiB 3MiB"
+    run "parted -s /dev/$disk set 1 bios_grub on"
 
-  # Mount tmpfs at /mnt
-  elif [ "$ROOT_FS" = "tmpfs" ]; then
-    msg "Mounting $ROOT_FS to $ROOT_MNT"
-    cmd "mount -t $ROOT_FS none $ROOT_MNT"
-    mount -t tmpfs none $ROOT_MNT
-    echo
-  fi
+    msg "Create EFI system partition ($esp)"
+    run "parted -s /dev/$disk mkpart ESP FAT32 3MiB 1GiB"
+    run "parted -s /dev/$disk set 2 esp on"
 
-  # Prepare boot mount point
-  mkdir -p $BOOT_MNT
+  # Otherwise, the ESP alone is fine
+  else
 
-  # Format boot partition
-  if [ "$BOOT_FS" = "vfat" ]; then
+    esp="${disk}1"
+    swap="${disk}2"
+    butter="${disk}3"
 
-    msg "Formating $BOOT_DEV as $BOOT_FS for the boot partition"
-    cmd "mkfs.fat -F32 $BOOT_DEV"
-    mkfs.fat -F32 $BOOT_DEV
-    echo
-
-    msg "Mounting $BOOT_DEV to $BOOT_MNT"
-    cmd "mount $BOOT_DEV $BOOT_MNT"
-    mount $BOOT_DEV $BOOT_MNT
-    echo
+    msg "Create EFI system partition ($esp)"
+    run "parted -s /dev/$disk mkpart ESP FAT32 1MiB 1GiB"
+    run "parted -s /dev/$disk set 2 esp on"
 
   fi
 
+  msg "Format EFI system partition"
+  run "mkfs.fat -F32 -n ESP /dev/$esp"
 
-  # Check swap format and mount
-  if [ "$SWAP_FS" = "swap" ]; then
+  msg "Create swap partition ($swap)"
+  run "parted -s /dev/$disk mkpart Swap linux-swap 1GiB 5GiB"
+  run "parted -s /dev/$disk set 3 swap on"
 
-    # Format this device if required
-    if [ "$(lsblk $SWAP_DEV -no FSTYPE)" != "$SWAP_FS" ]; then
-      msg "Formating $SWAP_DEV as $SWAP_FS"
-      cmd "mkswap $SWAP_DEV"
-      mkswap $SWAP_DEV
-      echo
-    fi
+  msg "Enable swap partition"
+  run "mkswap /dev/$swap"
+  run "swapon /dev/$swap"
 
-    # Enable swap partition
-    msg "Enabling $SWAP_FS"
-    cmd "swapon $SWAP_DEV"
-    swapon $SWAP_DEV
-    echo
+  msg "Create btrfs partition ($butter)"
+  run "parted -s /dev/$disk mkpart Butter btrfs 5GiB 100%"
 
-  fi
+  msg "Format btrfs partition"
+  run "mkfs.btrfs -L Butter /dev/$butter"
 
+  msg "Create btrfs subvolume structure"
+  # nix
+  # ├── root
+  # ├── snaps
+  # └── state
+  #     ├── home
+  #     ├── etc
+  #     └── var
+  #         └── log
+  run "mkdir -p /mnt && mount /dev/$butter /mnt"
+  run "btrfs subvolume create /mnt/root"
+  run "btrfs subvolume create /mnt/snaps"
+  run "btrfs subvolume snapshot -r /mnt/root /mnt/snaps/root"
+  run "mkdir -p /mnt/root/{boot,nix}"
+  run "btrfs subvolume create /mnt/state"
+  run "btrfs subvolume create /mnt/state/home"
+  run "mkdir -p /mnt/state/{var/lib,etc/{ssh,NetworkManager/system-connections}}"
+  run "btrfs subvolume create /mnt/state/var/log"
+  run "umount /mnt"
 
-  # Prepare nix mount point
-  mkdir -p $NIX_MNT
+  msg "Mount root"
+  run "mount -o subvol=root /dev/$butter /mnt"
 
-  # Prepare nix btrfs and subvolumes
-  if [ "$NIX_FS" = "btrfs" ]; then
+  msg "Mount nix"
+  run "mount /dev/$butter /mnt/nix"
 
-    # Format this device if required
-    if [ "$(lsblk $NIX_DEV -no FSTYPE)" != "$NIX_FS" ]; then
-      msg "Formating $NIX_DEV as $NIX_FS for the nix partition"
-      cmd "mkfs.btrfs -L nix $NIX_DEV"
-      mkfs.btrfs -L nix $NIX_DEV
-      echo
-    fi
-
-    # Mount nix btrfs
-    msg "Mounting $NIX_DEV to $NIX_MNT"
-    cmd "mount -o compress-force=zstd,noatime $NIX_DEV $NIX_MNT"
-    mount -o compress-force=zstd,noatime $NIX_DEV $NIX_MNT
-    echo
-
-    # Create nested subvolume tree like so:
-    # nix
-    # ├── snaps
-    # └── state
-    #     ├── home
-    #     ├── etc
-    #     └── var
-    #         └── log
-    msg "Creating snaps subvolume"
-    cmd "btrfs subvolume create $NIX_MNT/snaps"
-    [ -d $NIX_MNT/snaps ] || btrfs subvolume create $NIX_MNT/snaps
-    echo
-
-    msg "Creating state subvolume"
-    cmd "btrfs subvolume create $NIX_MNT/state"
-    [ -d $NIX_MNT/state ] || btrfs subvolume create $NIX_MNT/state
-    echo
-
-    msg "Creating home subvolume"
-    cmd "btrfs subvolume create $NIX_MNT/state/home"
-    [ -d $NIX_MNT/state/home ] || btrfs subvolume create $NIX_MNT/state/home
-    echo
-   
-    msg "Creating state var/etc directory structure"
-    cmd "mkdir -p $NIX_MNT/state/{var/lib,etc/{ssh,NetworkManager/system-connections}}"
-    mkdir -p $NIX_MNT/state/{var,etc/ssh}
-    echo
-
-    msg "Creating log subvolume"
-    cmd "btrfs subvolume create $NIX_MNT/state/var/log"
-    [ -d $NIX_MNT/state/var/log ] || btrfs subvolume create $NIX_MNT/state/var/log
-    echo
-
-  fi
+  msg "Mount boot"
+  run "mount /dev/$esp /mnt/boot"
 
   # Ensure git is installed
   command -v git >/dev/null 2>&1 || ( cmd "nix-env -iA nixos.git" && nix-env -iA nixos.git && echo )
 
-  # Path to nixos flake
-  local nixos=$NIX_MNT/state/etc/nixos
+  # Path to nixos flake and minimal configuration
+  local nixos="/mnt/nix/state/etc/nixos" min="$nixos/configurations/min"
 
   # Clone git repo into persistant directory
   msg "Cloning nixos git repo"
   if [ -d $nixos ]; then
-    cmd "cd $nixos && git pull"
-    cd $nixos && git pull
+    run "cd $nixos && git pull"
   else
-    cmd "git clone https://github.com/suderman/nixos $nixos"
-    git clone https://github.com/suderman/nixos $nixos 
+    run "git clone https://github.com/suderman/nixos $nixos"
   fi
   echo
 
-  # Path to minimal configuration
-  local min=$nixos/configurations/min
-
   # Generate config and copy hardware-configuration.nix
   msg "Generating hardware-configuration.nix"
-  cmd "nixos-generate-config --root $ROOT_MNT --dir $min"
-  nixos-generate-config --root $ROOT_MNT --dir $min
-  cmd "cp -f $min/hardware-configuration.nix $nixos/"
-  cp -f $min/hardware-configuration.nix $nixos/
+  run "nixos-generate-config --root /mnt --dir $min"
+  run "cp -f $min/hardware-configuration.nix $nixos/"
   echo
 
   # If linode install detected, set config.hardware.linode.enable = true;
   if is_linode; then
     msg "Enabling linode in configuration.nix"
-    cmd "sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix"
-    sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix
+    run "sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix"
     echo
   fi
 
   # Personal user owns /etc/nixos 
   msg "Updating configuration permissions"
-  cmd "chown -R 1000:100 $nixos"
-  chown -R 1000:100 $nixos
+  run "chown -R 1000:100 $nixos"
   echo
   
   # Run nixos installer
@@ -269,6 +171,14 @@ function main {
 
 function is_linode {
   [ "$arg" = "LINODE" ] && return 0 || return 1
+}
+
+function is_bios {
+  if [ "$arg" = "LINODE" ] || [ "$arg" = "BIOS" ]; then
+    return 0
+  else 
+    return 1
+  fi
 }
 
 # /end of installer script

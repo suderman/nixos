@@ -22,8 +22,10 @@ in {
     '';
 
     # Configure GRUB for Linode
+    boot.loader.grub.enable = true;
     boot.loader.grub.forceInstall = true;
-    boot.loader.grub.device = "nodev";
+    # boot.loader.grub.device = "nodev";
+    boot.loader.grub.devices = [ "/dev/sda" ];
     boot.loader.timeout = 10;
 
     # Disable predictable interface names for Linode
