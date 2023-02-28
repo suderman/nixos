@@ -30,7 +30,7 @@ function main {
   local linode_size=$(linode-cli linodes type-view $linode_type --no-header --text --format disk) # example: 51200
   local installer_size=1024  # reserve 1GB for installer
   local nixos_size=$((linode_size - installer_size)) # nix uses remaining available disk
-  local flags swap_flag nixos_flag installer_flag
+  local flags nixos_disk nixos_config installer_disk installer_config
 
 
   # Final warning
@@ -89,13 +89,13 @@ function main {
   msg "Creating INSTALLER disk"
   run linode-cli linodes disk-create $id $flags --label installer --filesystem ext4 --size $installer_size
   disk_id="$(cat /tmp/run | awk '{print $1}')"
-  installer_flag="--devices.sdb.disk_id $disk_id"
+  installer_disk="--devices.sdb.disk_id $disk_id"
   wait_for_disk $disk_id
 
   msg "Creating NIXOS disk"
   run linode-cli linodes disk-create $id $flags --label nixos --filesystem raw --size $nixos_size
   disk_id="$(cat /tmp/run | awk '{print $1}')"
-  nixos_flag="--devices.sda.disk_id $disk_id"
+  nixos_disk="--devices.sda.disk_id $disk_id"
   wait_for_disk $disk_id
 
 
@@ -106,22 +106,21 @@ function main {
   
   # Create the installer configuration
   msg "Creating INSTALLER configuration"
-  run linode-cli linodes config-create $LINODE_ID $flags $nixos_flag $installer_flag --label installer --kernel linode/direct-disk --root_device /dev/sdb
-  installer_flag="--config_id $(cat /tmp/run | awk '{print $1}')"
+  run linode-cli linodes config-create $LINODE_ID $flags $nixos_disk $installer_disk --label installer --kernel linode/direct-disk --root_device /dev/sdb
+  installer_config="--config_id $(cat /tmp/run | awk '{print $1}')"
   sleep 10
   echo
 
   # Create the main configuration
   msg "Creating NIXOS configuration"
-  # run linode-cli linodes config-create $LINODE_ID $flags --label nixos --kernel linode/grub2 --root_device /dev/sda
-  run linode-cli linodes config-create $LINODE_ID $flags $nixos_flag --label nixos --root_device /dev/sda
-  nixos_flag="--config_id $(cat /tmp/run | awk '{print $1}')"
+  run linode-cli linodes config-create $LINODE_ID $flags $nixos_disk --label nixos --root_device /dev/sda
+  nixos_config="--config_id $(cat /tmp/run | awk '{print $1}')"
   sleep 10
   echo
 
   # Rescue mode
   msg "Rebooting the linode in RESCUE mode"
-  run linode-cli linodes rescue $id $installer_flag
+  run linode-cli linodes rescue $id $installer_disk
   sleep 5
   wait_for_linode "running"
   echo
@@ -143,7 +142,7 @@ function main {
 
   # Installer config
   msg "Rebooting the linode..."
-  run linode-cli linodes reboot $id $installer_flag
+  run linode-cli linodes reboot $id $installer_config
   sleep 5
   wait_for_linode "running"
   echo
@@ -162,7 +161,7 @@ function main {
 
   # NixOS config
   msg "Rebooting the linode..."
-  run linode-cli linodes reboot $id $nixos_flag
+  run linode-cli linodes reboot $id $nixos_config
   sleep 5
   wait_for_linode "running"
   echo
