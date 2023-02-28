@@ -1,6 +1,6 @@
 # State configuration for NixOS hosts
 
-Use the [impermanence](https://github.com/nix-community/impermanence) to mount
+Use [impermanence](https://github.com/nix-community/impermanence) to mount
 or link certain directories and files in `/nix/state`:
 
 ## Directories
