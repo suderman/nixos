@@ -45,9 +45,6 @@
   # Memory management
   services.earlyoom.enable = true;
 
-  # Fingerprint reader
-  services.fprintd.enable = true;
-
   # Keyboard control
   services.keyd.enable = true;
   services.ydotool.enable = true;
@@ -71,14 +68,26 @@
   programs.neovim.enable = true;
   programs.steam.enable = false;
 
-  # # Power management
-  # services.tlp.enable = true;
-  # services.tlp.settings = {
-  #   CPU_BOOST_ON_BAT = 0;
-  #   CPU_SCALING_GOVERNOR_ON_BATTERY = "powersave";
-  #   START_CHARGE_THRESH_BAT0 = 90;
-  #   STOP_CHARGE_THRESH_BAT0 = 97;
-  #   RUNTIME_PM_ON_BAT = "auto";
-  # };
+  # Power management
+  services.tlp.enable = false;
+  services.tlp.settings = {
+    CPU_BOOST_ON_BAT = 0;
+    CPU_SCALING_GOVERNOR_ON_BATTERY = "powersave";
+    START_CHARGE_THRESH_BAT0 = 90;
+    STOP_CHARGE_THRESH_BAT0 = 97;
+    RUNTIME_PM_ON_BAT = "auto";
+  };
+
+  # Suspend-then-hibernate after two hours
+  services.logind = {
+    lidSwitch = "suspend-then-hibernate";
+    lidSwitchExternalPower = "suspend";
+    extraConfig = ''
+      HandlePowerKey=suspend-then-hibernate
+      IdleAction=suspend-then-hibernate
+      IdleActionSec=2m
+    '';
+  };
+  systemd.sleep.extraConfig = "HibernateDelaySec=2h";
 
 }

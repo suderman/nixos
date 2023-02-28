@@ -44,6 +44,11 @@ in {
         speed = "0.30882352941176472";
       };
 
+      # Power button hybernates system
+      "org/gnome/settings-daemon/plugins/power" = {
+        power-button-action = "hibernate"; # default: suspend
+      };
+
       # Keyboard Shortcuts
       "org/gnome/desktop/wm/keybindings" = {
         close = "['<Super>q']";
