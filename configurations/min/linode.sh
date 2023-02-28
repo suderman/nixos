@@ -56,7 +56,7 @@ function main {
   }
 
   # Power down
-  msg "OK! Powering off linode \"${label}\". Please wait..."
+  msg "OK! Powering off linode. Please wait..."
   run linode-cli linodes shutdown $id
   wait_for_linode "offline"
   echo
