@@ -105,6 +105,7 @@ function main {
   #     ├── etc
   #     └── var
   #         └── log
+  cmd "mkdir -p /mnt"
   mkdir -p /mnt
   run "mount /dev/$butter /mnt"
   run "btrfs subvolume create /mnt/root"
@@ -112,6 +113,7 @@ function main {
   run "btrfs subvolume snapshot -r /mnt/root /mnt/snaps/root"
   run "btrfs subvolume create /mnt/state"
   run "btrfs subvolume create /mnt/state/home"
+  cmd "-p /mnt/state/{var/lib,etc/{ssh,NetworkManager/system-connections}}"
   mkdir -p /mnt/state/{var/lib,etc/{ssh,NetworkManager/system-connections}}
   run "btrfs subvolume create /mnt/state/var/log"
   run "umount /mnt"
@@ -120,10 +122,12 @@ function main {
   run "mount -o subvol=root /dev/$butter /mnt"
 
   msg "Mount nix"
+  cmd "mkdir -p /mnt/nix"
   mkdir -p /mnt/nix
-  cmd "mount /dev/$butter /mnt/nix"
+  run "mount /dev/$butter /mnt/nix"
 
   msg "Mount boot"
+  cmd "mkdir -p /mnt/boot"
   mkdir -p /mnt/boot
   run "mount /dev/$esp /mnt/boot"
 
