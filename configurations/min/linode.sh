@@ -28,12 +28,9 @@ function main {
   local label="$(linode-cli linodes view $id --format label --no-header --text)"
   local linode_type=$(linode-cli linodes view $id --no-header --text --format type) # example: g6-standard-1
   local linode_size=$(linode-cli linodes type-view $linode_type --no-header --text --format disk) # example: 51200
-  local iso_size=1024  # reserve 1GB for installer
-  # local root_size=1024 # reserve 1GB for root
-  # local swap_size=2048 # reserve 2GB for swap
-  # local nix_size=$((linode_size - iso_size - root_size - swap_size)) # nix uses remaining available disk
-  local nix_size=$((linode_size - iso_size)) # nix uses remaining available disk
-  local flags iso_flag iso_flag swap_flag nix_flag nixos_flag installer_flag
+  local installer_size=1024  # reserve 1GB for installer
+  local nixos_size=$((linode_size - installer_size)) # nix uses remaining available disk
+  local flags swap_flag nixos_flag installer_flag
 
 
   # Final warning
@@ -89,30 +86,16 @@ function main {
   # Shared flags
   flags="--text --no-header"
 
-  msg "Creating ISO disk"
-  run linode-cli linodes disk-create $id $flags --label iso --filesystem ext4 --size $iso_size
+  msg "Creating INSTALLER disk"
+  run linode-cli linodes disk-create $id $flags --label installer --filesystem ext4 --size $installer_size
   disk_id="$(cat /tmp/run | awk '{print $1}')"
-  # iso_flag="--devices.sdd.disk_id $disk_id"
-  iso_flag="--devices.sdb.disk_id $disk_id"
+  installer_flag="--devices.sdb.disk_id $disk_id"
   wait_for_disk $disk_id
 
-  # msg "Creating ROOT disk"
-  # run linode-cli linodes disk-create $id $flags --label root --filesystem ext4 --size $root_size
-  # disk_id="$(cat /tmp/run | awk '{print $1}')"
-  # root_flag="--devices.sda.disk_id $disk_id"
-  # wait_for_disk $disk_id
-  #
-  # msg "Creating SWAP disk"
-  # run linode-cli linodes disk-create $id $flags --label swap --filesystem swap --size $swap_size
-  # disk_id="$(cat /tmp/run | awk '{print $1}')"
-  # swap_flag="--devices.sdb.disk_id $disk_id"
-  # wait_for_disk $disk_id
-
-  msg "Creating NIX disk"
-  run linode-cli linodes disk-create $id $flags --label nix --filesystem raw --size $nix_size
+  msg "Creating NIXOS disk"
+  run linode-cli linodes disk-create $id $flags --label nix --filesystem raw --size $nixos_size
   disk_id="$(cat /tmp/run | awk '{print $1}')"
-  # nix_flag="--devices.sdc.disk_id $disk_id"
-  nix_flag="--devices.sda.disk_id $disk_id"
+  nixos_flag="--devices.sda.disk_id $disk_id"
   wait_for_disk $disk_id
 
 
@@ -120,12 +103,10 @@ function main {
   flags="--text --no-header"
   flags="$flags --kernel linode/direct-disk"
   flags="$flags --helpers.updatedb_disabled=0 --helpers.distro=0 --helpers.modules_dep=0 --helpers.network=0 --helpers.devtmpfs_automount=0"
-  # flags="$flags $root_flag $swap_flag $nix_flag"
-  # flags="$flags $nix_flag"
   
   # Create the installer configuration
   msg "Creating INSTALLER configuration"
-  run linode-cli linodes config-create $LINODE_ID $flags $nix_flag $iso_flag --label installer --kernel linode/direct-disk --root_device /dev/sdb
+  run linode-cli linodes config-create $LINODE_ID $flags $nixos_flag $installer_flag --label installer --kernel linode/direct-disk --root_device /dev/sdb
   installer_flag="--config_id $(cat /tmp/run | awk '{print $1}')"
   sleep 10
   echo
@@ -133,19 +114,19 @@ function main {
   # Create the main configuration
   msg "Creating NIXOS configuration"
   # run linode-cli linodes config-create $LINODE_ID $flags --label nixos --kernel linode/grub2 --root_device /dev/sda
-  run linode-cli linodes config-create $LINODE_ID $flags $nix_flag --label nixos --root_device /dev/sda
+  run linode-cli linodes config-create $LINODE_ID $flags $nixos_flag --label nixos --root_device /dev/sda
   nixos_flag="--config_id $(cat /tmp/run | awk '{print $1}')"
   sleep 10
   echo
 
   # Rescue mode
   msg "Rebooting the linode in RESCUE mode"
-  run linode-cli linodes rescue $id $iso_flag
+  run linode-cli linodes rescue $id $installer_flag
   sleep 5
   wait_for_linode "running"
   echo
 
-  # Create ISO disk
+  # Create INSTALLER disk
   msg "Opening a Weblish console:"
   url "https://cloud.linode.com/linodes/$id/lish/weblish"
   echo
@@ -173,17 +154,6 @@ function main {
   msg "Paste the following to install NixOS (second line copied to clipboard):"
   echo "sudo -s"
   echo "bash <(curl -sL https://github.com/suderman/nixos/raw/main/configurations/min/install.sh) LINODE" | tee >(wl-copy)
-  echo
-  msg "The installer should automatically make the following selections:"
-  purple "┏━━━━━━┳━━━━━━━━┓ \n"
-  purple "┃ DISK ┃ DEVICE ┃ \n"
-  purple "┣━━━━━━╋━━━━━━━━┫ \n"
-  # purple "┃ ROOT ┃ sda    ┃ \n"
-  # purple "┃ BOOT ┃ none   ┃ \n"
-  # purple "┃ SWAP ┃ sdb    ┃ \n"
-  # purple "┃ NIX  ┃ sdc    ┃ \n"
-  purple "┃ NIX  ┃ sda    ┃ \n"
-  purple "┗━━━━━━┻━━━━━━━━┛ \n"
   echo
 
   msg "Wait until it's finished before we reboot with NIXOS config"
