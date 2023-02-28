@@ -93,7 +93,7 @@ function main {
   wait_for_disk $disk_id
 
   msg "Creating NIXOS disk"
-  run linode-cli linodes disk-create $id $flags --label nix --filesystem raw --size $nixos_size
+  run linode-cli linodes disk-create $id $flags --label nixos --filesystem raw --size $nixos_size
   disk_id="$(cat /tmp/run | awk '{print $1}')"
   nixos_flag="--devices.sda.disk_id $disk_id"
   wait_for_disk $disk_id
