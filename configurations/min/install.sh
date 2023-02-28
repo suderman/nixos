@@ -28,7 +28,7 @@ function main {
   local disks disk
   local bbp esp swap butter
   disks=($(lsblk -nirdo NAME | xargs))
-  choose -q "Choose the $(yellow disk) to partition for NixOS" -o disks -m 8 -v "disk"
+  is_linode && disk="sda" || choose -q "Choose the $(yellow disk) to partition for NixOS" -o disks -m 8 -v "disk"
 
   # Bail if no disk selected
   if [ ! -e /dev/$disk ]; then
@@ -91,7 +91,7 @@ function main {
   run "swapon /dev/$swap"
 
   msg "Create btrfs partition ($butter)"
-  run "parted -s /dev/$disk mkpart Butter btrfs 5GiB 100\%"
+  run "parted -s /dev/$disk mkpart Butter btrfs 5GiB 100%"
 
   msg "Format btrfs partition"
   run "mkfs.btrfs -L Butter /dev/$butter"
