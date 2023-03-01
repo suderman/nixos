@@ -1,15 +1,20 @@
-{ inputs, config, lib, pkgs, ... }: {
+{ config, lib, pkgs, ... }: {
 
   imports = [
     ./hardware-configuration.nix
   ];
 
-  fileSystems."/".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" "subvol=root" ];
+  # Btrfs mount options
+  fileSystems."/".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
   fileSystems."/nix".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
 
+  # Base configuration
   base.enable = true;
   state.enable = true;
   secrets.enable = true;
+
+  # Use freshest kernel
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Hardware configuration
   hardware.linode.enable = true;

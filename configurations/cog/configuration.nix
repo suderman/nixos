@@ -9,20 +9,17 @@
   fileSystems."/".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
   fileSystems."/nix".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
 
-  # Use the systemd-boot EFI boot loader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
-  # Use freshest kernel
-  boot.kernelPackages = pkgs.linuxPackages_latest;
-
   # Base configuration
   base.enable = true;
   state.enable = true;
   secrets.enable = true;
 
-  # Desktop Environments
-  desktops.gnome.enable = true;
+  # Use freshest kernel
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+
+  # Use the systemd-boot EFI boot loader.
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
 
   # Network
   services.tailscale.enable = true;
@@ -52,6 +49,9 @@
   services.tandoor-recipes.enable = false;
   # services.gitea.enable = true;
   # services.gitea.database.type = "mysql";
+
+  # Desktop Environments
+  desktops.gnome.enable = true;
 
   # Apps
   services.flatpak.enable = true;
