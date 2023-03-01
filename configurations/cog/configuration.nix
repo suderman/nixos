@@ -5,18 +5,9 @@
     inputs.hardware.nixosModules.framework 
   ];
 
-  # root is tmpfs
-  fileSystems."/" = { 
-    # device = "none"; fsType = "tmpfs";
-    options = [ "size=8G" "mode=755" ]; # limit to 8GB and only writable by root
-  };
-
-  # /nix is btrfs
-  fileSystems."/nix" = { 
-    # device = "/dev/disk/by-uuid/xxx"; fsType = "btrfs";
-    options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ]; # btrfs mount options
-    neededForBoot = true; 
-  };
+  # Btrfs mount options
+  fileSystems."/".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
+  fileSystems."/nix".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
