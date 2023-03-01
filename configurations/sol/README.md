@@ -27,22 +27,20 @@ We need to install the [min](https://github.com/suderman/nixos/tree/main/configu
 
 Choose the `00000000_sol` linode from the menu and follow the wizard. After confirmation, it will power off the chosen linode, destroy any existing disks & configurations, and create the following:
 
-### Four disks under Storage tab:
+### Two disks under Storage tab:
 
-| Label  | Type    | Size  | Device   |
-| ------ | ------- | ----- | -------- |
-| iso    | ext4    | 1024M | /dev/sdd |
-| root   | ext4    | 1024M | /dev/sda |
-| swap   | swap    | 2048M | /dev/sdb |
-| nix    | raw     | -     | /dev/sdc |
+| Label     | Type    | Size  | Device   |
+| --------- | ------- | ----- | -------- |
+| installer | ext4    | 1024M | /dev/sdb |
+| nixos     | raw     | -     | /dev/sda |
 
 
 ### Two configuration profiles under Configurations tab:
 
-| Label     | Kernel      | /dev/sda | /dev/sdb | /dev/sdc | /dev/sdd | Root Device |
-| --------- | ----------- | -------- | -------- | -------- | -------- | ----------- |
-| installer | Direct Disk | root     | swap     | nix      | iso      | /dev/sdd    |
-| nixos     | GRUB 2      | root     | swap     | nix      | -        | /dev/sda    |
+| Label     | Kernel      | /dev/sda | /dev/sdb  | Root Device |
+| --------- | ----------- | -------- | --------- | ----------- |
+| installer | Direct Disk | nixos    | installer | /dev/sdb    |
+| nixos     | Direct Disk | root     | -         | /dev/sda    |
 
 *All Filesystem/Boot Helpers disabled!*
 
@@ -51,14 +49,14 @@ Choose the `00000000_sol` linode from the menu and follow the wizard. After conf
 
 <summary><b>3. Create NixOS installer</b></summary>
 
-Next, the wizard will launch a Weblish console with the Linode booted in Rescue mode. Paste the following into the console to [download](https://nixos.org/download.html) the latest NixOS ISO and write it to `/dev/sdd`:
+Next, the wizard will launch a Weblish console with the Linode booted in Rescue mode. Paste the following into the console to [download](https://nixos.org/download.html) the latest NixOS ISO and write it to `/dev/sdb`:
 
 ```bash
 # https://nixos.org/download.html
 iso=https://channels.nixos.org/nixos-22.11/latest-nixos-minimal-x86_64-linux.iso
 
 # Download the ISO, write it to the installer disk, and verify the checksum:
-curl -L $iso | tee >(dd of=/dev/sdd) | sha256sum
+curl -L $iso | tee >(dd of=/dev/sdb) | sha256sum
 ```
 
 When finished, type `y` on the other computer to continue.

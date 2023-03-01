@@ -4,33 +4,31 @@
 
 Prepare disks under the Storage tab:
 
-| Label  | Type    | Size  | Device   |
-| ------ | ------- | ----- | -------- |
-| iso    | ext4    | 1024M | /dev/sdd |
-| root   | ext4    | 1024M | /dev/sda |
-| swap   | swap    | 2048M | /dev/sdb |
-| nix    | raw     | -     | /dev/sdc |
+| Label     | Type    | Size  | Device   |
+| --------- | ------- | ----- | -------- |
+| installer | ext4    | 1024M | /dev/sdb |
+| nixos     | raw     | -     | /dev/sda |
 
 
 Prepare two configurations under the Configurations tab:
 
-| Label     | Kernel      | /dev/sda | /dev/sdb | /dev/sdc | /dev/sdd | Root Device |
-| --------- | ----------- | -------- | -------- | -------- | -------- | ----------- |
-| installer | Direct Disk | root     | swap     | nix      | iso      | /dev/sdd    |
-| nixos     | GRUB 2      | root     | swap     | nix      | -        | /dev/sda    |
+| Label     | Kernel      | /dev/sda | /dev/sdb  | Root Device |
+| --------- | ----------- | -------- | --------- | ----------- |
+| installer | Direct Disk | nixos    | installer | /dev/sdb    |
+| nixos     | Direct Disk | root     | -         | /dev/sda    |
 
 *Disable all Filesystem/Boot Helpers at the bottom!*
 
 ## Create NixOS installer
 
-Boot node into Rescue Mode with `iso` mounted at `/dev/sdd`. Then launch a console:
+Boot node into Rescue Mode with `installer` mounted at `/dev/sdb`. Then launch a console:
 
 ```zsh
 # https://nixos.org/download.html
 iso=https://channels.nixos.org/nixos-22.11/latest-nixos-minimal-x86_64-linux.iso
 
 # Download the ISO, write it to the installer disk, and verify the checksum:
-curl -L $iso | tee >(dd of=/dev/sdd) | sha256sum
+curl -L $iso | tee >(dd of=/dev/sdb) | sha256sum
 ```
 
 ## Install NixOS

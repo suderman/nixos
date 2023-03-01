@@ -1,6 +1,6 @@
 # Secrets configuration for NixOS hosts
 
-Use the [agenix](https://github.com/ryantm/agenix) to encrypt/decrypt
+Use [agenix](https://github.com/ryantm/agenix) to encrypt/decrypt
 files for use in NixOS configuration. 
 
 ## Usage
