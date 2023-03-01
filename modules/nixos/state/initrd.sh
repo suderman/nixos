@@ -1,6 +1,6 @@
 # Mount btrfs disk to /mnt
 mkdir -p /mnt
-mount /dev/disk/by-label/Butter /mnt
+mount /dev/disk/by-label/nix /mnt
 
 # Delete all of root's subvolumes
 btrfs subvolume list -o /mnt/root |

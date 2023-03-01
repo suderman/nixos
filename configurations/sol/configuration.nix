@@ -7,43 +7,6 @@
   fileSystems."/".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" "subvol=root" ];
   fileSystems."/nix".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
 
-  # boot.initrd.postDeviceCommands = lib.mkBefore ''
-  #   btrfs subvolume list -o /nix/root |
-  #   cut -f9 -d' ' |
-  #   while read subvolume; do
-  #     echo "deleting /$subvolume subvolume..."
-  #     btrfs subvolume delete "/nix/$subvolume"
-  #   done &&
-  #
-  #   echo "deleting /root subvolume..." &&
-  #   btrfs subvolume delete /nix/root
-  #
-  #   echo "restoring blank /root subvolume..."
-  #   btrfs subvolume snapshot /nix/snaps/root /nix/root
-  # '';
-
-  boot.initrd.postDeviceCommands = lib.mkBefore ''
-    # Mount btrfs disk to /mnt
-    mkdir -p /mnt
-    mount /dev/disk/by-label/Butter /mnt
-
-    # Delete all of root's subvolumes
-    btrfs subvolume list -o /mnt/root |
-    cut -f9 -d' ' |
-    while read subvolume; do
-      btrfs subvolume delete "/mnt/$subvolume"
-    done &&
-
-    # Delete root itself
-    btrfs subvolume delete /mnt/root
-
-    # Restore root from blank snapshot
-    btrfs subvolume snapshot /mnt/snaps/root /mnt/root
-
-    # Clean up
-    umount /mnt
-  '';
-
   base.enable = true;
   state.enable = true;
   secrets.enable = true;

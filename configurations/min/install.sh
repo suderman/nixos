@@ -68,7 +68,7 @@ function main {
     run parted -s /dev/$disk set 2 esp on
 
     msg "Create swap partition ($swap)"
-    run parted -s /dev/$disk mkpart Swap linux-swap 1GiB $(swap_size)GiB
+    run parted -s /dev/$disk mkpart swap linux-swap 1GiB $(swap_size)GiB
     run parted -s /dev/$disk set 3 swap on
 
   # Booting with UEFI, the ESP partition alone is fine
@@ -84,13 +84,13 @@ function main {
     run parted -s /dev/$disk set 1 esp on
 
     msg "Create swap partition ($swap)"
-    run parted -s /dev/$disk mkpart Swap linux-swap 1GiB $(swap_size)GiB
+    run parted -s /dev/$disk mkpart swap linux-swap 1GiB $(swap_size)GiB
     run parted -s /dev/$disk set 2 swap on
 
   fi
 
   msg "Create btrfs partition ($butter)"
-  run parted -s /dev/$disk mkpart Butter btrfs $(swap_size)GiB 100%
+  run parted -s /dev/$disk mkpart nix btrfs $(swap_size)GiB 100%
 
   msg "Format EFI system partition"
   run mkfs.fat -F32 -n ESP /dev/$esp
@@ -100,7 +100,7 @@ function main {
   run swapon /dev/$swap
 
   msg "Format btrfs partition"
-  run mkfs.btrfs -fL Butter /dev/$butter
+  run mkfs.btrfs -fL nix /dev/$butter
 
   msg "Create btrfs subvolume structure"
   # nix
