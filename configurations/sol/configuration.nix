@@ -31,16 +31,13 @@
     btrfs subvolume list -o /mnt/root |
     cut -f9 -d' ' |
     while read subvolume; do
-      echo "deleting /$subvolume subvolume..."
       btrfs subvolume delete "/mnt/$subvolume"
     done &&
 
     # Delete root itself
-    echo "deleting /root subvolume..." &&
     btrfs subvolume delete /mnt/root
 
     # Restore root from blank snapshot
-    echo "restoring blank /root subvolume..."
     btrfs subvolume snapshot /mnt/snaps/root /mnt/root
 
     # Clean up

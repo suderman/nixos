@@ -45,6 +45,9 @@ in {
 
   config = lib.mkIf cfg.enable {
 
+    # Script to wipe the root subvolume at boot
+    boot.initrd.postDeviceCommands = lib.mkBefore builtins.readFile ./initrd.sh;
+
     # Configuration impermanence module
     environment.persistence = {
 
