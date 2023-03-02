@@ -78,19 +78,22 @@ When finished, type `y` on the other computer to continue.
 </details>
 <details>
 
-<summary><b>5. Switch configurations</b></summary>
+<summary><b>5. Rekey secrets</b></summary>
 
-Next, the wizard will launch a Weblish console with the Linode booted using the `nixos` profile. Login as a regular user (with matching password).
-
-On the other computer, the repo's secrets will be updated with Linode's public key and all the secrets rekeyed. Commit these changes and `git push`:
+After the Linode boots using the `nixos` profile, the other computer will keyscan the new host. Then repo's secrets will be updated with Linode's public key and all the secrets rekeyed. Commit these changes and `git push`:
 
 ```bash
  cd /etc/nixos
  git commit -m rekey
  git push
 ```
+ 
+</details>
+<details>
+ 
+<summary><b>6. Switch configurations</b></summary>
 
-On the Linode Weblish console, `git pull` changes in this repo and run the `nixos-rebuild switch` command. Then exit and login again.
+Using the Weblish console, login to the Linode as a regular user (with matching password). Then `git pull` changes in this repo and run the `nixos-rebuild switch` command. Exit and login again.
 
 ```bash
  cd /etc/nixos
@@ -115,7 +118,7 @@ Reboot to ensure everything worked. Commit the generated `hardware-configuration
 </details>
 <details>
 
-<summary><b>6. Configure Tailscale</b></summary>
+<summary><b>7. Configure Tailscale</b></summary>
 
 If this machine previously existed in the Tailnet, first login to [Tailscale](https://login.tailscale.com/admin/machines) and remove the old entry. Then enter the following commands to login to Tailscale and update our DNS records:
 
