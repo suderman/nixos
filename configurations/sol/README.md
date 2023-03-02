@@ -118,7 +118,7 @@ Reboot to ensure everything worked. Commit the generated `hardware-configuration
 </details>
 <details>
 
-<summary><b>6. Configure Tailscale</b></summary>
+<summary><b>7. Configure Tailscale</b></summary>
 
 If this machine previously existed in the Tailnet, first login to [Tailscale](https://login.tailscale.com/admin/machines) and remove the old entry. Then enter the following commands to login to Tailscale and update our DNS records:
 
