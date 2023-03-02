@@ -35,3 +35,8 @@ Additional directories and files can be added in the configuration like so:
   state.files = [ "/etc/passwd" ];
 }
 ```
+
+## Resources
+- <https://grahamc.com/blog/erase-your-darlings>
+- <https://elis.nu/blog/2020/05/nixos-tmpfs-as-root/>
+- <https://mt-caret.github.io/blog/posts/2020-06-29-optin-state.html>
