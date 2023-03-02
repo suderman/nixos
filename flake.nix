@@ -111,10 +111,10 @@
         sol = mkSystem { host = "sol"; inherit domain publicDomain; };
 
         # Intel NUC home server
-        lux = mkSystem { host = "lux"; inherit domain publicDomain; };
+        # lux = mkSystem { host = "lux"; inherit domain publicDomain; };
 
         # Retired Intel NUC for testing ideas
-        lab = mkSystem { host = "lab"; inherit domain publicDomain; };
+        # lab = mkSystem { host = "lab"; inherit domain publicDomain; };
 
       };
 
