@@ -1,8 +1,9 @@
 { config, lib, pkgs, inputs, ... }: {
 
   imports = [ 
-    ./hardware-configuration.nix 
     inputs.hardware.nixosModules.framework 
+    ./framework.nix
+    ./hardware-configuration.nix 
   ];
 
   # Btrfs mount options

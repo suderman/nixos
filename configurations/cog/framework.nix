@@ -1,11 +1,7 @@
-#
 # NixOS Configuration for Framework Laptop
 # https://gist.github.com/digitalknk/ee0379c1cd4597463c31a323ea5882a5
 # https://community.frame.work/t/nixos-on-the-framework-blog-review/3835
-
-{ config, lib, pkgs, modulesPath, ... }:
-
-{
+{ config, lib, pkgs, modulesPath, ... }: {
 
   boot.kernelParams = [ "mem_sleep_default=deep" ];
 
@@ -24,7 +20,8 @@
   powerManagement = {
     enable = true;
     powertop.enable = true;
-    cpuFreqGovernor = lib.mkDefault "ondemand";
+    # *conflicts with inputs.hardware.nixosModules.framework
+    # cpuFreqGovernor = lib.mkDefault "ondemand";
   };
 
   # Enable Bluetooth
@@ -47,21 +44,22 @@
     intel-media-driver
   ];
 
-  # Bring in some audio
-  security.rtkit.enable = true;
   # rtkit is optional but recommended
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-    # If you want to use JACK applications, uncomment this
-    #jack.enable = true;
+  security.rtkit.enable = true;
 
-    # use the example session manager (no others are packaged yet so this is enabled by default,
-    # no need to redefine it in your config for now)
-    #media-session.enable = true;
-  };
+  # *conflicts with inputs.hardware.nixosModules.framework
+  # services.pipewire = {
+  #   enable = true;
+  #   alsa.enable = true;
+  #   alsa.support32Bit = true;
+  #   pulse.enable = true;
+  #   # If you want to use JACK applications, uncomment this
+  #   #jack.enable = true;
+  #
+  #   # use the example session manager (no others are packaged yet so this is enabled by default,
+  #   # no need to redefine it in your config for now)
+  #   #media-session.enable = true;
+  # };
 
   # Enable touchpad support (enabled default in most desktopManager).
   services.xserver.libinput.enable = true;
