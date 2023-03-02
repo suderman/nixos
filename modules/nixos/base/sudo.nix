@@ -3,8 +3,14 @@
 
   config = mkIf config.base.enable {
 
-    # Skip password for sudo
-    security.sudo.wheelNeedsPassword = false;
+    # Does sudo need a password?
+    security.sudo.wheelNeedsPassword = true;
+
+    # If so, how long before asking again?
+    security.sudo.extraConfig = lib.mkAfter ''
+      Defaults timestamp_timeout=60
+      Defaults lecture=never
+    '';
 
     # Increase open file limit for sudoers
     security.pam.loginLimits = [

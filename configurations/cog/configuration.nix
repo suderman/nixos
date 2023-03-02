@@ -84,4 +84,14 @@
   #   ACTION=="add", SUBSYSTEM=="usb", DRIVER=="usb", ATTR{power/wakeup}="enabled"
   # '';
 
+  services.xserver.displayManager.gdm.debug = true;
+
+  # sudo fwupdmgr update
+  services.fwupd.enable = true;
+
+  # services.fprintd.enable = true;
+  # services.fprintd.tod.enable = true;
+  # services.fprintd.tod.driver = pkgs.libfprint-2-tod1-vfs0090;  # (If the vfs0090 Driver does not work, use the following driver)
+  # # services.fprintd.tod.driver = pkgs.libfprint-2-tod1-goodix; # (On my device it only worked with this driver)
+  
 }

@@ -33,10 +33,17 @@
       tree = "tree -a --dirsfirst -I .git";
       tl = "tldr";
       less = "less -R";
+
       type-clipboard = ''
         sh -c 'sleep 5.0; ydotool type -- "$(wl-paste)"'
       '';
+
       bashly = "docker run --rm -it --user $(id -u):$(id -g) --volume \"$PWD:/app\" dannyben/bashly";
+
+      j = "journalctl";
+      s = "sudo systemctl";
+      sz = "sudo sysz";
+
     };
 
   };
