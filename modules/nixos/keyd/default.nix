@@ -32,7 +32,7 @@ in {
       serviceConfig = {
         Type = "simple";
         ExecStart = "${keyd}/bin/keyd";
-        Restart = "on-failure";
+        # Restart = "on-failure";
       };
     };
 

@@ -44,7 +44,7 @@ in {
         speed = "0.30882352941176472";
       };
 
-      # Power button hybernates system
+      # Power button suspends system
       "org/gnome/settings-daemon/plugins/power" = {
         power-button-action = "hibernate"; # default: suspend
       };

@@ -34,8 +34,9 @@
       tl = "tldr";
       less = "less -R";
       type-clipboard = ''
-        sh -c 'sudo sleep 5.0; sudo ydotool type -- "$(wl-paste)"'
+        sh -c 'sleep 5.0; ydotool type -- "$(wl-paste)"'
       '';
+      bashly = "docker run --rm -it --user $(id -u):$(id -g) --volume \"$PWD:/app\" dannyben/bashly";
     };
 
   };

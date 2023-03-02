@@ -6,7 +6,8 @@ let
 in { 
 
   # Personal scripts
-  yo = self.callPackage ./yo.nix { };
+  cli = self.callPackage ./cli {};
+  yo = self.callPackage ./yo.nix {};
 
   # These packages support Wayland but sometimes need to be persuaded
   # _1password-gui  = enableWayland { type = "electron"; pkg = super._1password-gui; bin = "1password"; };

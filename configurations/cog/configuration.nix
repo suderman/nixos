@@ -80,5 +80,8 @@
     '';
   };
   systemd.sleep.extraConfig = "HibernateDelaySec=2h";
+  # services.udev.extraRules = lib.mkAfter ''
+  #   ACTION=="add", SUBSYSTEM=="usb", DRIVER=="usb", ATTR{power/wakeup}="enabled"
+  # '';
 
 }

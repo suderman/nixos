@@ -31,6 +31,7 @@
     unstable.sl
     xorg.xeyes
     yo
+    systemdgenie
     # keygen
   ];
 
