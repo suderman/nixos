@@ -46,9 +46,9 @@ ask() {
   fi
 
   if [ "$tone" = "warn" ]; then
-    echo -n "$(red_bold "#") $(red $*)" 
+    echo -n "$(red_bold "#") $(red $question)" 
   else
-    echo -n "$(green_bold "#") $(green $*)" 
+    echo -n "$(green_bold "#") $(green $question)" 
   fi
 
   read -p " $(blue_bold y)/[$(red_bold n)] " -n 1 -r

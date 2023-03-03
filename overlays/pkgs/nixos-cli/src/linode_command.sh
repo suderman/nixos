@@ -110,8 +110,8 @@ function main {
   info "Paste the following to download the NixOS installer (copied to clipboard):"
   line1="iso=https://channels.nixos.org/nixos-22.11/latest-nixos-minimal-x86_64-linux.iso"
   line2="curl -L \$iso | tee >(dd of=/dev/sdb) | sha256sum"
-  out $line1
-  out $line2
+  echo $line1
+  echo $line2
   echo "$line1; $line2" | wl-copy
   echo
   info "Wait until it's finished before we reboot with the INSTALLER config"
@@ -202,7 +202,7 @@ function choose_linode {
 }
 
 function wait_for_linode {
-  printf "   "
+  printf "  "
   while [ "$(linode-cli linodes view $LINODE_ID --text --no-header --format status)" != "$1" ]; do
     echo -n $(yellow ".")
     sleep 5
