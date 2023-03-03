@@ -4,54 +4,88 @@ version: 0.1.0
 extensible: true
 
 commands:
-- name: completions
-  help: |-
-    Generate bash completions
-    Usage: eval "\$(cli completions)" 
+
+- name: switch
+  alias: sw
+  help: Shortcut for nixos-rebuild switch
+
+- name: secrets
+  alias: s
+  help: Edit or add secrets to secrets/files
+
+  args:
+  - name: secret
+    required: false
+    help: "name of secret (leave empty to choose from list)"
+
+  examples:
+  - nixos secrets
+  - nixos secrets foo
+
+- name: rekey
+  alias: r
+  help: Rekey secrets with secrets/keys
+
+  flags:
+  - long: --force
+    short: -f
+    arg: force
+    help: "Force rekey"
+
+  examples:
+  - nixos rekey
+  - nixos rekey --force
+
+
+- name: keyscan
+  alias: k
+  help: Scan a host for public keys and add to secrets/keys
+
+  args:
+  - name: host
+    required: true
+    help: "IP address or hostname"
+  - name: name
+    required: false
+    help: "Name of host (default: first argument)"
+
+  flags:
+  - long: --force
+    short: -f
+    arg: force
+    help: "Force rekey after keyscan"
+
+  examples:
+  - nixos keyscan 192.168.1.10 myhost
+  - nixos keyscan 192.168.1.10 myhost --force
+
 
 - name: linode
   alias: l
   help: Install configuration to Linode VPS
 
-- name: download
-  alias: d
-  help: Download a file
+- name: bootstrap
+  alias: b
+  help: Bootstrap a NixOS installation
 
   args:
-  - name: source
+  - name: type
     required: true
-    help: URL to download from
-  - name: target
-    help: "Target filename (default: same as source)"
+    help: "uefi, bios, linode"
 
   flags:
-  - long: --force
-    short: -f
-    help: Overwrite existing files
+  - long: --swap
+    short: -s
+    arg: swap
+    help: "min, max, or any number of GB for swap (default: max)"
 
   examples:
-  - cli download example.com
-  - cli download example.com ./output -f
+  - nixos bootstrap linode
+  - nixos bootstrap uefi --swap min
+  - nixos bootstrap bios --swap 8
 
-  environment_variables:
-  - name: default_target_location
-    help: Set the default location to download to
 
-- name: upload
-  alias: u
-  help: Upload a file
-  args:
-  - name: source
-    required: true
-    help: File to upload
-
-  flags:
-  - long: --user
-    short: -u
-    arg: user
-    help: Username to use for logging in
-    required: true
-  - long: --password
-    short: -p
-    arg: password
-    help: Password to use for logging in
+- name: completions
+  help: |-
+    Generate bash completions
+    Usage: eval "\$(cli completions)" 

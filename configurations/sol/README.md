@@ -71,6 +71,7 @@ Next, the wizard will launch a Glish console with the Linode booted using the `i
 ```bash
 sudo -s
 bash <(curl -sL https://github.com/suderman/nixos/raw/main/configurations/min/install.sh) LINODE
+bash <(curl -sL https://github.com/suderman/nixos/raw/main/overlays/pkgs/nixos-cli/nixos) bootstrap linode
 ```
 
 When finished, type `y` on the other computer to continue.

@@ -1,4 +1,4 @@
-{ lib, writeShellApplication, pick, curl, less, gnused }: (writeShellApplication {
+{ lib, writeShellApplication, fzf, curl, less, gnused }: (writeShellApplication {
   name = "nixos";
   runtimeInputs = [ fzf curl less gnused ];
   text = builtins.readFile ./nixos;

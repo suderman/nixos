@@ -27,28 +27,31 @@ nixos_usage() {
 
   fi
 
-  printf "%s\n" "Usage:"
+  printf "%s\n" "$(bold "Usage:")"
   printf "  nixos COMMAND\n"
   printf "  nixos [COMMAND] --help | -h\n"
   printf "  nixos --version | -v\n"
   echo
   # :command.usage_commands
-  printf "%s\n" "Commands:"
-  printf "  %s   Generate bash completions\n" "completions"
-  printf "  %s   Install configuration to Linode VPS\n" "linode     "
-  printf "  %s   Download a file\n" "download   "
-  printf "  %s   Upload a file\n" "upload     "
+  printf "%s\n" "$(bold "Commands:")"
+  printf "  %s   Shortcut for nixos-rebuild switch\n" "$(green "switch")     "
+  printf "  %s   Edit or add secrets to secrets/files\n" "$(green "secrets")    "
+  printf "  %s   Rekey secrets with secrets/keys\n" "$(green "rekey")      "
+  printf "  %s   Scan a host for public keys and add to secrets/keys\n" "$(green "keyscan")    "
+  printf "  %s   Install configuration to Linode VPS\n" "$(green "linode")     "
+  printf "  %s   Bootstrap a NixOS installation\n" "$(green "bootstrap")  "
+  printf "  %s   Generate bash completions\n" "$(green "completions")"
   echo
 
   # :command.long_usage
   if [[ -n $long_usage ]]; then
-    printf "%s\n" "Options:"
+    printf "%s\n" "$(bold "Options:")"
 
     # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
+    printf "  %s\n" "$(magenta "--help, -h")"
     printf "    Show this help\n"
     echo
-    printf "  %s\n" "--version, -v"
+    printf "  %s\n" "$(magenta "--version, -v")"
     printf "    Show version number\n"
     echo
 
@@ -56,32 +59,179 @@ nixos_usage() {
 }
 
 # :command.usage
-nixos_completions_usage() {
+nixos_switch_usage() {
   if [[ -n $long_usage ]]; then
-    printf "nixos completions\n"
-    echo
-
-    printf "  Generate bash completions\n  Usage: eval \"\$(cli completions)\"\n"
+    printf "nixos switch - Shortcut for nixos-rebuild switch\n"
     echo
 
   else
-    printf "nixos completions - Generate bash completions\n"
+    printf "nixos switch - Shortcut for nixos-rebuild switch\n"
     echo
 
   fi
 
-  printf "%s\n" "Usage:"
-  printf "  nixos completions\n"
-  printf "  nixos completions --help | -h\n"
+  printf "Alias: sw\n"
+  echo
+
+  printf "%s\n" "$(bold "Usage:")"
+  printf "  nixos switch\n"
+  printf "  nixos switch --help | -h\n"
   echo
 
   # :command.long_usage
   if [[ -n $long_usage ]]; then
-    printf "%s\n" "Options:"
+    printf "%s\n" "$(bold "Options:")"
 
     # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
+    printf "  %s\n" "$(magenta "--help, -h")"
     printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+nixos_secrets_usage() {
+  if [[ -n $long_usage ]]; then
+    printf "nixos secrets - Edit or add secrets to secrets/files\n"
+    echo
+
+  else
+    printf "nixos secrets - Edit or add secrets to secrets/files\n"
+    echo
+
+  fi
+
+  printf "Alias: s\n"
+  echo
+
+  printf "%s\n" "$(bold "Usage:")"
+  printf "  nixos secrets [SECRET]\n"
+  printf "  nixos secrets --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n $long_usage ]]; then
+    printf "%s\n" "$(bold "Options:")"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "$(magenta "--help, -h")"
+    printf "    Show this help\n"
+    echo
+
+    # :command.usage_args
+    printf "%s\n" "$(bold "Arguments:")"
+
+    # :argument.usage
+    printf "  %s\n" "$(blue "SECRET")"
+    printf "    name of secret (leave empty to choose from list)\n"
+    echo
+
+    # :command.usage_examples
+    printf "%s\n" "$(bold "Examples:")"
+    printf "  nixos secrets\n"
+    printf "  nixos secrets foo\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+nixos_rekey_usage() {
+  if [[ -n $long_usage ]]; then
+    printf "nixos rekey - Rekey secrets with secrets/keys\n"
+    echo
+
+  else
+    printf "nixos rekey - Rekey secrets with secrets/keys\n"
+    echo
+
+  fi
+
+  printf "Alias: r\n"
+  echo
+
+  printf "%s\n" "$(bold "Usage:")"
+  printf "  nixos rekey [OPTIONS]\n"
+  printf "  nixos rekey --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n $long_usage ]]; then
+    printf "%s\n" "$(bold "Options:")"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "$(magenta "--force, -f FORCE")"
+    printf "    Force rekey\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "$(magenta "--help, -h")"
+    printf "    Show this help\n"
+    echo
+
+    # :command.usage_examples
+    printf "%s\n" "$(bold "Examples:")"
+    printf "  nixos rekey\n"
+    printf "  nixos rekey --force\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+nixos_keyscan_usage() {
+  if [[ -n $long_usage ]]; then
+    printf "nixos keyscan - Scan a host for public keys and add to secrets/keys\n"
+    echo
+
+  else
+    printf "nixos keyscan - Scan a host for public keys and add to secrets/keys\n"
+    echo
+
+  fi
+
+  printf "Alias: k\n"
+  echo
+
+  printf "%s\n" "$(bold "Usage:")"
+  printf "  nixos keyscan HOST [NAME] [OPTIONS]\n"
+  printf "  nixos keyscan --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n $long_usage ]]; then
+    printf "%s\n" "$(bold "Options:")"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "$(magenta "--force, -f FORCE")"
+    printf "    Force rekey after keyscan\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "$(magenta "--help, -h")"
+    printf "    Show this help\n"
+    echo
+
+    # :command.usage_args
+    printf "%s\n" "$(bold "Arguments:")"
+
+    # :argument.usage
+    printf "  %s\n" "$(blue "HOST")"
+    printf "    IP address or hostname\n"
+    echo
+
+    # :argument.usage
+    printf "  %s\n" "$(blue "NAME")"
+    printf "    Name of host (default: first argument)\n"
+    echo
+
+    # :command.usage_examples
+    printf "%s\n" "$(bold "Examples:")"
+    printf "  nixos keyscan 192.168.1.10 myhost\n"
+    printf "  nixos keyscan 192.168.1.10 myhost --force\n"
     echo
 
   fi
@@ -102,17 +252,17 @@ nixos_linode_usage() {
   printf "Alias: l\n"
   echo
 
-  printf "%s\n" "Usage:"
+  printf "%s\n" "$(bold "Usage:")"
   printf "  nixos linode\n"
   printf "  nixos linode --help | -h\n"
   echo
 
   # :command.long_usage
   if [[ -n $long_usage ]]; then
-    printf "%s\n" "Options:"
+    printf "%s\n" "$(bold "Options:")"
 
     # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
+    printf "  %s\n" "$(magenta "--help, -h")"
     printf "    Show this help\n"
     echo
 
@@ -120,116 +270,85 @@ nixos_linode_usage() {
 }
 
 # :command.usage
-nixos_download_usage() {
+nixos_bootstrap_usage() {
   if [[ -n $long_usage ]]; then
-    printf "nixos download - Download a file\n"
+    printf "nixos bootstrap - Bootstrap a NixOS installation\n"
     echo
 
   else
-    printf "nixos download - Download a file\n"
+    printf "nixos bootstrap - Bootstrap a NixOS installation\n"
     echo
 
   fi
 
-  printf "Alias: d\n"
+  printf "Alias: b\n"
   echo
 
-  printf "%s\n" "Usage:"
-  printf "  nixos download SOURCE [TARGET] [OPTIONS]\n"
-  printf "  nixos download --help | -h\n"
+  printf "%s\n" "$(bold "Usage:")"
+  printf "  nixos bootstrap TYPE [OPTIONS]\n"
+  printf "  nixos bootstrap --help | -h\n"
   echo
 
   # :command.long_usage
   if [[ -n $long_usage ]]; then
-    printf "%s\n" "Options:"
+    printf "%s\n" "$(bold "Options:")"
 
     # :command.usage_flags
     # :flag.usage
-    printf "  %s\n" "--force, -f"
-    printf "    Overwrite existing files\n"
+    printf "  %s\n" "$(magenta "--swap, -s SWAP")"
+    printf "    min, max, or any number of GB for swap (default: max)\n"
     echo
 
     # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
+    printf "  %s\n" "$(magenta "--help, -h")"
     printf "    Show this help\n"
     echo
 
     # :command.usage_args
-    printf "%s\n" "Arguments:"
+    printf "%s\n" "$(bold "Arguments:")"
 
     # :argument.usage
-    printf "  %s\n" "SOURCE"
-    printf "    URL to download from\n"
-    echo
-
-    # :argument.usage
-    printf "  %s\n" "TARGET"
-    printf "    Target filename (default: same as source)\n"
-    echo
-
-    # :command.usage_environment_variables
-    printf "%s\n" "Environment Variables:"
-
-    # :environment_variable.usage
-    printf "  %s\n" "DEFAULT_TARGET_LOCATION"
-    printf "    Set the default location to download to\n"
+    printf "  %s\n" "$(blue "TYPE")"
+    printf "    uefi, bios, linode\n"
     echo
 
     # :command.usage_examples
-    printf "%s\n" "Examples:"
-    printf "  cli download example.com\n"
-    printf "  cli download example.com ./output -f\n"
+    printf "%s\n" "$(bold "Examples:")"
+    printf "  nixos bootstrap linode\n"
+    printf "  nixos bootstrap uefi --swap min\n"
+    printf "  nixos bootstrap bios --swap 8\n"
     echo
 
   fi
 }
 
 # :command.usage
-nixos_upload_usage() {
+nixos_completions_usage() {
   if [[ -n $long_usage ]]; then
-    printf "nixos upload - Upload a file\n"
+    printf "nixos completions\n"
+    echo
+
+    printf "  Generate bash completions\n  Usage: eval \"\$(cli completions)\"\n"
     echo
 
   else
-    printf "nixos upload - Upload a file\n"
+    printf "nixos completions - Generate bash completions\n"
     echo
 
   fi
 
-  printf "Alias: u\n"
-  echo
-
-  printf "%s\n" "Usage:"
-  printf "  nixos upload SOURCE [OPTIONS]\n"
-  printf "  nixos upload --help | -h\n"
+  printf "%s\n" "$(bold "Usage:")"
+  printf "  nixos completions\n"
+  printf "  nixos completions --help | -h\n"
   echo
 
   # :command.long_usage
   if [[ -n $long_usage ]]; then
-    printf "%s\n" "Options:"
-
-    # :command.usage_flags
-    # :flag.usage
-    printf "  %s\n" "--user, -u USER (required)"
-    printf "    Username to use for logging in\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--password, -p PASSWORD"
-    printf "    Password to use for logging in\n"
-    echo
+    printf "%s\n" "$(bold "Options:")"
 
     # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
+    printf "  %s\n" "$(magenta "--help, -h")"
     printf "    Show this help\n"
-    echo
-
-    # :command.usage_args
-    printf "%s\n" "Arguments:"
-
-    # :argument.usage
-    printf "  %s\n" "SOURCE"
-    printf "    File to upload\n"
     echo
 
   fi
@@ -280,239 +399,6 @@ inspect_args() {
 }
 
 # :command.user_lib
-# src/lib/choose.sh
-# # https://github.com/the0neWhoKnocks/shell-menu-select
-# CHAR__GREEN='\033[0;32m'
-# CHAR__RED='\033[0;31m'
-# CHAR__RESET='\033[0m'
-# menuStr=""
-# returnOrExit=""
-#
-# function __hideCursor {
-#   printf "\033[?25l"
-#
-
-#   # capture CTRL+C so cursor can be reset
-#   trap "__showCursor && echo '' && ${returnOrExit} 0" SIGINT
-# }
-#
-# function __showCursor {
-#   printf "\033[?25h"
-#   trap - SIGINT
-# }
-#
-# function __clearLastMenu {
-#   local msgLineCount=$(printf "$menuStr" | wc -l)
-#   # moves the cursor up N lines so the output overwrites it
-#   echo -en "\033[${msgLineCount}A"
-#
-#   # clear to end of screen to ensure there's no text left behind from previous input
-#   [ $1 ] && tput ed
-# }
-#
-# function __renderMenu {
-#   local start=0
-#   local selector=""
-#   local instruction="$1"
-#   local selectedIndex=$2
-#   local listLength=$itemsLength
-#   local longest=0
-#   local spaces=""
-#   menuStr="\n $instruction\n"
-#
-#   # Get the longest item from the list so that we know how many spaces to add
-#   # to ensure there's no overlap from longer items when a list is scrolling up or down.
-#   for (( i=0; i<$itemsLength; i++ )); do
-#     if (( ${#menuItems[i]} > longest )); then
-#       longest=${#menuItems[i]}
-#     fi
-#   done
-#   spaces=$(printf ' %.0s' $(eval "echo {1.."$(($longest))"}"))
-#
-#   if [ $3 -ne 0 ]; then
-#     listLength=$3
-#
-#     if [ $selectedIndex -ge $listLength ]; then
-#       start=$(($selectedIndex+1-$listLength))
-#       listLength=$(($selectedIndex+1))
-#     fi
-#   fi
-#
-#   for (( i=$start; i<$listLength; i++ )); do
-#     local currItem="${menuItems[i]}"
-#     currItemLength=${#currItem}
-#
-#     if [[ $i = $selectedIndex ]]; then
-#       currentSelection="${currItem}"
-#       selector="${CHAR__GREEN}ᐅ${CHAR__RESET}"
-#       currItem="${CHAR__GREEN}${currItem}${CHAR__RESET}"
-#     else
-#       selector=" "
-#     fi
-#
-#     currItem="${spaces:0:0}${currItem}${spaces:currItemLength}"
-#
-#     menuStr="${menuStr}\n ${selector} ${currItem}"
-#   done
-#
-#   menuStr="${menuStr}\n"
-#
-#   # whether or not to overwrite the previous menu output
-#   [ $4 ] && __clearLastMenu
-#
-#   printf "${menuStr}"
-# }
-#
-# function __renderHelp {
-#   echo;
-#   echo "Usage: choose [OPTION]..."
-#   echo "Renders a keyboard navigable menu with a visual indicator of what's selected."
-#   echo;
-#   echo "  -h, --help               Displays this message"
-#   echo "  -i, --index              The initially selected index for the options"
-#   echo "  -m, --max                Limit how many options are displayed"
-#   echo "  -o, --options            An Array of options for a user to choose from"
-#   echo "  -q, --query              Question or statement presented to the user"
-#   # echo "  -v, --selectionVariable  Variable the selected choice will be saved to. Defaults to the 'selectedChoice' variable."
-#   echo;
-#   echo "Example:"
-#   echo "  foodOptions=(\"pizza\" \"burgers\" \"chinese\" \"sushi\" \"thai\" \"italian\" \"shit\")"
-#   echo;
-#   echo "  choose -q \"What do you feel like eating?\" -o foodOptions -i 6 -m 4 -v \"firstChoice\""
-#   echo "  printf \"\\n First choice is '\${firstChoice}'\\n\""
-#   echo;
-#   echo "  choose -q \"Select another option in case the first isn't available\" -o foodOptions"
-#   echo "  printf \"\\n Second choice is '\${selectedChoice}'\\n\""
-#   echo;
-# }
-#
-# function choose {
-#   local KEY__ARROW_UP=$(echo -e "\033[A")
-#   local KEY__ARROW_DOWN=$(echo -e "\033[B")
-#   local KEY__ENTER=$(echo -e "\n")
-#   local captureInput=true
-#   local displayHelp=false
-#   local maxViewable=0
-#   local instruction="Select an item from the list:"
-#   local selectedIndex=0
-#
-
-#   unset selectedChoice
-#   # unset selectionVariable
-#
-
-#   if [[ "${PS1}" == "" ]]; then
-#     # running via script
-#     returnOrExit="exit"
-#   else
-#     # running via CLI
-#     returnOrExit="return"
-#   fi
-#
-
-#   if [[ "${BASH}" == "" ]]; then
-#     printf "\n ${CHAR__RED}[ERROR] This function utilizes Bash expansion, but your current shell is \"${SHELL}\"${CHAR__RESET}\n"
-#     $returnOrExit 1
-#   elif [[ $# == 0 ]]; then
-#     printf "\n ${CHAR__RED}[ERROR] No arguments provided${CHAR__RESET}\n"
-#     __renderHelp
-#     $returnOrExit 1
-#   fi
-#
-
-#   local remainingArgs=()
-#   while [[ $# -gt 0 ]]; do
-#     local key="$1"
-#
-#     case $key in
-#       -h|--help)
-#         displayHelp=true
-#         shift
-#         ;;
-#       -i|--index)
-#         selectedIndex=$2
-#         shift 2
-#         ;;
-#       -m|--max)
-#         maxViewable=$2
-#         shift 2
-#         ;;
-#       -o|--options)
-#         menuItems=$2[@]
-#         menuItems=("${!menuItems}")
-#         shift 2
-#         ;;
-#       -q|--query)
-#         instruction="$2"
-#         shift 2
-#         ;;
-#       # -v|--selectionVariable)
-#       #   selectionVariable="$2"
-#       #   shift 2
-#       #   ;;
-#       *)
-#         remainingArgs+=("$1")
-#         shift
-#         ;;
-#     esac
-#   done
-#
-#   # just display help
-#   if $displayHelp; then
-#     __renderHelp
-#     $returnOrExit 0
-#   fi
-#
-#   set -- "${remainingArgs[@]}"
-#   local itemsLength=${#menuItems[@]}
-#
-
-#   # no menu items, at least 1 required
-#   if [[ $itemsLength -lt 1 ]]; then
-#     printf "\n ${CHAR__RED}[ERROR] No menu items provided${CHAR__RESET}\n"
-#     __renderHelp
-#     $returnOrExit 1
-#   fi
-#
-#   __renderMenu "$instruction" "$selectedIndex" "$maxViewable"
-#   __hideCursor
-#
-#   while $captureInput; do
-#     read -rsn3 key # `3` captures the escape (\033'), bracket ([), & type (A) characters.
-#
-#     case "$key" in
-#       "$KEY__ARROW_UP")
-#         selectedIndex=$((selectedIndex-1))
-#         (( $selectedIndex < 0 )) && selectedIndex=$((itemsLength-1))
-#
-#         __renderMenu "$instruction" "$selectedIndex" "$maxViewable" true
-#         ;;
-#
-#       "$KEY__ARROW_DOWN")
-#         selectedIndex=$((selectedIndex+1))
-#         (( $selectedIndex == $itemsLength )) && selectedIndex=0
-#
-#         __renderMenu "$instruction" "$selectedIndex" "$maxViewable" true
-#         ;;
-#
-#       "$KEY__ENTER")
-#         __clearLastMenu true
-#         __showCursor
-#         captureInput=false
-#
-
-#         # if [[ "${selectionVariable}" != "" ]]; then
-#         #   printf -v "${selectionVariable}" "${currentSelection}"
-#         # else
-#           selectedChoice="${currentSelection}"
-#         # fi
-#         ;;
-#     esac
-#   done
-#
-#   export choice="$selectedChoice"
-# }
-
 # src/lib/colors.sh
 print_in_color() {
   local color="$1"
@@ -544,106 +430,6 @@ yellow_underlined() { print_in_color "\e[4;33m" "$*"; }
 blue_underlined() { print_in_color "\e[4;34m" "$*"; }
 magenta_underlined() { print_in_color "\e[4;35m" "$*"; }
 cyan_underlined() { print_in_color "\e[4;36m" "$*"; }
-
-# src/lib/menu.sh
-#
-#
-# function print_menu()  # selected_item, ...menu_items
-# {
-# 	local function_arguments=($@)
-#
-# 	local selected_item="$1"
-# 	local menu_items=(${function_arguments[@]:1})
-# 	local menu_size="${#menu_items[@]}"
-#
-# 	for (( i = 0; i < $menu_size; ++i ))
-# 	do
-# 		if [ "$i" = "$selected_item" ]
-# 		then
-# 			echo "-> ${menu_items[i]}"
-# 		else
-# 			echo "   ${menu_items[i]}"
-# 		fi
-# 	done
-# }
-#
-# function run_menu()  # selected_item, ...menu_items
-# {
-# 	local function_arguments=($@)
-#
-# 	local selected_item="$1"
-# 	local menu_items=(${function_arguments[@]:1})
-# 	local menu_size="${#menu_items[@]}"
-# 	local menu_limit=$((menu_size - 1))
-#
-# 	clear
-# 	print_menu "$selected_item" "${menu_items[@]}"
-#
-
-# 	while read -rsn1 input
-# 	do
-# 		case "$input"
-# 		in
-# 			$'\x1B')  # ESC ASCII code (https://dirask.com/posts/ASCII-Table-pJ3Y0j)
-# 				read -rsn1 -t 0.1 input
-# 				if [ "$input" = "[" ]  # occurs before arrow code
-# 				then
-# 					read -rsn1 -t 0.1 input
-# 					case "$input"
-# 					in
-# 						A)  # Up Arrow
-# 							if [ "$selected_item" -ge 1 ]
-# 							then
-# 								selected_item=$((selected_item - 1))
-# 								clear
-# 								print_menu "$selected_item" "${menu_items[@]}"
-# 							fi
-# 							;;
-# 						B)  # Down Arrow
-# 							if [ "$selected_item" -lt "$menu_limit" ]
-# 							then
-# 								selected_item=$((selected_item + 1))
-# 								clear
-# 								print_menu "$selected_item" "${menu_items[@]}"
-# 							fi
-# 							;;
-# 					esac
-# 				fi
-# 				read -rsn5 -t 0.1  # flushing stdin
-# 				;;
-# 			"")  # Enter key
-# 				return "$selected_item"
-# 				;;
-# 		esac
-# 	done
-# }
-#
-#
-# # Usage example:
-#
-# selected_item=0
-# menu_items=('Login' 'Register' 'Guest' 'Exit')
-#
-# run_menu "$selected_item" "${menu_items[@]}"
-# menu_result="$?"
-#
-# echo
-#
-# case "$menu_result"
-# in
-# 	0)
-# 		echo 'Login item selected'
-# 		;;
-# 	1)
-# 		echo 'Register item selected'
-# 		;;
-# 	2)
-# 		echo 'Guest item selected'
-# 		;;
-# 	3)
-# 		echo 'Exit item selected'
-# 		;;
-# esac
 
 # src/lib/send_completions.sh
 send_completions() {
@@ -713,86 +499,69 @@ send_completions() {
 }
 
 # src/lib/shelpers.sh
-info() {
+# True if command or file does exist
+function has {
+  if [ -e "$1" ]; then return 0; fi
+  command -v $1 >/dev/null 2>&1 && { return 0; }
+  return 1
+}
+
+# True if command or file doesn't exist
+function hasnt {
+  if [ -e "$1" ]; then return 1; fi
+  command -v $1 >/dev/null 2>&1 && { return 1; }
+  return 0
+}
+
+# True if variable is not empty
+function defined {
+  if [ -z "$1" ]; then return 1; fi
+
+  return 0
+}
+
+# True if variable is empty
+function empty {
+  if [ -z "$1" ]; then return 0; fi
+  return 1
+}
+
+# Echo information
+function info {
 
   echo "$(green_bold "#") $(green $*)"
 
 }
 
-warn() {
+# Echo warning
+function warn {
 
   echo "$(red_bold "#") $(red $*)"
 
 }
 
-cmd() {
+# Echo task and execute command (unless --dry-run)
+function task {
 
-  local command execute
+  local cmd x
   case "$1" in
-    "--dry-run" | "-d" )
-      command="${@:2}"
-      ;;
-    *)
-
-      command="${@}"
-      execute="1"
-      ;;
+    "--dry-run" | "-d" ) cmd="${@:2}" ;;
+    *                  ) cmd="${@}"; x=1 ;;
   esac
-  echo "$(magenta_bold ">") $(magenta ${command//\%/%%})";
-  [ -z "$execute" ] || $command > /tmp/cmd
+  echo "$(magenta_bold ">") $(magenta "$cmd")";
+  [ -z "$x" ] || eval "$cmd" > /tmp/task
 }
 
-url() {
+# Echo URL, copy to clipboard, and open in browser
+function url {
 
-  echo $1 | wl-copy; xdg-open $1
+  has wl-copy && echo $1 | wl-copy
+  has xdg-open && xdg-open $1
   echo "$(magenta_bold ">") $(cyan_underlined $1)"
 }
 
-ask() {
-
-  local tone question answer
-  case "$1" in
-    "--warn" | "-w" )
-      question="${@:2}"
-      tone="warn"
-      ;;
-    "--info" | "-i" )
-      question="${@:2}"
-      ;;
-    *)
-
-      question="${@}"
-      ;;
-  esac
-
-  if [[ "$answer" == "y" ]]; then
-
-    return 0
-  fi
-
-  if [ "$tone" = "warn" ]; then
-    echo -n "$(red_bold "#") $(red $question)"
-
-  else
-    echo -n "$(green_bold "#") $(green $question)"
-
-  fi
-
-  read -p " $(blue_bold y)/[$(red_bold n)] " -n 1 -r
-  echo
-
-  [[ $REPLY =~ ^[Yy]$ ]]
-
-  if [ ! $? -ne 0 ]; then
-
-    return 0
-  else
-
-    return 1
-  fi
-}
-
-pause() {
+# Pause script until input
+function pause {
   echo -n "$(green_bold "#") $(green "Press") $(blue_bold "y") $(green "to continue:") "
 
   local continue=""
@@ -804,19 +573,70 @@ pause() {
   echo
 }
 
+# Ask confirmation, return true if [y], return false if anything else
+
+function ask {
+
+  case "$1" in
+    "--warn" | "-w" ) echo -n "$(red_bold "#") $(red ${@:2})" ;;
+    "--info" | "-i" ) echo -n "$(green_bold "#") $(green ${@:2})" ;;
+    *               ) echo -n "$(green_bold "#") $(green ${@})" ;;
+  esac
+  read -p " $(blue_bold y)/[$(red_bold n)] " -n 1 -r
+  echo && [[ $REPLY =~ ^[Yy]$ ]]
+  [ ! $? -ne 0 ] && return 0 || return 1
+
+}
+
+# Echo but spaces replaced with newlines
+function explode {
+  echo $* | tr ' ' '\n'
+}
+
+# Styled fzf with label argument
+function pick {
+  local label
+  [ -z "$1" ] || label=" $(green_bold "${@}") "
+
+  has fzf && fzf --border-label="$label" --border --height=30% --margin=1 --padding=1 --layout=reverse --info=hidden
+}
+
 # :command.command_functions
 # :command.function
-nixos_completions_command() {
-  # src/completions_command.sh
-  # Call the `send_completions` function which was added by running:
-  #
-  #   $ bashly add completions
-  #
-  # Users can now enable bash completion for this script by running:
-  #
-  #   $ eval "$(cli completions)"
-  #
-  send_completions
+nixos_switch_command() {
+  # src/switch_command.sh
+  task -d 'nixos-rebuild switch --flake /etc/nixos#'$(hostname)
+  sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)
+
+}
+
+# :command.function
+nixos_secrets_command() {
+  # src/secrets_command.sh
+  echo "# this file is located in 'src/secrets_command.sh'"
+  echo "# code for 'nixos secrets' goes here"
+  echo "# you can edit it freely and regenerate (it will not be overwritten)"
+  inspect_args
+
+}
+
+# :command.function
+nixos_rekey_command() {
+  # src/rekey_command.sh
+  echo "# this file is located in 'src/rekey_command.sh'"
+  echo "# code for 'nixos rekey' goes here"
+  echo "# you can edit it freely and regenerate (it will not be overwritten)"
+  inspect_args
+
+}
+
+# :command.function
+nixos_keyscan_command() {
+  # src/keyscan_command.sh
+  echo "# this file is located in 'src/keyscan_command.sh'"
+  echo "# code for 'nixos keyscan' goes here"
+  echo "# you can edit it freely and regenerate (it will not be overwritten)"
+  inspect_args
 
 }
 
@@ -833,16 +653,16 @@ nixos_linode_command() {
     yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 
     # Choose linode from list
-    [ -z "$LINODE_ID" ] && LINODE_ID="$(choose_linode)"
+    defined $LINODE_ID || LINODE_ID="$(choose_linode)"
 
     # Bail if no ID was selected
-    if [ -z "$LINODE_ID" ]; then
-      info "Exiting, no LINODE_ID provided"
+    if empty $LINODE_ID; then
+      warn "Exiting, no LINODE_ID provided"
       return 1
     fi
 
     # Look up details about this linode
-    info "Gathering details..."
+    info "Gathering details..."; echo
     local id="$LINODE_ID"
 
     local label="$(linode-cli linodes view $id --format label --no-header --text)"
@@ -856,47 +676,43 @@ nixos_linode_command() {
     warn "DANGER! Last chance to bail!"
     if ! ask --warn "Re-create all disks and configurations for linode $(yellow \"${label}\")?"; then
       return
-    fi
-    echo
+    fi && echo
 
     # Power down
     info "OK! Powering off linode. Please wait..."
-    cmd linode-cli linodes shutdown $id
-    wait_for_linode "offline"
-    echo
+    task linode-cli linodes shutdown $id
+    wait_for_linode "offline" && echo
 
     # Delete all configurations
     info "Deleting any existing configurations"
     configs=($(linode-cli linodes configs-list $id --text | awk 'NR > 1 {print $1}'))
     for config_id in "${configs[@]}"; do
-      cmd linode-cli linodes config-delete $id $config_id
+      task linode-cli linodes config-delete $id $config_id
       sleep 5
-    done
-    echo
+    done && echo
 
     # Delete all disks
     info "Deleting any existing disks"
     disks=($(linode-cli linodes disks-list $id --text | awk 'NR > 1 {print $1}'))
     for disk_id in "${disks[@]}"; do
-      cmd linode-cli linodes disk-delete $id $disk_id
+      task linode-cli linodes disk-delete $id $disk_id
       while [ "$(linode-cli linodes disk-view $id $disk_id --text --no-header --format status 2>/dev/null)" == "deleting" ]; do
         sleep 5
       done
-    done
-    echo
+    done && echo
 
     # Shared flags
     flags="--text --no-header"
 
     info "Creating INSTALLER disk"
-    cmd linode-cli linodes disk-create $id $flags --label installer --filesystem ext4 --size $installer_size
-    disk_id="$(cat /tmp/cmd | awk '{print $1}')"
+    task linode-cli linodes disk-create $id $flags --label installer --filesystem ext4 --size $installer_size
+    disk_id="$(cat /tmp/task | awk '{print $1}')"
     installer_disk="--devices.sdb.disk_id $disk_id"
     wait_for_disk $disk_id
 
     info "Creating NIXOS disk"
-    cmd linode-cli linodes disk-create $id $flags --label nixos --filesystem raw --size $nixos_size
-    disk_id="$(cat /tmp/cmd | awk '{print $1}')"
+    task linode-cli linodes disk-create $id $flags --label nixos --filesystem raw --size $nixos_size
+    disk_id="$(cat /tmp/task | awk '{print $1}')"
     nixos_disk="--devices.sda.disk_id $disk_id"
     wait_for_disk $disk_id
 
@@ -907,119 +723,86 @@ nixos_linode_command() {
 
     # Create the installer configuration
     info "Creating INSTALLER configuration"
-    cmd linode-cli linodes config-create $LINODE_ID $flags $nixos_disk $installer_disk --label installer --kernel linode/direct-disk --root_device /dev/sdb
-    installer_config="--config_id $(cat /tmp/cmd | awk '{print $1}')"
-    sleep 10
-    echo
+    task linode-cli linodes config-create $LINODE_ID $flags $nixos_disk $installer_disk --label installer --kernel linode/direct-disk --root_device /dev/sdb
+    installer_config="--config_id $(cat /tmp/task | awk '{print $1}')"
+    sleep 10 && echo
 
     # Create the main configuration
     info "Creating NIXOS configuration"
-    cmd linode-cli linodes config-create $LINODE_ID $flags $nixos_disk --label nixos --root_device /dev/sda
-    nixos_config="--config_id $(cat /tmp/cmd | awk '{print $1}')"
-    sleep 10
-    echo
+    task linode-cli linodes config-create $LINODE_ID $flags $nixos_disk --label nixos --root_device /dev/sda
+    nixos_config="--config_id $(cat /tmp/task | awk '{print $1}')"
+    sleep 10 && echo
 
     # Rescue mode
     info "Rebooting the linode in RESCUE mode"
-    cmd linode-cli linodes rescue $id $installer_disk
+    task linode-cli linodes rescue $id $installer_disk
     sleep 5
-    wait_for_linode "running"
-    echo
+    wait_for_linode "running" && echo
 
     # Create INSTALLER disk
     info "Opening a Weblish console:"
-    url "https://cloud.linode.com/linodes/$id/lish/weblish"
-    echo
+    url "https://cloud.linode.com/linodes/$id/lish/weblish" && echo
     info "Paste the following to download the NixOS installer (copied to clipboard):"
     line1="iso=https://channels.nixos.org/nixos-22.11/latest-nixos-minimal-x86_64-linux.iso"
     line2="curl -L \$iso | tee >(dd of=/dev/sdb) | sha256sum"
     echo $line1
     echo $line2
-    echo "$line1; $line2" | wl-copy
-    echo
+    echo "$line1; $line2" | wl-copy && echo
     info "Wait until it's finished before we reboot with the INSTALLER config"
-    pause
-    echo
+    pause && echo
 
     # Installer config
     info "Rebooting the linode..."
-    cmd linode-cli linodes reboot $id $installer_config
+    task linode-cli linodes reboot $id $installer_config
     sleep 5
-    wait_for_linode "running"
-    echo
+    wait_for_linode "running" && echo
 
     info "Opening a Glish console:"
-    url "https://cloud.linode.com/linodes/$id/lish/glish"
-    echo
+    url "https://cloud.linode.com/linodes/$id/lish/glish" && echo
     info "Paste the following to install NixOS (second line copied to clipboard):"
-    echo "sudo -s"
-    echo "bash <(curl -sL https://github.com/suderman/nixos/raw/main/configurations/min/install.sh) LINODE" | tee >(wl-copy)
-    echo
+    line1="sudo -s"
+    line2="bash <(curl -sL https://github.com/suderman/nixos/raw/main/configurations/min/install.sh) LINODE"
+    echo $line1
+    echo $line2
+    echo "$line2" | wl-copy && echo
 
     info "Wait until it's finished before we reboot with NIXOS config"
-    pause
-    echo
+    pause && echo
 
     # NixOS config
     info "Rebooting the linode..."
-    cmd linode-cli linodes reboot $id $nixos_config
+    task linode-cli linodes reboot $id $nixos_config
     sleep 5
-    wait_for_linode "running"
-    echo
+    wait_for_linode "running" && echo
 
     # Update secrets keys
     info "Scanning new host key in 30 seconds..."
     sleep 30
     local ip="$(linode-cli linodes view $id --no-header --text --format ipv4)"
-    cmd $dir/secrets/scripts/secrets-keyscan $ip $label --force
-    echo
+    task $dir/secrets/scripts/secrets-keyscan $ip $label --force && echo
     info "Commit and push to git so changes can be pulled on the new linode at /etc/nixos"
-    cmd "cd $dir && git status"
-    cd $dir && git status
+    task "cd $dir && git status"
+
     sleep 5
 
     # Test login
     info "Opening a Weblish console:"
-    url "https://cloud.linode.com/linodes/$id/lish/weblish"
-    echo
+    url "https://cloud.linode.com/linodes/$id/lish/weblish" && echo
     info "Login as user, pull from git, and rebuild config (copied to clipboard):"
     line1="cd /etc/nixos; git pull"
     line2="sudo nixos-rebuild switch"
-    cmd "$line1"
-    cmd "$line2"
-    echo "$line1; $line2" | wl-copy
-    echo
+    echo $line1
+    echo $line2
+    echo "$line1; $line2" | wl-copy && echo
 
     # After switching to intended configuration, clean the changes made to min
     # cd /etc/nixos; git restore configurations/min
-
-    # #
-    # echo "LINODE_ID:"
-    # msg "$LINODE_ID"
-    # # # url "$LINODE_ID"
-    # url https://suderman.net
-    # cmd -d "$LINODE_ID"
-    # pwd
-    # cmd -d lsblk -f
-    # cmd pwd
-    # pause
-    #
-    # if ask "Really do it?"; then
-    #   cmt "we are doing it"
-    # fi
 
   }
 
   function choose_linode {
     local linodes="$(linode-cli linodes list --text --no-header | awk '{print $1"_"$2}')"
-    local linode="$(echo $linodes | tr " " "\n" | fzf \
-      --border-label=" Choose which existing linode to prepare " \
-      --border \
-      --height=40% \
-      --margin=1 \
-      --padding=1 \
-      --layout=reverse \
-      --info=hidden)"
+    local linode="$(explode $linodes | pick "Choose which existing linode to prepare")"
     echo "${linode%_*}"
   }
 
@@ -1028,15 +811,13 @@ nixos_linode_command() {
     while [ "$(linode-cli linodes view $LINODE_ID --text --no-header --format status)" != "$1" ]; do
       echo -n $(yellow ".")
       sleep 5
-    done
-    echo
+    done && echo
   }
 
   function wait_for_disk {
     while [ "$(linode-cli linodes disk-view $LINODE_ID $1 --text --no-header --format status 2>/dev/null)" != "ready" ]; do
       sleep 5
-    done
-    echo
+    done && echo
   }
 
   main
@@ -1044,25 +825,27 @@ nixos_linode_command() {
 }
 
 # :command.function
-nixos_download_command() {
-  # src/download_command.sh
-  echo "# this file is located in 'src/download_command.sh'"
-  echo "# code for 'cli download' goes here"
+nixos_bootstrap_command() {
+  # src/bootstrap_command.sh
+  echo "# this file is located in 'src/bootstrap_command.sh'"
+  echo "# code for 'nixos bootstrap' goes here"
   echo "# you can edit it freely and regenerate (it will not be overwritten)"
   inspect_args
-
-  echo "before $(red this is red) after"
-  echo "before $(green_bold this is green_bold) after"
 
 }
 
 # :command.function
-nixos_upload_command() {
-  # src/upload_command.sh
-  echo "# this file is located in 'src/upload_command.sh'"
-  echo "# code for 'cli upload' goes here"
-  echo "# you can edit it freely and regenerate (it will not be overwritten)"
-  inspect_args
+nixos_completions_command() {
+  # src/completions_command.sh
+  # Call the `send_completions` function which was added by running:
+  #
+  #   $ bashly add completions
+  #
+  # Users can now enable bash completion for this script by running:
+  #
+  #   $ eval "$(cli completions)"
+  #
+  send_completions
 
 }
 
@@ -1095,10 +878,31 @@ parse_requirements() {
   case $action in
     -*) ;;
 
-    completions)
-      action="completions"
+    switch | sw)
+      action="switch"
       shift
-      nixos_completions_parse_requirements "$@"
+      nixos_switch_parse_requirements "$@"
+      shift $#
+      ;;
+
+    secrets | s)
+      action="secrets"
+      shift
+      nixos_secrets_parse_requirements "$@"
+      shift $#
+      ;;
+
+    rekey | r)
+      action="rekey"
+      shift
+      nixos_rekey_parse_requirements "$@"
+      shift $#
+      ;;
+
+    keyscan | k)
+      action="keyscan"
+      shift
+      nixos_keyscan_parse_requirements "$@"
       shift $#
       ;;
 
@@ -1109,17 +913,17 @@ parse_requirements() {
       shift $#
       ;;
 
-    download | d)
-      action="download"
+    bootstrap | b)
+      action="bootstrap"
       shift
-      nixos_download_parse_requirements "$@"
+      nixos_bootstrap_parse_requirements "$@"
       shift $#
       ;;
 
-    upload | u)
-      action="upload"
+    completions)
+      action="completions"
       shift
-      nixos_upload_parse_requirements "$@"
+      nixos_completions_parse_requirements "$@"
       shift $#
       ;;
 
@@ -1165,13 +969,13 @@ parse_requirements() {
 }
 
 # :command.parse_requirements
-nixos_completions_parse_requirements() {
+nixos_switch_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     case "${1:-}" in
       --help | -h)
         long_usage=yes
-        nixos_completions_usage
+        nixos_switch_usage
         exit
         ;;
 
@@ -1183,7 +987,7 @@ nixos_completions_parse_requirements() {
   done
 
   # :command.command_filter
-  action="completions"
+  action="switch"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
@@ -1205,6 +1009,188 @@ nixos_completions_parse_requirements() {
 
     esac
   done
+
+}
+
+# :command.parse_requirements
+nixos_secrets_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    case "${1:-}" in
+      --help | -h)
+        long_usage=yes
+        nixos_secrets_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="secrets"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        if [[ -z ${args['secret']+x} ]]; then
+
+          args['secret']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+nixos_rekey_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    case "${1:-}" in
+      --help | -h)
+        long_usage=yes
+        nixos_rekey_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="rekey"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --force | -f)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+
+          args['--force']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--force requires an argument: --force, -f FORCE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+nixos_keyscan_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    case "${1:-}" in
+      --help | -h)
+        long_usage=yes
+        nixos_keyscan_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="keyscan"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --force | -f)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+
+          args['--force']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--force requires an argument: --force, -f FORCE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        if [[ -z ${args['host']+x} ]]; then
+
+          args['host']=$1
+          shift
+        elif [[ -z ${args['name']+x} ]]; then
+
+          args['name']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
+
+        ;;
+
+    esac
+  done
+
+  # :command.required_args_filter
+  if [[ -z ${args['host']+x} ]]; then
+    printf "missing required argument: HOST\nusage: nixos keyscan HOST [NAME] [OPTIONS]\n" >&2
+    exit 1
+  fi
 
 }
 
@@ -1253,13 +1239,13 @@ nixos_linode_parse_requirements() {
 }
 
 # :command.parse_requirements
-nixos_download_parse_requirements() {
+nixos_bootstrap_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     case "${1:-}" in
       --help | -h)
         long_usage=yes
-        nixos_download_usage
+        nixos_bootstrap_usage
         exit
         ;;
 
@@ -1271,18 +1257,25 @@ nixos_download_parse_requirements() {
   done
 
   # :command.command_filter
-  action="download"
+  action="bootstrap"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       # :flag.case
-      --force | -f)
+      --swap | -s)
 
-        # :flag.case_no_arg
-        args['--force']=1
-        shift
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+
+          args['--swap']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--swap requires an argument: --swap, -s SWAP" >&2
+          exit 1
+        fi
         ;;
 
       -?*)
@@ -1293,13 +1286,9 @@ nixos_download_parse_requirements() {
       *)
         # :command.parse_requirements_case
         # :command.parse_requirements_case_simple
-        if [[ -z ${args['source']+x} ]]; then
+        if [[ -z ${args['type']+x} ]]; then
 
-          args['source']=$1
-          shift
-        elif [[ -z ${args['target']+x} ]]; then
-
-          args['target']=$1
+          args['type']=$1
           shift
         else
           printf "invalid argument: %s\n" "$key" >&2
@@ -1312,21 +1301,21 @@ nixos_download_parse_requirements() {
   done
 
   # :command.required_args_filter
-  if [[ -z ${args['source']+x} ]]; then
-    printf "missing required argument: SOURCE\nusage: nixos download SOURCE [TARGET] [OPTIONS]\n" >&2
+  if [[ -z ${args['type']+x} ]]; then
+    printf "missing required argument: TYPE\nusage: nixos bootstrap TYPE [OPTIONS]\n" >&2
     exit 1
   fi
 
 }
 
 # :command.parse_requirements
-nixos_upload_parse_requirements() {
+nixos_completions_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     case "${1:-}" in
       --help | -h)
         long_usage=yes
-        nixos_upload_usage
+        nixos_completions_usage
         exit
         ;;
 
@@ -1338,41 +1327,12 @@ nixos_upload_parse_requirements() {
   done
 
   # :command.command_filter
-  action="upload"
+  action="completions"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
-      # :flag.case
-      --user | -u)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-
-          args['--user']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--user requires an argument: --user, -u USER" >&2
-          exit 1
-        fi
-        ;;
-
-      # :flag.case
-      --password | -p)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-
-          args['--password']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--password requires an argument: --password, -p PASSWORD" >&2
-          exit 1
-        fi
-        ;;
 
       -?*)
         printf "invalid option: %s\n" "$key" >&2
@@ -1382,31 +1342,13 @@ nixos_upload_parse_requirements() {
       *)
         # :command.parse_requirements_case
         # :command.parse_requirements_case_simple
-        if [[ -z ${args['source']+x} ]]; then
-
-          args['source']=$1
-          shift
-        else
-          printf "invalid argument: %s\n" "$key" >&2
-          exit 1
-        fi
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
 
         ;;
 
     esac
   done
-
-  # :command.required_args_filter
-  if [[ -z ${args['source']+x} ]]; then
-    printf "missing required argument: SOURCE\nusage: nixos upload SOURCE [OPTIONS]\n" >&2
-    exit 1
-  fi
-
-  # :command.required_flags_filter
-  if [[ -z ${args['--user']+x} ]]; then
-    printf "missing required flag: --user, -u USER\n" >&2
-    exit 1
-  fi
 
 }
 
@@ -1429,12 +1371,39 @@ run() {
   parse_requirements "${input[@]}"
 
   case "$action" in
-    "completions")
+    "switch")
       if [[ ${args['--help']:-} ]]; then
         long_usage=yes
-        nixos_completions_usage
+        nixos_switch_usage
       else
-        nixos_completions_command
+        nixos_switch_command
+      fi
+      ;;
+
+    "secrets")
+      if [[ ${args['--help']:-} ]]; then
+        long_usage=yes
+        nixos_secrets_usage
+      else
+        nixos_secrets_command
+      fi
+      ;;
+
+    "rekey")
+      if [[ ${args['--help']:-} ]]; then
+        long_usage=yes
+        nixos_rekey_usage
+      else
+        nixos_rekey_command
+      fi
+      ;;
+
+    "keyscan")
+      if [[ ${args['--help']:-} ]]; then
+        long_usage=yes
+        nixos_keyscan_usage
+      else
+        nixos_keyscan_command
       fi
       ;;
 
@@ -1447,21 +1416,21 @@ run() {
       fi
       ;;
 
-    "download")
+    "bootstrap")
       if [[ ${args['--help']:-} ]]; then
         long_usage=yes
-        nixos_download_usage
+        nixos_bootstrap_usage
       else
-        nixos_download_command
+        nixos_bootstrap_command
       fi
       ;;
 
-    "upload")
+    "completions")
       if [[ ${args['--help']:-} ]]; then
         long_usage=yes
-        nixos_upload_usage
+        nixos_completions_usage
       else
-        nixos_upload_command
+        nixos_completions_command
       fi
       ;;
 
