@@ -133,17 +133,18 @@ function main {
   info "Scanning new host key in 30 seconds..."
   sleep 30
   local ip="$(linode-cli linodes view $id --no-header --text --format ipv4)"
-  task "/etc/nixos/secrets/scripts/secrets-keyscan $ip $label --force && echo"
-  info "Commit and push to git so changes can be pulled on the new linode at /etc/nixos"
+  task "/etc/nixos/secrets/scripts/secrets-keyscan $ip $label --force"
+  echo
+  info "Commit and git push so changes can be pulled on the new linode at /etc/nixos"
   task "cd /etc/nixos && git status" 
-  sleep 5
+  sleep 5 && echo
 
   # Switch configuration
   info "Opening a Weblish console:"
   url "https://cloud.linode.com/linodes/$id/lish/weblish" && echo
   info "Login as root, pull from git, and rebuild config (copied to clipboard):"
   echo "nixos bootstrap switch [CONFIGURATION]" 
-  echo "nixos bootstrap switch " | wl-copy && echo
+  echo -n "nixos bootstrap switch " | wl-copy && echo
   
 }
 
