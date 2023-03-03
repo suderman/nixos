@@ -44,6 +44,7 @@ function main {
 
   info "Create GPT partition table"
   task parted -s /dev/$disk mklabel gpt
+  echo
 
   # Booting with legacy BIOS requires BBP and ESP partitions
   if is_bios; then
@@ -160,7 +161,7 @@ function main {
   # If linode install detected, set config.hardware.linode.enable = true;
   if is_linode; then
     info "Enabling linode in configuration.nix"
-    task "run sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix"
+    task "sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix"
     echo
   fi
 
