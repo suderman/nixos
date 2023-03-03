@@ -32,6 +32,7 @@
     xorg.xeyes
     yo
     systemdgenie
+    pick
     # keygen
   ];
 

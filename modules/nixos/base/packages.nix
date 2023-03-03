@@ -17,7 +17,7 @@
         nix-zsh-completions zsh-completions 
         nix-bash-completions bash-completion
         home-manager # include home-manager command
-        cli # found in overlays
+        nixos-cli # found in overlays
       ];
 
       # Add terminfo files

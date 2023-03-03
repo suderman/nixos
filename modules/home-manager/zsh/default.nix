@@ -34,10 +34,10 @@ in {
         theme = "robbyrussell";
       };
 
-      initExtra = ''
-        # zsh-fzf-tab
-        . ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
-      '';
+      # initExtra = ''
+      #   # zsh-fzf-tab
+      #   . ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
+      # '';
 
     };
 

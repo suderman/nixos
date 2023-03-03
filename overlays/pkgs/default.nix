@@ -6,7 +6,8 @@ let
 in { 
 
   # Personal scripts
-  cli = self.callPackage ./cli {};
+  nixos-cli = self.callPackage ./nixos-cli {};
+  shmenu = self.callPackage ./shmenu {};
   yo = self.callPackage ./yo.nix {};
 
   # These packages support Wayland but sometimes need to be persuaded

@@ -1,13 +1,18 @@
 name: nixos
-help: cli application
+help: nixos-cli application
 version: 0.1.0
 extensible: true
 
-environment_variables:
-- name: api_key
-  help: Set your API key
-
 commands:
+- name: completions
+  help: |-
+    Generate bash completions
+    Usage: eval "\$(cli completions)" 
+
+- name: linode
+  alias: l
+  help: Install configuration to Linode VPS
+
 - name: download
   alias: d
   help: Download a file
