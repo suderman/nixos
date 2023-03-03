@@ -8,13 +8,13 @@ function main {
     return 1
   fi
 
+  # Be prepared
+  install_dependencies
+
   # Banner
   yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
   yellow "┃        Suderman's NixOS Installer         ┃"
   yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
-
-  # Be prepared
-  install_dependencies
 
   # List disks and partitions for reference
   echo
@@ -177,7 +177,7 @@ function install_dependencies {
   fi
   if hasnt fzf; then
     info "Installing fzf"
-    task nix-env -iA nixos.git
+    task nix-env -iA nixos.fzf
   fi
   if hasnt awk; then
     info "Installing awk"
