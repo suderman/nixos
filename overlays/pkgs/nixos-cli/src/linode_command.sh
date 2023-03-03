@@ -115,7 +115,7 @@ function main {
   url "https://cloud.linode.com/linodes/$id/lish/glish" && echo
   info "Paste the following to install NixOS (second line copied to clipboard):"
   line1="sudo -s"
-  line2="bash <(curl -sL https://github.com/suderman/nixos/raw/main/configurations/min/install.sh) LINODE"
+  line2="bash <(curl -sL https://github.com/suderman/nixos/raw/main/overlays/pkgs/nixos-cli/nixos) bootstrap linode"
   echo $line1
   echo $line2
   echo "$line2" | wl-copy && echo
