@@ -215,7 +215,8 @@ function switch_configuration {
     nixos-rebuild switch --flake /etc/nixos\#${args[configuration]}
 
     info "Rebuild complete!"
-    info "Reboot to ensure everything worked. Commit the generated hardware-configuration.nix and git push to the repo."
+    info "Reboot in 10 seconds. Login as user and commit the generated hardware-configuration.nix to git."
+    sleep 10 && systemctl reboot
     return 0
 
   else
