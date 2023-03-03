@@ -1,9 +1,9 @@
-{ lib, writeTextFile, runtimeShell, git, fzf, gawk, gnused, linode-cli }: 
+{ lib, writeTextFile, runtimeShell, fzf, gawk, git, gnused, linode-cli, wl-clipboard, xdg-utils }: 
 
 let 
   name = "nixos";
   description = "nixos-cli script";
-  runtimeInputs = [ git fzf gawk gnused linode-cli ];
+  runtimeInputs = [ fzf gawk git gnused linode-cli wl-clipboard xdg-utils ];
   text = builtins.readFile ./nixos;
 in 
 
