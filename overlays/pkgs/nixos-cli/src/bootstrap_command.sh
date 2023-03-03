@@ -10,6 +10,9 @@ function main {
   # Be prepared
   install_dependencies
 
+  # Switch configuration (stage 2)
+  is_switch && switch_configuration
+
   # Banner
   yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
   yellow "┃        Suderman's NixOS Installer         ┃"
@@ -182,21 +185,9 @@ function main {
 }
 
 function install_dependencies {
-  if hasnt parted; then
-    info "Installing parted"
-    task nix-env -iA nixos.parted
-  fi
   if hasnt git; then
     info "Installing git"
     task nix-env -iA nixos.git
-  fi
-  if hasnt awk; then
-    info "Installing awk"
-    task nix-env -iA nixos.gawk
-  fi
-  if hasnt sed; then
-    info "Installing sed"
-    task nix-env -iA nixos.gnused
   fi
   if hasnt fzf; then
     info "Installing fzf"
@@ -204,8 +195,40 @@ function install_dependencies {
   fi
 }
 
+# Pull in rekeyed secrets, copy hardware-configuration from min to host, and switch
+function switch_configuration {
+  local host="${args[configuration]}"
+  if has_configuration; then
+
+    info "Pulling secrets"
+    task "cd /etc/nixos; git pull" && echo
+
+    info "Copying generated hardware-configuration to $host"
+    task mv -f /etc/nixos/configurations/min/hardware-configuration.nix /etc/nixos/configurations/$host/hardware-configuration.nix
+    task "cd /etc/nixos; git restore configurations/min" && echo
+
+    info "Rebuilding system to $host"
+    task -d "nixos-rebuild switch --flake /etc/nixos\#${args[configuration]}"
+    nixos-rebuild switch --flake /etc/nixos\#${args[configuration]}
+
+    info "Rebuild complete!"
+    info "Reboot to ensure everything worked. Commit the generated hardware-configuration.nix and git push to the repo."
+
+  else
+    warn "Exiting, missing configuration"
+    return 1
+  fi
+}
+
+function is_switch {
+  [ "${args[type]}" = "switch" ] && return 0 || return 1
+}
+
+function has_configuration {
+  [ "${args[configuration]}" != "" ] && return 0 || return 1
+}
+
 function is_linode {
-  # [ "$ARG" = "LINODE" ] && return 0 || return 1
   [ "${args[type]}" = "linode" ] && return 0 || return 1
 }
 

@@ -73,6 +73,10 @@ commands:
     required: true
     help: "uefi, bios, linode"
 
+  - name: configuration
+    required: false
+    help: "Name of configuration"
+
   flags:
   - long: --swap
     short: -s
@@ -83,6 +87,7 @@ commands:
   - nixos bootstrap linode
   - nixos bootstrap uefi --swap min
   - nixos bootstrap bios --swap 8
+  - nixos bootstrap switch sol
 
 - name: bashly-generate
   alias: bg

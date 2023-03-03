@@ -141,8 +141,8 @@ function main {
   # Test login
   info "Opening a Weblish console:"
   url "https://cloud.linode.com/linodes/$id/lish/weblish" && echo
-  info "Login as user, pull from git, and rebuild config (copied to clipboard):"
-  line1="cd /etc/nixos; git pull"
+  info "Login as root, pull from git, and rebuild config (copied to clipboard):"
+  line1="cd /etc/nixos; git pull; "
   line2="sudo nixos-rebuild switch"
   echo $line1
   echo $line2
