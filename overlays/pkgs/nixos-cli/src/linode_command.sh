@@ -138,19 +138,13 @@ function main {
   task "cd /etc/nixos && git status" 
   sleep 5
 
-  # Test login
+  # Switch configuration
   info "Opening a Weblish console:"
   url "https://cloud.linode.com/linodes/$id/lish/weblish" && echo
   info "Login as root, pull from git, and rebuild config (copied to clipboard):"
-  line1="cd /etc/nixos; git pull; "
-  line2="sudo nixos-rebuild switch"
-  echo $line1
-  echo $line2
-  echo "$line1; $line2" | wl-copy && echo
+  echo "nixos bootstrap switch [CONFIGURATION]" 
+  echo "nixos bootstrap switch " | wl-copy && echo
   
-  # After switching to intended configuration, clean the changes made to min
-  # cd /etc/nixos; git restore configurations/min
-
 }
 
 

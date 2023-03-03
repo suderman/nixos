@@ -826,18 +826,13 @@ nixos_linode_command() {
 
     sleep 5
 
-    # Test login
+    # Switch configuration
     info "Opening a Weblish console:"
     url "https://cloud.linode.com/linodes/$id/lish/weblish" && echo
     info "Login as root, pull from git, and rebuild config (copied to clipboard):"
-    line1="cd /etc/nixos; git pull; "
-    line2="sudo nixos-rebuild switch"
-    echo $line1
-    echo $line2
-    echo "$line1; $line2" | wl-copy && echo
+    echo "nixos bootstrap switch [CONFIGURATION]"
 
-    # After switching to intended configuration, clean the changes made to min
-    # cd /etc/nixos; git restore configurations/min
+    echo "nixos bootstrap switch " | wl-copy && echo
 
   }
 
@@ -881,7 +876,11 @@ nixos_bootstrap_command() {
     install_dependencies
 
     # Switch configuration (stage 2)
-    is_switch && switch_configuration
+    if is_switch; then
+
+      switch_configuration
+      return 0
+    fi
 
     # Banner
     yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
@@ -1085,6 +1084,7 @@ nixos_bootstrap_command() {
 
       info "Rebuild complete!"
       info "Reboot to ensure everything worked. Commit the generated hardware-configuration.nix and git push to the repo."
+      return 0
 
     else
       warn "Exiting, missing configuration"

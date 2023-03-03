@@ -11,7 +11,10 @@ function main {
   install_dependencies
 
   # Switch configuration (stage 2)
-  is_switch && switch_configuration
+  if is_switch; then 
+    switch_configuration
+    return 0
+  fi
 
   # Banner
   yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
@@ -213,6 +216,7 @@ function switch_configuration {
 
     info "Rebuild complete!"
     info "Reboot to ensure everything worked. Commit the generated hardware-configuration.nix and git push to the repo."
+    return 0
 
   else
     warn "Exiting, missing configuration"
