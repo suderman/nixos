@@ -34,13 +34,14 @@ nixos_usage() {
   echo
   # :command.usage_commands
   printf "%s\n" "$(bold "Commands:")"
-  printf "  %s   Shortcut for nixos-rebuild switch\n" "$(green "switch")     "
-  printf "  %s   Edit or add secrets to secrets/files\n" "$(green "secrets")    "
-  printf "  %s   Rekey secrets with secrets/keys\n" "$(green "rekey")      "
-  printf "  %s   Scan a host for public keys and add to secrets/keys\n" "$(green "keyscan")    "
-  printf "  %s   Install configuration to Linode VPS\n" "$(green "linode")     "
-  printf "  %s   Bootstrap a NixOS installation\n" "$(green "bootstrap")  "
-  printf "  %s   Generate bash completions\n" "$(green "completions")"
+  printf "  %s   Shortcut for nixos-rebuild switch\n" "$(green "switch")         "
+  printf "  %s   Edit or add secrets to secrets/files\n" "$(green "secrets")        "
+  printf "  %s   Rekey secrets with secrets/keys\n" "$(green "rekey")          "
+  printf "  %s   Scan a host for public keys and add to secrets/keys\n" "$(green "keyscan")        "
+  printf "  %s   Install configuration to Linode VPS\n" "$(green "linode")         "
+  printf "  %s   Bootstrap a NixOS installation\n" "$(green "bootstrap")      "
+  printf "  %s   Shortcut for bashly generate\n" "$(green "bashly-generate")"
+  printf "  %s   Generate bash completions\n" "$(green "completions")    "
   echo
 
   # :command.long_usage
@@ -317,6 +318,38 @@ nixos_bootstrap_usage() {
     printf "  nixos bootstrap linode\n"
     printf "  nixos bootstrap uefi --swap min\n"
     printf "  nixos bootstrap bios --swap 8\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+nixos_bashly_generate_usage() {
+  if [[ -n $long_usage ]]; then
+    printf "nixos bashly-generate - Shortcut for bashly generate\n"
+    echo
+
+  else
+    printf "nixos bashly-generate - Shortcut for bashly generate\n"
+    echo
+
+  fi
+
+  printf "Alias: bg\n"
+  echo
+
+  printf "%s\n" "$(bold "Usage:")"
+  printf "  nixos bashly-generate\n"
+  printf "  nixos bashly-generate --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n $long_usage ]]; then
+    printf "%s\n" "$(bold "Options:")"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "$(magenta "--help, -h")"
+    printf "    Show this help\n"
     echo
 
   fi
@@ -781,9 +814,9 @@ nixos_linode_command() {
     info "Scanning new host key in 30 seconds..."
     sleep 30
     local ip="$(linode-cli linodes view $id --no-header --text --format ipv4)"
-    task $dir/secrets/scripts/secrets-keyscan $ip $label --force && echo
+    task "/etc/nixos/secrets/scripts/secrets-keyscan $ip $label --force && echo"
     info "Commit and push to git so changes can be pulled on the new linode at /etc/nixos"
-    task "cd $dir && git status"
+    task "cd /etc/nixos && git status"
 
     sleep 5
 
@@ -829,7 +862,6 @@ nixos_linode_command() {
 # :command.function
 nixos_bootstrap_command() {
   # src/bootstrap_command.sh
-  # Install script
   # sudo -s
   # bash <(curl -sL https://github.com/suderman/nixos/raw/main/overlays/pkgs/nixos-cli/nixos) bootstrap
   function main {
@@ -856,7 +888,7 @@ nixos_bootstrap_command() {
 
     # Choose a disk to partition
     local disk bbp esp swap butter
-    is_linode && disk="sda" || disk="$(lsblk -nirdo NAME | pick "Choose the disk to partition for NixOS")"
+    is_linode && disk="sda" || disk="$(lsblk -nirdo NAME | pick "Choose the disk to partition")"
 
     # Bail if no disk selected
     if [ ! -e /dev/$disk ]; then
@@ -1011,26 +1043,30 @@ nixos_bootstrap_command() {
     echo
 
     info "Install complete!"
-    info "Reboot without installer media and check if it actually worked.	(｡◕‿‿◕｡)"
+    info "Reboot without installer media and login as root."
 
   }
 
   function install_dependencies {
+    if hasnt parted; then
+      info "Installing parted"
+      task nix-env -iA nixos.parted
+    fi
     if hasnt git; then
       info "Installing git"
       task nix-env -iA nixos.git
-    fi
-    if hasnt fzf; then
-      info "Installing fzf"
-      task nix-env -iA nixos.fzf
     fi
     if hasnt awk; then
       info "Installing awk"
       task nix-env -iA nixos.gawk
     fi
-    if hasnt parted; then
-      info "Installing parted"
-      task nix-env -iA nixos.parted
+    if hasnt sed; then
+      info "Installing sed"
+      task nix-env -iA nixos.gnused
+    fi
+    if hasnt fzf; then
+      info "Installing fzf"
+      task nix-env -iA nixos.fzf
     fi
   }
 
@@ -1091,6 +1127,15 @@ nixos_bootstrap_command() {
   }
 
   main
+
+}
+
+# :command.function
+nixos_bashly_generate_command() {
+  # src/bashly_generate_command.sh
+  bashly="docker run --rm -it --user $(id -u):$(id -g) --volume $PWD:/app dannyben/bashly"
+  task -d "cd /etc/nixos/overlays/pkgs/nixos-cli && bashly generate"
+  (cd /etc/nixos/overlays/pkgs/nixos-cli && $bashly generate)
 
 }
 
@@ -1177,6 +1222,13 @@ parse_requirements() {
       action="bootstrap"
       shift
       nixos_bootstrap_parse_requirements "$@"
+      shift $#
+      ;;
+
+    bashly-generate | bg)
+      action="bashly-generate"
+      shift
+      nixos_bashly_generate_parse_requirements "$@"
       shift $#
       ;;
 
@@ -1569,6 +1621,50 @@ nixos_bootstrap_parse_requirements() {
 }
 
 # :command.parse_requirements
+nixos_bashly_generate_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    case "${1:-}" in
+      --help | -h)
+        long_usage=yes
+        nixos_bashly_generate_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="bashly-generate"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
 nixos_completions_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
@@ -1682,6 +1778,15 @@ run() {
         nixos_bootstrap_usage
       else
         nixos_bootstrap_command
+      fi
+      ;;
+
+    "bashly-generate")
+      if [[ ${args['--help']:-} ]]; then
+        long_usage=yes
+        nixos_bashly_generate_usage
+      else
+        nixos_bashly_generate_command
       fi
       ;;
 

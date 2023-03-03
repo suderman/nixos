@@ -84,6 +84,9 @@ commands:
   - nixos bootstrap uefi --swap min
   - nixos bootstrap bios --swap 8
 
+- name: bashly-generate
+  alias: bg
+  help: Shortcut for bashly generate
 
 - name: completions
   help: |-

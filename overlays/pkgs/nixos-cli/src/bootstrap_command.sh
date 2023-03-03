@@ -1,4 +1,3 @@
-# Install script
 # sudo -s
 # bash <(curl -sL https://github.com/suderman/nixos/raw/main/overlays/pkgs/nixos-cli/nixos) bootstrap
 function main {
@@ -25,7 +24,7 @@ function main {
 
   # Choose a disk to partition
   local disk bbp esp swap butter
-  is_linode && disk="sda" || disk="$(lsblk -nirdo NAME | pick "Choose the disk to partition for NixOS")"
+  is_linode && disk="sda" || disk="$(lsblk -nirdo NAME | pick "Choose the disk to partition")"
 
   # Bail if no disk selected
   if [ ! -e /dev/$disk ]; then
@@ -178,26 +177,30 @@ function main {
   echo
 
   info "Install complete!"
-  info "Reboot without installer media and check if it actually worked.	(｡◕‿‿◕｡)"
+  info "Reboot without installer media and login as root."
 
 }
 
 function install_dependencies {
+  if hasnt parted; then
+    info "Installing parted"
+    task nix-env -iA nixos.parted
+  fi
   if hasnt git; then
     info "Installing git"
     task nix-env -iA nixos.git
-  fi
-  if hasnt fzf; then
-    info "Installing fzf"
-    task nix-env -iA nixos.fzf
   fi
   if hasnt awk; then
     info "Installing awk"
     task nix-env -iA nixos.gawk
   fi
-  if hasnt parted; then
-    info "Installing parted"
-    task nix-env -iA nixos.parted
+  if hasnt sed; then
+    info "Installing sed"
+    task nix-env -iA nixos.gnused
+  fi
+  if hasnt fzf; then
+    info "Installing fzf"
+    task nix-env -iA nixos.fzf
   fi
 }
 

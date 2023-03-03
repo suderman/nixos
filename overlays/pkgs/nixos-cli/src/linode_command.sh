@@ -133,9 +133,9 @@ function main {
   info "Scanning new host key in 30 seconds..."
   sleep 30
   local ip="$(linode-cli linodes view $id --no-header --text --format ipv4)"
-  task $dir/secrets/scripts/secrets-keyscan $ip $label --force && echo
+  task "/etc/nixos/secrets/scripts/secrets-keyscan $ip $label --force && echo"
   info "Commit and push to git so changes can be pulled on the new linode at /etc/nixos"
-  task "cd $dir && git status" 
+  task "cd /etc/nixos && git status" 
   sleep 5
 
   # Test login
