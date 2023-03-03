@@ -42,7 +42,6 @@ function main {
   warn "OK! Proceeding in 5 seconds..."
   sleep 5 && echo && echo
 
-  return
   info "Create GPT partition table"
   task parted -s /dev/$disk mklabel gpt
 
@@ -58,14 +57,17 @@ function main {
     info "Create BIOS boot partition ($bbp)"
     task parted -s /dev/$disk mkpart BBP 1MiB 3MiB
     task parted -s /dev/$disk set 1 bios_grub on
+    echo
 
     info "Create EFI system partition ($esp)"
     task parted -s /dev/$disk mkpart ESP FAT32 3MiB 1GiB
     task parted -s /dev/$disk set 2 esp on
+    echo
 
     info "Create swap partition ($swap)"
     task parted -s /dev/$disk mkpart swap linux-swap 1GiB $(swap_size)GiB
     task parted -s /dev/$disk set 3 swap on
+    echo
 
   # Booting with UEFI, the ESP partition alone is fine
   else
@@ -78,25 +80,31 @@ function main {
     info "Create EFI system partition ($esp)"
     task parted -s /dev/$disk mkpart ESP FAT32 1MiB 1GiB
     task parted -s /dev/$disk set 1 esp on
+    echo
 
     info "Create swap partition ($swap)"
     task parted -s /dev/$disk mkpart swap linux-swap 1GiB $(swap_size)GiB
     task parted -s /dev/$disk set 2 swap on
+    echo
 
   fi
 
   info "Create btrfs partition ($butter)"
   task parted -s /dev/$disk mkpart nix btrfs $(swap_size)GiB 100%
+  echo
 
   info "Format EFI system partition"
   task mkfs.fat -F32 -n ESP /dev/$esp
+  echo
 
   info "Enable swap partition"
   task mkswap /dev/$swap
   task swapon /dev/$swap
+  echo
 
   info "Format btrfs partition"
   task mkfs.btrfs -fL nix /dev/$butter
+  echo
 
   info "Create btrfs subvolume structure"
   # nix
@@ -116,15 +124,19 @@ function main {
   task mkdir -p /mnt/state/{var/lib,etc/{ssh,NetworkManager/system-connections}}
   task btrfs subvolume create /mnt/state/var/log
   task umount /mnt
+  echo
 
   info "Mount root"
   task mount -o subvol=root /dev/$butter /mnt
+  echo
 
   info "Mount nix"
   task "mkdir -p /mnt/nix && mount /dev/$butter /mnt/nix"
+  echo
 
-  msg "Mount boot"
+  info "Mount boot"
   task "mkdir -p /mnt/boot && mount /dev/$esp /mnt/boot"
+  echo
 
   # Path to nixos flake and minimal configuration
   local nixos="/mnt/nix/state/etc/nixos" 
@@ -148,8 +160,7 @@ function main {
   # If linode install detected, set config.hardware.linode.enable = true;
   if is_linode; then
     info "Enabling linode in configuration.nix"
-    task -d "run sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix"
-    sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix
+    task "run sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix"
     echo
   fi
 
@@ -165,8 +176,8 @@ function main {
   nixos-install --flake $nixos\#min --no-root-password
   echo
 
-  info "...install is complete."
-  info "Reboot without installer media and check if it actually worked. ;-)"
+  info "Install complete!"
+  info "Reboot without installer media and check if it actually worked.	(｡◕‿‿◕｡)"
 
 }
 
