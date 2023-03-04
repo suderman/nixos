@@ -25,7 +25,7 @@ linode-cli linodes create –label sol
 
 <summary><b>2. Create disks & profiles</b></summary>
 
-We need to install the [min](https://github.com/suderman/nixos/tree/main/configurations/min) configuration as a starting point. Using your laptop, run the [nixos linode]([https://github.com/suderman/nixos/blob/main/configurations/min/linode.sh](https://github.com/suderman/nixos/blob/main/overlays/pkgs/nixos-cli/src/linode_command.sh)) script found in this repo:
+We need to install the [min](https://github.com/suderman/nixos/tree/main/configurations/min) configuration as a starting point. Using your laptop, run the [nixos linode](https://github.com/suderman/nixos/blob/main/configurations/min/linode.sh](https://github.com/suderman/nixos/blob/main/overlays/pkgs/nixos-cli/src/linode_command.sh) script found in this repo:
 
 ```bash
 nixos linode
@@ -99,7 +99,7 @@ git push
  
 <summary><b>6. Switch configurations</b></summary>
 
-Using the Weblish console, login to the Linode as root (with password "root"). Then finish the install with `nixos bootstrap switch sol`. This will pull in the rekeyed secrets from git, move min's generated `hardware-configuration.nix` to sol, and run `nixos-rebuild switch`. 
+Using the Weblish console, login to the Linode as root (with password "root"). Then finish the install with [nixos bootstrap switch sol](https://github.com/suderman/nixos/blob/main/configurations/min/linode.sh](https://github.com/suderman/nixos/blob/main/overlays/pkgs/nixos-cli/src/bootstrap_command.sh). This will pull in the rekeyed secrets from git, move min's generated `hardware-configuration.nix` to sol, and run `nixos-rebuild switch`. 
 
 ```bash
 nixos bootstrap switch sol
