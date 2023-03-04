@@ -99,7 +99,7 @@ git push
  
 <summary><b>6. Switch configurations</b></summary>
 
-Using the Weblish console, login to the Linode as root (with password "root"). Then finish the install with [nixos bootstrap switch sol](https://github.com/suderman/nixos/blob/main/overlays/pkgs/nixos-cli/src/bootstrap_command.sh). This will pull in the rekeyed secrets from git, move min's generated `hardware-configuration.nix` to sol, and run `nixos-rebuild switch`. 
+Using the Weblish console, login to the Linode as root (with password "root"). Then finish the install with [nixos bootstrap](https://github.com/suderman/nixos/blob/main/overlays/pkgs/nixos-cli/src/bootstrap_command.sh). This will pull in the rekeyed secrets from git, move min's generated `hardware-configuration.nix` to sol, and run `nixos-rebuild switch`. 
 
 ```bash
 nixos bootstrap switch sol
