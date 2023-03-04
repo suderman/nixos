@@ -8,7 +8,7 @@ Linode VPS for public web services. This instance is running the Linode 2 GB pla
 
 <summary><b>1. Provision server</b></summary>
 
-Create new server named `sol` via [Linode dashboard](https://cloud.linode.com/linodes). Also, ensure the `linode-cli` command is available and logged in on the other computer. Run the command a provide a [Personal Access Token](https://cloud.linode.com/profile/tokens) if prompted.
+Create new server named `sol` via [Linode dashboard](https://cloud.linode.com/linodes). Also, ensure the `linode-cli` command is available and logged in on your laptop. Run the command a provide a [Personal Access Token](https://cloud.linode.com/profile/tokens) if prompted.
 
 ```bash
 linode-cli linodes create –label sol
@@ -25,7 +25,7 @@ linode-cli linodes create –label sol
 
 <summary><b>2. Create disks & profiles</b></summary>
 
-We need to install the [min](https://github.com/suderman/nixos/tree/main/configurations/min) configuration as a starting point. Using the other computer, run the [nixos linode]([https://github.com/suderman/nixos/blob/main/configurations/min/linode.sh](https://github.com/suderman/nixos/blob/main/overlays/pkgs/nixos-cli/src/linode_command.sh)) script found in this repo:
+We need to install the [min](https://github.com/suderman/nixos/tree/main/configurations/min) configuration as a starting point. Using your laptop, run the [nixos linode]([https://github.com/suderman/nixos/blob/main/configurations/min/linode.sh](https://github.com/suderman/nixos/blob/main/overlays/pkgs/nixos-cli/src/linode_command.sh)) script found in this repo:
 
 ```bash
 nixos linode
@@ -86,7 +86,7 @@ When finished, type `y` on the other computer to continue.
 
 <summary><b>5. Rekey secrets</b></summary>
 
-After the Linode boots using the `nixos` profile, the other computer will keyscan the new host. Then repo's secrets will be updated with Linode's public key and all the secrets rekeyed. Commit these changes and `git push`:
+After the Linode boots using the `nixos` profile, the laptop will keyscan the new host. Then repo's secrets will be updated with Linode's public key and all the secrets rekeyed. Commit these changes and `git push`:
 
 ```bash
 cd /etc/nixos
@@ -105,7 +105,7 @@ Using the Weblish console, login to the Linode as root (with password "root"). T
 nixos bootstrap switch sol
 ```
 
-Once finished, the systme will reboot. Login as a regular user. Commit the generated `hardware-configuration.nix` and `git push` to the repo.
+Once finished, the system will reboot. Login as a regular user. Commit the generated `hardware-configuration.nix` and `git push` to the repo.
 
 </details>
 <details>
