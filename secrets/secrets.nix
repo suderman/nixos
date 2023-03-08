@@ -35,4 +35,6 @@ with (import ./keys); {
 
   # Testing
 
+  "files/foo.age".publicKeys = all;
+
 }
