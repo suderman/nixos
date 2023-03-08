@@ -36,12 +36,24 @@ function warn {
   echo "$(red_bold "#") $(red "$*")" 
 }
 
+# Show arguments
+function show {
+  echo "$(magenta_bold ">") $(magenta "$*")";
+}
+
 # Echo task and execute command (unless --dry-run)
 function task { 
   local cmd="$(strip_flags "${@}")"
-  echo "$(magenta_bold ">") $(magenta "$cmd")";
-  is_dry "${@}" || eval "$cmd" > /tmp/task
+  show "$cmd"
+  is_dry "${@}" || eval "$cmd" > /tmp/out
 }
+
+# Echo output from last task
+function out {
+  touch /tmp/out
+  cat /tmp/out
+}
+
 
 # Echo URL, copy to clipboard, and open in browser
 function url { 
@@ -109,19 +121,26 @@ function ask {
   fi
 }
 
+# info "Choose your disk"
+# disk="$(ask_disk)"
 function ask_disk {
-  smenu -c -q -n 20 -N -d \
-    -I '/__/ /g' -E '/__/ /g' \
-    -i ^nvme -i ^sd -i ^hd -i ^vd \
-    -i refresh -i cancel \
-    -a e:4 i:6,b c:6,br  \
-    -1 '(refresh|cancel)' '3,b' \
-    -s /refresh \
-    <<-EOF
-			$(lsblk -o NAME,FSTYPE,LABEL,FSAVAIL,FSUSE%,MOUNTPOINT)
-			__
-			refresh__ cancel__
-		EOF
+  # prepare menu of disks
+  local menu="$(lsblk -o NAME,FSTYPE,LABEL,FSAVAIL,FSUSE%,MOUNTPOINT)"
+  menu="${menu}\n__\n"
+  menu="${menu}refresh__ cancel__"
+  # choose disk from menu
+  local disk="refresh"
+  while [[ "$disk" = "refresh" ]]; do
+    disk="$(smenu -c -q -n 20 -N -d \
+      -I '/__/ /g' -E '/__/ /g' \
+      -i ^nvme -i ^sd -i ^hd -i ^vd \
+      -i refresh -i cancel \
+      -a e:4 i:6,b c:6,br  \
+      -1 '(refresh|cancel)' '3,b' \
+      -s /refresh \
+      <<< "$menu")"
+  done
+  [[ "$disk" != "cancel" ]] && echo "$disk" || return 1
 }
 
 # smenu formatting

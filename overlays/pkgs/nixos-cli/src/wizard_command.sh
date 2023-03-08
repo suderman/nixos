@@ -4,35 +4,33 @@ echo "# you can edit it freely and regenerate (it will not be overwritten)"
 inspect_args
 
 info "Choose your disk"
-local disk="refresh"; while [[ "$disk" = "refresh" ]]; do
-  disk="$(ask_disk)"
-done
-task -d $disk
+disk="$(ask_disk)"
+show $disk
 
 info "What's it gonna be?"
 val=$(ask ready set go)
-echo $val
+show $val
+
 info "What is your name?"
 name="$(ask)"
-echo $name
-# pause
-# pause "Again people"
+show $name
+
+pause
+pause "Again people"
+
 if confirm --warn Scary?; then
   echo "You think scary"
 else
   echo "You dunna want it"
 fi
 
+ask "one" "two" "three"
 
-echo $(choose "do re mi")
-echo "one two three" | ask "What it gonna be"
-info "What is your name?"
-name="$(ask)"
-echo $name
 warn "Well? What it gunna be?"
-# if choose
-#   echo you agreed
-# else
-#   echo you did not agree
-# fi
+if confirm; then
+  show you agreed
+else
+  show you did not agree
+fi
+
 pause "Hold it!"

@@ -19,7 +19,7 @@ in {
       };
 
       environment = {
-        "LS_COLORS" = "1";
+        "LS_COLORS" = "";
       };
 
       keybindings = {
