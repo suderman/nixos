@@ -845,6 +845,7 @@ nixos_secrets_command() {
     fi
 
     # Add (or use existing) secret by argument name
+    git_stash
     has_secret "$secret" || add_secret "$secret"
 
     # Edit secret with agenix
@@ -855,6 +856,7 @@ nixos_secrets_command() {
 
     # Commit on git
     git_commit
+    git_stash_pop
 
   }
 
@@ -916,11 +918,16 @@ nixos_secrets_command() {
     task "echo '}' >> $nix"
   }
 
+  function git_stash {
+    task "cd $dir && git stash"
+  }
+
   function git_commit {
-    echo
-    # task "cd $dir && git stash"
-    # task "cd $dir && git add . && git commit -m \"secret: $secret\""
-    # task "cd $dir git stash pop"
+    task "cd $dir && git add . && git commit -m \"secret: $secret\""
+  }
+
+  function git_stash_pop {
+    task "cd $dir && git stash pop"
   }
 
   main

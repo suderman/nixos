@@ -99,7 +99,7 @@ function git_commit {
 }
 
 function git_stash_pop {
-  task "cd $dir git stash pop"
+  task "cd $dir && git stash pop"
 }
 
 main
