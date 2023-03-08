@@ -9,6 +9,7 @@
   baz = ./baz.age;
   cloudflare-env = ./cloudflare-env.age;
   foo = ./foo.age;
+  lucy = ./lucy.age;
   password = ./password.age;
   tailscale-cloudflare = ./tailscale-cloudflare.age;
   token = ./token.age;
