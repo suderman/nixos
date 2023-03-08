@@ -19,6 +19,7 @@ function main {
   fi
 
   # Add (or use existing) secret by argument name
+  git_stash
   has_secret "$secret" || add_secret "$secret"
 
   # Edit secret with agenix
@@ -29,6 +30,7 @@ function main {
 
   # Commit on git
   git_commit
+  git_stash_pop
 
 }
 
@@ -88,9 +90,15 @@ function add_secret {
   task "echo '}' >> $nix"
 }
 
-function git_commit {
+function git_stash {
   task "cd $dir && git stash"
+}
+
+function git_commit {
   task "cd $dir && git add . && git commit -m \"secret: $secret\""
+}
+
+function git_stash_pop {
   task "cd $dir git stash pop"
 }
 
