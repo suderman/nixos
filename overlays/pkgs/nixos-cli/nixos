@@ -918,6 +918,7 @@ nixos_secrets_command() {
     task "echo '}' >> $nix"
   }
 
+<<<<<<< Updated upstream
   function git_stash {
     task "cd $dir && git stash"
   }
@@ -928,6 +929,12 @@ nixos_secrets_command() {
 
   function git_stash_pop {
     task "cd $dir && git stash pop"
+=======
+  function git_commit {
+    task "cd $dir && git stash"
+    task "cd $dir && git add . && git commit -m \"secret: $secret\""
+    task "cd $dir git stash pop"
+>>>>>>> Stashed changes
   }
 
   main
