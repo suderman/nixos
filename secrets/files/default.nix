@@ -7,7 +7,6 @@
   basic-auth = ./basic-auth.age;
   cloudflare-env = ./cloudflare-env.age;
   password = ./password.age;
-  self-env = ./self-env.age;
   tailscale-cloudflare = ./tailscale-cloudflare.age;
   token = ./token.age;
 
