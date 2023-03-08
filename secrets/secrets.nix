@@ -34,7 +34,5 @@ with (import ./keys); {
   "files/tailscale-cloudflare.age".publicKeys = all;
 
   # Testing
-  "files/foo.age".publicKeys = all;
-  "files/baz.age".publicKeys = all;
 
 }

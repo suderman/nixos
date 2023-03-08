@@ -36,6 +36,11 @@ function warn {
   echo "$(red_bold "#") $(red "$*")" 
 }
 
+# Return error
+function error { 
+  warn "Error: ${*-exiting}" && exit 1
+}
+
 # Show arguments
 function show {
   echo "$(magenta_bold ">") $(magenta "$*")";
@@ -112,7 +117,7 @@ function ask {
   [[ -p /dev/stdin ]] && choices="$(cat -)"
   # If any choices, get choice from smenu
   if [[ -n "$choices" ]]; then
-    smenu -a i:3,b c:3,br <<< "$choices"
+    smenu -c -a i:3,b c:3,br <<< "$choices"
   # Otherwise, prompt for input
   else
     local reply=""; while [[ -z "$reply" ]]; do
