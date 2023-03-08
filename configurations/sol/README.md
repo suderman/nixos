@@ -8,10 +8,16 @@ Linode VPS for public web services. This instance is running the Linode 2 GB pla
 
 <summary><b>1. Provision server</b></summary>
 
-Create new server named `sol` via [Linode dashboard](https://cloud.linode.com/linodes). Also, ensure the `linode-cli` command is available and logged in on the other computer. Run the command a provide a [Personal Access Token](https://cloud.linode.com/profile/tokens) if prompted.
+Create new server named `sol` via [Linode dashboard](https://cloud.linode.com/linodes). Also, ensure the `linode-cli` command is available and logged in on your laptop. Run the command a provide a [Personal Access Token](https://cloud.linode.com/profile/tokens) if prompted.
 
 ```bash
-linode-cli
+linode-cli linodes create –label sol
+–region ca-central
+–type g6-nanode-1
+–root_pass
+–booted true
+–backups_enabled false
+–private_ip false
 ```
 
 </details>
@@ -19,10 +25,10 @@ linode-cli
 
 <summary><b>2. Create disks & profiles</b></summary>
 
-We need to install the [min](https://github.com/suderman/nixos/tree/main/configurations/min) configuration as a starting point. Using the other computer, run the [linode.sh](https://github.com/suderman/nixos/blob/main/configurations/min/linode.sh) script found in this repo:
+We need to install the [min](https://github.com/suderman/nixos/tree/main/configurations/min) configuration as a starting point. Using your laptop, run the [nixos linode](https://github.com/suderman/nixos/blob/main/overlays/pkgs/nixos-cli/src/linode_command.sh) script found in this repo:
 
 ```bash
-/etc/nixos/configurations/min/linode.sh
+nixos linode
 ```
 
 Choose the `00000000_sol` linode from the menu and follow the wizard. After confirmation, it will power off the chosen linode, destroy any existing disks & configurations, and create the following:
@@ -70,7 +76,6 @@ Next, the wizard will launch a Glish console with the Linode booted using the `i
 
 ```bash
 sudo -s
-bash <(curl -sL https://github.com/suderman/nixos/raw/main/configurations/min/install.sh) LINODE
 bash <(curl -sL https://github.com/suderman/nixos/raw/main/overlays/pkgs/nixos-cli/nixos) bootstrap linode
 ```
 
@@ -81,12 +86,12 @@ When finished, type `y` on the other computer to continue.
 
 <summary><b>5. Rekey secrets</b></summary>
 
-After the Linode boots using the `nixos` profile, the other computer will keyscan the new host. Then repo's secrets will be updated with Linode's public key and all the secrets rekeyed. Commit these changes and `git push`:
+After the Linode boots using the `nixos` profile, the laptop will keyscan the new host. Then repo's secrets will be updated with Linode's public key and all the secrets rekeyed. Commit these changes and `git push`:
 
 ```bash
- cd /etc/nixos
- git commit -m rekey
- git push
+cd /etc/nixos
+git commit -m rekey
+git push
 ```
  
 </details>
@@ -94,27 +99,13 @@ After the Linode boots using the `nixos` profile, the other computer will keysca
  
 <summary><b>6. Switch configurations</b></summary>
 
-Using the Weblish console, login to the Linode as a regular user (with matching password). Then `git pull` changes in this repo and run the `nixos-rebuild switch` command. Exit and login again.
+Using the Weblish console, login to the Linode as root (with password "root"). Then finish the install with [nixos bootstrap](https://github.com/suderman/nixos/blob/main/overlays/pkgs/nixos-cli/src/bootstrap_command.sh). This will pull in the rekeyed secrets from git, move min's generated `hardware-configuration.nix` to sol, and run `nixos-rebuild switch`. 
 
 ```bash
- cd /etc/nixos
- git pull
- sudo nixos-rebuild switch
- exit
+nixos bootstrap switch sol
 ```
 
-Head back into `/etc/nixos` repo and move the generated `hardware-configuration.nix` into this configuration's directory. Then `git restore` the [min](https://github.com/suderman/nixos/tree/main/configurations/min) configuration to how it was before. Finally, run `nixos-rebuild switch` to change into this configuration:
-
-```bash
-cd /etc/nixos
-mv -f configurations/min/hardware-configuration.nix configurations/sol/hardware-configuration.nix
-git restore configurations/min
-
-# Finally!
-sudo nixos-rebuild switch --flake /etc/nixos#sol
-```
-
-Reboot to ensure everything worked. Commit the generated `hardware-configuration.nix` and `git push` to the repo.
+Once finished, the system will reboot. Login as a regular user. Commit the generated `hardware-configuration.nix` and `git push` to the repo.
 
 </details>
 <details>
