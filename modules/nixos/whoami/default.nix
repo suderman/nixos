@@ -20,7 +20,7 @@ in {
 
     # agenix
     age.secrets = mkIf age.enable {
-      self-env.file = age.files.self-env;
+      cloudflare-env.file = age.files.cloudflare-env;
     };
 
     # service
@@ -32,7 +32,7 @@ in {
         "--label=traefik.http.routers.whoami.tls.certresolver=resolver-dns"
         "--label=traefik.http.routers.whoami.middlewares=local@file"
       ];
-      environmentFiles = mkIf age.enable [ age.secrets.self-env.path ];
+      environmentFiles = mkIf age.enable [ age.secrets.cloudflare-env.path ];
       environment = {
         FOO = "BAR";
       };

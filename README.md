@@ -21,5 +21,3 @@ outputs.nixosConfigurations.<tab>
 outputs.homeConfigurations.<tab>
 inputs.<tab>
 ```
-
-hi
