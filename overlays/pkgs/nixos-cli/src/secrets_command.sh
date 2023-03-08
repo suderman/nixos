@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+# inspect_args
 local dir="/etc/nixos/secrets" secret 
 
 function main {
