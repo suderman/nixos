@@ -845,7 +845,6 @@ nixos_secrets_command() {
     fi
 
     # Add (or use existing) secret by argument name
-    git_stash
     has_secret "$secret" || add_secret "$secret"
 
     # Edit secret with agenix
@@ -854,9 +853,8 @@ nixos_secrets_command() {
     # Update age/default.nix
     write_nix
 
-    # Commit on git
+    # Commit secrets
     git_commit
-    git_stash_pop
 
   }
 
@@ -918,23 +916,8 @@ nixos_secrets_command() {
     task "echo '}' >> $nix"
   }
 
-<<<<<<< Updated upstream
-  function git_stash {
-    task "cd $dir && git stash"
-  }
-
   function git_commit {
     task "cd $dir && git add . && git commit -m \"secret: $secret\""
-  }
-
-  function git_stash_pop {
-    task "cd $dir && git stash pop"
-=======
-  function git_commit {
-    task "cd $dir && git stash"
-    task "cd $dir && git add . && git commit -m \"secret: $secret\""
-    task "cd $dir git stash pop"
->>>>>>> Stashed changes
   }
 
   main
