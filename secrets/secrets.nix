@@ -17,9 +17,6 @@ with (import ./keys); {
   # ---------------------------------------------------------------------------
   "files/cloudflare-env.age".publicKeys = all;
 
-  # .env for most of my self-hosted services 
-  "files/self-env.age".publicKeys = all;
-
   # Encrypted password for NixOS user account
   # > mkpasswd -m sha-512 mySecr3tpa$$w0rd!
   "files/password.age".publicKeys = all;
@@ -34,7 +31,8 @@ with (import ./keys); {
   "files/tailscale-cloudflare.age".publicKeys = all;
 
   # Testing
-
   "files/foo.age".publicKeys = all;
+  "files/bar.age".publicKeys = all;
+  "files/baz.age".publicKeys = all;
 
 }
