@@ -3,6 +3,7 @@ local dir="/etc/nixos/secrets" secret
 
 function main {
 
+  # Get secret arg and ensure agenix
   secret="${args[secret]}"
   has agenix || error "agenix missing"
 
@@ -12,10 +13,11 @@ function main {
     secret="$(ask "$(list_secrets) [new]")"
   fi
 
+  # If [new], ask for name of new secret
   if [[ "$secret" == "[new]" ]]; then
     secret="$(ask)"
   fi
-  
+
   # Add (or use existing) secret by argument name
   has_secret "$secret" || add_secret "$secret"
 
@@ -25,14 +27,9 @@ function main {
   # Update age/default.nix
   write_nix 
 
-  # Stage on git
-  # git_stage
+  # Commit on git
+  git_commit
 
-  other
-}
-
-function other {
-  show $secret
 }
 
 # Write the default.nix file compiling all age files
@@ -91,9 +88,10 @@ function add_secret {
   task "echo '}' >> $nix"
 }
 
-function git_stage {
-  cmd "cd $secrets && git add ."
-  cd $secrets && git add .
+function git_commit {
+  task "cd $dir && git stash"
+  task "cd $dir && git add . && git commit -m \"secret: $secret\""
+  task "cd $dir git stash pop"
 }
 
 main
