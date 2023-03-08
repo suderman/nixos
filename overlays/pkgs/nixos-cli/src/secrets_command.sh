@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 local dir="/etc/nixos/secrets" secret 
 
-{ RULES="/etc/nixos/secrets/secrets.nix" agenix --edit "files/foo.age" }
-
 function main {
 
   # Get secret arg and ensure agenix
@@ -25,7 +23,7 @@ function main {
   has_secret "$secret" || add_secret "$secret"
 
   # Edit secret with agenix
-  cd $dir && agenix --edit "files/$secret.age" > /dev/null 2>&1
+  cd $dir && agenix --edit "files/$secret.age"
 
   # show $?
 
