@@ -19,20 +19,18 @@ function main {
   fi
 
   # Add (or use existing) secret by argument name
-  # git_stash
+  git_stash
   has_secret "$secret" || add_secret "$secret"
 
   # Edit secret with agenix
   cd $dir && agenix --edit "files/$secret.age"
-
-  # show $?
 
   # Update age/default.nix
   write_nix 
 
   # Commit on git
   git_commit
-  # git_stash_pop
+  git_stash_pop
 
 }
 
