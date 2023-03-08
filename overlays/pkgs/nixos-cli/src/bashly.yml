@@ -5,6 +5,21 @@ extensible: true
 
 commands:
 
+- name: wizard
+  alias: w
+  help: Wizard up a NixOS installation
+
+  args:
+  - name: type
+    required: false
+    help: "uefi, bios, linode"
+
+  flags:
+  - long: --swap
+    short: -s
+    arg: swap
+    help: "min, max, or any number of GB for swap (default: max)"
+
 - name: switch
   alias: sw
   help: Shortcut for nixos-rebuild switch

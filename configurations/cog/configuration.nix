@@ -70,17 +70,27 @@
     RUNTIME_PM_ON_BAT = "auto";
   };
 
-  # Suspend-then-hibernate after two hours
+  # # Suspend-then-hibernate after two hours
+  # services.logind = {
+  #   lidSwitch = "suspend-then-hibernate";
+  #   lidSwitchExternalPower = "suspend";
+  #   extraConfig = ''
+  #     HandlePowerKey=suspend-then-hibernate
+  #     IdleAction=suspend-then-hibernate
+  #     IdleActionSec=2m
+  #   '';
+  # };
+  # systemd.sleep.extraConfig = "HibernateDelaySec=2h";
   services.logind = {
-    lidSwitch = "suspend-then-hibernate";
-    lidSwitchExternalPower = "suspend";
-    extraConfig = ''
-      HandlePowerKey=suspend-then-hibernate
-      IdleAction=suspend-then-hibernate
-      IdleActionSec=2m
-    '';
+    lidSwitch = "lock";
+    lidSwitchExternalPower = "lock";
+    lidSwitchDocked = "ignore";
+    # extraConfig = ''
+    #   IdleActionSec=30m
+    #   IdleAction=hibernate
+    #   HandlePowerKey=hibernate
+    # '';
   };
-  systemd.sleep.extraConfig = "HibernateDelaySec=2h";
   # services.udev.extraRules = lib.mkAfter ''
   #   ACTION=="add", SUBSYSTEM=="usb", DRIVER=="usb", ATTR{power/wakeup}="enabled"
   # '';

@@ -2,27 +2,27 @@
 
 # True if command or file does exist
 function has {
-  if [ -e "$1" ]; then return 0; fi
+  if [[ -e "$1" ]]; then return 0; fi
   command -v "$1" >/dev/null 2>&1 && { return 0; }
   return 1
 }
 
 # True if command or file doesn't exist
 function hasnt {
-  if [ -e "$1" ]; then return 1; fi
+  if [[ -e "$1" ]]; then return 1; fi
   command -v "$1" >/dev/null 2>&1 && { return 1; }
   return 0
 }
 
 # True if variable is not empty
 function defined {
-  if [ -z "$1" ]; then return 1; fi  
+  if [[ -z "$1" ]]; then return 1; fi  
   return 0
 }
 
 # True if variable is empty
 function empty {
-  if [ -z "$1" ]; then return 0; fi
+  if [[ -z "$1" ]]; then return 0; fi
   return 1
 }
 
@@ -38,13 +38,9 @@ function warn {
 
 # Echo task and execute command (unless --dry-run)
 function task { 
-  local cmd x
-  case "$1" in
-    "--dry-run" | "-d" ) cmd="${*:2}" ;;
-    *                  ) cmd="${*}"; x=1 ;;
-  esac
+  local cmd="$(strip_flags "${@}")"
   echo "$(magenta_bold ">") $(magenta "$cmd")";
-  [ -z "$x" ] || eval "$cmd" > /tmp/task
+  is_dry "${@}" || eval "$cmd" > /tmp/task
 }
 
 # Echo URL, copy to clipboard, and open in browser
@@ -56,24 +52,25 @@ function url {
 
 # Pause script until input
 function pause {
-  echo -n "$(green_bold "#") $(green "Press") $(blue_bold "y") $(green "to continue:") " 
-  local continue=""
-  while [[ "$continue" != "y" ]]; do 
-    read -n 1 continue; 
-  done
-  echo
+  info "${1-Paused}"
+  smenu -d -i continue -a e:7 i:2,br c:2,blr <<< "Press enter to continue ..."
 }
 
-# Ask confirmation, return true if [y], return false if anything else 
-function ask { 
+function is_warn {
+  [[ "$1" == "--warn" || "$1" == "-w" ]] && return 0
+  return 1
+}
+
+function is_dry {
+  [[ "$1" == "--dry-run" || "$1" == "-d" ]] && return 0
+  return 1
+}
+
+function strip_flags {
   case "$1" in
-    "--warn" | "-w" ) echo -n "$(red_bold "#") $(red "${*:2}")" ;;
-    "--info" | "-i" ) echo -n "$(green_bold "#") $(green "${*:2}")" ;;
-    *               ) echo -n "$(green_bold "#") $(green "${*}")" ;;
+    "--warn" | "-w" | "--info" | "-i" | "--dry-run" | "-d") echo "${*:2}" ;;
+    * ) echo "${*}" ;;
   esac
-  read -p " $(blue_bold y)/[$(red_bold n)] " -n 1 -r
-  echo && [[ $REPLY =~ ^[Yy]$ ]]
-  [ ! $? -ne 0 ] && return 0 || return 1 
 }
 
 # Echo but spaces replaced with newlines
@@ -81,9 +78,69 @@ function explode {
   echo "$@" | tr ' ' '\n'
 }
 
-# Styled fzf with label argument
-function pick {
-  local label
-  [ -z "$1" ] || label=" $(green_bold "${*}") " 
-  has fzf && fzf --border-label="$label" --border --height=30% --margin=1 --padding=1 --layout=reverse --info=hidden
+# if confirm --warn "Wanna go on?"; then
+#   echo "You do! :)"
+# else
+#   echo "You don't :("
+# fi
+function confirm {
+  local out="$(strip_flags "${@}")"
+  [[ -z "$out" ]] && out="Confirm?"
+  is_warn "${@}" && warn "$out" || info "$out"
+  [[ "$(ask "yes no")" == "yes" ]] && return 0 || return 1 
 }
+
+# info "Which color?"
+# color="$(ask red green blue)"
+# info "What is your name?"
+# name="$(ask)"
+function ask { 
+  # Check for args or stdin
+  local choices="${@}"
+  [[ -p /dev/stdin ]] && choices="$(cat -)"
+  # If any choices, get choice from smenu
+  if [[ -n "$choices" ]]; then
+    smenu -a i:3,b c:3,br <<< "$choices"
+  # Otherwise, prompt for input
+  else
+    local reply=""; while [[ -z "$reply" ]]; do
+      read -p "$(blue_bold :) " -e reply
+    done; echo "$reply"
+  fi
+}
+
+function ask_disk {
+  smenu -c -q -n 20 -N -d \
+    -I '/__/ /g' -E '/__/ /g' \
+    -i ^nvme -i ^sd -i ^hd -i ^vd \
+    -i refresh -i cancel \
+    -a e:4 i:6,b c:6,br  \
+    -1 '(refresh|cancel)' '3,b' \
+    -s /refresh \
+    <<-EOF
+			$(lsblk -o NAME,FSTYPE,LABEL,FSAVAIL,FSUSE%,MOUNTPOINT)
+			__
+			refresh__ cancel__
+		EOF
+}
+
+# smenu formatting
+# ----------------
+#
+# [fb]/[bg],[blru]
+#
+# 0: black    1: red    2: green
+# 3: yellow   4: blue   5: purple
+# 6: aqua     7: white  8: gray
+# 
+# [b]old b[l]inking [r]everse [u]nderline
+#
+# -N                   :: numbers added for selection
+# -q                   :: hide scroll bar
+# -N                   :: numbers added for selection
+# -n 20                :: number of lines height
+# -i '^[a-z].'         :: regex for what is selectable
+# -1 '^[a-z].' '1/0,b' :: regex for formatting
+# -m                   :: Message for title
+# -d                   :: Clear menu after selection
+# -W$'\n'              :: 

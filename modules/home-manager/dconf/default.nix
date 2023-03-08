@@ -44,15 +44,34 @@ in {
         speed = "0.30882352941176472";
       };
 
+      # # Power button suspends system
+      # "org/gnome/settings-daemon/plugins/power" = {
+      #   power-button-action = "hibernate"; # default: suspend
+      # };
+
       # Power button suspends system
       "org/gnome/settings-daemon/plugins/power" = {
-        power-button-action = "hibernate"; # default: suspend
+        power-button-action = "hibernate"; # default is suspend
+        sleep-inactive-battery-type = "hibernate"; # when battery: idle means hibernate 
+        sleep-inactive-battery-timeout = "1800"; # when battery: idle after half hour
+        sleep-inactive-ac-type = "nothing"; # when ac: idle means do nothing (just let screensaver lock occur) 
+        sleep-inactive-ac-timeout = "0"; # when ac: don't idle at all
       };
 
       # Keyboard Shortcuts
       "org/gnome/desktop/wm/keybindings" = {
-        close = "['<Super>q']";
+        activate-window-menu = "@as []";
+        toggle-message-tray = "@as []";
+        close = "['<Super>q', '<Alt>F4']";
+        minimize = "['<Super>comma']";
+        toggle-maximized = "['<Super>m']";
         move-to-center = "['<Super>o']";
+      };
+
+      "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
+        name = "kitty super";
+        command = "kitty -e tmux";
+        binding = "<Super>Return";
       };
 
     };
