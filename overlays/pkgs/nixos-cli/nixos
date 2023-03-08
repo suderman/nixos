@@ -571,13 +571,13 @@ function task {
 
   local cmd="$(strip_flags "${@}")"
   show "$cmd"
-  is_dry "${@}" || eval "$cmd" > /tmp/out
+  is_dry "${@}" || eval "$cmd" > /tmp/task
 }
 
 # Echo output from last task
-function out {
-  touch /tmp/out
-  cat /tmp/out
+function last {
+  touch /tmp/task
+  cat /tmp/task
 }
 
 # Echo URL, copy to clipboard, and open in browser
@@ -773,6 +773,10 @@ nixos_wizard_command() {
   disk="$(ask_disk)"
   show $disk
 
+  task "ls -lah && pwd"
+  info "Cool!"
+  last
+
   info "What's it gonna be?"
   val=$(ask ready set go)
   show $val
@@ -782,6 +786,7 @@ nixos_wizard_command() {
   show $name
 
   pause
+
   pause "Again people"
 
   if confirm --warn Scary?; then

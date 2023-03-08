@@ -45,13 +45,13 @@ function show {
 function task { 
   local cmd="$(strip_flags "${@}")"
   show "$cmd"
-  is_dry "${@}" || eval "$cmd" > /tmp/out
+  is_dry "${@}" || eval "$cmd" > /tmp/task
 }
 
 # Echo output from last task
-function out {
-  touch /tmp/out
-  cat /tmp/out
+function last {
+  touch /tmp/task
+  cat /tmp/task
 }
 
 

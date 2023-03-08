@@ -7,6 +7,9 @@ info "Choose your disk"
 disk="$(ask_disk)"
 show $disk
 
+task "ls -lah && pwd"
+info "Cool!"
+
 info "What's it gonna be?"
 val=$(ask ready set go)
 show $val
@@ -15,7 +18,7 @@ info "What is your name?"
 name="$(ask)"
 show $name
 
-pause
+pause 
 pause "Again people"
 
 if confirm --warn Scary?; then
