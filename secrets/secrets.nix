@@ -37,4 +37,6 @@ with (import ./keys); {
 
   "files/lucy.age".publicKeys = all;
 
+  "files/pup.age".publicKeys = all;
+
 }

@@ -11,6 +11,7 @@
   foo = ./foo.age;
   lucy = ./lucy.age;
   password = ./password.age;
+  pup = ./pup.age;
   tailscale-cloudflare = ./tailscale-cloudflare.age;
   token = ./token.age;
 
