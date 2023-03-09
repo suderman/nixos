@@ -26,7 +26,9 @@ commands:
 
 - name: secrets
   alias: s
-  help: Edit or add secrets to secrets/files
+  help: |-
+    Edit or add secrets to secrets/files
+    Wrapper for agenix --edit
 
   args:
   - name: secret
@@ -44,7 +46,9 @@ commands:
 
 - name: rekey
   alias: r
-  help: Rekey secrets with secrets/keys
+  help: |-
+    Rekey secrets with secrets/keys
+    Wrapper for agenix --rekey
 
   flags:
   - long: --force
@@ -62,7 +66,9 @@ commands:
 
 - name: keyscan
   alias: k
-  help: Scan a host for public keys and add to secrets/keys
+  help: |-
+    Scan a host for public keys and add to secrets/keys
+    Wrapper for ssh-keyscan
 
   args:
   - name: ip
@@ -76,6 +82,9 @@ commands:
   - long: --force
     short: -f
     help: "Force rekey after keyscan"
+  - long: --add
+    short: -a
+    help: "Add extra host key instead of replacing"
   - long: --commit
     short: -c
     help: "Automatically commit changes to git"
@@ -83,6 +92,7 @@ commands:
   examples:
   - nixos keyscan 192.168.1.10 myhost
   - nixos keyscan 192.168.1.10 myhost --force
+  - nixos keyscan 192.168.1.10 myhost --add --commit
 
 
 - name: linode

@@ -1,5 +1,5 @@
 # inspect_args
-local dir="/etc/nixos/secrets" ip hostname force filename key
+local dir="/etc/nixos/secrets" ip hostname
 
 function main {
 
@@ -7,28 +7,12 @@ function main {
   has ssh-keyscan || error "ssh-keyscan missing"
 
   # Set up args
-  force="${args[--force]}"
-  ip="${args[ip]}"
-  hostname="${args[hostname]}"
-  [[ -z "$hostname" ]] && hostname="$ip"
-
-  # Modify hostname to ensure 
-  # - it doesn't end in .pub
-  # - periods replaces with hypens
-  # - only alphanumeric with hypens and underscores
-  # - no leading/trailing hypens and underscores
-  hostname="$(awk '{ 
-    gsub(/\.pub$/, "", $0); 
-    gsub(/[\. -]+/, "-", $0); 
-    gsub(/[^a-zA-Z0-9_-]+/, "", $0); 
-    gsub(/^[-_]+|[-_]+$/, "", $0); 
-    print tolower($0) 
-  }' <<< $hostname)"
+  ip="${args[ip]}" hostname="$(hostname)"
 
   # Attempt to scan public key
   task ssh-keyscan -t ssh-ed25519 $ip 2> /dev/null
-  key="$(last | awk '{print $2} {print $3}' | xargs)"
-  filename="${dir}/keys/${hostname}.pub"
+  local key="$(last | awk '{print $2} {print $3}' | xargs)"
+  local filename="$(filename)"
 
   # Check for acquired key
   show "key=\"$key\""
@@ -36,23 +20,72 @@ function main {
     error "failed to scan key from $ip"
   fi
 
-  # Ask to delete existing key
-  if [[ "$force" == "1" ]]; then
-    task "rm -f $filename"
+  # Add extra key
+  if [[ "${args[--add]}" == "1" ]]; then
+    filename="$(filename unique)"
+
+  # Replace existing key
+  else
+    # Delete any existing keys if forced
+    if [[ "${args[--force]}" == "1" ]]; then
+      remove "$filename"
+    # Otherwise, first check if key exists
+    else
+      if [[ -e "$filename" ]]; then
+        # Ask before deleting existing key
+        if confirm "Key \"$hostname\" already exists, replace?"; then
+          remove "$filename"
+        # Exit with error
+        else
+          error "Key \"$hostname\" already exists"
+        fi
+      fi
+    fi
   fi
 
-  # Unique filename if it already exists
-  [[ -e $filename ]] && filename="${dir}/keys/${hostname}-$(date +%s).pub"
-
   # Write key to file
-  show "echo \"\$key\" > $filename"
-  echo "$key" > $filename
-  info "Success: $name written to $filename"
+  info "Writing $filename"
+  show 'echo "${key}" > '"$filename"
+  echo "${key}" > $filename
 
   # Rekey the secrets with the new identity
-  nixos rekey
+  if [[ "${args[--commit]}" == "1" ]]; then
+    nixos rekey --commit
+  else
+    nixos rekey
+  fi
 
 }
 
+# Modify hostname to ensure 
+# - it doesn't end in .pub
+# - periods replaces with hypens
+# - only alphanumeric with hypens and underscores
+# - no leading/trailing hypens and underscores
+function hostname {
+  local hostname="${args[hostname]}"
+  [[ -z "$hostname" ]] && hostname="${args[ip]}"
+  echo "$(awk '{ 
+    gsub(/\.pub$/, "", $0); 
+    gsub(/[\. -]+/, "-", $0); 
+    gsub(/[^a-zA-Z0-9_-]+/, "", $0); 
+    gsub(/^[-_]+|[-_]+$/, "", $0); 
+    print tolower($0) 
+  }' <<< $hostname)"
+}
+
+function filename {
+  local filename="${dir}/keys/${hostname}.pub"
+  if [[ "$1" == "unique" ]]; then
+    [[ -e $filename ]] && echo "${dir}/keys/${hostname}-$(date +%s).pub"
+  else
+    echo "$filename"
+  fi
+}
+
+function remove {
+  info "Removing $1"
+  task "rm -f $1"
+}
 
 main

@@ -141,7 +141,10 @@ nixos_switch_usage() {
 # :command.usage
 nixos_secrets_usage() {
   if [[ -n $long_usage ]]; then
-    printf "nixos secrets - Edit or add secrets to secrets/files\n"
+    printf "nixos secrets\n"
+    echo
+
+    printf "  Edit or add secrets to secrets/files\n  Wrapper for agenix --edit\n"
     echo
 
   else
@@ -193,7 +196,10 @@ nixos_secrets_usage() {
 # :command.usage
 nixos_rekey_usage() {
   if [[ -n $long_usage ]]; then
-    printf "nixos rekey - Rekey secrets with secrets/keys\n"
+    printf "nixos rekey\n"
+    echo
+
+    printf "  Rekey secrets with secrets/keys\n  Wrapper for agenix --rekey\n"
     echo
 
   else
@@ -243,7 +249,10 @@ nixos_rekey_usage() {
 # :command.usage
 nixos_keyscan_usage() {
   if [[ -n $long_usage ]]; then
-    printf "nixos keyscan - Scan a host for public keys and add to secrets/keys\n"
+    printf "nixos keyscan\n"
+    echo
+
+    printf "  Scan a host for public keys and add to secrets/keys\n  Wrapper for ssh-keyscan\n"
     echo
 
   else
@@ -268,6 +277,11 @@ nixos_keyscan_usage() {
     # :flag.usage
     printf "  %s\n" "$(magenta "--force, -f")"
     printf "    Force rekey after keyscan\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "$(magenta "--add, -a")"
+    printf "    Add extra host key instead of replacing\n"
     echo
 
     # :flag.usage
@@ -297,6 +311,7 @@ nixos_keyscan_usage() {
     printf "%s\n" "$(bold "Examples:")"
     printf "  nixos keyscan 192.168.1.10 myhost\n"
     printf "  nixos keyscan 192.168.1.10 myhost --force\n"
+    printf "  nixos keyscan 192.168.1.10 myhost --add --commit\n"
     echo
 
   fi
@@ -1096,7 +1111,7 @@ nixos_rekey_command() {
 nixos_keyscan_command() {
   # src/keyscan_command.sh
   # inspect_args
-  local dir="/etc/nixos/secrets" ip hostname force filename key
+  local dir="/etc/nixos/secrets" ip hostname
 
   function main {
 
@@ -1104,18 +1119,66 @@ nixos_keyscan_command() {
     has ssh-keyscan || error "ssh-keyscan missing"
 
     # Set up args
-    force="${args[--force]}"
-    ip="${args[ip]}"
-    hostname="${args[hostname]}"
-    [[ -z "$hostname" ]] && hostname="$ip"
+    ip="${args[ip]}" hostname="$(hostname)"
 
-    # Modify hostname to ensure
+    # Attempt to scan public key
+    task ssh-keyscan -t ssh-ed25519 $ip 2> /dev/null
+    local key="$(last | awk '{print $2} {print $3}' | xargs)"
+    local filename="$(filename)"
 
-    # - it doesn't end in .pub
-    # - periods replaces with hypens
-    # - only alphanumeric with hypens and underscores
-    # - no leading/trailing hypens and underscores
-    hostname="$(awk '{
+    # Check for acquired key
+    show "key=\"$key\""
+    if [[ -z "$key" ]]; then
+      error "failed to scan key from $ip"
+    fi
+
+    # Add extra key
+    if [[ "${args[--add]}" == "1" ]]; then
+      filename="$(filename unique)"
+
+    # Replace existing key
+    else
+      # Delete any existing keys if forced
+      if [[ "${args[--force]}" == "1" ]]; then
+        remove "$filename"
+      # Otherwise, first check if key exists
+      else
+        if [[ -e "$filename" ]]; then
+          # Ask before deleting existing key
+          if confirm "Key \"$hostname\" already exists, replace?"; then
+            remove "$filename"
+          # Exit with error
+          else
+            error "Key \"$hostname\" already exists"
+          fi
+        fi
+      fi
+    fi
+
+    # Write key to file
+    info "Writing $filename"
+    show 'echo "${key}" > '"$filename"
+    echo "${key}" > $filename
+
+    # Rekey the secrets with the new identity
+    if [[ "${args[--commit]}" == "1" ]]; then
+      nixos rekey --commit
+    else
+      nixos rekey
+    fi
+
+  }
+
+  # Modify hostname to ensure
+
+  # - it doesn't end in .pub
+  # - periods replaces with hypens
+  # - only alphanumeric with hypens and underscores
+  # - no leading/trailing hypens and underscores
+  function hostname {
+    local hostname="${args[hostname]}"
+    [[ -z "$hostname" ]] && hostname="${args[ip]}"
+    echo "$(awk '{
 
       gsub(/\.pub$/, "", $0);
 
@@ -1128,34 +1191,20 @@ nixos_keyscan_command() {
       print tolower($0)
 
     }' <<< $hostname)"
+  }
 
-    # Attempt to scan public key
-    task ssh-keyscan -t ssh-ed25519 $ip 2> /dev/null
-    key="$(last | awk '{print $2} {print $3}' | xargs)"
-    filename="${dir}/keys/${hostname}.pub"
-
-    # Check for acquired key
-    show "key=\"$key\""
-    if [[ -z "$key" ]]; then
-      error "failed to scan key from $ip"
+  function filename {
+    local filename="${dir}/keys/${hostname}.pub"
+    if [[ "$1" == "unique" ]]; then
+      [[ -e $filename ]] && echo "${dir}/keys/${hostname}-$(date +%s).pub"
+    else
+      echo "$filename"
     fi
+  }
 
-    # Ask to delete existing key
-    if [[ "$force" == "1" ]]; then
-      task "rm -f $filename"
-    fi
-
-    # Unique filename if it already exists
-    [[ -e $filename ]] && filename="${dir}/keys/${hostname}-$(date +%s).pub"
-
-    # Write key to file
-    show "echo \"\$key\" > $filename"
-    echo "$key" > $filename
-    info "Success: $name written to $filename"
-
-    # Rekey the secrets with the new identity
-    nixos rekey
-
+  function remove {
+    info "Removing $1"
+    task "rm -f $1"
   }
 
   main
@@ -2054,6 +2103,14 @@ nixos_keyscan_parse_requirements() {
 
         # :flag.case_no_arg
         args['--force']=1
+        shift
+        ;;
+
+      # :flag.case
+      --add | -a)
+
+        # :flag.case_no_arg
+        args['--add']=1
         shift
         ;;
 
