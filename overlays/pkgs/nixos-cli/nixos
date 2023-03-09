@@ -254,7 +254,7 @@ nixos_keyscan_usage() {
 
     # :command.usage_flags
     # :flag.usage
-    printf "  %s\n" "$(magenta "--force, -f FORCE")"
+    printf "  %s\n" "$(magenta "--force, -f")"
     printf "    Force rekey after keyscan\n"
     echo
 
@@ -811,6 +811,12 @@ nixos_wizard_command() {
 
   pause "Hold it!"
 
+  # Wait until live and then keyscan
+  # until ping -c1 $ip_address >/dev/null 2>&1; do
+  #   sleep 5
+  # done
+  # nixos keyscan $ip_address $config_name
+
 }
 
 # :command.function
@@ -940,7 +946,6 @@ nixos_rekey_command() {
     write_nix
 
     # Rekey secrets with agenix and restage on git
-    show $force
     if [[ "$(prev_hash)" != "$(calc_hash)" ]] || [[ "$force" == "1" ]]; then
       agenix_rekey && update_hash && git_commit
     else
@@ -1097,6 +1102,7 @@ nixos_keyscan_command() {
     key="$(last | awk '{print $2} {print $3}' | xargs)"
     filename="${dir}/keys/${hostname}.pub"
 
+    # Check for acquired key
     show "key=\"$key\""
     if [[ -z "$key" ]]; then
       error "failed to scan key from $ip"
@@ -1107,13 +1113,8 @@ nixos_keyscan_command() {
       task "rm -f $filename"
     fi
 
-    if [[ -e $filename ]]; then
-      if ask "Overwrite existing \"$hostname\" key?"; then
-        task "rm -f $filename"
-      else
-        error "$hostname already exists in keys directory"
-      fi
-    fi
+    # Unique filename if it already exists
+    [[ -e $filename ]] && filename="${dir}/keys/${hostname}-$(date +%s).pub"
 
     # Write key to file
     show "echo \"\$key\" > $filename"
@@ -2004,16 +2005,9 @@ nixos_keyscan_parse_requirements() {
       # :flag.case
       --force | -f)
 
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-
-          args['--force']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--force requires an argument: --force, -f FORCE" >&2
-          exit 1
-        fi
+        # :flag.case_no_arg
+        args['--force']=1
+        shift
         ;;
 
       -?*)

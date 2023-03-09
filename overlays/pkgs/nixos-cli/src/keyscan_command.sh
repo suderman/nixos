@@ -30,6 +30,7 @@ function main {
   key="$(last | awk '{print $2} {print $3}' | xargs)"
   filename="${dir}/keys/${hostname}.pub"
 
+  # Check for acquired key
   show "key=\"$key\""
   if [[ -z "$key" ]]; then
     error "failed to scan key from $ip"
@@ -40,13 +41,8 @@ function main {
     task "rm -f $filename"
   fi
 
-  if [[ -e $filename ]]; then
-    if ask "Overwrite existing \"$hostname\" key?"; then
-      task "rm -f $filename"
-    else
-      error "$hostname already exists in keys directory"
-    fi
-  fi
+  # Unique filename if it already exists
+  [[ -e $filename ]] && filename="${dir}/keys/${hostname}-$(date +%s).pub"
 
   # Write key to file
   show "echo \"\$key\" > $filename"

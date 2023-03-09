@@ -37,3 +37,9 @@ else
 fi
 
 pause "Hold it!"
+
+# Wait until live and then keyscan
+# until ping -c1 $ip_address >/dev/null 2>&1; do
+#   sleep 5
+# done
+# nixos keyscan $ip_address $config_name

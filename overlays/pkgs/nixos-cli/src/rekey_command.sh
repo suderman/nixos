@@ -11,7 +11,6 @@ function main {
   write_nix 
 
   # Rekey secrets with agenix and restage on git
-  show $force
   if [[ "$(prev_hash)" != "$(calc_hash)" ]] || [[ "$force" == "1" ]]; then
     agenix_rekey && update_hash && git_commit
   else
