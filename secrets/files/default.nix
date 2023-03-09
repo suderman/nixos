@@ -6,12 +6,8 @@
   alphanumeric-secret = ./alphanumeric-secret.age;
   bar = ./bar.age;
   basic-auth = ./basic-auth.age;
-  baz = ./baz.age;
   cloudflare-env = ./cloudflare-env.age;
-  foo = ./foo.age;
-  lucy = ./lucy.age;
   password = ./password.age;
-  pup = ./pup.age;
   tailscale-cloudflare = ./tailscale-cloudflare.age;
   token = ./token.age;
 
