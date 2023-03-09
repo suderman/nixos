@@ -117,11 +117,11 @@ function agenix_rekey {
 function git_commit {
   info "Adding files to the staging area"
   task "cd $dir"\
-       '&& git add ./keys/*.pub ./keys/default.nix ./files/*.age'
+       '&& git add ./keys ./files/*.age'
   if [[ "${args[--commit]}" == "1" ]]; then
     info "Committing staged files to the repository"
     task "cd $dir"\
-         '&& git commit ./keys/*.pub ./keys/default.nix ./files/*.age -m rekey'
+         '&& git commit ./keys ./files/*.age -m rekey'
   fi
 }
 
