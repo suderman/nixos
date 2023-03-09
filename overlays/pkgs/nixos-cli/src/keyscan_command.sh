@@ -8,8 +8,8 @@ function main {
 
   # Set up args
   force="${args[--force]}"
-  ip="${args[host]}"
-  hostname="${args[name]}"
+  ip="${args[ip]}"
+  hostname="${args[hostname]}"
   [[ -z "$hostname" ]] && hostname="$ip"
 
   # Modify hostname to ensure 

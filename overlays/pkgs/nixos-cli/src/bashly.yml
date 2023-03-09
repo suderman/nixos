@@ -33,6 +33,11 @@ commands:
     required: false
     help: "name of secret (leave empty to choose from list)"
 
+  flags:
+  - long: --commit
+    short: -c
+    help: "Automatically commit changes to git"
+
   examples:
   - nixos secrets
   - nixos secrets foo
@@ -44,11 +49,15 @@ commands:
   flags:
   - long: --force
     short: -f
-    help: "Force rekey"
+    help: "Force rekey even if no changes have been detected"
+  - long: --commit
+    short: -c
+    help: "Automatically commit changes to git"
 
   examples:
   - nixos rekey
   - nixos rekey --force
+  - nixos rekey --commit
 
 
 - name: keyscan
@@ -56,10 +65,10 @@ commands:
   help: Scan a host for public keys and add to secrets/keys
 
   args:
-  - name: host
+  - name: ip
     required: true
     help: "IP address or hostname"
-  - name: name
+  - name: hostname
     required: false
     help: "Name of host (default: first argument)"
 
@@ -67,6 +76,9 @@ commands:
   - long: --force
     short: -f
     help: "Force rekey after keyscan"
+  - long: --commit
+    short: -c
+    help: "Automatically commit changes to git"
 
   examples:
   - nixos keyscan 192.168.1.10 myhost

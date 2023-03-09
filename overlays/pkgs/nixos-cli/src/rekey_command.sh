@@ -1,17 +1,16 @@
 # inspect_args
-local dir="/etc/nixos/secrets" force
+local dir="/etc/nixos/secrets"
 
 function main {
 
   # Ensure agenix
   has agenix || error "agenix missing"
-  force="${args[--force]}"
 
   # Update keys/default.nix
-  write_nix 
+  write_keys_nix 
 
   # Rekey secrets with agenix and restage on git
-  if [[ "$(prev_hash)" != "$(calc_hash)" ]] || [[ "$force" == "1" ]]; then
+  if [[ "$(prev_hash)" != "$(calc_hash)" ]] || [[ "${args[--force]}" == "1" ]]; then
     agenix_rekey && update_hash && git_commit
   else
     info "No changes detected"
@@ -20,7 +19,7 @@ function main {
 }
 
 # Write the default.nix file compiling all public keys
-function write_nix {
+function write_keys_nix {
 
   # Ouput file path 
   local nix="$dir/keys/default.nix"
@@ -116,7 +115,14 @@ function agenix_rekey {
 }
 
 function git_commit {
-  task "cd $dir && git add . && git commit -m rekey"
+  info "Adding files to the staging area"
+  task "cd $dir"\
+       '&& git add ./keys/*.pub ./keys/default.nix ./files/*.age'
+  if [[ "${args[--commit]}" == "1" ]]; then
+    info "Committing staged files to the repository"
+    task "cd $dir"\
+         '&& git commit ./keys/*.pub ./keys/default.nix ./files/*.age -m rekey'
+  fi
 }
 
 main
