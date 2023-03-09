@@ -33,4 +33,6 @@ with (import ./keys); {
   # Testing
   "files/bar.age".publicKeys = all;
 
+  "files/foo.age".publicKeys = all;
+
 }
