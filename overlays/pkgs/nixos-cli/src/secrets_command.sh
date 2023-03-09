@@ -10,7 +10,7 @@ function main {
   # Choose secret with menu
   if [[ -z "$secret" ]]; then
     info "Select a secret:"
-    secret="$(ask "$(list_secrets) [new]")"
+    secret="$(ask "[new] $(list_secrets)")"
   fi
 
   # If [new], ask for name of new secret
