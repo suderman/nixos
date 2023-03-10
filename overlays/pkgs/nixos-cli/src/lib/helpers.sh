@@ -14,6 +14,28 @@ function hasnt {
   return 0
 }
 
+# Install nixos dependencies if they don't exist
+# If package name doesn't match command, append pkg after colon
+# Example: dependencies git awk:gawk smenu
+function dependencies {
+  local arg cmd pkg
+  for arg in "$@"; do
+    if [[ $arg == *":"* ]]; then
+      IFS=: read -r cmd pkg <<< "$arg"
+    else
+      cmd="$arg"
+      pkg="$arg"
+    fi
+    if hasnt $cmd; then
+      info "Installing $pkg"
+      task nix-env -iA nixos.$pkg
+    fi
+  done
+}
+
+# Dependencies used by this helper script
+dependencies lsblk:util-linux smenu
+
 # True if variable is not empty
 function defined {
   if [[ -z "$1" ]]; then return 1; fi  
@@ -58,7 +80,6 @@ function last {
   touch /tmp/task
   cat /tmp/task
 }
-
 
 # Echo URL, copy to clipboard, and open in browser
 function url { 

@@ -3,6 +3,9 @@ echo "# code for 'nixos wizard' goes here"
 echo "# you can edit it freely and regenerate (it will not be overwritten)"
 inspect_args
 
+dependencies git tig awk:gawk lazydocker smenu 
+
+
 info "Choose your disk"
 disk="$(ask_disk)"
 show $disk

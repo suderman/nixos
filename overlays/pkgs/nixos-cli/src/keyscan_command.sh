@@ -1,4 +1,4 @@
-# inspect_args
+dependencies awk:gawk ssh-keyscan:openssh
 local dir="/etc/nixos/secrets" ip hostname
 
 function main {
@@ -62,6 +62,7 @@ function main {
 # - periods replaces with hypens
 # - only alphanumeric with hypens and underscores
 # - no leading/trailing hypens and underscores
+# - if it starts with a number (IP address), prepend with underscore
 function hostname {
   local hostname="${args[hostname]}"
   [[ -z "$hostname" ]] && hostname="${args[ip]}"
@@ -70,6 +71,7 @@ function hostname {
     gsub(/[\. -]+/, "-", $0); 
     gsub(/[^a-zA-Z0-9_-]+/, "", $0); 
     gsub(/^[-_]+|[-_]+$/, "", $0); 
+    if (substr($0, 1, 1) ~ /^[0-9]/) { $0 = "_" $0 }; 
     print tolower($0) 
   }' <<< $hostname)"
 }

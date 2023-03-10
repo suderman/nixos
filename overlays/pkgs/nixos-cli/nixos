@@ -566,6 +566,28 @@ function hasnt {
   return 0
 }
 
+# Install nixos dependencies if they don't exist
+# If package name doesn't match command, append pkg after colon
+# Example: dependencies git awk:gawk smenu
+function dependencies {
+  local arg cmd pkg
+  for arg in "$@"; do
+    if [[ $arg == *":"* ]]; then
+      IFS=: read -r cmd pkg <<< "$arg"
+    else
+      cmd="$arg"
+      pkg="$arg"
+    fi
+    if hasnt $cmd; then
+      info "Installing $pkg"
+      task nix-env -iA nixos.$pkg
+    fi
+  done
+}
+
+# Dependencies used by this helper script
+dependencies lsblk:util-linux smenu
+
 # True if variable is not empty
 function defined {
   if [[ -z "$1" ]]; then return 1; fi
@@ -807,6 +829,8 @@ nixos_wizard_command() {
   echo "# you can edit it freely and regenerate (it will not be overwritten)"
   inspect_args
 
+  dependencies git tig awk:gawk lazydocker smenu
+
   info "Choose your disk"
   disk="$(ask_disk)"
   show $disk
@@ -862,7 +886,7 @@ nixos_switch_command() {
 # :command.function
 nixos_secrets_command() {
   # src/secrets_command.sh
-  # inspect_args
+  dependencies awk:gawk git sed:gnused
   local dir="/etc/nixos/secrets" secret
 
   function main {
@@ -974,7 +998,7 @@ nixos_secrets_command() {
 # :command.function
 nixos_rekey_command() {
   # src/rekey_command.sh
-  # inspect_args
+  dependencies awk:gawk git sed:gnused
   local dir="/etc/nixos/secrets"
 
   function main {
@@ -1110,7 +1134,7 @@ nixos_rekey_command() {
 # :command.function
 nixos_keyscan_command() {
   # src/keyscan_command.sh
-  # inspect_args
+  dependencies awk:gawk ssh-keyscan:openssh
   local dir="/etc/nixos/secrets" ip hostname
 
   function main {
@@ -1175,6 +1199,7 @@ nixos_keyscan_command() {
   # - periods replaces with hypens
   # - only alphanumeric with hypens and underscores
   # - no leading/trailing hypens and underscores
+  # - if it starts with a number (IP address), prepend with underscore
   function hostname {
     local hostname="${args[hostname]}"
     [[ -z "$hostname" ]] && hostname="${args[ip]}"
@@ -1187,6 +1212,8 @@ nixos_keyscan_command() {
       gsub(/[^a-zA-Z0-9_-]+/, "", $0);
 
       gsub(/^[-_]+|[-_]+$/, "", $0);
+
+      if (substr($0, 1, 1) ~ /^[0-9]/) { $0 = "_" $0 };
 
       print tolower($0)
 

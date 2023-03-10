@@ -1,4 +1,4 @@
-# inspect_args
+dependencies awk:gawk git sed:gnused
 local dir="/etc/nixos/secrets"
 
 function main {
