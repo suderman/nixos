@@ -36,11 +36,15 @@ nixos_usage() {
   printf "%s\n" "$(bold "Commands:")"
   printf "  %s   Wizard up a NixOS installation\n" "$(green "wizard")         "
   printf "  %s   Shortcut for nixos-rebuild switch\n" "$(green "switch")         "
+  printf "  %s   Install configuration to Linode VPS\n" "$(green "linode")         "
+  printf "  %s   Bootstrap a NixOS installation\n" "$(green "bootstrap")      "
+  echo
+  printf "%s\n" "$(bold "Secrets Commands:")"
   printf "  %s   Edit or add secrets to secrets/files\n" "$(green "secrets")        "
   printf "  %s   Rekey secrets with secrets/keys\n" "$(green "rekey")          "
   printf "  %s   Scan a host for public keys and add to secrets/keys\n" "$(green "keyscan")        "
-  printf "  %s   Install configuration to Linode VPS\n" "$(green "linode")         "
-  printf "  %s   Bootstrap a NixOS installation\n" "$(green "bootstrap")      "
+  echo
+  printf "%s\n" "$(bold "Utility Commands:")"
   printf "  %s   Shortcut for bashly generate\n" "$(green "bashly-generate")"
   printf "  %s   Generate bash completions\n" "$(green "completions")    "
   echo
@@ -627,11 +631,16 @@ function show {
 }
 
 # Echo task and execute command (unless --dry-run)
+# function task {
+
+#   local cmd="$(strip_flags "${@}")"
+#   show "$cmd"
+#   is_dry "${@}" || eval "$cmd" > /tmp/task
+# }
 function task {
 
-  local cmd="$(strip_flags "${@}")"
-  show "$cmd"
-  is_dry "${@}" || eval "$cmd" > /tmp/task
+  show "${@}"
+  eval "${@}" > /tmp/task
 }
 
 # Echo output from last task
@@ -651,56 +660,56 @@ function url {
 # Pause script until input
 function pause {
   info "${1-Paused}"
-  smenu -d -i continue -a e:7 i:2,br c:2,blr <<< "Press enter to continue ..."
+  smenu -d -i "continue" -a e:7 i:2,br c:2,blr <<< "Press enter to continue ..."
 }
 
-function is_warn {
-  [[ "$1" == "--warn" || "$1" == "-w" ]] && return 0
-  return 1
-}
+# function is_warn {
+#   [[ "$1" == "--warn" || "$1" == "-w" ]] && return 0
+#   return 1
+# }
 
-function is_dry {
-  [[ "$1" == "--dry-run" || "$1" == "-d" ]] && return 0
-  return 1
-}
+# function is_dry {
+#   [[ "$1" == "--dry-run" || "$1" == "-d" ]] && return 0
+#   return 1
+# }
 
-function strip_flags {
-  case "$1" in
-    "--warn" | "-w" | "--info" | "-i" | "--dry-run" | "-d") echo "${*:2}" ;;
-    * ) echo "${*}" ;;
-  esac
-}
+# function strip_flags {
+#   case "$1" in
+#     "--warn" | "-w" | "--info" | "-i" | "--dry-run" | "-d") echo "${*:2}" ;;
+#     * ) echo "${*}" ;;
+#   esac
+# }
 
 # Echo but spaces replaced with newlines
 function explode {
   echo "$@" | tr ' ' '\n'
 }
 
-# if confirm --warn "Wanna go on?"; then
+# warn "Wanna go on?"
+# if confirm; then
 #   echo "You do! :)"
 # else
 #   echo "You don't :("
 # fi
 function confirm {
-  local out="$(strip_flags "${@}")"
-  [[ -z "$out" ]] && out="Confirm?"
-  is_warn "${@}" && warn "$out" || info "$out"
   [[ "$(ask "yes no")" == "yes" ]] && return 0 || return 1
 
 }
 
-# info "Which color?"
-# color="$(ask red green blue)"
 # info "What is your name?"
 # name="$(ask)"
+# info "Which color?"
+# color="$(ask "red green blue" "green")"
 function ask {
 
-  # Check for args or stdin
-  local choices="${@}"
-  [[ -p /dev/stdin ]] && choices="$(cat -)"
-  # If any choices, get choice from smenu
-  if [[ -n "$choices" ]]; then
-    smenu -c -a i:3,b c:3,br <<< "$choices"
+  # Check for 1st arg or stdin
+  local words="${1}"; [[ -p /dev/stdin ]] && words="$(cat -)"
+  # Check for 2nd arg as search word
+  local search="${2}"; [[ -n "$search" ]] && search="-s ${search}"
+
+  # If any words, get choice from smenu
+  if [[ -n "$words" ]]; then
+    smenu -c -a i:3,b c:3,br $search <<< "$words"
   # Otherwise, prompt for input
   else
     local reply=""; while [[ -z "$reply" ]]; do
@@ -831,6 +840,17 @@ nixos_wizard_command() {
 
   dependencies git tig awk:gawk lazydocker smenu
 
+  warn "Wanna go on?"
+  if confirm; then
+    echo "You do! :)"
+  else
+    echo "You don't :("
+  fi
+
+  info "Be cool"
+  ask
+  ask one two three
+
   info "Choose your disk"
   disk="$(ask_disk)"
   show $disk
@@ -878,7 +898,7 @@ nixos_wizard_command() {
 # :command.function
 nixos_switch_command() {
   # src/switch_command.sh
-  task -d 'nixos-rebuild switch --flake /etc/nixos#'$(hostname)
+  show 'nixos-rebuild switch --flake /etc/nixos#'$(hostname)
   sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)
 
 }
@@ -896,10 +916,7 @@ nixos_secrets_command() {
     has agenix || error "agenix missing"
 
     # Choose secret with menu
-    if [[ -z "$secret" ]]; then
-      info "Select a secret:"
-      secret="$(ask "[new] $(list_secrets)")"
-    fi
+    secret="$(ask "[new] $(list_secrets)" $secret)"
 
     # If [new], ask for name of new secret
     if [[ "$secret" == "[new]" ]]; then
@@ -910,6 +927,8 @@ nixos_secrets_command() {
     has_secret "$secret" || add_secret "$secret"
 
     # Edit secret with agenix
+    info "Editing secret with agenix"
+    show "cd $dir && agenix --edit \"files/$secret.age\""
     cd $dir && agenix --edit "files/$secret.age"
 
     # Update files/default.nix
@@ -1169,7 +1188,9 @@ nixos_keyscan_command() {
       else
         if [[ -e "$filename" ]]; then
           # Ask before deleting existing key
-          if confirm "Key \"$hostname\" already exists, replace?"; then
+          info "Key \"$hostname\" already exists, replace?"
+
+          if confirm; then
             remove "$filename"
           # Exit with error
           else
@@ -1603,7 +1624,7 @@ nixos_bootstrap_command() {
 
     # Run nixos installer
     info "Installing NixOS in 5 seconds..."
-    task -d "nixos-install --flake $nixos\#min --no-root-password"
+    show "nixos-install --flake $nixos\#min --no-root-password"
     sleep 5
     nixos-install --flake $nixos\#min --no-root-password
     echo
@@ -1637,7 +1658,7 @@ nixos_bootstrap_command() {
       task "cd /etc/nixos; git restore configurations/min" && echo
 
       info "Rebuilding system to $host"
-      task -d "nixos-rebuild switch --flake /etc/nixos\#${args[configuration]}"
+      show "nixos-rebuild switch --flake /etc/nixos\#${args[configuration]}"
       nixos-rebuild switch --flake /etc/nixos\#${args[configuration]}
 
       info "Rebuild complete!"

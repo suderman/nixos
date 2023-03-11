@@ -33,7 +33,8 @@ function main {
     else
       if [[ -e "$filename" ]]; then
         # Ask before deleting existing key
-        if confirm "Key \"$hostname\" already exists, replace?"; then
+        info "Key \"$hostname\" already exists, replace?" 
+        if confirm; then
           remove "$filename"
         # Exit with error
         else

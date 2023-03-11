@@ -1,2 +1,2 @@
-task -d 'nixos-rebuild switch --flake /etc/nixos#'$(hostname)
+show 'nixos-rebuild switch --flake /etc/nixos#'$(hostname)
 sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)

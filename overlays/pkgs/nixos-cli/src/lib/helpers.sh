@@ -70,9 +70,8 @@ function show {
 
 # Echo task and execute command (unless --dry-run)
 function task { 
-  local cmd="$(strip_flags "${@}")"
-  show "$cmd"
-  is_dry "${@}" || eval "$cmd" > /tmp/task
+  show "${@}"
+  eval "${@}" > /tmp/task
 }
 
 # Echo output from last task
@@ -91,24 +90,7 @@ function url {
 # Pause script until input
 function pause {
   info "${1-Paused}"
-  smenu -d -i continue -a e:7 i:2,br c:2,blr <<< "Press enter to continue ..."
-}
-
-function is_warn {
-  [[ "$1" == "--warn" || "$1" == "-w" ]] && return 0
-  return 1
-}
-
-function is_dry {
-  [[ "$1" == "--dry-run" || "$1" == "-d" ]] && return 0
-  return 1
-}
-
-function strip_flags {
-  case "$1" in
-    "--warn" | "-w" | "--info" | "-i" | "--dry-run" | "-d") echo "${*:2}" ;;
-    * ) echo "${*}" ;;
-  esac
+  smenu -d -i "continue" -a e:7 i:2,br c:2,blr <<< "Press enter to continue ..."
 }
 
 # Echo but spaces replaced with newlines
@@ -116,29 +98,28 @@ function explode {
   echo "$@" | tr ' ' '\n'
 }
 
-# if confirm --warn "Wanna go on?"; then
+# warn "Wanna go on?"
+# if confirm; then
 #   echo "You do! :)"
 # else
 #   echo "You don't :("
 # fi
 function confirm {
-  local out="$(strip_flags "${@}")"
-  [[ -z "$out" ]] && out="Confirm?"
-  is_warn "${@}" && warn "$out" || info "$out"
   [[ "$(ask "yes no")" == "yes" ]] && return 0 || return 1 
 }
 
-# info "Which color?"
-# color="$(ask red green blue)"
 # info "What is your name?"
 # name="$(ask)"
+# info "Which color?"
+# color="$(ask "red green blue" "green")"
 function ask { 
-  # Check for args or stdin
-  local choices="${@}"
-  [[ -p /dev/stdin ]] && choices="$(cat -)"
-  # If any choices, get choice from smenu
-  if [[ -n "$choices" ]]; then
-    smenu -c -a i:3,b c:3,br <<< "$choices"
+  # Check for 1st arg or stdin
+  local words="${1}"; [[ -p /dev/stdin ]] && words="$(cat -)"
+  # Check for 2nd arg as search word
+  local search="${2}"; [[ -n "$search" ]] && search="-s ${search}" 
+  # If any words, get choice from smenu
+  if [[ -n "$words" ]]; then
+    smenu -c -a i:3,b c:3,br $search <<< "$words"
   # Otherwise, prompt for input
   else
     local reply=""; while [[ -z "$reply" ]]; do

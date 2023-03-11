@@ -5,6 +5,16 @@ inspect_args
 
 dependencies git tig awk:gawk lazydocker smenu 
 
+warn "Wanna go on?"
+if confirm; then
+  echo "You do! :)"
+else
+  echo "You don't :("
+fi
+
+info "Be cool"
+ask
+ask one two three
 
 info "Choose your disk"
 disk="$(ask_disk)"

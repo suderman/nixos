@@ -177,7 +177,7 @@ function main {
 
   # Run nixos installer
   info "Installing NixOS in 5 seconds..."
-  task -d "nixos-install --flake $nixos\#min --no-root-password"
+  show "nixos-install --flake $nixos\#min --no-root-password"
   sleep 5
   nixos-install --flake $nixos\#min --no-root-password
   echo
@@ -211,7 +211,7 @@ function switch_configuration {
     task "cd /etc/nixos; git restore configurations/min" && echo
 
     info "Rebuilding system to $host"
-    task -d "nixos-rebuild switch --flake /etc/nixos\#${args[configuration]}"
+    show "nixos-rebuild switch --flake /etc/nixos\#${args[configuration]}"
     nixos-rebuild switch --flake /etc/nixos\#${args[configuration]}
 
     info "Rebuild complete!"

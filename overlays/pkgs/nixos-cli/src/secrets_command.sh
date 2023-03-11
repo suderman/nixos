@@ -8,10 +8,7 @@ function main {
   has agenix || error "agenix missing"
 
   # Choose secret with menu
-  if [[ -z "$secret" ]]; then
-    info "Select a secret:"
-    secret="$(ask "[new] $(list_secrets)")"
-  fi
+  secret="$(ask "[new] $(list_secrets)" $secret)"
 
   # If [new], ask for name of new secret
   if [[ "$secret" == "[new]" ]]; then
@@ -22,6 +19,8 @@ function main {
   has_secret "$secret" || add_secret "$secret"
 
   # Edit secret with agenix
+  info "Editing secret with agenix"
+  show "cd $dir && agenix --edit \"files/$secret.age\""
   cd $dir && agenix --edit "files/$secret.age"
 
   # Update files/default.nix

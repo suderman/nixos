@@ -26,6 +26,7 @@ commands:
 
 - name: secrets
   alias: s
+  group: Secrets
   help: |-
     Edit or add secrets to secrets/files
     Wrapper for agenix --edit
@@ -46,6 +47,7 @@ commands:
 
 - name: rekey
   alias: r
+  group: Secrets
   help: |-
     Rekey secrets with secrets/keys
     Wrapper for agenix --rekey
@@ -66,6 +68,7 @@ commands:
 
 - name: keyscan
   alias: k
+  group: Secrets
   help: |-
     Scan a host for public keys and add to secrets/keys
     Wrapper for ssh-keyscan
@@ -126,9 +129,18 @@ commands:
 
 - name: bashly-generate
   alias: bg
+  group: Utility
   help: Shortcut for bashly generate
 
 - name: completions
+  group: Utility
   help: |-
     Generate bash completions
     Usage: eval "\$(cli completions)" 
+
+# - name: helpers
+#   private: true
+#   commands:
+#     - name: ask
+#       alias: a
+#       help: Get input from user
