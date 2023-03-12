@@ -1,6 +1,7 @@
 # sudo -s
 # bash <(curl -sL https://github.com/suderman/nixos/raw/main/overlays/pkgs/nixos-cli/nixos) bootstrap
 local dir="/etc/nixos" config hardware firmware swap default_swap
+local iso="https://channels.nixos.org/nixos-22.11/latest-nixos-minimal-x86_64-linux.iso"
 
 function main {
 
@@ -53,17 +54,63 @@ function main {
 
     if [[ $hardware == "linode" ]]; then
       info "Starting NixOS installation process on Linode server"
-      linode
+      hardware_linode
     else
       info "Starting NixOS installation process on direct hardware"
-      direct
+      hardware_direct
     fi
 
   fi
 
 }
 
-function linode {
+
+function hardware_direct {
+  echo && info "Choose removable disk to install NixOS installer ISO"
+  local disk="$(ask_disk)"
+  if [[ -n "${disk}" && -e /dev/$disk ]]; then
+    warn "Overwrite data on ${disk} with NixOS installer?"
+    if confirm; then
+      task "sudo curl -L $iso | tee >(dd of=${disk}) | sha256sum"
+      info "...complete. Remove NixOS installer disk from this computer."
+    fi
+  fi
+
+  echo
+  info "Insert NixOS installer disk into target computer. Then boot from the installer."
+  pause && echo
+
+  info "Type the following to install NixOS (second line copied to clipboard):"
+  local firmware_flag=""; [[ "$firmware" == "uefi" ]] || firmware_flag="-f $firmware"
+  local swap_flag=""; [[ "$swap" == "max" ]] || swap_flag="-s $swap"
+  line1="sudo -s"
+  line2="bash <(curl -sL https://github.com/suderman/nixos/raw/main/overlays/pkgs/nixos-cli/nixos) bootstrap $firmware_flag $swap_flag"
+  echo $line1
+  echo $line2
+  echo "$line2" | wl-copy && echo
+
+  info "After it's finished, remove the installer disk and reboot into NixOS."
+  pause && echo
+
+  # Wait until live and then keyscan
+  info "What is the IP address of the target computer?"
+  local ip="$(ask)"
+  echo
+  info "Waiting to keyscan the target..."
+  until ping -c1 $ip >/dev/null 2>&1; do sleep 5; done
+  task "nixos keyscan $ip $config --add --commit"
+  task "cd $dir && git push" 
+  sleep 5 && echo
+
+  info "On the target computer, login as root and run the following (copied to clipboard):"
+  line1="nixos bootstrap -c $config"
+  echo $line1
+  echo "$line1" | wl-copy && echo
+
+}
+
+
+function hardware_linode {
 
   if [[ ! -e ~/.config/linode-cli ]]; then
     error "Missing ~/.config/linode-cli configuation. Run linode-cli to login and setup token on this computer, then start again."
@@ -155,8 +202,7 @@ function linode {
   info "Opening a Weblish console:"
   url "https://cloud.linode.com/linodes/$id/lish/weblish" && echo
   info "Paste the following to download the NixOS installer (copied to clipboard):"
-  line1="iso=https://channels.nixos.org/nixos-22.11/latest-nixos-minimal-x86_64-linux.iso"
-  line2="curl -L \$iso | tee >(dd of=/dev/sdb) | sha256sum"
+  line1="iso=${iso}"; line2="curl -L \$iso | tee >(dd of=/dev/sdb) | sha256sum"
   echo $line1
   echo $line2
   echo "$line1; $line2" | wl-copy && echo
@@ -189,16 +235,11 @@ function linode {
   wait_for_linode $id "running" && echo
 
   # Wait until live and then keyscan
-  # Update secrets keys
-  # info "Scanning new host key in 30 seconds..."
-  # sleep 30
   local ip="$(linode-cli linodes view $id --no-header --text --format ipv4)"
+  info "Waiting to keyscan the linode"
   until ping -c1 $ip >/dev/null 2>&1; do sleep 5; done
   task "nixos keyscan $ip $label --add --commit"
   task "cd $dir && git push" 
-  # echo
-  # info "Commit and git push so changes can be pulled on the new linode at /etc/nixos"
-  # task "cd /etc/nixos && git status" 
   sleep 5 && echo
 
   # Switch configuration
@@ -223,10 +264,6 @@ function wait_for_disk {
   while [ "$(linode-cli linodes disk-view $1 $2 --text --no-header --format status 2>/dev/null)" != "ready" ]; do
     sleep 5
   done && echo
-}
-
-function direct {
-  echo
 }
 
 
@@ -442,11 +479,7 @@ function is_linode {
 }
 
 function is_bios {
-  if [[ "${args[--firmware]}" == "bios" || "${args[--hardware]}" == "linode" ]]; then
-    return 0
-  else 
-    return 1
-  fi
+  [[ "${args[--firmware]}" == "bios" || "${args[--hardware]}" == "linode" ]] && return 0 || return 1
 }
 
 # Total memory available in GB

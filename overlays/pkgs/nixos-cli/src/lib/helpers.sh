@@ -89,7 +89,7 @@ function url {
 
 # Pause script until input
 function pause {
-  info "${1-Paused}"
+  [[ -n "$*" ]] && info "${*}"
   smenu -d -i "continue" -a e:7 i:2,br c:2,blr <<< "Press enter to continue ..."
 }
 
