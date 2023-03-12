@@ -34,10 +34,8 @@ nixos_usage() {
   echo
   # :command.usage_commands
   printf "%s\n" "$(bold "Commands:")"
-  printf "  %s   Wizard up a NixOS installation\n" "$(green "wizard")         "
-  printf "  %s   Shortcut for nixos-rebuild switch\n" "$(green "switch")         "
-  printf "  %s   Install configuration to Linode VPS\n" "$(green "linode")         "
   printf "  %s   Bootstrap a NixOS installation\n" "$(green "bootstrap")      "
+  printf "  %s   Shortcut for nixos-rebuild switch\n" "$(green "switch")         "
   echo
   printf "%s\n" "$(bold "Secrets Commands:")"
   printf "  %s   Edit or add secrets to secrets/files\n" "$(green "secrets")        "
@@ -65,23 +63,23 @@ nixos_usage() {
 }
 
 # :command.usage
-nixos_wizard_usage() {
+nixos_bootstrap_usage() {
   if [[ -n $long_usage ]]; then
-    printf "nixos wizard - Wizard up a NixOS installation\n"
+    printf "nixos bootstrap - Bootstrap a NixOS installation\n"
     echo
 
   else
-    printf "nixos wizard - Wizard up a NixOS installation\n"
+    printf "nixos bootstrap - Bootstrap a NixOS installation\n"
     echo
 
   fi
 
-  printf "Alias: w\n"
+  printf "Alias: b\n"
   echo
 
   printf "%s\n" "$(bold "Usage:")"
-  printf "  nixos wizard [TYPE] [OPTIONS]\n"
-  printf "  nixos wizard --help | -h\n"
+  printf "  nixos bootstrap [OPTIONS]\n"
+  printf "  nixos bootstrap --help\n"
   echo
 
   # :command.long_usage
@@ -90,21 +88,36 @@ nixos_wizard_usage() {
 
     # :command.usage_flags
     # :flag.usage
+    printf "  %s\n" "$(magenta "--config, -c CONFIG")"
+    printf "    name of NixOS configuration\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "$(magenta "--hardware, -h HARDWARE")"
+    printf "    direct, linode\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "$(magenta "--firmware, -f FIRMWARE")"
+    printf "    uefi, bios\n"
+    echo
+
+    # :flag.usage
     printf "  %s\n" "$(magenta "--swap, -s SWAP")"
     printf "    min, max, or any number of GB for swap (default: max)\n"
     echo
 
     # :command.usage_fixed_flags
-    printf "  %s\n" "$(magenta "--help, -h")"
+    printf "  %s\n" "$(magenta "--help")"
     printf "    Show this help\n"
     echo
 
-    # :command.usage_args
-    printf "%s\n" "$(bold "Arguments:")"
-
-    # :argument.usage
-    printf "  %s\n" "$(blue "TYPE")"
-    printf "    uefi, bios, linode\n"
+    # :command.usage_examples
+    printf "%s\n" "$(bold "Examples:")"
+    printf "  nixos bootstrap --hardware linode\n"
+    printf "  nixos bootstrap --firmware uefi --swap min\n"
+    printf "  nixos bootstrap --firmware bios --swap 8\n"
+    printf "  nixos bootstrap --config sol\n"
     echo
 
   fi
@@ -316,97 +329,6 @@ nixos_keyscan_usage() {
     printf "  nixos keyscan 192.168.1.10 myhost\n"
     printf "  nixos keyscan 192.168.1.10 myhost --force\n"
     printf "  nixos keyscan 192.168.1.10 myhost --add --commit\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-nixos_linode_usage() {
-  if [[ -n $long_usage ]]; then
-    printf "nixos linode - Install configuration to Linode VPS\n"
-    echo
-
-  else
-    printf "nixos linode - Install configuration to Linode VPS\n"
-    echo
-
-  fi
-
-  printf "Alias: l\n"
-  echo
-
-  printf "%s\n" "$(bold "Usage:")"
-  printf "  nixos linode\n"
-  printf "  nixos linode --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n $long_usage ]]; then
-    printf "%s\n" "$(bold "Options:")"
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "$(magenta "--help, -h")"
-    printf "    Show this help\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-nixos_bootstrap_usage() {
-  if [[ -n $long_usage ]]; then
-    printf "nixos bootstrap - Bootstrap a NixOS installation\n"
-    echo
-
-  else
-    printf "nixos bootstrap - Bootstrap a NixOS installation\n"
-    echo
-
-  fi
-
-  printf "Alias: b\n"
-  echo
-
-  printf "%s\n" "$(bold "Usage:")"
-  printf "  nixos bootstrap TYPE [CONFIGURATION] [OPTIONS]\n"
-  printf "  nixos bootstrap --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n $long_usage ]]; then
-    printf "%s\n" "$(bold "Options:")"
-
-    # :command.usage_flags
-    # :flag.usage
-    printf "  %s\n" "$(magenta "--swap, -s SWAP")"
-    printf "    min, max, or any number of GB for swap (default: max)\n"
-    echo
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "$(magenta "--help, -h")"
-    printf "    Show this help\n"
-    echo
-
-    # :command.usage_args
-    printf "%s\n" "$(bold "Arguments:")"
-
-    # :argument.usage
-    printf "  %s\n" "$(blue "TYPE")"
-    printf "    uefi, bios, linode\n"
-    echo
-
-    # :argument.usage
-    printf "  %s\n" "$(blue "CONFIGURATION")"
-    printf "    Name of configuration\n"
-    echo
-
-    # :command.usage_examples
-    printf "%s\n" "$(bold "Examples:")"
-    printf "  nixos bootstrap linode\n"
-    printf "  nixos bootstrap uefi --swap min\n"
-    printf "  nixos bootstrap bios --swap 8\n"
-    printf "  nixos bootstrap switch sol\n"
     echo
 
   fi
@@ -631,12 +553,6 @@ function show {
 }
 
 # Echo task and execute command (unless --dry-run)
-# function task {
-
-#   local cmd="$(strip_flags "${@}")"
-#   show "$cmd"
-#   is_dry "${@}" || eval "$cmd" > /tmp/task
-# }
 function task {
 
   show "${@}"
@@ -662,23 +578,6 @@ function pause {
   info "${1-Paused}"
   smenu -d -i "continue" -a e:7 i:2,br c:2,blr <<< "Press enter to continue ..."
 }
-
-# function is_warn {
-#   [[ "$1" == "--warn" || "$1" == "-w" ]] && return 0
-#   return 1
-# }
-
-# function is_dry {
-#   [[ "$1" == "--dry-run" || "$1" == "-d" ]] && return 0
-#   return 1
-# }
-
-# function strip_flags {
-#   case "$1" in
-#     "--warn" | "-w" | "--info" | "-i" | "--dry-run" | "-d") echo "${*:2}" ;;
-#     * ) echo "${*}" ;;
-#   esac
-# }
 
 # Echo but spaces replaced with newlines
 function explode {
@@ -831,67 +730,505 @@ send_completions() {
 
 # :command.command_functions
 # :command.function
-nixos_wizard_command() {
-  # src/wizard_command.sh
-  echo "# this file is located in 'src/wizard_command.sh'"
-  echo "# code for 'nixos wizard' goes here"
-  echo "# you can edit it freely and regenerate (it will not be overwritten)"
-  inspect_args
+nixos_bootstrap_command() {
+  # src/bootstrap_command.sh
+  # sudo -s
+  # bash <(curl -sL https://github.com/suderman/nixos/raw/main/overlays/pkgs/nixos-cli/nixos) bootstrap
+  local dir="/etc/nixos" config hardware firmware swap default_swap
 
-  dependencies git tig awk:gawk lazydocker smenu
+  function main {
 
-  warn "Wanna go on?"
-  if confirm; then
-    echo "You do! :)"
-  else
-    echo "You don't :("
-  fi
+    # Banner
+    yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
+    yellow "┃              Bootstrap NixOS              ┃"
+    yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 
-  info "Be cool"
-  ask
-  ask one two three
+    if [[ "$(hostname)" == "nixos" ]]; then
+      info "Installer ISO detected, launching Stage 1"
+      stage1
+    elif [[ "$(hostname)" == "min" ]]; then
+      info "Minimal configuration detected, launching Stage 2"
+      stage2
+    else
 
-  info "Choose your disk"
-  disk="$(ask_disk)"
-  show $disk
+      info "Choose NixOS configuration to install:"
+      config="$(ask "$(configurations)" ${args[--config]})"
+      echo
 
-  task "ls -lah && pwd"
-  info "Cool!"
+      info "Choose type of hardware:"
+      hardware="$(ask "direct linode" ${args[--hardware]})"
+      echo
 
-  info "What's it gonna be?"
-  val=$(ask ready set go)
-  show $val
+      # Linode install must boot via bios
+      if [[ "$hardware" == "linode" ]]; then
+        firmware="bios"
+        default_swap="min"
 
-  info "What is your name?"
-  name="$(ask)"
-  show $name
+      # Direct install on physical hardware
+      else
 
-  pause
+        info "Choose type of firmware:"
+        firmware="$(ask "uefi bios" ${args[--firmware]})"
+        default_swap="max"
+        echo
+      fi
 
-  pause "Again people"
+      # Swap partition size
+      info "Choose swap size (\"max\" required for hibernate):"
+      swap="$(ask "[custom] min max ${args[--swap]}" ${args[--swap]-$default_swap})"
+      [[ "$swap" == "[custom]" ]] && swap="$(ask)"
+      echo
 
-  if confirm --warn Scary?; then
-    echo "You think scary"
-  else
-    echo "You dunna want it"
-  fi
+      info "Review configuration"
+      show config: $config
+      show hardware: $hardware
+      show firmware: $firmware
+      show swap: $swap
+      echo && pause && echo
 
-  ask "one" "two" "three"
+      if [[ $hardware == "linode" ]]; then
+        info "Starting NixOS installation process on Linode server"
+        linode
+      else
+        info "Starting NixOS installation process on direct hardware"
+        direct
+      fi
 
-  warn "Well? What it gunna be?"
-  if confirm; then
-    show you agreed
-  else
-    show you did not agree
-  fi
+    fi
 
-  pause "Hold it!"
+  }
 
-  # Wait until live and then keyscan
-  # until ping -c1 $ip_address >/dev/null 2>&1; do
-  #   sleep 5
-  # done
-  # nixos keyscan $ip_address $config_name
+  function linode {
+
+    if [[ ! -e ~/.config/linode-cli ]]; then
+      error "Missing ~/.config/linode-cli configuation. Run linode-cli to login and setup token on this computer, then start again."
+    fi
+
+    # Choose linode from list
+    info "Choose which existing linode to prepare"
+    local linode="$(ask "$(linode-cli linodes list --text --no-header | awk '{print $1"_"$2}')")"
+    local id="$(echo "${linode%_*}")"
+    echo
+    [[ -z "$id" ]] && error "Missing Linode ID"
+
+    # Look up details about this linode
+    info "Gathering details..."; echo
+    local label="$(linode-cli linodes view $id --format label --no-header --text)"
+    local linode_type=$(linode-cli linodes view $id --no-header --text --format type) # example: g6-standard-1
+    local linode_size=$(linode-cli linodes type-view $linode_type --no-header --text --format disk) # example: 51200
+    local installer_size=1024  # reserve 1GB for installer
+    local nixos_size=$((linode_size - installer_size)) # nix uses remaining available disk
+    local flags nixos_disk nixos_config installer_disk installer_config
+
+    # Final warning
+    warn "DANGER! Last chance to bail!"
+    warn "Re-create all disks and configurations for linode $(magenta \"${label}\")?"
+    confirm || return && echo
+
+    # Power down
+    info "OK! Powering off linode. Please wait..."
+    task linode-cli linodes shutdown $id
+    wait_for_linode $id "offline" && echo
+
+    # Delete all configurations
+    info "Deleting any existing configurations"
+    configs=($(linode-cli linodes configs-list $id --text | awk 'NR > 1 {print $1}'))
+    for config_id in "${configs[@]}"; do
+      task linode-cli linodes config-delete $id $config_id
+      sleep 5
+    done && echo
+
+    # Delete all disks
+    info "Deleting any existing disks"
+    disks=($(linode-cli linodes disks-list $id --text | awk 'NR > 1 {print $1}'))
+    for disk_id in "${disks[@]}"; do
+      task linode-cli linodes disk-delete $id $disk_id
+      while [ "$(linode-cli linodes disk-view $id $disk_id --text --no-header --format status 2>/dev/null)" == "deleting" ]; do
+        sleep 5
+      done
+    done && echo
+
+    # Shared flags
+    flags="--text --no-header"
+
+    info "Creating INSTALLER disk"
+    task linode-cli linodes disk-create $id $flags --label installer --filesystem ext4 --size $installer_size
+    disk_id="$(last | awk '{print $1}')"
+    installer_disk="--devices.sdb.disk_id $disk_id"
+    wait_for_disk $id $disk_id
+
+    info "Creating NIXOS disk"
+    task linode-cli linodes disk-create $id $flags --label nixos --filesystem raw --size $nixos_size
+    disk_id="$(last | awk '{print $1}')"
+    nixos_disk="--devices.sda.disk_id $disk_id"
+    wait_for_disk $id $disk_id
+
+    # Shared flags
+    flags="--text --no-header"
+    flags="$flags --kernel linode/direct-disk"
+    flags="$flags --helpers.updatedb_disabled=0 --helpers.distro=0 --helpers.modules_dep=0 --helpers.network=0 --helpers.devtmpfs_automount=0"
+
+    # Create the installer configuration
+    info "Creating INSTALLER configuration"
+    task linode-cli linodes config-create $id $flags $nixos_disk $installer_disk --label installer --kernel linode/direct-disk --root_device /dev/sdb
+    installer_config="--config_id $(last | awk '{print $1}')"
+    sleep 10 && echo
+
+    # Create the main configuration
+    info "Creating NIXOS configuration"
+    task linode-cli linodes config-create $id $flags $nixos_disk --label nixos --root_device /dev/sda
+    nixos_config="--config_id $(last | awk '{print $1}')"
+    sleep 10 && echo
+
+    # Rescue mode
+    info "Rebooting the linode in RESCUE mode"
+    task linode-cli linodes rescue $id $installer_disk
+    sleep 5
+    wait_for_linode $id "running" && echo
+
+    # Create INSTALLER disk
+    info "Opening a Weblish console:"
+    url "https://cloud.linode.com/linodes/$id/lish/weblish" && echo
+    info "Paste the following to download the NixOS installer (copied to clipboard):"
+    line1="iso=https://channels.nixos.org/nixos-22.11/latest-nixos-minimal-x86_64-linux.iso"
+    line2="curl -L \$iso | tee >(dd of=/dev/sdb) | sha256sum"
+    echo $line1
+    echo $line2
+    echo "$line1; $line2" | wl-copy && echo
+    info "Wait until it's finished before we reboot with the INSTALLER config"
+    pause && echo
+
+    # Installer config
+    info "Rebooting the linode..."
+    task linode-cli linodes reboot $id $installer_config
+    sleep 5
+    wait_for_linode $id "running" && echo
+
+    info "Opening a Glish console:"
+    url "https://cloud.linode.com/linodes/$id/lish/glish" && echo
+    info "Paste the following to install NixOS (second line copied to clipboard):"
+    local swap_flag=""; [[ "$swap" == "min" ]] || swap_flag="-s $swap"
+    line1="sudo -s"
+    line2="bash <(curl -sL https://github.com/suderman/nixos/raw/main/overlays/pkgs/nixos-cli/nixos) bootstrap -h linode $swap_flag"
+    echo $line1
+    echo $line2
+    echo "$line2" | wl-copy && echo
+
+    info "Wait until it's finished before we reboot with NIXOS config"
+    pause && echo
+
+    # NixOS config
+    info "Rebooting the linode..."
+    task linode-cli linodes reboot $id $nixos_config
+    sleep 5
+    wait_for_linode $id "running" && echo
+
+    # Wait until live and then keyscan
+    # Update secrets keys
+    # info "Scanning new host key in 30 seconds..."
+    # sleep 30
+    local ip="$(linode-cli linodes view $id --no-header --text --format ipv4)"
+    until ping -c1 $ip >/dev/null 2>&1; do sleep 5; done
+    task "nixos keyscan $ip $label --add --commit"
+    task "cd $dir && git push"
+
+    # echo
+    # info "Commit and git push so changes can be pulled on the new linode at /etc/nixos"
+    # task "cd /etc/nixos && git status"
+
+    sleep 5 && echo
+
+    # Switch configuration
+    info "Opening a Weblish console:"
+    url "https://cloud.linode.com/linodes/$id/lish/weblish" && echo
+    info "Login as root, pull from git, and rebuild config (copied to clipboard):"
+    line1="nixos bootstrap -c $config"
+    echo $line1
+    echo "$line1" | wl-copy && echo
+
+  }
+
+  function wait_for_linode {
+    printf "  "
+    while [ "$(linode-cli linodes view $1 --text --no-header --format status)" != "$2" ]; do
+      echo -n $(yellow ".")
+      sleep 5
+    done && echo
+  }
+
+  function wait_for_disk {
+    while [ "$(linode-cli linodes disk-view $1 $2 --text --no-header --format status 2>/dev/null)" != "ready" ]; do
+      sleep 5
+    done && echo
+  }
+
+  function direct {
+    echo
+  }
+
+  function stage1 {
+
+    if [ "$(id -u)" != "0" ]; then
+      warn "Exiting, run as root."
+      return 1
+    fi
+
+    # Be prepared
+    dependencies git smenu
+
+    # Choose a disk to partition
+    local disk bbp esp swap butter
+    if is_linode; then disk="sda"
+    else
+      info "Choose the disk to partition"
+      disk="$(ask_disk)"
+    fi
+
+    # Bail if no disk selected
+    if [ ! -e /dev/$disk ]; then
+      warn "Exiting, no disk selected"
+      return
+    fi
+
+    # Final warning
+    warn "DANGER! This script will destroy any existing data on the \"$disk\" disk."
+    warn "Proceed?"
+    confirm || return
+
+    warn "OK! Proceeding in 5 seconds..."
+    sleep 5 && echo && echo
+
+    info "Create GPT partition table"
+    task parted -s /dev/$disk mklabel gpt
+    echo
+
+    # Booting with legacy BIOS requires BBP and ESP partitions
+    if is_bios; then
+
+      # /dev/sda1-4
+      bbp="${disk}1"
+      esp="${disk}2"
+      swap="${disk}3"
+      butter="${disk}4"
+
+      info "Create BIOS boot partition ($bbp)"
+      task parted -s /dev/$disk mkpart BBP 1MiB 3MiB
+      task parted -s /dev/$disk set 1 bios_grub on
+      echo
+
+      info "Create EFI system partition ($esp)"
+      task parted -s /dev/$disk mkpart ESP FAT32 3MiB 1GiB
+      task parted -s /dev/$disk set 2 esp on
+      echo
+
+      info "Create swap partition ($swap)"
+      task parted -s /dev/$disk mkpart swap linux-swap 1GiB $(swap_size)GiB
+      task parted -s /dev/$disk set 3 swap on
+      echo
+
+    # Booting with UEFI, the ESP partition alone is fine
+    else
+
+      # /dev/sda1-3
+      esp="${disk}1"
+      swap="${disk}2"
+      butter="${disk}3"
+
+      info "Create EFI system partition ($esp)"
+      task parted -s /dev/$disk mkpart ESP FAT32 1MiB 1GiB
+      task parted -s /dev/$disk set 1 esp on
+      echo
+
+      info "Create swap partition ($swap)"
+      task parted -s /dev/$disk mkpart swap linux-swap 1GiB $(swap_size)GiB
+      task parted -s /dev/$disk set 2 swap on
+      echo
+
+    fi
+
+    info "Create btrfs partition ($butter)"
+    task parted -s /dev/$disk mkpart nix btrfs $(swap_size)GiB 100%
+    echo
+
+    info "Format EFI system partition"
+    task mkfs.fat -F32 -n ESP /dev/$esp
+    echo
+
+    info "Enable swap partition"
+    task mkswap /dev/$swap
+    task swapon /dev/$swap
+    echo
+
+    info "Format btrfs partition"
+    task mkfs.btrfs -fL nix /dev/$butter
+    echo
+
+    info "Create btrfs subvolume structure"
+    # nix
+    # ├── root
+    # ├── snaps
+    # └── state
+    #     ├── home
+    #     ├── etc
+    #     └── var
+    #         └── log
+    task mkdir -p /mnt && mount /dev/$butter /mnt
+    task btrfs subvolume create /mnt/root
+    task btrfs subvolume create /mnt/snaps
+    task btrfs subvolume snapshot -r /mnt/root /mnt/snaps/root
+    task btrfs subvolume create /mnt/state
+    task btrfs subvolume create /mnt/state/home
+    task mkdir -p /mnt/state/{var/lib,etc/{ssh,NetworkManager/system-connections}}
+    task btrfs subvolume create /mnt/state/var/log
+    task umount /mnt
+    echo
+
+    info "Mount root"
+    task mount -o subvol=root /dev/$butter /mnt
+    echo
+
+    info "Mount nix"
+    task "mkdir -p /mnt/nix && mount /dev/$butter /mnt/nix"
+    echo
+
+    info "Mount boot"
+    task "mkdir -p /mnt/boot && mount /dev/$esp /mnt/boot"
+    echo
+
+    # Path to nixos flake and minimal configuration
+    local nixos="/mnt/nix/state/etc/nixos"
+
+    local min="$nixos/configurations/min"
+
+    # Clone git repo into persistant directory
+    info "Cloning nixos git repo"
+    if [ -d $nixos ]; then
+      task "cd $nixos && git pull"
+    else
+      task "git clone https://github.com/suderman/nixos $nixos"
+    fi
+    echo
+
+    # Generate config and copy hardware-configuration.nix
+    info "Generating hardware-configuration.nix"
+    task nixos-generate-config --root /mnt --dir $min
+    task cp -f $min/hardware-configuration.nix $nixos/
+    echo
+
+    # If linode install detected, set config.hardware.linode.enable = true;
+    if is_linode; then
+      info "Enabling linode in configuration.nix"
+      task "sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix"
+      echo
+    fi
+
+    # Personal user owns /etc/nixos
+
+    info "Updating configuration permissions"
+    task chown -R 1000:100 $nixos
+    echo
+
+    # Run nixos installer
+    info "Installing NixOS in 5 seconds..."
+    show "nixos-install --flake $nixos\#min --no-root-password"
+    sleep 5
+    nixos-install --flake $nixos\#min --no-root-password
+    echo
+
+    info "Install complete!"
+    info "Reboot without installer media and login as root."
+
+  }
+
+  # Pull in rekeyed secrets, copy hardware-configuration from min to host, and switch
+  function stage2 {
+    local config="${args[--config]}"
+    if has_configuration; then
+
+      info "Pulling secrets"
+      task "cd $dir; git pull" && echo
+
+      info "Copying generated hardware-configuration to $config"
+      task mv -f $dir/configurations/min/hardware-configuration.nix $dir/configurations/$config/hardware-configuration.nix
+      task "cd $dir; git restore configurations/min" && echo
+
+      info "Rebuilding system to $config"
+      show "nixos-rebuild switch --flake $dir\#${config}"
+      nixos-rebuild switch --flake $dir\#${config}
+
+      info "Rebuild complete!"
+      info "Reboot in 10 seconds. Login as user and commit the generated hardware-configuration.nix to git."
+      sleep 10 && systemctl reboot
+      return 0
+
+    else error "Exiting, missing configuration"
+    fi
+  }
+
+  function configurations {
+    nix flake show --json $dir | jq -r '.nixosConfigurations | keys[] | select(. != "min")' | xargs
+  }
+
+  function has_configuration {
+    [[ "${args[--config]}" != "" && "${args[--config]}" != "min" ]] && return 0 || return 1
+  }
+
+  function is_linode {
+    [[ "${args[--hardware]}" == "linode" ]] && return 0 || return 1
+  }
+
+  function is_bios {
+    if [[ "${args[--firmware]}" == "bios" || "${args[--hardware]}" == "linode" ]]; then
+      return 0
+    else
+
+      return 1
+    fi
+  }
+
+  # Total memory available in GB
+  function mem_total {
+    free -b | awk '/Mem/ { printf "%.0f\n", $2/1024/1024/1024 + 0.5 }'
+  }
+
+  # Total memory availble squared in GB
+  function mem_squared {
+    mem_total | awk '{printf("%d\n", sqrt($1)+0.5)}'
+  }
+
+  # Memory squared, minimal value 2
+  function swap_min {
+    local mem="$(mem_squared)"
+    [ "$mem" -lt "2" ] && mem="2"
+    echo $mem
+  }
+
+  # Total memory + memory squared, minimal value 2
+  function swap_max {
+    local mem="$(echo $(mem_total) $(mem_squared) | awk '{printf "%d", $1 + $2}')"
+    [ "$mem" -lt "2" ] && mem="2"
+    echo $mem
+  }
+
+  # Swap is set to second argument
+  # - if min, swap is memory squared (at least 2)
+  # - if max, swap is memory total + memory squared (at least 2)
+  # - if empty, swap is min if linode, max otherwise
+  # - if any other value, swap is set to that
+  function swap_size {
+    local swap="${args[--swap]}"
+    if [ "$swap" = "min" ]; then
+      swap="$(swap_min)"
+    elif [ "$swap" = "max" ]; then
+      swap="$(swap_max)"
+    elif [ "$swap" = "" ]; then
+      is_linode && swap="$(swap_min)" || swap="$(swap_max)"
+    fi
+    # Add 1 since this value will be used in parted and starts at the 1GB position
+    echo $swap | awk '{printf "%d", $1 + 1}'
+  }
+
+  main
 
 }
 
@@ -1260,491 +1597,11 @@ nixos_keyscan_command() {
 }
 
 # :command.function
-nixos_linode_command() {
-  # src/linode_command.sh
-  declare LINODE_ID
-
-  function main {
-
-    # Banner
-    yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
-    yellow "┃         Suderman's Linode Setup           ┃"
-    yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
-
-    # Choose linode from list
-    defined $LINODE_ID || LINODE_ID="$(choose_linode)"
-
-    # Bail if no ID was selected
-    if empty $LINODE_ID; then
-      warn "Exiting, no LINODE_ID provided"
-      return 1
-    fi
-
-    # Look up details about this linode
-    info "Gathering details..."; echo
-    local id="$LINODE_ID"
-
-    local label="$(linode-cli linodes view $id --format label --no-header --text)"
-    local linode_type=$(linode-cli linodes view $id --no-header --text --format type) # example: g6-standard-1
-    local linode_size=$(linode-cli linodes type-view $linode_type --no-header --text --format disk) # example: 51200
-    local installer_size=1024  # reserve 1GB for installer
-    local nixos_size=$((linode_size - installer_size)) # nix uses remaining available disk
-    local flags nixos_disk nixos_config installer_disk installer_config
-
-    # Final warning
-    warn "DANGER! Last chance to bail!"
-    if ! ask --warn "Re-create all disks and configurations for linode $(yellow \"${label}\")?"; then
-      return
-    fi && echo
-
-    # Power down
-    info "OK! Powering off linode. Please wait..."
-    task linode-cli linodes shutdown $id
-    wait_for_linode "offline" && echo
-
-    # Delete all configurations
-    info "Deleting any existing configurations"
-    configs=($(linode-cli linodes configs-list $id --text | awk 'NR > 1 {print $1}'))
-    for config_id in "${configs[@]}"; do
-      task linode-cli linodes config-delete $id $config_id
-      sleep 5
-    done && echo
-
-    # Delete all disks
-    info "Deleting any existing disks"
-    disks=($(linode-cli linodes disks-list $id --text | awk 'NR > 1 {print $1}'))
-    for disk_id in "${disks[@]}"; do
-      task linode-cli linodes disk-delete $id $disk_id
-      while [ "$(linode-cli linodes disk-view $id $disk_id --text --no-header --format status 2>/dev/null)" == "deleting" ]; do
-        sleep 5
-      done
-    done && echo
-
-    # Shared flags
-    flags="--text --no-header"
-
-    info "Creating INSTALLER disk"
-    task linode-cli linodes disk-create $id $flags --label installer --filesystem ext4 --size $installer_size
-    disk_id="$(cat /tmp/task | awk '{print $1}')"
-    installer_disk="--devices.sdb.disk_id $disk_id"
-    wait_for_disk $disk_id
-
-    info "Creating NIXOS disk"
-    task linode-cli linodes disk-create $id $flags --label nixos --filesystem raw --size $nixos_size
-    disk_id="$(cat /tmp/task | awk '{print $1}')"
-    nixos_disk="--devices.sda.disk_id $disk_id"
-    wait_for_disk $disk_id
-
-    # Shared flags
-    flags="--text --no-header"
-    flags="$flags --kernel linode/direct-disk"
-    flags="$flags --helpers.updatedb_disabled=0 --helpers.distro=0 --helpers.modules_dep=0 --helpers.network=0 --helpers.devtmpfs_automount=0"
-
-    # Create the installer configuration
-    info "Creating INSTALLER configuration"
-    task linode-cli linodes config-create $LINODE_ID $flags $nixos_disk $installer_disk --label installer --kernel linode/direct-disk --root_device /dev/sdb
-    installer_config="--config_id $(cat /tmp/task | awk '{print $1}')"
-    sleep 10 && echo
-
-    # Create the main configuration
-    info "Creating NIXOS configuration"
-    task linode-cli linodes config-create $LINODE_ID $flags $nixos_disk --label nixos --root_device /dev/sda
-    nixos_config="--config_id $(cat /tmp/task | awk '{print $1}')"
-    sleep 10 && echo
-
-    # Rescue mode
-    info "Rebooting the linode in RESCUE mode"
-    task linode-cli linodes rescue $id $installer_disk
-    sleep 5
-    wait_for_linode "running" && echo
-
-    # Create INSTALLER disk
-    info "Opening a Weblish console:"
-    url "https://cloud.linode.com/linodes/$id/lish/weblish" && echo
-    info "Paste the following to download the NixOS installer (copied to clipboard):"
-    line1="iso=https://channels.nixos.org/nixos-22.11/latest-nixos-minimal-x86_64-linux.iso"
-    line2="curl -L \$iso | tee >(dd of=/dev/sdb) | sha256sum"
-    echo $line1
-    echo $line2
-    echo "$line1; $line2" | wl-copy && echo
-    info "Wait until it's finished before we reboot with the INSTALLER config"
-    pause && echo
-
-    # Installer config
-    info "Rebooting the linode..."
-    task linode-cli linodes reboot $id $installer_config
-    sleep 5
-    wait_for_linode "running" && echo
-
-    info "Opening a Glish console:"
-    url "https://cloud.linode.com/linodes/$id/lish/glish" && echo
-    info "Paste the following to install NixOS (second line copied to clipboard):"
-    line1="sudo -s"
-    line2="bash <(curl -sL https://github.com/suderman/nixos/raw/main/overlays/pkgs/nixos-cli/nixos) bootstrap linode"
-    echo $line1
-    echo $line2
-    echo "$line2" | wl-copy && echo
-
-    info "Wait until it's finished before we reboot with NIXOS config"
-    pause && echo
-
-    # NixOS config
-    info "Rebooting the linode..."
-    task linode-cli linodes reboot $id $nixos_config
-    sleep 5
-    wait_for_linode "running" && echo
-
-    # Update secrets keys
-    info "Scanning new host key in 30 seconds..."
-    sleep 30
-    local ip="$(linode-cli linodes view $id --no-header --text --format ipv4)"
-    task "/etc/nixos/secrets/scripts/secrets-keyscan $ip $label --force"
-    echo
-    info "Commit and git push so changes can be pulled on the new linode at /etc/nixos"
-    task "cd /etc/nixos && git status"
-
-    sleep 5 && echo
-
-    # Switch configuration
-    info "Opening a Weblish console:"
-    url "https://cloud.linode.com/linodes/$id/lish/weblish" && echo
-    info "Login as root, pull from git, and rebuild config (copied to clipboard):"
-    echo "nixos bootstrap switch [CONFIGURATION]"
-
-    echo -n "nixos bootstrap switch " | wl-copy && echo
-
-  }
-
-  function choose_linode {
-    local linodes="$(linode-cli linodes list --text --no-header | awk '{print $1"_"$2}')"
-    local linode="$(explode $linodes | pick "Choose which existing linode to prepare")"
-    echo "${linode%_*}"
-  }
-
-  function wait_for_linode {
-    printf "  "
-    while [ "$(linode-cli linodes view $LINODE_ID --text --no-header --format status)" != "$1" ]; do
-      echo -n $(yellow ".")
-      sleep 5
-    done && echo
-  }
-
-  function wait_for_disk {
-    while [ "$(linode-cli linodes disk-view $LINODE_ID $1 --text --no-header --format status 2>/dev/null)" != "ready" ]; do
-      sleep 5
-    done && echo
-  }
-
-  main
-
-}
-
-# :command.function
-nixos_bootstrap_command() {
-  # src/bootstrap_command.sh
-  # sudo -s
-  # bash <(curl -sL https://github.com/suderman/nixos/raw/main/overlays/pkgs/nixos-cli/nixos) bootstrap
-  function main {
-
-    if [ "$(id -u)" != "0" ]; then
-      warn "Exiting, run as root."
-      return 1
-    fi
-
-    # Be prepared
-    install_dependencies
-
-    # Switch configuration (stage 2)
-    if is_switch; then
-
-      switch_configuration
-      return 0
-    fi
-
-    # Banner
-    yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
-    yellow "┃        Suderman's NixOS Installer         ┃"
-    yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
-
-    # List disks and partitions for reference
-    echo
-    blue "Disks & Partitions                           "
-    blue "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    lsblk -o NAME,FSTYPE,SIZE
-    blue "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-    # Choose a disk to partition
-    local disk bbp esp swap butter
-    is_linode && disk="sda" || disk="$(lsblk -nirdo NAME | pick "Choose the disk to partition")"
-
-    # Bail if no disk selected
-    if [ ! -e /dev/$disk ]; then
-      warn "Exiting, no disk selected"
-      return
-    fi
-
-    # Final warning
-    warn "DANGER! This script will destroy any existing data on the \"$disk\" disk."
-    if ! ask --warn "Proceed?"; then
-      return
-    fi
-
-    warn "OK! Proceeding in 5 seconds..."
-    sleep 5 && echo && echo
-
-    info "Create GPT partition table"
-    task parted -s /dev/$disk mklabel gpt
-    echo
-
-    # Booting with legacy BIOS requires BBP and ESP partitions
-    if is_bios; then
-
-      # /dev/sda1-4
-      bbp="${disk}1"
-      esp="${disk}2"
-      swap="${disk}3"
-      butter="${disk}4"
-
-      info "Create BIOS boot partition ($bbp)"
-      task parted -s /dev/$disk mkpart BBP 1MiB 3MiB
-      task parted -s /dev/$disk set 1 bios_grub on
-      echo
-
-      info "Create EFI system partition ($esp)"
-      task parted -s /dev/$disk mkpart ESP FAT32 3MiB 1GiB
-      task parted -s /dev/$disk set 2 esp on
-      echo
-
-      info "Create swap partition ($swap)"
-      task parted -s /dev/$disk mkpart swap linux-swap 1GiB $(swap_size)GiB
-      task parted -s /dev/$disk set 3 swap on
-      echo
-
-    # Booting with UEFI, the ESP partition alone is fine
-    else
-
-      # /dev/sda1-3
-      esp="${disk}1"
-      swap="${disk}2"
-      butter="${disk}3"
-
-      info "Create EFI system partition ($esp)"
-      task parted -s /dev/$disk mkpart ESP FAT32 1MiB 1GiB
-      task parted -s /dev/$disk set 1 esp on
-      echo
-
-      info "Create swap partition ($swap)"
-      task parted -s /dev/$disk mkpart swap linux-swap 1GiB $(swap_size)GiB
-      task parted -s /dev/$disk set 2 swap on
-      echo
-
-    fi
-
-    info "Create btrfs partition ($butter)"
-    task parted -s /dev/$disk mkpart nix btrfs $(swap_size)GiB 100%
-    echo
-
-    info "Format EFI system partition"
-    task mkfs.fat -F32 -n ESP /dev/$esp
-    echo
-
-    info "Enable swap partition"
-    task mkswap /dev/$swap
-    task swapon /dev/$swap
-    echo
-
-    info "Format btrfs partition"
-    task mkfs.btrfs -fL nix /dev/$butter
-    echo
-
-    info "Create btrfs subvolume structure"
-    # nix
-    # ├── root
-    # ├── snaps
-    # └── state
-    #     ├── home
-    #     ├── etc
-    #     └── var
-    #         └── log
-    task mkdir -p /mnt && mount /dev/$butter /mnt
-    task btrfs subvolume create /mnt/root
-    task btrfs subvolume create /mnt/snaps
-    task btrfs subvolume snapshot -r /mnt/root /mnt/snaps/root
-    task btrfs subvolume create /mnt/state
-    task btrfs subvolume create /mnt/state/home
-    task mkdir -p /mnt/state/{var/lib,etc/{ssh,NetworkManager/system-connections}}
-    task btrfs subvolume create /mnt/state/var/log
-    task umount /mnt
-    echo
-
-    info "Mount root"
-    task mount -o subvol=root /dev/$butter /mnt
-    echo
-
-    info "Mount nix"
-    task "mkdir -p /mnt/nix && mount /dev/$butter /mnt/nix"
-    echo
-
-    info "Mount boot"
-    task "mkdir -p /mnt/boot && mount /dev/$esp /mnt/boot"
-    echo
-
-    # Path to nixos flake and minimal configuration
-    local nixos="/mnt/nix/state/etc/nixos"
-
-    local min="$nixos/configurations/min"
-
-    # Clone git repo into persistant directory
-    info "Cloning nixos git repo"
-    if [ -d $nixos ]; then
-      task "cd $nixos && git pull"
-    else
-      task "git clone https://github.com/suderman/nixos $nixos"
-    fi
-    echo
-
-    # Generate config and copy hardware-configuration.nix
-    info "Generating hardware-configuration.nix"
-    task nixos-generate-config --root /mnt --dir $min
-    task cp -f $min/hardware-configuration.nix $nixos/
-    echo
-
-    # If linode install detected, set config.hardware.linode.enable = true;
-    if is_linode; then
-      info "Enabling linode in configuration.nix"
-      task "sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix"
-      echo
-    fi
-
-    # Personal user owns /etc/nixos
-
-    info "Updating configuration permissions"
-    task chown -R 1000:100 $nixos
-    echo
-
-    # Run nixos installer
-    info "Installing NixOS in 5 seconds..."
-    show "nixos-install --flake $nixos\#min --no-root-password"
-    sleep 5
-    nixos-install --flake $nixos\#min --no-root-password
-    echo
-
-    info "Install complete!"
-    info "Reboot without installer media and login as root."
-
-  }
-
-  function install_dependencies {
-    if hasnt git; then
-      info "Installing git"
-      task nix-env -iA nixos.git
-    fi
-    if hasnt fzf; then
-      info "Installing fzf"
-      task nix-env -iA nixos.fzf
-    fi
-  }
-
-  # Pull in rekeyed secrets, copy hardware-configuration from min to host, and switch
-  function switch_configuration {
-    local host="${args[configuration]}"
-    if has_configuration; then
-
-      info "Pulling secrets"
-      task "cd /etc/nixos; git pull" && echo
-
-      info "Copying generated hardware-configuration to $host"
-      task mv -f /etc/nixos/configurations/min/hardware-configuration.nix /etc/nixos/configurations/$host/hardware-configuration.nix
-      task "cd /etc/nixos; git restore configurations/min" && echo
-
-      info "Rebuilding system to $host"
-      show "nixos-rebuild switch --flake /etc/nixos\#${args[configuration]}"
-      nixos-rebuild switch --flake /etc/nixos\#${args[configuration]}
-
-      info "Rebuild complete!"
-      info "Reboot in 10 seconds. Login as user and commit the generated hardware-configuration.nix to git."
-      sleep 10 && systemctl reboot
-      return 0
-
-    else
-      warn "Exiting, missing configuration"
-      return 1
-    fi
-  }
-
-  function is_switch {
-    [ "${args[type]}" = "switch" ] && return 0 || return 1
-  }
-
-  function has_configuration {
-    [ "${args[configuration]}" != "" ] && return 0 || return 1
-  }
-
-  function is_linode {
-    [ "${args[type]}" = "linode" ] && return 0 || return 1
-  }
-
-  function is_bios {
-    if [ "${args[type]}" = "bios" ] || [ "${args[type]}" = "linode" ]; then
-      return 0
-    else
-
-      return 1
-    fi
-  }
-
-  # Total memory available in GB
-  function mem_total {
-    free -b | awk '/Mem/ { printf "%.0f\n", $2/1024/1024/1024 + 0.5 }'
-  }
-
-  # Total memory availble squared in GB
-  function mem_squared {
-    mem_total | awk '{printf("%d\n", sqrt($1)+0.5)}'
-  }
-
-  # Memory squared, minimal value 2
-  function swap_min {
-    local mem="$(mem_squared)"
-    [ "$mem" -lt "2" ] && mem="2"
-    echo $mem
-  }
-
-  # Total memory + memory squared, minimal value 2
-  function swap_max {
-    local mem="$(echo $(mem_total) $(mem_squared) | awk '{printf "%d", $1 + $2}')"
-    [ "$mem" -lt "2" ] && mem="2"
-    echo $mem
-  }
-
-  # Swap is set to second argument
-  # - if min, swap is memory squared (at least 2)
-  # - if max, swap is memory total + memory squared (at least 2)
-  # - if empty, swap is min if linode, max otherwise
-  # - if any other value, swap is set to that
-  function swap_size {
-    local swap="${args[--swap]}"
-    if [ "$swap" = "min" ]; then
-      swap="$(swap_min)"
-    elif [ "$swap" = "max" ]; then
-      swap="$(swap_max)"
-    elif [ "$swap" = "" ]; then
-      is_linode && swap="$(swap_min)" || swap="$(swap_max)"
-    fi
-    # Add 1 since this value will be used in parted and starts at the 1GB position
-    echo $swap | awk '{printf "%d", $1 + 1}'
-  }
-
-  main
-
-}
-
-# :command.function
 nixos_bashly_generate_command() {
   # src/bashly_generate_command.sh
   local dir=/etc/nixos/overlays/pkgs/nixos-cli
   local bashly="docker run --rm -it --user $(id -u):$(id -g) --volume $dir:/app dannyben/bashly"
-  task -d "cd $dir && bashly generate"
+  show "cd $dir && bashly generate"
   (cd $dir && $bashly generate)
 
 }
@@ -1793,10 +1650,10 @@ parse_requirements() {
   case $action in
     -*) ;;
 
-    wizard | w)
-      action="wizard"
+    bootstrap | b)
+      action="bootstrap"
       shift
-      nixos_wizard_parse_requirements "$@"
+      nixos_bootstrap_parse_requirements "$@"
       shift $#
       ;;
 
@@ -1825,20 +1682,6 @@ parse_requirements() {
       action="keyscan"
       shift
       nixos_keyscan_parse_requirements "$@"
-      shift $#
-      ;;
-
-    linode | l)
-      action="linode"
-      shift
-      nixos_linode_parse_requirements "$@"
-      shift $#
-      ;;
-
-    bootstrap | b)
-      action="bootstrap"
-      shift
-      nixos_bootstrap_parse_requirements "$@"
       shift $#
       ;;
 
@@ -1898,13 +1741,13 @@ parse_requirements() {
 }
 
 # :command.parse_requirements
-nixos_wizard_parse_requirements() {
+nixos_bootstrap_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     case "${1:-}" in
-      --help | -h)
+      --help)
         long_usage=yes
-        nixos_wizard_usage
+        nixos_bootstrap_usage
         exit
         ;;
 
@@ -1916,12 +1759,57 @@ nixos_wizard_parse_requirements() {
   done
 
   # :command.command_filter
-  action="wizard"
+  action="bootstrap"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
+      # :flag.case
+      --config | -c)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+
+          args['--config']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--config requires an argument: --config, -c CONFIG" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --hardware | -h)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+
+          args['--hardware']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--hardware requires an argument: --hardware, -h HARDWARE" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --firmware | -f)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+
+          args['--firmware']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--firmware requires an argument: --firmware, -f FIRMWARE" >&2
+          exit 1
+        fi
+        ;;
+
       # :flag.case
       --swap | -s)
 
@@ -1945,14 +1833,8 @@ nixos_wizard_parse_requirements() {
       *)
         # :command.parse_requirements_case
         # :command.parse_requirements_case_simple
-        if [[ -z ${args['type']+x} ]]; then
-
-          args['type']=$1
-          shift
-        else
-          printf "invalid argument: %s\n" "$key" >&2
-          exit 1
-        fi
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
 
         ;;
 
@@ -2205,124 +2087,6 @@ nixos_keyscan_parse_requirements() {
 }
 
 # :command.parse_requirements
-nixos_linode_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    case "${1:-}" in
-      --help | -h)
-        long_usage=yes
-        nixos_linode_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="linode"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        printf "invalid argument: %s\n" "$key" >&2
-        exit 1
-
-        ;;
-
-    esac
-  done
-
-}
-
-# :command.parse_requirements
-nixos_bootstrap_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    case "${1:-}" in
-      --help | -h)
-        long_usage=yes
-        nixos_bootstrap_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="bootstrap"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      # :flag.case
-      --swap | -s)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-
-          args['--swap']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--swap requires an argument: --swap, -s SWAP" >&2
-          exit 1
-        fi
-        ;;
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        if [[ -z ${args['type']+x} ]]; then
-
-          args['type']=$1
-          shift
-        elif [[ -z ${args['configuration']+x} ]]; then
-
-          args['configuration']=$1
-          shift
-        else
-          printf "invalid argument: %s\n" "$key" >&2
-          exit 1
-        fi
-
-        ;;
-
-    esac
-  done
-
-  # :command.required_args_filter
-  if [[ -z ${args['type']+x} ]]; then
-    printf "missing required argument: TYPE\nusage: nixos bootstrap TYPE [CONFIGURATION] [OPTIONS]\n" >&2
-    exit 1
-  fi
-
-}
-
-# :command.parse_requirements
 nixos_bashly_generate_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
@@ -2429,12 +2193,12 @@ run() {
   parse_requirements "${input[@]}"
 
   case "$action" in
-    "wizard")
+    "bootstrap")
       if [[ ${args['--help']:-} ]]; then
         long_usage=yes
-        nixos_wizard_usage
+        nixos_bootstrap_usage
       else
-        nixos_wizard_command
+        nixos_bootstrap_command
       fi
       ;;
 
@@ -2471,24 +2235,6 @@ run() {
         nixos_keyscan_usage
       else
         nixos_keyscan_command
-      fi
-      ;;
-
-    "linode")
-      if [[ ${args['--help']:-} ]]; then
-        long_usage=yes
-        nixos_linode_usage
-      else
-        nixos_linode_command
-      fi
-      ;;
-
-    "bootstrap")
-      if [[ ${args['--help']:-} ]]; then
-        long_usage=yes
-        nixos_bootstrap_usage
-      else
-        nixos_bootstrap_command
       fi
       ;;
 

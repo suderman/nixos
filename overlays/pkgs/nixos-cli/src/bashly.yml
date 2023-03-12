@@ -5,20 +5,33 @@ extensible: true
 
 commands:
 
-- name: wizard
-  alias: w
-  help: Wizard up a NixOS installation
-
-  args:
-  - name: type
-    required: false
-    help: "uefi, bios, linode"
+- name: bootstrap
+  alias: b
+  help: Bootstrap a NixOS installation
 
   flags:
+  - long: --config
+    short: -c
+    arg: config
+    help: "name of NixOS configuration"
+  - long: --hardware
+    short: -h
+    arg: hardware
+    help: "direct, linode"
+  - long: --firmware
+    short: -f
+    arg: firmware
+    help: "uefi, bios"
   - long: --swap
     short: -s
     arg: swap
     help: "min, max, or any number of GB for swap (default: max)"
+
+  examples:
+  - nixos bootstrap --hardware linode
+  - nixos bootstrap --firmware uefi --swap min
+  - nixos bootstrap --firmware bios --swap 8
+  - nixos bootstrap --config sol
 
 - name: switch
   alias: sw
@@ -98,34 +111,34 @@ commands:
   - nixos keyscan 192.168.1.10 myhost --add --commit
 
 
-- name: linode
-  alias: l
-  help: Install configuration to Linode VPS
-
-- name: bootstrap
-  alias: b
-  help: Bootstrap a NixOS installation
-
-  args:
-  - name: type
-    required: true
-    help: "uefi, bios, linode"
-
-  - name: configuration
-    required: false
-    help: "Name of configuration"
-
-  flags:
-  - long: --swap
-    short: -s
-    arg: swap
-    help: "min, max, or any number of GB for swap (default: max)"
-
-  examples:
-  - nixos bootstrap linode
-  - nixos bootstrap uefi --swap min
-  - nixos bootstrap bios --swap 8
-  - nixos bootstrap switch sol
+# - name: linode
+#   alias: l
+#   help: Install configuration to Linode VPS
+#
+# - name: bootstrap
+#   alias: b
+#   help: Bootstrap a NixOS installation
+#
+#   args:
+#   - name: type
+#     required: true
+#     help: "uefi, bios, linode"
+#
+#   - name: configuration
+#     required: false
+#     help: "Name of configuration"
+#
+#   flags:
+#   - long: --swap
+#     short: -s
+#     arg: swap
+#     help: "min, max, or any number of GB for swap (default: max)"
+#
+#   examples:
+#   - nixos bootstrap linode
+#   - nixos bootstrap uefi --swap min
+#   - nixos bootstrap bios --swap 8
+#   - nixos bootstrap switch sol
 
 - name: bashly-generate
   alias: bg
