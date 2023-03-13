@@ -28,6 +28,9 @@
   # Memory management
   services.earlyoom.enable = true;
 
+  # Snapshots & backup
+  services.btrbk.enable = true;
+
   # Database services
   services.mysql.enable = true;
   services.postgresql.enable = false;
