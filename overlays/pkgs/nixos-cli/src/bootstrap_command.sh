@@ -77,7 +77,7 @@ function hardware_direct {
       warn "Overwrite all data on ${disk} with NixOS installer?"
       if confirm; then
         info "Unmounting disk"
-        task "sudo umount /dev/${disk}* 2>/dev/null"
+        # task "sudo bash -c 'umount /dev/${disk}* && echo' && echo"
         info "Repartitioning disk"
         task sudo parted -s /dev/$disk mklabel gpt
         task sudo parted -s /dev/$disk mkpart installer ext4 1MiB 1GiB
