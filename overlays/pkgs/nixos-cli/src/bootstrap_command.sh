@@ -1,11 +1,9 @@
-# sudo -s
-# bash <(curl -sL https://github.com/suderman/nixos/raw/main/overlays/pkgs/nixos-cli/nixos) bootstrap
-local dir="/etc/nixos" config hardware firmware swap default_swap
 local iso="https://channels.nixos.org/nixos-22.11/latest-nixos-minimal-x86_64-linux.iso"
+local cli="https://github.com/suderman/nixos/raw/main/overlays/pkgs/nixos-cli/nixos"
+local dir="/etc/nixos" config hardware firmware swap default_swap
 
 function main {
 
-  # Banner
   yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
   yellow "┃              Bootstrap NixOS              ┃"
   yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
@@ -42,7 +40,7 @@ function main {
     # Swap partition size
     info "Choose swap size (\"max\" required for hibernate):"
     swap="$(ask "[custom] min max ${args[--swap]}" ${args[--swap]-$default_swap})"
-    [[ "$swap" == "[custom]" ]] && swap="$(ask)"
+    [[ "$swap" == "[custom]" ]] && swap="$(ask - "2")"
     echo
 
     info "Review configuration"
@@ -54,37 +52,54 @@ function main {
 
     if [[ $hardware == "linode" ]]; then
       info "Starting NixOS installation process on Linode server"
-      hardware_linode
+      echo && hardware_linode
     else
       info "Starting NixOS installation process on direct hardware"
-      hardware_direct
+      echo && hardware_direct
     fi
 
   fi
 
 }
 
-
+# Wizard guiding installation directly on hardware (laptop, home server, etc)
 function hardware_direct {
-  echo && info "Choose removable disk to install NixOS installer ISO"
-  local disk="$(ask_disk)"
-  if [[ -n "${disk}" && -e /dev/$disk ]]; then
-    warn "Overwrite data on ${disk} with NixOS installer?"
-    if confirm; then
-      task "sudo curl -L $iso | tee >(dd of=${disk}) | sha256sum"
-      info "...complete. Remove NixOS installer disk from this computer."
+
+  yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
+  yellow "┃ Step 1: Create NixOS installer            ┃"
+  yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
+
+  echo && info "Create NixOS Installer (choose \"no\" to skip this step)"
+  if confirm; then
+    echo && info "Choose removable disk to write NixOS installer ISO"
+    local disk="$(ask_disk)"
+    if [[ -n "${disk}" && -e /dev/$disk ]]; then
+      warn "Overwrite all data on ${disk} with NixOS installer?"
+      if confirm; then
+        info "Repartitioning disk"
+        task sudo parted -s /dev/$disk mklabel gpt
+        task sudo parted -s /dev/$disk mkpart installer ext4 1MiB 1GiB
+        info "Formatting partition"
+        task sudo mkfs.ext4 -L installer /dev/${disk}1
+        info "Downloading ISO to partition"
+        task "sudo bash -c 'curl -L $iso | tee >(dd of=/dev/${disk}1) | sha256sum'"
+        info "Finished. Remove NixOS installer disk from this computer."
+      fi
     fi
   fi
-
   echo
   info "Insert NixOS installer disk into target computer. Then boot from the installer."
   pause && echo
 
-  info "Type the following to install NixOS (second line copied to clipboard):"
+  yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
+  yellow "┃ Step 2: Install minimal configuration     ┃"
+  yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
+
+  echo && info "Type the following to install NixOS (second line copied to clipboard):"
   local firmware_flag=""; [[ "$firmware" == "uefi" ]] || firmware_flag="-f $firmware"
   local swap_flag=""; [[ "$swap" == "max" ]] || swap_flag="-s $swap"
   line1="sudo -s"
-  line2="bash <(curl -sL https://github.com/suderman/nixos/raw/main/overlays/pkgs/nixos-cli/nixos) bootstrap $firmware_flag $swap_flag"
+  line2="bash <(curl -sL $cli) bootstrap $firmware_flag $swap_flag"
   echo $line1
   echo $line2
   echo "$line2" | wl-copy && echo
@@ -92,17 +107,24 @@ function hardware_direct {
   info "After it's finished, remove the installer disk and reboot into NixOS."
   pause && echo
 
+  yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
+  yellow "┃ Step 3: Rekey secrets                     ┃"
+  yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
+
   # Wait until live and then keyscan
-  info "What is the IP address of the target computer?"
-  local ip="$(ask)"
-  echo
-  info "Waiting to keyscan the target..."
+  echo && info "What is the IP address of the target computer?"
+  local ip="$(ask_ip)"
+  echo && info "Waiting to keyscan the target..."
   until ping -c1 $ip >/dev/null 2>&1; do sleep 5; done
   task "nixos keyscan $ip $config --add --commit"
   task "cd $dir && git push" 
-  sleep 5 && echo
+  sleep 5
 
-  info "On the target computer, login as root and run the following (copied to clipboard):"
+  yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
+  yellow "┃ Step 4: Switch configuration              ┃"
+  yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
+
+  echo && info "On the target computer, login as root and run the following (copied to clipboard):"
   line1="nixos bootstrap -c $config"
   echo $line1
   echo "$line1" | wl-copy && echo
@@ -110,11 +132,16 @@ function hardware_direct {
 }
 
 
+# Wizard guiding installation on Linode virtual hardware
 function hardware_linode {
 
   if [[ ! -e ~/.config/linode-cli ]]; then
     error "Missing ~/.config/linode-cli configuation. Run linode-cli to login and setup token on this computer, then start again."
   fi
+
+  yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
+  yellow "┃ Step 1: Provision server                  ┃"
+  yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 
   # Choose linode from list
   info "Choose which existing linode to prepare"
@@ -136,6 +163,10 @@ function hardware_linode {
   warn "DANGER! Last chance to bail!"
   warn "Re-create all disks and configurations for linode $(magenta \"${label}\")?"
   confirm || return && echo
+
+  yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
+  yellow "┃ Step 2: Create disks & profiles           ┃"
+  yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 
   # Power down
   info "OK! Powering off linode. Please wait..."
@@ -192,6 +223,10 @@ function hardware_linode {
   nixos_config="--config_id $(last | awk '{print $1}')"
   sleep 10 && echo
 
+  yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
+  yellow "┃ Step 3: Create NixOS installer            ┃"
+  yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
+
   # Rescue mode
   info "Rebooting the linode in RESCUE mode"
   task linode-cli linodes rescue $id $installer_disk
@@ -209,6 +244,10 @@ function hardware_linode {
   info "Wait until it's finished before we reboot with the INSTALLER config"
   pause && echo
 
+  yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
+  yellow "┃ Step 4: Install minimal configuration     ┃"
+  yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
+
   # Installer config
   info "Rebooting the linode..."
   task linode-cli linodes reboot $id $installer_config
@@ -220,7 +259,7 @@ function hardware_linode {
   info "Paste the following to install NixOS (second line copied to clipboard):"
   local swap_flag=""; [[ "$swap" == "min" ]] || swap_flag="-s $swap"
   line1="sudo -s"
-  line2="bash <(curl -sL https://github.com/suderman/nixos/raw/main/overlays/pkgs/nixos-cli/nixos) bootstrap -h linode $swap_flag"
+  line2="bash <(curl -sL $cli) bootstrap -h linode $swap_flag"
   echo $line1
   echo $line2
   echo "$line2" | wl-copy && echo
@@ -234,13 +273,21 @@ function hardware_linode {
   sleep 5
   wait_for_linode $id "running" && echo
 
+  yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
+  yellow "┃ Step 5: Rekey secrets                     ┃"
+  yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
+
   # Wait until live and then keyscan
-  local ip="$(linode-cli linodes view $id --no-header --text --format ipv4)"
-  info "Waiting to keyscan the linode"
+  local ip="$(ask_ip "$(linode-cli linodes view $id --no-header --text --format ipv4)")"
+  echo && info "Waiting to keyscan the linode"
   until ping -c1 $ip >/dev/null 2>&1; do sleep 5; done
   task "nixos keyscan $ip $label --add --commit"
   task "cd $dir && git push" 
   sleep 5 && echo
+
+  yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
+  yellow "┃ Step 6: Switch configuration              ┃"
+  yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 
   # Switch configuration
   info "Opening a Weblish console:"
@@ -252,21 +299,7 @@ function hardware_linode {
 
 }
 
-function wait_for_linode {
-  printf "  "
-  while [ "$(linode-cli linodes view $1 --text --no-header --format status)" != "$2" ]; do
-    echo -n $(yellow ".")
-    sleep 5
-  done && echo
-}
-
-function wait_for_disk {
-  while [ "$(linode-cli linodes disk-view $1 $2 --text --no-header --format status 2>/dev/null)" != "ready" ]; do
-    sleep 5
-  done && echo
-}
-
-
+# Stage 1 is run on NixOS installer ISO to install min configuration
 function stage1 {
 
   if [ "$(id -u)" != "0" ]; then
@@ -275,7 +308,7 @@ function stage1 {
   fi
 
   # Be prepared
-  dependencies git smenu 
+  include git smenu 
 
   # Choose a disk to partition
   local disk bbp esp swap butter
@@ -440,7 +473,7 @@ function stage1 {
 }
 
 
-# Pull in rekeyed secrets, copy hardware-configuration from min to host, and switch
+# Stage 2 is run on min configuration, enables secrets and switches configuration
 function stage2 {
   local config="${args[--config]}"
   if has_configuration; then
@@ -465,6 +498,23 @@ function stage2 {
   fi
 }
 
+
+# Helper functions
+# ----------------
+
+function wait_for_linode {
+  printf "  "
+  while [ "$(linode-cli linodes view $1 --text --no-header --format status)" != "$2" ]; do
+    echo -n $(yellow ".")
+    sleep 5
+  done && echo
+}
+
+function wait_for_disk {
+  while [ "$(linode-cli linodes disk-view $1 $2 --text --no-header --format status 2>/dev/null)" != "ready" ]; do
+    sleep 5
+  done && echo
+}
 
 function configurations {
   nix flake show --json $dir | jq -r '.nixosConfigurations | keys[] | select(. != "min")' | xargs

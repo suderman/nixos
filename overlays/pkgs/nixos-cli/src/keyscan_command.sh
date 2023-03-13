@@ -1,4 +1,4 @@
-dependencies awk:gawk ssh-keyscan:openssh
+include awk:gawk ssh-keyscan:openssh
 local dir="/etc/nixos/secrets" ip hostname
 
 function main {

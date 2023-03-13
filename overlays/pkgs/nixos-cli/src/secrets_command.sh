@@ -1,4 +1,4 @@
-dependencies awk:gawk git sed:gnused
+include awk:gawk git sed:gnused
 local dir="/etc/nixos/secrets" secret
 
 function main {

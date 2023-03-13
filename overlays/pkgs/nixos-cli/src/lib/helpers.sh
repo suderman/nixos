@@ -14,28 +14,6 @@ function hasnt {
   return 0
 }
 
-# Install nixos dependencies if they don't exist
-# If package name doesn't match command, append pkg after colon
-# Example: dependencies git awk:gawk smenu
-function dependencies {
-  local arg cmd pkg
-  for arg in "$@"; do
-    if [[ $arg == *":"* ]]; then
-      IFS=: read -r cmd pkg <<< "$arg"
-    else
-      cmd="$arg"
-      pkg="$arg"
-    fi
-    if hasnt $cmd; then
-      info "Installing $pkg"
-      task nix-env -iA nixos.$pkg
-    fi
-  done
-}
-
-# Dependencies used by this helper script
-dependencies lsblk:util-linux smenu
-
 # True if variable is not empty
 function defined {
   if [[ -z "$1" ]]; then return 1; fi  
@@ -117,13 +95,15 @@ function ask {
   local words="${1}"; [[ -p /dev/stdin ]] && words="$(cat -)"
   # Check for 2nd arg as search word
   local search="${2}"; [[ -n "$search" ]] && search="-s ${search}" 
+  # Check for 3rd arg as timer seconds
+  local timer="${3}"; [[ -n "$timer" ]] && timer="-X ${timer}" 
   # If any words, get choice from smenu
-  if [[ -n "$words" ]]; then
-    smenu -c -a i:3,b c:3,br $search <<< "$words"
+  if [[ -n "$words" && "$words" != "-" ]]; then
+    smenu -c -a i:3,b c:3,br $search $timer <<< "$words"
   # Otherwise, prompt for input
   else
     local reply=""; while [[ -z "$reply" ]]; do
-      read -p "$(blue_bold :) " -e reply
+      read -p "$(blue_bold :) " -i "${2}" -e reply
     done; echo "$reply"
   fi
 }
@@ -149,6 +129,48 @@ function ask_disk {
   done
   [[ "$disk" != "cancel" ]] && echo "$disk" || return 1
 }
+
+# info "Enter your IP address"
+# ip="$(ask_ip 192.168.0.2)"
+function ask_ip {
+  local ip="" last_ip="" ips="" search=""
+  [[ -n "$1" ]] && ip="$1" || ip="$(ask - "192.168.")"
+  while :; do
+    last_ip="$ip"
+    if $(ping -c1 -w1 $ip >/dev/null 2>&1); then
+      echo "$ip"
+      return 0
+    else
+      [[ -n "$ip" ]] && search="-s $ip" || search=""
+      ips="$(echo "${ips} ${ip}" | tr ' ' '\n' | sort | uniq | xargs)"
+      ip="$(smenu -m "Retrying IP address" -q -d -a i:3,b c:3,br $search -x 5 <<< "[new] $ips [cancel]" )"
+      [[ "$ip" == "[cancel]" ]] && return 1
+      [[ "$ip" == "[new]" ]] && ip="$(ask - "$last_ip")"
+    fi
+  done
+}
+
+# Install nixos dependencies if they don't exist
+# If package name doesn't match command, append pkg after colon
+# Example: include git awk:gawk smenu
+function include {
+  local arg cmd pkg
+  for arg in "$@"; do
+    if [[ $arg == *":"* ]]; then
+      IFS=: read -r cmd pkg <<< "$arg"
+    else
+      cmd="$arg"
+      pkg="$arg"
+    fi
+    if hasnt $cmd; then
+      info "Installing $pkg"
+      task nix-env -iA nixos.$pkg
+    fi
+  done
+}
+
+# Dependencies used by this helper script
+include lsblk:util-linux smenu
 
 # smenu formatting
 # ----------------
