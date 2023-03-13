@@ -111,11 +111,6 @@ function ask {
 # info "Choose your disk"
 # disk="$(ask_disk)"
 function ask_disk {
-  # prepare menu of disks
-  local menu="$(lsblk -o NAME,FSTYPE,LABEL,FSAVAIL,FSUSE%,MOUNTPOINT)"
-  menu="${menu}\n__\n"
-  menu="${menu}refresh__ cancel__"
-  # choose disk from menu
   local disk="refresh"
   while [[ "$disk" = "refresh" ]]; do
     disk="$(smenu -c -q -n 20 -N -d \
@@ -125,9 +120,16 @@ function ask_disk {
       -a e:4 i:6,b c:6,br  \
       -1 '(refresh|cancel)' '3,b' \
       -s /refresh \
-      <<< "$menu")"
+      <<< "$(ask_disk_menu)")"
   done
   [[ "$disk" != "cancel" ]] && echo "$disk" || return 1
+}
+
+function ask_disk_menu {
+  local menu="$(lsblk -o NAME,FSTYPE,LABEL,FSAVAIL,FSUSE%,MOUNTPOINT)"
+  menu="${menu}\n__\n"
+  menu="${menu}refresh__ cancel__"
+  echo "$menu"
 }
 
 # info "Enter your IP address"

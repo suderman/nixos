@@ -601,11 +601,6 @@ function ask {
 # info "Choose your disk"
 # disk="$(ask_disk)"
 function ask_disk {
-  # prepare menu of disks
-  local menu="$(lsblk -o NAME,FSTYPE,LABEL,FSAVAIL,FSUSE%,MOUNTPOINT)"
-  menu="${menu}\n__\n"
-  menu="${menu}refresh__ cancel__"
-  # choose disk from menu
   local disk="refresh"
   while [[ "$disk" = "refresh" ]]; do
     disk="$(smenu -c -q -n 20 -N -d \
@@ -615,9 +610,16 @@ function ask_disk {
       -a e:4 i:6,b c:6,br  \
       -1 '(refresh|cancel)' '3,b' \
       -s /refresh \
-      <<< "$menu")"
+      <<< "$(ask_disk_menu)")"
   done
   [[ "$disk" != "cancel" ]] && echo "$disk" || return 1
+}
+
+function ask_disk_menu {
+  local menu="$(lsblk -o NAME,FSTYPE,LABEL,FSAVAIL,FSUSE%,MOUNTPOINT)"
+  menu="${menu}\n__\n"
+  menu="${menu}refresh__ cancel__"
+  echo "$menu"
 }
 
 # info "Enter your IP address"
@@ -806,7 +808,7 @@ nixos_bootstrap_command() {
       show hardware: $hardware
       show firmware: $firmware
       show swap: $swap
-      echo && pause && echo
+      echo && pause
 
       if [[ $hardware == "linode" ]]; then
         info "Starting NixOS installation process on Linode server"
@@ -834,6 +836,8 @@ nixos_bootstrap_command() {
       if [[ -n "${disk}" && -e /dev/$disk ]]; then
         warn "Overwrite all data on ${disk} with NixOS installer?"
         if confirm; then
+          info "Unmounting disk"
+          task "sudo umount /dev/${disk}* 2>/dev/null"
           info "Repartitioning disk"
           task sudo parted -s /dev/$disk mklabel gpt
           task sudo parted -s /dev/$disk mkpart installer ext4 1MiB 1GiB
@@ -877,7 +881,7 @@ nixos_bootstrap_command() {
     task "nixos keyscan $ip $config --add --commit"
     task "cd $dir && git push"
 
-    sleep 5
+    sleep 5 && echo
 
     yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
     yellow "┃ Step 4: Switch configuration              ┃"
