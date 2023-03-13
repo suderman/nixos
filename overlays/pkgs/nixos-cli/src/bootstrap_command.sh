@@ -48,7 +48,7 @@ function main {
     show hardware: $hardware
     show firmware: $firmware
     show swap: $swap
-    echo && pause && echo
+    echo && pause
 
     if [[ $hardware == "linode" ]]; then
       info "Starting NixOS installation process on Linode server"
@@ -118,7 +118,7 @@ function hardware_direct {
   until ping -c1 $ip >/dev/null 2>&1; do sleep 5; done
   task "nixos keyscan $ip $config --add --commit"
   task "cd $dir && git push" 
-  sleep 5
+  sleep 5 && echo
 
   yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
   yellow "┃ Step 4: Switch configuration              ┃"
