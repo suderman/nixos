@@ -15,9 +15,26 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Other goodies
+  # Snapshots & backup
+  services.btrbk.enable = true;
+
+  # Memory management
+  services.earlyoom.enable = true;
+
+  # Keyboard control
   services.keyd.enable = true;
-  programs.neovim.enable = true;
+  services.ydotool.enable = true;
+
+  # Web services
+  services.traefik.enable = true;
+  services.whoami.enable = true;
+
+  # Desktop Environments
+  desktops.gnome.enable = true;
+
+  # Apps
+  services.flatpak.enable = true;
   programs.mosh.enable = true;
+  programs.neovim.enable = true;
 
 }

@@ -511,7 +511,8 @@ function stage2 {
 
     info "Copying generated hardware-configuration to $config"
     task mv -f $dir/configurations/bootstrap/hardware-configuration.nix $dir/configurations/$config/hardware-configuration.nix
-    task "cd $dir; git restore configurations/bootstrap" && echo
+    task "cd $dir; git restore configurations/bootstrap"
+    task "cd $dir/.git && chown -R 1000:100 ." && echo
 
     info "Rebuilding system to $config"
     show "nixos-rebuild switch --flake $dir\#${config}"
