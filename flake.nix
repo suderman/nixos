@@ -107,7 +107,7 @@
         bootstrap = mkSystem { host = "bootstrap"; };
 
         # Minimal system
-        min = mkSystem { host = "min"; };
+        min = mkSystem { host = "min"; inherit user; };
 
         # Framework Laptop
         cog = mkSystem { host = "cog"; inherit user domain; };
@@ -118,8 +118,8 @@
         # Intel NUC home server
         # lux = mkSystem { host = "lux"; inherit domain publicDomain; };
 
-        # Retired Intel NUC for testing ideas
-        # lab = mkSystem { host = "lab"; inherit domain publicDomain; };
+        # 2014 Intel NUC
+        lab = mkSystem { host = "lab"; inherit user domain publicDomain; };
 
       };
 

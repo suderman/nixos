@@ -463,12 +463,22 @@ function stage1 {
   task cp -f $bootstrap/hardware-configuration.nix $nixos/
   echo
 
-  # If linode install detected, set config.hardware.linode.enable = true;
+  # Modify configuration.nix based on detcted linode, uefi, or bios boot
+  local cfg="$bootstrap/configuration.nix"
+  info "Modifying configuration.nix with detected bootloader"
+  task "sed -i '$ d' ${cfg}"
   if is_linode; then
-    info "Enabling linode in configuration.nix"
-    task "sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $bootstrap/configuration.nix"
-    echo
+    task "echo '  hardware.linode.enable = true;' >> $cfg"
+  else
+    if is_bios; then
+      task "echo '  boot.loader = { grub.device = \"/dev/$disk\"; grub.enable = true; };' >> $cfg"
+    else
+      task "echo '  boot.loader = { efi.canTouchEfiVariables = true; systemd-boot.enable = true; };' >> $cfg"
+    fi
   fi
+  task "echo '' >> $cfg"
+  task "echo '}' >> $cfg"
+  echo
 
   # Personal user owns /etc/nixos 
   info "Updating configuration permissions"
@@ -483,7 +493,9 @@ function stage1 {
   echo
 
   info "Bootstrap install complete!"
+  echo
   info "Reboot without installer media and login as root."
+  show "bootstrap login: root"
 
 }
 

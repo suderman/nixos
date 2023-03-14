@@ -8,10 +8,16 @@
   state.enable = true;
   secrets.enable = false;
 
-  # Enable linode config
-  hardware.linode.enable = false;
-
   # Configure the SSH daemon
   services.openssh.enable = true;
+
+  # UEFI boot 
+  # boot.loader = { efi.canTouchEfiVariables = true; systemd-boot.enable = true; };
+  #
+  # BIOS boot
+  # boot.loader = { grub.device = "/dev/sda"; grub.enable = true; };
+  #
+  # Linode boot
+  # hardware.linode.enable = true;
 
 }
