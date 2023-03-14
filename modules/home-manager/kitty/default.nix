@@ -10,7 +10,7 @@ in {
 
     programs.kitty = {
 
-      theme = "Space Gray Eighties";
+      # theme = "Space Gray Eighties";
 
       settings = {
         scrollback_lines = 10000;
