@@ -4,7 +4,7 @@ local dir="/etc/nixos" config hardware firmware swap default_swap
 
 function main {
 
-  include git smenu 
+  include git smenu awk:gawk sed:gnused linode-cli jq smenu
 
   yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
   yellow "┃              Bootstrap NixOS              ┃"
@@ -53,7 +53,7 @@ function main {
     echo && pause
 
     if [[ $hardware == "linode" ]]; then
-      info "Starting NixOS installation process on Linode server"
+      info "Starting NixOS installation process on linode server"
       echo && hardware_linode
     else
       info "Starting NixOS installation process on direct hardware"
@@ -132,19 +132,19 @@ function hardware_direct {
   yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 
   echo && info "On the target computer, login as root. Password is also \"root\""
-  show root
+  show "bootstrap login: root"
   echo && info "Run the following command (copied to clipboard):"
   line1="nixos bootstrap -c $config"
   echo $line1
   echo "$line1" | wl-copy && echo
 
-  info "After it's finished, the Linode will automatically reboot into the $config configuration."
-  pause && echo && info "...install complete!"
+  info "After it's finished, the target computer will automatically reboot into the $config configuration."
+  pause && info "Install complete!"
 
 }
 
 
-# Wizard guiding installation on Linode virtual hardware
+# Wizard guiding installation on linode virtual hardware
 function hardware_linode {
 
   if [[ ! -e ~/.config/linode-cli ]]; then
@@ -160,7 +160,7 @@ function hardware_linode {
   local linode="$(ask "$(linode-cli linodes list --text --no-header | awk '{print $1"_"$2}')")"
   local id="$(echo "${linode%_*}")"
   echo
-  [[ -z "$id" ]] && error "Missing Linode ID"
+  [[ -z "$id" ]] && error "Missing linode ID"
 
   # Look up details about this linode
   info "Gathering details..."; echo
@@ -306,14 +306,14 @@ function hardware_linode {
   echo && info "Opening a Weblish console:"
   url "https://cloud.linode.com/linodes/$id/lish/weblish"
   echo && info "On the linode console, login as root. Password is also \"root\""
-  show root
+  show "bootstrap login: root"
   echo && info "Run the following command (copied to clipboard):"
   line1="nixos bootstrap -c $config"
   echo $line1
   echo "$line1" | wl-copy && echo
 
-  info "After it's finished, the Linode will automatically reboot into the $config configuration."
-  pause && echo && info "...install complete!"
+  info "After it's finished, the linode will automatically reboot into the $config configuration."
+  pause && info "Install complete!"
 
 }
 
@@ -482,7 +482,7 @@ function stage1 {
   nixos-install --flake $nixos\#bootstrap --no-root-password
   echo
 
-  info "Install complete!"
+  info "Bootstrap install complete!"
   info "Reboot without installer media and login as root."
 
 }
