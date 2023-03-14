@@ -12,7 +12,7 @@ function main {
   # Attempt to scan public key
   task ssh-keyscan -t ssh-ed25519 $ip 2> /dev/null
   local key="$(last | awk '{print $2} {print $3}' | xargs)"
-  local filename="$(filename)"
+  local filename="$(keyfile)"
 
   # Check for acquired key
   show "key=\"$key\""
@@ -22,7 +22,7 @@ function main {
 
   # Add extra key
   if [[ "${args[--add]}" == "1" ]]; then
-    filename="$(filename unique)"
+    filename="$(keyfile "unique")"
 
   # Replace existing key
   else
@@ -43,6 +43,8 @@ function main {
       fi
     fi
   fi
+
+  show $filename
 
   # Write key to file
   info "Writing $filename"
@@ -77,10 +79,14 @@ function hostname {
   }' <<< $hostname)"
 }
 
-function filename {
+function keyfile {
   local filename="${dir}/keys/${hostname}.pub"
   if [[ "$1" == "unique" ]]; then
-    [[ -e $filename ]] && echo "${dir}/keys/${hostname}-$(date +%s).pub"
+    if [[ -e $filename ]]; then 
+      echo "${dir}/keys/${hostname}-$(date +%s).pub"
+    else
+      echo "$filename"
+    fi
   else
     echo "$filename"
   fi

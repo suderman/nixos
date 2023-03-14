@@ -117,7 +117,10 @@ function hardware_direct {
   yellow "┃ Step 3: Rekey secrets                     ┃"
   yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 
-  # Wait until live and then keyscan
+  echo && info "On the target computer, login as root. Password is also \"root\""
+  show "bootstrap login: root"
+  echo && info "Run the following command to discover the target's IP address:"
+  show "ip -4 a | grep inet"
   echo && info "What is the IP address of the target computer?"
   local ip="$(ask_ip)"
   echo && info "Waiting to keyscan the target..."
@@ -131,9 +134,7 @@ function hardware_direct {
   yellow "┃ Step 4: Switch configuration              ┃"
   yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 
-  echo && info "On the target computer, login as root. Password is also \"root\""
-  show "bootstrap login: root"
-  echo && info "Run the following command (copied to clipboard):"
+  echo && info "On the target computer, run the following command (copied to clipboard):"
   line1="nixos bootstrap -c $config"
   echo $line1
   echo "$line1" | wl-copy && echo

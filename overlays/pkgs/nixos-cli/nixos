@@ -879,7 +879,10 @@ nixos_bootstrap_command() {
     yellow "┃ Step 3: Rekey secrets                     ┃"
     yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 
-    # Wait until live and then keyscan
+    echo && info "On the target computer, login as root. Password is also \"root\""
+    show "bootstrap login: root"
+    echo && info "Run the following command to discover the target's IP address:"
+    show "ip -4 a | grep inet"
     echo && info "What is the IP address of the target computer?"
     local ip="$(ask_ip)"
     echo && info "Waiting to keyscan the target..."
@@ -894,9 +897,7 @@ nixos_bootstrap_command() {
     yellow "┃ Step 4: Switch configuration              ┃"
     yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 
-    echo && info "On the target computer, login as root. Password is also \"root\""
-    show "bootstrap login: root"
-    echo && info "Run the following command (copied to clipboard):"
+    echo && info "On the target computer, run the following command (copied to clipboard):"
     line1="nixos bootstrap -c $config"
     echo $line1
     echo "$line1" | wl-copy && echo
@@ -1640,7 +1641,7 @@ nixos_keyscan_command() {
     # Attempt to scan public key
     task ssh-keyscan -t ssh-ed25519 $ip 2> /dev/null
     local key="$(last | awk '{print $2} {print $3}' | xargs)"
-    local filename="$(filename)"
+    local filename="$(keyfile)"
 
     # Check for acquired key
     show "key=\"$key\""
@@ -1650,7 +1651,7 @@ nixos_keyscan_command() {
 
     # Add extra key
     if [[ "${args[--add]}" == "1" ]]; then
-      filename="$(filename unique)"
+      filename="$(keyfile "unique")"
 
     # Replace existing key
     else
@@ -1672,6 +1673,8 @@ nixos_keyscan_command() {
         fi
       fi
     fi
+
+    show $filename
 
     # Write key to file
     info "Writing $filename"
@@ -1714,10 +1717,15 @@ nixos_keyscan_command() {
     }' <<< $hostname)"
   }
 
-  function filename {
+  function keyfile {
     local filename="${dir}/keys/${hostname}.pub"
     if [[ "$1" == "unique" ]]; then
-      [[ -e $filename ]] && echo "${dir}/keys/${hostname}-$(date +%s).pub"
+      if [[ -e $filename ]]; then
+
+        echo "${dir}/keys/${hostname}-$(date +%s).pub"
+      else
+        echo "$filename"
+      fi
     else
       echo "$filename"
     fi
