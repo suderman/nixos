@@ -850,7 +850,7 @@ nixos_bootstrap_command() {
           info "Formatting partition"
           task sudo mkfs.ext4 -L installer /dev/${disk}1
           info "Downloading ISO to partition"
-          task "sudo bash -c 'curl -L $iso | dd of=/dev/${disk}1'"
+          task "sudo bash -c 'curl -L $iso | dd bs=4096 of=/dev/${disk}1'"
           info "Finished. Remove NixOS installer disk from this computer."
         fi
       fi
