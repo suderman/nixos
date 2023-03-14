@@ -4,6 +4,8 @@ local dir="/etc/nixos" config hardware firmware swap default_swap
 
 function main {
 
+  include git smenu 
+
   yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
   yellow "┃              Bootstrap NixOS              ┃"
   yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
@@ -86,7 +88,7 @@ function hardware_direct {
         info "Formatting partition"
         task sudo mkfs.ext4 -L installer /dev/${disk}1
         info "Downloading ISO to partition"
-        task "sudo bash -c 'curl -L $iso | tee >(dd of=/dev/${disk}1) | sha256sum'"
+        task "sudo bash -c 'curl -L $iso >(dd of=/dev/${disk}1)'"
         info "Finished. Remove NixOS installer disk from this computer."
       fi
     fi
@@ -129,10 +131,15 @@ function hardware_direct {
   yellow "┃ Step 4: Switch configuration              ┃"
   yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 
-  echo && info "On the target computer, login as root (password is also \"root\") and run the following (copied to clipboard):"
+  echo && info "On the target computer, login as root. Password is also \"root\""
+  show root
+  echo && info "Run the following command (copied to clipboard):"
   line1="nixos bootstrap -c $config"
   echo $line1
   echo "$line1" | wl-copy && echo
+
+  info "After it's finished, the Linode will automatically reboot into the $config configuration."
+  pause && echo && info "...install complete!"
 
 }
 
@@ -149,7 +156,7 @@ function hardware_linode {
   yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 
   # Choose linode from list
-  info "Choose which existing linode to prepare"
+  echo && info "Choose which existing linode to prepare"
   local linode="$(ask "$(linode-cli linodes list --text --no-header | awk '{print $1"_"$2}')")"
   local id="$(echo "${linode%_*}")"
   echo
@@ -242,7 +249,7 @@ function hardware_linode {
   echo && info "Opening a Weblish console:"
   url "https://cloud.linode.com/linodes/$id/lish/weblish" && echo
   info "Paste the following to download the NixOS installer (copied to clipboard):"
-  line1="iso=${iso}"; line2="curl -L \$iso | tee >(dd of=/dev/sdb) | sha256sum"
+  line1="iso=${iso}"; line2="curl -L \$iso >(dd of=/dev/sdb)"
   echo $line1
   echo $line2
   echo "$line1; $line2" | wl-copy && echo
@@ -297,11 +304,16 @@ function hardware_linode {
 
   # Switch configuration
   echo && info "Opening a Weblish console:"
-  url "https://cloud.linode.com/linodes/$id/lish/weblish" && echo
-  echo && info "On the linode console, login as root (password is also \"root\"), and run the following (copied to clipboard):"
+  url "https://cloud.linode.com/linodes/$id/lish/weblish"
+  echo && info "On the linode console, login as root. Password is also \"root\""
+  show root
+  echo && info "Run the following command (copied to clipboard):"
   line1="nixos bootstrap -c $config"
   echo $line1
   echo "$line1" | wl-copy && echo
+
+  info "After it's finished, the Linode will automatically reboot into the $config configuration."
+  pause && echo && info "...install complete!"
 
 }
 
@@ -312,9 +324,6 @@ function stage1 {
     warn "Exiting, run as root."
     return 1
   fi
-
-  # Be prepared
-  include git smenu 
 
   # Choose a disk to partition
   local disk bbp esp swap butter

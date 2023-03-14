@@ -150,7 +150,7 @@ function ask_ip {
     else
       [[ -n "$ip" ]] && search="-s $ip" || search=""
       ips="$(echo "${ips} ${ip}" | tr ' ' '\n' | sort | uniq | xargs)"
-      ip="$(smenu -m "Retrying IP address" -q -d -a i:3,b c:3,br $search -x 5 <<< "[new] $ips [cancel]" )"
+      ip="$(smenu -m "Retrying IP address" -q -d -a i:3,b c:3,br $search -x 10 <<< "[new] $ips [cancel]" )"
       [[ "$ip" == "[cancel]" ]] && return 1
       [[ "$ip" == "[new]" ]] && ip="$(ask - "$last_ip")"
     fi
