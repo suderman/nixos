@@ -67,6 +67,7 @@ function url {
 
 # Pause script until input
 function pause {
+  include smenu
   [[ -n "$*" ]] && info "${*}"
   smenu -d -i "continue" -a e:7 i:2,br c:2,blr <<< "Press enter to continue ..."
 }
@@ -91,6 +92,7 @@ function confirm {
 # info "Which color?"
 # color="$(ask "red green blue" "green")"
 function ask { 
+  include smenu
   # Check for 1st arg or stdin
   local words="${1}"; [[ -p /dev/stdin ]] && words="$(cat -)"
   # Check for 2nd arg as search word
@@ -111,6 +113,7 @@ function ask {
 # info "Choose your disk"
 # disk="$(ask_disk)"
 function ask_disk {
+  include smenu
   local disk="refresh"
   while [[ "$disk" = "refresh" ]]; do
     disk="$(smenu -c -q -n 20 -N -d \
@@ -126,6 +129,7 @@ function ask_disk {
 }
 
 function ask_disk_menu {
+  include lsblk:util-linux
   local menu="$(lsblk -o NAME,FSTYPE,LABEL,FSAVAIL,FSUSE%,MOUNTPOINT)"
   menu="${menu}\n__\n"
   menu="${menu}refresh__ cancel__"
@@ -135,6 +139,7 @@ function ask_disk_menu {
 # info "Enter your IP address"
 # ip="$(ask_ip 192.168.0.2)"
 function ask_ip {
+  include smenu
   local ip="" last_ip="" ips="" search=""
   [[ -n "$1" ]] && ip="$1" || ip="$(ask - "192.168.")"
   while :; do
@@ -170,9 +175,6 @@ function include {
     fi
   done
 }
-
-# Dependencies used by this helper script
-include lsblk:util-linux smenu
 
 # smenu formatting
 # ----------------

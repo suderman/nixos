@@ -77,7 +77,9 @@ function hardware_direct {
       warn "Overwrite all data on ${disk} with NixOS installer?"
       if confirm; then
         info "Unmounting disk"
-        # task "sudo bash -c 'umount /dev/${disk}* && echo' && echo"
+        for partition in "$(mount | awk '$1 ~ /^\/dev\/'$disk'/ {print $1}')"; do
+          task sudo umount $partition
+        done
         info "Repartitioning disk"
         task sudo parted -s /dev/$disk mklabel gpt
         task sudo parted -s /dev/$disk mkpart installer ext4 1MiB 1GiB
@@ -119,6 +121,7 @@ function hardware_direct {
   echo && info "Waiting to keyscan the target..."
   until ping -c1 $ip >/dev/null 2>&1; do sleep 5; done
   task "nixos keyscan $ip $config --add --commit"
+  echo && info "Pushing secrets back to git"
   task "cd $dir && git push" 
   sleep 5 && echo
 
@@ -126,7 +129,7 @@ function hardware_direct {
   yellow "┃ Step 4: Switch configuration              ┃"
   yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 
-  echo && info "On the target computer, login as root and run the following (copied to clipboard):"
+  echo && info "On the target computer, login as root (password is also \"root\") and run the following (copied to clipboard):"
   line1="nixos bootstrap -c $config"
   echo $line1
   echo "$line1" | wl-copy && echo
@@ -171,7 +174,7 @@ function hardware_linode {
   yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 
   # Power down
-  info "OK! Powering off linode. Please wait..."
+  echo && info "OK! Powering off linode. Please wait..."
   task linode-cli linodes shutdown $id
   wait_for_linode $id "offline" && echo
 
@@ -223,20 +226,20 @@ function hardware_linode {
   info "Creating NIXOS configuration"
   task linode-cli linodes config-create $id $flags $nixos_disk --label nixos --root_device /dev/sda
   nixos_config="--config_id $(last | awk '{print $1}')"
-  sleep 10 && echo
+  sleep 10
+
+  # Rescue mode
+  echo && info "Rebooting the linode in RESCUE mode"
+  task linode-cli linodes rescue $id $installer_disk
+  sleep 5
+  wait_for_linode $id "running" && echo
 
   yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
   yellow "┃ Step 3: Create NixOS installer            ┃"
   yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 
-  # Rescue mode
-  info "Rebooting the linode in RESCUE mode"
-  task linode-cli linodes rescue $id $installer_disk
-  sleep 5
-  wait_for_linode $id "running" && echo
-
   # Create INSTALLER disk
-  info "Opening a Weblish console:"
+  echo && info "Opening a Weblish console:"
   url "https://cloud.linode.com/linodes/$id/lish/weblish" && echo
   info "Paste the following to download the NixOS installer (copied to clipboard):"
   line1="iso=${iso}"; line2="curl -L \$iso | tee >(dd of=/dev/sdb) | sha256sum"
@@ -244,19 +247,19 @@ function hardware_linode {
   echo $line2
   echo "$line1; $line2" | wl-copy && echo
   info "Wait until it's finished before we reboot with the INSTALLER config"
-  pause && echo
+  pause
+  
+  # Installer config
+  echo && info "Rebooting the linode..."
+  task linode-cli linodes reboot $id $installer_config
+  sleep 5
+  wait_for_linode $id "running" && echo
 
   yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
   yellow "┃ Step 4: Install minimal configuration     ┃"
   yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 
-  # Installer config
-  info "Rebooting the linode..."
-  task linode-cli linodes reboot $id $installer_config
-  sleep 5
-  wait_for_linode $id "running" && echo
-
-  info "Opening a Glish console:"
+  echo && info "Opening a Glish console:"
   url "https://cloud.linode.com/linodes/$id/lish/glish" && echo
   info "Paste the following to install NixOS (second line copied to clipboard):"
   local swap_flag=""; [[ "$swap" == "min" ]] || swap_flag="-s $swap"
@@ -284,6 +287,7 @@ function hardware_linode {
   echo && info "Waiting to keyscan the linode"
   until ping -c1 $ip >/dev/null 2>&1; do sleep 5; done
   task "nixos keyscan $ip $label --add --commit"
+  echo && info "Pushing secrets back to git"
   task "cd $dir && git push" 
   sleep 5 && echo
 
@@ -292,9 +296,9 @@ function hardware_linode {
   yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 
   # Switch configuration
-  info "Opening a Weblish console:"
+  echo && info "Opening a Weblish console:"
   url "https://cloud.linode.com/linodes/$id/lish/weblish" && echo
-  info "Login as root, pull from git, and rebuild config (copied to clipboard):"
+  echo && info "On the linode console, login as root (password is also \"root\"), and run the following (copied to clipboard):"
   line1="nixos bootstrap -c $config"
   echo $line1
   echo "$line1" | wl-copy && echo
@@ -480,7 +484,7 @@ function stage2 {
   local config="${args[--config]}"
   if has_configuration; then
 
-    info "Pulling secrets"
+    echo && info "Pulling secrets"
     task "cd $dir; git pull" && echo
 
     info "Copying generated hardware-configuration to $config"
