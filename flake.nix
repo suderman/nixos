@@ -56,7 +56,7 @@
       };
 
       # Make a NixOS system configuration
-      mkSystem = args@{ system ? "x86_64-linux", user ? "me", domain ? "lan", publicDomain ? "", host, ... }: inputs.nixpkgs.lib.nixosSystem rec {
+      mkSystem = args@{ system ? "x86_64-linux", user ? "root", domain ? "lan", publicDomain ? "", host, ... }: inputs.nixpkgs.lib.nixosSystem rec {
         inherit system;
         pkgs = mkPkgs system;
         specialArgs = args // { inherit inputs outputs user host domain publicDomain; };
@@ -64,6 +64,7 @@
           ./configurations/${host}/configuration.nix 
           ./modules/nixos 
           ./secrets 
+        ] ++ (if user == "root" then [] else [
           inputs.home-manager.nixosModules.home-manager { 
             home-manager = {
               useGlobalPkgs = true; 
@@ -79,11 +80,11 @@
               };
             }; 
           } 
-        ];
+        ]);
       };
 
       # Make a Home Manager configuration
-      mkUser = args@{ system ? "x86_64-linux", user ? "me", host, ... }: inputs.home-manager.lib.homeManagerConfiguration rec {
+      mkUser = args@{ system ? "x86_64-linux", user, host, ... }: inputs.home-manager.lib.homeManagerConfiguration rec {
         pkgs = mkPkgs system;
         extraSpecialArgs = args // { inherit inputs outputs user; };
         modules = [ 
@@ -93,6 +94,7 @@
         ];
       };
 
+      user = "me";
       domain = "suderman.org";
       publicDomain = "suderman.net";
 
@@ -101,14 +103,17 @@
       # System configurations on NixOS
       nixosConfigurations = {
 
+        # Bootstrap configuration
+        bootstrap = mkSystem { host = "bootstrap"; };
+
         # Minimal system
         min = mkSystem { host = "min"; };
 
         # Framework Laptop
-        cog = mkSystem { host = "cog"; inherit domain; };
+        cog = mkSystem { host = "cog"; inherit user domain; };
 
         # Linode VPS
-        sol = mkSystem { host = "sol"; inherit domain publicDomain; };
+        sol = mkSystem { host = "sol"; inherit user domain publicDomain; };
 
         # Intel NUC home server
         # lux = mkSystem { host = "lux"; inherit domain publicDomain; };
@@ -122,7 +127,7 @@
       homeConfigurations = {
 
         # MacPro
-        umbra = mkUser { host = "umbra"; system = "x86_64-darwin"; };
+        umbra = mkUser { host = "umbra"; system = "x86_64-darwin"; inherit user; };
 
       };
 

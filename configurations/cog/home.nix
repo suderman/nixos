@@ -8,32 +8,54 @@
   # ---------------------------------------------------------------------------
 
   home.packages = with pkgs; [ 
-    # dolphin
-    # signal-desktop
-    # webex
-    linode-cli
     _1password
     _1password-gui
+    bat 
+    cargo
+    cowsay
+    darktable
     element-desktop
+    exa
     firefox-wayland
+    fish
+    inkscape
     joypixels
+    killall
+    lf 
     libreoffice 
+    linode-cli
+    lsd
+    micro
+    mosh
+    nano
+    neofetch
     nerdfonts
     newsflash
+    nodejs
+    nsxiv
     nur.repos.mic92.hello-nur
     owncloud-client
     owofetch
-    neofetch
+    pick
     plexamp
+    python39
+    python39Packages.pip
+    python39Packages.virtualenv
+    ripgrep
     slack
+    systemdgenie
+    sysz
     tdesktop
+    tealdeer
     unstable.nnn 
     unstable.sl
+    wget
     xorg.xeyes
     yo
-    systemdgenie
-    pick
     # keygen
+    # dolphin
+    # signal-desktop
+    # webex
   ];
 
   programs = {
@@ -46,7 +68,6 @@
     zsh.enable = true;
     dconf.enable = true;
   };
-
 
   # home.file.".ssh/id_ed25519".source = "/nix/keys/id_ed25519";
 

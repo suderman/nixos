@@ -4,7 +4,7 @@
 # state.dirs = [ "/var/lib/systemd" ];
 # state.files = [ "/etc/machine-id" ];
 #
-{ inputs, config, lib, user, ... }: 
+{ inputs, config, lib, ... }: 
 
 let 
   cfg = config.state;

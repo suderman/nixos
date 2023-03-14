@@ -10,8 +10,9 @@
     ./network.nix 
     ./nix.nix 
     ./packages.nix 
+    ./root.nix 
     ./sudo.nix 
-    ./users.nix 
+    ./user.nix 
   ];
 
   config = mkIf config.base.enable {

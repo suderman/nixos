@@ -772,8 +772,8 @@ nixos_bootstrap_command() {
     if [[ "$(hostname)" == "nixos" ]]; then
       info "Installer ISO detected, launching Stage 1"
       stage1
-    elif [[ "$(hostname)" == "min" ]]; then
-      info "Minimal configuration detected, launching Stage 2"
+    elif [[ "$(hostname)" == "bootstrap" ]]; then
+      info "Bootstrap configuration detected, launching Stage 2"
       stage2
     else
 
@@ -858,7 +858,7 @@ nixos_bootstrap_command() {
     pause && echo
 
     yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
-    yellow "┃ Step 2: Install minimal configuration     ┃"
+    yellow "┃ Step 2: Install bootstrap configuration   ┃"
     yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 
     echo && info "Type the following to install NixOS (second line copied to clipboard):"
@@ -1018,7 +1018,7 @@ nixos_bootstrap_command() {
     wait_for_linode $id "running" && echo
 
     yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
-    yellow "┃ Step 4: Install minimal configuration     ┃"
+    yellow "┃ Step 4: Install bootstrap configuration   ┃"
     yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 
     echo && info "Opening a Glish console:"
@@ -1068,7 +1068,7 @@ nixos_bootstrap_command() {
 
   }
 
-  # Stage 1 is run on NixOS installer ISO to install min configuration
+  # Stage 1 is run on NixOS installer ISO to install bootstrap configuration
   function stage1 {
 
     if [ "$(id -u)" != "0" ]; then
@@ -1198,10 +1198,10 @@ nixos_bootstrap_command() {
     task "mkdir -p /mnt/boot && mount /dev/$esp /mnt/boot"
     echo
 
-    # Path to nixos flake and minimal configuration
+    # Path to nixos flake and bootstrap configuration
     local nixos="/mnt/nix/state/etc/nixos"
 
-    local min="$nixos/configurations/min"
+    local bootstrap="$nixos/configurations/bootstrap"
 
     # Clone git repo into persistant directory
     info "Cloning nixos git repo"
@@ -1214,14 +1214,14 @@ nixos_bootstrap_command() {
 
     # Generate config and copy hardware-configuration.nix
     info "Generating hardware-configuration.nix"
-    task nixos-generate-config --root /mnt --dir $min
-    task cp -f $min/hardware-configuration.nix $nixos/
+    task nixos-generate-config --root /mnt --dir $bootstrap
+    task cp -f $bootstrap/hardware-configuration.nix $nixos/
     echo
 
     # If linode install detected, set config.hardware.linode.enable = true;
     if is_linode; then
       info "Enabling linode in configuration.nix"
-      task "sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $min/configuration.nix"
+      task "sed -i 's/hardware\.linode\.enable = false;/hardware.linode.enable = true;/' $bootstrap/configuration.nix"
       echo
     fi
 
@@ -1233,9 +1233,9 @@ nixos_bootstrap_command() {
 
     # Run nixos installer
     info "Installing NixOS in 5 seconds..."
-    show "nixos-install --flake $nixos\#min --no-root-password"
+    show "nixos-install --flake $nixos\#bootstrap --no-root-password"
     sleep 5
-    nixos-install --flake $nixos\#min --no-root-password
+    nixos-install --flake $nixos\#bootstrap --no-root-password
     echo
 
     info "Install complete!"
@@ -1243,7 +1243,7 @@ nixos_bootstrap_command() {
 
   }
 
-  # Stage 2 is run on min configuration, enables secrets and switches configuration
+  # Stage 2 is run on bootstrap configuration, enables secrets and switches configuration
   function stage2 {
     local config="${args[--config]}"
     if has_configuration; then
@@ -1252,8 +1252,8 @@ nixos_bootstrap_command() {
       task "cd $dir; git pull" && echo
 
       info "Copying generated hardware-configuration to $config"
-      task mv -f $dir/configurations/min/hardware-configuration.nix $dir/configurations/$config/hardware-configuration.nix
-      task "cd $dir; git restore configurations/min" && echo
+      task mv -f $dir/configurations/bootstrap/hardware-configuration.nix $dir/configurations/$config/hardware-configuration.nix
+      task "cd $dir; git restore configurations/bootstrap" && echo
 
       info "Rebuilding system to $config"
       show "nixos-rebuild switch --flake $dir\#${config}"
@@ -1286,11 +1286,11 @@ nixos_bootstrap_command() {
   }
 
   function configurations {
-    nix flake show --json $dir | jq -r '.nixosConfigurations | keys[] | select(. != "min")' | xargs
+    nix flake show --json $dir | jq -r '.nixosConfigurations | keys[] | select(. != "bootstrap")' | xargs
   }
 
   function has_configuration {
-    [[ "${args[--config]}" != "" && "${args[--config]}" != "min" ]] && return 0 || return 1
+    [[ "${args[--config]}" != "" && "${args[--config]}" != "bootstrap" ]] && return 0 || return 1
   }
 
   function is_linode {
