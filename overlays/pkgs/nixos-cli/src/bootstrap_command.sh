@@ -88,7 +88,7 @@ function hardware_direct {
         info "Formatting partition"
         task sudo mkfs.ext4 -L installer /dev/${disk}1
         info "Downloading ISO to partition"
-        task "sudo bash -c 'curl -L $iso >(dd of=/dev/${disk}1)'"
+        task "sudo bash -c 'curl -L $iso | dd of=/dev/${disk}1'"
         info "Finished. Remove NixOS installer disk from this computer."
       fi
     fi
@@ -249,7 +249,7 @@ function hardware_linode {
   echo && info "Opening a Weblish console:"
   url "https://cloud.linode.com/linodes/$id/lish/weblish" && echo
   info "Paste the following to download the NixOS installer (copied to clipboard):"
-  line1="iso=${iso}"; line2="curl -L \$iso >(dd of=/dev/sdb)"
+  line1="iso=${iso}"; line2="curl -L \$iso | dd of=/dev/sdb"
   echo $line1
   echo $line2
   echo "$line1; $line2" | wl-copy && echo
