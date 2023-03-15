@@ -26,6 +26,8 @@
   services.ydotool.enable = true;
 
   # Web services
+  services.tailscale.enable = true;
+  services.ddns.enable = true;
   services.traefik.enable = true;
   services.whoami.enable = true;
 
