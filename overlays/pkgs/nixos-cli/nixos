@@ -844,13 +844,13 @@ nixos_bootstrap_command() {
           for partition in "$(mount | awk '$1 ~ /^\/dev\/'$disk'/ {print $1}')"; do
             task sudo umount $partition
           done
-          info "Repartitioning disk"
+          info "Partitioning disk"
           task sudo parted -s /dev/$disk mklabel gpt
           task sudo parted -s /dev/$disk mkpart installer ext4 1MiB 1GiB
           info "Formatting partition"
           task sudo mkfs.ext4 -L installer /dev/${disk}1
           info "Downloading ISO to partition"
-          task "sudo bash -c 'curl -L $iso | dd of=/dev/${disk}1'"
+          task "sudo bash -c 'curl -L $iso | dd bs=4096 of=/dev/${disk}1'"
           info "Finished. Remove NixOS installer disk from this computer."
         fi
       fi
@@ -863,13 +863,13 @@ nixos_bootstrap_command() {
     yellow "┃ Step 2: Install bootstrap configuration   ┃"
     yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 
-    echo && info "Type the following to install NixOS (second line copied to clipboard):"
+    echo && info "Type the following to install NixOS:"
     local firmware_flag=""; [[ "$firmware" == "uefi" ]] || firmware_flag="-f $firmware"
     local swap_flag=""; [[ "$swap" == "max" ]] || swap_flag="-s $swap"
     line1="sudo -s"
     line2="bash <(curl -sL $cli) bootstrap $firmware_flag $swap_flag"
-    echo $line1
-    echo $line2
+    show $line1
+    show $line2
     echo "$line2" | wl-copy && echo
 
     info "After it's finished, remove the installer disk and reboot into NixOS."
@@ -897,11 +897,8 @@ nixos_bootstrap_command() {
     yellow "┃ Step 4: Switch configuration              ┃"
     yellow "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 
-    echo && info "On the target computer, run the following command (copied to clipboard):"
-    line1="nixos bootstrap -c $config"
-    echo $line1
-    echo "$line1" | wl-copy && echo
-
+    echo && info "On the target computer, run the following command:"
+    show "nixos bootstrap -c $config" && echo
     info "After it's finished, the target computer will automatically reboot into the $config configuration."
     pause && info "Install complete!"
 
