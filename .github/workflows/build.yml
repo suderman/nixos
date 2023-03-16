@@ -1,0 +1,55 @@
+name: "build"
+on:
+  pull_request:
+  push:
+jobs:
+  build-bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: cachix/install-nix-action@v19
+      with:
+        name: suderman
+        authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+    - run: nix build .#nixosConfigurations.bootstrap.config.system.build.toplevel --json | jq -r '.[].outputs | to_entries[].value' | cachix push suderman
+  build-min:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: cachix/install-nix-action@v19
+      with:
+        name: suderman
+        authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+    - run: nix build .#nixosConfigurations.min.config.system.build.toplevel --json | jq -r '.[].outputs | to_entries[].value' | cachix push suderman
+  build-sol:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: cachix/install-nix-action@v19
+      with:
+        name: suderman
+        authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+    - run: nix build .#nixosConfigurations.sol.config.system.build.toplevel --json | jq -r '.[].outputs | to_entries[].value' | cachix push suderman
+  build-lab:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: cachix/install-nix-action@v19
+      with:
+        name: suderman
+        authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+    - run: nix build .#nixosConfigurations.lab.config.system.build.toplevel --json | jq -r '.[].outputs | to_entries[].value' | cachix push suderman
+  build-cog:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: cachix/install-nix-action@v19
+      with:
+        name: suderman
+        authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+    - run: nix build .#nixosConfigurations.cog.config.system.build.toplevel --json | jq -r '.[].outputs | to_entries[].value' | cachix push suderman

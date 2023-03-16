@@ -1,15 +1,13 @@
-name: "build lab"
+name: "check"
 on:
   pull_request:
   push:
 jobs:
-  tests:
+  check:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - uses: cachix/install-nix-action@v19
       with:
-        name: suderman
-        authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
         github_access_token: ${{ secrets.GITHUB_TOKEN }}
-    - run: nix build .#nixosConfigurations.lab.config.system.build.toplevel
+    - run: nix flake check
