@@ -7,7 +7,8 @@ let
 in {
   config = lib.mkIf cfg.enable {
 
-    home.file."foobar/test.md".source = lib.file.mkOutOfStoreSymlink "/etc/nixos/modules/home-manager/wezterm/wezterm.lua"
+    home.file."foobar/test.md".source = config.lib.file.mkOutOfStoreSymlink ./wezterm.lua;
+    home.file."foobar/test2.md".source = config.lib.file.mkOutOfStoreSymlink ./default.nix;
 
     programs.wezterm = {
       extraConfig = ''
