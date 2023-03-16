@@ -20,6 +20,8 @@
         { plugin = nerdtree; config = builtins.readFile ./nerdtree.vim; }
         { plugin = nvim-tree-lua; config = builtins.readFile ./nvim-tree.vim; }
         { plugin = neoscroll-nvim; config = builtins.readFile ./neoscroll.vim; }
+        { plugin = vim-tmux-navigator; config = builtins.readFile ./vim-tmux-navigator.vim; }
+        { plugin = fzf-lua; config = builtins.readFile ./fzf-lua.vim; }
         nerdtree-git-plugin
         nvim-web-devicons
         vim-surround
@@ -30,7 +32,6 @@
         delimitMate
         tcomment_vim
         align
-        nvim-fzf
       ]; 
 
     };
