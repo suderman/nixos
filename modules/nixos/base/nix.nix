@@ -30,6 +30,7 @@
 
     };
 
+
     # Automatic garbage collection
     nix.gc = {
       automatic = true;
@@ -43,7 +44,8 @@
 
     # Map registries to channels
     # Very useful when using legacy commands
-    nix.nixPath = mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry;
+    # nix.nixPath = mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry;
+    nix.nixPath = let path = toString ./.; in [ "repl=${path}/repl.nix" "nixpkgs=${inputs.nixpkgs}" ];
 
     # Automatically upgrade this system while I sleep
     system.autoUpgrade = {

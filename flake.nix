@@ -55,7 +55,7 @@
 
       };
 
-      # Make a NixOS system configuration
+      # Make a NixOS system configuration (with home-manager module, if user isn't "root")
       mkSystem = args@{ system ? "x86_64-linux", user ? "root", domain ? "lan", publicDomain ? "", host, ... }: inputs.nixpkgs.lib.nixosSystem rec {
         inherit system;
         pkgs = mkPkgs system;
@@ -132,4 +132,5 @@
       };
 
     };
+
 }

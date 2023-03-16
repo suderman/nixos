@@ -37,6 +37,10 @@ commands:
   alias: sw
   help: Shortcut for nixos-rebuild switch
 
+- name: repl
+  alias: rp
+  help: Start a Repl for this Flake
+
 - name: cache
   alias: c
   help: Shortcut for nix build piped to cachix

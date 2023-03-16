@@ -36,6 +36,7 @@ nixos_usage() {
   printf "%s\n" "$(bold "Commands:")"
   printf "  %s   Bootstrap a NixOS installation\n" "$(green "bootstrap")      "
   printf "  %s   Shortcut for nixos-rebuild switch\n" "$(green "switch")         "
+  printf "  %s   Start a Repl for this Flake\n" "$(green "repl")           "
   printf "  %s   Shortcut for nix build piped to cachix\n" "$(green "cache")          "
   echo
   printf "%s\n" "$(bold "Secrets Commands:")"
@@ -142,6 +143,38 @@ nixos_switch_usage() {
   printf "%s\n" "$(bold "Usage:")"
   printf "  nixos switch\n"
   printf "  nixos switch --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n $long_usage ]]; then
+    printf "%s\n" "$(bold "Options:")"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "$(magenta "--help, -h")"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+nixos_repl_usage() {
+  if [[ -n $long_usage ]]; then
+    printf "nixos repl - Start a Repl for this Flake\n"
+    echo
+
+  else
+    printf "nixos repl - Start a Repl for this Flake\n"
+    echo
+
+  fi
+
+  printf "Alias: rp\n"
+  echo
+
+  printf "%s\n" "$(bold "Usage:")"
+  printf "  nixos repl\n"
+  printf "  nixos repl --help | -h\n"
   echo
 
   # :command.long_usage
@@ -1409,6 +1442,14 @@ nixos_switch_command() {
 }
 
 # :command.function
+nixos_repl_command() {
+  # src/repl_command.sh
+  source /etc/set-environment
+  nix repl --file "/etc/nixos/repl.nix" "$@"
+
+}
+
+# :command.function
 nixos_cache_command() {
   # src/cache_command.sh
   show "nix build .#nixosConfigurations.$(hostname).config.system.build.toplevel --json | jq -r '.[].outputs | to_entries[].value' | cachix push suderman"
@@ -1847,6 +1888,13 @@ parse_requirements() {
       shift $#
       ;;
 
+    repl | rp)
+      action="repl"
+      shift
+      nixos_repl_parse_requirements "$@"
+      shift $#
+      ;;
+
     cache | c)
       action="cache"
       shift
@@ -2053,6 +2101,50 @@ nixos_switch_parse_requirements() {
 
   # :command.command_filter
   action="switch"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+nixos_repl_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    case "${1:-}" in
+      --help | -h)
+        long_usage=yes
+        nixos_repl_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="repl"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
@@ -2442,6 +2534,15 @@ run() {
         nixos_switch_usage
       else
         nixos_switch_command
+      fi
+      ;;
+
+    "repl")
+      if [[ ${args['--help']:-} ]]; then
+        long_usage=yes
+        nixos_repl_usage
+      else
+        nixos_repl_command
       fi
       ;;
 
