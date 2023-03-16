@@ -146,7 +146,7 @@ function hardware_direct {
 function hardware_linode {
 
   if [[ ! -e ~/.config/linode-cli ]]; then
-    error "Missing ~/.config/linode-cli configuation. Run linode-cli to login and setup token on this computer, then start again."
+    error "Missing ~/.config/linode-cli configuration. Run linode-cli to login and setup token on this computer, then start again."
   fi
 
   yellow "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"

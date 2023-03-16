@@ -10,5 +10,9 @@ jobs:
     - uses: cachix/install-nix-action@v19
       with:
         github_access_token: ${{ secrets.GITHUB_TOKEN }}
-    - run: nix build
     - run: nix flake check
+    - run: nix build .#nixosConfigurations.bootstrap.config.system.build.toplevel
+    - run: nix build .#nixosConfigurations.min.config.system.build.toplevel
+    - run: nix build .#nixosConfigurations.cog.config.system.build.toplevel
+    - run: nix build .#nixosConfigurations.sol.config.system.build.toplevel
+    - run: nix build .#nixosConfigurations.lab.config.system.build.toplevel

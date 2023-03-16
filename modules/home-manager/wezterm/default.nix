@@ -7,6 +7,8 @@ let
 in {
   config = lib.mkIf cfg.enable {
 
+    home.file."foobar/test.md".source = lib.file.mkOutOfStoreSymlink "/etc/nixos/modules/home-manager/wezterm/wezterm.lua"
+
     programs.wezterm = {
       extraConfig = ''
         local wezterm = require 'wezterm';
