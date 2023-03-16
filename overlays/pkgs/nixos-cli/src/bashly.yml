@@ -37,6 +37,10 @@ commands:
   alias: sw
   help: Shortcut for nixos-rebuild switch
 
+- name: cache
+  alias: c
+  help: Shortcut for nix build piped to cachix
+
 - name: secrets
   alias: s
   group: Secrets

@@ -18,20 +18,11 @@
         nix-bash-completions bash-completion
         home-manager # include home-manager command
         nixos-cli # found in overlays
+        cachix # binary cache
       ];
 
       # Add terminfo files
       enableAllTerminfo = true;
-
-      # # Activate home-manager environment, if not already
-      # loginShellInit = ''
-      #   [ -d "$HOME/.nix-profile" ] || /nix/var/nix/profiles/per-user/$USER/home-manager/activate &> /dev/null
-      # '';
-
-      # # Persist logs, timers, etc
-      # persistence = {
-      #   "/persist".directories = [ "/var/lib/systemd" "/var/log" "/srv" ];
-      # };
 
     };
 
