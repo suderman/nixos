@@ -12,7 +12,7 @@ in {
 
       # Harden
       passwordAuthentication = false;
-      permitRootLogin = "no";
+      permitRootLogin = "yes";
 
       # Automatically remove stale sockets
       extraConfig = ''
