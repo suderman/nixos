@@ -21,7 +21,8 @@
       du = "du -ch --summarize";
       fst = "sed -n '1p'";
       snd = "sed -n '2p'";
-      ls = "LC_ALL=C ${coreutils}/bin/ls --color=auto --group-directories-first";
+      # ls = "LC_ALL=C ${coreutils}/bin/ls --color=auto --group-directories-first";
+      ls = "lsd";
       la = "${ls} -A";
       l = "${ls} -Alho";
       map = "xargs -n1";

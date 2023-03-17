@@ -14,6 +14,7 @@
       sysz
       tealdeer
       wget
+      lsd
     ];
 
     # Enable home-manager, git & zsh

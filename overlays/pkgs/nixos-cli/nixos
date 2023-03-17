@@ -33,11 +33,10 @@ nixos_usage() {
   printf "  nixos --version | -v\n"
   echo
   # :command.usage_commands
-  printf "%s\n" "$(bold "Commands:")"
+  printf "%s\n" "$(bold "Deploy Commands:")"
+  printf "  %s   Deploy flake to local or remote systems\n" "$(green "deploy")         "
+  printf "  %s   Roll back to the previous generation\n" "$(green "rollback")       "
   printf "  %s   Bootstrap a NixOS installation\n" "$(green "bootstrap")      "
-  printf "  %s   Shortcut for nixos-rebuild switch\n" "$(green "switch")         "
-  printf "  %s   Start a Repl for this Flake\n" "$(green "repl")           "
-  printf "  %s   Shortcut for nix build piped to cachix\n" "$(green "cache")          "
   echo
   printf "%s\n" "$(bold "Secrets Commands:")"
   printf "  %s   Edit or add secrets to secrets/files\n" "$(green "secrets")        "
@@ -45,6 +44,8 @@ nixos_usage() {
   printf "  %s   Scan a host for public keys and add to secrets/keys\n" "$(green "keyscan")        "
   echo
   printf "%s\n" "$(bold "Utility Commands:")"
+  printf "  %s   Start a Repl for this Flake\n" "$(green "repl")           "
+  printf "  %s   Shortcut for nix build piped to cachix\n" "$(green "cache")          "
   printf "  %s   Shortcut for bashly generate\n" "$(green "bashly-generate")"
   printf "  %s   Generate bash completions\n" "$(green "completions")    "
   echo
@@ -59,6 +60,136 @@ nixos_usage() {
     echo
     printf "  %s\n" "$(magenta "--version, -v")"
     printf "    Show version number\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+nixos_deploy_usage() {
+  if [[ -n $long_usage ]]; then
+    printf "nixos deploy\n"
+    echo
+
+    printf "  Deploy flake to local or remote systems\n  Wrapper for nixos-rebuild\n"
+    echo
+
+  else
+    printf "nixos deploy - Deploy flake to local or remote systems\n"
+    echo
+
+  fi
+
+  printf "Alias: d\n"
+  echo
+
+  printf "%s\n" "$(bold "Usage:")"
+  printf "  nixos deploy [TARGET] [OPTIONS]\n"
+  printf "  nixos deploy --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n $long_usage ]]; then
+    printf "%s\n" "$(bold "Options:")"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "$(magenta "--switch, -s")"
+    printf "    Make this config the default boot option, and activate (default)\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "$(magenta "--boot, -b")"
+    printf "    Make this config the default boot option, but don't activate\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "$(magenta "--test, -t")"
+    printf "    Activate this config, but don't make it the default boot option\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "$(magenta "--help, -h")"
+    printf "    Show this help\n"
+    echo
+
+    # :command.usage_args
+    printf "%s\n" "$(bold "Arguments:")"
+
+    # :argument.usage
+    printf "  %s\n" "$(blue "TARGET")"
+    printf "    Name of target host (default: this machine)\n"
+    echo
+
+    # :command.usage_examples
+    printf "%s\n" "$(bold "Examples:")"
+    printf "  nixos deploy\n"
+    printf "  nixos deploy foo --boot\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+nixos_rollback_usage() {
+  if [[ -n $long_usage ]]; then
+    printf "nixos rollback\n"
+    echo
+
+    printf "  Roll back to the previous generation\n  Wrapper for nixos-rebuild --rollback switch\n"
+    echo
+
+  else
+    printf "nixos rollback - Roll back to the previous generation\n"
+    echo
+
+  fi
+
+  printf "Alias: rb\n"
+  echo
+
+  printf "%s\n" "$(bold "Usage:")"
+  printf "  nixos rollback [TARGET] [OPTIONS]\n"
+  printf "  nixos rollback --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n $long_usage ]]; then
+    printf "%s\n" "$(bold "Options:")"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "$(magenta "--switch, -s")"
+    printf "    Rollback the previous boot option and activate previous config (default)\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "$(magenta "--boot, -b")"
+    printf "    Rollback the previous boot option, but don't activate\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "$(magenta "--test, -t")"
+    printf "    Rollback to the previous config, but don't make it the default boot option\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "$(magenta "--help, -h")"
+    printf "    Show this help\n"
+    echo
+
+    # :command.usage_args
+    printf "%s\n" "$(bold "Arguments:")"
+
+    # :argument.usage
+    printf "  %s\n" "$(blue "TARGET")"
+    printf "    Name of target host (default: this machine)\n"
+    echo
+
+    # :command.usage_examples
+    printf "%s\n" "$(bold "Examples:")"
+    printf "  nixos rollback\n"
+    printf "  nixos rollback foo --boot\n"
     echo
 
   fi
@@ -120,102 +251,6 @@ nixos_bootstrap_usage() {
     printf "  nixos bootstrap --firmware uefi --swap min\n"
     printf "  nixos bootstrap --firmware bios --swap 8\n"
     printf "  nixos bootstrap --config sol\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-nixos_switch_usage() {
-  if [[ -n $long_usage ]]; then
-    printf "nixos switch - Shortcut for nixos-rebuild switch\n"
-    echo
-
-  else
-    printf "nixos switch - Shortcut for nixos-rebuild switch\n"
-    echo
-
-  fi
-
-  printf "Alias: sw\n"
-  echo
-
-  printf "%s\n" "$(bold "Usage:")"
-  printf "  nixos switch\n"
-  printf "  nixos switch --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n $long_usage ]]; then
-    printf "%s\n" "$(bold "Options:")"
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "$(magenta "--help, -h")"
-    printf "    Show this help\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-nixos_repl_usage() {
-  if [[ -n $long_usage ]]; then
-    printf "nixos repl - Start a Repl for this Flake\n"
-    echo
-
-  else
-    printf "nixos repl - Start a Repl for this Flake\n"
-    echo
-
-  fi
-
-  printf "Alias: rp\n"
-  echo
-
-  printf "%s\n" "$(bold "Usage:")"
-  printf "  nixos repl\n"
-  printf "  nixos repl --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n $long_usage ]]; then
-    printf "%s\n" "$(bold "Options:")"
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "$(magenta "--help, -h")"
-    printf "    Show this help\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-nixos_cache_usage() {
-  if [[ -n $long_usage ]]; then
-    printf "nixos cache - Shortcut for nix build piped to cachix\n"
-    echo
-
-  else
-    printf "nixos cache - Shortcut for nix build piped to cachix\n"
-    echo
-
-  fi
-
-  printf "Alias: c\n"
-  echo
-
-  printf "%s\n" "$(bold "Usage:")"
-  printf "  nixos cache\n"
-  printf "  nixos cache --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n $long_usage ]]; then
-    printf "%s\n" "$(bold "Options:")"
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "$(magenta "--help, -h")"
-    printf "    Show this help\n"
     echo
 
   fi
@@ -395,6 +430,70 @@ nixos_keyscan_usage() {
     printf "  nixos keyscan 192.168.1.10 myhost\n"
     printf "  nixos keyscan 192.168.1.10 myhost --force\n"
     printf "  nixos keyscan 192.168.1.10 myhost --add --commit\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+nixos_repl_usage() {
+  if [[ -n $long_usage ]]; then
+    printf "nixos repl - Start a Repl for this Flake\n"
+    echo
+
+  else
+    printf "nixos repl - Start a Repl for this Flake\n"
+    echo
+
+  fi
+
+  printf "Alias: rp\n"
+  echo
+
+  printf "%s\n" "$(bold "Usage:")"
+  printf "  nixos repl\n"
+  printf "  nixos repl --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n $long_usage ]]; then
+    printf "%s\n" "$(bold "Options:")"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "$(magenta "--help, -h")"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+nixos_cache_usage() {
+  if [[ -n $long_usage ]]; then
+    printf "nixos cache - Shortcut for nix build piped to cachix\n"
+    echo
+
+  else
+    printf "nixos cache - Shortcut for nix build piped to cachix\n"
+    echo
+
+  fi
+
+  printf "Alias: c\n"
+  echo
+
+  printf "%s\n" "$(bold "Usage:")"
+  printf "  nixos cache\n"
+  printf "  nixos cache --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n $long_usage ]]; then
+    printf "%s\n" "$(bold "Options:")"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "$(magenta "--help, -h")"
+    printf "    Show this help\n"
     echo
 
   fi
@@ -822,6 +921,66 @@ send_completions() {
 }
 
 # :command.command_functions
+# :command.function
+nixos_deploy_command() {
+  # src/deploy_command.sh
+  local dir="/etc/nixos"
+
+  # List all NixOS configurations, skipping bootstrap
+  function configurations {
+    nix flake show --json $dir | jq -r '.nixosConfigurations | keys[] | select(. != "bootstrap")' | xargs
+  }
+
+  # Choose from list of configurations, including [all] to deploy to full list
+
+  local targets="$(ask "$(configurations) [all]" "${args[target]-$(hostname)}")"
+  [[ "$targets" == "[all]" ]] && targets="$(configurations)"
+
+  # Default action is switch configuration, but boot and test are available
+  local action="switch"
+  if [[ "${args[--boot]}" == "1" ]]; then
+    action="boot"
+  elif [[ "${args[--test]}" == "1" ]]; then
+    action="test"
+  fi
+
+  # nixos-rebuild on all selected targets
+  for target in $targets; do
+    task "nixos-rebuild --build-host localhost --target-host root@${target}.$(hostname -d) --flake ${dir}#${target} ${action}"
+  done
+
+}
+
+# :command.function
+nixos_rollback_command() {
+  # src/rollback_command.sh
+  local dir="/etc/nixos"
+
+  # List all NixOS configurations, skipping bootstrap
+  function configurations {
+    nix flake show --json $dir | jq -r '.nixosConfigurations | keys[] | select(. != "bootstrap")' | xargs
+  }
+
+  # Choose from list of configurations, including [all] to deploy to full list
+
+  local targets="$(ask "$(configurations) [all]" "${args[target]-$(hostname)}")"
+  [[ "$targets" == "[all]" ]] && targets="$(configurations)"
+
+  # Default action is switch configuration, but boot and test are available
+  local action="switch"
+  if [[ "${args[--boot]}" == "1" ]]; then
+    action="boot"
+  elif [[ "${args[--test]}" == "1" ]]; then
+    action="test"
+  fi
+
+  # nixos-rebuild on all selected targets
+  for target in $targets; do
+    task "nixos-rebuild --target-host root@${target}.$(hostname -d) --flake ${dir}#${target} --rollback ${action}"
+  done
+
+}
+
 # :command.function
 nixos_bootstrap_command() {
   # src/bootstrap_command.sh
@@ -1434,30 +1593,6 @@ nixos_bootstrap_command() {
 }
 
 # :command.function
-nixos_switch_command() {
-  # src/switch_command.sh
-  show 'nixos-rebuild switch --flake /etc/nixos#'$(hostname)
-  sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)
-
-}
-
-# :command.function
-nixos_repl_command() {
-  # src/repl_command.sh
-  source /etc/set-environment
-  nix repl --file "/etc/nixos/repl.nix" "$@"
-
-}
-
-# :command.function
-nixos_cache_command() {
-  # src/cache_command.sh
-  show "nix build .#nixosConfigurations.$(hostname).config.system.build.toplevel --json | jq -r '.[].outputs | to_entries[].value' | cachix push suderman"
-  nix build .#nixosConfigurations.$(hostname).config.system.build.toplevel --json | jq -r '.[].outputs | to_entries[].value' | cachix push suderman
-
-}
-
-# :command.function
 nixos_secrets_command() {
   # src/secrets_command.sh
   include awk:gawk git sed:gnused
@@ -1821,6 +1956,22 @@ nixos_keyscan_command() {
 }
 
 # :command.function
+nixos_repl_command() {
+  # src/repl_command.sh
+  source /etc/set-environment
+  nix repl --file "/etc/nixos/repl.nix" "$@"
+
+}
+
+# :command.function
+nixos_cache_command() {
+  # src/cache_command.sh
+  show "nix build .#nixosConfigurations.$(hostname).config.system.build.toplevel --json | jq -r '.[].outputs | to_entries[].value' | cachix push suderman"
+  nix build .#nixosConfigurations.$(hostname).config.system.build.toplevel --json | jq -r '.[].outputs | to_entries[].value' | cachix push suderman
+
+}
+
+# :command.function
 nixos_bashly_generate_command() {
   # src/bashly_generate_command.sh
   local dir=/etc/nixos/overlays/pkgs/nixos-cli
@@ -1874,31 +2025,24 @@ parse_requirements() {
   case $action in
     -*) ;;
 
+    deploy | d)
+      action="deploy"
+      shift
+      nixos_deploy_parse_requirements "$@"
+      shift $#
+      ;;
+
+    rollback | rb)
+      action="rollback"
+      shift
+      nixos_rollback_parse_requirements "$@"
+      shift $#
+      ;;
+
     bootstrap | b)
       action="bootstrap"
       shift
       nixos_bootstrap_parse_requirements "$@"
-      shift $#
-      ;;
-
-    switch | sw)
-      action="switch"
-      shift
-      nixos_switch_parse_requirements "$@"
-      shift $#
-      ;;
-
-    repl | rp)
-      action="repl"
-      shift
-      nixos_repl_parse_requirements "$@"
-      shift $#
-      ;;
-
-    cache | c)
-      action="cache"
-      shift
-      nixos_cache_parse_requirements "$@"
       shift $#
       ;;
 
@@ -1920,6 +2064,20 @@ parse_requirements() {
       action="keyscan"
       shift
       nixos_keyscan_parse_requirements "$@"
+      shift $#
+      ;;
+
+    repl | rp)
+      action="repl"
+      shift
+      nixos_repl_parse_requirements "$@"
+      shift $#
+      ;;
+
+    cache | c)
+      action="cache"
+      shift
+      nixos_cache_parse_requirements "$@"
       shift $#
       ;;
 
@@ -1970,6 +2128,152 @@ parse_requirements() {
         # :command.parse_requirements_case_simple
         printf "invalid argument: %s\n" "$key" >&2
         exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+nixos_deploy_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    case "${1:-}" in
+      --help | -h)
+        long_usage=yes
+        nixos_deploy_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="deploy"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --switch | -s)
+
+        # :flag.case_no_arg
+        args['--switch']=1
+        shift
+        ;;
+
+      # :flag.case
+      --boot | -b)
+
+        # :flag.case_no_arg
+        args['--boot']=1
+        shift
+        ;;
+
+      # :flag.case
+      --test | -t)
+
+        # :flag.case_no_arg
+        args['--test']=1
+        shift
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        if [[ -z ${args['target']+x} ]]; then
+
+          args['target']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+nixos_rollback_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    case "${1:-}" in
+      --help | -h)
+        long_usage=yes
+        nixos_rollback_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="rollback"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --switch | -s)
+
+        # :flag.case_no_arg
+        args['--switch']=1
+        shift
+        ;;
+
+      # :flag.case
+      --boot | -b)
+
+        # :flag.case_no_arg
+        args['--boot']=1
+        shift
+        ;;
+
+      # :flag.case
+      --test | -t)
+
+        # :flag.case_no_arg
+        args['--test']=1
+        shift
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        if [[ -z ${args['target']+x} ]]; then
+
+          args['target']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
 
         ;;
 
@@ -2062,138 +2366,6 @@ nixos_bootstrap_parse_requirements() {
           exit 1
         fi
         ;;
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        printf "invalid argument: %s\n" "$key" >&2
-        exit 1
-
-        ;;
-
-    esac
-  done
-
-}
-
-# :command.parse_requirements
-nixos_switch_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    case "${1:-}" in
-      --help | -h)
-        long_usage=yes
-        nixos_switch_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="switch"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        printf "invalid argument: %s\n" "$key" >&2
-        exit 1
-
-        ;;
-
-    esac
-  done
-
-}
-
-# :command.parse_requirements
-nixos_repl_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    case "${1:-}" in
-      --help | -h)
-        long_usage=yes
-        nixos_repl_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="repl"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        printf "invalid argument: %s\n" "$key" >&2
-        exit 1
-
-        ;;
-
-    esac
-  done
-
-}
-
-# :command.parse_requirements
-nixos_cache_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    case "${1:-}" in
-      --help | -h)
-        long_usage=yes
-        nixos_cache_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="cache"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
 
       -?*)
         printf "invalid option: %s\n" "$key" >&2
@@ -2413,6 +2585,94 @@ nixos_keyscan_parse_requirements() {
 }
 
 # :command.parse_requirements
+nixos_repl_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    case "${1:-}" in
+      --help | -h)
+        long_usage=yes
+        nixos_repl_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="repl"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+nixos_cache_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    case "${1:-}" in
+      --help | -h)
+        long_usage=yes
+        nixos_cache_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="cache"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
 nixos_bashly_generate_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
@@ -2519,39 +2779,30 @@ run() {
   parse_requirements "${input[@]}"
 
   case "$action" in
+    "deploy")
+      if [[ ${args['--help']:-} ]]; then
+        long_usage=yes
+        nixos_deploy_usage
+      else
+        nixos_deploy_command
+      fi
+      ;;
+
+    "rollback")
+      if [[ ${args['--help']:-} ]]; then
+        long_usage=yes
+        nixos_rollback_usage
+      else
+        nixos_rollback_command
+      fi
+      ;;
+
     "bootstrap")
       if [[ ${args['--help']:-} ]]; then
         long_usage=yes
         nixos_bootstrap_usage
       else
         nixos_bootstrap_command
-      fi
-      ;;
-
-    "switch")
-      if [[ ${args['--help']:-} ]]; then
-        long_usage=yes
-        nixos_switch_usage
-      else
-        nixos_switch_command
-      fi
-      ;;
-
-    "repl")
-      if [[ ${args['--help']:-} ]]; then
-        long_usage=yes
-        nixos_repl_usage
-      else
-        nixos_repl_command
-      fi
-      ;;
-
-    "cache")
-      if [[ ${args['--help']:-} ]]; then
-        long_usage=yes
-        nixos_cache_usage
-      else
-        nixos_cache_command
       fi
       ;;
 
@@ -2579,6 +2830,24 @@ run() {
         nixos_keyscan_usage
       else
         nixos_keyscan_command
+      fi
+      ;;
+
+    "repl")
+      if [[ ${args['--help']:-} ]]; then
+        long_usage=yes
+        nixos_repl_usage
+      else
+        nixos_repl_command
+      fi
+      ;;
+
+    "cache")
+      if [[ ${args['--help']:-} ]]; then
+        long_usage=yes
+        nixos_cache_usage
+      else
+        nixos_cache_command
       fi
       ;;
 

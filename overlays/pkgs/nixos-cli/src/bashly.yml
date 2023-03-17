@@ -5,10 +5,58 @@ extensible: true
 
 commands:
 
+- name: deploy
+  alias: d
+  group: Deploy
+  help: |-
+    Deploy flake to local or remote systems
+    Wrapper for nixos-rebuild
+  args:
+  - name: target
+    required: false
+    help: "Name of target host (default: this machine)"
+  flags:
+  - long: --switch
+    short: -s
+    help: "Make this config the default boot option, and activate (default)"
+  - long: --boot
+    short: -b
+    help: "Make this config the default boot option, but don't activate"
+  - long: --test
+    short: -t
+    help: "Activate this config, but don't make it the default boot option"
+  examples:
+  - nixos deploy
+  - nixos deploy foo --boot
+
+- name: rollback
+  alias: rb
+  group: Deploy
+  help: |-
+    Roll back to the previous generation
+    Wrapper for nixos-rebuild --rollback switch
+  args:
+  - name: target
+    required: false
+    help: "Name of target host (default: this machine)"
+  flags:
+  - long: --switch
+    short: -s
+    help: "Rollback the previous boot option and activate previous config (default)"
+  - long: --boot
+    short: -b
+    help: "Rollback the previous boot option, but don't activate"
+  - long: --test
+    short: -t
+    help: "Rollback to the previous config, but don't make it the default boot option"
+  examples:
+  - nixos rollback
+  - nixos rollback foo --boot
+
 - name: bootstrap
   alias: b
+  group: Deploy
   help: Bootstrap a NixOS installation
-
   flags:
   - long: --config
     short: -c
@@ -26,24 +74,11 @@ commands:
     short: -s
     arg: swap
     help: "min, max, or any number of GB for swap (default: max)"
-
   examples:
   - nixos bootstrap --hardware linode
   - nixos bootstrap --firmware uefi --swap min
   - nixos bootstrap --firmware bios --swap 8
   - nixos bootstrap --config sol
-
-- name: switch
-  alias: sw
-  help: Shortcut for nixos-rebuild switch
-
-- name: repl
-  alias: rp
-  help: Start a Repl for this Flake
-
-- name: cache
-  alias: c
-  help: Shortcut for nix build piped to cachix
 
 - name: secrets
   alias: s
@@ -51,17 +86,14 @@ commands:
   help: |-
     Edit or add secrets to secrets/files
     Wrapper for agenix --edit
-
   args:
   - name: secret
     required: false
     help: "name of secret (leave empty to choose from list)"
-
   flags:
   - long: --commit
     short: -c
     help: "Automatically commit changes to git"
-
   examples:
   - nixos secrets
   - nixos secrets foo
@@ -72,7 +104,6 @@ commands:
   help: |-
     Rekey secrets with secrets/keys
     Wrapper for agenix --rekey
-
   flags:
   - long: --force
     short: -f
@@ -80,12 +111,10 @@ commands:
   - long: --commit
     short: -c
     help: "Automatically commit changes to git"
-
   examples:
   - nixos rekey
   - nixos rekey --force
   - nixos rekey --commit
-
 
 - name: keyscan
   alias: k
@@ -93,7 +122,6 @@ commands:
   help: |-
     Scan a host for public keys and add to secrets/keys
     Wrapper for ssh-keyscan
-
   args:
   - name: ip
     required: true
@@ -101,7 +129,6 @@ commands:
   - name: hostname
     required: false
     help: "Name of host (default: first argument)"
-
   flags:
   - long: --force
     short: -f
@@ -112,41 +139,20 @@ commands:
   - long: --commit
     short: -c
     help: "Automatically commit changes to git"
-
   examples:
   - nixos keyscan 192.168.1.10 myhost
   - nixos keyscan 192.168.1.10 myhost --force
   - nixos keyscan 192.168.1.10 myhost --add --commit
 
+- name: repl
+  alias: rp
+  group: Utility
+  help: Start a Repl for this Flake
 
-# - name: linode
-#   alias: l
-#   help: Install configuration to Linode VPS
-#
-# - name: bootstrap
-#   alias: b
-#   help: Bootstrap a NixOS installation
-#
-#   args:
-#   - name: type
-#     required: true
-#     help: "uefi, bios, linode"
-#
-#   - name: configuration
-#     required: false
-#     help: "Name of configuration"
-#
-#   flags:
-#   - long: --swap
-#     short: -s
-#     arg: swap
-#     help: "min, max, or any number of GB for swap (default: max)"
-#
-#   examples:
-#   - nixos bootstrap linode
-#   - nixos bootstrap uefi --swap min
-#   - nixos bootstrap bios --swap 8
-#   - nixos bootstrap switch sol
+- name: cache
+  alias: c
+  group: Utility
+  help: Shortcut for nix build piped to cachix
 
 - name: bashly-generate
   alias: bg
@@ -158,10 +164,3 @@ commands:
   help: |-
     Generate bash completions
     Usage: eval "\$(cli completions)" 
-
-# - name: helpers
-#   private: true
-#   commands:
-#     - name: ask
-#       alias: a
-#       help: Get input from user
