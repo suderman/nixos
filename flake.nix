@@ -106,8 +106,8 @@
         # Bootstrap configuration
         bootstrap = mkSystem { host = "bootstrap"; };
 
-        # Minimal system
-        min = mkSystem { host = "min"; inherit user; };
+        # # Minimal system
+        # min = mkSystem { host = "min"; inherit user; };
 
         # Framework Laptop
         cog = mkSystem { host = "cog"; inherit user domain; };
@@ -116,17 +116,17 @@
         sol = mkSystem { host = "sol"; inherit user domain publicDomain; };
 
         # Intel NUC home server
-        # lux = mkSystem { host = "lux"; inherit domain publicDomain; };
+        hub = mkSystem { host = "hub"; inherit user domain publicDomain; };
 
-        # 2014 Intel NUC
-        lab = mkSystem { host = "lab"; inherit user domain publicDomain; };
+        # # Intel NUC media server
+        # lux = mkSystem { host = "lux"; inherit user domain publicDomain; };
 
       };
 
       # Home configurations on other systems
       homeConfigurations = {
 
-        # MacPro
+        # 2009 MacPro
         umbra = mkUser { host = "umbra"; system = "x86_64-darwin"; inherit user; };
 
       };

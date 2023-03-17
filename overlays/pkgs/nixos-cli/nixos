@@ -977,6 +977,7 @@ nixos_rollback_command() {
   # nixos-rebuild on all selected targets
   for target in $targets; do
     task "nixos-rebuild --target-host root@${target}.$(hostname -d) --flake ${dir}#${target} --rollback ${action}"
+
   done
 
 }
