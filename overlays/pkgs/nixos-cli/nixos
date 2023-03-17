@@ -35,8 +35,8 @@ nixos_usage() {
   # :command.usage_commands
   printf "%s\n" "$(bold "Deploy Commands:")"
   printf "  %s   Deploy flake to local or remote systems\n" "$(green "deploy")         "
-  printf "  %s   Roll back to the previous generation\n" "$(green "rollback")       "
-  printf "  %s   Bootstrap a NixOS installation\n" "$(green "bootstrap")      "
+  printf "  %s   Rollback to the previous generation\n" "$(green "rollback")       "
+  printf "  %s   Install a NixOS configuration on fresh hardware\n" "$(green "bootstrap")      "
   echo
   printf "%s\n" "$(bold "Secrets Commands:")"
   printf "  %s   Edit or add secrets to secrets/files\n" "$(green "secrets")        "
@@ -44,9 +44,9 @@ nixos_usage() {
   printf "  %s   Scan a host for public keys and add to secrets/keys\n" "$(green "keyscan")        "
   echo
   printf "%s\n" "$(bold "Utility Commands:")"
-  printf "  %s   Start a Repl for this Flake\n" "$(green "repl")           "
+  printf "  %s   Start a repl for this flake\n" "$(green "repl")           "
   printf "  %s   Shortcut for nix build piped to cachix\n" "$(green "cache")          "
-  printf "  %s   Shortcut for bashly generate\n" "$(green "bashly-generate")"
+  printf "  %s   Shortcut to generate this CLI from source\n" "$(green "bashly-generate")"
   printf "  %s   Generate bash completions\n" "$(green "completions")    "
   echo
 
@@ -136,11 +136,11 @@ nixos_rollback_usage() {
     printf "nixos rollback\n"
     echo
 
-    printf "  Roll back to the previous generation\n  Wrapper for nixos-rebuild --rollback switch\n"
+    printf "  Rollback to the previous generation\n  Wrapper for nixos-rebuild --rollback switch\n"
     echo
 
   else
-    printf "nixos rollback - Roll back to the previous generation\n"
+    printf "nixos rollback - Rollback to the previous generation\n"
     echo
 
   fi
@@ -198,11 +198,11 @@ nixos_rollback_usage() {
 # :command.usage
 nixos_bootstrap_usage() {
   if [[ -n $long_usage ]]; then
-    printf "nixos bootstrap - Bootstrap a NixOS installation\n"
+    printf "nixos bootstrap - Install a NixOS configuration on fresh hardware\n"
     echo
 
   else
-    printf "nixos bootstrap - Bootstrap a NixOS installation\n"
+    printf "nixos bootstrap - Install a NixOS configuration on fresh hardware\n"
     echo
 
   fi
@@ -438,11 +438,11 @@ nixos_keyscan_usage() {
 # :command.usage
 nixos_repl_usage() {
   if [[ -n $long_usage ]]; then
-    printf "nixos repl - Start a Repl for this Flake\n"
+    printf "nixos repl - Start a repl for this flake\n"
     echo
 
   else
-    printf "nixos repl - Start a Repl for this Flake\n"
+    printf "nixos repl - Start a repl for this flake\n"
     echo
 
   fi
@@ -502,11 +502,11 @@ nixos_cache_usage() {
 # :command.usage
 nixos_bashly_generate_usage() {
   if [[ -n $long_usage ]]; then
-    printf "nixos bashly-generate - Shortcut for bashly generate\n"
+    printf "nixos bashly-generate - Shortcut to generate this CLI from source\n"
     echo
 
   else
-    printf "nixos bashly-generate - Shortcut for bashly generate\n"
+    printf "nixos bashly-generate - Shortcut to generate this CLI from source\n"
     echo
 
   fi

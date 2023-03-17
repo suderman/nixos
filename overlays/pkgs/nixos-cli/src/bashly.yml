@@ -33,7 +33,7 @@ commands:
   alias: rb
   group: Deploy
   help: |-
-    Roll back to the previous generation
+    Rollback to the previous generation
     Wrapper for nixos-rebuild --rollback switch
   args:
   - name: target
@@ -56,7 +56,7 @@ commands:
 - name: bootstrap
   alias: b
   group: Deploy
-  help: Bootstrap a NixOS installation
+  help: Install a NixOS configuration on fresh hardware
   flags:
   - long: --config
     short: -c
@@ -147,7 +147,7 @@ commands:
 - name: repl
   alias: rp
   group: Utility
-  help: Start a Repl for this Flake
+  help: Start a repl for this flake
 
 - name: cache
   alias: c
@@ -157,7 +157,7 @@ commands:
 - name: bashly-generate
   alias: bg
   group: Utility
-  help: Shortcut for bashly generate
+  help: Shortcut to generate this CLI from source
 
 - name: completions
   group: Utility
