@@ -13,16 +13,6 @@ jobs:
         authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
         github_access_token: ${{ secrets.GITHUB_TOKEN }}
     - run: nix build .#nixosConfigurations.bootstrap.config.system.build.toplevel
-  build-min:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: cachix/install-nix-action@v19
-      with:
-        name: suderman
-        authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
-        github_access_token: ${{ secrets.GITHUB_TOKEN }}
-    - run: nix build .#nixosConfigurations.min.config.system.build.toplevel
   build-sol:
     runs-on: ubuntu-latest
     steps:
@@ -33,7 +23,7 @@ jobs:
         authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
         github_access_token: ${{ secrets.GITHUB_TOKEN }}
     - run: nix build .#nixosConfigurations.sol.config.system.build.toplevel
-  build-lab:
+  build-hub:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -42,7 +32,7 @@ jobs:
         name: suderman
         authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
         github_access_token: ${{ secrets.GITHUB_TOKEN }}
-    - run: nix build .#nixosConfigurations.lab.config.system.build.toplevel
+    - run: nix build .#nixosConfigurations.hub.config.system.build.toplevel
   build-cog:
     runs-on: ubuntu-latest
     steps:
