@@ -8,12 +8,14 @@
     ./earlyoom
     ./flatpak
     ./gnome
+    ./jellyfin
     ./keyd
     ./linode
     ./mysql
     ./neovim
     ./ocis
     ./openssh
+    ./plex
     ./postgresql
     ./sabnzbd
     ./secrets
@@ -22,6 +24,7 @@
     # ./sunshine
     ./tailscale
     ./tandoor-recipes
+    ./tautulli
     ./traefik
     ./whoami
     ./whoogle

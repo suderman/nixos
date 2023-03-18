@@ -5,6 +5,11 @@ if [ "${DEBUG,,}" = "true" ]; then
   set -x
 fi
 
+if [ "$(id -u)" != "0" ]; then
+  echo "Run as root."
+  exit 1
+fi
+
 function getPref {
   local key="$1"
   sed -n -E "s/^.*${key}=\"([^\"]*)\".*$/\1/p" "${prefFile}"
@@ -23,12 +28,13 @@ function setPref {
   fi
 }
 
-home="$(echo ~plex)"
-# pmsApplicationSupportDir="${PLEX_MEDIA_SERVER_APPLICATION_SUPPORT_DIR:-${home}/Library/Application Support}"
-pmsApplicationSupportDir="${PLEX_MEDIA_SERVER_APPLICATION_SUPPORT_DIR:-/var/lib/plex}"
-prefFile="${pmsApplicationSupportDir}/Plex Media Server/Preferences.xml"
+prefFile="/var/lib/plex/Plex Media Server/Preferences.xml"
 
 PLEX_CLAIM="$1"
+if [ -z "${PLEX_CLAIM}" ]; then
+  echo "Missing argument from https://www.plex.tv/claim/"
+  exit 1
+fi
 
 # Create empty shell pref file if it doesn't exist already
 if [ ! -e "${prefFile}" ]; then
@@ -55,6 +61,12 @@ fi
 
 # Get server token and only turn claim token into server token if we have former but not latter.
 token="$(getPref "PlexOnlineToken")"
+
+if [ -n "${token}" ]; then
+  echo "This Plex Server has already been claimed."
+  exit 1
+fi
+
 if [ ! -z "${PLEX_CLAIM}" ] && [ -z "${token}" ]; then
   echo "Attempting to obtain server token from claim token"
   loginInfo="$(curl -X POST \
@@ -72,6 +84,7 @@ if [ ! -z "${PLEX_CLAIM}" ] && [ -z "${token}" ]; then
   if [ "$token" ]; then
     setPref "PlexOnlineToken" "${token}"
     echo "Plex Media Server successfully claimed"
+    sudo systemctl restart plex.service
   fi
 fi
 

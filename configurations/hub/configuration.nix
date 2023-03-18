@@ -31,12 +31,13 @@
   services.traefik.enable = true;
   services.whoami.enable = true;
 
-  # Desktop Environments
-  desktops.gnome.enable = true;
-
   # Apps
   services.flatpak.enable = true;
   programs.mosh.enable = true;
   programs.neovim.enable = true;
+
+  services.plex.enable = true;
+  services.tautulli.enable = true;
+  services.jellyfin.enable = true;
 
 }
