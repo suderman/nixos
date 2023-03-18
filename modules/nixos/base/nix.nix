@@ -49,7 +49,7 @@
 
     # Automatically upgrade this system while I sleep
     system.autoUpgrade = {
-      enable = true;
+      enable = false;
       dates = "04:00";
       flake = "/etc/nixos#${config.networking.hostName}";
       flags = [ 
