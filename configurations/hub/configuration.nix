@@ -32,7 +32,6 @@
   services.whoami.enable = true;
 
   # Apps
-  services.flatpak.enable = true;
   programs.mosh.enable = true;
   programs.neovim.enable = true;
 
