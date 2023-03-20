@@ -25,6 +25,12 @@ in {
       "electron-flags17.conf".text = flags;
       "electron-flags18.conf".text = flags;
       "electron-flags19.conf".text = flags;
+      "electron-flags20.conf".text = flags;
+      "electron-flags21.conf".text = flags;
+      "electron-flags22.conf".text = flags;
+      "electron-flags23.conf".text = flags;
+      "electron-flags24.conf".text = flags;
+      "electron-flags25.conf".text = flags;
     };
 
   };

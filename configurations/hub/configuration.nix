@@ -38,5 +38,7 @@
   services.plex.enable = true;
   services.tautulli.enable = true;
   services.jellyfin.enable = true;
+  services.tiddlywiki.enable = true;
+  services.mysql.enable = true;
 
 }

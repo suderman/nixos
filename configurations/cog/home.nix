@@ -36,7 +36,6 @@
     nur.repos.mic92.hello-nur
     owncloud-client
     owofetch
-    pick
     plexamp
     python39
     python39Packages.pip
@@ -67,6 +66,7 @@
     kitty.enable = true;
     zsh.enable = true;
     dconf.enable = true;
+    foot.enable = true;
   };
 
   # home.file.".ssh/id_ed25519".source = "/nix/keys/id_ed25519";

@@ -69,8 +69,8 @@ in {
       };
 
       "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
-        name = "kitty super";
-        command = "kitty -e tmux";
+        name = "foot super";
+        command = "foot";
         binding = "<Super>Return";
       };
 

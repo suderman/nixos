@@ -17,7 +17,7 @@
         { plugin = gruvbox-nvim; config = builtins.readFile ./gruvbox.vim; }
         { plugin = bufexplorer; config = builtins.readFile ./bufexplorer.vim; }
         { plugin = vim-unimpaired; config = builtins.readFile ./unimpaired.vim; }
-        { plugin = nerdtree; config = builtins.readFile ./nerdtree.vim; }
+        # { plugin = nerdtree; config = builtins.readFile ./nerdtree.vim; }
         { plugin = nvim-tree-lua; config = builtins.readFile ./nvim-tree.vim; }
         { plugin = neoscroll-nvim; config = builtins.readFile ./neoscroll.vim; }
         { plugin = vim-tmux-navigator; config = builtins.readFile ./vim-tmux-navigator.vim; }

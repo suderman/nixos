@@ -15,7 +15,7 @@ in {
     services.plex.extraPlugins = [];
     services.plex.extraScanners = [];
     services.plex.openFirewall = true;
-    services.plex.package = pkgs.unstable.plex;
+    services.plex.package = pkgs.plex;
 
     services.traefik.dynamicConfigOptions.http = with config.networking; {
       routers.plex = {

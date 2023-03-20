@@ -25,6 +25,7 @@
     ./tailscale
     ./tandoor-recipes
     ./tautulli
+    ./tiddlywiki
     ./traefik
     ./whoami
     ./whoogle
