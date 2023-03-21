@@ -8,7 +8,7 @@ let
   keys = config.secrets.keys;
 
   # agenix secrets combined secrets toggle
-  age = config.age // { inherit (config.secrets) enable; };
+  secrets = config.age.secrets // { inherit (config.secrets) enable; };
 
 in {
 
@@ -20,8 +20,8 @@ in {
         shell = pkgs.zsh;
         home = "/home/${user}";
         description = user;
-        passwordFile = mkIf (age.enable) age.secrets.password.path;
-        password = mkIf (!age.enable) "${user}";
+        passwordFile = mkIf (secrets.enable) secrets.password.path;
+        password = mkIf (!secrets.enable) "${user}";
         extraGroups = [ "wheel" ] ++ ifTheyExist [ "networkmanager" "docker" ]; 
         openssh.authorizedKeys.keys = [ keys.users."${user}" ];
       };

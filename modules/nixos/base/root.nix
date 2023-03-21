@@ -7,7 +7,7 @@ let
   keys = config.secrets.keys;
 
   # agenix secrets combined secrets toggle
-  age = config.age // { inherit (config.secrets) enable; };
+  secrets = config.age.secrets // { inherit (config.secrets) enable; };
 
 in {
 
@@ -19,8 +19,8 @@ in {
     # Configure root user
     users.users.root = {
       shell = pkgs.zsh;
-      passwordFile = mkIf (age.enable) age.secrets.password.path;
-      password = mkIf (!age.enable) "root";
+      passwordFile = mkIf (secrets.enable) secrets.password.path;
+      password = mkIf (!secrets.enable) "root";
       openssh.authorizedKeys.keys = mkIf (user != "root") [ keys.users."${user}" ];
     };
 
