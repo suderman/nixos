@@ -5,23 +5,15 @@ with config.networking;
 
 let
   cfg = config.services.tandoor-recipes;
+  secrets = config.age.secrets;
   port = "8090";
-  nginxPort = "8091";
+  appPort = "8091";
   inherit (lib) mkIf;
   inherit (lib.strings) toInt;
-
-  # agenix secrets combined with age files paths
-  age = config.age // {
-    files = config.secrets.files;
-    enable = config.secrets.enable;
-  };
 
 in {
 
   config = mkIf cfg.enable {
-
-    # service port
-    services.tandoor-recipes.port = toInt port;
 
     # traefik proxy serving nginx proxy
     services.traefik.dynamicConfigOptions.http = {
@@ -31,23 +23,7 @@ in {
         middlewares = "local@file";
         service = "tandoor";
       };
-      services.tandoor.loadBalancer.servers = [{ url = "http://127.0.0.1:${nginxPort}"; }];
-    };
-
-    # nginx reverse proxy to statically host recipe images, proxy pass for python app
-    services.nginx.enable = true;
-    services.nginx.virtualHosts."tandoor.${hostName}.${domain}" = {
-      listen = [{ port = (toInt nginxPort); addr="127.0.0.1"; ssl = false; }];
-      extraConfig = ''
-        location /media/recipes/ {
-          alias /var/recipes/;
-        }
-        location / {
-          proxy_pass http://127.0.0.1:${port};
-          proxy_set_header Host tandoor.${hostName}.${domain};
-          proxy_set_header X-Forwarded-Proto https;
-        }
-      '';
+      services.tandoor.loadBalancer.servers = [{ url = "http://127.0.0.1:${port}"; }];
     };
 
     # Create empty directory for mount point 
@@ -55,21 +31,30 @@ in {
       mkdir -p /var/recipes
     '';
 
-    # Bind mount from private directory to accesible location for nginx
+    # Bind mount of private directory to location accessible for nginx
     fileSystems."/var/recipes" = {
       device = "/var/lib/private/tandoor-recipes/recipes";
       options = ["bind" "ro"];
     };
 
-    # agenix
-    age.secrets = mkIf age.enable {
-      smtp-env.file = age.files.smtp-env;
+    # nginx reverse proxy to statically host recipe images, proxy pass for python app
+    services.nginx.enable = true;
+    services.nginx.virtualHosts."tandoor.${hostName}.${domain}" = {
+      listen = [{ port = (toInt port); addr="127.0.0.1"; ssl = false; }];
+      extraConfig = ''
+        location /media/recipes/ {
+          alias /var/recipes/;
+        }
+        location / {
+          proxy_pass http://127.0.0.1:${appPort};
+          proxy_set_header Host tandoor.${hostName}.${domain};
+          proxy_set_header X-Forwarded-Proto https;
+        }
+      '';
     };
 
-    # Include SMTP environment variables
-    systemd.services.tandoor-recipes.serviceConfig = {
-      EnvironmentFile = mkIf age.enable age.secrets.smtp-env.path;
-    };
+    # Tandoor port
+    services.tandoor-recipes.port = toInt appPort;
 
     # Environment variable configuration
     services.tandoor-recipes.extraConfig = {
@@ -82,6 +67,11 @@ in {
       DEFAULT_FROM_EMAIL = "tandoor@${domain}";
       ENABLE_SIGNUP = "0";
       ENABLE_PDF_EXPORT = "1";
+    };
+
+    # Include SMTP environment variables
+    systemd.services.tandoor-recipes.serviceConfig = {
+      EnvironmentFile = secrets.smtp-env.path;
     };
 
     # Postgres database configuration

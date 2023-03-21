@@ -8,7 +8,9 @@ in {
 
   config = lib.mkIf cfg.enable {
 
-    # services.postgresql.package = pkgs.postgresql_15;
+    # Current default
+    services.postgresql.package = pkgs.postgresql_14;
+
     services.postgresql.ensureUsers = [{
       name = user;
       ensurePermissions = {
