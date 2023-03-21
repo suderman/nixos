@@ -12,6 +12,5 @@
   smtp-env = ./smtp-env.age;
   tailscale-cloudflare = ./tailscale-cloudflare.age;
   tandoor-env = ./tandoor-env.age;
-  token = ./token.age;
 
 }
