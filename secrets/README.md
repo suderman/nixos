@@ -70,14 +70,14 @@ A few helper
 included to streamline the management of secrets, which is a bit of a manual
 process when using the `agenix` CLI alone:
 
-#### `secrets-keyscan HOST [NAME]`
+#### `nixos keyscan HOST [NAME]`
 
 This script is a wrapper around `ssh-keyscan` which discovers SSH host public
 keys. When invoked, the host (or IP address) is asked to return an
 `ssh-ed25519` public key, which gets saved as `NAME.pub` in the `keys`
 directory. Then, the `secrets-rekey` script is run, which is explained next. 
 
-#### `secrets-rekey [--force]`
+#### `nixos rekey [--force]`
 
 This script is wrapper around `agenix --rekey`. First, the `keys/default.nix`
 file gets regenerated to include all keys found in that directory. If any
@@ -85,7 +85,7 @@ changes are detected (or the `--force` flag is used), `agenix --rekey` is run,
 which re-encrypts all `age` files with the rules found in `secrets.nix` and
 keys available. Lastly, the `secrets` folder is staged on `git`.
 
-#### `secrets [NAME]`
+#### `nixos secrets [NAME]`
 
 This script is wrapper around `agenix --edit`. First, a list of existing
 secrets (found in `secrets.nix`) is presented, unless a secret's `name` is
@@ -100,26 +100,22 @@ the `secrets` folder is staged on `git`.
 To add a system key from a host named `foo`, first get that host's IP address
 and run the following command:
 
-    secrets-keyscan 123.123.123.123 foo
+    nixos keyscan 123.123.123.123 foo
 
 To add a user key named `bar`, manually add the user's public key as `@bar.pub`
 to the `secrets/keys` directory. Then run the following command:
 
-    secrets-rekey
+    nixos rekey
 
-To change an existing secret, run the following command and choose the secret:
+To add or change an existing secret, run the following command and choose the secret:
 
-    secrets
-
-To add a new secret named `foobar`, run the following command:
-
-    secrets foobar
+    nixos secrets
 
 To remove a key, manually remove that `pub` file from the `secrets/keys`
 directory. Also remove any reference to that key in the `secrets/secrets.nix`
 file. Then run the follwing command:
 
-    secrets-rekey
+    nixos rekey
 
 To remove a secret, manually remove that `age` file from the `secrets/files`
 directory. Next, remove any references to that file in the
@@ -127,4 +123,4 @@ directory. Next, remove any references to that file in the
 [modules](https://github.com/suderman/nixos/tree/main/modules) directory. Then
 run the following command:
 
-    secrets-rekey
+    nixos rekey

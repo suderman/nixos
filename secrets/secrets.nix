@@ -30,12 +30,10 @@ with (import ./keys); {
   # ---------------------------------------------------------------------------
   "files/tailscale-cloudflare.age".publicKeys = all;
 
+  "files/smtp-env.age".publicKeys = all;
+
   # Testing
   "files/foo.age".publicKeys = all;
   "files/bar.age".publicKeys = all;
-
-  "files/tandoor-env.age".publicKeys = all;
-
-  "files/smtp-env.age".publicKeys = all;
 
 }

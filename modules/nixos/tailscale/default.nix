@@ -17,13 +17,8 @@
 
 let
   cfg = config.services.tailscale;
+  secrets = config.age.secrets;
   inherit (lib) mkIf;
-
-  # agenix secrets combined with age files paths
-  age = config.age // { 
-    files = config.secrets.files; 
-    enable = config.secrets.enable; 
-  };
 
 in {
 
@@ -34,15 +29,10 @@ in {
       allowedUDPPorts = [ 41641 ]; # Facilitate firewall punching
     };
 
-    # agenix
-    age.secrets = mkIf age.enable {
-      cloudflare-env = { file = age.files.cloudflare-env; };
-    };
-
     systemd.services."tailscale-dns" = {
       serviceConfig = {
         Type = "oneshot";
-        EnvironmentFile = mkIf age.enable age.secrets.cloudflare-env.path;
+        EnvironmentFile = secrets.cloudflare-env.path;
       };
       environment = with config.networking; {
         DOMAIN = domain;

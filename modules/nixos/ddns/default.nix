@@ -3,32 +3,23 @@
 
 let
   cfg = config.services.ddns;
+  secrets = config.age.secrets;
   inherit (lib) mkIf;
 
-  # agenix secrets combined with age files paths
-  age = config.age // { 
-    files = config.secrets.files; 
-    enable = config.secrets.enable; 
-  };
-
 in {
+
   options = {
     services.ddns.enable = lib.options.mkEnableOption "ddns"; 
   };
 
   config = mkIf cfg.enable {
 
-    # agenix
-    age.secrets = mkIf age.enable {
-      cloudflare-env = { file = age.files.cloudflare-env; };
-    };
-
     # Create DNS record of this machine's public IP
     # ddns.mymachine.mydomain.org -> 184.65.200.230 
     systemd.services."ddns" = {
       serviceConfig = {
         Type = "oneshot";
-        EnvironmentFile = mkIf age.enable age.secrets.cloudflare-env.path;
+        EnvironmentFile = secrets.cloudflare-env.path;
       };
       environment = with config.networking; {
         HOSTNAME = hostName;

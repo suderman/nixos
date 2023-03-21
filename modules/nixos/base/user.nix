@@ -7,20 +7,12 @@ let
   # public keys from the secrets dir
   keys = config.secrets.keys;
 
-  # agenix secrets combined with age files paths
-  age = config.age // { 
-    files = config.secrets.files; 
-    enable = config.secrets.enable; 
-  };
+  # agenix secrets combined secrets toggle
+  age = config.age // { inherit (config.secrets) enable; };
 
 in {
 
   config = mkIf config.base.enable {
-
-    # agenix
-    age.secrets = mkIf age.enable {
-      password.file = age.files.password;
-    };
 
     users.users = mkIf (user != "root") {
       "${user}" = {

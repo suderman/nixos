@@ -3,25 +3,16 @@
   
 let 
   cfg = config.services.whoami;
+  secrets = config.age.secrets;
   inherit (lib) mkIf;
 
-  # agenix secrets combined with age files paths
-  age = config.age // { 
-    files = config.secrets.files; 
-    enable = config.secrets.enable; 
-  };
-
 in {
+
   options = {
     services.whoami.enable = lib.options.mkEnableOption "whoami"; 
   };
 
   config = mkIf cfg.enable {
-
-    # agenix
-    age.secrets = mkIf age.enable {
-      cloudflare-env.file = age.files.cloudflare-env;
-    };
 
     # service
     virtualisation.oci-containers.containers."whoami" = with config.networking; {
@@ -32,7 +23,7 @@ in {
         "--label=traefik.http.routers.whoami.tls.certresolver=resolver-dns"
         "--label=traefik.http.routers.whoami.middlewares=local@file"
       ];
-      environmentFiles = mkIf age.enable [ age.secrets.cloudflare-env.path ];
+      environmentFiles = [ secrets.cloudflare-env.path ];
       environment = {
         FOO = "BAR";
       };
