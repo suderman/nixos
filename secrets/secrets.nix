@@ -34,4 +34,8 @@ with (import ./keys); {
   "files/foo.age".publicKeys = all;
   "files/bar.age".publicKeys = all;
 
+  "files/tandoor-env.age".publicKeys = all;
+
+  "files/smtp-env.age".publicKeys = all;
+
 }

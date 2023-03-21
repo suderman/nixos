@@ -40,5 +40,6 @@
   services.jellyfin.enable = true;
   services.tiddlywiki.enable = true;
   services.mysql.enable = true;
+  services.tandoor-recipes.enable = true;
 
 }

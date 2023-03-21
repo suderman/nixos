@@ -43,14 +43,14 @@
 
   # Database services
   services.mysql.enable = true;
-  services.postgresql.enable = false;
+  # services.postgresql.enable = false;
   
   # Web services
   services.traefik.enable = true;
   services.whoogle.enable = false;
   services.whoami.enable = true;
   services.sabnzbd.enable = false;
-  services.tandoor-recipes.enable = false;
+  services.tandoor-recipes.enable = true;
   # services.gitea.enable = true;
   # services.gitea.database.type = "mysql";
 
