@@ -27,6 +27,7 @@
     ./tautulli
     ./tiddlywiki
     ./traefik
+    ./unifi
     ./whoami
     ./whoogle
     ./ydotool

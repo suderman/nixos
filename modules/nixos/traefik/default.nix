@@ -26,7 +26,7 @@ in {
       # Static configuration
       staticConfigOptions = {
 
-        api.insecure = true;
+        api.insecure = false;
         api.dashboard = true;
         pilot.dashboard = false;
 
@@ -84,13 +84,6 @@ in {
             "100.64.0.0/10"  # vpn network
           ];
 
-        };
-
-        # Traefik dashboard
-        http.services = {
-          traefik = {
-            loadbalancer.servers = [{ url = "http://127.0.0.1:8080"; }];
-          };
         };
 
         # Set up wildcard domain certificates for both *.hostname.domain and *.local.domain

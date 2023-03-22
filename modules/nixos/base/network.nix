@@ -1,11 +1,9 @@
 # base.enable = true;
-{ config, lib, host, domain, publicDomain, ... }: with lib; {
+{ config, lib, host, domain, ... }: with lib; {
 
   # ---------------------------------------------------------------------------
   # System Networking
   # ---------------------------------------------------------------------------
-  options.networking.publicDomain = mkOption { type = types.str; };
-
   config = mkIf config.base.enable {
 
     networking = {
@@ -13,7 +11,6 @@
       # Hostname passed as argument from flake
       hostName = host; 
       domain = domain;
-      publicDomain = publicDomain;
 
       # Fewer IP addresses, please
       enableIPv6 = false;

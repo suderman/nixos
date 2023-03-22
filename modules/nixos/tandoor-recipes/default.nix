@@ -4,57 +4,63 @@
 with config.networking;
 
 let
+
   cfg = config.services.tandoor-recipes;
   secrets = config.age.secrets;
-  port = "8090";
-  appPort = "8091";
-  inherit (lib) mkIf;
-  inherit (lib.strings) toInt;
+
+  isPublic = if cfg.public == "" then false else true;
+  host = if isPublic then cfg.public else "tandoor.${hostName}.${domain}";
+  port = "8090"; appPort = "8091";
+
+  inherit (lib) mkIf mkOption types strings;
 
 in {
+
+  options.services.tandoor-recipes.public = mkOption { type = types.str; default = ""; };
 
   config = mkIf cfg.enable {
 
     # traefik proxy serving nginx proxy
     services.traefik.dynamicConfigOptions.http = {
       routers.tandoor = {
-        rule = "Host(`tandoor.${hostName}.${domain}`) || Host(`tandoor.local.${domain}`)";
+        rule = "Host(`${host}`)";
+        middlewares = mkIf (!isPublic) "local@file";
+        tls.domains = mkIf (isPublic) [{ main = "${host}"; sans = "*.${host}"; }];
         tls.certresolver = "resolver-dns";
-        middlewares = "local@file";
         service = "tandoor";
       };
       services.tandoor.loadBalancer.servers = [{ url = "http://127.0.0.1:${port}"; }];
     };
 
-    # Create empty directory for mount point 
-    system.activationScripts.mkRecipesDir = lib.stringAfter [ "var" ] ''
-      mkdir -p /var/recipes
-    '';
-
-    # Bind mount of private directory to location accessible for nginx
-    fileSystems."/var/recipes" = {
-      device = "/var/lib/private/tandoor-recipes/recipes";
-      options = ["bind" "ro"];
-    };
-
     # nginx reverse proxy to statically host recipe images, proxy pass for python app
     services.nginx.enable = true;
-    services.nginx.virtualHosts."tandoor.${hostName}.${domain}" = {
-      listen = [{ port = (toInt port); addr="127.0.0.1"; ssl = false; }];
+    services.nginx.virtualHosts."tandoor" = {
+      listen = [{ port = (strings.toInt port); addr="127.0.0.1"; ssl = false; }];
       extraConfig = ''
         location /media/recipes/ {
-          alias /var/recipes/;
+          alias /run/nginx/recipes/;
         }
         location / {
           proxy_pass http://127.0.0.1:${appPort};
-          proxy_set_header Host tandoor.${hostName}.${domain};
           proxy_set_header X-Forwarded-Proto https;
+          proxy_set_header Host ${host};
         }
       '';
     };
 
+    # Ensure recipes directory exists
+    system.activationScripts.mkRecipesDir = lib.stringAfter [ "users" ] ''
+      mkdir -p /var/lib/private/tandoor-recipes/recipes
+      chown -R tandoor_recipes:tandoor_recipes /var/lib/private/tandoor-recipes
+    '';
+
+    # Bind mount of private recipes directory to a location accessible for nginx
+    systemd.services.nginx.serviceConfig.BindPaths = [
+      "/var/lib/private/tandoor-recipes/recipes:/run/nginx/recipes"
+    ];
+
     # Tandoor port
-    services.tandoor-recipes.port = toInt appPort;
+    services.tandoor-recipes.port = strings.toInt appPort;
 
     # Environment variable configuration
     services.tandoor-recipes.extraConfig = {
