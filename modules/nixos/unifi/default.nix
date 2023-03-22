@@ -66,6 +66,17 @@ in {
       };
     };
 
+    # also traefik proxy for gateway "logos"
+    services.traefik.dynamicConfigOptions.http = {
+      routers.logos = {
+        rule = "Host(`logos.${hostName}.${domain}`)";
+        middlewares = "local@file";
+        tls.certresolver = "resolver-dns";
+        service = "logos";
+      };
+      services.logos.loadBalancer.servers = [{ url = "https://192.168.1.1:443"; }];
+    };
+
   };
 
 }
