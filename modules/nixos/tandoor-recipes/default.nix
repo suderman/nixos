@@ -49,9 +49,10 @@ in {
     };
 
     # Ensure recipes directory exists
+    # tandoor_recipes uid/gid = 63528
     system.activationScripts.mkRecipesDir = lib.stringAfter [ "users" ] ''
       mkdir -p /var/lib/private/tandoor-recipes/recipes
-      chown -R tandoor_recipes:tandoor_recipes /var/lib/private/tandoor-recipes
+      chown -R 63528:63528 /var/lib/private/tandoor-recipes
     '';
 
     # Bind mount of private recipes directory to a location accessible for nginx

@@ -8,6 +8,7 @@
     ./earlyoom
     ./flatpak
     ./gnome
+    ./hass
     ./jellyfin
     ./keyd
     ./linode

@@ -42,4 +42,6 @@
   services.tandoor-recipes.enable = true;
 
   services.docker-unifi.enable = true;
+  services.docker-hass.enable = true;
+
 }

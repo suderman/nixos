@@ -1,4 +1,4 @@
-# services.unifi-docker.enable = true;
+# services.docker-unifi.enable = true;
 { config, lib, pkgs, ... }:
 
 with config.networking;
@@ -6,28 +6,41 @@ with config.networking;
 let
 
   cfg = config.services.docker-unifi;
-  stateDir = "/var/lib/unifi";
+
   host = "unifi.${hostName}.${domain}";
-  id = 950;
+  stateDir = "/var/lib/unifi";
+
+  gateway = {
+    host = "logos.${hostName}.${domain}";
+    ip = "192.168.1.1";
+  };
 
   inherit (lib) mkIf mkOption types strings;
+  inherit (builtins) toString;
 
 in {
 
   options = {
-    services.docker-unifi.enable = lib.options.mkEnableOption "unifi-docker"; 
+    services.docker-unifi.enable = lib.options.mkEnableOption "docker-unifi"; 
   };
 
   config = mkIf cfg.enable {
 
+    # Used to be set in nixpkgs, restoring here
+    # https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/misc/ids.nix
+    ids.uids.unifi = 183;
+    ids.gids.unifi = 183;
+
+    # Inspired from services.unifi
+    # https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/services/networking/unifi.nix
     users.users.unifi = {
       isSystemUser = true;
       group = "unifi";
       description = "UniFi controller daemon user";
       home = "${stateDir}";
-      uid = id;
+      uid = config.ids.uids.unifi;
     };
-    users.groups.unifi.gid = id;
+    users.groups.unifi.gid = config.ids.gids.unifi;
 
     networking.firewall = {
       allowedTCPPorts = [
@@ -42,7 +55,9 @@ in {
       ];
     };
 
-    # service
+    # This docker image is more reliable than the nixpkgs version, at least for now.
+    # The controller requires a dated version of mongodb that nixpkgs has dropped.
+    # https://github.com/NixOS/nixpkgs/commit/45d27d43c4dfc0eb6f6b55aa9fbdfb90513271df
     virtualisation.oci-containers.containers."unifi" = {
       image = "jacobalberty/unifi:v7.3";
       extraOptions = [
@@ -54,27 +69,29 @@ in {
         "--label=traefik.http.services.unifi.loadbalancer.server.scheme=https"
         "--network=host"
       ];
-      volumes = [ "${stateDir}:/unifi" ];
+      # Run as unifi user instead of root:
+      # https://github.com/jacobalberty/unifi-docker/issues/509#issuecomment-1003727345
       environment = {
-        UNIFI_HTTP_PORT = "8080";
         UNIFI_HTTPS_PORT = "8443";
-        UNIFI_UID = "${builtins.toString id}";
-        UNIFI_GID = "${builtins.toString id}";
+        UNIFI_HTTP_PORT = "8080";
+        UNIFI_UID = "${toString config.ids.uids.unifi}";
+        UNIFI_GID = "${toString config.ids.gids.unifi}";
         RUNAS_UID0 = "false";
         BIND_PRIV = "false";
         TZ = config.time.timeZone;
       };
+      volumes = [ "${stateDir}:/unifi" ];
     };
 
     # also traefik proxy for gateway "logos"
     services.traefik.dynamicConfigOptions.http = {
       routers.logos = {
-        rule = "Host(`logos.${hostName}.${domain}`)";
+        rule = "Host(`${gateway.host}`)";
         middlewares = "local@file";
         tls.certresolver = "resolver-dns";
         service = "logos";
       };
-      services.logos.loadBalancer.servers = [{ url = "https://192.168.1.1:443"; }];
+      services.logos.loadBalancer.servers = [{ url = "https://${gateway.ip}:443"; }];
     };
 
   };

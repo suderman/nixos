@@ -35,10 +35,20 @@
       tl = "tldr";
       less = "less -R";
 
+      # 5 second countdown until the clipboard gets typed out
       type-clipboard = ''
         sh -c 'sleep 5.0; ydotool type -- "$(wl-paste)"'
       '';
 
+      # Force adoption of unifi devices
+      adopt = ''
+        for x in 1 2 3; do
+          echo "192.168.1.$x set-inform http://192.168.1.4:8080/inform"
+          ssh ${user}@192.168.1.$x "/usr/bin/mca-cli-op set-inform http://192.168.1.4:8080/inform ; exit"
+        done
+      '';
+
+      # Bashly CLI
       bashly = "docker run --rm -it --user $(id -u):$(id -g) --volume \"$PWD:/app\" dannyben/bashly";
 
       j = "journalctl";
