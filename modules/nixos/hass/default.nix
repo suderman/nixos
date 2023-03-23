@@ -45,7 +45,7 @@ in {
         "--label=traefik.http.services.hass.loadbalancer.server.port=8123"
         "--label=traefik.http.services.hass.loadbalancer.server.scheme=http"
         "--network=host"
-        "--privileged"
+        "--privileged" # access to host devices (zigbee, zwave, etc)
       ];
       # user = "hass:hass";
       environment = {
@@ -58,6 +58,9 @@ in {
     };
 
     # Postgres database configuration
+    # This "hass" postgres user isn't actually being used to access the database
+    # Since the docker is running the container as root, the "root" postgres user
+    # is what needs access, but that account already has access to all databases
     services.postgresql = {
       enable = true;
       ensureUsers = [{
@@ -71,11 +74,14 @@ in {
     systemd.services.docker-hass.after = [ "postgresql.service" ];
     systemd.services.docker-hass.requires = [ "postgresql.service" ];
 
+
     # Copy configuration to state directory before container starts up
-    systemd.services.docker-hass.preStart = mkBefore ''
+    systemd.services.docker-hass.preStart = let
+      configuration_yaml = pkgs.writeText "configuration.yaml" (builtins.readFile ./configuration.yaml);
+    in mkBefore ''
       mkdir -p ${stateDir}
       rm -rf ${stateDir}/configuration.yaml
-      cp -f ${toString ./configuration.yaml} ${stateDir}/configuration.yaml
+      cp -f ${configuration_yaml} ${stateDir}/configuration.yaml
       chown -R ${toString config.ids.uids.hass}:${toString config.ids.gids.hass} ${stateDir}
     '';
 

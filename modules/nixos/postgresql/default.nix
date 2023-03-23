@@ -2,22 +2,26 @@
 { config, lib, pkgs, user, ... }:
 
 let
+
   cfg = config.services.postgresql;
+  users = [ user "root" ]; 
 
 in {
 
   config = lib.mkIf cfg.enable {
 
-    # Current default
-    services.postgresql.package = pkgs.postgresql_14;
+    services.postgresql = {
 
-    services.postgresql.ensureUsers = [{
-      name = user;
-      ensurePermissions = {
-        "ALL TABLES IN SCHEMA public" = "ALL PRIVILEGES";
-      };
-    }];
-    services.postgresql.ensureDatabases = [ user ];
+      # default package as of 22.11
+      package = pkgs.postgresql_14; 
+
+      # full access for personal and root user
+      ensureDatabases = users;
+      ensureUsers = (map (name: 
+        { inherit name; ensurePermissions = { "ALL TABLES IN SCHEMA public" = "ALL PRIVILEGES"; }; }
+      ) users);
+
+    };
 
   };
 
