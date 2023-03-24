@@ -9,6 +9,9 @@ in {
   nixos-cli = self.callPackage ./nixos-cli {};
   yo = self.callPackage ./yo.nix {};
 
+  # Missing packages
+  monica = self.callPackage ./monica {};
+
   # These packages support Wayland but sometimes need to be persuaded
   # _1password-gui  = enableWayland { type = "electron"; pkg = super._1password-gui; bin = "1password"; };
   dolphin         = enableWayland { type = "qt"; pkg = super.dolphin; bin = "dolphin"; };

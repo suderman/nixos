@@ -1,21 +1,22 @@
 # services.keyd.enable = true;
 { config, lib, pkgs, user, ... }: 
 
-with pkgs; 
-
 let 
+
   cfg = config.services.keyd;
+  inherit (lib) mkIf;
+  inherit (lib.options) mkEnableOption;
 
 in {
 
   options = {
-    services.keyd.enable = lib.options.mkEnableOption "keyd"; 
+    services.keyd.enable = mkEnableOption "keyd"; 
   };
 
-  config = lib.mkIf cfg.enable {
+  config = mkIf cfg.enable {
 
     # Install keyd package
-    environment.systemPackages = [ keyd ];
+    environment.systemPackages = [ pkgs.keyd ];
 
     # Create keyd group
     users.groups.keyd.name = "keyd";
@@ -31,8 +32,7 @@ in {
       wantedBy = [ "sysinit.target" ];
       serviceConfig = {
         Type = "simple";
-        ExecStart = "${keyd}/bin/keyd";
-        # Restart = "on-failure";
+        ExecStart = "${pkgs.keyd}/bin/keyd";
       };
     };
 

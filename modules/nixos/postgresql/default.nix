@@ -5,10 +5,11 @@ let
 
   cfg = config.services.postgresql;
   users = [ user "root" ]; 
+  inherit (lib) mkIf;
 
 in {
 
-  config = lib.mkIf cfg.enable {
+  config = mkIf cfg.enable {
 
     services.postgresql = {
 

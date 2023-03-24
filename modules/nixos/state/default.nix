@@ -7,21 +7,23 @@
 { inputs, config, lib, ... }: 
 
 let 
+
   cfg = config.state;
-  inherit (lib) mkOption types;
   dir = "/nix/state";
+  inherit (lib) mkOption mkBefore mkIf types;
+  inherit (lib.options) mkEnableOption;
 
 in {
   
   imports = [ inputs.impermanence.nixosModule ];
 
-  options = with types; {
+  options = {
 
     # Persist in /nix
-    state = {
+    state = with types; {
 
       # Enabled by default in configurations/shared 
-      enable = lib.options.mkEnableOption "state"; 
+      enable = mkEnableOption "state"; 
 
       # Files relative to / root
       files = mkOption {
@@ -43,10 +45,10 @@ in {
 
   };
 
-  config = lib.mkIf cfg.enable {
+  config = mkIf cfg.enable {
 
     # Script to wipe the root subvolume at boot
-    boot.initrd.postDeviceCommands = lib.mkBefore (builtins.readFile ./initrd.sh);
+    boot.initrd.postDeviceCommands = mkBefore (builtins.readFile ./initrd.sh);
 
     # Configuration impermanence module
     environment.persistence = {
@@ -77,7 +79,7 @@ in {
     environment.etc."machine-id".source = "${dir}/etc/machine-id";
 
     # Maintain ssh host keys
-    services.openssh = lib.mkIf config.services.openssh.enable {
+    services.openssh = mkIf config.services.openssh.enable {
       hostKeys = [{
         path = "${dir}/etc/ssh/ssh_host_ed25519_key";
         type = "ed25519";

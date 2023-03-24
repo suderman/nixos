@@ -1,22 +1,20 @@
 # services.docker-hass.enable = true;
 { config, lib, pkgs, ... }:
 
-with config.networking;
-
 let
 
-  cfg = config.services.docker-hass;
-
-  host = "hass.${hostName}.${domain}";
-  stateDir = "/var/lib/hass";
-
   inherit (lib) mkIf mkOption mkBefore types strings;
-  inherit (builtins) toString;
+  inherit (lib.options) mkEnableOption;
+  inherit (builtins) toString readFile;
+
+  cfg = config.services.docker-hass;
+  host = "hass.${config.networking.hostName}.${config.networking.domain}";
+  stateDir = "/var/lib/hass";
 
 in {
 
   options = {
-    services.docker-hass.enable = lib.options.mkEnableOption "unifi-hass"; 
+    services.docker-hass.enable = mkEnableOption "docker-hass"; 
   };
 
   config = mkIf cfg.enable {
@@ -32,7 +30,10 @@ in {
     users.groups.hass.gid = config.ids.gids.hass;
 
     networking.firewall = {
-      allowedTCPPorts = [ 8123 21063 ];
+      allowedTCPPorts = [ 
+        8123  # home-assistant
+        21063 # homekit
+      ];
     };
 
     virtualisation.oci-containers.containers."hass" = {
@@ -58,9 +59,9 @@ in {
     };
 
     # Postgres database configuration
-    # This "hass" postgres user isn't actually being used to access the database
+    # This "hass" postgres user isn't actually being used to access the database.
     # Since the docker is running the container as root, the "root" postgres user
-    # is what needs access, but that account already has access to all databases
+    # is what needs access, but that account already has access to all databases.
     services.postgresql = {
       enable = true;
       ensureUsers = [{
@@ -74,10 +75,9 @@ in {
     systemd.services.docker-hass.after = [ "postgresql.service" ];
     systemd.services.docker-hass.requires = [ "postgresql.service" ];
 
-
     # Copy configuration to state directory before container starts up
     systemd.services.docker-hass.preStart = let
-      configuration_yaml = pkgs.writeText "configuration.yaml" (builtins.readFile ./configuration.yaml);
+      configuration_yaml = pkgs.writeText "configuration.yaml" (readFile ./configuration.yaml);
     in mkBefore ''
       mkdir -p ${stateDir}
       rm -rf ${stateDir}/configuration.yaml

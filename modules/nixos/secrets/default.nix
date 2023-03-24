@@ -2,6 +2,7 @@
 { inputs, config, pkgs, lib, ... }:
 
 let 
+
   cfg = config.secrets;
   age = config.age;
 
