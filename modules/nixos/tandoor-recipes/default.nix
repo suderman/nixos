@@ -10,7 +10,7 @@ let
 
   isPublic = if cfg.public == "" then false else true;
   host = if isPublic then cfg.public else "tandoor.${hostName}.${domain}";
-  port = "8090"; appPort = "8091";
+  port = "8095"; appPort = "8096";
 
   mediaDir = "/var/lib/private/tandoor-recipes/recipes";
   runDir = "/run/recipes";
