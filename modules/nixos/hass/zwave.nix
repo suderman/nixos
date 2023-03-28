@@ -1,28 +1,24 @@
-# services.docker-zwave.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, ... }:
 
 let
 
   inherit (lib) mkIf mkBefore;
-  inherit (lib.options) mkEnableOption;
   inherit (builtins) toString;
 
-  cfg = config.services.docker-zwave;
-  host = "zwave.${config.networking.hostName}.${config.networking.domain}";
-  stateDir = "/var/lib/hass/zwave";
+  cfg = config.services.docker-hass;
+  host = "zwave.${config.networking.fqdn}";
+  stateDir = "${config.users.users.hass.home}/zwave";
+  uid = toString config.users.users.hass.uid;
+  gid = toString config.users.groups.hass.gid;
 
 in {
-
-  options = {
-    services.docker-zwave.enable = mkEnableOption "docker-zwave"; 
-  };
 
   config = mkIf cfg.enable {
 
     networking.firewall = {
       allowedTCPPorts = [ 
-        3000 # websocket
-        8091 # web interface 
+        3000  # zwave websockets
+        8091  # zwave web interface 
       ];
     };
 
@@ -35,9 +31,10 @@ in {
         "--label=traefik.http.routers.zwave.middlewares=local@file"
         "--label=traefik.http.services.zwave.loadbalancer.server.port=8091"
         "--label=traefik.http.services.zwave.loadbalancer.server.scheme=http"
-        "--privileged" # access to host devices (zigbee, zwave, etc)
-        "--stop-signal=SIGINT"
+        "--device=${config.services.docker-hass.zwave}:/dev/zwave"
+        "--privileged"
         "--network=host"
+        "--stop-signal=SIGINT"
         "-t"
       ];
       environment = {
@@ -49,11 +46,11 @@ in {
     };
 
     systemd.services.docker-zwave = {
-      requires = [ "docker-hass.service" ];
       before = [ "docker-hass.service" ];
+      requires = [ "docker-hass.service" ];
       preStart = mkBefore ''
         mkdir -p ${stateDir}
-        chown -R ${toString config.ids.uids.hass}:${toString config.ids.gids.hass} ${stateDir}
+        chown -R ${uid}:${gid} ${stateDir}
       '';
     };
 

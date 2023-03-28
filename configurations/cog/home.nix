@@ -55,6 +55,9 @@
     # dolphin
     # signal-desktop
     # webex
+
+    isy
+
   ];
 
   programs = {

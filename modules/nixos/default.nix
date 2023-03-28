@@ -32,6 +32,5 @@
     ./whoami
     ./whoogle
     ./ydotool
-    ./zwave
   ];
 }

@@ -34,15 +34,15 @@ homekit:
 #   default_measurement: units
 
 panel_custom:
-  - name: ha_server
-    sidebar_title: Server
-    sidebar_icon: mdi:cog-transfer
-    js_url: /api/hassio/app/entrypoint.js
-    url_path: 'config/server_control'
-    embed_iframe: true
-    require_admin: true
-    config:
-      ingress: core_configurator  
+  # - name: ha_server
+  #   sidebar_title: Server
+  #   sidebar_icon: mdi:cog-transfer
+  #   js_url: /api/hassio/app/entrypoint.js
+  #   url_path: 'config/server_control'
+  #   embed_iframe: true
+  #   require_admin: true
+  #   config:
+  #     ingress: core_configurator  
   - name: ha_integ
     sidebar_title: Integrations
     sidebar_icon: mdi:checkerboard

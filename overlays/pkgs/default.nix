@@ -7,6 +7,7 @@ in {
 
   # Personal scripts
   nixos-cli = self.callPackage ./nixos-cli {};
+  isy = self.callPackage ./isy {};
   yo = self.callPackage ./yo.nix {};
 
   # Missing packages

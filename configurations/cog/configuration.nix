@@ -103,7 +103,7 @@
   # sudo fwupdmgr update
   services.fwupd.enable = true;
 
-  services.docker-hass.enable = true;
+  services.docker-hass.enable = false;
 
   # services.fprintd.enable = true;
   # services.fprintd.tod.enable = true;
