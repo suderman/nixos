@@ -11,7 +11,8 @@ in {
   config = mkIf cfg.enable {
 
     # agenix
-    secrets.basic-auth.owner = "traefik";
+    users.users.traefik.extraGroups = [ "secrets" ]; 
+    # secrets.basic-auth.owner = "traefik";
 
     # Import the env file containing the CloudFlare token for cert renewal
     systemd.services.traefik = {

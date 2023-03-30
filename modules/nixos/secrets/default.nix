@@ -1,5 +1,5 @@
 # secrets.enable = true;
-{ inputs, config, pkgs, lib, ... }:
+{ inputs, config, pkgs, lib, user, ... }:
 
 let 
 
@@ -24,7 +24,11 @@ in {
       # Example: age.secrets.password.file = cfg.files.password;
       secret = key: { 
         name = "${key}"; 
-        value = { file = cfg.files."${key}"; }; 
+        value = { 
+          file = cfg.files."${key}"; 
+          group = "secrets"; 
+          mode = "440";
+        }; 
       };
 
     # Loop through all encrypted files found in config.secrets.files
@@ -32,6 +36,10 @@ in {
       map secret (builtins.attrNames cfg.files)
     );
     
+    # Secrets group
+    users.groups.secrets.gid = 1100;
+    # users.users."${user}".extraGroups = [ "secrets" ]; 
+
   };
 
 }

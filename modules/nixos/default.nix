@@ -7,6 +7,7 @@
     ./docker
     ./earlyoom
     ./flatpak
+    ./freshrss
     ./gnome
     ./hass
     ./jellyfin
