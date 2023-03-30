@@ -1,5 +1,5 @@
 # services.docker-hass.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, user, ... }:
 
 let
 
@@ -55,6 +55,9 @@ in {
     users.groups.hass = {
       gid = config.ids.gids.hass;
     };
+
+    # Add user to the hass group
+    users.users."${user}".extraGroups = [ "hass" ]; 
 
   };
 

@@ -47,7 +47,7 @@ in {
 
     systemd.services.docker-zwave = {
       before = [ "docker-hass.service" ];
-      requires = [ "docker-hass.service" ];
+      wants = [ "docker-hass.service" ];
       preStart = mkBefore ''
         mkdir -p ${stateDir}
         chown -R ${uid}:${gid} ${stateDir}

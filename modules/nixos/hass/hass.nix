@@ -10,6 +10,7 @@ let
   cfg = config.services.docker-hass;
   host = "hass.${config.networking.fqdn}";
   stateDir = config.users.users.hass.home;
+  ip = "192.168.1.4";
   uid = toString config.users.users.hass.uid;
   gid = toString config.users.groups.hass.gid;
 
@@ -34,13 +35,14 @@ in {
         "--label=traefik.http.routers.hass.middlewares=local@file"
         "--label=traefik.http.services.hass.loadbalancer.server.port=8123"
         "--label=traefik.http.services.hass.loadbalancer.server.scheme=http"
-        # "--device=${config.services.docker-hass.zigbee}:/dev/zigbee"
-        # "--device=${config.services.docker-hass.insteon}:/dev/insteon"
         "--privileged" 
         "--network=host"
       ];
       environment = {
         TZ = config.time.timeZone;
+        ISY_URL = "https://isy.${config.networking.fqdn}";
+        ZWAVE_URL = "https://zwave.${config.networking.fqdn}";
+        HOST_IP = ip;
       };
       volumes = [ 
         "${stateDir}:/config"
@@ -62,8 +64,11 @@ in {
     };
 
     # Ensure the database is brought up first
-    systemd.services.docker-hass.after = [ "postgresql.service" ];
     systemd.services.docker-hass.requires = [ "postgresql.service" ];
+    systemd.services.docker-hass.after = [ "postgresql.service" ];
+
+    # Try to bring up zwave too
+    systemd.services.docker-hass.wants = [ "docker-zwave.service" ];
 
     # Copy configuration to state directory before container starts up
     systemd.services.docker-hass.preStart = let

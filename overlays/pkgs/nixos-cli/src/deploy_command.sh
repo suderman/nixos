@@ -19,5 +19,5 @@ fi
 
 # nixos-rebuild on all selected targets
 for target in $targets; do
-  task "nixos-rebuild --build-host localhost --target-host root@${target}.$(hostname -d) --flake ${dir}#${target} ${action}"
+  task "nixos-rebuild --target-host root@${target}.$(hostname -d) --flake ${dir}#${target} ${action}"
 done
