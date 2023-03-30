@@ -104,7 +104,7 @@
   services.fwupd.enable = true;
 
   services.docker-hass.enable = false;
-  services.freshrss.enable = false;
+  services.freshrss.enable = true;
 
   # services.fprintd.enable = true;
   # services.fprintd.tod.enable = true;

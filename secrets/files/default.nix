@@ -7,6 +7,7 @@
   basic-auth = ./basic-auth.age;
   cloudflare-env = ./cloudflare-env.age;
   password = ./password.age;
+  password-encrypted = ./password-encrypted.age;
   smtp-env = ./smtp-env.age;
   traefik-env = ./traefik-env.age;
 

@@ -1,16 +1,14 @@
 # services.tandoor-recipes.enable = true;
 { config, lib, pkgs, ... }:
 
-with config.networking;
-
 let
 
   cfg = config.services.tandoor-recipes;
   secrets = config.age.secrets;
 
   isPublic = if cfg.public == "" then false else true;
-  host = if isPublic then cfg.public else "tandoor.${hostName}.${domain}";
-  port = "8095"; appPort = "8096";
+  host = if isPublic then cfg.public else "tandoor.${config.networking.fqdn}";
+  port = "8096";
 
   mediaDir = "/var/lib/private/tandoor-recipes/recipes";
   runDir = "/run/recipes";
@@ -28,25 +26,29 @@ in {
     services.traefik.dynamicConfigOptions.http = {
       routers.tandoor = {
         rule = "Host(`${host}`)";
-        middlewares = mkIf (!isPublic) "local@file";
-        tls.domains = mkIf (isPublic) [{ main = "${host}"; sans = "*.${host}"; }];
         tls.certresolver = "resolver-dns";
+        tls.domains = mkIf (isPublic) [{ main = "${host}"; sans = "*.${host}"; }];
+        middlewares = [ "tandoor@file" ] ++ ( if isPublic then [] else [ "local@file" ] );
         service = "tandoor";
       };
-      services.tandoor.loadBalancer.servers = [{ url = "http://127.0.0.1:${port}"; }];
+      middlewares.tandoor = {
+        headers.customRequestHeaders.Host = "tandoor";
+      };
+      services.tandoor.loadBalancer.servers = [{ 
+        url = "http://127.0.0.1:${toString config.services.nginx.defaultHTTPListenPort}"; 
+      }];
     };
 
     # nginx reverse proxy to statically host recipe images, proxy pass for python app
     services.nginx = {
       enable = true;
       virtualHosts."tandoor" = {
-        listen = [{ port = (toInt port); addr="127.0.0.1"; ssl = false; }];
         extraConfig = ''
           location /media/recipes/ {
             alias ${runDir}/;
           }
           location / {
-            proxy_pass http://127.0.0.1:${appPort};
+            proxy_pass http://127.0.0.1:${port};
             proxy_set_header X-Forwarded-Proto https;
             proxy_set_header Host ${host};
           }
@@ -64,7 +66,7 @@ in {
     services.tandoor-recipes = {
 
       # Service port
-      port = toInt appPort;
+      port = toInt port;
 
       # Environment variable configuration
       extraConfig = {
@@ -74,7 +76,7 @@ in {
         POSTGRES_USER = "tandoor_recipes";
         POSTGRES_DB = "tandoor_recipes";
         GUNICORN_MEDIA = "0";
-        DEFAULT_FROM_EMAIL = "tandoor@${domain}";
+        DEFAULT_FROM_EMAIL = "tandoor@${config.networking.domain}";
         ENABLE_SIGNUP = "0";
         ENABLE_PDF_EXPORT = "1";
       };

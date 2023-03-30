@@ -15,6 +15,7 @@
     ./linode
     ./mysql
     ./neovim
+    ./nginx
     ./ocis
     ./openssh
     ./plex
@@ -23,7 +24,6 @@
     ./secrets
     ./state
     ./steam
-    # ./sunshine
     ./tailscale
     ./tandoor-recipes
     ./tautulli

@@ -20,7 +20,7 @@ in {
         shell = pkgs.zsh;
         home = "/home/${user}";
         description = user;
-        passwordFile = mkIf (secrets.enable) secrets.password.path;
+        passwordFile = mkIf (secrets.enable) secrets.password-encrypted.path;
         password = mkIf (!secrets.enable) "${user}";
         extraGroups = [ "wheel" ] ++ ifTheyExist [ "networkmanager" "docker" ]; 
         openssh.authorizedKeys.keys = [ keys.users."${user}" ];

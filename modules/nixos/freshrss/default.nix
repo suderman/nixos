@@ -1,54 +1,49 @@
 # services.freshrss.enable = true;
 { config, lib, pkgs, user, ... }:
 
-with config.networking;
-
 let
 
-  inherit (lib) mkIf mkOption mkBefore types strings;
-  inherit (lib.options) mkEnableOption;
-  inherit (builtins) toString readFile;
+  inherit (lib) mkIf;
+  inherit (lib.strings) toInt;
+  inherit (builtins) toString;
 
   cfg = config.services.freshrss;
   host = "freshrss.${config.networking.fqdn}";
   secrets = config.age.secrets;
-  # port = "8095"; appPort = "8096";
-
+  port = toString config.services.nginx.defaultHTTPListenPort;
 
 in {
 
-
-
   config = mkIf cfg.enable {
 
-    # # traefik proxy serving nginx proxy
-    # services.traefik.dynamicConfigOptions.http = {
-    #   routers.tandoor = {
-    #     rule = "Host(`${host}`)";
-    #     middlewares = mkIf (!isPublic) "local@file";
-    #     tls.domains = mkIf (isPublic) [{ main = "${host}"; sans = "*.${host}"; }];
-    #     tls.certresolver = "resolver-dns";
-    #     service = "tandoor";
-    #   };
-    #   services.tandoor.loadBalancer.servers = [{ url = "http://127.0.0.1:${port}"; }];
-    # };
+    # traefik proxy serving nginx proxy
+    services.traefik.dynamicConfigOptions.http = {
+      routers.freshrss = {
+        rule = "Host(`${host}`)";
+        tls.certresolver = "resolver-dns";
+        middlewares = [ "local@file" "freshrss@file" ];
+        service = "freshrss";
+      };
+      middlewares.freshrss = {
+        headers.customRequestHeaders.Host = "freshrss";
+      };
+      services.freshrss.loadBalancer.servers = [{ url = "http://127.0.0.1:${port}"; }];
+    };
 
     services.freshrss = {
-
       defaultUser = user;
       passwordFile = secrets.password.path;
-
       baseUrl = "https://${host}";
-      virtualHost = null; # Disable auto-generated nginx entry
-
+      virtualHost = "freshrss";
       database.type = "pgsql";
-      # database.host = "/var/run/postgresql";
       database.host = "127.0.0.1";
-      # database.port = null;
-      # database.name = "freshrss";
-      # database.user = "freshrss";
-
+      database.name = "freshrss";
+      database.user = "freshrss";
     };
+
+    # services.nginx.virtualHosts."freshrss".listen = [
+    #   { port = (toInt port); addr="127.0.0.1"; ssl = false; }
+    # ];
 
     systemd.services.freshrss = {
 
