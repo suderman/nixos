@@ -5,21 +5,24 @@ let
 
   cfg = config.services.immich;
   secrets = config.age.secrets;
-
-  host = "immich.${config.networking.fqdn}";
+  host = "i.${config.networking.fqdn}";
   stateDir = "/var/lib/immich";
+
+  port = {
+    web = "3000";
+    server = "3001";
+    microservices = "3002";
+    machineLearning = "3003";
+    redis = "31640";
+    db = toString config.services.postgresql.port;
+  };
 
   uid = toString config.ids.uids.immich;
   gid = toString config.ids.gids.immich;
 
-  # immich-web:3000
-  # immich-server:3001
-  # immich-microservices:3002
-  # immich-machine-learning:3003
-  redisPort = 31640;
-
   inherit (lib) mkIf mkOption mkBefore types strings;
   inherit (builtins) toString;
+  inherit (lib.strings) toInt;
 
 in {
 
@@ -65,8 +68,8 @@ in {
         immich-server.stripPrefix.prefixes = [ "/api" ];
       };
       services = {
-        immich-server.loadBalancer.servers = [{ url = "http://127.0.0.1:3001"; }];
-        immich-web.loadBalancer.servers = [{ url = "http://127.0.0.1:3000"; }];
+        immich-server.loadBalancer.servers = [{ url = "http://127.0.0.1:${port.server}"; }];
+        immich-web.loadBalancer.servers = [{ url = "http://127.0.0.1:${port.web}"; }];
       };
     };
 
@@ -82,11 +85,11 @@ in {
         environment = {
           NODE_ENV = "production";
           DB_HOSTNAME = "127.0.0.1";
-          DB_PORT = toString config.services.postgresql.port;
+          DB_PORT = port.db;
           DB_USERNAME = "immich";
           DB_DATABASE_NAME = "immich";
           REDIS_HOSTNAME = "127.0.0.1";
-          REDIS_PORT = toString config.services.redis.servers.immich.port;
+          REDIS_PORT = port.redis;
           TYPESENSE_ENABLED = "false";
           REVERSE_GEOCODING_DUMP_DIRECTORY = "/usr/src/app/geocoding";
           # PUID = uid;
@@ -154,7 +157,7 @@ in {
     # Redis cache configuration
     services.redis.servers.immich = {
       enable = true;
-      port = redisPort;
+      port = toInt port.redis;
     };
 
     systemd.services.docker-immich-server = {
