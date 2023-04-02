@@ -27,7 +27,7 @@ in {
 
       # Allow password-less access on 127.0.0.1 
       authentication = lib.mkOrder 600 ''
-        host  all all 127.0.0.1/32 ident
+        host all all 127.0.0.1/32 ident
       '';
 
     };
