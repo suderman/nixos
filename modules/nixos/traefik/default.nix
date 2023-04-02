@@ -16,7 +16,7 @@ in {
 
     # Import the env file containing the CloudFlare token for cert renewal
     systemd.services.traefik = {
-      serviceConfig.EnvironmentFile = secrets.cloudflare-env.path;
+      serviceConfig.EnvironmentFile = secrets.traefik-env.path;
     };
 
     services.traefik = with config.networking; {

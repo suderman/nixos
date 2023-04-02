@@ -50,4 +50,6 @@ with (import ./keys); {
   # > tr -cd '[:alnum:]' < /dev/urandom | fold -w "64" | head -n 1 | tr -d '\n' ; echo
   "files/alphanumeric-secret.age".publicKeys = all;
 
+  "files/immich-env.age".publicKeys = all;
+
 }

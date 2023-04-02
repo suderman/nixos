@@ -22,12 +22,12 @@ in {
         { inherit name; ensurePermissions = { "ALL TABLES IN SCHEMA public" = "ALL PRIVILEGES"; }; }
       ) users);
 
+      # Listen everywhere
+      enableTCPIP = true;
+
       # Allow password-less access on 127.0.0.1 
-      authentication = lib.mkForce ''
-        # Generated file; do not edit!
-        local all all              peer
+      authentication = lib.mkOrder 600 ''
         host  all all 127.0.0.1/32 ident
-        host  all all ::1/128      md5
       '';
 
     };

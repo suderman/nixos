@@ -105,6 +105,7 @@
 
   services.docker-hass.enable = false;
   services.freshrss.enable = true;
+  services.immich.enable = true;
 
   # services.fprintd.enable = true;
   # services.fprintd.tod.enable = true;

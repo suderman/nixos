@@ -10,6 +10,7 @@
     ./freshrss
     ./gnome
     ./hass
+    ./immich
     ./jellyfin
     ./keyd
     ./linode

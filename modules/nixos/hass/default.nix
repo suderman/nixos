@@ -28,17 +28,11 @@ in {
       example = [ "/dev/serial/by-id/usb-Nabu_Casa_SkyConnect_v1.0_28b77f55258dec11915068e883c5466d-if00-port0" ];
     };
     services.docker-hass.zwave = mkOption {
-      description = "Path to Zwave USB device";
+      description = "Path to Z-Wave USB device";
       type = types.str;
       default = "";
-      example = [ "/dev/serial/by-id/usb-0658_0200-if00" ];
+      example = [ "/dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_3e535b346625ed11904d6ac2f9a97352-if00-port0" ];
     };
-    # services.docker-hass.insteon = mkOption {
-    #   description = "Path to Insteon USB device";
-    #   type = types.str;
-    #   default = "";
-    #   example = [ "/dev/serial/by-id/usb-Prolific_Technology_Inc._USB-Serial_Controller_DVADb116L16-if00-port0" ];
-    # };
   };
 
   config = mkIf cfg.enable {

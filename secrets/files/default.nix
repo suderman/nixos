@@ -6,6 +6,7 @@
   alphanumeric-secret = ./alphanumeric-secret.age;
   basic-auth = ./basic-auth.age;
   cloudflare-env = ./cloudflare-env.age;
+  immich-env = ./immich-env.age;
   password = ./password.age;
   password-encrypted = ./password-encrypted.age;
   smtp-env = ./smtp-env.age;
