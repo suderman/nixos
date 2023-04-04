@@ -42,6 +42,13 @@ in {
       };
     };
 
+    # services.btrbk.instances.local.settings = {
+    #   volume."/data" = {
+    #     snapshot_dir = "snaps";
+    #     subvolume."photos".snapshot_preserve = "48h 7d";
+    #   };
+    # };
+
     # services.btrbk.instances.remote = {
     #   onCalendar = "weekly";
     #   settings = {

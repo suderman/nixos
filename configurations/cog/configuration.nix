@@ -10,6 +10,14 @@
   fileSystems."/".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
   fileSystems."/nix".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
 
+  # # Additional data disk
+  # fileSystems."/mnt/ssd".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
+  fileSystems."/data" = { device = "/mnt/ssd/data"; options = [ "bind" ]; };
+  #
+  # # 4-disk RAID device 
+  # fileSystems."/mnt/raid".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
+  # fileSystems."/media" = { device = "/mnt/raid/media"; options = [ "bind" ]; };
+
   # Base configuration
   base.enable = true;
   state.enable = true;
@@ -63,6 +71,8 @@
   programs.neovim.enable = true;
   programs.steam.enable = false;
 
+  programs.kdeconnect.enable = true;
+
   # # Power management
   # services.tlp.enable = false;
   # services.tlp.settings = {
@@ -104,8 +114,23 @@
   services.fwupd.enable = true;
 
   services.docker-hass.enable = false;
-  services.freshrss.enable = true;
-  services.immich.enable = true;
+  services.freshrss.enable = false;
+
+  services.immich = {
+    enable = true;
+    dataDir = "/data/immich";
+    host = "i.${config.networking.fqdn}";
+  };
+
+  # fileSystems."/srv/media" = {
+  #
+  # fileSystems."/var/media" = {
+  #   # device = "/run/media/me/nixos/ssd/data/immich";
+  #   device = "/mnt/pool/data";
+  #   options = [ "bind" ];
+  # };
+
+
 
   # services.fprintd.enable = true;
   # services.fprintd.tod.enable = true;

@@ -26,7 +26,7 @@ in {
     environment = {
 
       systemPackages = with pkgs; [
-        gnome.gnome-software
+        gnome.gnome-software 
         gnome.gnome-tweaks
         gnome.dconf-editor
         chrome-gnome-shell

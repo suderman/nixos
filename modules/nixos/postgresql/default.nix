@@ -35,6 +35,10 @@ in {
     # ident is equivalent to peer, but requires identd daemon
     services.oidentd.enable = true;
 
+    # Allow docker containers to connect
+    networking.firewall.allowedTCPPorts = [ config.services.postgresql.port ];
+
+
   };
 
 }

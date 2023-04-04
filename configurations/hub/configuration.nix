@@ -4,6 +4,10 @@
     ./hardware-configuration.nix
   ];
 
+  # Btrfs mount options
+  fileSystems."/".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
+  fileSystems."/nix".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
+
   base.enable = true;
   state.enable = true;
   secrets.enable = true;

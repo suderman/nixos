@@ -5,20 +5,40 @@ let
 
   cfg = config.services.immich;
   secrets = config.age.secrets;
-  host = "i.${config.networking.fqdn}";
-  stateDir = "/var/lib/immich";
-
-  port = {
-    web = "3000";
-    server = "3001";
-    microservices = "3002";
-    machineLearning = "3003";
-    redis = "31640";
-    db = toString config.services.postgresql.port;
-  };
 
   uid = toString config.ids.uids.immich;
   gid = toString config.ids.gids.immich;
+
+  # https://github.com/immich-app/immich/releases
+  version = "1.52.1";
+
+  # Shared configuration for each docker container
+  base = {
+    environment = {
+      # immich
+      NODE_ENV = "production";
+      PUID = uid;
+      PGID = gid;
+      REVERSE_GEOCODING_DUMP_DIRECTORY = "/usr/src/app/geocoding";
+      # postgresql
+      DB_HOSTNAME = "host.docker.internal";
+      DB_PORT = toString cfg.dbPort;
+      DB_USERNAME = "immich";
+      DB_DATABASE_NAME = "immich";
+      # redis
+      REDIS_HOSTNAME = "immich-redis";
+      # typesense
+      TYPESENSE_HOST =  "immich-typesense";
+      TYPESENSE_API_KEY = "1234567890";
+      TYPESENSE_DATA_DIR = "/data";
+    };
+    # only secrets need to be included, e.g. DB_PASSWORD, TYPESENSE_API_KEY, MAPBOX_KEY
+    environmentFiles = [ secrets.immich-env.path ];
+    extraOptions = [
+      "--add-host=host.docker.internal:host-gateway"
+      "--network=immich"
+    ];
+  };
 
   inherit (lib) mkIf mkOption mkBefore types strings;
   inherit (builtins) toString;
@@ -28,8 +48,40 @@ in {
 
   # Inspiration from:
   # https://github.com/kradalby/dotfiles/blob/9caed5967db7afd67c79fe0d8649a2ff98b0a26b/machines/core.terra/immich.nix
-  options = {
-    services.immich.enable = lib.options.mkEnableOption "immich"; 
+  options.services.immich = {
+
+    enable = lib.options.mkEnableOption "immich"; 
+
+    host = mkOption {
+      type = types.str;
+      default = "immich.${config.networking.fqdn}";
+      description = "Host for Immich";
+    };
+
+    dataDir = mkOption {
+      type = types.path;
+      default = "/var/lib/immich";
+      description = "Data directory for Immich";
+    };
+
+    webPort = mkOption {
+      description = "Immich web port.";
+      default = 3000;
+      type = types.port;
+    };
+
+    serverPort = mkOption {
+      description = "Immich server port.";
+      default = 3001;
+      type = types.port;
+    };
+
+    dbPort = mkOption {
+      description = "Immich database port.";
+      default = config.services.postgresql.port;
+      type = types.port;
+    };
+
   };
 
   config = mkIf cfg.enable {
@@ -43,22 +95,23 @@ in {
       isSystemUser = true;
       group = "immich";
       description = "Immich daemon user";
-      home = "${stateDir}";
+      home = cfg.dataDir;
       uid = config.ids.uids.immich;
     };
     users.groups.immich.gid = config.ids.gids.immich;
+
 
     # Reverse proxy
     services.traefik.dynamicConfigOptions.http = {
       routers = {
         immich-server = {
-          rule = "Host(`${host}`) && PathPrefix(`/api`)";
+          rule = "Host(`${cfg.host}`) && PathPrefix(`/api`)";
           middlewares = [ "local@file" "immich-server@file" ];
           tls.certresolver = "resolver-dns";
           service = "immich-server";
         };
         immich-web = {
-          rule = "Host(`${host}`)";
+          rule = "Host(`${cfg.host}`)";
           middlewares = "local@file";
           tls.certresolver = "resolver-dns";
           service = "immich-web";
@@ -68,78 +121,47 @@ in {
         immich-server.stripPrefix.prefixes = [ "/api" ];
       };
       services = {
-        immich-server.loadBalancer.servers = [{ url = "http://127.0.0.1:${port.server}"; }];
-        immich-web.loadBalancer.servers = [{ url = "http://127.0.0.1:${port.web}"; }];
+        immich-server.loadBalancer.servers = [{ url = "http://127.0.0.1:${toString cfg.serverPort}"; }];
+        immich-web.loadBalancer.servers = [{ url = "http://127.0.0.1:${toString cfg.webPort}"; }];
       };
     };
 
 
-    # Immich docker containers
-    virtualisation.oci-containers.containers = let 
-
-      # https://github.com/immich-app/immich/releases
-      version = "1.52.1";
-
-      # Shared configuration
-      base = {
-        environment = {
-          NODE_ENV = "production";
-          DB_HOSTNAME = "127.0.0.1";
-          DB_PORT = port.db;
-          DB_USERNAME = "immich";
-          DB_DATABASE_NAME = "immich";
-          REDIS_HOSTNAME = "127.0.0.1";
-          REDIS_PORT = port.redis;
-          TYPESENSE_ENABLED = "false";
-          REVERSE_GEOCODING_DUMP_DIRECTORY = "/usr/src/app/geocoding";
-          # PUID = uid;
-          # PGID = gid;
-        };
-        # only secrets need to be included, e.g. DB_PASSWORD, TYPESENSE_API_KEY, MAPBOX_KEY
-        environmentFiles = [ secrets.immich-env.path ];
-        entrypoint = "/bin/sh";
-        extraOptions = [
-          "--network=host"
-          "--add-host=immich-server:127.0.0.1"
-          "--add-host=immich-microservices:127.0.0.1"
-          "--add-host=immich-machine-learning:127.0.0.1"
-          "--add-host=immich-web:127.0.0.1"
-        ];
+    # Init service
+    systemd.services.immich = {
+      enable = true;
+      description = "Set up paths & database access";
+      requires = [ "postgresql.service" ];
+      after = [ "postgresql.service" ];
+      before = [
+        "docker-immich-web.service"
+        "docker-immich-redis.service"
+        "docker-immich-typesense.service"
+        "docker-immich-machine-learning.service"
+        "docker-immich-server.service"
+        "docker-immich-microservices.service"
+      ];
+      wantedBy = [ "multi-user.target" ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = "yes";
+        EnvironmentFile = secrets.immich-env.path;
       };
-
-    in {
-
-      immich-web = base // {
-        image = "altran1502/immich-web:v${version}";
-        cmd = [ "./entrypoint.sh" ];
-      };
-
-      immich-server = base // {
-        image = "altran1502/immich-server:v${version}";
-        cmd = [ "./start-server.sh" ];
-        # user = "${uid}:${gid}";
-        volumes = [ "${stateDir}:/usr/src/app/upload" ];
-      };
-
-      # https://github.com/immich-app/immich/issues/776#issuecomment-1271459885
-      immich-microservices = base // {
-        image = "altran1502/immich-server:v${version}";
-        cmd = [ "./start-microservices.sh" ];
-        # user = "${uid}:${gid}";
-        volumes = [ 
-          "${stateDir}:/usr/src/app/upload" 
-          "${stateDir}/geocoding:/usr/src/app/geocoding"
-        ];
-      };
-
-      # immich-machine-learning = base // {
-      #   image = "altran1502/immich-machine-learning:v${version}";
-      #   cmd = [ "./entrypoint.sh" ];
-      #   # user = "${uid}:${gid}";
-      #   volumes = [ "${stateDir}:/usr/src/app/upload" ];
-      # };
-
+      script = ''
+        #
+        # Ensure docker network exists
+        ${pkgs.docker}/bin/docker network create immich 2>/dev/null || true
+        #
+        # Ensure data directory exists with expected ownership
+        mkdir -p ${cfg.dataDir}/geocoding
+        chown -R ${uid}:${gid} ${cfg.dataDir}
+        #
+        # Ensure database user has expected password
+        ${pkgs.sudo}/bin/sudo -u postgres ${pkgs.postgresql}/bin/psql postgres \
+          -c "alter user immich with password '$DB_PASSWORD'"
+      '';
     };
+
 
     # Postgres database configuration
     services.postgresql = {
@@ -149,56 +171,101 @@ in {
         ensurePermissions = { "DATABASE immich" = "ALL PRIVILEGES"; };
       }];
       ensureDatabases = [ "immich" ];
+      # Allow connections from docker container IP addresses
       authentication = lib.mkBefore ''
-        host immich immich 127.0.0.1/32 md5
+        host immich immich 172.17.0.0/12 md5
       '';
     };
 
-    # Redis cache configuration
-    services.redis.servers.immich = {
-      enable = true;
-      port = toInt port.redis;
+
+    # Web front-end
+    virtualisation.oci-containers.containers.immich-web = base // {
+      image = "ghcr.io/immich-app/immich-web:v${version}";
+      entrypoint = "/bin/sh";
+      cmd = [ "./entrypoint.sh" ];
+      ports = [ "${toString cfg.webPort}:3000" ];
     };
 
-    systemd.services.docker-immich-server = {
-      requires = [ "postgresql.service" "redis-immich.service" ];
-      after = [ "postgresql.service" "redis-immich.service" ];
+    systemd.services.docker-immich-web = {
+      requires = [ "immich.service" ];
+      after = [ "immich.service" ];
     };
 
-    systemd.services.docker-microservices = {
-      requires = [ "postgresql.service" "redis-immich.service" ];
-      after = [ "postgresql.service" "redis-immich.service" ];
+
+    # Redis cache
+    virtualisation.oci-containers.containers.immich-redis = base // {
+      image = "redis:6.2";
+    };
+
+    systemd.services.docker-immich-redis = {
+      requires = [ "immich.service" ];
+      after = [ "docker-immich-web.service" ];
+    };
+
+
+    # Typesense search engine
+    virtualisation.oci-containers.containers.immich-typesense = base // {
+      image = "typesense/typesense:0.24.0";
+      volumes = [ "tsdata:/data" ];
+    };
+
+    systemd.services.docker-immich-typesense = {
+      requires = [ "immich.service" ];
+      after = [ "docker-immich-redis.service" ];
+    };
+
+
+    # Machine learning
+    virtualisation.oci-containers.containers.immich-machine-learning = base // {
+      image = "ghcr.io/immich-app/immich-machine-learning:v${version}";
+      # port 3003
+      volumes = [ 
+        "${cfg.dataDir}:/usr/src/app/upload" 
+        "model-cache:/cache"
+      ];
     };
 
     systemd.services.docker-immich-machine-learning = {
-      requires = [ "postgresql.service" ];
-      after = [ "postgresql.service" ];
+      requires = [ "immich.service" "docker-immich-typesense.service" "docker-immich-redis.service" "postgresql.service" ];
+      after = [ "docker-immich-typesense.service" ];
     };
 
-    systemd.services.immich-init = {
-      enable = true;
-      description = "Set up paths & database access";
-      requires = [ "postgresql.service" ];
-      after = [ "postgresql.service" ];
-      before = [
-        "docker-immich-server.service"
-        "docker-immich-microservices.service"
-        "docker-immich-machine-learning.service"
-        "docker-immich-web.service"
-        "docker-immich-proxy.service"
-      ];
-      wantedBy = [ "multi-user.target" ];
-      serviceConfig = {
-        Type = "oneshot";
-        EnvironmentFile = secrets.immich-env.path;
-      };
-      script = ''
-        mkdir -p ${stateDir}/geocoding
-        chown -R ${uid}:${gid} ${stateDir}
-        ${pkgs.sudo}/bin/sudo -u postgres ${pkgs.postgresql}/bin/psql postgres \
-          -c "alter user immich with password '$DB_PASSWORD'"
-      '';
+
+    # Server back-end
+    virtualisation.oci-containers.containers.immich-server = base // {
+      image = "ghcr.io/immich-app/immich-server:v${version}";
+      entrypoint = "/bin/sh";
+      cmd = [ "./start-server.sh" ];
+      user = "${uid}:${gid}";
+      ports = [ "${toString cfg.serverPort}:3001" ];
+      volumes = [ "${cfg.dataDir}:/usr/src/app/upload" ];
     };
+
+    systemd.services.docker-immich-server = {
+      requires = [ "immich.service" "docker-immich-typesense.service" "docker-immich-redis.service" "postgresql.service" ];
+      after = [ "docker-immich-typesense.service" ];
+    };
+
+
+    # Microservices
+    # https://github.com/immich-app/immich/issues/776#issuecomment-1271459885
+    virtualisation.oci-containers.containers.immich-microservices = base // {
+      image = "ghcr.io/immich-app/immich-server:v${version}";
+      entrypoint = "/bin/sh";
+      cmd = [ "./start-microservices.sh" ];
+      user = "${uid}:${gid}"; 
+      # port 3002
+      volumes = [ 
+        "${cfg.dataDir}:/usr/src/app/upload" 
+        "${cfg.dataDir}/geocoding:/usr/src/app/geocoding"
+      ];
+    };
+
+    systemd.services.docker-immich-microservices = {
+      requires = [ "immich.service" "docker-immich-typesense.service" "docker-immich-redis.service" "postgresql.service" ];
+      after = [ "docker-immich-typesense.service" ];
+    };
+
 
   };
 

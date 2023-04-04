@@ -29,6 +29,16 @@
       fsType = "btrfs";
     };
 
+  # fileSystems."/mnt/ssd" =
+  #   { device = "/dev/disk/by-uuid/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxx1";
+  #     fsType = "btrfs";
+  #   };
+
+  # fileSystems."/mnt/raid" =
+  #   { device = "/dev/disk/by-uuid/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxx2";
+  #     fsType = "btrfs";
+  #   };
+
   swapDevices =
     [ { device = "/dev/disk/by-uuid/bf5e86ac-c711-48fe-a274-de6dda7e7671"; }
     ];
