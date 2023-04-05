@@ -413,7 +413,7 @@ function stage1 {
   info "Create btrfs subvolume structure"
   # nix
   # ├── root
-  # ├── snaps
+  # ├── snapshots
   # └── state
   #     ├── home
   #     ├── etc
@@ -421,8 +421,8 @@ function stage1 {
   #         └── log
   task mkdir -p /mnt && mount /dev/$butter /mnt
   task btrfs subvolume create /mnt/root
-  task btrfs subvolume create /mnt/snaps
-  task btrfs subvolume snapshot -r /mnt/root /mnt/snaps/root
+  task btrfs subvolume create /mnt/snapshots
+  task btrfs subvolume snapshot -r /mnt/root /mnt/snapshots/root
   task btrfs subvolume create /mnt/state
   task btrfs subvolume create /mnt/state/home
   task mkdir -p /mnt/state/{var/lib,etc/{ssh,NetworkManager/system-connections}}

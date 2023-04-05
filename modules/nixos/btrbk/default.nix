@@ -19,7 +19,7 @@ in {
     # snapshot_preserve_min   18h
     # snapshot_preserve       48h
     #
-    # snapshot_dir /nix/snaps
+    # snapshot_dir /nix/snapshots
     # subvolume    /nix/state
     # subvolume    /nix/state/home
 
@@ -35,7 +35,7 @@ in {
         # All snapshots are retained for at least 6 hours regardless of other policies.
         snapshot_preserve_min = "6h";
         volume."/nix" = {
-          snapshot_dir = "snaps";
+          snapshot_dir = "snapshots";
           subvolume."state".snapshot_preserve = "48h 7d";
           subvolume."state/home".snapshot_preserve = "48h 7d 4w";
         };
@@ -44,7 +44,7 @@ in {
 
     # services.btrbk.instances.local.settings = {
     #   volume."/data" = {
-    #     snapshot_dir = "snaps";
+    #     snapshot_dir = "snapshots";
     #     subvolume."photos".snapshot_preserve = "48h 7d";
     #   };
     # };

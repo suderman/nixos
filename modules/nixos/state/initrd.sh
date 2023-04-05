@@ -13,7 +13,7 @@ done
 btrfs subvolume delete /mnt/root
 
 # Restore root from blank snapshot
-btrfs subvolume snapshot /mnt/snaps/root /mnt/root
+btrfs subvolume snapshot /mnt/snapshots/root /mnt/root
 
 # Clean up
 umount /mnt

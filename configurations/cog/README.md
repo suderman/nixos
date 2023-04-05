@@ -53,13 +53,15 @@ Create nested subvolumes in /mnt/nix to manage state.
 ```zsh
 # Create nested subvolume tree like so:
 # nix
-# ├── snaps
+# ├── root
+# ├── snapshots
 # └── state
 #     ├── home
 #     ├── etc
 #     └── var
 #         └── log
-btrfs subvolume create /mnt/nix/snaps
+btrfs subvolume create /mnt/root
+btrfs subvolume create /mnt/nix/snapshots
 btrfs subvolume create /mnt/nix/state
 btrfs subvolume create /mnt/nix/state/home
 mkdir -p /mnt/nix/state/{var,etc/ssh}
