@@ -49,7 +49,11 @@
   services.traefik.enable = true;
   services.whoogle.enable = true;
   services.whoami.enable = true;
-  services.sabnzbd.enable = false;
+
+  services.sabnzbd.enable = true;
+  # services.sabnzbd.host = "s.${config.networking.fqdn}";
+  # services.sabnzbd.port = 8008;
+
   services.tandoor-recipes.enable = true;
   # services.gitea.enable = true;
   # services.gitea.database.type = "mysql";
