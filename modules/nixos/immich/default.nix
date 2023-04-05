@@ -40,6 +40,14 @@ let
     ];
   };
 
+  # Containers will not stop gracefully, so kill it
+  kill = {
+    serviceConfig = {
+      KillSignal = "SIGKILL";
+      SuccessExitStatus = "0 SIGKILL";
+    };
+  };
+
   inherit (lib) mkIf mkOption mkBefore types strings;
   inherit (builtins) toString;
   inherit (lib.strings) toInt;
@@ -186,7 +194,7 @@ in {
       ports = [ "${toString cfg.webPort}:3000" ];
     };
 
-    systemd.services.docker-immich-web = {
+    systemd.services.docker-immich-web = kill // {
       requires = [ "immich.service" ];
       after = [ "immich.service" ];
     };
@@ -218,14 +226,13 @@ in {
     # Machine learning
     virtualisation.oci-containers.containers.immich-machine-learning = base // {
       image = "ghcr.io/immich-app/immich-machine-learning:v${version}";
-      # port 3003
       volumes = [ 
         "${cfg.dataDir}:/usr/src/app/upload" 
         "model-cache:/cache"
       ];
     };
 
-    systemd.services.docker-immich-machine-learning = {
+    systemd.services.docker-immich-machine-learning = kill // {
       requires = [ "immich.service" "docker-immich-typesense.service" "docker-immich-redis.service" "postgresql.service" ];
       after = [ "docker-immich-typesense.service" ];
     };
@@ -241,7 +248,7 @@ in {
       volumes = [ "${cfg.dataDir}:/usr/src/app/upload" ];
     };
 
-    systemd.services.docker-immich-server = {
+    systemd.services.docker-immich-server = kill // {
       requires = [ "immich.service" "docker-immich-typesense.service" "docker-immich-redis.service" "postgresql.service" ];
       after = [ "docker-immich-typesense.service" ];
     };
@@ -254,14 +261,13 @@ in {
       entrypoint = "/bin/sh";
       cmd = [ "./start-microservices.sh" ];
       user = "${uid}:${gid}"; 
-      # port 3002
       volumes = [ 
         "${cfg.dataDir}:/usr/src/app/upload" 
         "${cfg.dataDir}/geocoding:/usr/src/app/geocoding"
       ];
     };
 
-    systemd.services.docker-immich-microservices = {
+    systemd.services.docker-immich-microservices = kill // {
       requires = [ "immich.service" "docker-immich-typesense.service" "docker-immich-redis.service" "postgresql.service" ];
       after = [ "docker-immich-typesense.service" ];
     };

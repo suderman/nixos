@@ -2,26 +2,34 @@
 { inputs, config, pkgs, lib, ... }:
   
 let 
-  name = "whoogle"; 
+
   cfg = config.services.whoogle;
+  host = "search.${config.networking.fqdn}";
+
+  inherit (lib) mkIf mkForce;
+  inherit (lib.options) mkEnableOption;
 
 in {
   options = {
-    services.whoogle.enable = lib.options.mkEnableOption "whoogle"; 
+    services.whoogle.enable = mkEnableOption "whoogle"; 
   };
 
-  config = lib.mkIf cfg.enable {
+  config = mkIf cfg.enable {
 
-    virtualisation.oci-containers.containers."whoogle" = with config.networking; {
+    virtualisation.oci-containers.containers."whoogle" = {
       image = "benbusby/whoogle-search";
-      # ports = [ "5000:5000" ]; #server locahost : docker localhost
       extraOptions = [
         "--label=traefik.enable=true"
-        "--label=traefik.http.routers.whoogle.rule=Host(`search.${hostName}.${domain}`) || Host(`search.local.${domain}`)"
+        "--label=traefik.http.routers.whoogle.rule=Host(`${host}`)"
         "--label=traefik.http.routers.whoogle.tls.certresolver=resolver-dns"
         "--label=traefik.http.routers.whoogle.middlewares=local@file"
-        "--stop-signal=SIGKILL"
       ];
+    };
+
+    # Container will not stop gracefully, so kill it
+    systemd.services.docker-whoogle.serviceConfig = {
+      KillSignal = "SIGKILL";
+      SuccessExitStatus = "0 SIGKILL";
     };
 
   }; 

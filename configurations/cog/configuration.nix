@@ -10,14 +10,6 @@
   fileSystems."/".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
   fileSystems."/nix".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
 
-  # # Additional data disk
-  # fileSystems."/mnt/ssd".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
-  fileSystems."/data" = { device = "/mnt/ssd/data"; options = [ "bind" ]; };
-  #
-  # # 4-disk RAID device 
-  # fileSystems."/mnt/raid".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
-  # fileSystems."/media" = { device = "/mnt/raid/media"; options = [ "bind" ]; };
-
   # Base configuration
   base.enable = true;
   state.enable = true;
@@ -55,7 +47,7 @@
   
   # Web services
   services.traefik.enable = true;
-  services.whoogle.enable = false;
+  services.whoogle.enable = true;
   services.whoami.enable = true;
   services.sabnzbd.enable = false;
   services.tandoor-recipes.enable = true;
@@ -118,8 +110,8 @@
 
   services.immich = {
     enable = true;
-    # dataDir = "/data/immich";
     host = "i.${config.networking.fqdn}";
+    # dataDir = "/data/immich";
   };
 
   # services.fprintd.enable = true;
