@@ -118,19 +118,9 @@
 
   services.immich = {
     enable = true;
-    dataDir = "/data/immich";
+    # dataDir = "/data/immich";
     host = "i.${config.networking.fqdn}";
   };
-
-  # fileSystems."/srv/media" = {
-  #
-  # fileSystems."/var/media" = {
-  #   # device = "/run/media/me/nixos/ssd/data/immich";
-  #   device = "/mnt/pool/data";
-  #   options = [ "bind" ];
-  # };
-
-
 
   # services.fprintd.enable = true;
   # services.fprintd.tod.enable = true;

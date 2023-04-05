@@ -2,28 +2,12 @@
 
   imports = [ 
     ./hardware-configuration.nix
+    ./additional-storage.nix
   ];
 
-  fileSystems."/mnt/ssd" =
-    { device = "/dev/disk/by-uuid/e3591e1c-e091-4e16-b55f-088ab195fec4";
-      fsType = "btrfs";
-    };
-
-  fileSystems."/mnt/raid" =
-    { device = "/dev/disk/by-uuid/e3591e1c-e091-4e16-b55f-088ab195fec4";
-      fsType = "btrfs";
-    };
-
-
-  fileSystems."/data/media" = {
-    device = "/mnt/raid/media";
-    options = [ "bind" ];
-  };
-
-  fileSystems."/data" = {
-    device = "/mnt/ssd/data";
-    options = [ "bind" ];
-  };
+  # Btrfs mount options
+  fileSystems."/".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
+  fileSystems."/nix".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
 
   # /data/immich
   # /media/movies
@@ -92,8 +76,11 @@
   desktops.gnome.enable = true;
 
   # Apps
-  services.flatpak.enable = true;
   programs.mosh.enable = true;
   programs.neovim.enable = true;
+
+  services.plex.enable = true;
+  services.tautulli.enable = true;
+  services.jellyfin.enable = true;
 
 }
