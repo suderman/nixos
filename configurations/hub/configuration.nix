@@ -45,13 +45,13 @@
   services.tiddlywiki.enable = true;
   services.tandoor-recipes.enable = true;
 
-  services.docker-unifi.enable = true;
-  # services.docker-hass.enable = true;
+  services.ubiquiti.enable = true;
 
-  services.docker-hass = {
-    enable = true;
+  services.hass = {
+    enable = true; ip = "192.168.1.4";
     zigbee = "/dev/serial/by-id/usb-Nabu_Casa_SkyConnect_v1.0_28b77f55258dec11915068e883c5466d-if00-port0";
     zwave = "/dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_3e535b346625ed11904d6ac2f9a97352-if00-port0";
+    isy = "192.168.2.3";
   };
 
 }

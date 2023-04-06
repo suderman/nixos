@@ -2,18 +2,16 @@
 
 let
 
-  inherit (lib) mkIf mkBefore;
-  inherit (builtins) toString;
-
-  cfg = config.services.docker-hass;
-  host = "zwave.${config.networking.fqdn}";
-  stateDir = "${config.users.users.hass.home}/zwave";
+  cfg = config.services.hass;
   uid = toString config.users.users.hass.uid;
   gid = toString config.users.groups.hass.gid;
 
+  inherit (lib) mkIf mkBefore;
+  inherit (builtins) toString;
+
 in {
 
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.zwave != "") {
 
     networking.firewall = {
       allowedTCPPorts = [ 
@@ -26,12 +24,12 @@ in {
       image = "zwavejs/zwave-js-ui:latest";
       extraOptions = [
         "--label=traefik.enable=true"
-        "--label=traefik.http.routers.zwave.rule=Host(`${host}`)"
+        "--label=traefik.http.routers.zwave.rule=Host(`${cfg.zwaveHost}`)"
         "--label=traefik.http.routers.zwave.tls.certresolver=resolver-dns"
         "--label=traefik.http.routers.zwave.middlewares=local@file"
         "--label=traefik.http.services.zwave.loadbalancer.server.port=8091"
         "--label=traefik.http.services.zwave.loadbalancer.server.scheme=http"
-        "--device=${config.services.docker-hass.zwave}:/dev/zwave"
+        "--device=${cfg.zwave}:/dev/zwave"
         "--privileged"
         "--network=host"
         "--stop-signal=SIGINT"
@@ -41,7 +39,7 @@ in {
         TZ = config.time.timeZone;
       };
       volumes = [ 
-        "${stateDir}:/usr/src/app/store"
+        "${cfg.dataDir}/zwave:/usr/src/app/store"
       ];
     };
 
@@ -49,8 +47,8 @@ in {
       before = [ "docker-hass.service" ];
       wants = [ "docker-hass.service" ];
       preStart = mkBefore ''
-        mkdir -p ${stateDir}
-        chown -R ${uid}:${gid} ${stateDir}
+        mkdir -p ${cfg.dataDir}/zwave
+        chown -R ${uid}:${gid} ${cfg.dataDir}/zwave
       '';
     };
 

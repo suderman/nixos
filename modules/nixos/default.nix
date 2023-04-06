@@ -30,7 +30,7 @@
     ./tautulli
     ./tiddlywiki
     ./traefik
-    ./unifi
+    ./ubiquiti
     ./whoami
     ./whoogle
     ./ydotool

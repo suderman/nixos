@@ -8,6 +8,7 @@ let
   cfg = config.services.immich;
 
   inherit (lib) mkIf mkOption mkBefore types strings;
+  inherit (lib.options) mkEnableOption;
   inherit (builtins) toString;
   inherit (lib.strings) toInt;
 
@@ -26,16 +27,17 @@ in {
   ];
 
 
-  options.services.immich = {
-    enable = lib.options.mkEnableOption "immich"; 
+  options = {
 
-    host = mkOption {
+    services.immich.enable = mkEnableOption "immich"; 
+
+    services.immich.host = mkOption {
       type = types.str;
       default = "immich.${config.networking.fqdn}";
       description = "Host for Immich";
     };
 
-    dataDir = mkOption {
+    services.immich.dataDir = mkOption {
       type = types.path;
       default = "/var/lib/immich";
       description = "Data directory for Immich";
@@ -72,7 +74,7 @@ in {
       ensureDatabases = [ "immich" ];
 
       # Allow connections from any docker IP addresses
-      authentication = lib.mkBefore ''
+      authentication = mkBefore ''
         host immich immich 172.17.0.0/12 md5
       '';
 

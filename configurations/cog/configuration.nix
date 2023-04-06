@@ -109,7 +109,7 @@
   # sudo fwupdmgr update
   services.fwupd.enable = true;
 
-  services.docker-hass.enable = false;
+  services.hass.enable = true;
   services.freshrss.enable = false;
 
   services.immich = {

@@ -3,12 +3,13 @@
 let
 
   cfg = config.services.immich;
+  inherit (lib) mkIf;
   inherit (import ./shared.nix { inherit config; }) 
     version uid gid environment environmentFiles extraOptions serviceConfig;
 
 in {
 
-  config = lib.mkIf cfg.enable {
+  config = mkIf cfg.enable {
 
     # Machine learning
     virtualisation.oci-containers.containers.immich-machine-learning = {

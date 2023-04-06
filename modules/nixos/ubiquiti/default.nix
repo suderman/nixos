@@ -1,14 +1,11 @@
-# services.docker-unifi.enable = true;
+# services.ubiquiti.enable = true;
 { config, lib, pkgs, ... }:
 
 with config.networking;
 
 let
 
-  cfg = config.services.docker-unifi;
-
-  host = "unifi.${hostName}.${domain}";
-  stateDir = "/var/lib/unifi";
+  cfg = config.services.ubiquiti;
 
   gateway = {
     host = "logos.${hostName}.${domain}";
@@ -16,12 +13,27 @@ let
   };
 
   inherit (lib) mkIf mkOption types strings;
+  inherit (lib.options) mkEnableOption;
   inherit (builtins) toString;
 
 in {
 
   options = {
-    services.docker-unifi.enable = lib.options.mkEnableOption "docker-unifi"; 
+
+    services.ubiquiti.enable = mkEnableOption "ubiquiti"; 
+
+    services.ubiquiti.host = mkOption {
+      type = types.str;
+      default = "unifi.${config.networking.fqdn}";
+      description = "Host for UniFi";
+    };
+
+    services.ubiquiti.dataDir = mkOption {
+      type = types.path;
+      default = "/var/lib/unifi";
+      description = "Data directory for UniFi";
+    };
+
   };
 
   config = mkIf cfg.enable {
@@ -37,7 +49,7 @@ in {
       isSystemUser = true;
       group = "unifi";
       description = "UniFi controller daemon user";
-      home = "${stateDir}";
+      home = "${cfg.dataDir}";
       uid = config.ids.uids.unifi;
     };
     users.groups.unifi.gid = config.ids.gids.unifi;
@@ -62,7 +74,7 @@ in {
       image = "jacobalberty/unifi:v7.3";
       extraOptions = [
         "--label=traefik.enable=true"
-        "--label=traefik.http.routers.unifi.rule=Host(`${host}`)"
+        "--label=traefik.http.routers.unifi.rule=Host(`${cfg.host}`)"
         "--label=traefik.http.routers.unifi.tls.certresolver=resolver-dns"
         "--label=traefik.http.routers.unifi.middlewares=local@file"
         "--label=traefik.http.services.unifi.loadbalancer.server.port=8443"
@@ -80,7 +92,7 @@ in {
         BIND_PRIV = "false";
         TZ = config.time.timeZone;
       };
-      volumes = [ "${stateDir}:/unifi" ];
+      volumes = [ "${cfg.dataDir}:/unifi" ];
     };
 
     # also traefik proxy for gateway "logos"

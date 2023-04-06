@@ -1,21 +1,17 @@
-# services.docker-hass.enable = true;
+# services.hass.enable = true;
 { config, lib, pkgs, ... }:
 
 let
+
+  cfg = config.services.hass;
+  uid = toString config.users.users.hass.uid;
+  gid = toString config.users.groups.hass.gid;
 
   inherit (lib) mkIf mkOption mkBefore types strings;
   inherit (lib.options) mkEnableOption;
   inherit (builtins) toString readFile;
 
-  cfg = config.services.docker-hass;
-  host = "hass.${config.networking.fqdn}";
-  stateDir = config.users.users.hass.home;
-  ip = "192.168.1.4";
-  uid = toString config.users.users.hass.uid;
-  gid = toString config.users.groups.hass.gid;
-
 in {
-
 
   config = mkIf cfg.enable {
 
@@ -30,22 +26,25 @@ in {
       image = "ghcr.io/home-assistant/home-assistant:stable";
       extraOptions = [
         "--label=traefik.enable=true"
-        "--label=traefik.http.routers.hass.rule=Host(`${host}`)"
+        "--label=traefik.http.routers.hass.rule=Host(`${cfg.host}`)"
         "--label=traefik.http.routers.hass.tls.certresolver=resolver-dns"
         "--label=traefik.http.routers.hass.middlewares=local@file"
         "--label=traefik.http.services.hass.loadbalancer.server.port=8123"
         "--label=traefik.http.services.hass.loadbalancer.server.scheme=http"
+      ] ++ (if cfg.zigbee == "" then [] else [
+        "--device=${cfg.zigbee}:/dev/zigbee"
+      ]) ++ [
         "--privileged" 
         "--network=host"
       ];
       environment = {
         TZ = config.time.timeZone;
-        ISY_URL = "https://isy.${config.networking.fqdn}";
-        ZWAVE_URL = "https://zwave.${config.networking.fqdn}";
-        HOST_IP = ip;
+        ISY_URL = "https://${cfg.isyHost}";
+        ZWAVE_URL = "https://${cfg.zwaveHost}";
+        HOST_IP = cfg.ip;
       };
       volumes = [ 
-        "${stateDir}:/config"
+        "${cfg.dataDir}:/config"
         "/run/postgresql:/run/postgresql"
       ];
     };
@@ -74,10 +73,10 @@ in {
     systemd.services.docker-hass.preStart = let
       configuration_yaml = pkgs.writeText "configuration.yaml" (readFile ./configuration.yaml);
     in mkBefore ''
-      mkdir -p ${stateDir}
-      rm -rf ${stateDir}/configuration.yaml
-      cp -f ${configuration_yaml} ${stateDir}/configuration.yaml
-      chown -R ${uid}:${gid} ${stateDir}
+      mkdir -p ${cfg.dataDir}
+      rm -rf ${cfg.dataDir}/configuration.yaml
+      cp -f ${configuration_yaml} ${cfg.dataDir}/configuration.yaml
+      chown -R ${uid}:${gid} ${cfg.dataDir}
     '';
 
   };

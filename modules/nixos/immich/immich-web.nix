@@ -3,12 +3,13 @@
 let
 
   cfg = config.services.immich;
+  inherit (lib) mkIf mkBefore;
   inherit (import ./shared.nix { inherit config; }) 
     version uid gid environment environmentFiles extraOptions serviceConfig;
 
 in {
 
-  config = lib.mkIf cfg.enable {
+  config = mkIf cfg.enable {
 
     # Web front-end
     virtualisation.oci-containers.containers.immich-web = {
@@ -19,7 +20,7 @@ in {
     };
       
     systemd.services.docker-immich-web = {
-      preStart = lib.mkBefore ''
+      preStart = mkBefore ''
         #
         # Ensure docker network exists
         ${pkgs.docker}/bin/docker network create immich 2>/dev/null || true

@@ -5,9 +5,17 @@ let
 
   cfg = config.services.plex;
   port = "32400"; 
-  inherit (lib) mkIf;
+  inherit (lib) mkIf mkOption types;
 
 in {
+
+  options.services.sabznbd = {
+    host = mkOption {
+      type = types.str;
+      default = "sabnzbd.${config.networking.fqdn}";
+      description = "Host for sabnzbd";
+    };
+  };
 
   config = mkIf cfg.enable {
 

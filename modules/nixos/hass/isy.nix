@@ -2,28 +2,26 @@
 
 let
 
+  cfg = config.services.hass;
+
   inherit (lib) mkIf mkBefore types strings;
   inherit (builtins) toString readFile;
 
-  cfg = config.services.docker-hass;
-  host = "isy.${config.networking.fqdn}";
-  ip = "192.168.2.3";
-
 in {
 
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.isy != "") {
 
     services.traefik.dynamicConfigOptions.http = {
       middlewares.isy = {
         headers.customRequestHeaders.authorization = "Basic {{ env `ISY_BASIC_AUTH` }}";
       };
       routers.isy = {
-        rule = "Host(`${host}`)";
+        rule = "Host(`${cfg.isyHost}`)";
         middlewares = [ "local@file" "isy@file" ];
         tls.certresolver = "resolver-dns";
         service = "isy";
       };
-      services.isy.loadBalancer.servers = [{ url = "http://${ip}:80"; }];
+      services.isy.loadBalancer.servers = [{ url = "http://${cfg.isy}:80"; }];
     };
 
   };
