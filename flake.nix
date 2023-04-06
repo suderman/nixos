@@ -111,14 +111,14 @@
         # Framework Laptop
         cog = mkSystem { host = "cog"; inherit user domain; };
 
-        # Linode VPS
-        sol = mkSystem { host = "sol"; inherit user domain; };
-
         # Intel NUC home server
         hub = mkSystem { host = "hub"; inherit user domain; };
 
-        # # Intel NUC media server
-        # lux = mkSystem { host = "lux"; inherit user domain; };
+        # Intel NUC media server
+        lux = mkSystem { host = "lux"; inherit user domain; };
+
+        # Linode VPS
+        sol = mkSystem { host = "sol"; inherit user domain; };
 
       };
 
