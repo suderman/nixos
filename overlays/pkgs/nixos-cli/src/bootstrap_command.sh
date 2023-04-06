@@ -324,11 +324,12 @@ function stage1 {
   fi
 
   # Choose a disk to partition
-  local disk bbp esp swap butter
+  local disk part bbp esp swap butter
   if is_linode; then disk="sda"
   else
     info "Choose the disk to partition"
     disk="$(ask_disk)"
+    [[ "$disk" == nvme* ]] && part="p"
   fi
 
   # Bail if no disk selected
@@ -353,10 +354,10 @@ function stage1 {
   if is_bios; then
 
     # /dev/sda1-4
-    bbp="${disk}1"
-    esp="${disk}2"
-    swap="${disk}3"
-    butter="${disk}4"
+    bbp="${disk}${part}1"
+    esp="${disk}${part}2"
+    swap="${disk}${part}3"
+    butter="${disk}${part}4"
 
     info "Create BIOS boot partition ($bbp)"
     task parted -s /dev/$disk mkpart BBP 1MiB 3MiB
@@ -377,9 +378,9 @@ function stage1 {
   else
 
     # /dev/sda1-3
-    esp="${disk}1"
-    swap="${disk}2"
-    butter="${disk}3"
+    esp="${disk}${part}1"
+    swap="${disk}${part}2"
+    butter="${disk}${part}3"
 
     info "Create EFI system partition ($esp)"
     task parted -s /dev/$disk mkpart ESP FAT32 1MiB 1GiB
