@@ -1,7 +1,7 @@
 { config }: {
 
   # https://github.com/immich-app/immich/releases
-  version = "1.52.1";
+  version = "1.53.0";
 
   uid = builtins.toString config.ids.uids.immich;
   gid = builtins.toString config.ids.gids.immich;

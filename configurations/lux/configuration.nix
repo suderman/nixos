@@ -43,6 +43,11 @@
   services.tautulli.enable = true;
   services.jellyfin.enable = true;
 
+  services.immich = {
+    enable = true;
+    dataDir = "/data/immich";
+  };
+
   # /data/immich
   # /media/movies
 
