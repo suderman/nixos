@@ -2,7 +2,7 @@
 
   imports = [ 
     ./hardware-configuration.nix
-    # ./additional-storage.nix
+    ./additional-storage.nix
   ];
 
   # Btrfs mount options
