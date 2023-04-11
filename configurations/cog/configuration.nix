@@ -50,7 +50,8 @@
   services.whoogle.enable = true;
   services.whoami.enable = true;
 
-  services.sabnzbd.enable = true;
+  # services.sabnzbd.enable = true;
+  modules.sabnzbd.enable = true;
   # services.sabnzbd.host = "s.${config.networking.fqdn}";
   # services.sabnzbd.port = 8008;
 
@@ -112,11 +113,7 @@
   services.hass.enable = true;
   services.freshrss.enable = false;
 
-  services.immich = {
-    enable = true;
-    host = "i.${config.networking.fqdn}";
-    # dataDir = "/data/immich";
-  };
+  modules.immich.enable = true;
 
   # services.fprintd.enable = true;
   # services.fprintd.tod.enable = true;
@@ -125,6 +122,7 @@
   
   environment.systemPackages = with pkgs; [ 
     monica
+    unstable.nodePackages_latest.immich
   ];
   
 }

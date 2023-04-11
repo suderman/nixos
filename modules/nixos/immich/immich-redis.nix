@@ -2,10 +2,8 @@
 
 let
 
-  cfg = config.services.immich;
+  cfg = config.modules.immich;
   inherit (lib) mkIf;
-  inherit (import ./shared.nix { inherit config; }) 
-    version uid gid environment environmentFiles extraOptions serviceConfig;
 
 in {
 
@@ -14,11 +12,26 @@ in {
     # Redis cache
     virtualisation.oci-containers.containers.immich-redis = {
       image = "redis:6.2";
-      inherit environment environmentFiles extraOptions;
+      autoStart = false;
+
+      # Environment variables
+      environment = cfg.environment;
+      environmentFiles =  [ cfg.environment.file ];
+
+      # Map volumes to host
+      volumes = [ "immich-redis:/data" ];
+
+      # Networking for docker containers
+      extraOptions = [
+        "--add-host=host.docker.internal:host-gateway"
+        "--network=immich"
+      ];
+
     };
 
+    # Extend systemd service
     systemd.services.docker-immich-redis = {
-      after = [ "docker-immich-web.service" ];
+      requires = [ "immich.service" ];
     };
 
   };

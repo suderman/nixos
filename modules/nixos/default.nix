@@ -4,7 +4,7 @@
     ./base
     ./btrbk
     ./ddns
-    ./docker
+    # ./docker
     ./earlyoom
     ./flatpak
     ./freshrss

@@ -2,10 +2,8 @@
 
 let
 
-  cfg = config.services.immich;
+  cfg = config.modules.immich;
   inherit (lib) mkIf;
-  inherit (import ./shared.nix { inherit config; }) 
-    version uid gid environment environmentFiles extraOptions serviceConfig;
 
 in {
 
@@ -14,12 +12,26 @@ in {
     # Typesense search engine
     virtualisation.oci-containers.containers.immich-typesense = {
       image = "typesense/typesense:0.24.0";
-      volumes = [ "tsdata:/data" ];
-      inherit environment environmentFiles extraOptions;
+      autoStart = false;
+
+      # Environment variables
+      environment = cfg.environment;
+      environmentFiles =  [ cfg.environment.file ];
+
+      # Map volumes to host
+      volumes = [ "immich-typesense:/data" ];
+
+      # Networking for docker containers
+      extraOptions = [
+        "--add-host=host.docker.internal:host-gateway"
+        "--network=immich"
+      ];
+
     };
 
+    # Extend systemd service
     systemd.services.docker-immich-typesense = {
-      after = [ "docker-immich-redis.service" ];
+      requires = [ "immich.service" ];
     };
 
   };

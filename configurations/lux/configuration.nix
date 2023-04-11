@@ -37,16 +37,18 @@
   # Web services
   services.tailscale.enable = true;
   services.ddns.enable = true;
-  services.traefik.enable = true;
   services.whoami.enable = true;
   services.plex.enable = true;
   services.tautulli.enable = true;
   services.jellyfin.enable = true;
 
-  services.immich = {
+  modules.immich = {
     enable = true;
     dataDir = "/data/immich";
   };
+
+  modules.sabnzbd.enable = true;
+  # modules.radarr.enable = true;
 
   # /data/immich
   # /media/movies

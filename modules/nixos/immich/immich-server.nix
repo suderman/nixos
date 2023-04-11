@@ -2,10 +2,8 @@
 
 let
 
-  cfg = config.services.immich;
+  cfg = config.modules.immich;
   inherit (lib) mkIf;
-  inherit (import ./shared.nix { inherit config; }) 
-    version uid gid environment environmentFiles extraOptions serviceConfig;
 
 in {
 
@@ -13,18 +11,39 @@ in {
 
     # Server back-end
     virtualisation.oci-containers.containers.immich-server = {
-      image = "ghcr.io/immich-app/immich-server:v${version}";
+      image = "ghcr.io/immich-app/immich-server:v${cfg.version}";
       entrypoint = "/bin/sh";
       cmd = [ "./start-server.sh" ];
-      user = "${uid}:${gid}";
+      autoStart = false;
+
+      # Run as immich user
+      user = "${cfg.environment.PUID}:${cfg.environment.PGID}";
+
+      # Environment variables
+      environment = cfg.environment;
+      environmentFiles =  [ cfg.environment.file ];
+
+      # Map volumes to host
       volumes = [ "${cfg.dataDir}:/usr/src/app/upload" ];
-      inherit environment environmentFiles extraOptions;
+
+      # Networking for docker containers
+      extraOptions = [
+        "--add-host=host.docker.internal:host-gateway"
+        "--network=immich"
+      ];
+
     };
 
+    # Extend systemd service
     systemd.services.docker-immich-server = {
-      requires = [ "docker-immich-typesense.service" "docker-immich-redis.service" "postgresql.service" ];
-      after = [ "docker-immich-typesense.service" ];
-      inherit serviceConfig;
+      requires = [ "immich.service" ];
+
+      # Container will not stop gracefully, so kill it
+      serviceConfig = {
+        KillSignal = "SIGKILL";
+        SuccessExitStatus = "0 SIGKILL";
+      };
+
     };
 
   };

@@ -2,10 +2,8 @@
 
 let
 
-  cfg = config.services.immich;
+  cfg = config.modules.immich;
   inherit (lib) mkIf mkBefore;
-  inherit (import ./shared.nix { inherit config; }) 
-    version uid gid environment environmentFiles extraOptions serviceConfig;
 
 in {
 
@@ -13,27 +11,33 @@ in {
 
     # Web front-end
     virtualisation.oci-containers.containers.immich-web = {
-      image = "ghcr.io/immich-app/immich-web:v${version}";
+      image = "ghcr.io/immich-app/immich-web:v${cfg.version}";
       entrypoint = "/bin/sh";
       cmd = [ "./entrypoint.sh" ];
-      inherit environment environmentFiles extraOptions;
+      autoStart = false;
+
+      # Environment variables
+      environment = cfg.environment;
+      environmentFiles =  [ cfg.environment.file ];
+
+      # Networking for docker containers
+      extraOptions = [
+        "--add-host=host.docker.internal:host-gateway"
+        "--network=immich"
+      ];
+
     };
       
+    # Extend systemd service
     systemd.services.docker-immich-web = {
-      preStart = mkBefore ''
-        #
-        # Ensure docker network exists
-        ${pkgs.docker}/bin/docker network create immich 2>/dev/null || true
-        #
-        # Ensure data directory exists with expected ownership
-        mkdir -p ${cfg.dataDir}/geocoding
-        chown -R ${uid}:${gid} ${cfg.dataDir}
-        #
-        # Ensure database user has expected password
-        ${pkgs.sudo}/bin/sudo -u postgres ${pkgs.postgresql}/bin/psql postgres \
-          -c "alter user immich with password '$DB_PASSWORD'"
-      '';
-      inherit serviceConfig;
+      requires = [ "immich.service" ];
+
+      # Container will not stop gracefully, so kill it
+      serviceConfig = {
+        KillSignal = "SIGKILL";
+        SuccessExitStatus = "0 SIGKILL";
+      };
+
     };
 
   };

@@ -5,6 +5,7 @@ let
   cfg = config.services.traefik;
   secrets = config.age.secrets;
   inherit (lib) mkIf;
+  inherit (lib.options) mkEnableOption;
 
 in {
 
@@ -12,7 +13,6 @@ in {
 
     # agenix
     users.users.traefik.extraGroups = [ "secrets" ]; 
-    # secrets.basic-auth.owner = "traefik";
 
     # Import the env file containing the CloudFlare token for cert renewal
     systemd.services.traefik = {
@@ -81,7 +81,7 @@ in {
             "127.0.0.1/32"   # local host
             "192.168.0.0/16" # local network
             "10.0.0.0/8"     # local network
-            "172.16.0.0/12"  # local network
+            "172.16.0.0/12"  # docker network
             "100.64.0.0/10"  # vpn network
           ];
 
@@ -109,6 +109,7 @@ in {
     # Enable Docker and set to backend (over podman default)
     virtualisation = {
       docker.enable = true;
+      docker.storageDriver = "overlay";
       oci-containers.backend = "docker";
     };
 

@@ -2,10 +2,8 @@
 
 let
 
-  cfg = config.services.immich;
+  cfg = config.modules.immich;
   inherit (lib) mkIf;
-  inherit (import ./shared.nix { inherit config; }) 
-    version uid gid environment environmentFiles extraOptions serviceConfig;
 
 in {
 
@@ -13,18 +11,36 @@ in {
 
     # Machine learning
     virtualisation.oci-containers.containers.immich-machine-learning = {
-      image = "ghcr.io/immich-app/immich-machine-learning:v${version}";
+      image = "ghcr.io/immich-app/immich-machine-learning:v${cfg.version}";
+      autoStart = false;
+
+      # Environment variables
+      environment = cfg.environment;
+      environmentFiles =  [ cfg.environment.file ];
+
+      # Map volumes to host
       volumes = [ 
         "${cfg.dataDir}:/usr/src/app/upload" 
-        "model-cache:/cache"
+        "immich-machine-learning:/cache"
       ];
-      inherit environment environmentFiles extraOptions;
+
+      # Networking for docker containers
+      extraOptions = [
+        "--add-host=host.docker.internal:host-gateway"
+        "--network=immich"
+      ];
+
     };
 
+    # Extend systemd service
     systemd.services.docker-immich-machine-learning = {
-      requires = [ "docker-immich-typesense.service" "docker-immich-redis.service" "postgresql.service" ];
-      after = [ "docker-immich-typesense.service" ];
-      inherit serviceConfig;
+      requires = [ "immich.service" ];
+
+      # Container will not stop gracefully, so kill it
+      serviceConfig = {
+        KillSignal = "SIGKILL";
+        SuccessExitStatus = "0 SIGKILL";
+      };
     };
 
   };

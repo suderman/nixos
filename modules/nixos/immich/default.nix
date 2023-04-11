@@ -1,11 +1,12 @@
-# services.immich.enable = true;
+# modules.immich.enable = true;
 { config, lib, pkgs, ... }:
 
 let
 
-  # Inspiration from:
-  # https://github.com/kradalby/dotfiles/blob/9caed5967db7afd67c79fe0d8649a2ff98b0a26b/machines/core.terra/immich.nix
-  cfg = config.services.immich;
+  # https://github.com/immich-app/immich/releases
+  version = "1.53.0";
+
+  cfg = config.modules.immich;
 
   inherit (lib) mkIf mkOption mkBefore types strings;
   inherit (lib.options) mkEnableOption;
@@ -17,6 +18,7 @@ in {
   # Service order reference:
   # https://github.com/immich-app/immich/blob/main/docker/docker-compose.yml
   imports = [
+    ./environment.nix
     ./immich-web.nix
     ./immich-redis.nix
     ./immich-typesense.nix
@@ -27,20 +29,32 @@ in {
   ];
 
 
-  options = {
+  options.modules.immich = {
 
-    services.immich.enable = mkEnableOption "immich"; 
+    enable = mkEnableOption "immich"; 
 
-    services.immich.host = mkOption {
+    version = mkOption {
       type = types.str;
-      default = "immich.${config.networking.fqdn}";
-      description = "Host for Immich";
+      default = version;
+      description = "Version of the Immich instance";
     };
 
-    services.immich.dataDir = mkOption {
+    hostName = mkOption {
+      type = types.str;
+      default = "immich.${config.networking.fqdn}";
+      description = "FQDN for the Immich instance";
+    };
+
+    dataDir = mkOption {
       type = types.path;
       default = "/var/lib/immich";
-      description = "Data directory for Immich";
+      description = "Data directory the Immich instance";
+    };
+
+    environment = mkOption { 
+      type = types.attrs; 
+      default = {};
+      description = "Shared environment across Immich services";
     };
 
   };
@@ -62,7 +76,6 @@ in {
     };
     users.groups.immich.gid = config.ids.gids.immich;
 
-
     # Postgres database configuration
     services.postgresql = {
 
@@ -74,12 +87,46 @@ in {
       ensureDatabases = [ "immich" ];
 
       # Allow connections from any docker IP addresses
-      authentication = mkBefore ''
-        host immich immich 172.17.0.0/12 md5
-      '';
+      authentication = mkBefore "host immich immich 172.16.0.0/12 md5";
 
     };
 
+    # Init service
+    systemd.services.immich = let this = config.systemd.services.immich; in {
+      enable = true;
+      description = "Set up paths & database access";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "postgresql.service" ]; # run this after db
+      before = [ # run this before the rest:
+        "docker-immich-web.service"
+        "docker-immich-redis.service"
+        "docker-immich-typesense.service"
+        "docker-immich-machine-learning.service"
+        "docker-immich-server.service"
+        "docker-immich-microservices.service"
+        "docker-immich-proxy.service"
+      ];
+      wants = this.after ++ this.before; 
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = "yes";
+        EnvironmentFile = cfg.environment.file;
+      };
+      script = ''
+        sleep 5
+        #
+        # Ensure docker network exists
+        ${pkgs.docker}/bin/docker network create immich 2>/dev/null || true
+        #
+        # Ensure data directory exists with expected ownership
+        mkdir -p ${cfg.dataDir}/geocoding
+        chown -R ${cfg.environment.PUID}:${cfg.environment.PGID} ${cfg.dataDir}
+        #
+        # Ensure database user has expected password
+        ${pkgs.sudo}/bin/sudo -u postgres ${pkgs.postgresql}/bin/psql postgres \
+          -c "alter user immich with password '$DB_PASSWORD'"
+      '';
+    };
 
   };
 

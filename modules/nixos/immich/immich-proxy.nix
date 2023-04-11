@@ -2,10 +2,8 @@
 
 let
 
-  cfg = config.services.immich;
+  cfg = config.modules.immich;
   inherit (lib) mkIf;
-  inherit (import ./shared.nix { inherit config; }) 
-    version uid gid environment environmentFiles extraOptions serviceConfig;
 
 in {
 
@@ -13,19 +11,31 @@ in {
 
     # Reverse proxy server
     virtualisation.oci-containers.containers.immich-proxy = {
-      image = "ghcr.io/immich-app/immich-proxy:v${version}";
+      image = "ghcr.io/immich-app/immich-proxy:v${cfg.version}";
+      autoStart = false;
+
+      # Environment variables
+      environment = cfg.environment;
+      environmentFiles =  [ cfg.environment.file ];
+
+      # Traefik labels
       extraOptions = [
         "--label=traefik.enable=true"
-        "--label=traefik.http.routers.immich.rule=Host(`${cfg.host}`)"
+        "--label=traefik.http.routers.immich.rule=Host(`${cfg.hostName}`)"
         "--label=traefik.http.routers.immich.tls.certresolver=resolver-dns"
         "--label=traefik.http.routers.immich.middlewares=local@file"
-      ] ++ extraOptions;
-      inherit environment environmentFiles;
+
+      # Networking for docker containers
+      ] ++ [
+        "--add-host=host.docker.internal:host-gateway"
+        "--network=immich"
+      ];
+
     };
 
+    # Extend systemd service
     systemd.services.docker-immich-proxy = {
-      requires = [ "docker-immich-server.service" ];
-      after = [ "docker-immich-server.service" ];
+      requires = [ "immich.service" ];
     };
 
   };
