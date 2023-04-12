@@ -18,7 +18,7 @@ should include the following:
 { config, ... }: {
 
     # Enable secrets
-    secrets.enable = true;
+    modules.secrets.enable = true;
 }
 ```
 
@@ -32,8 +32,8 @@ let
 
   # agenix secrets combined with age files paths
   age = config.age // { 
-    files = config.secrets.files; 
-    enable = config.secrets.enable; 
+    files = config.modules.secrets.files; 
+    enable = config.modules.secrets.enable; 
   };
   
 in {

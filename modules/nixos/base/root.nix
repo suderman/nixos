@@ -1,17 +1,19 @@
-# base.enable = true;
-{ config, lib, pkgs, user, ... }: with lib; with builtins; 
+{ config, lib, pkgs, user, ... }: 
 
 let
 
+  cfg = config.modules.base;
+  inherit (lib) mkIf mapAttrs;
+
   # public keys from the secrets dir
-  keys = config.secrets.keys;
+  keys = config.modules.secrets.keys;
 
   # agenix secrets combined secrets toggle
-  secrets = config.age.secrets // { inherit (config.secrets) enable; };
+  secrets = config.age.secrets // { inherit (config.modules.secrets) enable; };
 
 in {
 
-  config = mkIf config.base.enable {
+  config = mkIf cfg.enable {
 
     # Disallow modifying users outside of this config
     users.mutableUsers = false;

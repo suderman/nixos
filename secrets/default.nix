@@ -1,8 +1,8 @@
 { config, lib, ... }: with lib; {
 
-  options.secrets = mkOption { type = types.attrs; };
+  options.modules.secrets = mkOption { type = types.attrs; };
 
-  config.secrets = {
+  config.modules.secrets = {
 
     # Host should have to opt into secrets
     enable = false;

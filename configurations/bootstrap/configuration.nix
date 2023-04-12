@@ -4,9 +4,8 @@
     ./hardware-configuration.nix
   ];
 
-  base.enable = true;
-  state.enable = true;
-  secrets.enable = false;
+  modules.base.enable = true;
+  modules.secrets.enable = false;
 
   # Configure the SSH daemon
   services.openssh.enable = true;

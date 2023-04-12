@@ -9,9 +9,8 @@
   fileSystems."/nix".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
 
   # Base configuration
-  base.enable = true;
-  state.enable = true;
-  secrets.enable = true;
+  modules.base.enable = true;
+  modules.secrets.enable = true;
 
   # Use freshest kernel
   boot.kernelPackages = pkgs.linuxPackages_latest;
@@ -32,7 +31,9 @@
   services.btrbk.enable = true;
 
   # Web services
-  services.traefik.enable = true;
+  modules.traefik.enable = true;
+  modules.postgresql.enable = true;
+
   services.whoogle.enable = false;
   services.whoami.enable = true;
   services.sabnzbd.enable = false;

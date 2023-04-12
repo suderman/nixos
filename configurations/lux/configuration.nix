@@ -9,9 +9,8 @@
   fileSystems."/".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
   fileSystems."/nix".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
 
-  base.enable = true;
-  state.enable = true;
-  secrets.enable = true;
+  modules.base.enable = true;
+  modules.secrets.enable = true;
 
   # Configure the SSH daemon
   services.openssh.enable = true;

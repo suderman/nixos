@@ -1,10 +1,16 @@
-# base.enable = true;
-{ config, lib, pkgs, user, ... }: with lib; {
+{ config, lib, pkgs, user, ... }:
+
+let
+
+  cfg = config.modules.base;
+  inherit (lib) mkIf;
+
+in {
 
   # ---------------------------------------------------------------------------
   # User Configuration
   # ---------------------------------------------------------------------------
-  config = mkIf config.base.enable {
+  config = mkIf cfg.enable {
 
     home.username = user;
     home.homeDirectory = "/${if (pkgs.stdenv.isLinux) then "home" else "Users"}/${user}";

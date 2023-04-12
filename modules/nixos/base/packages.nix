@@ -1,11 +1,16 @@
-# base.enable = true;
-{ config, lib, pkgs, ... }: with lib; {
+{ config, lib, pkgs, ... }: 
+
+let
+
+  cfg = config.modules.base;
+  inherit (lib) mkIf;
+
+in {
 
   # ---------------------------------------------------------------------------
   # System Enviroment & Packages
   # ---------------------------------------------------------------------------
-
-  config = mkIf config.base.enable {
+  config = mkIf cfg.enable {
 
     environment = {
 

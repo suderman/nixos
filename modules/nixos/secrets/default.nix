@@ -1,17 +1,18 @@
-# secrets.enable = true;
-{ inputs, config, pkgs, lib, user, ... }:
+# modules.secrets.enable = true;
+{ config, pkgs, lib, user, inputs, ... }:
 
 let 
 
-  cfg = config.secrets;
+  cfg = config.modules.secrets;
   age = config.age;
+  inherit (lib) mkIf;
 
 in {
 
   # Import agenix module
   imports = [ inputs.agenix.nixosModules.default ];
 
-  config = lib.mkIf cfg.enable {
+  config = mkIf cfg.enable {
 
     # agenix command
     environment.systemPackages = [
@@ -31,7 +32,7 @@ in {
         }; 
       };
 
-    # Loop through all encrypted files found in config.secrets.files
+    # Loop through all encrypted files found in config.modules.secrets.files
     in builtins.listToAttrs ( 
       map secret (builtins.attrNames cfg.files)
     );

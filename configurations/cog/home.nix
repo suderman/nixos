@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }: {
 
-  base.enable = true;
-  secrets.enable = true;
+  modules.base.enable = true;
+  modules.secrets.enable = true;
 
   # ---------------------------------------------------------------------------
   # Home Enviroment & Packages

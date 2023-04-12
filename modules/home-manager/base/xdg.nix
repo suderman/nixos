@@ -1,16 +1,19 @@
-# base.enable = true;
-{ config, lib, ... }: with lib; 
+{ config, lib, ... }:
 
 let
+
+  cfg = config.modules.base;
+  inherit (lib) mkIf;
+
   # homeage secrets combined with age files paths
   homeage = config.homeage // { 
-    files = config.secrets.files; 
-    enable = config.secrets.enable; 
+    files = config.modules.secrets.files; 
+    enable = config.modules.secrets.enable; 
   };
 
 in {
 
-  config = mkIf config.base.enable {
+  config = mkIf cfg.enable {
 
     # # secrets
     # homeage.file = lib.mkIf homeage.enable {

@@ -1,7 +1,14 @@
-# base.enable = true;
-{ config, lib, inputs, ... }: with lib; {
+{ config, lib, inputs, ... }:
 
-  config = mkIf config.base.enable {
+let
+
+  cfg = config.modules.base;
+  inherit (lib) mkIf mapAttrs;
+  inherit (builtins) toString;
+
+in {
+
+  config = mkIf cfg.enable {
 
     # Nix Settings
     nix.settings = {

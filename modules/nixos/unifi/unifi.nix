@@ -2,8 +2,10 @@
 
 let
 
-  cfg = config.modules.unifi;
+  # https://hub.docker.com/r/jacobalberty/unifi/tags
   version = "7.3";
+
+  cfg = config.modules.unifi;
   inherit (lib) mkIf;
   inherit (builtins) toString;
 

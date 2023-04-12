@@ -1,10 +1,16 @@
-# base.enable = true;
-{ config, lib, pkgs, ... }: with lib; {
+{ config, lib, pkgs, ... }:
+
+let
+
+  cfg = config.modules.base;
+  inherit (lib) mkIf;
+
+in {
 
   # ---------------------------------------------------------------------------
   # User Environment & Packages
   # ---------------------------------------------------------------------------
-  config = mkIf config.base.enable {
+  config = mkIf cfg.enable {
 
     home.packages = with pkgs; [ 
       bat 

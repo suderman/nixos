@@ -105,9 +105,6 @@
         # Bootstrap configuration
         bootstrap = mkSystem { host = "bootstrap"; };
 
-        # # Minimal system
-        # min = mkSystem { host = "min"; inherit user; };
-
         # Framework Laptop
         cog = mkSystem { host = "cog"; inherit user domain; };
 

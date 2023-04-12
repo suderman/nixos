@@ -1,15 +1,17 @@
-# secrets.enable = true;
-{ inputs, config, lib, ... }: 
+# modules.secrets.enable = true;
+{ config, lib, inputs, ... }: 
 
 let 
-  cfg = config.secrets;
+
+  cfg = config.modules.secrets;
+  inherit (lib) mkIf;
 
 in {
 
   # Import homeage module
   imports = [ inputs.homeage.homeManagerModules.homeage ];
 
-  config = lib.mkIf cfg.enable {
+  config = mkIf cfg.enable {
 
     # Configure homeage (agenix for home-manager)
     homeage.identityPaths = [ "~/.ssh/id_rsa" ];

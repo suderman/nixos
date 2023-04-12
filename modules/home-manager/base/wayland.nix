@@ -1,7 +1,13 @@
-# base.enable = true;
-{ config, lib, ... }: with lib; {
+{ config, lib, ... }:
 
-  config = mkIf config.base.enable {
+let
+
+  cfg = config.modules.base;
+  inherit (lib) mkIf;
+
+in {
+
+  config = mkIf cfg.enable {
 
     home.sessionVariables = {
       NIXOS_OZONE_WL = "1";

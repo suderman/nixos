@@ -1,49 +1,40 @@
-# state.enable = true;
-#
 # Add directories or files to persist
-# state.dirs = [ "/var/lib/systemd" ];
-# state.files = [ "/etc/machine-id" ];
+# modules.base.dirs = [ "/var/lib/systemd" ];
+# modules.base.files = [ "/etc/machine-id" ];
 #
-{ inputs, config, lib, ... }: 
+{ config, lib, inputs, ... }: 
 
 let 
 
-  cfg = config.state;
+  cfg = config.modules.base;
   dir = "/nix/state";
   inherit (lib) mkOption mkBefore mkIf types;
-  inherit (lib.options) mkEnableOption;
 
 in {
   
   imports = [ inputs.impermanence.nixosModule ];
 
-  options = {
+  # Persist in /nix
+  options.modules.base = with types; {
 
-    # Persist in /nix
-    state = with types; {
+    # Files relative to / root
+    files = mkOption {
+      description = "System files to preserve";
+      type = listOf (either str attrs);
+      default = [];
+      example = [ "/etc/machine-id" ];
+    };
 
-      # Enabled by default in configurations/shared 
-      enable = mkEnableOption "state"; 
-
-      # Files relative to / root
-      files = mkOption {
-        description = "System files to preserve";
-        type = listOf (either str attrs);
-        default = [];
-        example = [ "/etc/machine-id" ];
-      };
-
-      # Directories relative to / root
-      dirs = mkOption {
-        description = "System directories to preserve";
-        type = listOf (either str attrs);
-        default = [];
-        example = [ "/etc/nixos" ];
-      };
-
+    # Directories relative to / root
+    dirs = mkOption {
+      description = "System directories to preserve";
+      type = listOf (either str attrs);
+      default = [];
+      example = [ "/etc/nixos" ];
     };
 
   };
+
 
   config = mkIf cfg.enable {
 
@@ -58,7 +49,7 @@ in {
         hideMounts = true;
 
         # System files
-        files = config.state.files;
+        files = cfg.files;
 
         # System directories
         directories = [
@@ -67,7 +58,7 @@ in {
           "/var/lib"  
           "/var/log"  
           "/home"  
-        ] ++ config.state.dirs;
+        ] ++ cfg.dirs;
 
       };
     };

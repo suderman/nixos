@@ -22,7 +22,6 @@
     ./postgresql
     ./sabnzbd
     ./secrets
-    ./state
     ./steam
     ./tailscale
     ./tandoor-recipes

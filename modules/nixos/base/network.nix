@@ -1,10 +1,16 @@
-# base.enable = true;
-{ config, lib, host, domain, ... }: with lib; {
+{ config, lib, host, domain, ... }:
+
+let
+
+  cfg = config.modules.base;
+  inherit (lib) mkIf;
+
+in {
 
   # ---------------------------------------------------------------------------
   # System Networking
   # ---------------------------------------------------------------------------
-  config = mkIf config.base.enable {
+  config = mkIf cfg.enable {
 
     networking = {
 

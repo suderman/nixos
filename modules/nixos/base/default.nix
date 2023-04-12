@@ -1,21 +1,31 @@
-# base.enable = true;
-{ config, lib, ... }: with lib; {
+# modules.base.enable = true;
+{ config, lib, ... }:
 
-  # ---------------------------------------------------------------------------
-  # Common Configuration for all NixOS hosts
-  # ---------------------------------------------------------------------------
-  options.base.enable = options.mkEnableOption "base"; 
+let
+
+  cfg = config.modules.base;
+  inherit (lib) mkIf;
+
+in {
 
   imports = [ 
     ./network.nix 
     ./nix.nix 
     ./packages.nix 
     ./root.nix 
+    ./state.nix
     ./sudo.nix 
     ./user.nix 
   ];
 
-  config = mkIf config.base.enable {
+  # ---------------------------------------------------------------------------
+  # Common Configuration for all NixOS hosts
+  # ---------------------------------------------------------------------------
+  options.modules.base = {
+    enable = lib.options.mkEnableOption "base"; 
+  };
+
+  config = mkIf cfg.enable {
 
     # Set your time zone.
     time.timeZone = "America/Edmonton";

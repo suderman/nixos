@@ -11,9 +11,8 @@
   fileSystems."/nix".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
 
   # Base configuration
-  base.enable = true;
-  state.enable = true;
-  secrets.enable = true;
+  modules.base.enable = true;
+  modules.secrets.enable = true;
 
   # Use freshest kernel
   boot.kernelPackages = pkgs.linuxPackages_latest;

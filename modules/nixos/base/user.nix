@@ -1,18 +1,22 @@
-# base.enable = true;
-{ config, lib, pkgs, user, ... }: with lib; with builtins; 
+{ config, lib, pkgs, user, ... }: 
 
 let
+
+  cfg = config.modules.base;
+  inherit (lib) mkIf;
+  inherit (builtins) hasAttr filter;
+
   ifTheyExist = groups: filter (group: hasAttr group config.users.groups) groups;
 
   # public keys from the secrets dir
-  keys = config.secrets.keys;
+  keys = config.modules.secrets.keys;
 
   # agenix secrets combined secrets toggle
-  secrets = config.age.secrets // { inherit (config.secrets) enable; };
+  secrets = config.age.secrets // { inherit (config.modules.secrets) enable; };
 
 in {
 
-  config = mkIf config.base.enable {
+  config = mkIf cfg.enable {
 
     users.users = mkIf (user != "root") {
       "${user}" = {
