@@ -1,35 +1,43 @@
-# services.plex.enable = true;
+# modules.plex.enable = true;
 { config, lib, pkgs, user, ... }:
 
 let
 
-  cfg = config.services.plex;
+  cfg = config.modules.plex;
   port = "32400"; 
   inherit (lib) mkIf mkOption types;
 
 in {
 
-  options.services.sabznbd = {
-    host = mkOption {
+  options.modules.plex = {
+    enable = lib.options.mkEnableOption "plex"; 
+    hostName = mkOption {
       type = types.str;
-      default = "sabnzbd.${config.networking.fqdn}";
-      description = "Host for sabnzbd";
+      default = "plex.${config.networking.fqdn}";
+      description = "FQDN for the Plex instance";
     };
   };
 
   config = mkIf cfg.enable {
 
-    services.plex.user = "plex"; # default
-    services.plex.group = "plex"; # default
-    services.plex.extraPlugins = [];
-    services.plex.extraScanners = [];
-    services.plex.openFirewall = true;
-    services.plex.package = pkgs.plex;
+    services.plex = {
+      enable = true;
+      user = "plex"; # default
+      group = "plex"; # default
+      extraPlugins = [];
+      extraScanners = [];
+      openFirewall = true;
+      package = pkgs.plex;
+    };
 
+    # Enable reverse proxy
+    modules.traefik.enable = true;
+
+    # Traefik configuration
     services.traefik.dynamicConfigOptions.http = {
-      routers.plex = with config.networking; {
+      routers.plex = {
         entrypoints = "websecure";
-        rule = "Host(`plex.${hostName}.${domain}`)";
+        rule = "Host(`${cfg.hostName}`)";
         tls.certresolver = "resolver-dns";
         middlewares = "local@file";
         service = "plex";

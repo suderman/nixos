@@ -2,10 +2,8 @@
 
 let
 
-  cfg = config.services.hass;
-
-  inherit (lib) mkIf mkBefore types strings;
-  inherit (builtins) toString readFile;
+  cfg = config.modules.home-assistant;
+  inherit (lib) mkIf;
 
 in {
 
@@ -16,7 +14,7 @@ in {
         headers.customRequestHeaders.authorization = "Basic {{ env `ISY_BASIC_AUTH` }}";
       };
       routers.isy = {
-        rule = "Host(`${cfg.isyHost}`)";
+        rule = "Host(`${cfg.isyHostName}`)";
         middlewares = [ "local@file" "isy@file" ];
         tls.certresolver = "resolver-dns";
         service = "isy";

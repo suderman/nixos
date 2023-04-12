@@ -1,13 +1,14 @@
-# services.traefik.enable = true;
+# modules.traefik.enable = true;
 { config, lib, pkgs, ... }:
 
 let
-  cfg = config.services.traefik;
+  cfg = config.modules.traefik;
   secrets = config.age.secrets;
-  inherit (lib) mkIf;
-  inherit (lib.options) mkEnableOption;
+  inherit (lib) mkIf options;
 
 in {
+
+  options.modules.traefik.enable = options.mkEnableOption "traefik"; 
 
   config = mkIf cfg.enable {
 
@@ -20,6 +21,8 @@ in {
     };
 
     services.traefik = with config.networking; {
+
+      enable = true;
 
       # Required so traefik is permitted to watch docker events
       group = "docker"; 

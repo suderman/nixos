@@ -36,10 +36,10 @@
   # Web services
   services.tailscale.enable = true;
   services.ddns.enable = true;
-  services.traefik.enable = true;
   services.whoami.enable = true;
-  services.ubiquiti.enable = true;
-  services.hass = {
+
+  modules.unifi.enable = true;
+  modules.home-assistant = {
     enable = true; ip = "192.168.1.4";
     zigbee = "/dev/serial/by-id/usb-Nabu_Casa_SkyConnect_v1.0_28b77f55258dec11915068e883c5466d-if00-port0";
     zwave = "/dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_3e535b346625ed11904d6ac2f9a97352-if00-port0";
@@ -47,7 +47,7 @@
   };
 
   # Test services
-  services.plex.enable = true;
+  modules.plex.enable = true;
   services.tautulli.enable = true;
   services.jellyfin.enable = true;
   services.tiddlywiki.enable = true;

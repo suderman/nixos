@@ -110,9 +110,9 @@
   # sudo fwupdmgr update
   services.fwupd.enable = true;
 
-  services.hass.enable = true;
   services.freshrss.enable = false;
 
+  modules.home-assistant.enable = true;
   modules.immich.enable = true;
 
   # services.fprintd.enable = true;

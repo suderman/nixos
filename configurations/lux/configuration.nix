@@ -38,9 +38,10 @@
   services.tailscale.enable = true;
   services.ddns.enable = true;
   services.whoami.enable = true;
-  services.plex.enable = true;
   services.tautulli.enable = true;
   services.jellyfin.enable = true;
+
+  modules.plex.enable = true;
 
   modules.immich = {
     enable = true;

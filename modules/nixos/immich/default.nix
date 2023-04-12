@@ -1,5 +1,5 @@
 # modules.immich.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, user, ... }:
 
 let
 
@@ -8,8 +8,7 @@ let
 
   cfg = config.modules.immich;
 
-  inherit (lib) mkIf mkOption mkBefore types strings;
-  inherit (lib.options) mkEnableOption;
+  inherit (lib) mkIf mkOption mkBefore options types strings;
   inherit (builtins) toString;
   inherit (lib.strings) toInt;
 
@@ -31,7 +30,7 @@ in {
 
   options.modules.immich = {
 
-    enable = mkEnableOption "immich"; 
+    enable = options.mkEnableOption "immich"; 
 
     version = mkOption {
       type = types.str;
@@ -59,7 +58,6 @@ in {
 
   };
 
-
   config = mkIf cfg.enable {
 
     # Unused uid/gid snagged from this list:
@@ -74,7 +72,17 @@ in {
       home = cfg.dataDir;
       uid = config.ids.uids.immich;
     };
-    users.groups.immich.gid = config.ids.gids.immich;
+
+    users.groups.immich = {
+      gid = config.ids.gids.immich;
+    };
+
+    # Add user to the immich group
+    users.users."${user}".extraGroups = [ "immich" ]; 
+
+    # Enable database and reverse proxy
+    modules.postgresql.enable = true;
+    modules.traefik.enable = true;
 
     # Postgres database configuration
     services.postgresql = {

@@ -1,17 +1,21 @@
-# services.postgresql.enable = true;
+# modules.postgresql.enable = true;
 { config, lib, pkgs, user, ... }:
 
 let
 
-  cfg = config.services.postgresql;
+  cfg = config.modules.postgresql;
   users = [ user "root" ]; 
-  inherit (lib) mkIf;
+  inherit (lib) mkIf mkOrder options;
 
 in {
+
+  options.modules.postgresql.enable = options.mkEnableOption "postgresql"; 
 
   config = mkIf cfg.enable {
 
     services.postgresql = {
+
+      enable = true;
 
       # Default package as of 22.11
       package = pkgs.postgresql_14; 
@@ -26,7 +30,7 @@ in {
       enableTCPIP = true;
 
       # Allow password-less access on 127.0.0.1 
-      authentication = lib.mkOrder 600 ''
+      authentication = mkOrder 600 ''
         host all all 127.0.0.1/32 ident
       '';
 
@@ -37,7 +41,6 @@ in {
 
     # Allow docker containers to connect
     networking.firewall.allowedTCPPorts = [ config.services.postgresql.port ];
-
 
   };
 

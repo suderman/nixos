@@ -4,12 +4,11 @@
     ./base
     ./btrbk
     ./ddns
-    # ./docker
     ./earlyoom
     ./flatpak
     ./freshrss
     ./gnome
-    ./hass
+    ./home-assistant
     ./immich
     ./jellyfin
     ./keyd
@@ -30,7 +29,7 @@
     ./tautulli
     ./tiddlywiki
     ./traefik
-    ./ubiquiti
+    ./unifi
     ./whoami
     ./whoogle
     ./ydotool

@@ -4,14 +4,13 @@
 let
 
   cfg = config.modules.sabnzbd;
-  inherit (lib) mkIf mkBefore mkOption types;
-  inherit (lib.options) mkEnableOption;
+  inherit (lib) mkIf mkBefore mkOption options types;
   inherit (builtins) toString;
 
 in {
 
   options.modules.sabnzbd = {
-    enable = mkEnableOption "sabnzbd"; 
+    enable = options.mkEnableOption "sabnzbd"; 
     hostName = mkOption {
       type = types.str;
       default = "sab.${config.networking.fqdn}";
@@ -71,18 +70,19 @@ in {
       after = [ "sabnzbd.service" ];
     };
 
-    services.traefik = {
-      enable = true;
-      dynamicConfigOptions.http = {
-        routers.sabnzbd = {
-          entrypoints = "websecure";
-          rule = "Host(`${cfg.hostName}`)";
-          tls.certresolver = "resolver-dns";
-          middlewares = "local@file";
-          service = "sabnzbd";
-        };
-        services.sabnzbd.loadBalancer.servers = [{ url = "http://127.0.0.1:${toString cfg.port}"; }];
+    # Enable reverse proxy
+    modules.traefik.enable = true;
+
+    # Traefik proxy
+    services.traefik.dynamicConfigOptions.http = {
+      routers.sabnzbd = {
+        entrypoints = "websecure";
+        rule = "Host(`${cfg.hostName}`)";
+        tls.certresolver = "resolver-dns";
+        middlewares = "local@file";
+        service = "sabnzbd";
       };
+      services.sabnzbd.loadBalancer.servers = [{ url = "http://127.0.0.1:${toString cfg.port}"; }];
     };
 
   };
