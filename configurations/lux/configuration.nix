@@ -35,14 +35,18 @@
   modules.ddns.enable = true;
   modules.whoami.enable = true;
 
+  modules.bluebubbles.enable = true;
+
   modules.plex.enable = true;
   modules.tautulli.enable = true;
   modules.jellyfin.enable = true;
 
+  modules.lunasea.enable = true;
   modules.sabnzbd.enable = true;
   modules.radarr.enable = true;
   modules.sonarr.enable = true;
   modules.lidarr.enable = true;
+  modules.ombi.enable = true;
 
   modules.immich = {
     enable = true;

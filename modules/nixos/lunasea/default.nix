@@ -9,10 +9,6 @@ let
 
 in {
 
-  imports = [ 
-    ./sabnzbd.nix 
-  ];
-
   options.modules.lunasea = {
 
     enable = options.mkEnableOption "lunasea"; 
@@ -23,12 +19,6 @@ in {
       description = "FQDN for the LunaSea instance";
     };
 
-    # dataDir = mkOption {
-    #   type = types.path;
-    #   default = "/var/lib/unifi";
-    #   description = "Data directory the Unifi Controller instance";
-    # };
-
   };
 
   config = mkIf cfg.enable {
@@ -36,24 +26,15 @@ in {
     # Enable reverse proxy
     modules.traefik.enable = true;
 
-    # # Init service
-    # systemd.services.lunasea = {
-    #   enable = true;
-    #   description = "Initiate LunaSea service";
-    #   wantedBy = [ "multi-user.target" ];
-    #   wants = [ "docker-lunasea.service" ]; 
-    #   serviceConfig = {
-    #     Type = "oneshot";
-    #     RemainAfterExit = "yes";
-    #   };
-    #   script = let
-    #     uid = toString config.users.users.unifi.uid;
-    #     gid = toString config.users.groups.unifi.gid;
-    #   in ''
-    #     mkdir -p ${cfg.dataDir}
-    #     chown -R ${uid}:${gid} ${cfg.dataDir}
-    #   '';
-    # };
+    virtualisation.oci-containers.containers.lunasea = {
+      image = "ghcr.io/jagandeepbrar/lunasea:stable";
+      extraOptions = [
+        "--label=traefik.enable=true"
+        "--label=traefik.http.routers.lunasea.rule=Host(`${cfg.hostName}`)"
+        "--label=traefik.http.routers.lunasea.tls.certresolver=resolver-dns"
+        "--label=traefik.http.routers.lunasea.middlewares=local@file"
+      ];
+    };
 
   };
 

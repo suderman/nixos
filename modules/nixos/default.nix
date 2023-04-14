@@ -3,6 +3,7 @@
   imports = [
     ./base
     ./btrbk
+    ./bluebubbles
     ./ddns
     ./earlyoom
     ./flatpak
@@ -14,10 +15,12 @@
     ./keyd
     ./lidarr
     ./linode
+    ./lunasea
     ./mysql
     ./neovim
     ./nginx
     ./ocis
+    ./ombi
     ./plex
     ./postgresql
     ./radarr
