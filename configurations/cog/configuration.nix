@@ -22,51 +22,50 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Network
-  services.tailscale.enable = true;
-  services.ddns.enable = true;
-  services.openssh.enable = true;
+  modules.tailscale.enable = true;
+  modules.ddns.enable = true;
   networking.extraHosts = "";
 
   # Snapshots & backup
-  services.btrbk.enable = true;
+  modules.btrbk.enable = true;
 
   # Broken? Prevents boot.
-  # services.sunshine.enable = false;
+  # modules.sunshine.enable = false;
 
   # Memory management
-  services.earlyoom.enable = true;
+  modules.earlyoom.enable = true;
 
   # Keyboard control
-  services.keyd.enable = true;
-  services.ydotool.enable = true;
+  modules.keyd.enable = true;
+  modules.ydotool.enable = true;
 
   # Database services
-  services.mysql.enable = true;
+  modules.mysql.enable = true;
   # services.postgresql.enable = false;
   
   # Web services
-  services.traefik.enable = true;
-  services.whoogle.enable = true;
-  services.whoami.enable = true;
+  modules.traefik.enable = true;
+  modules.whoogle.enable = true;
+  modules.whoami.enable = true;
 
   # services.sabnzbd.enable = true;
   modules.sabnzbd.enable = true;
   # services.sabnzbd.host = "s.${config.networking.fqdn}";
   # services.sabnzbd.port = 8008;
 
-  services.tandoor-recipes.enable = true;
+  modules.tandoor-recipes.enable = true;
   # services.gitea.enable = true;
   # services.gitea.database.type = "mysql";
 
   # Desktop Environments
-  desktops.gnome.enable = true;
+  modules.gnome.enable = true;
 
   # Apps
-  services.flatpak.enable = true;
-  programs.mosh.enable = true;
-  programs.neovim.enable = true;
-  programs.steam.enable = false;
+  modules.flatpak.enable = true;
+  modules.neovim.enable = true;
+  modules.steam.enable = false;
 
+  programs.mosh.enable = true;
   programs.kdeconnect.enable = true;
 
   # # Power management
@@ -109,7 +108,7 @@
   # sudo fwupdmgr update
   services.fwupd.enable = true;
 
-  services.freshrss.enable = false;
+  modules.freshrss.enable = false;
 
   modules.home-assistant.enable = true;
   modules.immich.enable = true;
@@ -124,4 +123,11 @@
     unstable.nodePackages_latest.immich
   ];
   
+  
+  # systemd.mounts = [{
+  #   what = "/dev/sda1";
+  #   where = "/mnt/usb";
+  #   options = "defaults,noauto,x-systemd.automount";
+  #   wantedBy = ["multi-user.target"];
+  # }];
 }

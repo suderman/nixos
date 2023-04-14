@@ -16,29 +16,28 @@
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Hardware configuration
-  hardware.linode.enable = true;
+  modules.linode.enable = true;
 
   # Network
-  services.tailscale.enable = true;
-  services.ddns.enable = true;
-  services.openssh.enable = true;
+  modules.tailscale.enable = true;
+  modules.ddns.enable = true;
   networking.extraHosts = "";
 
   # Memory management
-  services.earlyoom.enable = true;
+  modules.earlyoom.enable = true;
 
   # Snapshots & backup
-  services.btrbk.enable = true;
+  modules.btrbk.enable = true;
 
   # Web services
   modules.traefik.enable = true;
   modules.postgresql.enable = true;
 
-  services.whoogle.enable = false;
-  services.whoami.enable = true;
-  services.sabnzbd.enable = false;
+  modules.whoogle.enable = false;
+  modules.whoami.enable = true;
+  modules.sabnzbd.enable = false;
 
-  services.tandoor-recipes = {
+  modules.tandoor-recipes = {
     enable = true;
     public = "tandoor.suderman.net";
   };
@@ -47,8 +46,8 @@
   # services.gitea.database.type = "mysql";
 
   # Apps
+  modules.neovim.enable = true;
   programs.mosh.enable = true;
-  programs.neovim.enable = true;
   programs.tmux.enable = true;
 
 }

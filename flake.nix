@@ -119,13 +119,13 @@
 
       };
 
-      # Home configurations on other systems
-      homeConfigurations = {
-
-        # 2009 MacPro
-        umbra = mkUser { host = "umbra"; system = "x86_64-darwin"; inherit user; };
-
-      };
+      # # Home configurations on other systems
+      # homeConfigurations = {
+      #
+      #   # 2009 MacPro
+      #   umbra = mkUser { host = "umbra"; system = "x86_64-darwin"; inherit user; };
+      #
+      # };
 
     };
 

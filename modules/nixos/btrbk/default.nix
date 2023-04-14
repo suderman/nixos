@@ -1,19 +1,19 @@
-# services.btrbk.enable = true;
+# modules.btrbk.enable = true;
 { config, lib, pkgs, user, ... }: 
 
-with pkgs; 
-
 let 
-  cfg = config.services.btrbk;
+
+  cfg = config.modules.btrbk;
+  inherit (lib) mkIf;
 
 in {
 
-  options = {
-    services.btrbk.enable = lib.options.mkEnableOption "btrbk"; 
+  options.modules.btrbk = {
+    enable = lib.options.mkEnableOption "btrbk"; 
   };
 
   # Use btrbk to snapshot persistent states and home
-  config = lib.mkIf cfg.enable {
+  config = mkIf cfg.enable {
 
     # timestamp_format        long
     # snapshot_preserve_min   18h

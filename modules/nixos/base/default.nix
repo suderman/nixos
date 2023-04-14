@@ -13,8 +13,8 @@ in {
     ./nix.nix 
     ./packages.nix 
     ./root.nix 
+    ./security.nix 
     ./state.nix
-    ./sudo.nix 
     ./user.nix 
   ];
 

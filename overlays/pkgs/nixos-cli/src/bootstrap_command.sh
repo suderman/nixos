@@ -467,7 +467,7 @@ function stage1 {
   info "Modifying configuration.nix with detected bootloader"
   task "sed -i '$ d' ${cfg}"
   if is_linode; then
-    task "echo '  hardware.linode.enable = true;' >> $cfg"
+    task "echo '  modules.linode.enable = true;' >> $cfg"
   else
     if is_bios; then
       task "echo '  boot.loader = { grub.device = \"/dev/$disk\"; grub.enable = true; };' >> $cfg"

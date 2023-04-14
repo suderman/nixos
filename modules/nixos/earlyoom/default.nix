@@ -1,14 +1,21 @@
-# services.earlyoom.enable = true;
+# modules.earlyoom.enable = true;
 { config, lib, ... }:
 
 let
-  cfg = config.services.earlyoom;
+
+  cfg = config.modules.earlyoom;
+  inherit (lib) mkIf;
 
 in {
 
-  config = lib.mkIf cfg.enable {
+  options.modules.earlyoom = {
+    enable = lib.options.mkEnableOption "earlyoom"; 
+  };
+
+  config = mkIf cfg.enable {
 
     services.earlyoom = {
+      enable = true;
       freeSwapThreshold = 10; # % default
       freeMemThreshold = 10; # % default
       extraArgs = [

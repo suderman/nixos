@@ -67,6 +67,33 @@ in {
     "/mnt/raid" = btrfs // { device = "/dev/disk/by-uuid/75ae6de3-04d1-4c62-9d15-357038fc4d81"; };
     "/media" = bind // { device = "/mnt/raid/media"; };
 
+    # "/mnt/raid2" = { 
+    #   device = "/dev/disk/by-uuid/75ae6de3-04d1-4c62-9d15-357038fc4d81";
+    #   fsType = "btrfs";
+    #   options = [ "noauto" "x-systemd.automount" "x-systemd.device-timeout=175" "timeo=15" "x-systemd.idle-timeout=1min" "users" ];
+    # };
+
+    # systemd.automounts = [
+    #   {
+    #     where = "/mnt/raid";
+    #     what = "/dev/disk/by-uuid/75ae6de3-04d1-4c62-9d15-357038fc4d81";
+    #     options = "defaults,noauto,x-systemd.automount,compress=zstd,space_cache=v2,discard=async,noatime";
+    #     wantedBy = ["multi-user.target"];
+    #   }
+    # ];
+    #
+    # systemd.mounts = [
+    #   {
+    #     what = "/mnt/raid/media";
+    #     where = "/media";
+    #     type = "none";
+    #     options = "bind";
+    #     requires = ["raid-automount.service"];
+    #     after = ["raid-automount.service"];
+    #   }
+    # ];
+
+
   };
 
 }

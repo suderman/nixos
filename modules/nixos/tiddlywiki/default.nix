@@ -1,33 +1,59 @@
-# services.tiddlywiki.enable = true;
+# modules.tiddlywiki.enable = true;
 { config, lib, pkgs, user, ... }:
 
-
 let
-  cfg = config.services.tiddlywiki;
-  port = "3465"; 
+
+  cfg = config.modules.tiddlywiki;
+  inherit (lib) mkIf mkOption mkBefore types;
+  inherit (builtins) toString;
 
 in {
 
-  config = lib.mkIf cfg.enable {
+  options.modules.tiddlywiki = {
+
+    enable = lib.options.mkEnableOption "tiddlywiki"; 
+
+    hostName = mkOption {
+      type = types.str;
+      default = "wiki.${config.networking.fqdn}";
+      description = "FQDN for the Tiddlywiki instance";
+    };
+
+    port = mkOption {
+      description = "Port for Tiddlywiki instance";
+      default = 3456;
+      type = types.port;
+    };
+
+  };
+
+  config = mkIf cfg.enable {
 
     # Add user to the tiddlywiki group
     users.users."${user}".extraGroups = [ "tiddlywiki" ]; 
 
-    services.tiddlywiki.listenOptions = {
-      port = lib.strings.toInt port;
-      # credentials = "../credentials.csv";
-      # readers="(authenticated)";
+    services.tiddlywiki = {
+      enable = true;
+      listenOptions = {
+        port = cfg.port;
+        # credentials = "../credentials.csv";
+        # readers="(authenticated)";
+      };
     };
 
-    services.traefik.dynamicConfigOptions.http = with config.networking; {
+    # Enable reverse proxy
+    modules.traefik.enable = true;
+
+    # Traefik proxy
+    services.traefik.dynamicConfigOptions.http = {
       routers.tiddlywiki = {
         entrypoints = "websecure";
-        rule = "Host(`wiki.${hostName}.${domain}`) || Host(`wiki.local.${domain}`)";
+        rule = "Host(`${cfg.hostName}`)";
         tls.certresolver = "resolver-dns";
         middlewares = "local@file";
         service = "tiddlywiki";
       };
-      services.tiddlywiki.loadBalancer.servers = [{ url = "http://127.0.0.1:${port}"; }];
+      services.tiddlywiki.loadBalancer.servers = [{ url = "http://127.0.0.1:${toString cfg.port}"; }];
     };
 
   };

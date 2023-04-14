@@ -17,7 +17,6 @@
     ./neovim
     ./nginx
     ./ocis
-    ./openssh
     ./plex
     ./postgresql
     ./sabnzbd

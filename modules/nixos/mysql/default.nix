@@ -1,23 +1,36 @@
-# services.mysql.enable = true;
+# modules.mysql.enable = true;
 { config, lib, pkgs, user, ... }:
 
 let
-  cfg = config.services.mysql;
+
+  cfg = config.modules.mysql;
+  inherit (lib) mkIf mkOption types;
 
 in {
 
-  config = lib.mkIf cfg.enable {
+  options.modules.mysql = {
+    enable = lib.options.mkEnableOption "mysql"; 
+  };
 
-    services.mysql.user = "mysql";
-    services.mysql.group = "mysql";
+  config = mkIf cfg.enable {
 
-    services.mysql.package = pkgs.mysql80;
-    services.mysql.ensureUsers = [{
-      name = user;
-      ensurePermissions = {
-        "*.*" = "ALL PRIVILEGES";
-      };
-    }];
+    services.mysql = {
+
+      enable = true;
+
+      user = "mysql";
+      group = "mysql";
+
+      package = pkgs.mysql80;
+
+      ensureUsers = [{
+        name = user;
+        ensurePermissions = {
+          "*.*" = "ALL PRIVILEGES";
+        };
+      }];
+
+    };
 
     services.mysqlBackup = {
       enable = true;

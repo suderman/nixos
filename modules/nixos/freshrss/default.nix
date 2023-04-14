@@ -1,39 +1,37 @@
-# services.freshrss.enable = true;
+# modules.freshrss.enable = true;
 { config, lib, pkgs, user, ... }:
 
 let
 
-  inherit (lib) mkIf;
-  inherit (lib.strings) toInt;
-  inherit (builtins) toString;
-
-  cfg = config.services.freshrss;
-  host = "freshrss.${config.networking.fqdn}";
+  cfg = config.modules.freshrss;
   secrets = config.age.secrets;
   port = toString config.services.nginx.defaultHTTPListenPort;
 
+  inherit (lib) mkIf mkOption types;
+  inherit (lib.strings) toInt;
+  inherit (builtins) toString;
+
 in {
+
+  options.modules.freshrss = {
+
+    enable = lib.options.mkEnableOption "freshrss"; 
+
+    hostName = mkOption {
+      type = types.str;
+      default = "freshrss.${config.networking.fqdn}";
+      description = "FQDN for the FreshRSS instance";
+    };
+
+  };
 
   config = mkIf cfg.enable {
 
-    # traefik proxy serving nginx proxy
-    services.traefik.dynamicConfigOptions.http = {
-      routers.freshrss = {
-        rule = "Host(`${host}`)";
-        tls.certresolver = "resolver-dns";
-        middlewares = [ "local@file" "freshrss@file" ];
-        service = "freshrss";
-      };
-      middlewares.freshrss = {
-        headers.customRequestHeaders.Host = "freshrss";
-      };
-      services.freshrss.loadBalancer.servers = [{ url = "http://127.0.0.1:${port}"; }];
-    };
-
     services.freshrss = {
+      enable = true;
       defaultUser = user;
       passwordFile = secrets.password.path;
-      baseUrl = "https://${host}";
+      baseUrl = "https://${cfg.hostName}";
       virtualHost = "freshrss";
       database.type = "pgsql";
       database.host = "127.0.0.1";
@@ -41,10 +39,7 @@ in {
       database.user = "freshrss";
     };
 
-    # services.nginx.virtualHosts."freshrss".listen = [
-    #   { port = (toInt port); addr="127.0.0.1"; ssl = false; }
-    # ];
-
+    # Extend systemd service
     systemd.services.freshrss = {
 
       # Secret environment variables (SMTP credentials)
@@ -73,6 +68,25 @@ in {
 
     # Allow freshrss user to read password file
     users.users.freshrss.extraGroups = [ "secrets" ]; 
+
+    # Enable database and reverse proxies
+    modules.postgresql.enable = true;
+    modules.traefik.enable = true;
+    modules.nginx.enable = true;
+
+    # traefik proxy serving nginx proxy
+    services.traefik.dynamicConfigOptions.http = {
+      routers.freshrss = {
+        rule = "Host(`${cfg.hostName}`)";
+        tls.certresolver = "resolver-dns";
+        middlewares = [ "local@file" "freshrss@file" ];
+        service = "freshrss";
+      };
+      middlewares.freshrss = {
+        headers.customRequestHeaders.Host = "freshrss";
+      };
+      services.freshrss.loadBalancer.servers = [{ url = "http://127.0.0.1:${port}"; }];
+    };
 
   };
 

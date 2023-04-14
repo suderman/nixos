@@ -1,17 +1,20 @@
-# hardware.linode.enable = true;
+# modules.linode.enable = true;
 #
 # https://www.linode.com/docs/guides/install-nixos-on-linode/
 { config, lib, pkgs, ... }:
 
 let 
-  cfg = config.hardware.linode;
+
+  cfg = config.modules.linode;
+  inherit (lib) mkIf mkOption types;
 
 in {
-  options = {
-    hardware.linode.enable = lib.options.mkEnableOption "linode"; 
+
+  options.modules.linode = {
+    enable = lib.options.mkEnableOption "linode"; 
   };
 
-  config = lib.mkIf cfg.enable {
+  config = mkIf cfg.enable {
 
     # Enable LISH for Linode
     boot.kernelParams = [ "console=ttyS0;19200n8" ];

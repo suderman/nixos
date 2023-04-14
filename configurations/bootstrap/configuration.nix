@@ -17,6 +17,6 @@
   # boot.loader = { grub.device = "/dev/sda"; grub.enable = true; };
   #
   # Linode boot
-  # hardware.linode.enable = true;
+  # modules.linode.enable = true;
 
 }

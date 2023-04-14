@@ -1,4 +1,4 @@
-# services.tailscale.enable = true;
+# modules.tailscale.enable = true;
 #
 # I want all my tailscale machines to have DNS records in Cloudflare
 #
@@ -16,13 +16,20 @@
 { config, lib, pkgs, ... }:
 
 let
-  cfg = config.services.tailscale;
+
+  cfg = config.modules.tailscale;
   secrets = config.age.secrets;
   inherit (lib) mkIf;
 
 in {
 
+  options.modules.tailscale = {
+    enable = lib.options.mkEnableOption "tailscale"; 
+  };
+
   config = mkIf cfg.enable {
+
+    services.tailscale.enable = true;
 
     networking.firewall = {
       checkReversePath = "loose";  # https://github.com/tailscale/tailscale/issues/4432

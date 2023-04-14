@@ -1,15 +1,18 @@
-# desktops.gnome.enable = true;
+# modules.gnome.enable = true;
 { config, lib, pkgs, ... }:
 
-with pkgs; 
-
 let 
-  cfg = config.desktops.gnome;
+
+  cfg = config.modules.gnome;
+  inherit (lib) mkIf mkOption types;
 
 in {
-  options.desktops.gnome.enable = lib.options.mkEnableOption "gnome"; 
 
-  config = lib.mkIf cfg.enable {
+  options.modules.gnome = {
+    enable = lib.options.mkEnableOption "gnome"; 
+  };
+
+  config = mkIf cfg.enable {
 
     services = {
       xserver = {

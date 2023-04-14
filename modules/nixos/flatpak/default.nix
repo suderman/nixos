@@ -1,14 +1,22 @@
-# services.flatpak.enable = true;
+# modules.flatpak.enable = true;
 { config, pkgs, lib, ... }:
 
 let
-  cfg = config.services.flatpak;
+
+  cfg = config.modules.flatpak;
+  inherit (lib) mkIf;
 
 in {
 
-  config = lib.mkIf cfg.enable {
+  options.modules.flatpak = {
+    enable = lib.options.mkEnableOption "flatpak"; 
+  };
 
-    systemd.services.flatpak = lib.mkIf cfg.enable {
+  config = mkIf cfg.enable {
+
+    services.flatpak.enable = true;
+
+    systemd.services.flatpak = mkIf cfg.enable {
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {
         Type = "oneshot";

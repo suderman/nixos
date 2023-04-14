@@ -1,30 +1,57 @@
-# services.tautulli.enable = true;
+# modules.tautulli.enable = true;
 { config, lib, pkgs, ... }:
 
-
 let
-  cfg = config.services.tautulli;
-  port = "8181"; 
+
+  cfg = config.modules.tautulli;
+  inherit (lib) mkIf mkOption mkBefore types;
+  inherit (builtins) toString;
 
 in {
 
-  config = lib.mkIf cfg.enable {
+  options.modules.tautulli = {
 
-    services.tautulli.user = "plexpy";
-    services.tautulli.group = "nogroup";
-    services.tautulli.port = lib.strings.toInt port;
-    services.tautulli.openFirewall = true;
+    enable = lib.options.mkEnableOption "tautulli"; 
 
-    services.traefik.dynamicConfigOptions.http = with config.networking; {
+    hostName = mkOption {
+      type = types.str;
+      default = "tautulli.${config.networking.fqdn}";
+      description = "FQDN for the Tautulli instance";
+    };
+
+    port = mkOption {
+      description = "Port for Tautulli instance";
+      default = 8181;
+      type = types.port;
+    };
+
+  };
+
+  config = mkIf cfg.enable {
+
+    services.tautulli = {
+      enable = true;
+      user = "plexpy";
+      group = "nogroup";
+      port = cfg.port;
+      openFirewall = true;
+    };
+
+    # Enable reverse proxy
+    modules.traefik.enable = true;
+
+    # Traefik proxy
+    services.traefik.dynamicConfigOptions.http = {
       routers.tautulli = {
         entrypoints = "websecure";
-        rule = "Host(`tautulli.${hostName}.${domain}`) || Host(`tautulli.local.${domain}`)";
+        rule = "Host(`${cfg.hostName}`)";
         tls.certresolver = "resolver-dns";
         middlewares = "local@file";
         service = "tautulli";
       };
-      services.tautulli.loadBalancer.servers = [{ url = "http://127.0.0.1:${port}"; }];
+      services.tautulli.loadBalancer.servers = [{ url = "http://127.0.0.1:${toString cfg.port}"; }];
     };
+
 
   };
 

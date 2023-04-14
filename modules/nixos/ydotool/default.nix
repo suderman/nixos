@@ -1,21 +1,21 @@
-# services.ydotool.enable = true;
+# modules.ydotool.enable = true;
 { config, lib, pkgs, user, ... }: 
 
-with pkgs; 
-
 let 
-  cfg = config.services.ydotool;
+
+  cfg = config.modules.ydotool;
+  inherit (lib) mkIf mkOption mkBefore types;
 
 in {
 
-  options = {
-    services.ydotool.enable = lib.options.mkEnableOption "ydotool"; 
+  options.modules.ydotool = {
+    enable = lib.options.mkEnableOption "ydotool"; 
   };
 
-  config = lib.mkIf cfg.enable {
+  config = mkIf cfg.enable {
 
     # Install ydotool package
-    environment.systemPackages = [ ydotool ];
+    environment.systemPackages = [ pkgs.ydotool ];
 
     # Add user to the input group
     users.users."${user}".extraGroups = [ "input" ]; 

@@ -1,15 +1,15 @@
-# services.whoami.enable = true;
+# modules.whoami.enable = true;
 { inputs, config, pkgs, lib, ... }:
   
 let 
-  cfg = config.services.whoami;
+  cfg = config.modules.whoami;
   secrets = config.age.secrets;
   inherit (lib) mkIf;
 
 in {
 
   options = {
-    services.whoami.enable = lib.options.mkEnableOption "whoami"; 
+    modules.whoami.enable = lib.options.mkEnableOption "whoami"; 
   };
 
   config = mkIf cfg.enable {

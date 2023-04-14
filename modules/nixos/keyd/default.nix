@@ -1,16 +1,15 @@
-# services.keyd.enable = true;
+# modules.keyd.enable = true;
 { config, lib, pkgs, user, ... }: 
 
 let 
 
-  cfg = config.services.keyd;
+  cfg = config.modules.keyd;
   inherit (lib) mkIf;
-  inherit (lib.options) mkEnableOption;
 
 in {
 
-  options = {
-    services.keyd.enable = mkEnableOption "keyd"; 
+  options.modules.keyd = {
+   enable = lib.options.mkEnableOption "keyd"; 
   };
 
   config = mkIf cfg.enable {

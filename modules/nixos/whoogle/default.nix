@@ -1,17 +1,23 @@
-# services.whoogle.enable = true;
+# modules.whoogle.enable = true;
 { inputs, config, pkgs, lib, ... }:
   
 let 
 
-  cfg = config.services.whoogle;
-  host = "search.${config.networking.fqdn}";
-
-  inherit (lib) mkIf mkForce;
-  inherit (lib.options) mkEnableOption;
+  cfg = config.modules.whoogle;
+  inherit (lib) mkIf mkOption mkBefore types;
 
 in {
-  options = {
-    services.whoogle.enable = mkEnableOption "whoogle"; 
+
+  options.modules.whoogle = {
+
+    enable = lib.options.mkEnableOption "whoogle"; 
+
+    hostName = mkOption {
+      type = types.str;
+      default = "search.${config.networking.fqdn}";
+      description = "FQDN for the Whoogle instance";
+    };
+
   };
 
   config = mkIf cfg.enable {
@@ -20,7 +26,7 @@ in {
       image = "benbusby/whoogle-search";
       extraOptions = [
         "--label=traefik.enable=true"
-        "--label=traefik.http.routers.whoogle.rule=Host(`${host}`)"
+        "--label=traefik.http.routers.whoogle.rule=Host(`${cfg.hostName}`)"
         "--label=traefik.http.routers.whoogle.tls.certresolver=resolver-dns"
         "--label=traefik.http.routers.whoogle.middlewares=local@file"
       ];
@@ -31,6 +37,9 @@ in {
       KillSignal = "SIGKILL";
       SuccessExitStatus = "0 SIGKILL";
     };
+
+    # Enable reverse proxy
+    modules.traefik.enable = true;
 
   }; 
 

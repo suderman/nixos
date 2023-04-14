@@ -1,8 +1,11 @@
-# services.sunshine.enable = true;
+# modules.sunshine.enable = true;
 { config, lib, pkgs, ... }: 
 
 let 
-  cfg = config.services.sunshine;
+
+  cfg = config.modules.sunshine;
+  inherit (lib) mkIf mkOption types;
+  
   configFile = pkgs.writeTextFile { 
     name = "sunshine.conf"; 
     text = ''
@@ -15,10 +18,10 @@ let
 in {
 
   options = {
-    services.sunshine.enable = lib.options.mkEnableOption "sunshine"; 
+    modules.sunshine.enable = lib.options.mkEnableOption "sunshine"; 
   };
 
-  config = lib.mkIf cfg.enable {
+  config = mkIf cfg.enable {
 
     systemd.services.sunshine = {
       description = "Sunshine Gamestream host";

@@ -11,31 +11,28 @@
   modules.base.enable = true;
   modules.secrets.enable = true;
 
-  # Configure the SSH daemon
-  services.openssh.enable = true;
-
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Snapshots & backup
-  services.btrbk.enable = true;
+  modules.btrbk.enable = true;
 
   # Memory management
-  services.earlyoom.enable = true;
+  modules.earlyoom.enable = true;
 
   # Keyboard control
-  services.keyd.enable = true;
-  services.ydotool.enable = true;
+  modules.keyd.enable = true;
+  modules.ydotool.enable = true;
 
   # Apps
   programs.mosh.enable = true;
-  programs.neovim.enable = true;
+  modules.neovim.enable = true;
 
   # Web services
-  services.tailscale.enable = true;
-  services.ddns.enable = true;
-  services.whoami.enable = true;
+  modules.tailscale.enable = true;
+  modules.ddns.enable = true;
+  modules.whoami.enable = true;
 
   modules.unifi.enable = true;
   modules.home-assistant = {
@@ -47,9 +44,9 @@
 
   # Test services
   modules.plex.enable = true;
-  services.tautulli.enable = true;
-  services.jellyfin.enable = true;
-  services.tiddlywiki.enable = true;
-  services.tandoor-recipes.enable = true;
+  modules.tautulli.enable = true;
+  modules.jellyfin.enable = true;
+  modules.tiddlywiki.enable = true;
+  modules.tandoor-recipes.enable = true;
 
 }
