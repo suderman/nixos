@@ -136,6 +136,11 @@ in {
       '';
     };
 
+    # # todo: replace mkdir with tmpfiles
+    # systemd.tmpfiles.rules = [
+    #   "d '${cfg.dataDir}' 0700 ${cfg.user} ${cfg.group} - -"
+    # ];
+
   };
 
 }

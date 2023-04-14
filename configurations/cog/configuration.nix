@@ -113,6 +113,10 @@
   modules.home-assistant.enable = true;
   modules.immich.enable = true;
 
+  # modules.radarr.enable = true;
+  # modules.sonarr.enable = true;
+  # modules.lidarr.enable = true;
+
   # services.fprintd.enable = true;
   # services.fprintd.tod.enable = true;
   # services.fprintd.tod.driver = pkgs.libfprint-2-tod1-vfs0090;  # (If the vfs0090 Driver does not work, use the following driver)

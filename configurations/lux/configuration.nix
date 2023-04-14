@@ -34,17 +34,21 @@
   modules.tailscale.enable = true;
   modules.ddns.enable = true;
   modules.whoami.enable = true;
+
+  modules.plex.enable = true;
   modules.tautulli.enable = true;
   modules.jellyfin.enable = true;
 
-  modules.plex.enable = true;
+  modules.sabnzbd.enable = true;
+  modules.radarr.enable = true;
+  modules.sonarr.enable = true;
+  modules.lidarr.enable = true;
 
   modules.immich = {
     enable = true;
     dataDir = "/data/immich";
   };
 
-  modules.sabnzbd.enable = true;
   # modules.radarr.enable = true;
 
   # /data/immich

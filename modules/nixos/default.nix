@@ -12,6 +12,7 @@
     ./immich
     ./jellyfin
     ./keyd
+    ./lidarr
     ./linode
     ./mysql
     ./neovim
@@ -19,8 +20,10 @@
     ./ocis
     ./plex
     ./postgresql
+    ./radarr
     ./sabnzbd
     ./secrets
+    ./sonarr
     ./steam
     ./tailscale
     ./tandoor-recipes
