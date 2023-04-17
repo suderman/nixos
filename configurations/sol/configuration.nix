@@ -21,6 +21,7 @@
   # Network
   modules.tailscale.enable = true;
   modules.ddns.enable = true;
+  modules.whoami.enable = true;
   networking.extraHosts = "";
 
   # Memory management
@@ -29,25 +30,21 @@
   # Snapshots & backup
   modules.btrbk.enable = true;
 
-  # Web services
-  modules.traefik.enable = true;
-  modules.postgresql.enable = true;
-
-  modules.whoogle.enable = false;
-  modules.whoami.enable = true;
-  modules.sabnzbd.enable = false;
-
-  modules.tandoor-recipes = {
-    enable = true;
-    public = "tandoor.suderman.net";
-  };
-
-  # services.gitea.enable = true;
-  # services.gitea.database.type = "mysql";
-
   # Apps
   modules.neovim.enable = true;
   programs.mosh.enable = true;
   programs.tmux.enable = true;
+
+  # Web services
+  modules.whoogle.enable = true;
+  modules.gitea.enable = true;
+  modules.tiddlywiki.enable = true;
+  modules.freshrss.enable = true;
+  modules.tandoor-recipes.enable = true;
+
+  # modules.tandoor-recipes = {
+  #   enable = true;
+  #   public = "tandoor.suderman.net";
+  # };
 
 }

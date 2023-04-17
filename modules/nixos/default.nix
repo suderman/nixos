@@ -2,12 +2,13 @@
 {
   imports = [
     ./base
-    ./btrbk
     ./bluebubbles
+    ./btrbk
     ./ddns
     ./earlyoom
     ./flatpak
     ./freshrss
+    ./gitea
     ./gnome
     ./home-assistant
     ./immich

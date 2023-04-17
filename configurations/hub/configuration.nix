@@ -43,10 +43,10 @@
   };
 
   # Test services
-  modules.plex.enable = true;
-  modules.tautulli.enable = true;
-  modules.jellyfin.enable = true;
-  modules.tiddlywiki.enable = true;
-  modules.tandoor-recipes.enable = true;
+  # modules.plex.enable = true;
+  # modules.tautulli.enable = true;
+  # modules.jellyfin.enable = true;
+  # modules.tiddlywiki.enable = true;
+  # modules.tandoor-recipes.enable = true;
 
 }

@@ -20,6 +20,7 @@ in {
   owncloud-client = enableWayland { type = "qt"; pkg = super.owncloud-client; bin = "owncloud"; };
   plexamp         = enableWayland { type = "electron"; pkg = super.plexamp; bin = "plexamp"; };
   signal-desktop  = enableWayland { type = "electron"; pkg = super.signal-desktop; bin = "signal-desktop"; };
+  figma-linux     = enableWayland { type = "electron"; pkg = super.figma-linux; bin = "figma-linux"; };
   # slack           = enableWayland { type = "electron"; pkg = super.slack; bin = "slack"; };
 
 }

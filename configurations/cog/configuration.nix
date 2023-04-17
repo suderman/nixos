@@ -41,21 +41,13 @@
 
   # Database services
   modules.mysql.enable = true;
-  # services.postgresql.enable = false;
+  modules.postgresql.enable = true;
   
   # Web services
-  modules.traefik.enable = true;
-  modules.whoogle.enable = true;
   modules.whoami.enable = true;
-
-  # services.sabnzbd.enable = true;
-  modules.sabnzbd.enable = true;
-  # services.sabnzbd.host = "s.${config.networking.fqdn}";
-  # services.sabnzbd.port = 8008;
-
-  modules.tandoor-recipes.enable = true;
-  # services.gitea.enable = true;
-  # services.gitea.database.type = "mysql";
+  modules.tandoor-recipes.enable = false;
+  modules.home-assistant.enable = false;
+  modules.immich.enable = false;
 
   # Desktop Environments
   modules.gnome.enable = true;
@@ -108,15 +100,6 @@
   # sudo fwupdmgr update
   services.fwupd.enable = true;
 
-  modules.freshrss.enable = false;
-
-  modules.home-assistant.enable = true;
-  modules.immich.enable = true;
-
-  # modules.radarr.enable = true;
-  # modules.sonarr.enable = true;
-  # modules.lidarr.enable = true;
-
   # services.fprintd.enable = true;
   # services.fprintd.tod.enable = true;
   # services.fprintd.tod.driver = pkgs.libfprint-2-tod1-vfs0090;  # (If the vfs0090 Driver does not work, use the following driver)
@@ -125,6 +108,7 @@
   environment.systemPackages = with pkgs; [ 
     monica
     unstable.nodePackages_latest.immich
+    unstable.figma-linux
   ];
   
   

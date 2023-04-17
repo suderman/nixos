@@ -8,8 +8,8 @@ let
 
 in {
 
-  options = {
-    modules.whoami.enable = lib.options.mkEnableOption "whoami"; 
+  options.modules.whoami = {
+    enable = lib.options.mkEnableOption "whoami"; 
   };
 
   config = mkIf cfg.enable {
@@ -23,11 +23,14 @@ in {
         "--label=traefik.http.routers.whoami.tls.certresolver=resolver-dns"
         "--label=traefik.http.routers.whoami.middlewares=local@file"
       ];
-      environmentFiles = [ secrets.cloudflare-env.path ];
+      environmentFiles = [ secrets.traefik-env.path ];
       environment = {
         FOO = "BAR";
       };
     };
+
+    # Enable reverse proxy
+    modules.traefik.enable = true;
 
   }; 
 
