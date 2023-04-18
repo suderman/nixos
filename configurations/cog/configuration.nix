@@ -48,6 +48,7 @@
   modules.tandoor-recipes.enable = false;
   modules.home-assistant.enable = false;
   modules.immich.enable = false;
+  modules.rsshub.enable = false;
 
   # Desktop Environments
   modules.gnome.enable = true;

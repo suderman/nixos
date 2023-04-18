@@ -25,6 +25,7 @@
     ./plex
     ./postgresql
     ./radarr
+    ./rsshub
     ./sabnzbd
     ./secrets
     ./sonarr

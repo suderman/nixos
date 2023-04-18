@@ -39,6 +39,7 @@
   modules.whoogle.enable = true;
   modules.gitea.enable = true;
   modules.tiddlywiki.enable = true;
+  modules.rsshub.enable = true;
   modules.freshrss.enable = true;
   modules.tandoor-recipes.enable = true;
 
