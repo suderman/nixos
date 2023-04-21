@@ -35,6 +35,7 @@ in {
         chrome-gnome-shell
         wl-clipboard
         # shairplay
+        unstable.epiphany
 
         gnomeExtensions.appindicator
         gnomeExtensions.bluetooth-quick-connect

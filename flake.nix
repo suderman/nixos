@@ -117,6 +117,9 @@
         # Linode VPS
         sol = mkSystem { host = "sol"; inherit user domain; };
 
+        # Mac Mini
+        pom = mkSystem { host = "pom"; inherit user domain; };
+
       };
 
       # # Home configurations on other systems

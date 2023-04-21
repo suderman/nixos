@@ -42,7 +42,7 @@
     python39Packages.virtualenv
     ripgrep
     slack
-    systemdgenie
+    # systemdgenie
     sysz
     tdesktop
     tealdeer
@@ -51,6 +51,9 @@
     wget
     xorg.xeyes
     yo
+
+    junction
+
     # keygen
     # dolphin
     # signal-desktop
@@ -72,6 +75,8 @@
     foot.enable = true;
   };
 
+
+  # modules.firefox-pwa.enable = true;
   # home.file.".ssh/id_ed25519".source = "/nix/keys/id_ed25519";
 
 }

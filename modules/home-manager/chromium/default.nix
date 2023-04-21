@@ -1,5 +1,5 @@
 # programs.chromium.enable = true
-{ config, lib, ... }:
+{ config, lib, pkgs, user, ... }:
 
 let 
   cfg = config.programs.chromium;
@@ -32,6 +32,19 @@ in {
       "electron-flags24.conf".text = flags;
       "electron-flags25.conf".text = flags;
     };
+
+    # Chromium's PWA/SSB "installed" web apps don't open because the wrong path to chromium is used. 
+    # This fixes it to whatever is currently set in the nix profile.
+    home.packages = [
+      ( pkgs.writeShellScriptBin "fix-chromium-pwa" ''
+        for file in /home/${user}/.local/share/applications/chrome-*-Default.desktop; do
+          if [ -f "$file" ]; then
+            tail -n +2 "$file" > tmpfile && echo '#!/run/current-system/sw/bin/xdg-open' | cat - tmpfile > "$file"; rm -f tmpfile
+            sed -i 's|Exec=/nix/store/.*chromium-unwrapped.*libexec/chromium/chromium|Exec=/etc/profiles/per-user/${user}/bin/chromium|g' "$file"
+          fi
+        done
+      '')
+    ];
 
   };
 

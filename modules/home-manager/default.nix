@@ -6,6 +6,7 @@
     ./dconf
     ./direnv
     ./foot
+    ./firefox-pwa
     ./fzf
     ./git
     ./gtk

@@ -31,6 +31,8 @@ in {
       openFirewall = true;
     };
 
+    users.groups.media.members = [ config.services.jellyfin.user ];
+
     # Enable reverse proxy
     modules.traefik.enable = true;
 
