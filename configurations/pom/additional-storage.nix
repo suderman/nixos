@@ -1,4 +1,22 @@
-{ config, ... }: {
+{ config, ... }: let 
+
+  # These disks aren't automatically added by the installer and must be added manually.
+  automount = [ 
+    "noauto"                       # do not mount on boot
+    "nofail"                       # continue boot even if disk is missing
+    "x-systemd.automount"          # create automount unit to mount when accessed
+    "x-systemd.device-timeout=1ms" # assume device is already plugged in and do not wait
+    "x-systemd.idle-timout=5m"     # unmount after 5 min of inactivity
+  ];
+  btrfs = [ 
+    "compress=zstd"                # enable zstd compression
+    "space_cache=v2"               # track available free space on filesystem
+    "discard=async"                # free up deleted space in the background
+    "noatime"                      # disables access time updates on files
+  ]; 
+  bind = [ "bind" ]; 
+
+in {
 
   # Additional HDD disk pool
   # -------------------------------------------------------------------------
@@ -30,7 +48,17 @@
   fileSystems."/mnt/pool" = {
     fsType = "btrfs"; 
     device = "/dev/disk/by-uuid/2b311ebc-75bb-4235-86d9-bc7f57f6820d";
-    options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" "x-systemd.automount" ]; 
+    options = btrfs ++ automount;  
   };
+
+  fileSystems."/data" = {
+    device = "/mnt/pool/data"; 
+    options = bind ++ automount;
+  };
+
+  # # Services that depend on this mount may need the following
+  # systemd.services.my-app = {
+  #   requires = [ "mnt-pool.mount" ];
+  # };
 
 }
