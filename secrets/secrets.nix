@@ -52,4 +52,6 @@ with (import ./keys); {
 
   "files/immich-env.age".publicKeys = all;
 
+  "files/btrbk-key.age".publicKeys = all;
+
 }

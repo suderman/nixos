@@ -4,7 +4,9 @@
 let 
 
   cfg = config.modules.btrbk;
-  inherit (lib) mkIf;
+  secrets = config.age.secrets;
+  keys = config.modules.secrets.keys;
+  inherit (lib) mkIf mkForce;
 
 in {
 
@@ -25,22 +27,44 @@ in {
 
     services.btrbk.extraPackages = [ pkgs.lz4 ];
 
+    services.btrbk.sshAccess = [{
+      key = keys.users.btrbk;
+      roles = [ "info" "source" "target" "snapshot" "send" "receive" ];
+    }];
+
     # Snapshot on the start and the middle of every hour.
-    services.btrbk.instances.local = {
+    services.btrbk.instances.btrbk = {
       onCalendar = "*:00,30";
       settings = {
+
+        ssh_user = "btrbk";
+        ssh_identity = secrets.btrbk-key.path;
+        stream_compress = "lz4";
+
         timestamp_format = "long";
         preserve_day_of_week = "monday";
         preserve_hour_of_day = "23";
+
         # All snapshots are retained for at least 6 hours regardless of other policies.
+        snapshot_dir = "snapshots";
         snapshot_preserve_min = "6h";
+        snapshot_preserve = "48h 7d";
+
+        target_preserve_min = "1w";
+	      target_preserve = "30d 12w 6m";
+
         volume."/nix" = {
-          snapshot_dir = "snapshots";
+          # snapshot_dir = "snapshots";
           subvolume."state".snapshot_preserve = "48h 7d";
           subvolume."state/home".snapshot_preserve = "48h 7d 4w";
         };
       };
     };
+
+    # Allow btrbk user to read ssh key file
+    # users.users.btrbk.extraGroups = [ "secrets" ]; 
+
+    age.secrets.btrbk-key.mode = mkForce "400"; 
 
     # services.btrbk.instances.local.settings = {
     #   volume."/data" = {

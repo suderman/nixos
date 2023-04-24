@@ -42,8 +42,8 @@ in {
   # mount -t btrfs -o defaults /dev/disk/by-uuid/2b311ebc-75bb-4235-86d9-bc7f57f6820d /mnt/pool
   #
   # Create two subvolumes:
-  # > btrfs subvolume create /mnt/pool/backups
   # > btrfs subvolume create /mnt/pool/data
+  # > btrfs subvolume create /mnt/pool/backups
 
   fileSystems."/mnt/pool" = {
     fsType = "btrfs"; 
@@ -53,6 +53,11 @@ in {
 
   fileSystems."/data" = {
     device = "/mnt/pool/data"; 
+    options = bind ++ automount;
+  };
+
+  fileSystems."/backups" = {
+    device = "/mnt/pool/backups"; 
     options = bind ++ automount;
   };
 

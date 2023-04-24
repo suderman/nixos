@@ -17,6 +17,9 @@
 
   # Snapshots & backup
   modules.btrbk.enable = true;
+  services.btrbk.instances.btrbk.settings.volume."/nix" = {
+    target = with config.networking; "ssh://pom.${domain}/backups/${hostName}";
+  };
 
   # Memory management
   modules.earlyoom.enable = true;

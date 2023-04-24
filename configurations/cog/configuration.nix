@@ -28,6 +28,22 @@
 
   # Snapshots & backup
   modules.btrbk.enable = true;
+  services.btrbk.instances.btrbk.settings.volume."/nix" = {
+    target = with config.networking; "ssh://pom.${domain}/backups/${hostName}";
+  };
+
+  # modules.btrbk = {
+  #   enable = true;
+  #   volume = with config.networking; { 
+  #     "/nix" = {
+  #       target = "ssh://pom.${domain}/backups/${hostName}";
+  #     };
+  #     "/data" = {
+  #       subvolume = "data";
+  #       target = "ssh://pom.${domain}/backups/${hostName}-data";
+  #     };
+  #   };
+  # };
 
   # Broken? Prevents boot.
   # modules.sunshine.enable = false;
