@@ -2,6 +2,7 @@
 
   imports = [ 
     ./hardware-configuration.nix
+    ./additional-storage.nix
   ];
 
   # Btrfs mount options
@@ -11,9 +12,14 @@
   modules.base.enable = true;
   modules.secrets.enable = true;
 
+  # Use freshest kernel
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+
+  networking.networkmanager.enable = true;
 
   # Snapshots & backup
   modules.btrbk.enable = true;
