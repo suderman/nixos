@@ -4,11 +4,8 @@
     inputs.hardware.nixosModules.framework 
     ./framework.nix
     ./hardware-configuration.nix 
+    ./storage.nix
   ];
-
-  # Btrfs mount options
-  fileSystems."/".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
-  fileSystems."/nix".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
 
   # Base configuration
   modules.base.enable = true;
@@ -25,14 +22,6 @@
   modules.tailscale.enable = true;
   modules.ddns.enable = true;
   networking.extraHosts = "";
-
-  # Snapshots & backup
-  modules.btrbk = {
-    enable = true;
-    backup = with config.networking; {
-      "/nix".target."ssh://lux.${domain}/backups/${hostName}" = {};
-    };
-  };
 
   # Broken? Prevents boot.
   # modules.sunshine.enable = false;

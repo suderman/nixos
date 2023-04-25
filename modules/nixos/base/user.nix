@@ -24,7 +24,7 @@ in {
         shell = pkgs.zsh;
         home = "/home/${user}";
         description = user;
-        passwordFile = mkIf (secrets.enable) secrets.password-encrypted.path;
+        passwordFile = mkIf (secrets.enable) secrets.password-hash.path;
         password = mkIf (!secrets.enable) "${user}";
         extraGroups = [ "wheel" ] ++ ifTheyExist [ "networkmanager" "docker" ]; 
         openssh.authorizedKeys.keys = [ keys.users."${user}" ];

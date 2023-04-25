@@ -2,11 +2,8 @@
 
   imports = [ 
     ./hardware-configuration.nix
+    ./storage.nix
   ];
-
-  # Btrfs mount options
-  fileSystems."/".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
-  fileSystems."/nix".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
 
   modules.base.enable = true;
   modules.secrets.enable = true;
@@ -14,14 +11,6 @@
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-
-  # Snapshots & backup
-  modules.btrbk = {
-    enable = true;
-    backup = with config.networking; {
-      "/nix".target."ssh://lux.${domain}/backups/${hostName}" = {};
-    };
-  };
 
   # Memory management
   modules.earlyoom.enable = true;

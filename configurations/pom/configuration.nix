@@ -2,12 +2,8 @@
 
   imports = [ 
     ./hardware-configuration.nix
-    ./additional-storage.nix
+    ./storage.nix
   ];
-
-  # Btrfs mount options
-  fileSystems."/".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
-  fileSystems."/nix".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
 
   modules.base.enable = true;
   modules.secrets.enable = true;
@@ -20,9 +16,6 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.networkmanager.enable = true;
-
-  # Snapshots & backup
-  modules.btrbk.enable = true;
 
   # Memory management
   modules.earlyoom.enable = true;

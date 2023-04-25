@@ -7,9 +7,6 @@
   modules.base.enable = true;
   modules.secrets.enable = false;
 
-  # Configure the SSH daemon
-  services.openssh.enable = true;
-
   # UEFI boot 
   # boot.loader = { efi.canTouchEfiVariables = true; systemd-boot.enable = true; };
   #

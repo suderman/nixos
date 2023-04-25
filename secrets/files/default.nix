@@ -9,7 +9,7 @@
   cloudflare-env = ./cloudflare-env.age;
   immich-env = ./immich-env.age;
   password = ./password.age;
-  password-encrypted = ./password-encrypted.age;
+  password-hash = ./password-hash.age;
   smtp-env = ./smtp-env.age;
   traefik-env = ./traefik-env.age;
 

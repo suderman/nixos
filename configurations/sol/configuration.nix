@@ -2,11 +2,8 @@
 
   imports = [
     ./hardware-configuration.nix
+    ./storage.nix
   ];
-
-  # Btrfs mount options
-  fileSystems."/".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
-  fileSystems."/nix".options = [ "compress=zstd" "space_cache=v2" "discard=async" "noatime" ];
 
   # Base configuration
   modules.base.enable = true;
@@ -26,9 +23,6 @@
 
   # Memory management
   modules.earlyoom.enable = true;
-
-  # Snapshots & backup
-  modules.btrbk.enable = true;
 
   # Apps
   modules.neovim.enable = true;

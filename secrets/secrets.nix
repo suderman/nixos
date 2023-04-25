@@ -1,8 +1,8 @@
 with (import ./keys); {
 
-  # Encrypted password for NixOS user account
+  # Password hash for NixOS user account
   # > mkpasswd -m sha-512 mySecr3tpa$$w0rd!
-  "files/password-encrypted.age".publicKeys = all;
+  "files/password-hash.age".publicKeys = all;
 
   # Plain-text password (typically used in web services)
   "files/password.age".publicKeys = all;

@@ -1,6 +1,5 @@
 { config, ... }: let 
 
-  # These disks aren't automatically added by the installer and must be added manually.
   automount = [ 
     "noauto"                       # do not mount on boot
     "nofail"                       # continue boot even if disk is missing
@@ -17,6 +16,10 @@
   bind = [ "bind" ]; 
 
 in {
+
+  # Btrfs mount options
+  fileSystems."/".options = btrfs;
+  fileSystems."/nix".options = btrfs;
 
   # Additional SSD disk
   # -------------------------------------------------------------------------
@@ -99,5 +102,18 @@ in {
   # systemd.services.my-app = {
   #   requires = [ "mnt-raid.mount" ];
   # };
+
+  # Snapshots & backup
+  modules.btrbk = {
+    enable = true;
+    snapshot = {
+      "/mnt/ssd".subvolume."data" = {};
+    };
+    backup = with config.networking; {
+      "/mnt/ssd".subvolume."data" = {};
+      "/mnt/ssd".target."/backups/${hostName}" = {};
+      "/nix".target."/backups/${hostName}" = {};
+    };
+  };
 
 }

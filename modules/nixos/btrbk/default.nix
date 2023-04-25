@@ -57,13 +57,13 @@ in {
       };
       
       "backup" = {
-        onCalendar = "daily 02:00";
+        onCalendar = "daily 02:15";
         settings = shared // {
           ssh_user = "btrbk";
           ssh_identity = secrets.btrbk-key.path;
           stream_compress = "lz4";
-          snapshot_create = "ondemand";
-          snapshot_preserve_min = "latest";
+          snapshot_create = "no";
+          snapshot_preserve_min = "all";
           target_preserve_min = "1d";
           target_preserve = "7d 4w 6m";
           volume = recursiveUpdate {

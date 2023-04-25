@@ -1,6 +1,5 @@
 { config, ... }: let 
 
-  # These disks aren't automatically added by the installer and must be added manually.
   automount = [ 
     "noauto"                       # do not mount on boot
     "nofail"                       # continue boot even if disk is missing
@@ -17,6 +16,10 @@
   bind = [ "bind" ]; 
 
 in {
+
+  # Btrfs mount options
+  fileSystems."/".options = btrfs;
+  fileSystems."/nix".options = btrfs;
 
   # Additional HDD disk pool
   # -------------------------------------------------------------------------
@@ -65,5 +68,8 @@ in {
   # systemd.services.my-app = {
   #   requires = [ "mnt-pool.mount" ];
   # };
+
+  # Snapshots & backup
+  modules.btrbk.enable = true;
 
 }
