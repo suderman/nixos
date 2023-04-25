@@ -1,11 +1,10 @@
 # modules.btrbk.enable = true;
-{ config, lib, pkgs, user, ... }: 
+{ config, lib, pkgs, ... }: 
 
 let 
 
   cfg = config.modules.btrbk;
   secrets = config.age.secrets;
-  keys = config.modules.secrets.keys;
   inherit (lib) mkIf mkOption mkForce types recursiveUpdate;
 
 in {
@@ -19,11 +18,15 @@ in {
   # Use btrbk to snapshot persistent states and home
   config = mkIf cfg.enable {
 
-    services.btrbk.extraPackages = [ pkgs.lz4 pkgs.mbuffer ];
+    # Public key to private key found in secrets/files/btrbk-key.age
+    # > ssh-keygen -t ed25519 -C btrbk -f /tmp/btrbk
     services.btrbk.sshAccess = [{
-      key = keys.users.btrbk;
+      key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINTAr4tawFxq0q+cazxkwfIqFPF3CdkY1kCGZNVn9LWj";
       roles = [ "info" "source" "target" "delete" "snapshot" "send" "receive" ];
     }];
+
+    # Enable compression
+    services.btrbk.extraPackages = [ pkgs.lz4 pkgs.mbuffer ];
 
     services.btrbk.instances = let
 
@@ -37,9 +40,8 @@ in {
 
     in {
 
-      # Instance was "snapshot" but now named "btrbk" so it generates default btrbk.conf
       # All snapshots are retained for at least 6 hours regardless of other policies.
-      "btrbk" = {
+      "snapshot" = {
         onCalendar = "*:00,30";
         settings = shared // {
           snapshot_create = "onchange";
@@ -74,6 +76,9 @@ in {
       };
 
     };
+
+    # Point default btrbk.conf to backup config
+    environment.etc."btrbk.conf".source = "/etc/btrbk/backup.conf";
 
     # Allow btrbk user to read ssh key file
     age.secrets.btrbk-key = {

@@ -50,8 +50,11 @@ with (import ./keys); {
   # > tr -cd '[:alnum:]' < /dev/urandom | fold -w "64" | head -n 1 | tr -d '\n' ; echo
   "files/alphanumeric-secret.age".publicKeys = all;
 
-  "files/immich-env.age".publicKeys = all;
-
+  # Private key used by btrkbk to send backups
+  # > ssh-keygen -t ed25519 -C btrbk -f /tmp/btrbk
   "files/btrbk-key.age".publicKeys = all;
+
+  # Environment variables used by Immich
+  "files/immich-env.age".publicKeys = all;
 
 }
