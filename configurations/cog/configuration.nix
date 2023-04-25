@@ -28,8 +28,12 @@
 
   # Snapshots & backup
   modules.btrbk.enable = true;
-  services.btrbk.instances.btrbk.settings.volume."/nix" = {
-    target = with config.networking; "ssh://pom.${domain}/backups/${hostName}";
+  services.btrbk.instances.btrbk.settings.volume = with config.networking; {
+    "/nix".target = "ssh://pom.${domain}/backups/${hostName}"; 
+    # "/mnt/ssd" = {
+    #   subvolume = "data";
+    #   target = "ssh://pom.${domain}/backups/${hostName}";
+    # };
   };
 
   # modules.btrbk = {

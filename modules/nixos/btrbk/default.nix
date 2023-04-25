@@ -25,11 +25,11 @@ in {
     # subvolume    /nix/state
     # subvolume    /nix/state/home
 
-    services.btrbk.extraPackages = [ pkgs.lz4 ];
+    services.btrbk.extraPackages = [ pkgs.lz4 pkgs.mbuffer ];
 
     services.btrbk.sshAccess = [{
       key = keys.users.btrbk;
-      roles = [ "info" "source" "target" "snapshot" "send" "receive" ];
+      roles = [ "info" "source" "target" "delete" "snapshot" "send" "receive" ];
     }];
 
     # Snapshot on the start and the middle of every hour.
@@ -39,7 +39,9 @@ in {
 
         ssh_user = "btrbk";
         ssh_identity = secrets.btrbk-key.path;
+
         stream_compress = "lz4";
+        stream_buffer = "256m";
 
         timestamp_format = "long";
         preserve_day_of_week = "monday";
@@ -64,7 +66,10 @@ in {
     # Allow btrbk user to read ssh key file
     # users.users.btrbk.extraGroups = [ "secrets" ]; 
 
-    age.secrets.btrbk-key.mode = mkForce "400"; 
+    age.secrets.btrbk-key = {
+      owner = mkForce "btrbk";
+      mode = mkForce "400"; 
+    };
 
     # services.btrbk.instances.local.settings = {
     #   volume."/data" = {
