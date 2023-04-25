@@ -16,9 +16,11 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Snapshots & backup
-  modules.btrbk.enable = true;
-  services.btrbk.instances.btrbk.settings.volume."/nix" = {
-    target = with config.networking; "ssh://pom.${domain}/backups/${hostName}";
+  modules.btrbk = {
+    enable = true;
+    backup = with config.networking; {
+      "/nix".target."ssh://lux.${domain}/backups/${hostName}" = {};
+    };
   };
 
   # Memory management

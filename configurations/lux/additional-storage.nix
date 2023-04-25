@@ -90,6 +90,11 @@ in {
     options = bind ++ automount;
   };
 
+  fileSystems."/backups" = {
+    device = "/mnt/raid/backups"; 
+    options = bind ++ automount;
+  };
+
   # # Services that depend on this mount may need the following
   # systemd.services.my-app = {
   #   requires = [ "mnt-raid.mount" ];

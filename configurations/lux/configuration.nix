@@ -17,7 +17,17 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Snapshots & backup
-  modules.btrbk.enable = true;
+  modules.btrbk = {
+    enable = true;
+    snapshot = {
+      "/mnt/ssd".subvolume."data" = {};
+    };
+    backup = with config.networking; {
+      "/mnt/ssd".subvolume."data" = {};
+      "/mnt/ssd".target."/backups/${hostName}" = {};
+      "/nix".target."/backups/${hostName}" = {};
+    };
+  };
 
   # Memory management
   modules.earlyoom.enable = true;
