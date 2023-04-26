@@ -61,6 +61,8 @@
 
     isy
 
+    unstable.nodePackages_latest.immich
+
   ];
 
   programs = {

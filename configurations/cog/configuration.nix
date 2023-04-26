@@ -43,11 +43,7 @@
   modules.home-assistant.enable = false;
   modules.immich.enable = false;
   modules.rsshub.enable = false;
-
-  modules.backblaze = {
-    enable = true;
-    backupDir = "/home";
-  };
+  modules.backblaze.enable = false;
 
   # Desktop Environments
   modules.gnome.enable = true;
@@ -59,6 +55,9 @@
 
   programs.mosh.enable = true;
   programs.kdeconnect.enable = true;
+
+  # sudo fwupdmgr update
+  services.fwupd.enable = true;
 
   # # Power management
   # services.tlp.enable = false;
@@ -95,27 +94,5 @@
   #   ACTION=="add", SUBSYSTEM=="usb", DRIVER=="usb", ATTR{power/wakeup}="enabled"
   # '';
 
-  services.xserver.displayManager.gdm.debug = true;
 
-  # sudo fwupdmgr update
-  services.fwupd.enable = true;
-
-  # services.fprintd.enable = true;
-  # services.fprintd.tod.enable = true;
-  # services.fprintd.tod.driver = pkgs.libfprint-2-tod1-vfs0090;  # (If the vfs0090 Driver does not work, use the following driver)
-  # # services.fprintd.tod.driver = pkgs.libfprint-2-tod1-goodix; # (On my device it only worked with this driver)
-  
-  environment.systemPackages = with pkgs; [ 
-    monica
-    unstable.nodePackages_latest.immich
-    unstable.figma-linux
-  ];
-  
-  
-  # systemd.mounts = [{
-  #   what = "/dev/sda1";
-  #   where = "/mnt/usb";
-  #   options = "defaults,noauto,x-systemd.automount";
-  #   wantedBy = ["multi-user.target"];
-  # }];
 }

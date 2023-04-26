@@ -21,7 +21,7 @@ in {
   fileSystems."/".options = btrfs;
   fileSystems."/nix".options = btrfs;
 
-  # Snapshots & backup
+  # Snapshots & backups
   modules.btrbk = {
     enable = true;
     backups = with config.networking; {
