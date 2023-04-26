@@ -44,6 +44,11 @@
   modules.immich.enable = false;
   modules.rsshub.enable = false;
 
+  modules.backblaze = {
+    enable = true;
+    backupDir = "/home";
+  };
+
   # Desktop Environments
   modules.gnome.enable = true;
 

@@ -14,6 +14,7 @@
     "noatime"                      # disables access time updates on files
   ]; 
   bind = [ "bind" ]; 
+  inherit (config.networking) hostName domain;
 
 in {
 
@@ -103,17 +104,43 @@ in {
   #   requires = [ "mnt-raid.mount" ];
   # };
 
-  # Snapshots & backup
+  # Snapshots & backups
   modules.btrbk = {
     enable = true;
+
+    # Also snapshot both SSD and RAID volumes
     snapshot = {
       "/mnt/ssd".subvolume."data" = {};
+      "/mnt/raid".subvolume."media" = {};
     };
-    backup = with config.networking; {
-      "/mnt/ssd".subvolume."data" = {};
-      "/mnt/ssd".target."/backups/${hostName}" = {};
+
+    # Many machines backup to here
+    backup = {
+
+      # RAID is mounted to /backups, so target can be directory instead of ssh
       "/nix".target."/backups/${hostName}" = {};
+
+      # Same for secondary data drive
+      "/mnt/ssd" = {
+        subvolume."data" = {};
+        target."/backups/${hostName}" = {};
+      };
+
+      # Media subvolume is on same RAID volume as /backups.
+      # Save redundant set of media snapshots to /backups directory
+      # to keep all machines backups in one place for convenient archiving.
+      "/mnt/raid".subvolume."media" = {
+        snapshot_dir = "/backups/${hostName}";
+        snapshot_create = "onchange";
+      };
+
     };
+  };
+
+  modules.backblaze = {
+    enable = true;
+    runDir = "/mnt/raid/bz";
+    backupDir = "/backups";
   };
 
 }

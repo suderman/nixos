@@ -1,6 +1,7 @@
 { ... }:
 {
   imports = [
+    ./backblaze
     ./base
     ./bluebubbles
     ./btrbk
