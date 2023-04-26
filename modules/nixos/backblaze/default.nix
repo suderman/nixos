@@ -19,10 +19,6 @@ in {
       type = types.path;
       default = "/var/lib/backblaze";
     };
-    runDir = mkOption {
-      type = types.path;
-      default = "/run/backblaze";
-    };
     backupDir = mkOption {
       type = types.path;
       default = "/home";
@@ -49,7 +45,7 @@ in {
     };
 
     virtualisation.oci-containers.containers."backblaze" = {
-      image = "tessypowder/backblaze-personal-wine";
+      image = "tessypowder/backblaze-personal-wine:main";
       autoStart = true;
 
       # Traefik labels
@@ -76,8 +72,7 @@ in {
       # Bind volumes
       volumes = [ 
         "${cfg.dataDir}:/config" 
-        "${cfg.runDir}:/drive_d"
-        "${cfg.backupDir}:/drive_d/data"
+        "${cfg.backupDir}:/drive_d"
       ];
 
     };
@@ -87,11 +82,19 @@ in {
         uid = toString config.users.users.backblaze.uid;
         gid = toString config.users.groups.backblaze.gid;
       in mkBefore ''
-        mkdir -p ${cfg.runDir}
-        chown ${uid}:${gid} ${cfg.runDir}
-        [ -e ${cfg.runDir}/.bzvol ] && chown -R ${uid}:${gid} ${cfg.runDir}/.bzvol
+        mkdir -p ${cfg.backupDir}/.bzvol
+        chown ${uid}:${gid} ${cfg.backupDir}
+        chown -R ${uid}:${gid} ${cfg.backupDir}/.bzvol
       '';
-      # serviceConfig.BindPaths = [ "${cfg.backupDir}:${cfg.runDir}/data" ];
+      # postStart = let 
+      #   dir = "${cfg.dataDir}/wine/dosdevices";
+      #   sudo = "${pkgs.sudo}/bin/sudo";
+      # in mkBefore ''
+      #   if [ ! -e "${dir}" ]; then
+      #     while [ ! -d "${dir}" ]; do sleep 1; done
+      #     [ -h "${dir}/d:" ] || ${sudo} -u backblaze ln -s /drive_d "${dir}/d:"
+      #   fi
+      # '';
     };
 
     # # Container will not stop gracefully, so kill it

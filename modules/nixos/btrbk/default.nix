@@ -11,8 +11,8 @@ in {
 
   options.modules.btrbk = {
     enable = lib.options.mkEnableOption "btrbk"; 
-    snapshot = mkOption { type = types.attrs; default = {}; };
-    backup = mkOption { type = types.attrs; default = {}; };
+    snapshots = mkOption { type = types.attrs; default = {}; };
+    backups = mkOption { type = types.attrs; default = {}; };
   };
 
   # Use btrbk to snapshot persistent states and home
@@ -41,7 +41,7 @@ in {
     in {
 
       # All snapshots are retained for at least 6 hours regardless of other policies.
-      "snapshot" = {
+      "snapshots" = {
         onCalendar = "*:00,30";
         settings = shared // {
           snapshot_create = "onchange";
@@ -52,11 +52,11 @@ in {
               subvolume."state" = {};
               subvolume."state/home" = {};
             };
-          } cfg.snapshot; 
+          } cfg.snapshots; 
         };
       };
       
-      "backup" = {
+      "backups" = {
         onCalendar = "daily 02:15";
         settings = shared // {
           ssh_user = "btrbk";
@@ -71,14 +71,14 @@ in {
               subvolume."state" = {};
               subvolume."state/home" = {};
             }; 
-          } cfg.backup;
+          } cfg.backups;
         };
       };
 
     };
 
     # Point default btrbk.conf to backup config
-    environment.etc."btrbk.conf".source = "/etc/btrbk/backup.conf";
+    environment.etc."btrbk.conf".source = "/etc/btrbk/backups.conf";
 
     # Allow btrbk user to read ssh key file
     age.secrets.btrbk-key = {

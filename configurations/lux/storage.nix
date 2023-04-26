@@ -109,13 +109,13 @@ in {
     enable = true;
 
     # Also snapshot both SSD and RAID volumes
-    snapshot = {
+    snapshots = {
       "/mnt/ssd".subvolume."data" = {};
       "/mnt/raid".subvolume."media" = {};
     };
 
     # Many machines backup to here
-    backup = {
+    backups = {
 
       # RAID is mounted to /backups, so target can be directory instead of ssh
       "/nix".target."/backups/${hostName}" = {};
@@ -139,7 +139,6 @@ in {
 
   modules.backblaze = {
     enable = true;
-    runDir = "/mnt/raid/bz";
     backupDir = "/backups";
   };
 

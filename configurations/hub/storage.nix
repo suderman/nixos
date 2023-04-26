@@ -24,7 +24,7 @@ in {
   # Snapshots & backup
   modules.btrbk = {
     enable = true;
-    backup = with config.networking; {
+    backups = with config.networking; {
       "/nix".target."ssh://lux.${domain}/backups/${hostName}" = {};
     };
   };
