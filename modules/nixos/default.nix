@@ -39,6 +39,7 @@
     ./unifi
     ./whoami
     ./whoogle
+    ./withings-sync
     ./ydotool
   ];
 }

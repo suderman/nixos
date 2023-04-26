@@ -6,7 +6,6 @@
   home.packages = with pkgs; [ 
     neofetch
     yo
-    withings-sync
   ];
 
   programs = {

@@ -13,7 +13,6 @@ in {
   # Missing packages
   monica = self.callPackage ./monica {};
   firefox-pwa = self.callPackage ./firefox-pwa.nix {};
-  withings-sync = self.callPackage ./withings-sync.nix {};
 
   # These packages support Wayland but sometimes need to be persuaded
   # _1password-gui  = enableWayland { type = "electron"; pkg = super._1password-gui; bin = "1password"; };
