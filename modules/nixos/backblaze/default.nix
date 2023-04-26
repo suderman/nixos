@@ -1,4 +1,10 @@
-# modules.backblaze.enable = true;
+# modules.backblaze = {
+#   enable = true;
+#   driveD = "/nix/state/home";
+#   driveE = "/nix/state/var/lib";
+#   driveF = "/mnt/ssd/data";
+#   driveG = "/mnt/raid/media";
+# };
 { inputs, config, pkgs, lib, ... }:
   
 let 
@@ -19,33 +25,16 @@ in {
       type = types.path;
       default = "/var/lib/backblaze";
     };
-    backupDir = mkOption {
-      type = types.path;
-      default = "/home";
-    };
+    driveD = mkOption { type = types.str; default = "drive_d"; };
+    driveE = mkOption { type = types.str; default = "drive_e"; };
+    driveF = mkOption { type = types.str; default = "drive_f"; };
+    driveG = mkOption { type = types.str; default = "drive_g"; };
   };
 
   config = mkIf cfg.enable {
 
-    # Randomly chose unused id from here:
-    # https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/misc/ids.nix
-    ids.uids.backblaze = 199;
-    ids.gids.backblaze = 199;
-
-    users.users.backblaze = {
-      isSystemUser = true;
-      group = "backblaze";
-      description = "Backblaze daemon user";
-      home = "${cfg.dataDir}";
-      uid = config.ids.uids.backblaze;
-    };
-
-    users.groups.backblaze = {
-      gid = config.ids.gids.backblaze;
-    };
-
     virtualisation.oci-containers.containers."backblaze" = {
-      image = "tessypowder/backblaze-personal-wine:main";
+      image = "tessypowder/backblaze-personal-wine:latest";
       autoStart = true;
 
       # Traefik labels
@@ -56,63 +45,41 @@ in {
         "--label=traefik.http.routers.backblaze.middlewares=local@file"
 
       # Additional flags
-      ] ++ [
-        "--init"
-      ];
+      ] ++ [ "--init" ];
 
       # https://github.com/JonathanTreffler/backblaze-personal-wine-container#environment-variables
       environment = {
         DISPLAY_WIDTH = "660";
         DISPLAY_HEIGHT = "476";
-        USER_ID = toString config.users.users.backblaze.uid;
-        GROUP_ID = toString config.users.groups.backblaze.gid;
+        USER_ID = "0"; # run as root
+        GROUP_ID = "0"; # run as root
         TZ = config.time.timeZone;
       };
 
       # Bind volumes
       volumes = [ 
         "${cfg.dataDir}:/config" 
-        "${cfg.backupDir}:/drive_d"
+        "${cfg.driveD}:/drive_d"
+        "${cfg.driveE}:/drive_e"
+        "${cfg.driveF}:/drive_f"
+        "${cfg.driveG}:/drive_g"
       ];
 
     };
 
+    # After installing Mono/Wine, stop at the email input and run:
+    # > docker restart backblaze
+    # This will ensure Backblaze can see the volumes/drive letters
     systemd.services.docker-backblaze = {
-      preStart = let
-        uid = toString config.users.users.backblaze.uid;
-        gid = toString config.users.groups.backblaze.gid;
-      in mkBefore ''
-        mkdir -p ${cfg.backupDir}/.bzvol
-        chown ${uid}:${gid} ${cfg.backupDir}
-        chown -R ${uid}:${gid} ${cfg.backupDir}/.bzvol
+      preStart = mkBefore "mkdir -p ${cfg.dataDir}";
+      postStart = let dir = "${cfg.dataDir}/wine/dosdevices"; in mkBefore ''
+        while [ ! -d "${dir}" ]; do sleep 1; done
+        [ -h "${dir}/d:" ] || ln -s /drive_d "${dir}/d:"
+        [ -h "${dir}/e:" ] || ln -s /drive_e "${dir}/e:"
+        [ -h "${dir}/f:" ] || ln -s /drive_f "${dir}/f:"
+        [ -h "${dir}/g:" ] || ln -s /drive_g "${dir}/g:"
       '';
-      # postStart = let 
-      #   dir = "${cfg.dataDir}/wine/dosdevices";
-      #   sudo = "${pkgs.sudo}/bin/sudo";
-      # in mkBefore ''
-      #   if [ ! -e "${dir}" ]; then
-      #     while [ ! -d "${dir}" ]; do sleep 1; done
-      #     [ -h "${dir}/d:" ] || ${sudo} -u backblaze ln -s /drive_d "${dir}/d:"
-      #   fi
-      # '';
     };
-
-    # # Container will not stop gracefully, so kill it
-    # systemd.services.docker-backblaze.serviceConfig = {
-    #   KillSignal = "SIGKILL";
-    #   SuccessExitStatus = "0 SIGKILL";
-    # };
-
-    # After installing Mono/Wine, stop at the email input and instead run:
-    # sudo backblaze-add-storage
-    # ...once the container reloads, head back in and enter your email address.
-    environment.systemPackages = [( 
-      pkgs.writeShellScriptBin "backblaze-add-storage" ''
-        #!/usr/bin/env bash
-        docker exec --user app backblaze ln -s /drive_d/ /config/wine/dosdevices/d:
-        docker restart backblaze
-      ''
-    )];
 
     # Enable reverse proxy
     modules.traefik.enable = true;

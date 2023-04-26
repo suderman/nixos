@@ -139,7 +139,10 @@ in {
 
   modules.backblaze = {
     enable = true;
-    backupDir = "/backups";
+    driveD = "/nix/state/home";
+    driveE = "/nix/state/var/lib";
+    driveF = "/mnt/ssd/data";
+    # driveG = "/mnt/raid/media";
   };
 
 }
