@@ -142,7 +142,7 @@ in {
     driveD = "/nix/state/home";
     driveE = "/nix/state/var/lib";
     driveF = "/mnt/ssd/data";
-    # driveG = "/mnt/raid/media";
+    driveG = "/mnt/raid/media";
   };
 
 }
