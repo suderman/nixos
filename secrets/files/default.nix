@@ -12,5 +12,6 @@
   password-hash = ./password-hash.age;
   smtp-env = ./smtp-env.age;
   traefik-env = ./traefik-env.age;
+  withings-env = ./withings-env.age;
 
 }

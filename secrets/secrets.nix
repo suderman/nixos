@@ -57,4 +57,6 @@ with (import ./keys); {
   # Environment variables used by Immich
   "files/immich-env.age".publicKeys = all;
 
+  "files/withings-env.age".publicKeys = all;
+
 }

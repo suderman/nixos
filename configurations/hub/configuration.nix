@@ -3,6 +3,7 @@
   imports = [ 
     ./hardware-configuration.nix
     ./storage.nix
+    ./withings.nix
   ];
 
   modules.base.enable = true;
@@ -42,5 +43,9 @@
   # modules.jellyfin.enable = true;
   # modules.tiddlywiki.enable = true;
   # modules.tandoor-recipes.enable = true;
+
+
+
+
 
 }
