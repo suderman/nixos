@@ -36,13 +36,15 @@ in {
         preserve_hour_of_day = "23";
         stream_buffer = "256m";
         snapshot_dir = "snapshots";
+        ssh_user = "btrbk";
+        ssh_identity = secrets.btrbk-key.path;
       };
 
     in {
 
       # All snapshots are retained for at least 6 hours regardless of other policies.
       "snapshots" = {
-        onCalendar = "*:00,30";
+        onCalendar = "*:00";
         settings = shared // {
           snapshot_create = "onchange";
           snapshot_preserve_min = "6h";
@@ -56,11 +58,10 @@ in {
         };
       };
       
+      # Send snapshots to backup targets (none declared here) at 12:15 every night.
       "backups" = {
-        onCalendar = "daily 02:15";
+        onCalendar = "00:15";
         settings = shared // {
-          ssh_user = "btrbk";
-          ssh_identity = secrets.btrbk-key.path;
           stream_compress = "lz4";
           snapshot_create = "no";
           snapshot_preserve_min = "all";

@@ -26,6 +26,7 @@ in {
     enable = true;
     backups = with config.networking; {
       "/nix".target."ssh://lux.${domain}/backups/${hostName}" = {};
+      "/nix".target."ssh://pom.${domain}/backups/${hostName}" = {};
     };
   };
 
