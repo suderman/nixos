@@ -41,6 +41,8 @@
   modules.lidarr.enable = true;
   modules.ombi.enable = true;
 
+  modules.nextcloud.enable = true;
+
   modules.immich = {
     enable = true;
     dataDir = "/data/immich";

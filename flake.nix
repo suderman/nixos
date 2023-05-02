@@ -1,5 +1,4 @@
-{
-  description = "My personal NixOS configuration";
+{ description = "Jon Suderman's NixOS configuration";
 
   inputs = {
 
@@ -14,7 +13,7 @@
 
     # Home Manager
     # <https://mipmip.github.io/home-manager-option-search>
-    home-manager.url = "github:nix-community/home-manager";
+    home-manager.url = "github:nix-community/home-manager/release-22.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     # NixOS profiles for different hardware
@@ -94,7 +93,10 @@
         ];
       };
 
-      user = "me";
+      # My username
+      user = "me"; 
+
+      # My private network
       domain = "suderman.org";
 
     in {

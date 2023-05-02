@@ -68,6 +68,8 @@
     yt-dlp
     # yt-dlp -f mp4-240p -x --audio-format mp3 https://rumble.com/...
 
+    nextcloud-client
+
   ];
 
   programs = {
