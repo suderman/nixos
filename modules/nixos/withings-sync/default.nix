@@ -7,12 +7,9 @@ let
   secrets = config.age.secrets;
   inherit (lib) mkIf;
 
-  # https://github.com/jaroslawhartman/withings-sync/
-  docker = "${pkgs.docker}/bin/docker";
-  flags = ''--name withings --rm -e GARMIN_USERNAME -e GARMIN_PASSWORD -v "$HOME:/root"''; 
-
   # https://github.com/jaroslawhartman/withings-sync/releases/tag/v3.6.1
   img = "ghcr.io/jaroslawhartman/withings-sync:master";
+  flags = ''--name withings --rm -e GARMIN_USERNAME -e GARMIN_PASSWORD -v "/home/${user}:/root"''; 
 
 in {
 
@@ -25,41 +22,34 @@ in {
     # Create shell script wrapper for docker run
     environment.systemPackages = let script = ''
       if [[ -v NONINTERACTIVE ]]; then
-        ${docker} run ${flags} ${img} "$@"
+        docker run ${flags} ${img} "$@"
       else
-        ${docker} run -it ${flags} ${img} "$@"
+        docker run -it ${flags} ${img} "$@"
       fi
     ''; in [( pkgs.writeShellScriptBin "withings-sync" script )];
 
     # Create systemd service and timer
-    systemd = {
-
-      # Run noninteractively
-      services.withings-sync = {
-        enable = true;
-        description = "Run withings sync";
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = "yes";
-          EnvironmentFile = secrets.withings-env.path; 
-          User = "${user}";
-        };
-        environment.NONINTERACTIVE = "1";
-        script = "/run/current-system/sw/bin/withings-sync";
+    systemd.services.withings-sync = {
+      serviceConfig = {
+        Type = "oneshot";
+        EnvironmentFile = secrets.withings-env.path; 
       };
-
-      # Run every 3 hours
-      timers.withings-sync = {
-        wantedBy = [ "timers.target" ];
-        partOf = [ "withings-sync.service" ];
-        timerConfig = {
-          OnCalendar = "*:0/3";
-          Unit = "withings-sync.service";
-        };
+      environment = {
+        NONINTERACTIVE = "1";
       };
-
+      path = with pkgs; [ docker ];
+      script = "/run/current-system/sw/bin/withings-sync";
     };
 
+    # Run this script every two hours
+    systemd.timers.withings-sync = {
+      wantedBy = [ "timers.target" ];
+      partOf = [ "withings-sync.service" ];
+      timerConfig = {
+        OnCalendar = "*:0/3";
+        Unit = "withings-sync.service";
+      };
+    };
 
   }; 
 
