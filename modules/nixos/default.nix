@@ -20,6 +20,7 @@
     ./lunasea
     ./mysql
     ./neovim
+    ./nextcloud
     ./nginx
     ./ocis
     ./ombi
