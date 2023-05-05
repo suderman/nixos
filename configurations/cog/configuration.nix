@@ -46,6 +46,7 @@
   modules.backblaze.enable = false;
 
   modules.nextcloud.enable = true;
+  modules.ocis.enable = true;
 
   # Desktop Environments
   modules.gnome.enable = true;

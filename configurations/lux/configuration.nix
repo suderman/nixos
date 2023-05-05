@@ -42,6 +42,7 @@
   modules.ombi.enable = true;
 
   modules.nextcloud.enable = true;
+  modules.ocis.enable = true;
 
   modules.immich = {
     enable = true;

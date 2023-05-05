@@ -59,4 +59,13 @@ with (import ./keys); {
 
   "files/withings-env.age".publicKeys = all;
 
+  # Environment variables used by OCIS
+  # ---------------------------------------------------------------------------
+  # IDM_ADMIN_PASSWORD=xxxxxxxxxxxxxxx;
+  # NOTIFICATIONS_SMTP_HOST=smtp.example.com;
+  # NOTIFICATIONS_SMTP_PORT=587
+  # NOTIFICATIONS_SMTP_SENDER=user@example.com
+  # NOTIFICATIONS_SMTP_PASSWORD=xxxxxxxxxxxx
+  "files/ocis-env.age".publicKeys = all;
+
 }
