@@ -45,8 +45,8 @@
   modules.rsshub.enable = false;
   modules.backblaze.enable = false;
 
-  modules.nextcloud.enable = true;
-  modules.ocis.enable = true;
+  modules.nextcloud.enable = false;
+  modules.ocis.enable = false;
 
   # Desktop Environments
   modules.gnome.enable = true;

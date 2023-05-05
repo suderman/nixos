@@ -34,7 +34,6 @@
     nodejs
     nsxiv
     nur.repos.mic92.hello-nur
-    owncloud-client
     owofetch
     plexamp
     python39
@@ -69,6 +68,8 @@
     # yt-dlp -f mp4-240p -x --audio-format mp3 https://rumble.com/...
 
     nextcloud-client
+    unstable.owncloud-client
+
 
   ];
 

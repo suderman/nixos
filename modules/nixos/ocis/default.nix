@@ -5,7 +5,10 @@ let
 
   cfg = config.modules.ocis;
   secrets = config.age.secrets;
+
   ownership = "${toString config.ids.uids.ocis}:${toString config.ids.gids.ocis}";
+  signingKey = "${cfg.dataDir}/config/idp-private-key.pem";
+  encryptionSecret = "${cfg.dataDir}/config/idp-encryption.key";
 
   inherit (lib) mkIf mkOption mkBefore types;
 
@@ -74,10 +77,11 @@ in {
         OCIS_INSECURE = "false";
         GRAPH_LDAP_INSECURE = "true"; # https://github.com/owncloud/ocis/issues/3812
         PROXY_ENABLE_BASIC_AUTH = "true";
-        IDP_SIGNING_PRIVATE_KEY_FILES = "${cfg.dataDir}/config/idp-private-key.pem";
-        IDP_ENCRYPTION_SECRET_FILE = "${cfg.dataDir}/config/idp-encryption.key";
+        IDP_SIGNING_PRIVATE_KEY_FILES = signingKey;
+        IDP_ENCRYPTION_SECRET_FILE = encryptionSecret;
         IDM_CREATE_DEMO_USERS = "false";
       };
+
 
       # IDM_ADMIN_PASSWORD=xxxxxxxxxxxxxxx;
       # NOTIFICATIONS_SMTP_HOST=smtp.example.com;
@@ -87,8 +91,8 @@ in {
       environmentFiles = [ secrets.ocis-env.path ];
       
       volumes = [
+        "${cfg.dataDir}:/var/lib/ocis"
         "${cfg.dataDir}/config:/etc/ocis"
-        "${cfg.dataDir}/data:/var/lib/ocis"
       ];
 
     };
@@ -98,14 +102,10 @@ in {
 
       # Persist sessions - regenerating these files will force all clients to reauthenticate
       # https://github.com/owncloud/ocis/issues/3540#issuecomment-1144517534
-      preStart = let 
-        openssl = "${pkgs.openssl}/bin/openssl";
-        key = "${cfg.dataDir}/config/idp-encryption.key";
-        pem = "${cfg.dataDir}/config/idp-private-key.pem";
-      in mkBefore ''
-        mkdir -p ${cfg.dataDir}/{config,data}
-        [ -e ${key} ] || ${openssl} rand -out ${key} 32 
-        [ -e ${pem} ] || ${openssl} genpkey -algorithm RSA -out ${pem} -pkeyopt rsa_keygen_bits:4096
+      preStart = let openssl = "${pkgs.openssl}/bin/openssl"; in mkBefore ''
+        mkdir -p ${cfg.dataDir}/config
+        [ -e ${encryptionSecret} ] || ${openssl} rand -out ${encryptionSecret} 32 
+        [ -e ${signingKey} ] || ${openssl} genpkey -algorithm RSA -out ${signingKey} -pkeyopt rsa_keygen_bits:4096
         chown -R ${ownership} ${cfg.dataDir}
       '';
 
