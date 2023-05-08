@@ -122,6 +122,9 @@
         # Mac Mini
         pom = mkSystem { host = "pom"; inherit user domain; };
 
+        # 2009 Mac Pro (at work)
+        non = mkSystem { host = "non"; inherit user domain; };
+
       };
 
       # # Home configurations on other systems
