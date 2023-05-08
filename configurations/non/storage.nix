@@ -44,21 +44,21 @@ in {
   # > btrfs subvolume create /mnt/pool/data
   # > btrfs subvolume create /mnt/pool/backups
 
-  # fileSystems."/mnt/pool" = {
-  #   fsType = "btrfs"; 
-  #   device = "/dev/disk/by-uuid/68ab0d1f-4070-4cec-a2c3-267d1cafc6ea";
-  #   options = btrfs ++ automount;  
-  # };
-  #
-  # fileSystems."/data" = {
-  #   device = "/mnt/pool/data"; 
-  #   options = bind ++ automount;
-  # };
-  #
-  # fileSystems."/backups" = {
-  #   device = "/mnt/pool/backups"; 
-  #   options = bind ++ automount;
-  # };
+  fileSystems."/mnt/pool" = {
+    fsType = "btrfs"; 
+    device = "/dev/disk/by-uuid/68ab0d1f-4070-4cec-a2c3-267d1cafc6ea";
+    options = btrfs ++ automount;  
+  };
+
+  fileSystems."/data" = {
+    device = "/mnt/pool/data"; 
+    options = bind ++ automount;
+  };
+
+  fileSystems."/backups" = {
+    device = "/mnt/pool/backups"; 
+    options = bind ++ automount;
+  };
 
   # # Services that depend on this mount may need the following
   # systemd.services.my-app = {
