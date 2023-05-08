@@ -123,7 +123,7 @@
         pom = mkSystem { host = "pom"; inherit user domain; };
 
         # 2009 Mac Pro (at work)
-        non = mkSystem { host = "non"; inherit user domain; };
+        eve = mkSystem { host = "eve"; inherit user domain; };
 
       };
 
