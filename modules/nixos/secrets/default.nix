@@ -38,8 +38,8 @@ in {
     );
     
     # Secrets group
-    users.groups.secrets.gid = 1100;
-    # users.users."${user}".extraGroups = [ "secrets" ]; 
+    ids.gids.secrets = 900;
+    users.groups.secrets.gid = config.ids.gids.secrets;
 
   };
 

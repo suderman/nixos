@@ -41,12 +41,16 @@
   modules.whoami.enable = true;
   modules.tandoor-recipes.enable = false;
   modules.home-assistant.enable = false;
-  modules.immich.enable = false;
   modules.rsshub.enable = false;
   modules.backblaze.enable = false;
 
   modules.nextcloud.enable = false;
   modules.ocis.enable = false;
+
+  modules.immich.enable = true;
+  modules.photoprism.enable = true;
+  modules.photoprism.originalsPath = "/var/lib/immich/library";
+
 
   # Desktop Environments
   modules.gnome.enable = true;

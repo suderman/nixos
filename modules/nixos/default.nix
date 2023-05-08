@@ -24,6 +24,7 @@
     ./nginx
     ./ocis
     ./ombi
+    ./photoprism
     ./plex
     ./postgresql
     ./radarr

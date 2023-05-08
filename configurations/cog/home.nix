@@ -69,6 +69,7 @@
 
     nextcloud-client
     unstable.owncloud-client
+    digikam
 
 
   ];

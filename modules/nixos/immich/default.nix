@@ -62,12 +62,12 @@ in {
 
     # Unused uid/gid snagged from this list:
     # https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/misc/ids.nix
-    ids.uids.immich = 282;
-    ids.gids.immich = 282;
+    ids.uids.immich = 911;
+    ids.gids.immich = 911;
 
     users.users.immich = {
       isSystemUser = true;
-      group = "immich";
+      group = "photos";
       description = "Immich daemon user";
       home = cfg.dataDir;
       uid = config.ids.uids.immich;

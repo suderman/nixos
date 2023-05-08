@@ -43,6 +43,11 @@
 
   modules.nextcloud.enable = true;
   modules.ocis.enable = true;
+  modules.gitea.enable = true;
+  modules.tiddlywiki.enable = true;
+
+  modules.freshrss.enable = true;
+  modules.tandoor-recipes.enable = false;
 
   modules.immich = {
     enable = true;
