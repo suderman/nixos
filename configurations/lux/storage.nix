@@ -114,29 +114,24 @@ in {
       "/mnt/raid".subvolume."media" = {};
     };
 
-    # Many machines backup to here
-    backups = {
+    # Nightly backups
+    backups = with config.networking; {
+      "/mnt/ssd".subvolume."data" = {};
+      "/mnt/raid".subvolume."media" = {};
 
       # RAID is mounted to /backups, so target can be directory instead of ssh
       "/nix".target."/backups/${hostName}" = {};
+      "/mnt/ssd".target."/backups/${hostName}" = {};
 
-      # Same for secondary data drive
-      "/mnt/ssd" = {
-        subvolume."data" = {};
-        target."/backups/${hostName}" = {};
-      };
-
-      # Media subvolume is on same RAID volume as /backups.
-      # Save redundant set of media snapshots to /backups directory
-      # to keep all machines backups in one place for convenient archiving.
-      "/mnt/raid".subvolume."media" = {
-        snapshot_dir = "/backups/${hostName}";
-        snapshot_create = "onchange";
-      };
+      # Remote backup to "eve" server using ssh
+      "/nix".target."ssh://eve.${domain}/backups/${hostName}" = {};
+      "/mnt/ssd".target."ssh://eve.${domain}/backups/${hostName}" = {};
+      "/mnt/raid".target."ssh://eve.${domain}/backups/${hostName}" = {};
 
     };
   };
 
+  # Send everything to backblaze
   modules.backblaze = {
     enable = true;
     driveD = "/nix/state/home";

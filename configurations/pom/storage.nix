@@ -69,7 +69,12 @@ in {
   #   requires = [ "mnt-pool.mount" ];
   # };
 
-  # Snapshots & backup
-  modules.btrbk.enable = true;
+  # Snapshots & backups
+  modules.btrbk = {
+    enable = true;
+    backups = with config.networking; {
+      "/nix".target."ssh://eve.${domain}/backups/${hostName}" = {};
+    };
+  };
 
 }

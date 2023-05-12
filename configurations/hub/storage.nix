@@ -21,12 +21,12 @@ in {
   fileSystems."/".options = btrfs;
   fileSystems."/nix".options = btrfs;
 
-  # Snapshots & backup
+  # Snapshots & backups
   modules.btrbk = {
     enable = true;
     backups = with config.networking; {
       "/nix".target."ssh://lux.${domain}/backups/${hostName}" = {};
-      "/nix".target."ssh://pom.${domain}/backups/${hostName}" = {};
+      "/nix".target."ssh://eve.${domain}/backups/${hostName}" = {};
     };
   };
 
