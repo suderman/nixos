@@ -5,6 +5,7 @@
     ./base
     ./bluebubbles
     ./btrbk
+    ./cockpit
     ./ddns
     ./earlyoom
     ./flatpak

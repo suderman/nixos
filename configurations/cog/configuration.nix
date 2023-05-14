@@ -44,6 +44,8 @@
   modules.rsshub.enable = false;
   modules.backblaze.enable = false;
 
+  modules.cockpit.enable = true;
+
   modules.nextcloud.enable = false;
   modules.ocis.enable = false;
 
