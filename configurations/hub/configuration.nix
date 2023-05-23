@@ -27,6 +27,7 @@
   modules.tailscale.enable = true;
   modules.ddns.enable = true;
   modules.whoami.enable = true;
+  modules.cockpit.enable = true;
   modules.withings-sync.enable = true;
 
   modules.unifi.enable = true;

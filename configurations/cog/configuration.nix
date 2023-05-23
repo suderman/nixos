@@ -49,10 +49,15 @@
   modules.nextcloud.enable = false;
   modules.ocis.enable = false;
 
-  modules.immich.enable = true;
-  modules.photoprism.enable = true;
-  modules.photoprism.originalsPath = "/var/lib/immich/library";
+  modules.immich = {
+    enable = true;
+    photosDir = "/photos/immich";
+  };
 
+  modules.photoprism = {
+    enable = true;
+    photosDir = "/photos";
+  };
 
   # Desktop Environments
   modules.gnome.enable = true;

@@ -28,6 +28,8 @@
   modules.ddns.enable = true;
   modules.whoami.enable = true;
 
+  modules.cockpit.enable = true;
+
   modules.bluebubbles.enable = true;
 
   modules.plex.enable = true;
@@ -51,7 +53,12 @@
 
   modules.immich = {
     enable = true;
-    dataDir = "/data/immich";
+    photosDir = "/data/photos/immich";
+  };
+
+  modules.photoprism = {
+    enable = false;
+    photosDir = "/data/photos";
   };
 
 }

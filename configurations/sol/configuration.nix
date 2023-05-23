@@ -30,6 +30,7 @@
   programs.tmux.enable = true;
 
   # Web services
+  modules.cockpit.enable = true;
   modules.nextcloud.enable = true;
   modules.whoogle.enable = true;
   modules.gitea.enable = true;
