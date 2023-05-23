@@ -29,8 +29,8 @@ in {
       type = types.str; 
       default = "/var/lib/photoprism"; 
     };
-    originalsPath = mkOption {
-      type = types.str; 
+    photosDir = mkOption {
+      type = types.str;
       default = null; 
     };
   };
@@ -58,7 +58,7 @@ in {
       passwordFile = secrets.password.path;
       port = cfg.port;
       settings.PHOTOPRISM_ADMIN_USER = user;
-      originalsPath = cfg.originalsPath;
+      originalsPath = cfg.photosDir;
       storagePath = cfg.dataDir;
     };
 

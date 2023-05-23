@@ -24,7 +24,11 @@ in {
       environmentFiles =  [ cfg.environment.file ];
 
       # Map volumes to host
-      volumes = [ "${cfg.dataDir}:/usr/src/app/upload" ];
+      volumes = [ 
+        "${cfg.dataDir}:/usr/src/app/upload"
+      ] ++ (if cfg.photosDir == "" then [] else [
+        "${cfg.photosDir}:/usr/src/app/upload/library" 
+      ]);
 
       # Networking for docker containers
       extraOptions = [

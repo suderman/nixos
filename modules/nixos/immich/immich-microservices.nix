@@ -26,14 +26,17 @@ in {
 
       # Map volumes to host
       volumes = [ 
-        "${cfg.dataDir}:/usr/src/app/upload" 
         "${cfg.dataDir}/geocoding:/usr/src/app/geocoding"
-      ];
+        "${cfg.dataDir}:/usr/src/app/upload" 
+      ] ++ (if cfg.photosDir == "" then [] else [
+        "${cfg.photosDir}:/usr/src/app/upload/library" 
+      ]);
 
       # Networking for docker containers
       extraOptions = [
         "--add-host=host.docker.internal:host-gateway"
         "--network=immich"
+        "--cpus=0.9"
       ];
 
     };

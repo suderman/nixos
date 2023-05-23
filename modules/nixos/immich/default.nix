@@ -4,7 +4,7 @@
 let
 
   # https://github.com/immich-app/immich/releases
-  version = "1.55.1";
+  version = "1.57.0";
 
   cfg = config.modules.immich;
 
@@ -47,7 +47,13 @@ in {
     dataDir = mkOption {
       type = types.path;
       default = "/var/lib/immich";
-      description = "Data directory the Immich instance";
+      description = "Data directory for the Immich instance";
+    };
+
+    photosDir = mkOption {
+      type = types.str;
+      default = "";
+      description = "Photos directory for the Immich instance";
     };
 
     environment = mkOption { 
