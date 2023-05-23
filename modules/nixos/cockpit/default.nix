@@ -43,6 +43,9 @@ in {
       pkgs.nur.repos.dukzcry.libvirt-dbus
     ];
 
+    services.udisks2.enable = true;
+    services.packagekit.enable = true;
+
     # Enable database and reverse proxy
     modules.traefik.enable = true;
 
