@@ -4,7 +4,8 @@
 
     # Nix Packages 
     # <https://search.nixos.org/packages>
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-22.11";
+    # nixpkgs.url = "github:nixos/nixpkgs/nixos-22.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.05";
     unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
     # Nix User Repository
@@ -13,7 +14,8 @@
 
     # Home Manager
     # <https://mipmip.github.io/home-manager-option-search>
-    home-manager.url = "github:nix-community/home-manager/release-22.11";
+    # home-manager.url = "github:nix-community/home-manager/release-22.11";
+    home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     # NixOS profiles for different hardware
@@ -48,6 +50,10 @@
         # Accept agreements for unfree software
         config.allowUnfree = true;
         config.joypixels.acceptLicense = true;
+
+        # OpenSSL 1.1 is reaching its end of life on 2023/09/11 and cannot be supported through the NixOS 23.05 release cycle.
+        # https://www.openssl.org/blog/blog/2023/03/28/1.1.1-EOL/ 
+        config.permittedInsecurePackages = [ "openssl-1.1.1t" ];
 
         # Include personal scripts and package modifications
         overlays = with (import ./overlays { inherit inputs system config; } ); [ lib pkgs nur unstable ];

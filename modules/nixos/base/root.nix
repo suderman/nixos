@@ -26,6 +26,9 @@ in {
       openssh.authorizedKeys.keys = mkIf (user != "root") [ keys.users."${user}" ];
     };
 
+    # Default shell
+    programs.zsh.enable = true;
+
     # Allow root to work with git on the /etc/nixos directory
     system.activationScripts.root.text = ''
       printf "[safe]\ndirectory = /etc/nixos" > /root/.gitconfig

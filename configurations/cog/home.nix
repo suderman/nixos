@@ -71,6 +71,7 @@
     unstable.owncloud-client
     digikam
 
+    rclone
 
   ];
 

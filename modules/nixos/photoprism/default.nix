@@ -13,7 +13,7 @@ let
 in {
 
   # Taken from unstable, expected to be added in 23.05
-  imports = [ ./photoprism.nix ];
+  # imports = [ ./photoprism.nix ];
 
   options.modules.photoprism = {
     enable = lib.options.mkEnableOption "photoprism"; 

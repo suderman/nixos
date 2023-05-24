@@ -13,7 +13,7 @@ let
 in {
 
   # Taken from unstable, expected to be added in 23.05
-  imports = [ ./cockpit.nix ];
+  # imports = [ ./cockpit.nix ];
 
   options.modules.cockpit = {
     enable = lib.options.mkEnableOption "cockpit"; 

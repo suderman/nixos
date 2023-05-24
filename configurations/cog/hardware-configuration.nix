@@ -44,6 +44,8 @@
     ];
 
   powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
+
+  # The option definition `hardware.video.hidpi.enable' no longer has any effect; please remove it. high-resolution display
   # high-resolution display
-  hardware.video.hidpi.enable = lib.mkDefault true;
+  # hardware.video.hidpi.enable = lib.mkDefault true;
 }

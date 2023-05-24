@@ -29,13 +29,15 @@ in {
     services.gitea = {
       enable = true;
       package = pkgs.gitea;
-      domain = cfg.hostName;
-      rootUrl = "https://${cfg.hostName}/";
-      httpPort = cfg.port;
       database.type = "postgres";
       database.socket = "/run/postgresql";
-      settings.session.COOKIE_SECURE = true;
-      settings.service.DISABLE_REGISTRATION = false;
+      settings = {
+        server.DOMAIN = cfg.hostName;
+        server.ROOT_URL = "https://${cfg.hostName}/";
+        server.HTTP_PORT = cfg.port;
+        session.COOKIE_SECURE = true;
+        service.DISABLE_REGISTRATION = false;
+      };
     };
 
     # Extend systemd service

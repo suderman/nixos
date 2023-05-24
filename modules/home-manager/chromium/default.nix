@@ -8,11 +8,11 @@ in {
 
   config = lib.mkIf cfg.enable {
 
-    programs.chromium.commandLineArgs = [ 
-      "--enable-features=UseOzonePlatform" 
-      "-ozone-platform=wayland" 
-      "--gtk-version=4" 
-    ];
+    # programs.chromium.commandLineArgs = [ 
+    #   "--enable-features=UseOzonePlatform" 
+    #   "-ozone-platform=wayland" 
+    #   "--gtk-version=4" 
+    # ];
 
     xdg.configFile = let flags = ''
       --enable-features=UseOzonePlatform 
