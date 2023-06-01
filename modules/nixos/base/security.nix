@@ -35,8 +35,8 @@ in {
       enable = true;
 
       # Harden
-      settings.passwordAuthentication = false;
-      settings.permitRootLogin = "yes";
+      settings.PasswordAuthentication = false;
+      settings.PermitRootLogin = "yes";
 
       # Automatically remove stale sockets
       extraConfig = ''
@@ -44,7 +44,7 @@ in {
       '';
 
       # Allow forwarding ports to everywhere
-      settings.gatewayPorts = "clientspecified";
+      settings.GatewayPorts = "clientspecified";
 
     };
 

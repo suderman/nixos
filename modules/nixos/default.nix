@@ -13,9 +13,11 @@
     ./gitea
     ./gnome
     ./home-assistant
+    ./hyprland
     ./immich
     ./jellyfin
     ./keyd
+    ./libimobiledevice
     ./lidarr
     ./linode
     ./lunasea

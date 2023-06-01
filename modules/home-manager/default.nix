@@ -5,11 +5,12 @@
     ./chromium
     ./dconf
     ./direnv
-    ./foot
     ./firefox-pwa
+    ./foot
     ./fzf
     ./git
     ./gtk
+    ./hyprland
     ./keyd
     ./kitty
     ./neovim

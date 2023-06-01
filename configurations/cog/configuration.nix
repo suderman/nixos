@@ -21,7 +21,9 @@
   # Network
   modules.tailscale.enable = true;
   modules.ddns.enable = true;
-  networking.extraHosts = "";
+  networking.extraHosts = ''
+    127.0.0.1 example.com
+  '';
 
   # Broken? Prevents boot.
   # modules.sunshine.enable = false;
@@ -32,6 +34,9 @@
   # Keyboard control
   modules.keyd.enable = true;
   modules.ydotool.enable = true;
+
+  # Support iOS devices
+  modules.libimobiledevice.enable = true;
 
   # Database services
   modules.mysql.enable = true;
@@ -50,17 +55,18 @@
   modules.ocis.enable = false;
 
   modules.immich = {
-    enable = true;
+    enable = false;
     photosDir = "/photos/immich";
   };
 
   modules.photoprism = {
-    enable = true;
+    enable = false;
     photosDir = "/photos";
   };
 
   # Desktop Environments
   modules.gnome.enable = true;
+  modules.hyprland.enable = true;
 
   # Apps
   modules.flatpak.enable = true;

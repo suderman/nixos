@@ -3,6 +3,9 @@
   modules.base.enable = true;
   modules.secrets.enable = true;
 
+  # Window manager
+  modules.hyprland.enable = true;
+
   # ---------------------------------------------------------------------------
   # Home Enviroment & Packages
   # ---------------------------------------------------------------------------
@@ -11,11 +14,10 @@
     _1password
     _1password-gui
     bat 
-    cargo
     cowsay
     darktable
-    element-desktop
     exa
+    ncdu
     firefox-wayland
     fish
     inkscape
@@ -33,24 +35,22 @@
     newsflash
     nodejs
     nsxiv
-    nur.repos.mic92.hello-nur
     owofetch
-    plexamp
-    python39
-    python39Packages.pip
-    python39Packages.virtualenv
+    # plexamp
+    # python39
+    # python39Packages.pip
+    # python39Packages.virtualenv
     ripgrep
     slack
     # systemdgenie
     sysz
     tdesktop
     tealdeer
-    unstable.nnn 
-    unstable.sl
+    nnn 
+    sl
     wget
     xorg.xeyes
     yo
-
     junction
 
     # keygen
@@ -62,12 +62,17 @@
 
     unstable.nodePackages_latest.immich
 
-    unstable.quickemu
+    lapce
+
+    quickemu
+
+    polaris
+    polaris-web
 
     yt-dlp
     # yt-dlp -f mp4-240p -x --audio-format mp3 https://rumble.com/...
 
-    nextcloud-client
+    # nextcloud-client
     unstable.owncloud-client
     digikam
 

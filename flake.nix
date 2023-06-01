@@ -14,8 +14,7 @@
 
     # Home Manager
     # <https://mipmip.github.io/home-manager-option-search>
-    # home-manager.url = "github:nix-community/home-manager/release-22.11";
-    home-manager.url = "github:nix-community/home-manager";
+    home-manager.url = "github:nix-community/home-manager/release-23.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     # NixOS profiles for different hardware
@@ -36,6 +35,14 @@
     homeage.url = "github:jordanisaacs/homeage";
     homeage.inputs.nixpkgs.follows = "nixpkgs";
 
+    # Hyperland
+    # <https://wiki.hyprland.org/Nix/Hyprland-on-NixOS>
+    hyprland.url = "github:hyprwm/Hyprland";
+    # hyprland.inputs.nixpkgs.follows = "nixpkgs";
+
+    anyrun.url = "github:Kirottu/anyrun";
+    anyrun.inputs.nixpkgs.follows = "nixpkgs";
+
   };
 
   outputs = { self, ... }: 
@@ -53,10 +60,12 @@
 
         # OpenSSL 1.1 is reaching its end of life on 2023/09/11 and cannot be supported through the NixOS 23.05 release cycle.
         # https://www.openssl.org/blog/blog/2023/03/28/1.1.1-EOL/ 
-        config.permittedInsecurePackages = [ "openssl-1.1.1t" ];
+        config.permittedInsecurePackages = [ "openssl-1.1.1u" ];
 
         # Include personal scripts and package modifications
-        overlays = with (import ./overlays { inherit inputs system config; } ); [ lib pkgs nur unstable ];
+        overlays = with (import ./overlays { inherit inputs system config; } ); [ lib pkgs nur unstable ] ++ [
+          inputs.anyrun.overlay 
+        ];
 
       };
 

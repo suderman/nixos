@@ -65,7 +65,7 @@ in {
       ];
 
       variables = {
-        WAYLAND_DISPLAY = "wayland-0";
+        # WAYLAND_DISPLAY = "wayland-0";
         MOZ_ENABLE_WAYLAND = "1";
         MOZ_USE_XINPUT2 = "1";
         GDK_BACKEND = "wayland";
