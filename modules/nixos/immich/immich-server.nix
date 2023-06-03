@@ -12,8 +12,9 @@ in {
     # Server back-end
     virtualisation.oci-containers.containers.immich-server = {
       image = "ghcr.io/immich-app/immich-server:v${cfg.version}";
-      entrypoint = "/bin/sh";
-      cmd = [ "./start-server.sh" ];
+      # entrypoint = "/bin/sh";
+      # cmd = [ "./start-server.sh" ];
+      cmd = [ "start-server.sh" ];
       autoStart = false;
 
       # Run as immich user
