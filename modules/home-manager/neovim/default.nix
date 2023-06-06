@@ -1,5 +1,12 @@
 # programs.neovim.enable = true;
-{ config, lib, pkgs, ... }: {
+{ config, lib, pkgs, ... }: 
+
+let
+
+  inherit (pkgs.vimUtils) buildVimPluginFrom2Nix;
+  inherit (pkgs) fetchFromGitHub;
+
+in {
 
   config = lib.mkIf config.programs.neovim.enable {
 
@@ -32,6 +39,19 @@
         delimitMate
         tcomment_vim
         align
+
+        # buildVimPluginFrom2Nix {
+        (pkgs.vimUtils.buildVimPlugin {
+          name = "hyprland-vim-syntax";
+          src = pkgs.fetchFromGitHub {
+            owner = "theRealCarneiro";
+            repo = "hyprland-vim-syntax";
+            rev = "254df6b476db5784bc6bfe3f612129b73dfc43b5";
+            sha256 = "sx1NWPrZeA2J7D3k69GweeubqFSloytktAKd4eGiV6c=";
+          };
+        })
+
+        # { plugin = vim-plug; config = builtins.readFile ./vim-plug.vim; }
       ]; 
 
     };

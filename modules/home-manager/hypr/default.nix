@@ -17,17 +17,23 @@ in {
 
   config = mkIf cfg.enable {
 
+    modules.anyrun.enable = true;
+
     home.packages = with pkgs; [ 
-      anyrun 
       gnome.nautilus
       wofi
       wezterm
       waybar
     ];
 
+    xdg.configFile."hypr/local.conf".source = config.lib.file.mkOutOfStoreSymlink "/etc/nixos/modules/home-manager/hypr/local.conf";
+
     wayland.windowManager.hyprland = {
       enable = true;
-      extraConfig = builtins.readFile ./hyprland.conf;
+      extraConfig = ''
+        exec-once=dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+        source = ~/.config/hypr/local.conf
+      '';
     };
 
   };

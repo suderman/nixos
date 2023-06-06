@@ -38,9 +38,9 @@
   # Support iOS devices
   modules.libimobiledevice.enable = true;
 
-  # Database services
-  modules.mysql.enable = true;
-  modules.postgresql.enable = true;
+  # # Database services
+  # modules.mysql.enable = true;
+  # modules.postgresql.enable = true;
   
   # Web services
   modules.whoami.enable = true;
@@ -66,7 +66,7 @@
 
   # Desktop Environments
   modules.gnome.enable = true;
-  modules.hyprland.enable = true;
+  # modules.hyprland.enable = true;
 
   # Apps
   modules.flatpak.enable = true;

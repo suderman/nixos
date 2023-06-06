@@ -63,9 +63,7 @@
         config.permittedInsecurePackages = [ "openssl-1.1.1u" ];
 
         # Include personal scripts and package modifications
-        overlays = with (import ./overlays { inherit inputs system config; } ); [ lib pkgs nur unstable ] ++ [
-          inputs.anyrun.overlay 
-        ];
+        overlays = with (import ./overlays { inherit inputs system config; } ); [ lib pkgs nur unstable ];
 
       };
 
@@ -133,6 +131,9 @@
 
         # Linode VPS
         sol = mkSystem { host = "sol"; inherit user domain; };
+
+        # Macbook Pro
+        rig = mkSystem { host = "rig"; inherit user domain; };
 
         # Mac Mini
         pom = mkSystem { host = "pom"; inherit user domain; };

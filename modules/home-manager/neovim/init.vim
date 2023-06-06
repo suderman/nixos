@@ -92,3 +92,8 @@ nnoremap <silent> <F5> :let _s=@/<Bar>:%s/\s\+$//e<Bar>:let @/=_s<Bar>:nohl<CR>:
 
 " Clear search with comma-space
 noremap <leader><space> :noh<CR>:match none<CR>:2match none<CR>:3match none<CR>
+
+" augroup hypr_ftdetect
+"   au!
+"   au BufRead,BufNewFile *hypr/*.conf,*hypr/*/*.conf,*hyprland/*.conf,*hyprland/*/*.conf set ft=hypr
+" augroup END

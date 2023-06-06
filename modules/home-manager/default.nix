@@ -1,6 +1,7 @@
 { ... }:
 {
   imports = [
+    ./anyrun
     ./base
     ./chromium
     ./dconf
@@ -10,7 +11,7 @@
     ./fzf
     ./git
     ./gtk
-    ./hyprland
+    ./hypr
     ./keyd
     ./kitty
     ./neovim

@@ -4,7 +4,7 @@
   modules.secrets.enable = true;
 
   # Window manager
-  modules.hyprland.enable = true;
+  # modules.hyprland.enable = true;
 
   # ---------------------------------------------------------------------------
   # Home Enviroment & Packages

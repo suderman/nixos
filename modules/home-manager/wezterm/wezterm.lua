@@ -13,6 +13,9 @@ return {
   tab_bar_at_bottom = false,
   tab_max_width = 64,
 
+  -- xcursor_theme = "Adwaita",
+  hide_mouse_cursor_when_typing = false,
+
   window_padding = {
     left = "0.5cell",
     right = "0.5cell",
