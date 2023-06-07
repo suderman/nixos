@@ -6,12 +6,13 @@
     ./chromium
     ./dconf
     ./direnv
+    ./eww
     ./firefox-pwa
     ./foot
     ./fzf
     ./git
     ./gtk
-    ./hypr
+    ./hyprland
     ./keyd
     ./kitty
     ./neovim

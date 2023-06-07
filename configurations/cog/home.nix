@@ -1,10 +1,12 @@
-{ config, lib, pkgs, ... }: {
+{ config, lib, pkgs, gui, ... }: {
 
   modules.base.enable = true;
   modules.secrets.enable = true;
 
   # Window manager
   # modules.hyprland.enable = true;
+
+  modules.hyprland.enable = (if gui == "hyprland" then true else false);
 
   # ---------------------------------------------------------------------------
   # Home Enviroment & Packages

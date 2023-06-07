@@ -1,0 +1,146 @@
+; -> WIDGETS FOR EWW <- ;
+
+;;;; Imports
+(include "eww_variables.yuck")
+
+;;;; Metric (cpu, ram, etc bars) constructor widget
+(defwidget metric [label value onchange]
+  (box :orientation "h" :class "metric" :space-evenly false
+    (box :class "label" label)
+    (scale :min 0 :max 101 :active {onchange != ""} :value value :onchange onchange)))
+
+;;;; Background Black Holder Widget
+
+(defwidget bg []
+  (box :class "bg-box" :orientation "v" :space-evenly false))
+
+
+;;;; Favorite App Locations
+
+(defwidget favorites[]
+  (box :class "favs" :orientation "v" :space-evenly false :halign "center" :valign "center"
+    (button :onclick "pcmanfm ~ &" "")
+    (button :onclick "pcmanfm ~/.config/ &" "漣")
+    (button :onclick "pcmanfm ~/Downloads &" "")
+    (button :onclick "pcmanfm ~/Pictures &" "")))
+
+;;;; Big Calendar Widget
+
+(defwidget cal []
+  (calendar :halign "center" :valign "center" :class "cal" :month 10 :year 2021))
+
+;;;; Small date in mm/dd/yy format
+
+(defwidget smalldate []
+  (label :class "small-date" :valign "center" :halign "center" :text TODAY))
+
+;;;; User information fetch widget
+
+(defwidget uinfo []
+  (box :class "uinfo" :orientation "v" :space-evenly false :halign "center" :valign "center"
+    (label :style "color: #5e81ac;" :text "sparsh@asus-sea" :halign "center" :valign "center" :wrap "false" :limit-width 25)
+    (label :style "color: #efefef;" :text "⎯⎯⎯⎯⎯⎯⎯⎯" :halign "center" :valign "center" :wrap "false" :limit-width 25)
+    
+    ;; Tags for values
+    (box :orientation "h" :space-evenly "false" :spacing 10
+        (box :orientation "v" :class "fetch" :spacing 2
+          (label :style "font-family: 'archcraft'; color: #b48ead;" :halign "end" :text "")
+          (label :style "color: #ebcb8b;" :halign "end" :text "缾")
+          (label :style "color: #80a0c0;" :halign "end" :text "")
+          (label :style "color: #b48ead;" :halign "end" :text "")
+          (button :style "color: #88c0d0;" :halign "end" :onclick "alacritty --class 'alacritty-float,alacritty-float' -e yay -Syu &" ""))
+    
+    ;; Fetch Values
+    (box :orientation "v"   :class "fetch"
+      (label :style "color: #b48ead;" :halign "start" :text ": ${distro}")
+      (label :style "color: #ebcb8b;" :halign "start" :text ": ${wm}")
+      (label :style "color: #80a0c0;" :halign "start" :text ": ${shell}")
+      (label :style "color: #b48ead;" :halign "start" :text ": ${uptime}")
+      (button :style "color: #88c0d0;" :halign "start" :onclick "alacritty --class 'alacritty-float,alacritty-float' -e yay -Syu &" ": ${packages}")))))
+
+;;;; System Information Widget
+
+(defwidget sys[]
+  (box :class "cpu" :orientation "v" :space-evenly false :halign "center" :valign "center"
+    (metric :label "﬙" :value {EWW_CPU.avg} :onchange "")
+    (metric :label "" :value {EWW_RAM.used_mem_perc} :onchange "")
+    (metric :label "龍" :value {(EWW_NET.wlan0.NET_UP)/100} :onchange "")
+    (metric :label "" :value {(EWW_DISK["/"].free / EWW_DISK["/"].total) * 100} :onchange "")))
+
+;;;; Random Quote Widget
+
+(defwidget quote[]
+  (box :class "quote" :orientation "v" :space-evenly false :halign "center" :valign "center"
+    (label :class "quote-text" :text "${quote_text}" :wrap true)))
+
+;;;; QuickSettings widget
+
+(defwidget quicksettings []
+  (box :orientation "h" :space-evenly true :class "quicksettings" :spacing "10" :halign "center" :valign "center"
+    (button :style "color: #5e81ac;" :onclick "mpv --demuxer-lavf-format=video4linux2 --demuxer-lavf-o-set=input_format=mjpeg av://v4l2:/dev/video0 &" (image :path "images/camera-web.svg" :width 32 :height 32))
+    (button :style "color: #81a1c1; padding-left: 3px;" :onclick "pavucontrol &" (image :path "images/audio-headphones.svg" :width 32 :height 32))
+    (button :style "color: #b48ead;" :onclick "sh ~/.config/eww/scripts/airplane_mode.sh &" (image :path "images/network-card.svg" :width 32 :height 32))))
+
+;;;; AppBar widget
+(defwidget appbar []
+  (box :orientation "h" :space-evenly true :class "appbar" :spacing "5" :halign "center" :valign "center"
+    (button :style "color: #5e81ac;" :onclick "krita&" (image :path "images/krita.svg" :width 32 :height 32))
+    (button :style "color: #81a1c1;" :onclick "firefox&" (image :path "images/firefox.svg" :width 32 :height 32))
+    (button :style "color: #b48ead;" :onclick "vscodium&" (image :path "images/vscode.svg" :width 32 :height 32))
+    (button :style "color: #bf616a;" :onclick "gimp&" (image :path "images/gimp.svg" :width 32 :height 32))))
+
+;;;; TODO Notes Displaying widget
+
+(defwidget notes []
+  (box :spacing 5 :class "notes" :orientation "v" :space-evenly false :halign "center" :valign "center"
+    (label :style "color: #5e81ac;" :text NOTES :halign "center" :valign "center" :wrap true :limit-width 150 :vexpand false :hexpand false)
+    (box :orientation "h"
+      (button :onclick "echo '' > ~/Documents/notes.txt" "[ Empty ]")
+      (button :onclick "pcmanfm ~/Documents/notes.txt" "[ Edit TODO ]"))))
+
+;;;; Rofi style search
+(defwidget searchapps []
+  (eventbox :onhoverlost "eww close searchapps"
+    (box :orientation "v" :space-evenly false :class "search-win" :halign "top" :valign "top"
+      (box :orientation "h" :space-evenly false :class "searchapps-bar" :halign "top" :valign "top"
+        (label :class "search-label" :text "")
+        (input :class "search-bar" :onchange "~/.config/eww/scripts/search.sh {}"))
+      (literal :halign "center" :valign "center" :class "app-container" :content search_listen))))
+
+;;;; Rofi style powermenu
+(defwidget bigpowermenu []
+  (box :orientation "h" :space-evenly false :class "bigpowermenu" :halign "center" :valign "center" :spacing 20
+    (button :style "color: #d8dee9;" :class "shutdown" :onrightclick "systemctl poweroff" "")
+    (button :style "color: #e5e9f0;" :class "reboot" :onrightclick "systemctl reboot" "")
+    (button :style "color: #eceff4;" :class "lock" :onrightclick "bsplock" "")
+    (button :style "color: #e8e8e8;" :class "suspend" :onrightclick "mpc -q pause & amixer set Master mute & systemctl suspend" "")
+    (button :style "color: #ffffff;" :class "logout" :onrightclick "bspc quit" "")))
+
+;;;; Music Player
+(defwidget musicplayer []
+
+  (box :orientation "v" :space-evenly false :class "musicplayer" :halign "center" :valign "center" :hexpand true :vexpand true  
+    (label :class "label-control" :text "${music_current}" :halign "center" :limit-width 50 :show-truncated true :hexpand true :vexpand true)
+    (box :orientation "h" :space-evenly false :class "controls" :halign "center" :valign "center" :spacing 20
+         (button :style "color: #d8dee9;" :onclick "mpc -q toggle && notify-send -u low -t 1800 ${music_current}" "懶")
+         (button :style "color: #e5e9f0;" :onclick "mpc -q stop" "")
+         (button :style "color: #eceff4;" :onclick "mpc -q next && notify-send -u low -t 1800 ${music_current}" "")
+         (button :style "color: #e8e8e8;" :onclick "mpc -q prev && notify0send -u low -t 1800 ${music_current}" ""))))
+
+(defwidget network []
+
+  (box :orientation "v" :space-evenly false :class "network" :halign "center" :valign "center" :hexpand true :vexpand true  
+    (label :class "label-control" :text "${ssid}" :halign "center" :limit-width 50 :show-truncated true :hexpand true :vexpand true)
+    (box :orientation "h" :space-evenly false :class "controls" :halign "center" :valign "center" :spacing 20
+         (button :style "color: #d8dee9;" :onclick "sh ~/.config/eww/scripts/airplane_mode.sh" "")
+         (button :style "color: #e5e9f0;" :onclick "alacritty --class 'alacritty-float,alacritty-float' -e bmon &" "")
+         (button :style "color: #eceff4;" :onclick "alacritty --class 'alacritty-float,alacritty-float' -e nmtui &" "")
+         (button :style "color: #e8e8e8;" :onclick "nm-connection-editor &" ""))))
+
+(defwidget screenshot []
+
+  (box :orientation "v" :space-evenly false :class "network" :halign "center" :valign "center" :hexpand true :vexpand true  
+    (label :class "label-control" :text "  Screenshot" :halign "center" :limit-width 50 :show-truncated true :hexpand true :vexpand true)
+    (box :orientation "h" :space-evenly false :class "controls" :halign "center" :valign "center" :spacing 20
+         (button :style "color: #d8dee9;" :onclick "eww close screenshot && ~/.config/eww/scripts/screenshot 'SCREEN'"  "")
+         (button :style "color: #e5e9f0;" :onclick "eww close screenshot && ~/.config/eww/scripts/screenshot 'SELECT'" ""))))

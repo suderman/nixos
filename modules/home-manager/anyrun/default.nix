@@ -78,6 +78,7 @@ in {
         #plugin,
         #main {
           background: transparent;
+          color: #fff;
         }
 
         #match:selected {
@@ -98,6 +99,7 @@ in {
           border: 1px solid #28283d;
           border-radius: 24px;
           padding: 8px;
+          color: #fff;
         }
 
         row:first-child {

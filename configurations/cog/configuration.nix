@@ -1,4 +1,4 @@
-{ config, lib, pkgs, inputs, ... }: {
+{ config, lib, pkgs, inputs, gui, ... }: {
 
   imports = [ 
     inputs.hardware.nixosModules.framework 
@@ -65,8 +65,8 @@
   };
 
   # Desktop Environments
-  modules.gnome.enable = true;
-  # modules.hyprland.enable = true;
+  modules.gnome.enable = (if gui == "gnome" then true else false);
+  modules.hyprland.enable = (if gui == "hyprland" then true else false);
 
   # Apps
   modules.flatpak.enable = true;
