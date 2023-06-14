@@ -25,6 +25,8 @@ in {
       # Supress annoying warning
       warn-dirty = false;
 
+      builders-use-substitutes = true;
+
       # substituters = [
       #   "https://suderman.cachix.org"
       #   "https://nix-community.cachix.org"

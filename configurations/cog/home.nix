@@ -7,6 +7,7 @@
   # modules.hyprland.enable = true;
 
   modules.hyprland.enable = (if gui == "hyprland" then true else false);
+  modules.anyrun.enable = true;
 
   # ---------------------------------------------------------------------------
   # Home Enviroment & Packages
@@ -79,6 +80,12 @@
     digikam
 
     rclone
+
+    dolphin-emu
+
+    writeShellScriptBin "beeper" ''
+      ${beeper}/bin/beeper-beta --ozone-platform-hint=auto --enable-features=WaylandWindowDecorations
+    ''
 
   ];
 

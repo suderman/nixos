@@ -1,128 +1,95 @@
+@import 'css/colors';
+
+@mixin rounding {
+  border-radius: 16px;
+}
+
+@mixin window {
+  border: 1px solid rgba(0,0,0,0.3);
+  margin: 5px 5px 10px;
+  @include rounding;
+}
+
 * {
   all: unset;
-  font-family: "JetBrains Mono";
-}
-// WINDOW RELATED CSS
-.bg {
-  background-color: #1E222A;
-  border: 2px solid #80A0C0;
+  font-family: "Jost *", Roboto, sans-serif;
+  transition: 200ms ease;
 }
 
-.notes {
-  padding: 10px 20px 10px 5px;
+@import 'css/calendar';
+@import 'css/indicators';
+@import 'css/music';
+@import 'css/osd';
+@import 'css/sidebar';
+@import 'css/system';
+@import 'css/volume';
+
+.bar {
+  background-color: $bg;
+  color: $fg;
+
+  label {
+    font-size: 1.2rem;
+  }
 }
 
-window {
-  background: #2e3440;
-  color: #ebcb8b;
-  //border-radius: 2rem;
-  border: 3px solid #80A0C0;
+tooltip {
+  background: $bg;
+  border: 1px solid $border;
+  border-radius: 8px;
+
+  label {
+    font-size: 1rem;
+  }
 }
 
-// MISC EDITING
-.uinfo {
-  font-size: 1.25rem;
-}
-.cpu {
-  padding: 19px;
+.text,
+.text label, { text-shadow: 0 0 .3rem $base; }
+
+.icon,
+.icon label { font-family: Material Symbols Outlined; }
+
+.ws {
+  border-radius: 2rem;
+  margin: .7rem .25rem;
 }
 
-// METRIC LOOKS
-.metric scale trough highlight {
-  all: unset;
-  color: #000000;
-  background: linear-gradient(90deg, #88c0d0 0%, #81a1c1  50%, #5E81ac 100%);
-  //border-radius: 10px;
+.focused {
+  background-color: $bg;
+  border-radius: 1rem;
+  margin: .3rem;
+  padding: .25rem;
 }
-.metric scale trough {
-  all: unset;
-  background-color: #545454;
-  //border-radius: 50px;
+
+.module { margin: 0 5px; }
+
+.hour {
+  font-weight: bold;
+  padding-left: 5px;
+}
+
+.minute {
+  padding-right: .7rem;
+}
+
+.date {
+  background: $bg;
+  color: $flamingo;
+
+  label {
+    font-size: 1.2rem;
+  }
+}
+
+.bright-icon { color: $yellow; }
+.module-bt { font-size: 1.2rem; }
+
+scale trough {
+  background-color: $bg1;
+  border-radius: 24px;
+  margin: 0 1rem;
   min-height: 10px;
-  min-width: 100px;
-  margin-left: 10px;
-  margin-right: 5px;
+  min-width: 70px;
 }
 
-.metric .label {
-  color: #B48EAD;
-  font-size: 1.5rem;
-}
-
-// POWERMENU
-.bigpowermenu {
-  font-size: 3rem;
-}
-
-.quicksettings {
-  font-size: 1.75rem;
-}
-
-// WIDGET MISC SETTINGS
-
-.quote-text {
-  padding: 5px;
-  font-size: 1rem;
-  font-style: italic;
-  font-weight: 600;
-  color: #BF616A;
-}
-
-.appbar{
-  font-size: 2rem;
-}
-
-.cal {
-  color: #8fbcbb;
-  padding: 5px;
-  padding-bottom: 1px;
-}
-
-.favs {
-  color: #ECEFF4;
-  font-size: 2rem;
-}
-
-.small-date {
-  font-weight: 700;
-}
-
-// Search App CSS
-.searchapps-bar {
-  color: #88c0d0;
-  font-size: 1.5rem;
-  margin: -2px;
-  padding: 30px 90px 30px 90px;
-  background-color: #1E222A;
-  border: 6px solid #80A0C0;
-}
-.search-bar {
-  color: #88c0d0;
-}
-.search-label {
-  font-family: "Iosevka";
-  font-size: 2rem;
-  font-weight: 700;
-  padding-right: 20px;
-}
-.app-container {
-  margin: -2px;
-  font-size: 1.25rem;
-  padding: 30px;
-  color: #88c0d0;
-}
-.item {
-  padding: 10px;
-  background: rgba(10,10,10,0.4);
-}
-
-.label-control {
-  color: #81a1c1;
-  font-size: 1.5rem;
-  padding: 15px;
-}
-
-.controls {
-  font-size: 2rem;
-  padding-bottom: 20px;
-}
+.workspaces { margin-left: 10px; }

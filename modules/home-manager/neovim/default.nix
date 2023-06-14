@@ -36,6 +36,9 @@ in {
         vim-repeat
         vim-lastplace 
         vim-nix 
+        vim-parinfer
+        yuck-vim
+        ron-vim
         delimitMate
         tcomment_vim
         align

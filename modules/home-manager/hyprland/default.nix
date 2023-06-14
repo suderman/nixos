@@ -14,7 +14,6 @@ in {
   # Import hyprland module
   imports = [ 
     inputs.hyprland.homeManagerModules.default 
-    inputs.fufexan.homeManagerModules.eww-hyprland
   ];
 
 
@@ -22,40 +21,20 @@ in {
     enable = lib.options.mkEnableOption "hyprland"; 
   };
 
-
-
-
-
   config = mkIf cfg.enable {
 
     modules.eww.enable = true;
     modules.anyrun.enable = true;
 
-    programs.eww-hyprland = {
-     enable = true;
-
-     # default package
-     package = pkgs.eww-wayland;
-
-     # if you want to change colors
-     # colors = builtins.readFile ./macchiato.scss;
-
-     # set to true to reload on change
-     autoReload = true; 
-
-    };
-
-
     home.packages = with pkgs; [ 
       gnome.nautilus
       wofi
       wezterm
-      waybar
+      # waybar
       hyprpaper
       brightnessctl
-      pamixer
-      ncpamixer
-      eww-wayland
+      # pamixer
+      # ncpamixer
     ];
 
     xdg.configFile."hypr/local.conf".source = mkOutOfStoreSymlink "${dir}/local.conf";

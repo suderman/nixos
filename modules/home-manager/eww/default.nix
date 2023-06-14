@@ -41,6 +41,12 @@ let
     wlogout
   ];
 
+  fonts = with pkgs; [
+    jost
+    roboto
+    material-symbols
+  ];
+
 in {
 
   options.modules.eww = {
@@ -53,7 +59,7 @@ in {
 
   config = mkIf cfg.enable {
 
-    home.packages = [ cfg.package ];
+    home.packages = [ cfg.package ] ++ fonts;
     xdg.configFile."eww".source = mkOutOfStoreSymlink "${dir}";
 
     systemd.user.services.eww = {
