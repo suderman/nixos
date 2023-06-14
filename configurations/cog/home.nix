@@ -14,78 +14,56 @@
   # ---------------------------------------------------------------------------
 
   home.packages = with pkgs; [ 
-    _1password
-    _1password-gui
+
     bat 
     cowsay
-    darktable
     exa
-    ncdu
-    firefox-wayland
     fish
-    inkscape
-    joypixels
     killall
     lf 
-    libreoffice 
     linode-cli
     lsd
-    micro
     mosh
     nano
+    ncdu
     neofetch
-    nerdfonts
-    newsflash
-    nodejs
-    nsxiv
-    owofetch
-    # plexamp
-    # python39
-    # python39Packages.pip
-    # python39Packages.virtualenv
-    ripgrep
-    slack
-    # systemdgenie
-    sysz
-    tdesktop
-    tealdeer
     nnn 
+    owofetch
+    rclone
+    ripgrep
     sl
+    sysz
+    tealdeer
     wget
-    xorg.xeyes
     yo
-    junction
 
-    # keygen
-    # dolphin
-    # signal-desktop
-    # webex
+    nerdfonts
+    joypixels
 
     isy
-
-    unstable.nodePackages_latest.immich
-
     lapce
-
+    micro
     quickemu
-
-    polaris
-    polaris-web
-
+    xorg.xeyes
     yt-dlp
     # yt-dlp -f mp4-240p -x --audio-format mp3 https://rumble.com/...
 
-    # nextcloud-client
-    unstable.owncloud-client
+    _1password
+    _1password-gui
+    darktable
     digikam
-
-    rclone
-
     dolphin-emu
+    firefox-wayland
+    inkscape
+    junction
+    libreoffice 
+    newsflash
+    unstable.nodePackages_latest.immich
+    unstable.owncloud-client
 
-    writeShellScriptBin "beeper" ''
-      ${beeper}/bin/beeper-beta --ozone-platform-hint=auto --enable-features=WaylandWindowDecorations
-    ''
+    beeper
+    tdesktop
+    slack
 
   ];
 

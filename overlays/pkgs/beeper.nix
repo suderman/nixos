@@ -1,11 +1,12 @@
+# https://github.com/sumnerevans/home-manager-config/blob/master/pkgs/beeper-desktop.nix
 { lib, fetchurl, appimageTools }:
 appimageTools.wrapType2 rec {
-  name = "beeper-beta";
-  version = "unstable-2023-06-12";
+  name = "beeper";
+  version = "unstable-2023-06-13";
 
   src = fetchurl {
-    url = "https://dl.todesktop.com/201202u1n7yn5b0/builds/2306129wxk9is9g/linux/appimage/x64";
-    sha256 = "sha256-DLUuWtTTp9UCiUP+1akfxXxAL4ypyRKePUBr2yFQKYg=";
+    url = "https://download.beeper.com/linux/appImage/x64";
+    sha256 = "sha256-yDfhu0xtvKizcZtXUSieiPpmTF47kQm4fTbw3e+NugM=";
   };
 
   extraInstallCommands =
@@ -19,7 +20,7 @@ appimageTools.wrapType2 rec {
     ''
       install -Dm444 ${appimageContents}/${name}.desktop -t $out/share/applications
       substituteInPlace $out/share/applications/${name}.desktop \
-        --replace 'Exec=AppRun --no-sandbox' 'Exec=${name}'
+        --replace 'Exec=AppRun --no-sandbox' 'Exec=${name} --ozone-platform-hint=auto --enable-features=WaylandWindowDecorations'
       ${lib.concatMapStringsSep "\n" installIcon (map toString [16 32 48 64 128 256 512 1024 ])}
     '';
 
