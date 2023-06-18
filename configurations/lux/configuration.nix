@@ -47,6 +47,7 @@
   modules.ocis.enable = true;
   modules.gitea.enable = true;
   modules.tiddlywiki.enable = true;
+  modules.wallabag.enable = true;
 
   modules.freshrss.enable = true;
   modules.tandoor-recipes.enable = false;

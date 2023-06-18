@@ -42,6 +42,7 @@
     ./tiddlywiki
     ./traefik
     ./unifi
+    ./wallabag
     ./whoami
     ./whoogle
     ./withings-sync

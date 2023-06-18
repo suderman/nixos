@@ -48,6 +48,7 @@
   modules.home-assistant.enable = false;
   modules.rsshub.enable = false;
   modules.backblaze.enable = false;
+  modules.wallabag.enable = false;
 
   modules.cockpit.enable = true;
 
