@@ -22,46 +22,13 @@ should include the following:
 }
 ```
 
-Inside a module, a helpful usage pattern is to combine `secrets.files` and 
-`secrets.enable` attributes with `age` in the `let` block:
+Enabling the secrets NixOS module will automatically extend the
+`config.age.secrets` with every encrypted file found in
+`config.modules.secrets.files`. In other modules, the file path to a decrypted
+example secret will be available at `config.age.secrets.example.path`.
 
-```nix
-{ config, pkgs, lib, ... }:
-  
-let 
-
-  # agenix secrets combined with age files paths
-  age = config.age // { 
-    files = config.modules.secrets.files; 
-    enable = config.modules.secrets.enable; 
-  };
-  
-in {
-  # ...
-```
-
-Then, in the config section of this module, set the `age.secrets` attribute as
-described in the [agenix
-documentation](https://github.com/ryantm/agenix#reference), but as an
-condition of secrets being enabled and also using the path to the encrypted file
-given above:
-
-```nix
-{ #...
-
-  # agenix
-  age.secrets = lib.mkIf age.enable {
-    example-env.file = age.files.example-env;
-  };
-
-  # service
-  virtualisation.oci-containers.containers."example" = {
-    environmentFiles = lib.mkIf age.enable [ age.secrets.example-env.path ];
-    # ...
-  };
-
-}
-```
+The details of `config.age` is available in the [agenix
+documentation](https://github.com/ryantm/agenix#reference).
 
 ## CLI Commands
 
