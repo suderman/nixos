@@ -21,10 +21,7 @@ in {
       # Map volumes to host
       volumes = [ 
         "immich-machine-learning:/cache"
-        "${cfg.dataDir}:/usr/src/app/upload" 
-      ] ++ (if cfg.photosDir == "" then [] else [
-        "${cfg.photosDir}:/usr/src/app/upload/library" 
-      ]);
+      ];
 
       # Networking for docker containers
       extraOptions = [

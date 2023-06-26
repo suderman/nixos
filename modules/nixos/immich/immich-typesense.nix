@@ -11,7 +11,7 @@ in {
 
     # Typesense search engine
     virtualisation.oci-containers.containers.immich-typesense = {
-      image = "typesense/typesense:0.24.0";
+      image = "typesense/typesense:0.24.1";
       autoStart = false;
 
       # Environment variables
