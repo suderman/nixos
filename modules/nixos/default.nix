@@ -7,6 +7,7 @@
     ./btrbk
     ./cockpit
     ./ddns
+    ./dolphin
     ./earlyoom
     ./flatpak
     ./freshrss

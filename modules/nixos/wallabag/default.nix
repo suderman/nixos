@@ -25,7 +25,7 @@ in {
     };
     port = mkOption {
       type = types.port;
-      default = 8755; 
+      default = config.services.nginx.defaultSSLListenPort; 
     };
   };
 
@@ -56,6 +56,9 @@ in {
     modules.traefik.enable = true;
     modules.nginx.enable = true;
 
+    # Enable redis service for wallabag
+    services.redis.servers.wallabag.enable = true;
+
     # Postgres database configuration
     services.postgresql = {
       ensureUsers = [{
@@ -70,18 +73,19 @@ in {
       routers.wallabag = {
         rule = "Host(`${cfg.hostName}`)";
         tls.certresolver = "resolver-dns";
-        middlewares = [ "local@file" ];
+        middlewares = [ "local@file" "wallabag@file" ];
         service = "wallabag";
       };
-      middlewares.wallabag = {
-        headers.customRequestHeaders.Host = "wallabag";
+      middlewares.wallabag.headers = {
+        customRequestHeaders.Host = cfg.hostName;
       };
-      services.wallabag.loadBalancer.servers = [{ url = "http://127.0.0.1:${toString cfg.port}"; }];
+      services.wallabag.loadBalancer.servers = [{ 
+        url = "https://127.0.0.1:${toString cfg.port}"; 
+      }];
     };
 
     # nginx server for php fpm
-    services.nginx.virtualHosts."wallabag" = {
-      listen = [{ addr = "0.0.0.0"; port = cfg.port; ssl = false; }];
+    services.nginx.virtualHosts."${cfg.hostName}" = {
       root = "${pkgs.wallabag}/web";
       extraConfig = ''
         add_header X-Frame-Options SAMEORIGIN;
@@ -101,12 +105,12 @@ in {
         internal;
       '';
       locations."~ /(?!app)\\.php$".extraConfig = "return 404;";
-    };
+    } // config.modules.nginx.ssl; # use self-signed certificates
 
     # make php magic happen
-    services.phpfpm.pools.wallabag = {
+    services.phpfpm.pools.wallabag = with pkgs; { 
       user = "wallabag";
-      phpPackage = pkgs.php;
+      phpPackage = php.withExtensions ({ enabled, all }: enabled ++ [ all.imagick all.tidy ]);
       settings = {
         "env[WALLABAG_DATA]" = cfg.dataDir;
         "listen.owner" = "nginx";
@@ -124,80 +128,29 @@ in {
       '';
     };
 
-    # Generate the parameters file
-    # https://doc.wallabag.org/en/admin/parameters.html
-    environment.etc."wallabag/parameters.yml".source = pkgs.writeTextFile {
-      name = "wallabag-config";
-      text = builtins.toJSON {
-        parameters = {
 
-          database_driver = "pdo_pgsql";
-          database_driver_class = null;
-          database_host = null;
-          database_port = 5432;
-          database_name = "wallabag";
-          database_user = "wallabag";
-          database_password = null;
-          database_path = null;
-          database_table_prefix = null;
-          database_socket = "/run/postgresql";
-          database_charset = "utf8";
-
-          mailer_transport = "smtp";
-          mailer_host = "EMAIL_HOST";
-          mailer_port = "EMAIL_PORT";
-          mailer_user = "EMAIL_HOST_USER";
-          mailer_password = "EMAIL_HOST_PASSWORD";
-          mailer_encryption = "tls";
-          mailer_auth_mode = "plain";
-
-          domain_name = "https://${cfg.hostName}";
-          server_name = "Wallabag";
-          from_email = "noreply@${cfg.hostName}";
-
-          twofactor_auth = true;
-          twofactor_sender = "noreply@${cfg.hostName}";
-
-          fosuser_registration = true;
-          fosuser_confirmation = true;
-          fos_oauth_server_access_token_lifetime = 3600;
-          fos_oauth_server_refresh_token_lifetime = 1209600;
-
-          locale = "en";
-          rss_limit = 50;
-          sentry_dsn = null;
-          secret = "SECRET_KEY";
-
-          rabbitmq_host = null;
-          rabbitmq_port = null;
-          rabbitmq_user = null;
-          rabbitmq_password = null;
-          rabbitmq_prefetch_count = null;
-
-          redis_scheme = null;
-          redis_host = null;
-          redis_port = null;
-          redis_path = null;
-          redis_password = null;
-
-        };
-      };
+    # Copy paramaters.yml to /etc/wallabag
+    environment.etc."wallabag/parameters.template.yml" = {
+      source = ./parameters.yml;
+      mode = "0644";
     };
 
-    # We use agenix so we need to modify the config at activation time
+    # Run this activation script AFTER etc & agenix
     system.activationScripts."wallabag" = let 
-      sed = "${pkgs.gnused}/bin/sed";
+      dir = "/etc/wallabag";
     in lib.stringAfter [ "etc" "agenix" ] ''
+
+      # Prepare environment variables
+      PATH=$PATH:${lib.makeBinPath [ pkgs.envsubst ]}
       source "${secrets.smtp-env.path}"
-      dir=/etc/wallabag
-      mkdir -p "$dir"
-      ${sed} -i "s/EMAIL_HOST/$EMAIL_HOST/" "$dir/parameters.yml"
-      ${sed} -i "s/EMAIL_PORT/$EMAIL_PORT/" "$dir/parameters.yml"
-      ${sed} -i "s/EMAIL_HOST_USER/$EMAIL_HOST_USER/" "$dir/parameters.yml"
-      ${sed} -i "s/EMAIL_HOST_PASSWORD/$EMAIL_HOST_PASSWORD/" "$dir/parameters.yml"
-      ${sed} -i "s/SECRET_KEY/$SECRET_KEY/" "$dir/parameters.yml"
-      chown -R wallabag:nginx "$dir"
-      chmod 755 "$dir"
+      export EMAIL_HOST EMAIL_PORT EMAIL_HOST_USER EMAIL_HOST_PASSWORD SECRET_KEY
+      export HOST_NAME="${cfg.hostName}"
+
+      # Populate parameters configuration with secrets
+      cat ${dir}/parameters.template.yml | envsubst > ${dir}/parameters.yml
+      chown -R wallabag:nginx ${dir}
+      chmod 755 ${dir}
+
     '';
 
     # Wallabag systemd unit
@@ -252,11 +205,11 @@ in {
         ln -sf ${pkgs.wallabag}/composer.{json,lock} .
         export WALLABAG_DATA="${cfg.dataDir}"
         if [ ! -f installed ]; then
-        mkdir -p data
-        php ${pkgs.wallabag}/bin/console --env=prod wallabag:install
-        touch installed
+          mkdir -p data
+          php ${pkgs.wallabag}/bin/console --env=prod wallabag:install
+          touch installed
         else
-        php ${pkgs.wallabag}/bin/console --env=prod doctrine:migrations:migrate --no-interaction
+          php ${pkgs.wallabag}/bin/console --env=prod doctrine:migrations:migrate --no-interaction
         fi
         php ${pkgs.wallabag}/bin/console --env=prod cache:clear
       '';

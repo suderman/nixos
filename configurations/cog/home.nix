@@ -52,7 +52,7 @@
     _1password-gui
     darktable
     digikam
-    dolphin-emu
+    # dolphin-emu
     firefox-wayland
     inkscape
     junction

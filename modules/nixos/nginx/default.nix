@@ -4,12 +4,26 @@
 let
 
   cfg = config.modules.nginx;
-  inherit (lib) mkIf;
+  inherit (lib) mkIf mkOption types;
 
 in {
 
   options.modules.nginx = {
+
     enable = lib.options.mkEnableOption "nginx"; 
+
+    # Enable self-signed certificate https:
+    # config.services.nginx.virtualHosts."foo" = { ... } // config.modules.nginx.ssl
+    ssl = mkOption { 
+      type = types.attrs; 
+      default = {
+        addSSL = true;
+        # TODO: generate my own certificate and not use acme test cert for convenience
+        sslCertificate = "${pkgs.path}/nixos/tests/common/acme/server/acme.test.cert.pem";
+        sslCertificateKey = "${pkgs.path}/nixos/tests/common/acme/server/acme.test.key.pem";
+      };
+    };
+
   };
 
   config = mkIf cfg.enable {

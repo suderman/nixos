@@ -48,7 +48,7 @@
   modules.home-assistant.enable = false;
   modules.rsshub.enable = false;
   modules.backblaze.enable = false;
-  modules.wallabag.enable = false;
+  modules.wallabag.enable = true;
 
   modules.cockpit.enable = true;
 
@@ -69,6 +69,8 @@
   modules.gnome.enable = (if gui == "gnome" then true else false);
   modules.hyprland.enable = (if gui == "hyprland" then true else false);
 
+  modules.dolphin.enable = true;
+
   # Apps
   modules.flatpak.enable = true;
   modules.neovim.enable = true;
@@ -76,6 +78,8 @@
 
   programs.mosh.enable = true;
   programs.kdeconnect.enable = true;
+
+  programs.evolution.enable = true;
 
   # sudo fwupdmgr update
   services.fwupd.enable = true;
