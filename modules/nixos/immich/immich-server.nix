@@ -43,6 +43,9 @@ in {
     systemd.services.docker-immich-server = {
       requires = [ "immich.service" ];
 
+      # This one sometimes needs extra encouragment to return when deploying an update
+      wants = [ "docker-immich-proxy.service" ]; 
+
       # Container will not stop gracefully, so kill it
       serviceConfig = {
         KillSignal = "SIGKILL";

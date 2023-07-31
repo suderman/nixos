@@ -27,7 +27,7 @@ in {
       extraOptions = [
         "--add-host=host.docker.internal:host-gateway"
         "--network=immich"
-        "--cpus=0.9"
+        # "--cpus=0.9"
       ];
 
     };

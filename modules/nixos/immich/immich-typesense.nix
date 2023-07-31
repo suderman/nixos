@@ -11,7 +11,8 @@ in {
 
     # Typesense search engine
     virtualisation.oci-containers.containers.immich-typesense = {
-      image = "typesense/typesense:0.24.1";
+      # image = "typesense/typesense:0.24.1";
+      image = "typesense/typesense:0.24.1@sha256:9bcff2b829f12074426ca044b56160ca9d777a0c488303469143dd9f8259d4dd";
       autoStart = false;
 
       # Environment variables
@@ -25,7 +26,7 @@ in {
       extraOptions = [
         "--add-host=host.docker.internal:host-gateway"
         "--network=immich"
-        "--cpus=0.9"
+        # "--cpus=0.9"
       ];
 
     };
