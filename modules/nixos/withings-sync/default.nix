@@ -46,7 +46,8 @@ in {
       wantedBy = [ "timers.target" ];
       partOf = [ "withings-sync.service" ];
       timerConfig = {
-        OnCalendar = "*:0/3";
+        # OnCalendar = "*:0/3";
+        OnCalendar = "0/1:00";
         Unit = "withings-sync.service";
       };
     };
