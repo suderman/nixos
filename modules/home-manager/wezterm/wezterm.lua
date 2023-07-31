@@ -35,6 +35,9 @@ return {
 
   },
 
+  -- https://github.com/wez/wezterm/issues/3765#issuecomment-1634985882
+  front_end = "WebGpu",
+
   launch_menu = {
     {
       args = {"btop"},

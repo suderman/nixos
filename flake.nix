@@ -87,8 +87,8 @@
         # Linode VPS
         sol = mkSystem { host = "sol"; inherit user domain; };
 
-        # Macbook Pro
-        rig = mkSystem { host = "rig"; inherit user domain; };
+        # # Macbook Pro
+        # rig = mkSystem { host = "rig"; inherit user domain; };
 
         # Mac Mini
         pom = mkSystem { host = "pom"; inherit user domain; };

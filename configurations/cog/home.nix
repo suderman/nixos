@@ -9,6 +9,9 @@
   modules.hyprland.enable = (if gui == "hyprland" then true else false);
   # modules.anyrun.enable = true;
 
+  # terminal du jour
+  modules.kitty.enable = true;
+
   # ---------------------------------------------------------------------------
   # Home Enviroment & Packages
   # ---------------------------------------------------------------------------
@@ -37,13 +40,14 @@
     wget
     yo
 
-    nerdfonts
     joypixels
+    jetbrains-mono
 
     gst_all_1.gst-libav
 
     isy
     lapce
+    unstable.anytype
     micro
     quickemu
     xorg.xeyes
@@ -76,11 +80,11 @@
     chromium.enable = true;
     git.enable = true;
     tmux.enable = true;
-    wezterm.enable = true;
-    kitty.enable = true;
     zsh.enable = true;
     dconf.enable = true;
-    foot.enable = true;
+
+    wezterm.enable = false;
+    foot.enable = false;
   };
 
 

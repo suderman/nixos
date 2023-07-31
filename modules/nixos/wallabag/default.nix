@@ -27,6 +27,10 @@ in {
       type = types.port;
       default = config.services.nginx.defaultSSLListenPort; 
     };
+    package = mkOption {
+      type = types.package;
+      default = pkgs.wallabag; # 2.5.4
+    };
   };
 
   config = mkIf cfg.enable {
@@ -86,21 +90,21 @@ in {
 
     # nginx server for php fpm
     services.nginx.virtualHosts."${cfg.hostName}" = {
-      root = "${pkgs.wallabag}/web";
+      root = "${cfg.package}/web";
       extraConfig = ''
         add_header X-Frame-Options SAMEORIGIN;
         add_header X-Content-Type-Options nosniff;
         add_header X-XSS-Protection "1; mode=block";
       '';
       locations."/".extraConfig = "try_files $uri /app.php$is_args$args;";
-      locations."/assets".root = "${pkgs.wallabag}/app/web";
+      locations."/assets".root = "${cfg.package}/app/web";
       locations."~ ^/app\\.php(/|$)".extraConfig = ''
         fastcgi_pass unix:${config.services.phpfpm.pools.wallabag.socket};
         include ${config.services.nginx.package}/conf/fastcgi.conf;
         fastcgi_param PATH_INFO $fastcgi_path_info;
         fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
-        fastcgi_param SCRIPT_FILENAME ${pkgs.wallabag}/web/$fastcgi_script_name;
-        fastcgi_param DOCUMENT_ROOT ${pkgs.wallabag}/web;
+        fastcgi_param SCRIPT_FILENAME ${cfg.package}/web/$fastcgi_script_name;
+        fastcgi_param DOCUMENT_ROOT ${cfg.package}/web;
         fastcgi_read_timeout 120;
         internal;
       '';
@@ -192,7 +196,7 @@ in {
           checkCollisionContents = false;
           paths = [ 
             configFileLink
-            "${pkgs.wallabag}/app" 
+            "${cfg.package}/app" 
           ];
         };
 
@@ -202,16 +206,16 @@ in {
         rm -rf var/cache/*
         rm -f app
         ln -sf "${appDir}" app
-        ln -sf ${pkgs.wallabag}/composer.{json,lock} .
+        ln -sf ${cfg.package}/composer.{json,lock} .
         export WALLABAG_DATA="${cfg.dataDir}"
         if [ ! -f installed ]; then
           mkdir -p data
-          php ${pkgs.wallabag}/bin/console --env=prod wallabag:install
+          php ${cfg.package}/bin/console --env=prod wallabag:install
           touch installed
         else
-          php ${pkgs.wallabag}/bin/console --env=prod doctrine:migrations:migrate --no-interaction
+          php ${cfg.package}/bin/console --env=prod doctrine:migrations:migrate --no-interaction
         fi
-        php ${pkgs.wallabag}/bin/console --env=prod cache:clear
+        php ${cfg.package}/bin/console --env=prod cache:clear
       '';
     };
 
