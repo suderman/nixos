@@ -7,7 +7,7 @@
   # modules.hyprland.enable = true;
 
   modules.hyprland.enable = (if gui == "hyprland" then true else false);
-  modules.anyrun.enable = true;
+  # modules.anyrun.enable = true;
 
   # ---------------------------------------------------------------------------
   # Home Enviroment & Packages
@@ -40,6 +40,8 @@
     nerdfonts
     joypixels
 
+    gst_all_1.gst-libav
+
     isy
     lapce
     micro
@@ -64,6 +66,8 @@
     beeper
     tdesktop
     slack
+
+    libsForQt5.kdenlive
 
   ];
 
