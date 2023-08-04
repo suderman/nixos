@@ -31,13 +31,13 @@
 
   # Web services
   modules.cockpit.enable = true;
-  modules.nextcloud.enable = true;
+  modules.nextcloud.enable = false;
   modules.whoogle.enable = true;
   modules.gitea.enable = true;
   modules.tiddlywiki.enable = true;
   modules.rsshub.enable = true;
   modules.freshrss.enable = true;
-  modules.tandoor-recipes.enable = true;
+  modules.tandoor-recipes.enable = false;
 
   # modules.tandoor-recipes = {
   #   enable = true;
