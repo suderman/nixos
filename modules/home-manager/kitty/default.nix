@@ -27,6 +27,8 @@ in {
 
       enable = true;
 
+      theme = "GitHub Light";
+
       settings = {
         scrollback_lines = 10000;
         enable_audio_bell = false;
@@ -72,6 +74,7 @@ in {
 
       extraConfig = ''
         include symbols.conf
+        include current-theme.conf
         include local.conf
       '';
 
@@ -79,6 +82,7 @@ in {
 
     xdg.configFile = {
       "kitty/symbols.conf".source = mkOutOfStoreSymlink "${dir}/symbols.conf";
+      "kitty/current-theme.conf".source = mkOutOfStoreSymlink "${dir}/current-theme.conf";
       "kitty/local.conf".source = mkOutOfStoreSymlink "${dir}/local.conf";
     };
 

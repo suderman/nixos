@@ -47,7 +47,7 @@
 
     isy
     lapce
-    unstable.anytype
+    anytype-wayland
     micro
     quickemu
     xorg.xeyes

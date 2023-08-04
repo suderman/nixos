@@ -22,6 +22,7 @@ in {
         { plugin = ale; config = builtins.readFile ./ale.vim; }
         { plugin = lightline-vim; config = builtins.readFile ./lightline.vim; }
         { plugin = gruvbox-nvim; config = builtins.readFile ./gruvbox.vim; }
+        { plugin = nightfox-nvim; config = builtins.readFile ./nightfox.vim; }
         { plugin = bufexplorer; config = builtins.readFile ./bufexplorer.vim; }
         { plugin = vim-unimpaired; config = builtins.readFile ./unimpaired.vim; }
         # { plugin = nerdtree; config = builtins.readFile ./nerdtree.vim; }

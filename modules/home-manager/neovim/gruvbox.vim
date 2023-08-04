@@ -1,5 +1,5 @@
-try 
-  colorscheme gruvbox
-  set background=dark
-catch
-endtry
+" try 
+"   colorscheme gruvbox
+"   set background=dark
+" catch
+" endtry
