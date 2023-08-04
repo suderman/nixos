@@ -24,13 +24,13 @@ in {
   config = mkIf cfg.enable {
 
     modules.eww.enable = true;
-    modules.anyrun.enable = true;
+    # modules.anyrun.enable = true;
 
     home.packages = with pkgs; [ 
       gnome.nautilus
       wofi
       wezterm
-      # waybar
+      waybar
       hyprpaper
       brightnessctl
       # pamixer
@@ -49,6 +49,7 @@ in {
         source = ~/.config/hypr/local.conf
       '';
     };
+
   };
 
 }

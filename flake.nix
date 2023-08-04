@@ -77,6 +77,7 @@
 
         # Framework Laptop
         cog = mkSystem { host = "cog"; gui = "gnome"; inherit user domain; };
+        # cog = mkSystem { host = "cog"; gui = "hyprland"; inherit user domain; };
 
         # Intel NUC home server
         hub = mkSystem { host = "hub"; inherit user domain; };
@@ -147,11 +148,11 @@
     # Hyprland
     # <https://wiki.hyprland.org/Nix/Hyprland-on-NixOS>
     hyprland.url = "github:hyprwm/Hyprland";
-    hyprland.inputs.nixpkgs.follows = "nixpkgs";
+    # hyprland.inputs.nixpkgs.follows = "nixpkgs";
     hyprland-plugins.url = "github:hyprwm/hyprland-plugins";
-    hyprland-plugins.inputs.hyprland.follows = "hyprland";
-    anyrun.url = "github:Kirottu/anyrun";
-    anyrun.inputs.nixpkgs.follows = "nixpkgs";
+    # hyprland-plugins.inputs.hyprland.follows = "hyprland";
+    # anyrun.url = "github:Kirottu/anyrun";
+    # anyrun.inputs.nixpkgs.follows = "nixpkgs";
 
   };
 
@@ -162,7 +163,7 @@
       "https://hyprland.cachix.org"
       "https://fufexan.cachix.org"
       "https://nix-gaming.cachix.org"
-      "https://anyrun.cachix.org"
+      # "https://anyrun.cachix.org"
     ];
     extra-trusted-public-keys = [
       "suderman.cachix.org-1:8lYeb2gOOVDPbUn1THnL5J3/L4tFWU30/uVPk7sCGmI="
@@ -170,7 +171,7 @@
       "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
       "fufexan.cachix.org-1:LwCDjCJNJQf5XD2BV+yamQIMZfcKWR9ISIFy5curUsY="
       "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4="
-      "anyrun.cachix.org-1:pqBobmOjI7nKlsUMV25u9QHa9btJK65/C8vnO3p346s="
+      # "anyrun.cachix.org-1:pqBobmOjI7nKlsUMV25u9QHa9btJK65/C8vnO3p346s="
     ];
   };
 

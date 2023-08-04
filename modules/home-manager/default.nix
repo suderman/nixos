@@ -1,7 +1,7 @@
 { ... }:
 {
   imports = [
-    ./anyrun
+    # ./anyrun
     ./base
     ./chromium
     ./dconf
