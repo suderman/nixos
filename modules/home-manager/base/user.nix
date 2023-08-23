@@ -23,7 +23,7 @@ in {
       cp = "cp -i";
       rm = "rm -I";
       df = "df -h";
-      diff = "diff --color=auto";
+      # diff = "diff --color=auto";
       du = "du -ch --summarize";
       fst = "sed -n '1p'";
       snd = "sed -n '2p'";

@@ -13,8 +13,6 @@ in {
     # https://github.com/immich-app/immich/issues/776#issuecomment-1271459885
     virtualisation.oci-containers.containers.immich-microservices = {
       image = "ghcr.io/immich-app/immich-server:v${cfg.version}";
-      # entrypoint = "/bin/sh";
-      # cmd = [ "./start-microservices.sh" ];
       cmd = [ "start-microservices.sh" ];
       autoStart = false;
 
@@ -37,6 +35,8 @@ in {
       extraOptions = [
         "--add-host=host.docker.internal:host-gateway"
         "--network=immich"
+        # https://github.com/immich-app/immich/blob/main/docker/hwaccel.yml
+        "--device=/dev/dri:/dev/dri" 
         # "--cpus=0.9"
       ];
 

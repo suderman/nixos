@@ -1,4 +1,4 @@
-{ config, lib, ... }: 
+{ config, lib, pkgs, ... }: 
 
 let
 
@@ -46,6 +46,65 @@ in {
       # Allow forwarding ports to everywhere
       settings.GatewayPorts = "clientspecified";
 
+    };
+
+
+    # MOTD
+    programs.rust-motd = {
+      enable = true;
+      enableMotdInSSHD = true;
+      settings = {
+        global = {};
+        banner = {
+          color = "red";
+          command = ''
+            ${pkgs.inetutils}/bin/hostname | ${pkgs.figlet}/bin/figlet -f slant
+          '';
+        };
+        uptime.prefix = "Up";
+        memory.swap_pos = "beside";
+        filesystems = {
+          root = "/";
+        };
+        # docker = {};
+        # fail2_ban = {};
+        # filesystems = {};
+        # last_login = {};
+        # last_run = {};
+        # memory = {};
+        # service_status = {};
+        # user_service_status = {};
+        # s_s_l_certs = {};
+        # uptime = {};
+        # weather = {};
+      };
+
+      # settings = {
+      #   banner = {
+      #     color = "yellow";
+      #     command = ''
+      #       echo ""
+      #       echo " +-------------+"
+      #       echo " | 10110 010   |"
+      #       echo " | 101 101 10  |"
+      #       echo " | 0   _____   |"
+      #       echo " |    / ___ \  |"
+      #       echo " |   / /__/ /  |"
+      #       echo " +--/ _____/---+"
+      #       echo "   / /"
+      #       echo "  /_/"
+      #       echo ""
+      #       systemctl --failed --quiet
+      #     '';
+      #   };
+      #   uptime.prefix = "Uptime:";
+      #   last_login = builtins.listToAttrs (map
+      #   (user: {
+      #     name = user;
+      #     value = 2;
+      #   })
+      #   (builtins.attrNames config.home-manager.users));
+      # };
     };
 
   };

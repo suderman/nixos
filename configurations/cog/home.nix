@@ -73,6 +73,8 @@
 
     libsForQt5.kdenlive
 
+    join-desktop
+
   ];
 
   programs = {

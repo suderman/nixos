@@ -12,8 +12,6 @@ in {
     # Web front-end
     virtualisation.oci-containers.containers.immich-web = {
       image = "ghcr.io/immich-app/immich-web:v${cfg.version}";
-      # entrypoint = "/bin/sh";
-      # cmd = [ "./entrypoint.sh" ];
       autoStart = false;
 
       # Environment variables

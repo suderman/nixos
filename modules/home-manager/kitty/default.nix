@@ -4,7 +4,7 @@
 let
 
   cfg = config.modules.kitty;
-  inherit (lib) mkIf;
+  inherit (lib) mkIf mkAfter;
   inherit (config.lib.file) mkOutOfStoreSymlink;
 
   dir = "/etc/nixos/modules/home-manager/kitty";
@@ -22,6 +22,19 @@ in {
       jetbrains-mono
       (unstable.nerdfonts.override { fonts = [ "NerdFontsSymbolsOnly" ]; })
     ];
+
+    home.shellAliases = {
+      icat="kitty +kitten icat";
+    };
+
+    programs.zsh = {
+      initExtra = mkAfter ''
+        # Alias ssh command if using kitty
+        [ "$TERM" = "xterm-kitty" ] && alias ssh="kitty +kitten ssh"
+        # Alias diff command if using kitty
+        [ "$TERM" = "xterm-kitty" ] && alias diff="kitty +kitten diff"
+      '';
+    };
 
     programs.kitty = {
 

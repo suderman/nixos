@@ -31,6 +31,7 @@ in {
     TYPESENSE_API_KEY = "1234567890";
     TYPESENSE_DATA_DIR = "/data";
     # TYPESENSE_ENABLED = "false";
+    GLOG_minloglevel = "1";
 
     # Path to secret file
     file = config.age.secrets.immich-env.path;

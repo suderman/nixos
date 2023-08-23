@@ -44,6 +44,9 @@ in {
 
         ## zsh-fzf-tab
         #. ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
+
+        # message of the day
+        [[ -e /var/lib/rust-motd/motd ]] && cat /var/lib/rust-motd/motd
       '';
 
     };

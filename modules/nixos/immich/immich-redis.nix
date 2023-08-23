@@ -11,7 +11,6 @@ in {
 
     # Redis cache
     virtualisation.oci-containers.containers.immich-redis = {
-      # image = "redis:6.2";
       image = "redis:6.2-alpine@sha256:70a7a5b641117670beae0d80658430853896b5ef269ccf00d1827427e3263fa3";
       autoStart = false;
 

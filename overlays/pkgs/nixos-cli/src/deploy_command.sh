@@ -19,5 +19,9 @@ fi
 
 # nixos-rebuild on all selected targets
 for target in $targets; do
-  task "nixos-rebuild --target-host root@${target}.$(domainname) --flake ${dir}#${target} ${action}"
+  if [[ "${target}" == "$(hostname)" ]]; then
+    task "nixos-rebuild --target-host root@${target}.$(domainname) --flake ${dir}#${target} ${action}"
+  else
+    task "nixos-rebuild --build-host root@${target}.$(domainname) --target-host root@${target}.$(domainname) --flake ${dir}#${target} ${action}"
+  fi
 done
