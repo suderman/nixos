@@ -8,44 +8,42 @@
     [ (modulesPath + "/installer/scan/not-detected.nix")
     ];
 
-  boot.initrd.availableKernelModules = [ "xhci_pci" "thunderbolt" "nvme" "uas" "sd_mod" ];
+  boot.initrd.availableKernelModules = [ "xhci_pci" "thunderbolt" "nvme" "usbhid" "usb_storage" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/e3591e1c-e091-4e16-b55f-088ab195fec4";
+    { device = "/dev/disk/by-uuid/9c6491ae-6399-490e-8894-0e5b0e57fdd8";
       fsType = "btrfs";
       options = [ "subvol=root" ];
     };
 
-  fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/5EE4-758D";
-      fsType = "vfat";
-    };
-
   fileSystems."/nix" =
-    { device = "/dev/disk/by-uuid/e3591e1c-e091-4e16-b55f-088ab195fec4";
+    { device = "/dev/disk/by-uuid/9c6491ae-6399-490e-8894-0e5b0e57fdd8";
       fsType = "btrfs";
     };
 
-  # fileSystems."/mnt/ssd" =
-  #   { device = "/dev/disk/by-uuid/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxx1";
-  #     fsType = "btrfs";
-  #   };
-
-  # fileSystems."/mnt/raid" =
-  #   { device = "/dev/disk/by-uuid/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxx2";
-  #     fsType = "btrfs";
-  #   };
+  fileSystems."/boot" =
+    { device = "/dev/disk/by-uuid/E605-38B6";
+      fsType = "vfat";
+    };
 
   swapDevices =
-    [ { device = "/dev/disk/by-uuid/bf5e86ac-c711-48fe-a274-de6dda7e7671"; }
+    [ { device = "/dev/disk/by-uuid/29179355-9b6d-42c5-b619-373ea723c6c3"; }
     ];
 
-  powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
+  # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
+  # (the default) this is the recommended approach. When using systemd-networkd it's
+  # still possible to use this option, but it's recommended to use it in conjunction
+  # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
+  networking.useDHCP = lib.mkDefault true;
+  # networking.interfaces.enp0s13f0u1u3u3.useDHCP = lib.mkDefault true;
+  # networking.interfaces.wlp170s0.useDHCP = lib.mkDefault true;
 
-  # The option definition `hardware.video.hidpi.enable' no longer has any effect; please remove it. high-resolution display
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+  powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
+  hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
   # high-resolution display
   # hardware.video.hidpi.enable = lib.mkDefault true;
 }
