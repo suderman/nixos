@@ -20,8 +20,8 @@ fi
 # nixos-rebuild on all selected targets
 for target in $targets; do
   if [[ "${target}" == "$(hostname)" ]]; then
-    task "nixos-rebuild --target-host root@${target}.$(domainname) --flake ${dir}#${target} ${action}"
+    task "sudo nixos-rebuild --flake ${dir}#${target} ${action}"
   else
-    task "nixos-rebuild --build-host root@${target}.$(domainname) --target-host root@${target}.$(domainname) --flake ${dir}#${target} ${action}"
+    task "nixos-rebuild --build-host ${USER}@${target}.$(domainname) --target-host ${USER}@${target}.$(domainname) --flake ${dir}#${target} --use-remote-sudo ${action}"
   fi
 done
