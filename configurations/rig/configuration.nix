@@ -34,4 +34,9 @@
   modules.whoami.enable = true;
   modules.cockpit.enable = true;
 
+  services.xserver.desktopManager.retroarch = {
+    enable = true;
+    package = pkgs.retroarchFull;
+  };
+
 }

@@ -69,6 +69,11 @@
   modules.gnome.enable = (if gui == "gnome" then true else false);
   modules.hyprland.enable = (if gui == "hyprland" then true else false);
 
+  services.xserver.desktopManager.retroarch = {
+    enable = true;
+    package = pkgs.retroarchFull;
+  };
+
   modules.dolphin.enable = true;
 
   # Apps

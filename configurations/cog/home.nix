@@ -75,6 +75,8 @@
 
     join-desktop
 
+    unstable.yuzu-mainline
+
   ];
 
   programs = {

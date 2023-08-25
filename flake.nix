@@ -85,14 +85,14 @@
         # Intel NUC media server
         lux = mkSystem { host = "lux"; inherit user domain; };
 
+        # Mac Mini
+        pom = mkSystem { host = "pom"; inherit user domain; };
+
         # Linode VPS
         sol = mkSystem { host = "sol"; inherit user domain; };
 
-        # # Macbook Pro
-        # rig = mkSystem { host = "rig"; inherit user domain; };
-
-        # Mac Mini
-        pom = mkSystem { host = "pom"; inherit user domain; };
+        # 2009 Mac Pro (at home)
+        rig = mkSystem { host = "rig"; inherit user domain; };
 
         # 2009 Mac Pro (at work)
         eve = mkSystem { host = "eve"; inherit user domain; };
