@@ -52,7 +52,7 @@ in {
     # MOTD
     programs.rust-motd = {
       enable = true;
-      enableMotdInSSHD = true;
+      # enableMotdInSSHD = true;
       settings = {
         global = {};
         banner = {

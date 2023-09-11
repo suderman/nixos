@@ -140,4 +140,10 @@ in {
     driveG = "/mnt/raid/media";
   };
 
+  # Additional filesystems in motd
+  programs.rust-motd.settings.filesystems = {
+    ssd = "/mnt/ssd";
+    raid = "/mnt/raid";
+  };
+
 }
