@@ -12,7 +12,7 @@ in {
 
     # Z-Wave JS UI container
     virtualisation.oci-containers.containers.zwave = {
-      image = "zwavejs/zwave-js-ui:latest";
+      image = "ghcr.io/zwave-js/zwave-js-ui:${cfg.zwaveVersion}";
       autoStart = false;
 
       # Traefik labels

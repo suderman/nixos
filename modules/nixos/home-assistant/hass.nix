@@ -12,7 +12,7 @@ in {
 
     # Home Assistant container
     virtualisation.oci-containers.containers.home-assistant = {
-      image = "ghcr.io/home-assistant/home-assistant:stable";
+      image = "ghcr.io/home-assistant/home-assistant:${cfg.version}";
       autoStart = false;
 
       # Traefik labels

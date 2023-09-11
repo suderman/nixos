@@ -7,6 +7,12 @@ let
   inherit (lib) mkIf mkOption mkBefore options types strings;
   inherit (builtins) toString readFile;
 
+  # https://github.com/home-assistant/core/pkgs/container/home-assistant/versions?filters%5Bversion_type%5D=tagged
+  version = "2023.9.1";
+
+  # https://github.com/zwave-js/zwave-js-ui/pkgs/container/zwave-js-ui/versions?filters%5Bversion_type%5D=tagged
+  zwaveVersion = "8.25.1";
+
 in {
 
   imports = [ 
@@ -18,6 +24,12 @@ in {
   options.modules.home-assistant = {
 
     enable = options.mkEnableOption "home-assistant"; 
+
+    version = mkOption {
+      type = types.str;
+      default = version;
+      description = "Version of the Home Asssistant instance";
+    };
 
     hostName = mkOption {
       type = types.str;
@@ -55,6 +67,12 @@ in {
       type = types.str;
       default = "zwave.${config.networking.fqdn}";
       description = "FQDN for the Z-Wave UI instance";
+    };
+
+    zwaveVersion = mkOption {
+      type = types.str;
+      default = zwaveVersion;
+      description = "Version of the Z-Wave instance";
     };
 
     isy = mkOption {
