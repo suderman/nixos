@@ -54,7 +54,8 @@ in {
     # Docker container
     virtualisation.oci-containers.containers.ocis = {
       # image = "owncloud/ocis:latest";
-      image = "owncloud/ocis:3.1.0-beta.1";
+      # image = "owncloud/ocis:3.1.0-beta.1";
+      image = "owncloud/ocis:4.0.0";
       autoStart = true;
 
       entrypoint = "/bin/sh";
