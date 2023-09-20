@@ -1,9 +1,10 @@
 # modules.gnome.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, user, ... }:
 
 let 
 
   cfg = config.modules.gnome;
+  home = config.users.users."${user}".home;
   inherit (lib) mkIf mkOption types;
 
 in {
@@ -87,6 +88,30 @@ in {
     # Fix broken stuff
     # services.avahi.enable = false;
     # networking.networkmanager.enable = false;
+
+    # Gnome has a hard-coded screenshots directory
+    # Watch that directory for screenshots, move contents to new directory and delete old
+    # https://discourse.gnome.org/t/feature-request-change-screenshot-directory/14001/9
+    systemd = let old = "${home}/data/images/Screenshots"; new = "${home}/data/images/screenshots"; in { 
+
+      # Watch the "old" path and when it exists, trigger the ssmv service
+      paths.ssmv = {
+        wantedBy = [ "paths.target" ];
+        pathConfig = {
+          PathExists = old;
+          Unit = "ssmv.service";
+        };
+      };
+
+      # Move all files inside the "old" directory into the "new" and delete the "old" directory
+      services.ssmv = {
+        description = "Moves files from ${old} to ${new} and deletes ${old}";
+        requires = [ "ssmv.path" ];
+        serviceConfig.Type = "oneshot";
+        script = "mv ${old}/* ${new}/ && rmdir --ignore-fail-on-non-empty ${old}";
+      };
+
+    };
 
   };
 
