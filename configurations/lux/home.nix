@@ -6,7 +6,10 @@
   home.packages = with pkgs; [ 
     neofetch
     yo
+    # unstable.yazi
   ];
+
+  modules.yazi.enable = true;
 
   programs = {
     git.enable = true;

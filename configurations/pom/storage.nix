@@ -48,21 +48,21 @@ in {
   # > btrfs subvolume create /mnt/pool/data
   # > btrfs subvolume create /mnt/pool/backups
 
-  fileSystems."/mnt/pool" = {
-    fsType = "btrfs"; 
-    device = "/dev/disk/by-uuid/2b311ebc-75bb-4235-86d9-bc7f57f6820d";
-    options = btrfs ++ automount;  
-  };
-
-  fileSystems."/data" = {
-    device = "/mnt/pool/data"; 
-    options = bind ++ automount;
-  };
-
-  fileSystems."/backups" = {
-    device = "/mnt/pool/backups"; 
-    options = bind ++ automount;
-  };
+  # fileSystems."/mnt/pool" = {
+  #   fsType = "btrfs"; 
+  #   device = "/dev/disk/by-uuid/2b311ebc-75bb-4235-86d9-bc7f57f6820d";
+  #   options = btrfs ++ automount;  
+  # };
+  #
+  # fileSystems."/data" = {
+  #   device = "/mnt/pool/data"; 
+  #   options = bind ++ automount;
+  # };
+  #
+  # fileSystems."/backups" = {
+  #   device = "/mnt/pool/backups"; 
+  #   options = bind ++ automount;
+  # };
 
   # # Services that depend on this mount may need the following
   # systemd.services.my-app = {
@@ -77,9 +77,9 @@ in {
     };
   };
 
-  # Additional filesystems in motd
-  programs.rust-motd.settings.filesystems = {
-    pool = "/mnt/pool";
-  };
+  # # Additional filesystems in motd
+  # programs.rust-motd.settings.filesystems = {
+  #   pool = "/mnt/pool";
+  # };
 
 }

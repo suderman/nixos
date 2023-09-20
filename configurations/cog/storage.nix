@@ -21,13 +21,61 @@ in {
   fileSystems."/".options = btrfs;
   fileSystems."/nix".options = btrfs;
 
+  # USB drive backup (work)
+  # -------------------------------------------------------------------------
+  # Assuming the disk is "sda", create the partion table and new partition:
+  # > parted -s /dev/sda mklabel gpt
+  # > parted -s /dev/sda mkpart citadel btrfs 1MiB 100%
+  #
+  # Format the partition as btrfs
+  # > mkfs.btrfs -fL citadel /dev/sda1
+  #
+  # Mount the partition and create a backups subvolume
+  # > mkdir -p /mnt/citadel
+  # > mount /dev/sda1 /mnt/citadel
+  # > btrfs subvolume create /mnt/citadel/backups
+
+  fileSystems."/mnt/citadel" = {
+    fsType = "btrfs"; 
+    device = "/dev/disk/by-uuid/243e60e9-7dab-44bc-bd56-2be667f4f78c";
+    options = btrfs ++ automount;
+  };
+
+  # USB drive backup (home)
+  # -------------------------------------------------------------------------
+  # Assuming the disk is "sdb", create the partion table and new partition:
+  # > parted -s /dev/sdb mklabel gpt
+  # > parted -s /dev/sdb mkpart safehouse btrfs 1MiB 100%
+  #
+  # Format the partition as btrfs
+  # > mkfs.btrfs -fL safehouse /dev/sdb1
+  #
+  # > mkdir -p /mnt/safehouse
+  # > mount /dev/sdb1 /mnt/safehouse
+  # > btrfs subvolume create /mnt/safehouse/backups  
+
+  fileSystems."/mnt/safehouse" = {
+    fsType = "btrfs"; 
+    device = "/dev/disk/by-uuid/f76c2e2d-ad36-46f8-ad16-4ebdbc1bc8b4";
+    options = btrfs ++ automount;
+  };
+
+
   # Snapshots & backups
-  modules.btrbk = {
+  modules.btrbk = with config.networking; {
     enable = true;
-    backups = with config.networking; {
-      # "/nix".target."ssh://lux.${domain}/backups/${hostName}" = {};
+
+    # Backup snapshots to USB drive when attached
+    snapshots = {
+      "/nix".target."/mnt/safehouse/backups/${hostName}" = {};
+      "/nix".target."/mnt/citadel/backups/${hostName}" = {};
+    };
+
+    # Nightly backups over SSH
+    backups = {
       "/nix".target."ssh://eve.${domain}/backups/${hostName}" = {};
     };
+
   };
 
 }
