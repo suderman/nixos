@@ -19,6 +19,7 @@
     ./secrets
     ./tmux
     ./wezterm
+    ./yazi
     ./zsh
   ];
 }
