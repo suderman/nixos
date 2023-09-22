@@ -11,6 +11,7 @@
     ./earlyoom
     ./flatpak
     ./freshrss
+    ./garmin
     ./gitea
     ./gnome
     ./home-assistant

@@ -92,7 +92,7 @@ in {
     # Gnome has a hard-coded screenshots directory
     # Watch that directory for screenshots, move contents to new directory and delete old
     # https://discourse.gnome.org/t/feature-request-change-screenshot-directory/14001/9
-    systemd = let old = "${home}/data/images/Screenshots"; new = "${home}/data/images/screenshots"; in { 
+    systemd = let old = "${home}/data/images/Screenshots"; new = "${home}/data/images/screens"; in { 
 
       # Watch the "old" path and when it exists, trigger the ssmv service
       paths.ssmv = {
