@@ -38,6 +38,8 @@
   # Support iOS devices
   modules.libimobiledevice.enable = true;
 
+  modules.garmin.enable = true;
+
   # # Database services
   # modules.mysql.enable = true;
   # modules.postgresql.enable = true;
