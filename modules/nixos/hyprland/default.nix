@@ -1,9 +1,7 @@
-# modules.hyprland.enable = true;
-{ config, lib, pkgs, inputs, ... }: 
+# desktop = "hyprland";
+{ config, lib, pkgs, inputs, desktop, ... }: 
 
 let 
-
-  cfg = config.modules.hyprland;
   inherit (lib) mkIf mkOption mkBefore types;
 
 in {
@@ -11,11 +9,7 @@ in {
   # Import hyprland module
   imports = [ inputs.hyprland.nixosModules.default ];
 
-  options.modules.hyprland = {
-    enable = lib.options.mkEnableOption "hyprland"; 
-  };
-
-  config = mkIf cfg.enable {
+  config = mkIf (desktop == "hyprland") {
 
     programs.hyprland = {
       enable = true;
@@ -25,5 +19,3 @@ in {
   };
 
 }
-
-

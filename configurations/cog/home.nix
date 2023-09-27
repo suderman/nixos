@@ -1,13 +1,10 @@
-{ config, lib, pkgs, gui, ... }: {
+{ config, lib, pkgs, ... }: {
 
   modules.base.enable = true;
   modules.secrets.enable = true;
 
   # Window manager
   # modules.hyprland.enable = true;
-
-  modules.hyprland.enable = (if gui == "hyprland" then true else false);
-  # modules.anyrun.enable = true;
 
   # terminal du jour
   modules.kitty.enable = true;

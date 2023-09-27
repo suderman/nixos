@@ -1,4 +1,4 @@
-{ config, pkgs, gui, ... }: {
+{ config, pkgs, ... }: {
 
   imports = [ 
     ./hardware-configuration.nix
@@ -7,8 +7,6 @@
 
   modules.base.enable = true;
   modules.secrets.enable = true;
-
-  # modules.hyprland.enable = (if gui == "hyprland" then true else false);
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;

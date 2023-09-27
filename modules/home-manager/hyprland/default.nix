@@ -1,9 +1,8 @@
-# modules.hyprland.enable = true;
-{ config, pkgs, lib, inputs, ... }: 
+# desktop = "hyprland";
+{ config, pkgs, lib, inputs, desktop, ... }: 
 
 let 
 
-  cfg = config.modules.hyprland;
   inherit (lib) mkIf;
   inherit (config.lib.file) mkOutOfStoreSymlink;
 
@@ -17,11 +16,7 @@ in {
   ];
 
 
-  options.modules.hyprland = {
-    enable = lib.options.mkEnableOption "hyprland"; 
-  };
-
-  config = mkIf cfg.enable {
+  config = mkIf (desktop == "hyprland") {
 
     modules.eww.enable = true;
     # modules.anyrun.enable = true;

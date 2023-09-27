@@ -1,4 +1,4 @@
-{ config, lib, pkgs, inputs, gui, ... }: {
+{ config, lib, pkgs, inputs, ... }: {
 
   imports = [ 
     inputs.hardware.nixosModules.framework 
@@ -66,10 +66,6 @@
     enable = false;
     photosDir = "/photos";
   };
-
-  # Desktop Environments
-  modules.gnome.enable = (if gui == "gnome" then true else false);
-  modules.hyprland.enable = (if gui == "hyprland" then true else false);
 
   services.xserver.desktopManager.retroarch = {
     enable = true;
