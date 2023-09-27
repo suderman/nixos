@@ -80,9 +80,8 @@
         config.allowUnfree = true;
         config.joypixels.acceptLicense = true;
 
-        # OpenSSL 1.1 is reaching its end of life on 2023/09/11 and cannot be supported through the NixOS 23.05 release cycle.
-        # https://www.openssl.org/blog/blog/2023/03/28/1.1.1-EOL/ 
-        config.permittedInsecurePackages = [ "openssl-1.1.1u" ];
+        # Add to-be-updated packages blocking builds (none right now)
+        config.permittedInsecurePackages = [ ];
 
         # Include personal scripts and package modifications
         overlays = with (import ./overlays { inherit inputs system config; } ); [ lib pkgs nur unstable ];
