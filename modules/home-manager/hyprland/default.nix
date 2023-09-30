@@ -32,18 +32,24 @@ in {
       # ncpamixer
     ];
 
-    xdg.configFile."hypr/local.conf".source = mkOutOfStoreSymlink "${dir}/local.conf";
+    # xdg.configFile."hypr/local.conf".source = mkOutOfStoreSymlink "${dir}/local.conf";
 
     wayland.windowManager.hyprland = {
       enable = true;
       plugins = [
         inputs.hyprland-plugins.packages.${pkgs.system}.hyprbars
       ];
-      extraConfig = ''
-        exec-once=dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
-        source = ~/.config/hypr/local.conf
-      '';
+      recommendedEnvironment = true;
+      extraConfig = builtins.readFile ./hyprland.conf;
+      # extraConfig = ''
+      #   exec-once=dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+      #   source = ~/.config/hypr/local.conf
+      # '';
     };
+
+    home.activation.hyprland = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      $DRY_RUN_CMD touch $HOME/.config/hypr/local.conf
+    '';
 
   };
 
