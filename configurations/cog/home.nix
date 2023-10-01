@@ -9,6 +9,8 @@
   # terminal du jour
   modules.kitty.enable = true;
 
+  modules.yazi.enable = true;
+
   # ---------------------------------------------------------------------------
   # Home Enviroment & Packages
   # ---------------------------------------------------------------------------

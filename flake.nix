@@ -103,7 +103,7 @@
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
-              extraSpecialArgs = specialArgs // { inherit inputs outputs; base = (import config); };
+              extraSpecialArgs = { inherit inputs outputs; base = (import config); };
               users."${specialArgs.base.user}" = let home = { imports }: { inherit imports; };
               in home { 
                 imports = [
