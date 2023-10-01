@@ -1,10 +1,10 @@
 # modules.base.enable = true;
-{ config, lib, ... }:
+{ config, lib, base, ... }:
 
 let
 
   cfg = config.modules.base;
-  inherit (lib) mkIf;
+  inherit (lib) mkIf optionalAttrs recursiveUpdate;
 
 in {
 
@@ -24,6 +24,9 @@ in {
   };
 
   config = mkIf cfg.enable {
+
+    # Get all modules settings from configuration's default.nix
+    modules = optionalAttrs (base ? modules) (recursiveUpdate base.modules {});
 
     # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
     home.stateVersion = "22.05";
