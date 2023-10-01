@@ -1,4 +1,4 @@
-# desktop = "gnome";
+# modules.gnome.enable = true;
 { config, lib, pkgs, ... }:
 
 let 
@@ -13,7 +13,6 @@ in {
     enable = lib.options.mkEnableOption "gnome"; 
   };
 
-  # config = mkIf (desktop == "gnome") {
   config = mkIf cfg.enable {
 
     services = {

@@ -1,4 +1,4 @@
-# desktop = "hyprland";
+# modules.hyprland.enable = true;
 { config, pkgs, lib, inputs, ... }: 
 
 let 
@@ -21,7 +21,6 @@ in {
     enable = lib.options.mkEnableOption "hyprland"; 
   };
 
-  # config = mkIf (desktop == "hyprland") {
   config = mkIf cfg.enable {
 
     modules.eww.enable = true;

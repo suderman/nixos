@@ -11,6 +11,7 @@
     ./foot
     ./fzf
     ./git
+    ./gnome
     ./gtk
     ./hyprland
     ./keyd
