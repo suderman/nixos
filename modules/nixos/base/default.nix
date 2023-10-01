@@ -1,10 +1,10 @@
 # modules.base.enable = true;
-{ config, lib, ... }:
+{ config, lib, base, ... }:
 
 let
 
   cfg = config.modules.base;
-  inherit (lib) mkIf;
+  inherit (lib) mkIf optionalAttrs recursiveUpdate;
 
 in {
 
@@ -26,6 +26,9 @@ in {
   };
 
   config = mkIf cfg.enable {
+
+    # Get all modules settings from configuration's default.nix
+    modules = optionalAttrs (base ? modules) (recursiveUpdate base.modules {});
 
     # Set your time zone.
     time.timeZone = "America/Edmonton";

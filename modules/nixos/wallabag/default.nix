@@ -1,12 +1,13 @@
 # modules.wallabag.enable = true;
 # https://github.com/jtojnar/nixfiles/blob/0c3326906559fa3f8e876e251152f0532ab239c9/hosts/azazel/ogion.cz/bag/default.nix
-{ config, lib, pkgs, user, ... }:
+{ config, lib, pkgs, ... }:
 
 let
 
   cfg = config.modules.wallabag;
   secrets = config.age.secrets;
 
+  inherit (config.users) user;
   inherit (lib) mkIf mkOption types;
   inherit (lib.strings) toInt;
   inherit (builtins) toString;

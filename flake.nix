@@ -90,21 +90,21 @@
 
       # Make a NixOS system configuration (with home-manager module, if user isn't "root")
       mkSystem = config: inputs.nixpkgs.lib.nixosSystem rec {
-        specialArgs = (import config) // { inherit inputs outputs; };
-        inherit (specialArgs) system;
+        specialArgs = { inherit inputs outputs; base = (import config); };
+        inherit (specialArgs.base) system;
         pkgs = mkPkgs system;
         modules = [ 
           (config + /configuration.nix)
           ./modules/nixos 
           ./secrets 
           caches
-        ] ++ (if specialArgs.user == "root" then [] else [
+        ] ++ (if specialArgs.base.user == "root" then [] else [
           inputs.home-manager.nixosModules.home-manager { 
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
-              extraSpecialArgs = specialArgs // { inherit inputs outputs; };
-              users."${specialArgs.user}" = let home = { imports }: { inherit imports; };
+              extraSpecialArgs = specialArgs // { inherit inputs outputs; base = (import config); };
+              users."${specialArgs.base.user}" = let home = { imports }: { inherit imports; };
               in home { 
                 imports = [
                   (config + /home.nix)
@@ -120,7 +120,7 @@
 
       # Make a Home Manager configuration
       mkUser = config: inputs.home-manager.lib.homeManagerConfiguration rec {
-        extraSpecialArgs = (import config) // { inherit inputs outputs; };
+        extraSpecialArgs = { inherit inputs outputs; base = (import config); };
         pkgs = mkPkgs extraSpecialArgs.system;
         modules = [ 
           (config + /home.nix)

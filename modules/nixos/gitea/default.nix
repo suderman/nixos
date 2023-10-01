@@ -1,5 +1,5 @@
 # modules.gitea.enable = true;
-{ config, lib, pkgs, user, ... }:
+{ config, lib, pkgs, ... }:
 
 let
 

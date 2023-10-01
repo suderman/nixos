@@ -1,10 +1,11 @@
 # modules.withings-sync.enable = true;
-{ inputs, config, pkgs, lib, user, ... }:
+{ inputs, config, pkgs, lib, ... }:
   
 let 
 
   cfg = config.modules.withings-sync;
   secrets = config.age.secrets;
+  inherit (config.users) user;
   inherit (lib) mkIf;
 
   # https://github.com/jaroslawhartman/withings-sync/releases/tag/v3.6.1

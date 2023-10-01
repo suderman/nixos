@@ -1,8 +1,9 @@
 # programs.chromium.enable = true
-{ config, lib, pkgs, user, ... }:
+{ config, lib, pkgs, ... }:
 
 let 
   cfg = config.programs.chromium;
+  inherit (config) user;
 
 in {
 

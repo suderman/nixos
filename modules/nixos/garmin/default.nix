@@ -1,10 +1,10 @@
 # modules.garmin.enable = true;
-{ config, lib, pkgs, user, ... }:
+{ config, lib, pkgs, ... }:
 
 let 
 
   cfg = config.modules.garmin;
-  home = config.users.users."${user}".home;
+  home = config.users.users."${config.users.user}".home;
   inherit (lib) mkIf mkOption types;
 
 in {

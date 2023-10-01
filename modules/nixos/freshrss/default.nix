@@ -1,5 +1,5 @@
 # modules.freshrss.enable = true;
-{ config, lib, pkgs, user, ... }:
+{ config, lib, pkgs, ... }:
 
 let
 
@@ -7,6 +7,7 @@ let
   secrets = config.age.secrets;
   port = toString config.services.nginx.defaultHTTPListenPort;
 
+  inherit (config.users) user;
   inherit (lib) mkIf mkOption types;
   inherit (lib.strings) toInt;
   inherit (builtins) toString;

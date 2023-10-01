@@ -1,9 +1,10 @@
 # modules.radarr.enable = true;
-{ config, lib, pkgs, user, ... }:
+{ config, lib, pkgs, ... }:
 
 let
 
   cfg = config.modules.radarr;
+  inherit (config.users) user;
   inherit (lib) mkIf mkBefore mkOption options types;
   inherit (builtins) toString;
 

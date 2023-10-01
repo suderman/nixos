@@ -1,9 +1,10 @@
 # modules.ydotool.enable = true;
-{ config, lib, pkgs, user, ... }: 
+{ config, lib, pkgs, ... }: 
 
 let 
 
   cfg = config.modules.ydotool;
+  inherit (config.users) user;
   inherit (lib) mkIf mkOption mkBefore types;
 
 in {

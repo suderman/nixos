@@ -1,8 +1,9 @@
-{ config, lib, pkgs, user, ... }: 
+{ config, lib, pkgs, ... }: 
 
 let
 
   cfg = config.modules.base;
+  inherit (config.users) user;
   inherit (lib) mkIf mapAttrs;
 
   # public keys from the secrets dir

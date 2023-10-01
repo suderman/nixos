@@ -1,14 +1,20 @@
 # desktop = "gnome";
-{ config, lib, pkgs, user, desktop, ... }:
+{ config, lib, pkgs, ... }:
 
 let 
 
-  home = config.users.users."${user}".home;
+  cfg = config.modules.gnome;
+  home = config.users.users."${config.users.user}".home;
   inherit (lib) mkIf mkOption types;
 
 in {
 
-  config = mkIf (desktop == "gnome") {
+  options.modules.gnome = {
+    enable = lib.options.mkEnableOption "gnome"; 
+  };
+
+  # config = mkIf (desktop == "gnome") {
+  config = mkIf cfg.enable {
 
     services = {
       xserver = {

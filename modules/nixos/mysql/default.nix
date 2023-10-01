@@ -1,9 +1,10 @@
 # modules.mysql.enable = true;
-{ config, lib, pkgs, user, ... }:
+{ config, lib, pkgs, ... }:
 
 let
 
   cfg = config.modules.mysql;
+  inherit (config.users) user;
   inherit (lib) mkIf mkOption types;
 
 in {

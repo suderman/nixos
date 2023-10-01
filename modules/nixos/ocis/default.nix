@@ -1,5 +1,5 @@
 # modules.ocis.enable = true;
-{ config, lib, pkgs, user, ... }:
+{ config, lib, pkgs, ... }:
   
 let 
 
@@ -10,6 +10,7 @@ let
   signingKey = "${cfg.dataDir}/config/idp-private-key.pem";
   encryptionSecret = "${cfg.dataDir}/config/idp-encryption.key";
 
+  inherit (config.users) user;
   inherit (lib) mkIf mkOption mkBefore types;
 
 in {

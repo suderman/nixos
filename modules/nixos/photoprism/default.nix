@@ -1,11 +1,12 @@
 # modules.photoprism.enable = true;
-{ config, lib, pkgs, user, ... }:
+{ config, lib, pkgs, ... }:
 
 let
 
   cfg = config.modules.photoprism;
   secrets = config.age.secrets;
 
+  inherit (config.users) user;
   inherit (lib) mkIf mkOption mkBefore mkForce types;
   inherit (lib.strings) toInt;
   inherit (builtins) toString;

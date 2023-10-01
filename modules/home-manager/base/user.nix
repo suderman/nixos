@@ -1,11 +1,14 @@
-{ config, lib, pkgs, user, ... }:
+{ config, lib, pkgs, base, ... }:
 
 let
 
   cfg = config.modules.base;
+  inherit (base) user;
   inherit (lib) mkIf;
 
 in {
+
+  options.user = lib.mkOption { type = lib.types.str; default = user; };
 
   # ---------------------------------------------------------------------------
   # User Configuration

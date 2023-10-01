@@ -1,8 +1,9 @@
-{ config, lib, pkgs, user, ... }: 
+{ config, lib, pkgs, base, ... }: 
 
 let
 
   cfg = config.modules.base;
+  inherit (base) user;
   inherit (lib) mkIf;
   inherit (builtins) hasAttr filter;
 
@@ -15,6 +16,10 @@ let
   secrets = config.age.secrets // { inherit (config.modules.secrets) enable; };
 
 in {
+
+  options = {
+    users.user = lib.mkOption { type = lib.types.str; default = user; };
+  };
 
   config = mkIf cfg.enable {
 

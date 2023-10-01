@@ -3,5 +3,6 @@
   domain = "suderman.org"; 
   user = "me"; 
   system = "x86_64-linux";
-  desktop = "gnome"; # desktop = "hyprland"; 
+  modules.gnome.enable = true;
+  # modules.hyprland.enable = true;
 }

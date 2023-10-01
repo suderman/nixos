@@ -1,5 +1,5 @@
 # gtk.enable = true;
-{ config, lib, pkgs, user, ... }: 
+{ config, lib, pkgs, ... }: 
 
 let 
   cfg = config.gtk;

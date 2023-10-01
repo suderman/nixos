@@ -1,9 +1,10 @@
 # modules.keyd.enable = true;
-{ config, lib, pkgs, user, ... }: 
+{ config, lib, pkgs, ... }: 
 
 let 
 
   cfg = config.modules.keyd;
+  inherit (config.users) user;
   inherit (lib) mkIf;
 
 in {

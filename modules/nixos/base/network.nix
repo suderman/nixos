@@ -1,4 +1,4 @@
-{ config, lib, host, domain, ... }:
+{ config, lib, base, ... }:
 
 let
 
@@ -15,8 +15,8 @@ in {
     networking = {
 
       # Hostname passed as argument from flake
-      hostName = host; 
-      domain = domain;
+      hostName = base.host; 
+      domain = base.domain;
 
       # Fewer IP addresses, please
       enableIPv6 = false;

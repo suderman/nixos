@@ -1,10 +1,11 @@
 # modules.nextcloud.enable = true;
-{ config, lib, pkgs, user, ... }:
+{ config, lib, pkgs, ... }:
 
 let
 
   cfg = config.modules.nextcloud;
   secrets = config.age.secrets;
+  inherit (config.users) user;
   inherit (lib) mkIf mkOption types;
 
 in {

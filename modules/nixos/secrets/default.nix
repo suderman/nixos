@@ -1,5 +1,5 @@
 # modules.secrets.enable = true;
-{ config, pkgs, lib, user, inputs, ... }:
+{ config, pkgs, lib, inputs, ... }:
 
 let 
 

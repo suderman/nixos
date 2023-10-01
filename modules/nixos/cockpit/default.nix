@@ -1,5 +1,5 @@
 # modules.cockpit.enable = true;
-{ config, lib, pkgs, user, ... }:
+{ config, lib, pkgs, ... }:
 
 let
 

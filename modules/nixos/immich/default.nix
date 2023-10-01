@@ -1,5 +1,5 @@
 # modules.immich.enable = true;
-{ config, lib, pkgs, user, ... }:
+{ config, lib, pkgs, ... }:
 
 let
 
@@ -8,6 +8,7 @@ let
 
   cfg = config.modules.immich;
 
+  inherit (config.users) user;
   inherit (lib) mkIf mkOption mkBefore options types strings;
   inherit (builtins) toString;
   inherit (lib.strings) toInt;
