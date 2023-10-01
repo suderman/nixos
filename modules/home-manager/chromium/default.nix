@@ -3,7 +3,7 @@
 
 let 
   cfg = config.programs.chromium;
-  inherit (config) user;
+  user = config.home.username;
 
 in {
 
