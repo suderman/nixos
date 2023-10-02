@@ -9,13 +9,13 @@ rec {
   users.all = [ users.blink users.me ];
 
   systems.cog = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdUvzQK5foIc/7wyzgNstR74lY/CeNLKcolnRa3wM+j";
+  systems.eve = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILVIFHAdEcejD3y6+KsZQsHxfvn6xGBy+zDZGET20Bv4";
   systems.hub = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINkT/YqlPNy1SgDyx2SLJWYR5JrBBvbSQtOxEa0j5JFe";
   systems.lux = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH4vCpdLog563yCJ1epf/CaWhQKNvvMYvC5gTe/QfaX2";
-  systems.non = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILVIFHAdEcejD3y6+KsZQsHxfvn6xGBy+zDZGET20Bv4";
   systems.pom = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGxHN343UNDxowh8JH1KMxRjWdUqhc7QYksuOau++h3n";
   systems.rig = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHJbuVdWrt3P1OdK5nc2Arek8VWn4cCz3S8nZahDc1rt";
   systems.sol = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEVjSYCtJ0VAslez3CdPwu4ZWE1hRHb6ceT7+I/+6yqL";
-  systems.all = [ systems.cog systems.hub systems.lux systems.non systems.pom systems.rig systems.sol ];
+  systems.all = [ systems.cog systems.eve systems.hub systems.lux systems.pom systems.rig systems.sol ];
 
   all = users.all ++ systems.all;
 

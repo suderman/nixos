@@ -3,7 +3,7 @@
 let
 
   cfg = config.modules.base;
-  inherit (lib) mkIf;
+  inherit (lib) filterAttrs listToAttrs attrNames mkIf;
 
 in {
 
@@ -48,6 +48,17 @@ in {
 
     };
 
+    # Start ssh agent and add all configurations as known hosts
+    programs.ssh = let 
+      keys = filterAttrs (k: v: k != "all") config.modules.secrets.keys.systems;
+      knownHost = name: { 
+        inherit name;
+        value.publicKey = keys.${name};
+      };
+    in {
+      knownHosts = listToAttrs ( map knownHost (attrNames keys) );
+      startAgent = true;
+    };
 
     # MOTD
     programs.rust-motd = {
