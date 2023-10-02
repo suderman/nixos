@@ -36,7 +36,7 @@
   modules.tiddlywiki.enable = true;
   modules.rsshub.enable = true;
   modules.freshrss.enable = true;
-  modules.wallabag.enable = true;
+  modules.wallabag.enable = false;
 
   # modules.tandoor-recipes.enable = false;
   # modules.nextcloud.enable = false;
