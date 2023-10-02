@@ -50,7 +50,7 @@
   modules.home-assistant.enable = false;
   modules.rsshub.enable = false;
   modules.backblaze.enable = false;
-  modules.wallabag.enable = true;
+  modules.wallabag.enable = false;
 
   modules.cockpit.enable = true;
 
