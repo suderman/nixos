@@ -6,7 +6,13 @@
   home.packages = with pkgs; [ 
     neofetch
     yo
-    # unstable.yazi
+
+    lazygit
+    lazydocker
+    parted
+    imagemagick
+    yt-dlp
+
   ];
 
   modules.yazi.enable = true;

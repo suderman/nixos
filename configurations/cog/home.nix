@@ -39,6 +39,11 @@
     wget
     yo
 
+    lazygit
+    lazydocker
+    parted
+    imagemagick
+
     joypixels
     jetbrains-mono
 
@@ -46,7 +51,7 @@
 
     isy
     lapce
-    anytype-wayland
+    # anytype-wayland
     micro
     quickemu
     xorg.xeyes
@@ -72,7 +77,7 @@
 
     libsForQt5.kdenlive
 
-    join-desktop
+    # join-desktop
 
     unstable.yuzu-mainline
 

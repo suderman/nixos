@@ -112,8 +112,8 @@ in {
     # Enable Docker and set to backend (over podman default)
     virtualisation = {
       docker.enable = true;
-      # docker.storageDriver = "overlay2";
-      docker.storageDriver = "overlay";
+      docker.storageDriver = "overlay2";
+      # docker.storageDriver = "overlay";
       oci-containers.backend = "docker";
     };
 
