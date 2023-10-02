@@ -3,14 +3,6 @@
   modules.base.enable = true;
   modules.secrets.enable = true;
 
-  # Window manager
-  # modules.hyprland.enable = true;
-
-  # terminal du jour
-  modules.kitty.enable = true;
-
-  modules.yazi.enable = true;
-
   # ---------------------------------------------------------------------------
   # Home Enviroment & Packages
   # ---------------------------------------------------------------------------
@@ -55,14 +47,12 @@
     micro
     quickemu
     xorg.xeyes
-    yt-dlp
-    # yt-dlp -f mp4-240p -x --audio-format mp3 https://rumble.com/...
+    yt-dlp # yt-dlp -f mp4-240p -x --audio-format mp3 https://rumble.com/...
 
     _1password
     _1password-gui
     darktable
     digikam
-    # dolphin-emu
     firefox-wayland
     inkscape
     junction
@@ -78,8 +68,8 @@
     libsForQt5.kdenlive
 
     # join-desktop
-
-    unstable.yuzu-mainline
+    # unstable.yuzu-mainline
+    # dolphin-emu
 
   ];
 
@@ -95,6 +85,10 @@
     foot.enable = false;
   };
 
+  modules.yazi.enable = true;
+
+  # terminal du jour
+  modules.kitty.enable = true;
 
   # modules.firefox-pwa.enable = true;
   # home.file.".ssh/id_ed25519".source = "/nix/keys/id_ed25519";
