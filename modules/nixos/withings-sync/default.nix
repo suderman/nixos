@@ -1,4 +1,14 @@
 # modules.withings-sync.enable = true;
+
+# Manually sync today:
+# withings-sync
+#
+# Force a date further back to sync from:
+# withings-sync -f 2023-09-21
+#
+# Check the timer for the next run
+# systemctl list-timers --all 
+
 { inputs, config, pkgs, lib, ... }:
   
 let 
@@ -6,7 +16,7 @@ let
   cfg = config.modules.withings-sync;
   secrets = config.age.secrets;
   inherit (config.users) user;
-  inherit (lib) mkIf;
+  inherit (lib) mkIf mkForce;
 
   # https://github.com/jaroslawhartman/withings-sync/releases/tag/v3.6.1
   img = "ghcr.io/jaroslawhartman/withings-sync:master";
@@ -22,6 +32,8 @@ in {
 
     # Create shell script wrapper for docker run
     environment.systemPackages = let script = ''
+      source "${secrets.withings-env.path}"
+      export GARMIN_USERNAME GARMIN_PASSWORD
       if [[ -v NONINTERACTIVE ]]; then
         docker run ${flags} ${img} "$@"
       else
@@ -47,11 +59,13 @@ in {
       wantedBy = [ "timers.target" ];
       partOf = [ "withings-sync.service" ];
       timerConfig = {
-        # OnCalendar = "*:0/3";
         OnCalendar = "0/1:00";
         Unit = "withings-sync.service";
       };
     };
+
+    # Allow user to read withings-env file
+    age.secrets.withings-env.owner = mkForce user;
 
   }; 
 
