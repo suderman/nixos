@@ -94,12 +94,12 @@
       };
 
       # Make a NixOS system configuration (with home-manager module, if user isn't "root")
-      mkSystem = config: inputs.nixpkgs.lib.nixosSystem rec {
-        specialArgs = { inherit inputs outputs; base = (import config); };
+      mkSystem = path: inputs.nixpkgs.lib.nixosSystem rec {
+        specialArgs = { inherit inputs outputs; base = import (path + /base.nix); };
         inherit (specialArgs.base) system;
         pkgs = mkPkgs system;
         modules = [ 
-          (config + /configuration.nix)
+          (path + /configuration.nix)
           ./modules 
           ./secrets 
           caches
@@ -108,11 +108,11 @@
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
-              extraSpecialArgs = { inherit inputs outputs; base = (import config); };
+              extraSpecialArgs = { inherit inputs outputs; base = import (path + /base.nix); };
               users."${specialArgs.base.user}" = let home = { imports }: { inherit imports; };
               in home { 
                 imports = [
-                  (config + /home.nix)
+                  (path + /home.nix)
                   ./modules/home.nix 
                   ./secrets 
                   caches
@@ -124,11 +124,11 @@
       };
 
       # Make a Home Manager configuration
-      mkUser = config: inputs.home-manager.lib.homeManagerConfiguration rec {
-        extraSpecialArgs = { inherit inputs outputs; base = (import config); };
+      mkUser = path: inputs.home-manager.lib.homeManagerConfiguration rec {
+        extraSpecialArgs = { inherit inputs outputs; base = import (path + /base.nix); };
         pkgs = mkPkgs extraSpecialArgs.system;
         modules = [ 
-          (config + /home.nix)
+          (path + /home.nix)
           ./modules/home.nix 
           ./secrets 
           caches
