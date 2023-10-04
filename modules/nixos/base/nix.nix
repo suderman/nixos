@@ -25,10 +25,17 @@ in {
       # Supress annoying warning
       warn-dirty = false;
 
+      # builders = 
+
+      # Speed up remote builds
       builders-use-substitutes = true;
 
     };
 
+    nix.sshServe = {
+      enable = true;
+      keys = config.modules.secrets.keys.all;
+    };
 
     # Automatic garbage collection
     nix.gc = {
@@ -43,7 +50,6 @@ in {
 
     # Map registries to channels
     # Very useful when using legacy commands
-    # nix.nixPath = mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry;
     nix.nixPath = let path = toString ./.; in [ "repl=${path}/repl.nix" "nixpkgs=${inputs.nixpkgs}" ];
 
     # Automatically upgrade this system while I sleep
