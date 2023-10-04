@@ -1,3 +1,4 @@
+# Compatible as both nixos and home-manager module
 { config, lib, ... }: with lib; {
 
   options.modules.secrets = mkOption { type = types.attrs; };

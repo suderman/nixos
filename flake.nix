@@ -100,7 +100,7 @@
         pkgs = mkPkgs system;
         modules = [ 
           (config + /configuration.nix)
-          ./modules/nixos 
+          ./modules 
           ./secrets 
           caches
         ] ++ (if specialArgs.base.user == "root" then [] else [
@@ -113,7 +113,7 @@
               in home { 
                 imports = [
                   (config + /home.nix)
-                  ./modules/home-manager 
+                  ./modules/home.nix 
                   ./secrets 
                   caches
                 ]; 
@@ -129,7 +129,7 @@
         pkgs = mkPkgs extraSpecialArgs.system;
         modules = [ 
           (config + /home.nix)
-          ./modules/home-manager 
+          ./modules/home.nix 
           ./secrets 
           caches
         ];
