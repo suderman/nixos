@@ -19,6 +19,7 @@
     ./neovim/home.nix
     ./secrets/home.nix
     ./tmux/home.nix
+    ./waybar/home.nix
     ./wezterm/home.nix
     ./yazi/home.nix
     ./zsh/home.nix

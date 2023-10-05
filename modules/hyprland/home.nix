@@ -4,11 +4,7 @@
 let 
 
   cfg = config.modules.hyprland;
-
   inherit (lib) mkIf;
-  inherit (config.lib.file) mkOutOfStoreSymlink;
-
-  dir = "/etc/nixos/modules/hyprland";
 
 in {
 
@@ -24,24 +20,23 @@ in {
   config = mkIf cfg.enable {
 
     modules.eww.enable = true;
+    modules.waybar.enable = true;
     # modules.anyrun.enable = true;
 
-    # programs.waybar = {
-    #   enable = true;
-    #   package = pkgs.unstable.waybar;
-    # };
-
     home.packages = with pkgs; [ 
-      gnome.nautilus
       wofi
       tofi
-      wezterm
-      unstable.waybar
+
       hyprpaper
       brightnessctl
       mako
       # pamixer
       # ncpamixer
+
+      font-awesome
+
+      gnome.nautilus
+      wezterm
 
       swaybg # the wallpaper
       swayidle # the idle timeout
@@ -60,22 +55,18 @@ in {
       hyprland = "Hyprland";
     };
 
-    # xdg.configFile."hypr/local.conf".source = mkOutOfStoreSymlink "${dir}/local.conf";
-
     wayland.windowManager.hyprland = {
       enable = true;
-      plugins = [
-        # inputs.hyprland-plugins.packages.${pkgs.system}.hyprbars
-      ];
+      # plugins = [ inputs.hyprland-plugins.packages.${pkgs.system}.hyprbars ];
       recommendedEnvironment = true;
-      extraConfig = builtins.readFile ./hyprland.conf;
-      # extraConfig = ''
-      #   exec-once=dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
-      #   source = ~/.config/hypr/local.conf
-      # '';
+      extraConfig = builtins.readFile ./hyprland.conf + "\n\n" + ''
+        source = ~/.config/hypr/local.conf
+      '';
     };
 
+    # Local override config
     home.activation.hyprland = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      $DRY_RUN_CMD mkdir -p $HOME/.config/hypr
       $DRY_RUN_CMD touch $HOME/.config/hypr/local.conf
     '';
 
