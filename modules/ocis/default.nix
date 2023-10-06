@@ -3,6 +3,9 @@
   
 let 
 
+  # https://github.com/owncloud/ocis/releases
+  version = "4.0.2";
+
   cfg = config.modules.ocis;
   secrets = config.age.secrets;
 
@@ -54,9 +57,7 @@ in {
 
     # Docker container
     virtualisation.oci-containers.containers.ocis = {
-      # image = "owncloud/ocis:latest";
-      # image = "owncloud/ocis:3.1.0-beta.1";
-      image = "owncloud/ocis:4.0.0";
+      image = "owncloud/ocis:${version}";
       autoStart = true;
 
       entrypoint = "/bin/sh";
@@ -84,7 +85,6 @@ in {
         IDP_ENCRYPTION_SECRET_FILE = encryptionSecret;
         IDM_CREATE_DEMO_USERS = "false";
       };
-
 
       # IDM_ADMIN_PASSWORD=xxxxxxxxxxxxxxx;
       # NOTIFICATIONS_SMTP_HOST=smtp.example.com;
