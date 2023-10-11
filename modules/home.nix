@@ -17,6 +17,7 @@
     ./keyd/home.nix
     ./kitty/home.nix
     ./neovim/home.nix
+    ./ocis/home.nix
     ./secrets/home.nix
     ./tmux/home.nix
     ./waybar/home.nix

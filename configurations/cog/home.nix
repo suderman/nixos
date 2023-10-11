@@ -59,7 +59,6 @@
     libreoffice 
     newsflash
     unstable.nodePackages_latest.immich
-    unstable.owncloud-client
 
     beeper
     tdesktop
@@ -85,10 +84,14 @@
     foot.enable = false;
   };
 
+
   modules.yazi.enable = true;
 
   # terminal du jour
   modules.kitty.enable = true;
+
+  # File sync
+  modules.ocis.enable = true;
 
   # modules.firefox-pwa.enable = true;
   # home.file.".ssh/id_ed25519".source = "/nix/keys/id_ed25519";
