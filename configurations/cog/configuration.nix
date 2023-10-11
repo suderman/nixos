@@ -87,15 +87,17 @@
   # sudo fwupdmgr update
   services.fwupd.enable = true;
 
-  # # Power management
-  # services.tlp.enable = false;
-  # services.tlp.settings = {
-  #   CPU_BOOST_ON_BAT = 0;
-  #   CPU_SCALING_GOVERNOR_ON_BATTERY = "powersave";
-  #   START_CHARGE_THRESH_BAT0 = 90;
-  #   STOP_CHARGE_THRESH_BAT0 = 97;
-  #   RUNTIME_PM_ON_BAT = "auto";
-  # };
+  # Power management
+  services.power-profiles-daemon.enable = false;
+  services.tlp.enable = true;
+  services.tlp.settings = {
+    SATA_LINKPWR_ON_BAT = "max_performance";
+    # CPU_BOOST_ON_BAT = 0;
+    # CPU_SCALING_GOVERNOR_ON_BATTERY = "powersave";
+    # START_CHARGE_THRESH_BAT0 = 90;
+    # STOP_CHARGE_THRESH_BAT0 = 97;
+    # RUNTIME_PM_ON_BAT = "auto";
+  };
 
   # # Suspend-then-hibernate after two hours
   # services.logind = {
@@ -109,8 +111,8 @@
   # };
   # systemd.sleep.extraConfig = "HibernateDelaySec=2h";
   services.logind = {
-    lidSwitch = "lock";
-    lidSwitchExternalPower = "lock";
+    lidSwitch = "suspend";
+    lidSwitchExternalPower = "suspend";
     lidSwitchDocked = "ignore";
     # extraConfig = ''
     #   IdleActionSec=30m

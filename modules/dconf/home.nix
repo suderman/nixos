@@ -51,8 +51,10 @@ in {
 
       # Power button suspends system
       "org/gnome/settings-daemon/plugins/power" = {
-        power-button-action = "hibernate"; # default is suspend
-        sleep-inactive-battery-type = "hibernate"; # when battery: idle means hibernate 
+        power-button-action = "interactive"; # default is suspend
+        sleep-inactive-battery-type = "suspend"; # when battery: idle means hibernate 
+        # power-button-action = "hibernate"; # default is suspend
+        # sleep-inactive-battery-type = "hibernate"; # when battery: idle means hibernate 
         sleep-inactive-battery-timeout = "1800"; # when battery: idle after half hour
         sleep-inactive-ac-type = "nothing"; # when ac: idle means do nothing (just let screensaver lock occur) 
         sleep-inactive-ac-timeout = "0"; # when ac: don't idle at all
