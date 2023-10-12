@@ -10,6 +10,7 @@
     ./firefox-pwa/home.nix
     ./foot/home.nix
     ./fzf/home.nix
+    ./gimp/home.nix
     ./git/home.nix
     ./gnome/home.nix
     ./gtk/home.nix

@@ -11,6 +11,7 @@ let
   # The ownCloud client automatically creates a directory in home called "~/ownCloud - My Name"
   # This is the default folder sync connection even though I've configurated a custom one called "~/data"
   # The script below deletes the unused default folder (only if it is empty)
+  # https://central.owncloud.org/t/default-folder-created-at-each-start/44101
   script = with pkgs; writeShellScript "owncloud-client-clean" ''
     PATH=${makeBinPath [ coreutils findutils ]}
     set -euxo pipefail

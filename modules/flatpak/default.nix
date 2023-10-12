@@ -16,7 +16,7 @@ in {
 
     services.flatpak.enable = true;
 
-    systemd.services.flatpak = mkIf cfg.enable {
+    systemd.services.flatpak = {
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {
         Type = "oneshot";
@@ -28,7 +28,6 @@ in {
     };
 
     xdg.portal.enable = true;
-    # xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
 
   };
 

@@ -93,6 +93,8 @@
   # File sync
   modules.ocis.enable = true;
 
+  modules.gimp.enable = true;
+
   # modules.firefox-pwa.enable = true;
   # home.file.".ssh/id_ed25519".source = "/nix/keys/id_ed25519";
 
