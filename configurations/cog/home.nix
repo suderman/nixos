@@ -98,4 +98,23 @@
   # modules.firefox-pwa.enable = true;
   # home.file.".ssh/id_ed25519".source = "/nix/keys/id_ed25519";
 
+  systemd.user.services.foobar-hm = {
+    Unit = {
+      Description = "Foobar Home-Manager";
+      After = [ "graphical-session.target" ];
+      Requires = [ "graphical-session.target" ];
+    };
+    Install.WantedBy = [ "default.target" ];
+    Service = {
+      Type = "oneshot";
+      RemainAfterExit = "yes";
+      Environment=''"FOO=bar"'';
+      ExecStart = with pkgs; writeShellScript "foobar-hm" ''
+        PATH=${lib.makeBinPath [ coreutils ]}
+        touch /tmp/foobar-hm.txt
+        date >> /tmp/foobar-hm.txt
+      '';
+    };
+  };
+
 }

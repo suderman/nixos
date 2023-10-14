@@ -6,6 +6,7 @@ let
   cfg = config.modules.gimp;
   inherit (lib) mkIf makeBinPath;
 
+  # https://www.gimp.org/downloads/devel/
   app = "org.gimp.GIMP";
   ref = "https://flathub.org/beta-repo/appstream/org.gimp.GIMP.flatpakref";
 

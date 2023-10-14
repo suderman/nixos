@@ -124,5 +124,23 @@
   #   ACTION=="add", SUBSYSTEM=="usb", DRIVER=="usb", ATTR{power/wakeup}="enabled"
   # '';
 
+  systemd.user.services.foobar = {
+    description = "Foobar NixOS";
+    after = [ "graphical-session.target" ];
+    requires = [ "graphical-session.target" ];
+    wantedBy = [ "default.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = "yes";
+    };
+    environment = {
+      FOO = "bar";
+    };
+    path = with pkgs; [ coreutils ];
+    script = ''
+      touch /tmp/foobar.txt
+      date >> /tmp/foobar.txt
+    '';
+  };
 
 }
