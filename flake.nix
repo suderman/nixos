@@ -143,34 +143,51 @@
         # Bootstrap configuration
         bootstrap = mkSystem ./configurations/bootstrap;
 
-        # Framework Laptop
-        cog = mkSystem ./configurations/cog;
+         # # Bender on OrRacle Cloud
+        bender = mkSystem ./configurations/bender;
+        
+        # # Framework Laptop
+        # cog = mkSystem ./configurations/cog;
 
-        # 2009 Mac Pro (at work)
-        eve = mkSystem ./configurations/eve;
+        # # 2009 Mac Pro (at work)
+        # eve = mkSystem ./configurations/eve;
 
-        # Intel NUC home server
-        hub = mkSystem ./configurations/hub;
+        # # Intel NUC home server
+        # hub = mkSystem ./configurations/hub;
 
-        # Intel NUC media server
-        lux = mkSystem ./configurations/lux;
+        # # Intel NUC media server
+        # lux = mkSystem ./configurations/lux;
 
-        # Mac Mini
-        pom = mkSystem ./configurations/pom;
+        # # Mac Mini
+        # pom = mkSystem ./configurations/pom;
 
-        # 2009 Mac Pro (at home)
-        rig = mkSystem ./configurations/rig;
+        # # 2009 Mac Pro (at home)
+        # rig = mkSystem ./configurations/rig;
 
-        # Linode VPS
-        sol = mkSystem ./configurations/sol;
+        # # Linode VPS
+        # sol = mkSystem ./configurations/sol;
 
       };
 
       # Home configurations on other systems
       homeConfigurations = {
         # umbra = mkUser ./configurations/umbra; /* system = "x86_64-darwin" */
+        chris = mkUser ./configurations/chris-pc; /* system = "x86_64-linux" */
+        # "chris" = inputs.home-manager.lib.homeManagerConfiguration {
+        #   pkgs = mkPkgs "x86_64-linux;
+        #   modules = [
+        #     ./configurations/chris-pc/home.nix
+        #     ./modules/home.nix
+        #     {
+        #       home = {
+        #         username = "chris";
+        #         homeDirectory = "/home/chris";
+        #         stateVersion = "22.05";
+        #       };
+        #     }
+        #   ];
+        # };
       };
-
     };
 
 }
