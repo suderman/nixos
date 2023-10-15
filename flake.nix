@@ -126,7 +126,7 @@
       # Make a Home Manager configuration
       mkUser = path: inputs.home-manager.lib.homeManagerConfiguration rec {
         extraSpecialArgs = { inherit inputs outputs; base = import (path + /base.nix); };
-        pkgs = mkPkgs extraSpecialArgs.system;
+        pkgs = mkPkgs extraSpecialArgs.base.system;
         modules = [ 
           (path + /home.nix)
           ./modules/home.nix 
@@ -174,7 +174,7 @@
         # umbra = mkUser ./configurations/umbra; /* system = "x86_64-darwin" */
         chris = mkUser ./configurations/chris-pc; /* system = "x86_64-linux" */
         # "chris" = inputs.home-manager.lib.homeManagerConfiguration {
-        #   pkgs = mkPkgs "x86_64-linux;
+        #   pkgs = mkPkgs "x86_64-linux"; # import nixpkgs { system = "x86_64-linux"; };
         #   modules = [
         #     ./configurations/chris-pc/home.nix
         #     ./modules/home.nix
