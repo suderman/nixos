@@ -12,8 +12,8 @@ in {
       ignores = [ "*~" "*.swp" ];
       extraConfig = {
         user = {
-          name = "Jon Suderman";
-          email = "jon@suderman.net";
+          name = "Buxel";
+          email = "buxel.dev@gmail.com";
         };
         core = {
           autocrlf = "input";
