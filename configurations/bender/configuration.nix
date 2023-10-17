@@ -13,11 +13,11 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Web services
-  modules.tailscale.enable = true;
-  modules.ddns.enable = true;
+  # modules.tailscale.enable = true;
+  # modules.ddns.enable = true;
   modules.whoami.enable = true;
 
-  modules.cockpit.enable = true;
+  # modules.cockpit.enable = true;
 
 
   # Test later. next generation owncloud
