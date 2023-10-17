@@ -4,6 +4,7 @@
 {
 
   basic-auth = ./basic-auth.age;
+  cloudflare-env = ./cloudflare-env.age;
   ocis-env = ./ocis-env.age;
   password-hash = ./password-hash.age;
   traefik-env = ./traefik-env.age;
