@@ -72,7 +72,7 @@ Clone git repo into `/mnt/nix/state/etc/nixos` and add generated `hardware-confi
 
 ```zsh
 # Clone git repo
-git clone https://github.com/suderman/nixos /mnt/nix/state/etc/nixos 
+git clone https://github.com/buxel/nixos /mnt/nix/state/etc/nixos 
 
 # Generate config and copy hardware-configuration.nix to /mnt/nix/state/etc/nixos/nixos/configurations/cog/hardware-configuration.nix
 nixos-generate-config --root /mnt

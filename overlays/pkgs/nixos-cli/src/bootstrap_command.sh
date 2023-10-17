@@ -1,5 +1,5 @@
 local iso="https://channels.nixos.org/nixos-22.11/latest-nixos-minimal-x86_64-linux.iso"
-local cli="https://github.com/suderman/nixos/raw/main/overlays/pkgs/nixos-cli/nixos"
+local cli="https://github.com/buxel/nixos/raw/main/overlays/pkgs/nixos-cli/nixos"
 local dir="/etc/nixos" config hardware firmware swap default_swap
 
 function main {
@@ -452,7 +452,7 @@ function stage1 {
   if [ -d $nixos ]; then
     task "cd $nixos && git pull"
   else
-    task "git clone https://github.com/suderman/nixos $nixos"
+    task "git clone https://github.com/buxel/nixos $nixos"
   fi
   echo
 
