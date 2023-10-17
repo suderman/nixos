@@ -3,6 +3,7 @@
 # Please add age files to /etc/nixos/secrets/files/*.age 
 {
 
+  basic-auth = ./basic-auth.age;
   ocis-env = ./ocis-env.age;
   password-hash = ./password-hash.age;
   traefik-env = ./traefik-env.age;
