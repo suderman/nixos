@@ -3,16 +3,6 @@
 # Please add age files to /etc/nixos/secrets/files/*.age 
 {
 
-  alphanumeric-secret = ./alphanumeric-secret.age;
-  basic-auth = ./basic-auth.age;
-  btrbk-key = ./btrbk-key.age;
-  cloudflare-env = ./cloudflare-env.age;
-  immich-env = ./immich-env.age;
   ocis-env = ./ocis-env.age;
-  password-hash = ./password-hash.age;
-  password = ./password.age;
-  smtp-env = ./smtp-env.age;
-  traefik-env = ./traefik-env.age;
-  withings-env = ./withings-env.age;
 
 }
