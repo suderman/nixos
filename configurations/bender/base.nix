@@ -1,6 +1,6 @@
 {
   host = "bender"; 
   domain = "pingbit.de"; 
-  user = "root"; 
+  user = "me"; 
   system = "aarch64-linux";
 }
