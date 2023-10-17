@@ -13,4 +13,4 @@ Enable module in configuration like so:
 }
 ```
 
-See `nixos secrets` CLI usage [here](https://github.com/suderman/nixos/tree/main/secrets).
+See `nixos secrets` CLI usage [here](https://github.com/buxel/nixos/tree/main/secrets).

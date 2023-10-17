@@ -1,10 +1,10 @@
 # secrets
 
-Sensitive [files](https://github.com/suderman/nixos/tree/main/secrets/files)
+Sensitive [files](https://github.com/buxel/nixos/tree/main/secrets/files)
 are age-encrypted using the [agenix](https://github.com/ryantm/agenix) CLI,
 and decrypted by that module using SSH public
-[keys](https://github.com/suderman/nixos/tree/main/secrets/keys). The
-[secrets.nix](https://github.com/suderman/nixos/blob/main/secrets/secrets.nix)
+[keys](https://github.com/buxel/nixos/tree/main/secrets/keys). The
+[secrets.nix](https://github.com/buxel/nixos/blob/main/secrets/secrets.nix)
 file is not imported into my NixOS configuration, but strictly used by the `agenix` CLI.
 
 ## Module Usage
@@ -33,7 +33,7 @@ documentation](https://github.com/ryantm/agenix#reference).
 ## CLI Commands
 
 A few helper
-[scripts](https://github.com/suderman/nixos/tree/main/secrets/scripts) are
+[scripts](https://github.com/buxel/nixos/tree/main/secrets/scripts) are
 included to streamline the management of secrets, which is a bit of a manual
 process when using the `agenix` CLI alone:
 
@@ -87,7 +87,7 @@ file. Then run the follwing command:
 To remove a secret, manually remove that `age` file from the `secrets/files`
 directory. Next, remove any references to that file in the
 `secrets/secrets.nix` file. Also, remove any references to this secret in the
-[modules](https://github.com/suderman/nixos/tree/main/modules) directory. Then
+[modules](https://github.com/buxel/nixos/tree/main/modules) directory. Then
 run the following command:
 
     nixos rekey
