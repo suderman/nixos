@@ -9,8 +9,8 @@
   cloudflare-env = ./cloudflare-env.age;
   immich-env = ./immich-env.age;
   ocis-env = ./ocis-env.age;
-  password = ./password.age;
   password-hash = ./password-hash.age;
+  password = ./password.age;
   smtp-env = ./smtp-env.age;
   traefik-env = ./traefik-env.age;
   withings-env = ./withings-env.age;
