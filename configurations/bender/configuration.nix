@@ -13,7 +13,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Traefik logging
-  services.traefik.staticConfigOptions.log.level = "DEBUG;
+  services.traefik.staticConfigOptions.log.level = "DEBUG";
 
   # Web services
   modules.tailscale.enable = true;
