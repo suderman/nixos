@@ -85,7 +85,7 @@ in {
             "192.168.0.0/16" # local network
             "10.0.0.0/8"     # local network
             "172.16.0.0/12"  # docker network
-            "100.105.0.0/10"  # vpn network
+            "100.64.0.0/10"  # vpn network 100.64.0.0 to 100.127.255.255
           ];
 
         };
