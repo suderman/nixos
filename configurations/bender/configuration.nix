@@ -12,6 +12,9 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  # Traefik logging
+  services.traefik.staticConfigOptions.log.level = "DEBUG;
+
   # Web services
   modules.tailscale.enable = true;
   modules.ddns.enable = true;
