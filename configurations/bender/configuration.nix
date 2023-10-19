@@ -14,15 +14,15 @@
 
   # Traefik logging
   services.traefik.staticConfigOptions.log.level = "DEBUG";
-
-  # Web services
+  
+  # Network
   modules.tailscale.enable = true;
   modules.ddns.enable = true;
   modules.whoami.enable = true;
-  modules.cockpit.enable = true;
+  networking.extraHosts = "";
 
 
-  # Test later. next generation owncloud
+  # Web services
   modules.ocis.enable = true;
 
 
