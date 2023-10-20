@@ -4,7 +4,7 @@
 let
 
   # https://github.com/immich-app/immich/releases
-  version = "1.81.1";
+  version = "1.82.1";
 
   cfg = config.modules.immich;
 
@@ -127,7 +127,8 @@ in {
         RemainAfterExit = "yes";
         EnvironmentFile = cfg.environment.file;
       };
-      script = ''
+      path = with pkgs; [ docker ];
+      script = with config.virtualisation.oci-containers.containers; ''
         sleep 5
         #
         # Ensure docker network exists
@@ -140,6 +141,14 @@ in {
         # Ensure database user has expected password
         ${pkgs.sudo}/bin/sudo -u postgres ${pkgs.postgresql}/bin/psql postgres \
           -c "alter user immich with password '$DB_PASSWORD'"
+        #
+        # Pull all docker images
+        docker pull ${immich-typesense.image};
+        docker pull ${immich-redis.image};
+        docker pull ${immich-machine-learning.image};
+        docker pull ${immich-server.image};
+        docker pull ${immich-web.image};
+        docker pull ${immich-proxy.image};
       '';
     };
 
@@ -147,6 +156,21 @@ in {
     # systemd.tmpfiles.rules = [
     #   "d '${cfg.dataDir}' 0700 ${cfg.user} ${cfg.group} - -"
     # ];
+
+    # # sudo systemctl start immich-pull
+    # systemd.services.immich-pull = {
+    #   description = "Pull docker images for Immich";
+    #   serviceConfig.Type = "oneshot";
+    #   path = with pkgs; [ docker ];
+    #   script = with config.virtualisation.oci-containers.containers; ''
+    #     docker pull ${immich-typesense.image};
+    #     docker pull ${immich-redis.image};
+    #     docker pull ${immich-machine-learning.image};
+    #     docker pull ${immich-server.image};
+    #     docker pull ${immich-web.image};
+    #     docker pull ${immich-proxy.image};
+    #   '';
+    # };
 
   };
 
