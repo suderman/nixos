@@ -26,8 +26,8 @@
   modules.ocis.enable = true;
 
 
-  # modules.immich = {
-  #   enable = true;
-  #   photosDir = "/data/photos/immich";
-  # };
+  modules.immich = {
+    enable = true;
+    photosDir = "/data/photos/immich";
+  };
 }
