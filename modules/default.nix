@@ -33,6 +33,7 @@
     ./plex
     ./postgresql
     ./radarr
+    ./rclone
     ./rsshub
     ./sabnzbd
     ./secrets
