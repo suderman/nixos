@@ -57,9 +57,9 @@ in {
     # Add user to the rclone group
     users.users."${user}".extraGroups = [ "rclone" ]; 
 
-    environment.systemPackages = [ pkgs.rclone ];
-    system.fsPackages = [ pkgs.rclone ];
-    systemd.packages = [ pkgs.rclone ];
+    environment.systemPackages = [ pkgs.unstable.rclone ];
+    system.fsPackages = [ pkgs.unstable.rclone ];
+    systemd.packages = [ pkgs.unstable.rclone ];
     
     systemd.mounts = [{
       description = "Rclone mount test";
