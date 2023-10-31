@@ -57,6 +57,7 @@ in {
     # Add user to the rclone group
     users.users."${user}".extraGroups = [ "rclone" ]; 
 
+    environment.systemPackages = [ pkgs.rclone ];
     system.fsPackages = [ pkgs.rclone ];
     systemd.packages = [ pkgs.rclone ];
     
