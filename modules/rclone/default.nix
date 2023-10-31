@@ -23,7 +23,7 @@ in {
 
     remote = mkOption {
       type = types.str;
-      default = "memoryRemote";
+      default = "memoryRemote:";
       description = "Name of rclone remote defined in RClone config";
     };
 
