@@ -1,4 +1,4 @@
-# modules.immich.enable = true;
+# modules.rclone.enable = true;
 { config, lib, pkgs, ... }:
 
 let
@@ -12,28 +12,14 @@ let
 
   configFile = pkgs.writeTextFile {
     name = "rclone.conf";
-    text = builtins.toINI cfg.settings;
+    text = lib.generators.toINI {} cfg.settings;
     checkPhase = "${pkgs.rclone}/bin/rclone config show --config $out";
   };
 
-in {
-
-  # Service order reference:
-  # https://github.com/immich-app/immich/blob/main/docker/docker-compose.yml
-  imports = [
-
-  ];
-
-
+in {  
   options.modules.rclone = {
 
     enable = options.mkEnableOption "rclone"; 
-
-    rcloneConfigPath = mkOption {
-      type = types.path;
-      default = "/etc/rclone.conf";
-      description = "RClone config file";
-    };
 
     remote = mkOption {
       type = types.str;
@@ -75,10 +61,10 @@ in {
     
     systemd.mounts = [{
       description = "Rclone mount test";
-      what = ${cfg.remote};
-      where = ${cfg.mountPath};
+      what = cfg.remote;
+      where = cfg.mountPath;
       type = "rclone";
-      options = "rw,_netdev,allow_other,args2env,vfs-cache-mode=writes,config=${configFile},cache-dir=${cacheDir}"; 
+      options = "rw,_netdev,allow_other,args2env,vfs-cache-mode=writes,config=${configFile},cache-dir=${cfg.cacheDir}"; 
     }]; 
     # systemd.mounts = [{
     #   description = "Rclone mount for ${cfg.remote}";
