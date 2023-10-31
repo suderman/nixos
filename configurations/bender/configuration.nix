@@ -21,6 +21,7 @@
   modules.whoami.enable = true;
   networking.extraHosts = "";
 
+  modules.rclone.enable = true;
 
   # Web services
   modules.ocis.enable = true;
