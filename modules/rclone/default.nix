@@ -77,16 +77,6 @@ in {
       wantedBy = [ "multi-user.target" ];
     }];
 
-    # /etc/systemd/system/var-gdrive.automount
-    # [Unit]
-    # After=network-online.target
-    # Before=remote-fs.target
-    # [Automount]
-    # Where=/var/gdrive
-    # TimeoutIdleSec=600
-    # [Install]
-    # WantedBy=multi-user.target
-
 
     # systemd.services.rclone-test-mount = {
     #   # path = with pkgs; [
@@ -116,7 +106,7 @@ in {
     #     Restart = "always";
     #     RestartSec = "10s";
     #   };
-    };
+    # };
 
 
 
