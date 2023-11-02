@@ -23,8 +23,8 @@
 
   modules.rclone.enable = true;
   modules.rclone.configPath = config.age.secrets.rclone-conf.path;
-  modules.rclone.remote = "azure-data:";
-  modules.rclone.mountPath = "/mnt/rclone/azure";
+  modules.rclone.remote = "azure-data:photos";
+  modules.rclone.mountPath = "/mnt/photos";
 
 
   # Web services
