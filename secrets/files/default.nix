@@ -8,6 +8,7 @@
   immich-env = ./immich-env.age;
   ocis-env = ./ocis-env.age;
   password-hash = ./password-hash.age;
+  rclone-conf = ./rclone-conf.age;
   traefik-env = ./traefik-env.age;
 
 }
