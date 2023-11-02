@@ -67,4 +67,6 @@ with (import ./keys); {
   # NOTIFICATIONS_SMTP_SENDER=user@example.com
   # NOTIFICATIONS_SMTP_PASSWORD=xxxxxxxxxxxx
   "files/ocis-env.age".publicKeys = all;
+  "files/rclone-conf.age".publicKeys = all;
+
 }

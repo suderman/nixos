@@ -62,7 +62,7 @@ in {
       what = cfg.remote;
       where = cfg.mountPath;
       type = "rclone";
-      options = "rw,_netdev,allow_other,args2env,vfs-cache-mode=writes,config=${configPath},cache-dir=${cfg.cacheDir}"; 
+      options = "rw,_netdev,allow_other,args2env,vfs-cache-mode=writes,config=${cfg.configPath},cache-dir=${cfg.cacheDir}"; 
     }]; 
 
     systemd.automounts = [{
