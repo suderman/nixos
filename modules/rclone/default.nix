@@ -55,52 +55,54 @@ in {
     system.fsPackages = [ pkgs.unstable.rclone ];
     systemd.packages = [ pkgs.unstable.rclone ];
     
-    systemd.mounts = [{
-      description = "Rclone mount test";
-      after = [ "network-online.target" ];
-      what = cfg.remote;
-      where = cfg.mountPath;
-      type = "rclone";
-      options = "rw,_netdev,allow_other,args2env,vfs-cache-mode=writes,log-level=DEBUG,config=${cfg.configPath},cache-dir=${cfg.cacheDir}"; 
-    }]; 
+    systemd.services.rclone-test-mount = {
+      # path = with pkgs; [
+      #   "/run/wrappers" # if you need something from /run/wrappers/bin, sudo, for example
+      # ];
+      description = "Mount rclone ";    
+      wantedBy = ["multi-user.target"];
+      # before = [ "phpfpm-nextcloud.service" ];
+      serviceConfig = {
+        # User = "nextcloud";
+        # Group = "nextcloud";
+        ExecStartPre = "/run/current-system/sw/bin/mkdir -p ${cfg.mountPath}";
+        ExecStart = ''
+          ${pkgs.rclone}/bin/rclone mount ${cfg.remote} ${cfg.mountPath} \
+            --config=${configPath} \
+            --allow-other \
+            --dir-perms=770 \
+            --file-perms=0664 \
+            --umask=002 \
+            --allow-non-empty \
+            --log-level=INFO \
+            --vfs-cache-mode full \
+            --vfs-cache-max-size 20G
+        '';
+        ExecStop = "/run/wrappers/bin/fusermount -u ${cfg.mountPath}";
+        Type = "notify";
+        Restart = "always";
+        RestartSec = "10s";
+      };
+    };
 
-    systemd.automounts = [{
-      after = [ "network-online.target" ];
-      before = [ "remote-fs.target" ];
-      where = cfg.mountPath;
-      wantedBy = [ "multi-user.target" ];
-    }];
+    # systemd.mounts = [{
+    #   description = "Rclone mount test";
+    #   after = [ "network-online.target" ];
+    #   what = cfg.remote;
+    #   where = cfg.mountPath;
+    #   type = "rclone";
+    #   options = "rw,_netdev,allow_other,args2env,vfs-cache-mode=writes,log-level=DEBUG,config=${cfg.configPath},cache-dir=${cfg.cacheDir}"; 
+    # }]; 
+
+    # systemd.automounts = [{
+    #   after = [ "network-online.target" ];
+    #   before = [ "remote-fs.target" ];
+    #   where = cfg.mountPath;
+    #   wantedBy = [ "multi-user.target" ];
+    # }];
 
 
-    # systemd.services.rclone-test-mount = {
-    #   # path = with pkgs; [
-    #   #   "/run/wrappers" # if you need something from /run/wrappers/bin, sudo, for example
-    #   # ];
-    #   description = "Mount rclone ";    
-    #   wantedBy = ["multi-user.target"];
-    #   # before = [ "phpfpm-nextcloud.service" ];
-    #   serviceConfig = {
-    #     # User = "nextcloud";
-    #     # Group = "nextcloud";
-    #     ExecStartPre = "/run/current-system/sw/bin/mkdir -p ${cfg.mountPath}";
-    #     ExecStart = ''
-    #       ${pkgs.rclone}/bin/rclone mount ${cfg.remote} ${cfg.mountPath} \
-    #         --config=${configFile} \
-    #         --allow-other \
-    #         --dir-perms=770 \
-    #         --file-perms=0664 \
-    #         --umask=002 \
-    #         --allow-non-empty \
-    #         --log-level=INFO \
-    #         --vfs-cache-mode full \
-    #         --vfs-cache-max-size 20G
-    #     '';
-    #     ExecStop = "/run/wrappers/bin/fusermount -u ${cfg.mountPath}";
-    #     Type = "notify";
-    #     Restart = "always";
-    #     RestartSec = "10s";
-    #   };
-    # };
+
 
 
 
