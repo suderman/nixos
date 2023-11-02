@@ -56,9 +56,9 @@ in {
     systemd.packages = [ pkgs.unstable.rclone ];
     
     systemd.services.rclone-azure-mount = {
-      # path = with pkgs; [
-      #   "/run/wrappers" # if you need something from /run/wrappers/bin, sudo, for example
-      # ];
+      path = with pkgs; [
+        "/run/wrappers" # if you need something from /run/wrappers/bin, sudo, for example
+      ];
       description = "Mount rclone ";    
       wantedBy = ["multi-user.target"];
       # before = [ "phpfpm-nextcloud.service" ];
