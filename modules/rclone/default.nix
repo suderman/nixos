@@ -39,13 +39,8 @@ in {
       description = "Cache directory for rclone vfs";
     };
 
-    settings = mkOption { 
-      type = types.attrs; 
-      default = {
-        memoryRemote = {
-          type = "memory";
-        };
-      };
+    configPath = mkOption { 
+      type = types.path; 
       description = "RClone config.";
     };
 
@@ -67,7 +62,7 @@ in {
       what = cfg.remote;
       where = cfg.mountPath;
       type = "rclone";
-      options = "rw,_netdev,allow_other,args2env,vfs-cache-mode=writes,config=${configFile},cache-dir=${cfg.cacheDir}"; 
+      options = "rw,_netdev,allow_other,args2env,vfs-cache-mode=writes,config=${configPath},cache-dir=${cfg.cacheDir}"; 
     }]; 
 
     systemd.automounts = [{

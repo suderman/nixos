@@ -22,6 +22,10 @@
   networking.extraHosts = "";
 
   modules.rclone.enable = true;
+  modules.rclone.configPath = config.age.secrets.rclone-conf.path;
+  modules.rclone.remote = "azure-data:";
+  modules.rclone.mountPath = "/mnt/rclone/azure";
+
 
   # Web services
   modules.ocis.enable = true;
