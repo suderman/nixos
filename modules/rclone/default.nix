@@ -23,13 +23,12 @@ in {
 
     remote = mkOption {
       type = types.str;
-      default = "memoryRemote:";
-      description = "Name of rclone remote defined in RClone config";
+      description = "Name of rclone remote defined in RClone config. Keep in mind to add the `:` after the name.";
     };
 
     mountPath = mkOption {
       type = types.path;
-      default = "/mnt/rclone/memory";
+      default = "/mnt/rclone";
       description = "Mointpoint for rclone remote";
     };
 
@@ -41,7 +40,7 @@ in {
 
     configPath = mkOption { 
       type = types.path; 
-      description = "RClone config.";
+      description = "RClone config file.";
     };
 
   };
