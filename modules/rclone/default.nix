@@ -55,7 +55,7 @@ in {
     system.fsPackages = [ pkgs.unstable.rclone ];
     systemd.packages = [ pkgs.unstable.rclone ];
     
-    systemd.services.rclone-test-mount = {
+    systemd.services.rclone-azure-mount = {
       # path = with pkgs; [
       #   "/run/wrappers" # if you need something from /run/wrappers/bin, sudo, for example
       # ];
@@ -68,7 +68,7 @@ in {
         ExecStartPre = "/run/current-system/sw/bin/mkdir -p ${cfg.mountPath}";
         ExecStart = ''
           ${pkgs.rclone}/bin/rclone mount ${cfg.remote} ${cfg.mountPath} \
-            --config=${configPath} \
+            --config=${cfg.configPath} \
             --allow-other \
             --dir-perms=770 \
             --file-perms=0664 \
