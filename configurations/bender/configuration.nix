@@ -33,6 +33,6 @@
 
   modules.immich = {
     enable = true;
-    photosDir = "/data/photos/immich";
+    photosDir = "/mnt/photos";
   };
 }
