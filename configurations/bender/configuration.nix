@@ -33,7 +33,7 @@
 
   modules.immich = {
     enable = true;
-    hostName = "immich.pingbit.de";
+    hostName = "photos.pingbit.de";
     photosDir = "/mnt/photos";
   };
 }
