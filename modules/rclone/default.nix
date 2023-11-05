@@ -45,13 +45,6 @@ in {
       type = types.path; 
       description = "RClone config file.";
     };
-
-    requiredBy = mkOption { 
-      type = types.listOf unitNameType; 
-      default = [];
-      description = "Services that requrie the mount to be ready";
-    };
-
   };
 
   # TODO: allow configuration of multiple mounts via <name> like here https://github.com/NixOS/nixpkgs/blob/nixos-23.05/nixos/modules/services/networking/wg-quick.nix#L219
@@ -83,40 +76,14 @@ in {
         "config=${cfg.configPath}"
         "cache_dir=${cfg.cacheDir}"
         "vfs-cache-mode=full"
+        # "dir-perms=770"
+        # "file-perms=0664"
+        # "umask=002"
+        # "allow-non-empty"
+        # "log-level=INFO"
+        # "vfs-cache-mode full"
+        # "vfs-cache-max-size 20G"
       ];
     };
-
-    # systemd.services.rclone-azure-mount = {
-    #   path = with pkgs; [
-    #     "/run/wrappers" # if you need something from /run/wrappers/bin, sudo, for example
-    #   ];
-    #   description = "Mount rclone ";    
-    #   wantedBy = ["multi-user.target"];
-    #   requiredBy = cfg.requiredBy;
-    #   # before = [ "phpfpm-nextcloud.service" ];
-    #   serviceConfig = {
-    #     # User = "nextcloud";
-    #     # Group = "nextcloud";
-    #     ExecStartPre = "/run/current-system/sw/bin/mkdir -p ${cfg.mountPath}";
-    #     ExecStart = ''
-    #       ${pkgs.rclone}/bin/rclone mount ${cfg.remote} ${cfg.mountPath} \
-    #         --config=${cfg.configPath} \
-    #         --allow-other \
-    #         --dir-perms=770 \
-    #         --file-perms=0664 \
-    #         --umask=002 \
-    #         --allow-non-empty \
-    #         --log-level=INFO \
-    #         --vfs-cache-mode full \
-    #         --vfs-cache-max-size 20G
-    #     '';
-    #     ExecStop = "/run/wrappers/bin/fusermount -u ${cfg.mountPath}";
-    #     Type = "notify";
-    #     Restart = "always";
-    #     RestartSec = "10s";
-    #   };
-    # };
-  };
-
-  
+  };  
 }
