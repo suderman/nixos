@@ -9,7 +9,8 @@ let
   inherit (lib) mkIf mkOption mkBefore options types strings;
   inherit (builtins) toString;
   inherit (lib.strings) toInt;
-  inherit (systemdUtils.lib) unitNameType;
+  inherit (utils.systemdUtils.lib) unitNameType;
+
 
   configFile = pkgs.writeTextFile {
     name = "rclone.conf";
