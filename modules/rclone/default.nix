@@ -1,5 +1,5 @@
 # modules.rclone.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, utils, ... }:
 
 let
 
