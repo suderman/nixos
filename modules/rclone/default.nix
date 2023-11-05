@@ -9,6 +9,7 @@ let
   inherit (lib) mkIf mkOption mkBefore options types strings;
   inherit (builtins) toString;
   inherit (lib.strings) toInt;
+  # Type for a valid systemd unit name. Needed for correctly passing "requiredBy" to "systemd.services"
   inherit (utils.systemdUtils.lib) unitNameType;
 
 
