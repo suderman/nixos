@@ -21,10 +21,14 @@
   modules.whoami.enable = true;
   networking.extraHosts = "";
 
-  modules.rclone.enable = true;
-  modules.rclone.configPath = config.age.secrets.rclone-conf.path;
-  modules.rclone.remote = "azure-data:photos";
-  modules.rclone.mountPath = "/mnt/photos";
+  
+  modules.rclone = {
+    enable = true;
+    configPath = config.age.secrets.rclone-conf.path;
+    remote = "azure-data:photos";
+    mountPath = "/mnt/photos";
+    wantedBy = ["immich.service"];
+  };
 
 
   # Web services

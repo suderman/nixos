@@ -9,6 +9,7 @@ let
   inherit (lib) mkIf mkOption mkBefore options types strings;
   inherit (builtins) toString;
   inherit (lib.strings) toInt;
+  inherit (systemdUtils.lib;) wantedBy
 
   configFile = pkgs.writeTextFile {
     name = "rclone.conf";
@@ -43,6 +44,12 @@ in {
       description = "RClone config file.";
     };
 
+    requiredBy = mkOption { 
+      type = types.listOf unitNameType; 
+      default = [];
+      description = "Services that requrie the mount to be ready";
+    };
+
   };
 
   # TODO: allow configuration of multiple mounts via <name> like here https://github.com/NixOS/nixpkgs/blob/nixos-23.05/nixos/modules/services/networking/wg-quick.nix#L219
@@ -51,7 +58,7 @@ in {
 
     # Name sanitazion: builtins.concatStringsSep "-" (builtins.filter (v: ! builtins.isList v) (builtins.split "[^[:alnum:]]" "azure:blob/dir"))
     # Add user to the rclone group
-    users.users."${user}".extraGroups = [ "rclone" ]; 
+    # users.users."${user}".extraGroups = [ "rclone" ]; 
 
     environment.systemPackages = [ pkgs.unstable.rclone ];
     system.fsPackages = [ pkgs.unstable.rclone ];
@@ -63,6 +70,7 @@ in {
       ];
       description = "Mount rclone ";    
       wantedBy = ["multi-user.target"];
+      requiredBy = cfg.requiredBy;
       # before = [ "phpfpm-nextcloud.service" ];
       serviceConfig = {
         # User = "nextcloud";
