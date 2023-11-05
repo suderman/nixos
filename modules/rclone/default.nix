@@ -71,7 +71,7 @@ in {
       device = cfg.remote;
       fsType = "rclone";
       options = [
-        "ro"
+        "rw"
         "allow_other"
         "_netdev"
         "noauto"
@@ -82,7 +82,6 @@ in {
         "env.PATH=/run/wrappers/bin" # for fusermount3
         "config=${cfg.configPath}"
         "cache_dir=${cfg.cacheDir}"
-        "allow-other"
         "vfs-cache-mode=full"
       ];
     };
