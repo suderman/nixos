@@ -1,5 +1,7 @@
 # modules.rclone.enable = true;
-{ config, lib, systemdUtils, pkgs, ... }:
+{ config, lib, pkgs, ... }:
+
+with systemdUtils.unitOptions;
 
 let
 
