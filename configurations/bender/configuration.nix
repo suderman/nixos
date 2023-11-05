@@ -29,7 +29,7 @@
 
   # Web services
   modules.ocis.enable = true;
-
+  modules.ocis.hostName = "cloud.pingbit.de";
 
   modules.immich = {
     enable = true;
