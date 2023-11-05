@@ -45,6 +45,8 @@ in {
 
   };
 
+  # TODO: allow configuration of multiple mounts via <name> like here https://github.com/NixOS/nixpkgs/blob/nixos-23.05/nixos/modules/services/networking/wg-quick.nix#L219
+  # Use this to properly escape the unit name https://github.com/NixOS/nixpkgs/blob/edbe9ad5e0a129424abdde36a0124333213fc667/nixos/lib/utils.nix#L46
   config = mkIf cfg.enable {  
 
     # Name sanitazion: builtins.concatStringsSep "-" (builtins.filter (v: ! builtins.isList v) (builtins.split "[^[:alnum:]]" "azure:blob/dir"))
