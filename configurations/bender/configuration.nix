@@ -27,7 +27,7 @@
     configPath = config.age.secrets.rclone-conf.path;
     remote = "azure-data:photos";
     mountPath = "/mnt/photos";
-    wantedBy = ["immich.service"];
+    requiredBy = ["immich.service"];
   };
 
 
