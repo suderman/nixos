@@ -82,6 +82,8 @@ in {
         "env.PATH=/run/wrappers/bin" # for fusermount3
         "config=${cfg.configPath}"
         "cache_dir=${cfg.cacheDir}"
+        "allow-other"
+        "vfs-cache-mode=full"
       ];
     };
 
