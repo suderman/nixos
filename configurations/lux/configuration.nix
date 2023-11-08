@@ -36,6 +36,8 @@
   modules.tautulli.enable = true;
   modules.jellyfin.enable = true;
 
+  modules.silverbullet.enable = true;
+
   modules.lunasea.enable = true;
   modules.sabnzbd.enable = true;
   modules.radarr.enable = true;

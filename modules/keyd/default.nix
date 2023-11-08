@@ -32,6 +32,7 @@ in {
       wantedBy = [ "sysinit.target" ];
       serviceConfig = {
         Type = "simple";
+        Restart = "always";
         ExecStart = "${pkgs.keyd}/bin/keyd";
       };
     };

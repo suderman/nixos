@@ -9,10 +9,10 @@ let
   inherit (builtins) toString readFile;
 
   # https://github.com/home-assistant/core/pkgs/container/home-assistant/versions?filters%5Bversion_type%5D=tagged
-  version = "2023.9.3";
+  version = "2023.11.1";
 
   # https://github.com/zwave-js/zwave-js-ui/pkgs/container/zwave-js-ui/versions?filters%5Bversion_type%5D=tagged
-  zwaveVersion = "9.0.3";
+  zwaveVersion = "9.3.1";
 
 in {
 

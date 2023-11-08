@@ -82,6 +82,15 @@
 
     wezterm.enable = false;
     foot.enable = false;
+
+    obs-studio = with pkgs.unstable; {
+      enable = true;
+      package = obs-studio;
+      # plugins = [ obs-studio-plugins.wlrobs ];
+    };
+
+    # pipewire-alsa pipewire-audio pipewire-docs pipewire-jack pipewire-media-session pipewire-pulse
+
   };
 
 

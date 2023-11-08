@@ -42,6 +42,10 @@ in {
           dd if="$1" skip=1 bs=$extractposition of="$(basename -s .jpg $1).mp4"
         }
 
+        # Unless run with sudo, run "systemctl --user" and "journalclt --user" by default
+        systemctl() { [ $EUID -eq 0 ] && command systemctl "$@" || command systemctl --user "$@"; }
+        journalctl() { [ $EUID -eq 0 ] && command journalctl "$@" || command journalctl --user "$@"; }
+
         ## zsh-fzf-tab
         #. ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
 

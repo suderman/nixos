@@ -36,6 +36,7 @@
     ./rsshub
     ./sabnzbd
     ./secrets
+    ./silverbullet
     ./sonarr
     ./steam
     ./tailscale
