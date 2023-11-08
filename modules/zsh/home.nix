@@ -31,7 +31,9 @@ in {
 
       oh-my-zsh = {
         enable = true;
-        theme = "robbyrussell";
+        # theme = "robbyrussell";
+        # theme = "cypher";
+        theme = "af-magic";
       };
 
       initExtra = ''
