@@ -10,8 +10,8 @@ let
   secrets = config.age.secrets;
 
   ownership = "${toString config.ids.uids.ocis}:${toString config.ids.gids.ocis}";
-  signingKey = "${cfg.dataDir}/config/idp-private-key.pem";
-  encryptionSecret = "${cfg.dataDir}/config/idp-encryption.key";
+  signingKey = "idp-private-key.pem";
+  encryptionSecret = "idp-encryption.key";
 
   inherit (config.users) user;
   inherit (lib) mkIf mkOption mkBefore types;
@@ -81,8 +81,8 @@ in {
         OCIS_INSECURE = "false";
         GRAPH_LDAP_INSECURE = "true"; # https://github.com/owncloud/ocis/issues/3812
         PROXY_ENABLE_BASIC_AUTH = "true";
-        IDP_SIGNING_PRIVATE_KEY_FILES = signingKey;
-        IDP_ENCRYPTION_SECRET_FILE = encryptionSecret;
+        IDP_SIGNING_PRIVATE_KEY_FILES = "/etc/ocis/${signingKey}";
+        IDP_ENCRYPTION_SECRET_FILE = "/etc/ocis/${encryptionSecret}";
         IDM_CREATE_DEMO_USERS = "false";
       };
 
@@ -105,10 +105,10 @@ in {
 
       # Persist sessions - regenerating these files will force all clients to reauthenticate
       # https://github.com/owncloud/ocis/issues/3540#issuecomment-1144517534
-      preStart = let openssl = "${pkgs.openssl}/bin/openssl"; in mkBefore ''
-        mkdir -p ${cfg.dataDir}/config
-        [ -e ${encryptionSecret} ] || ${openssl} rand -out ${encryptionSecret} 32 
-        [ -e ${signingKey} ] || ${openssl} genpkey -algorithm RSA -out ${signingKey} -pkeyopt rsa_keygen_bits:4096
+      preStart = let openssl = "${pkgs.openssl}/bin/openssl"; etc = "${cfg.dataDir}/config"; in mkBefore ''
+        mkdir -p ${etc}
+        [ -e ${etc}/${encryptionSecret} ] || ${openssl} rand -out ${etc}/${encryptionSecret} 32 
+        [ -e ${etc}/${signingKey} ] || ${openssl} genpkey -algorithm RSA -out ${etc}/${signingKey} -pkeyopt rsa_keygen_bits:4096
         chown -R ${ownership} ${cfg.dataDir}
       '';
 

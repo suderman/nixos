@@ -55,7 +55,11 @@
   modules.cockpit.enable = true;
 
   modules.nextcloud.enable = false;
-  modules.ocis.enable = false;
+
+  modules.ocis = {
+    enable = true;
+    dataDir = "/tmp/ocis";
+  };
 
   modules.immich = {
     enable = false;
