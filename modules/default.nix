@@ -4,6 +4,7 @@
     ./backblaze
     ./base
     ./bluebubbles
+    ./blobfuse
     ./btrbk
     ./cockpit
     ./ddns

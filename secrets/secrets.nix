@@ -69,4 +69,6 @@ with (import ./keys); {
   "files/ocis-env.age".publicKeys = all;
   "files/rclone-conf.age".publicKeys = all;
 
+  "files/blobfuse.yaml.age".publicKeys = all;
+
 }
