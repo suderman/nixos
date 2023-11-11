@@ -138,38 +138,16 @@
     in {
 
       # System configurations on NixOS
-      nixosConfigurations = {
-
-        # Bootstrap configuration
-        bootstrap = mkSystem ./configurations/bootstrap;
-
-        # Framework Laptop
-        cog = mkSystem ./configurations/cog;
-
-        # 2009 Mac Pro (at work)
-        eve = mkSystem ./configurations/eve;
-
-        # Intel NUC home server
-        hub = mkSystem ./configurations/hub;
-
-        # Intel NUC media server
-        lux = mkSystem ./configurations/lux;
-
-        # Mac Mini
-        pom = mkSystem ./configurations/pom;
-
-        # 2009 Mac Pro (at home)
-        rig = mkSystem ./configurations/rig;
-
-        # Linode VPS
-        sol = mkSystem ./configurations/sol;
-
-      };
-
-      # Home configurations on other systems
-      homeConfigurations = {
-        # umbra = mkUser ./configurations/umbra; /* system = "x86_64-darwin" */
-      };
+      nixosConfigurations = let 
+        inherit (builtins) readDir attrNames listToAttrs map;
+        inherit (inputs.nixpkgs.lib) filterAttrs;
+        dirNames = path: attrNames (filterAttrs (n: v: v == "directory") (readDir path));
+      in listToAttrs ( 
+        map (directory: { 
+          name = "${directory}"; 
+          value = mkSystem ./configurations/${directory}; 
+        }) (dirNames ./configurations)
+      );
 
     };
 
