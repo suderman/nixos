@@ -44,7 +44,7 @@ with (import ./keys); {
   # EMAIL_USE_SSL=0
   # SECRET_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
   # ---------------------------------------------------------------------------
-  "files/smtp-env.age".publicKeys = all;
+  # "files/smtp-env.age".publicKeys = all;
 
   # Long secret with characters constrained to alphabet and digits
   # > tr -cd '[:alnum:]' < /dev/urandom | fold -w "64" | head -n 1 | tr -d '\n' ; echo
@@ -52,7 +52,7 @@ with (import ./keys); {
 
   # Private key used by btrkbk to send backups
   # > ssh-keygen -t ed25519 -C btrbk -f /tmp/btrbk
-  "files/btrbk-key.age".publicKeys = all;
+  # "files/btrbk-key.age".publicKeys = all;
 
   # Environment variables used by Immich
   "files/immich-env.age".publicKeys = all;
@@ -69,6 +69,6 @@ with (import ./keys); {
   "files/ocis-env.age".publicKeys = all;
   "files/rclone-conf.age".publicKeys = all;
 
-  "files/blobfuse.yaml.age".publicKeys = all;
+  "files/blobfuse-yaml.age".publicKeys = all;
 
 }

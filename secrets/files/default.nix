@@ -3,12 +3,14 @@
 # Please add age files to /etc/nixos/secrets/files/*.age 
 {
 
+  alphanumeric-secret = ./alphanumeric-secret.age;
   basic-auth = ./basic-auth.age;
-  "blobfuse.yaml" = ./blobfuse.yaml.age;
+  blobfuse-yaml = ./blobfuse-yaml.age;
   cloudflare-env = ./cloudflare-env.age;
   immich-env = ./immich-env.age;
   ocis-env = ./ocis-env.age;
   password-hash = ./password-hash.age;
+  password = ./password.age;
   rclone-conf = ./rclone-conf.age;
   traefik-env = ./traefik-env.age;
 

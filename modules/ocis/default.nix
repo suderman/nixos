@@ -28,6 +28,10 @@ in {
       type = types.path;
       default = "/var/lib/ocis";
     };
+    storageDir = mkOption {
+      type = types.path;
+      default = cfg.dataDir;
+    };
   };
 
   config = mkIf cfg.enable {

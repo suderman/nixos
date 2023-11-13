@@ -26,6 +26,12 @@ let
         description = "Name of the cointainer to mount.";
       };
 
+      tmpDir = mkOption { 
+        type = types.path; 
+        default = "/tmp/blobfuse";
+        description = "directory for cache and temporary files";
+      };
+
       mountOpts = mkOption {
         type = types.listOf (types.str);
         default = [];
@@ -60,16 +66,20 @@ let
           "defaults"
           "_netdev"
           "allow_other"
-          "x-systemd.automount"
-          "x-systemd.mount-timeout=10s"
           "uid=${toString values.uid}"
           "gid=${toString values.gid}"
 
-          # blobfuse args 
+          # SystemD
+          # "x-systemd.automount"
+          
+          # "env.PATH=/run/wrappers/bin" # for fusermount3
+
+          # blobfuse  
           "--config-file=${values.configPath}"
           "--container-name=${values.container}"
-          # "--allow-other"
-          # "--tmp-path=/tmp/"
+          "--tmp-path=${values.tmpDir}"
+          "--allow-other"
+          
         ] ++ values.mountOpts;
       };
     in
@@ -93,7 +103,6 @@ in {
         example = {
           "/mnt/blobfuse" = {
             configPath = "/etc/blobfuse.yaml";
-
           };
         };
         type = with types; attrsOf (submodule mountOpts);
@@ -103,9 +112,8 @@ in {
   ###### implementation
 
   config = mkIf (cfg.mounts != {}) {
-    environment.systemPackages = [ pkgs.unstable.rclone ];
-    system.fsPackages = [ pkgs.unstable.rclone ];
-    systemd.packages = [ pkgs.unstable.rclone ];
+    system.fsPackages = [ cfg.package ];
+    systemd.packages = [ cfg.package ];
 
     fileSystems = mapAttrs' generateMount cfg.mounts;
   };
