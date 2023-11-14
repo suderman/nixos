@@ -77,6 +77,9 @@
     photosDir = "/mnt/photos";
   };
 
+  modules.silverbullet.enable = true;
+  modules.silverbullet.hostName = "wiki.pingbit.de";
+  
 
   ## Testing
 
