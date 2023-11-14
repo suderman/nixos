@@ -58,9 +58,21 @@
   #   gid = config.ids.gids.immich;
   #   mountOpts = [ "log-level=INFO" ];
   # };
+
+  systemd.services.immich.unitConfig = {
+    RequiresMountsFor = config.modules.immich.photosDir;
+  };
+  modules.blobfuse.mounts."${config.modules.immich.photosDir}" = {
+  #modules.blobfuse.mounts."/mnt/ocis" = {
+  #modules.blobfuse.mounts."${config.modules.ocis.dataDir}" = {
+    configPath = config.age.secrets."blobfuse-yaml".path;
+    container = "photos";
+    uid = config.ids.uids.immich;
+    gid = config.ids.gids.immich;
+  }; 
   # Immich 
   modules.immich = {
-    enable = false;
+    enable = true;
     hostName = "photos.pingbit.de";
     photosDir = "/mnt/photos";
   };
