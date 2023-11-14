@@ -127,7 +127,6 @@
       mkUser = path: inputs.home-manager.lib.homeManagerConfiguration rec {
         extraSpecialArgs = { inherit inputs outputs; base = import (path + /base.nix); };
         pkgs = mkPkgs extraSpecialArgs.base.system;
-        pkgs = mkPkgs extraSpecialArgs.base.system;
         modules = [ 
           (path + /home.nix)
           ./modules/home.nix 
