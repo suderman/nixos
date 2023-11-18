@@ -1,29 +1,16 @@
-{ ... }:
-{
-  imports = [
-    # ./anyrun/home.nix
-    ./base/home.nix
-    ./chromium/home.nix
-    ./dconf/home.nix
-    ./direnv/home.nix
-    ./eww/home.nix
-    ./firefox-pwa/home.nix
-    ./foot/home.nix
-    ./fzf/home.nix
-    ./gimp/home.nix
-    ./git/home.nix
-    ./gnome/home.nix
-    ./gtk/home.nix
-    ./hyprland/home.nix
-    ./keyd/home.nix
-    ./kitty/home.nix
-    ./neovim/home.nix
-    ./ocis/home.nix
-    ./secrets/home.nix
-    ./tmux/home.nix
-    ./waybar/home.nix
-    ./wezterm/home.nix
-    ./yazi/home.nix
-    ./zsh/home.nix
-  ];
-}
+# Import all Home Manager modules
+{ lib, ... }: let 
+
+  # Modules are named "home.nix"
+  file = "home.nix";
+
+  inherit (builtins) attrNames filter map pathExists readDir;
+  inherit (lib) filterAttrs;
+
+  # List all directories in current directory
+  dirNames = path: attrNames (filterAttrs (n: v: v == "directory") (readDir path));
+
+  # List modules in each subdirectory
+  modules = filter (path: pathExists path) (map (dir: ./${dir}/${file}) (dirNames ./.));
+
+in { imports = modules; }
