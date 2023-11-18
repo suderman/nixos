@@ -1,7 +1,7 @@
 { config, lib, pkgs, inputs, ... }: {
 
   imports = [ 
-    inputs.hardware.nixosModules.framework 
+    inputs.hardware.nixosModules.framework-11th-gen-intel
     ./framework.nix
     ./hardware-configuration.nix 
     ./storage.nix

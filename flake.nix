@@ -94,23 +94,22 @@
       };
 
       # Make a NixOS system configuration (with home-manager module, if user isn't "root")
-      mkSystem = path: inputs.nixpkgs.lib.nixosSystem rec {
-        specialArgs = { inherit inputs outputs; base = import (path + /base.nix); };
-        inherit (specialArgs.base) system;
-        pkgs = mkPkgs system;
+      mkConfiguration = path: let base = import (path + /base.nix); in inputs.nixpkgs.lib.nixosSystem {
+        inherit (base) system;
+        specialArgs = { inherit inputs outputs base; };
+        pkgs = mkPkgs base.system;
         modules = [ 
           (path + /configuration.nix)
           ./modules 
           ./secrets 
           # caches
-        ] ++ (if specialArgs.base.user == "root" then [] else [
+        ] ++ (if base.user == "root" then [] else [
           inputs.home-manager.nixosModules.home-manager { 
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
-              extraSpecialArgs = { inherit inputs outputs; base = import (path + /base.nix); };
-              users."${specialArgs.base.user}" = let home = { imports }: { inherit imports; };
-              in home { 
+              extraSpecialArgs = { inherit inputs outputs base; };
+              users."${base.user}" = let home = { imports }: { inherit imports; }; in home { 
                 imports = [
                   (path + /home.nix)
                   ./modules/home.nix 
@@ -123,21 +122,9 @@
         ]);
       };
 
-      # Make a Home Manager configuration
-      mkUser = path: inputs.home-manager.lib.homeManagerConfiguration rec {
-        extraSpecialArgs = { inherit inputs outputs; base = import (path + /base.nix); };
-        pkgs = mkPkgs extraSpecialArgs.base.system;
-        modules = [ 
-          (path + /home.nix)
-          ./modules/home.nix 
-          ./secrets 
-          # caches
-        ];
-      };
-
     in {
 
-      # System configurations on NixOS
+      # NixOS configurations found in configurations directory
       nixosConfigurations = let 
         inherit (builtins) readDir attrNames listToAttrs map;
         inherit (inputs.nixpkgs.lib) filterAttrs;
@@ -145,7 +132,7 @@
       in listToAttrs ( 
         map (directory: { 
           name = "${directory}"; 
-          value = mkSystem ./configurations/${directory}; 
+          value = mkConfiguration ./configurations/${directory}; 
         }) (dirNames ./configurations)
       );
 
