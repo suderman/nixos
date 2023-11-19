@@ -60,9 +60,9 @@
   # };
 
   systemd.services.immich.unitConfig = {
-    RequiresMountsFor = config.modules.immich.photosDir;
+    RequiresMountsFor = config.modules.immich.dataDir;
   };
-  modules.blobfuse.mounts."${config.modules.immich.photosDir}" = {
+  modules.blobfuse.mounts."${config.modules.immich.dataDir}" = {
   #modules.blobfuse.mounts."/mnt/ocis" = {
   #modules.blobfuse.mounts."${config.modules.ocis.dataDir}" = {
     configPath = config.age.secrets."blobfuse-yaml".path;
