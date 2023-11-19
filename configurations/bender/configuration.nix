@@ -74,7 +74,7 @@
   modules.immich = {
     enable = true;
     hostName = "photos.pingbit.de";
-    photosDir = "/mnt/photos";
+    dataDir = "/mnt/photos";
   };
 
   modules.silverbullet.enable = true;
