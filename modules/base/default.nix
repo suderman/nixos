@@ -23,6 +23,7 @@ in {
   # ---------------------------------------------------------------------------
   options.modules.base = {
     enable = lib.options.mkEnableOption "base"; 
+    config = lib.mkOption { type = lib.types.attrs; default = base; };
   };
 
   config = mkIf cfg.enable {

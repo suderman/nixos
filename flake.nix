@@ -41,14 +41,12 @@
     # hyprland.inputs.nixpkgs.follows = "nixpkgs";
     hyprland-plugins.url = "github:hyprwm/hyprland-plugins";
     # hyprland-plugins.inputs.hyprland.follows = "hyprland";
-    # anyrun.url = "github:Kirottu/anyrun";
+    anyrun.url = "github:Kirottu/anyrun";
     # anyrun.inputs.nixpkgs.follows = "nixpkgs";
 
   };
 
   outputs = { self, ... }: 
-    
-    with builtins;
     let inherit (self) outputs inputs; 
 
       # Additional binary caches and keys
@@ -94,48 +92,29 @@
       };
 
       # Make a NixOS system configuration (with home-manager module, if user isn't "root")
-      mkConfiguration = path: let base = import (path + /base.nix); in inputs.nixpkgs.lib.nixosSystem {
+      mkConfiguration = base: inputs.nixpkgs.lib.nixosSystem {
         inherit (base) system;
         specialArgs = { inherit inputs outputs base; };
         pkgs = mkPkgs base.system;
-        modules = [ 
-          (path + /configuration.nix)
-          ./modules 
-          ./secrets 
-          caches
-        ] ++ (if base.user == "root" then [] else [
+        modules = with base; [ nixosConfig nixosModules secrets caches ] ++ (if user == "root" then [] else [
           inputs.home-manager.nixosModules.home-manager { 
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
               extraSpecialArgs = { inherit inputs outputs base; };
-              users."${base.user}" = let home = { imports }: { inherit imports; }; in home { 
-                imports = [
-                  (path + /home.nix)
-                  ./modules/home.nix 
-                  ./secrets 
-                  caches
-                ]; 
+              users."${user}" = let home = { imports }: { inherit imports; }; in home { 
+                imports = [ homeConfig homeModules secrets caches ]; 
               };
             }; 
           } 
         ]);
       };
 
+    # NixOS configurations found in configurations directory
     in {
-
-      # NixOS configurations found in configurations directory
-      nixosConfigurations = let 
-        inherit (builtins) readDir attrNames listToAttrs map;
-        inherit (inputs.nixpkgs.lib) filterAttrs;
-        dirNames = path: attrNames (filterAttrs (n: v: v == "directory") (readDir path));
-      in listToAttrs ( 
-        map (directory: { 
-          name = "${directory}"; 
-          value = mkConfiguration ./configurations/${directory}; 
-        }) (dirNames ./configurations)
-      );
-
+      nixosConfigurations = 
+        builtins.mapAttrs (name: value: mkConfiguration value) 
+        (import ./configurations inputs);
     };
 
 }
