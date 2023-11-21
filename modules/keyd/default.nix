@@ -15,7 +15,7 @@ in {
     quirks = mkEnableOption "quirks"; 
     settings = mkOption {
       type = types.path;
-      default = ./settings.conf;
+      default = ./default.conf;
     };
   };
 
@@ -45,7 +45,6 @@ in {
     };
 
     # Configuration for keyd
-    # environment.etc."keyd/default.conf".source = ./default.conf;
     environment.etc."keyd/default.conf".source = cfg.settings;
 
     # Add quirks to make touchpad's "disable-while-typing" work properly
