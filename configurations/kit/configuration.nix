@@ -1,6 +1,7 @@
 { config, pkgs, ... }: {
 
   imports = [ 
+    inputs.nixos-hardware.nixosModules.lenovo-thinkpad-t480s
     ./hardware-configuration.nix
     ./storage.nix
   ];
