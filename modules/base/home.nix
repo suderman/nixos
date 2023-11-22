@@ -1,4 +1,4 @@
-{ config, lib, base, ... }:
+{ config, lib, pkgs, base, ... }:
 
 let
 
@@ -17,12 +17,16 @@ in {
   };
 
   # ---------------------------------------------------------------------------
-  # Common Configuration for all NixOS hosts
+  # Common Configuration for all Home Manager users
   # ---------------------------------------------------------------------------
   config = {
 
     # Get all modules settings from configuration's default.nix
     modules = optionalAttrs (base ? modules) (recursiveUpdate base.modules {});
+
+    # Set username and home directory
+    home.username = base.user;
+    home.homeDirectory = "/${if (pkgs.stdenv.isLinux) then "home" else "Users"}/${base.user}";
 
     # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
     home.stateVersion = "22.05";
