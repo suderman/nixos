@@ -1,6 +1,6 @@
 # cog
 
-* Note: this information is outdated and needs some attention from me. *
+*Note: this information is outdated and needs some attention from me.*
 
 Framework laptop
 
