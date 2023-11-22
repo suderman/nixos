@@ -1,6 +1,6 @@
 # NixOS system configurations & dotfiles
 
-![nixos](https://socialify.git.ci/suderman/nixos/image?description=1&language=1&name=1&owner=1&pattern=Circuit%20Board&theme=Dark)
+![nixos](https://socialify.git.ci/suderman/nixos/image?description=1&language=1&name=1&owner=1&pattern=Circuit%20Board&theme=Auto)
 
 *Welcome to the NixOS configuration for all my personal infrastucture!*  
 
