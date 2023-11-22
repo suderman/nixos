@@ -1,10 +1,9 @@
-# modules.base.enable = true;
 { config, lib, base, ... }:
 
 let
 
   cfg = config.modules.base;
-  inherit (lib) mkIf optionalAttrs recursiveUpdate;
+  inherit (lib) mkIf mkOption optionalAttrs recursiveUpdate types;
 
 in {
 
@@ -18,15 +17,14 @@ in {
     ./user.nix 
   ];
 
+  options.modules.base = {
+    config = mkOption { type = types.attrs; default = base; };
+  };
+
   # ---------------------------------------------------------------------------
   # Common Configuration for all NixOS hosts
   # ---------------------------------------------------------------------------
-  options.modules.base = {
-    enable = lib.options.mkEnableOption "base"; 
-    config = lib.mkOption { type = lib.types.attrs; default = base; };
-  };
-
-  config = mkIf cfg.enable {
+  config = {
 
     # Get all modules settings from configuration's default.nix
     modules = optionalAttrs (base ? modules) (recursiveUpdate base.modules {});

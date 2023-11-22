@@ -5,10 +5,6 @@
     ./storage.nix
   ];
 
-  # Base configuration
-  modules.base.enable = true;
-  modules.secrets.enable = true;
-
   # Use freshest kernel
   boot.kernelPackages = pkgs.linuxPackages_latest;
 

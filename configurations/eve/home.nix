@@ -1,8 +1,5 @@
 { config, lib, pkgs, ... }: {
 
-  modules.base.enable = true;
-  modules.secrets.enable = true;
-
   home.packages = with pkgs; [ 
     neofetch
     yo

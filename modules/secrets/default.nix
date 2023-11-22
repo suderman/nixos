@@ -5,12 +5,34 @@ let
 
   cfg = config.modules.secrets;
   age = config.age;
-  inherit (lib) mkIf;
+  inherit (lib) mkIf mkOption types;
+  inherit (lib.options) mkEnableOption;
 
 in {
 
   # Import agenix module
   imports = [ inputs.agenix.nixosModules.default ];
+
+  options.modules.secrets = {
+
+    # Must opt into secrets
+    enable = mkEnableOption "secrets"; 
+
+    # Public keys
+    keys = mkOption {
+      type = types.attrs;
+      description = "Import secrets/keys/default.nix";
+      default = { users.all = []; systems.all = []; all = []; };
+    };
+
+    # Encrypted files
+    files = mkOption {
+      type = types.attrs;
+      description = "Import secrets/files/default.nix";
+      default = {};
+    };
+
+  };
 
   config = mkIf cfg.enable {
 

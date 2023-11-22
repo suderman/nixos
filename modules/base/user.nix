@@ -2,7 +2,6 @@
 
 let
 
-  cfg = config.modules.base;
   inherit (base) user;
   inherit (lib) mkIf;
   inherit (builtins) hasAttr filter;
@@ -21,7 +20,7 @@ in {
     users.user = lib.mkOption { type = lib.types.str; default = user; };
   };
 
-  config = mkIf cfg.enable {
+  config = {
 
     users.users = mkIf (user != "root") {
       "${user}" = {

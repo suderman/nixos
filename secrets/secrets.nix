@@ -57,6 +57,7 @@ with (import ./keys); {
   # Environment variables used by Immich
   "files/immich-env.age".publicKeys = all;
 
+  # Withings / Garmin auth
   "files/withings-env.age".publicKeys = all;
 
   # Environment variables used by OCIS

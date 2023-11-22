@@ -1,12 +1,14 @@
 # Compatible as both nixos and home-manager module
-{ config, lib, ... }: with lib; {
+{ config, lib, ... }: 
 
-  options.modules.secrets = mkOption { type = types.attrs; };
+let
 
-  config.modules.secrets = {
+  cfg = config.modules.secrets;
+  inherit (lib) mkIf;
 
-    # Host should have to opt into secrets
-    enable = false;
+in {
+
+  modules.secrets = mkIf cfg.enable {
 
     # Public keys
     keys = import ./keys;

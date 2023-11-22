@@ -35,8 +35,7 @@ in {
 
   };
 
-
-  config = mkIf cfg.enable {
+  config = {
 
     # Script to wipe the root subvolume at boot
     boot.initrd.postDeviceCommands = mkBefore (builtins.readFile ./initrd.sh);
