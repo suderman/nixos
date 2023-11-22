@@ -9,7 +9,7 @@ Enable module in configuration like so:
 
 ```nix
 {
-  secrets.enable = true;
+  modules.secrets.enable = true;
 }
 ```
 
