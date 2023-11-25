@@ -1,5 +1,7 @@
 # bootstrap
 
+*Note: this information is outdated and needs some attention from me.*
+
 ## Prepare Storage and Configuration Profiles
 
 Prepare disks under the Storage tab:

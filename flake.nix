@@ -41,41 +41,39 @@
     # hyprland.inputs.nixpkgs.follows = "nixpkgs";
     hyprland-plugins.url = "github:hyprwm/hyprland-plugins";
     # hyprland-plugins.inputs.hyprland.follows = "hyprland";
-    # anyrun.url = "github:Kirottu/anyrun";
+    anyrun.url = "github:Kirottu/anyrun";
     # anyrun.inputs.nixpkgs.follows = "nixpkgs";
 
   };
 
   outputs = { self, ... }: 
-    
-    with builtins;
     let inherit (self) outputs inputs; 
 
-    #   # Additional binary caches and keys
-    #   caches = { ... }: let 
-    #     urls = [
-    #       "https://suderman.cachix.org"
-    #       "https://nix-community.cachix.org"
-    #       "https://hyprland.cachix.org"
-    #       "https://fufexan.cachix.org"
-    #       "https://nix-gaming.cachix.org"
-    #       "https://anyrun.cachix.org"
-    #       "https://cache.nixos.org"
-    #     ];
-    #     keys = [
-    #       "suderman.cachix.org-1:8lYeb2gOOVDPbUn1THnL5J3/L4tFWU30/uVPk7sCGmI="
-    #       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-    #       "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
-    #       "fufexan.cachix.org-1:LwCDjCJNJQf5XD2BV+yamQIMZfcKWR9ISIFy5curUsY="
-    #       "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4="
-    #       "anyrun.cachix.org-1:pqBobmOjI7nKlsUMV25u9QHa9btJK65/C8vnO3p346s="
-    #       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-    #     ];
-    #   in {
-    #     nix.settings.substituters = urls;  
-    #     nix.settings.trusted-substituters = urls;  
-    #     nix.settings.trusted-public-keys = keys;
-    #   };
+      # Additional binary caches and keys
+      caches = { ... }: let 
+        urls = [
+          "https://buxel.cachix.org"
+          "https://nix-community.cachix.org"
+          "https://hyprland.cachix.org"
+          "https://fufexan.cachix.org"
+          "https://nix-gaming.cachix.org"
+          "https://anyrun.cachix.org"
+          "https://cache.nixos.org"
+        ];
+        keys = [
+          "buxel.cachix.org-1:s250rRR2j5TyauO4dTmHqh9ZHhiAO7xLTLgCPKlKf+E="
+          "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+          "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
+          "fufexan.cachix.org-1:LwCDjCJNJQf5XD2BV+yamQIMZfcKWR9ISIFy5curUsY="
+          "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4="
+          "anyrun.cachix.org-1:pqBobmOjI7nKlsUMV25u9QHa9btJK65/C8vnO3p346s="
+          "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+        ];
+      in {
+        nix.settings.substituters = urls;  
+        nix.settings.trusted-substituters = urls;  
+        nix.settings.trusted-public-keys = keys;
+      };
 
       # Get configured pkgs for a given system with overlays, nur and unstable baked in
       mkPkgs = system: import inputs.nixpkgs rec {
@@ -94,48 +92,29 @@
       };
 
       # Make a NixOS system configuration (with home-manager module, if user isn't "root")
-      mkConfiguration = path: let base = import (path + /base.nix); in inputs.nixpkgs.lib.nixosSystem {
+      mkConfiguration = base: inputs.nixpkgs.lib.nixosSystem {
         inherit (base) system;
         specialArgs = { inherit inputs outputs base; };
         pkgs = mkPkgs base.system;
-        modules = [ 
-          (path + /configuration.nix)
-          ./modules 
-          ./secrets 
-          # caches
-        ] ++ (if base.user == "root" then [] else [
+        modules = with base; [ nixosConfig nixosModules secrets caches ] ++ (if user == "root" then [] else [
           inputs.home-manager.nixosModules.home-manager { 
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
               extraSpecialArgs = { inherit inputs outputs base; };
-              users."${base.user}" = let home = { imports }: { inherit imports; }; in home { 
-                imports = [
-                  (path + /home.nix)
-                  ./modules/home.nix 
-                  ./secrets 
-                  # caches
-                ]; 
+              users."${user}" = let home = { imports }: { inherit imports; }; in home { 
+                imports = [ homeConfig homeModules secrets caches ]; 
               };
             }; 
           } 
         ]);
       };
 
+    # NixOS configurations found in configurations directory
     in {
-
-      # NixOS configurations found in configurations directory
-      nixosConfigurations = let 
-        inherit (builtins) readDir attrNames listToAttrs map;
-        inherit (inputs.nixpkgs.lib) filterAttrs;
-        dirNames = path: attrNames (filterAttrs (n: v: v == "directory") (readDir path));
-      in listToAttrs ( 
-        map (directory: { 
-          name = "${directory}"; 
-          value = mkConfiguration ./configurations/${directory}; 
-        }) (dirNames ./configurations)
-      );
-
+      nixosConfigurations = 
+        builtins.mapAttrs (name: value: mkConfiguration value) 
+        (import ./configurations inputs);
     };
 
 }

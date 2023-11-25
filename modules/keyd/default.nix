@@ -5,12 +5,18 @@ let
 
   cfg = config.modules.keyd;
   inherit (config.users) user;
-  inherit (lib) mkIf;
+  inherit (lib) mkIf mkOption types;
+  inherit (lib.options) mkEnableOption;
 
 in {
 
   options.modules.keyd = {
-   enable = lib.options.mkEnableOption "keyd"; 
+    enable = mkEnableOption "keyd"; 
+    quirks = mkEnableOption "quirks"; 
+    settings = mkOption {
+      type = types.path;
+      default = ./default.conf;
+    };
   };
 
   config = mkIf cfg.enable {
@@ -35,13 +41,14 @@ in {
         Restart = "always";
         ExecStart = "${pkgs.keyd}/bin/keyd";
       };
+      restartIfChanged = false;
     };
 
-    # Add quirks to make touchpad's "disable-while-typing" work properly
-    environment.etc."libinput/local-overrides.quirks".source = ./local-overrides.quirks;
-
     # Configuration for keyd
-    environment.etc."keyd/default.conf".source = ./default.conf;
+    environment.etc."keyd/default.conf".source = cfg.settings;
+
+    # Add quirks to make touchpad's "disable-while-typing" work properly
+    environment.etc."libinput/local-overrides.quirks" = mkIf cfg.quirks { source = ./local-overrides.quirks; };
 
   };
 

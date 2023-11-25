@@ -1,10 +1,9 @@
-# modules.base.enable = true;
-{ config, lib, base, ... }:
+{ config, lib, pkgs, base, ... }:
 
 let
 
   cfg = config.modules.base;
-  inherit (lib) mkIf optionalAttrs recursiveUpdate;
+  inherit (lib) mkIf mkOption optionalAttrs recursiveUpdate types;
 
 in {
 
@@ -13,17 +12,21 @@ in {
     ./home-user.nix 
   ];
 
-  # ---------------------------------------------------------------------------
-  # Common Configuration for all NixOS hosts
-  # ---------------------------------------------------------------------------
   options.modules.base = {
-    enable = lib.options.mkEnableOption "base"; 
+    config = mkOption { type = types.attrs; default = base; };
   };
 
-  config = mkIf cfg.enable {
+  # ---------------------------------------------------------------------------
+  # Common Configuration for all Home Manager users
+  # ---------------------------------------------------------------------------
+  config = {
 
     # Get all modules settings from configuration's default.nix
     modules = optionalAttrs (base ? modules) (recursiveUpdate base.modules {});
+
+    # Set username and home directory
+    home.username = base.user;
+    home.homeDirectory = "/${if (pkgs.stdenv.isLinux) then "home" else "Users"}/${base.user}";
 
     # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
     home.stateVersion = "22.05";

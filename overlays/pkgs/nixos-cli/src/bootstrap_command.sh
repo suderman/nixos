@@ -1,4 +1,4 @@
-local iso="https://channels.nixos.org/nixos-22.11/latest-nixos-minimal-x86_64-linux.iso"
+local iso="https://channels.nixos.org/nixos-23.05/latest-nixos-minimal-x86_64-linux.iso"
 local cli="https://github.com/buxel/nixos/raw/main/overlays/pkgs/nixos-cli/nixos"
 local dir="/etc/nixos" config hardware firmware swap default_swap
 
@@ -82,13 +82,10 @@ function hardware_direct {
         for partition in "$(mount | awk '$1 ~ /^\/dev\/'$disk'/ {print $1}')"; do
           task sudo umount $partition
         done
-        info "Partitioning disk"
+        info "Erasing disk"
         task sudo parted -s /dev/$disk mklabel gpt
-        task sudo parted -s /dev/$disk mkpart installer ext4 1MiB 1GiB
-        info "Formatting partition"
-        task sudo mkfs.ext4 -L installer /dev/${disk}1
-        info "Downloading ISO to partition"
-        task "sudo bash -c 'curl -L $iso | dd bs=4096 of=/dev/${disk}1'"
+        info "Downloading ISO to disk"
+        task "sudo bash -c 'curl -L $iso | dd bs=4M status=progress conv=fdatasync of=/dev/${disk}'" 
         info "Finished. Remove NixOS installer disk from this computer."
       fi
     fi

@@ -1,10 +1,9 @@
-# modules.base.enable = true;
 { config, lib, base, ... }:
 
 let
 
   cfg = config.modules.base;
-  inherit (lib) mkIf optionalAttrs recursiveUpdate;
+  inherit (lib) mkIf mkOption optionalAttrs recursiveUpdate types;
 
 in {
 
@@ -18,14 +17,44 @@ in {
     ./user.nix 
   ];
 
-  # ---------------------------------------------------------------------------
-  # Common Configuration for all NixOS hosts
-  # ---------------------------------------------------------------------------
+  # Define base options
   options.modules.base = {
-    enable = lib.options.mkEnableOption "base"; 
+
+    # Store copy of base config for reference
+    config = mkOption { type = types.attrs; default = base; };
+
+    # Persist in /nix/state
+    stateDir = mkOption {
+      description = "Persist state with Impermanence module";
+      type = types.str;
+      default = "/nix/state";
+    };
+
+    # Persist files in relative to / root
+    files = mkOption {
+      description = "System files to preserve";
+      type = with types; listOf (either str attrs);
+      default = [];
+      example = [ "/etc/machine-id" ];
+    };
+
+    # Persist directories relative to / root
+    dirs = mkOption {
+      description = "System directories to preserve";
+      type = with types; listOf (either str attrs);
+      default = [];
+      example = [ "/etc/nixos" ];
+    };
+
   };
 
-  config = mkIf cfg.enable {
+  # Create new users.user option to store user name defined in base
+  options.users.user = mkOption { type = types.str; default = base.user; };
+
+  # ---------------------------------------------------------------------------
+  # Common Configuration for all NixOS systems
+  # ---------------------------------------------------------------------------
+  config = {
 
     # Get all modules settings from configuration's default.nix
     modules = optionalAttrs (base ? modules) (recursiveUpdate base.modules {});

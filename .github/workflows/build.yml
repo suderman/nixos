@@ -7,69 +7,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: cachix/install-nix-action@v19
+    - uses: cachix/install-nix-action@v23
       with:
-        name: suderman
+        name: buxel
         authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
         github_access_token: ${{ secrets.GITHUB_TOKEN }}
     - run: nix build .#nixosConfigurations.bootstrap.config.system.build.toplevel
-  build-sol:
+  build-bender:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: cachix/install-nix-action@v19
+    - run: sudo apt-get install -y qemu-user-static
+    - uses: cachix/install-nix-action@v23
       with:
-        name: suderman
+        name: buxel
         authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
         github_access_token: ${{ secrets.GITHUB_TOKEN }}
-    - run: nix build .#nixosConfigurations.sol.config.system.build.toplevel
-  build-hub:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: cachix/install-nix-action@v19
-      with:
-        name: suderman
-        authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
-        github_access_token: ${{ secrets.GITHUB_TOKEN }}
-    - run: nix build .#nixosConfigurations.hub.config.system.build.toplevel
-  build-lux:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: cachix/install-nix-action@v19
-      with:
-        name: suderman
-        authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
-        github_access_token: ${{ secrets.GITHUB_TOKEN }}
-    - run: nix build .#nixosConfigurations.lux.config.system.build.toplevel
-  build-pom:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: cachix/install-nix-action@v19
-      with:
-        name: suderman
-        authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
-        github_access_token: ${{ secrets.GITHUB_TOKEN }}
-    - run: nix build .#nixosConfigurations.pom.config.system.build.toplevel
-  build-eve:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: cachix/install-nix-action@v19
-      with:
-        name: suderman
-        authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
-        github_access_token: ${{ secrets.GITHUB_TOKEN }}
-    - run: nix build .#nixosConfigurations.eve.config.system.build.toplevel
-  build-rig:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: cachix/install-nix-action@v19
-      with:
-        name: suderman
-        authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
-        github_access_token: ${{ secrets.GITHUB_TOKEN }}
-    - run: nix build .#nixosConfigurations.rig.config.system.build.toplevel
+        extra_nix_config: |
+            system = aarch64-linux
+    - run: nix build .#nixosConfigurations.bender.config.system.build.toplevel

@@ -4,7 +4,7 @@
 let
 
   # https://github.com/immich-app/immich/releases
-  version = "1.87.0";
+  version = "1.88.2";
 
   cfg = config.modules.immich;
 
@@ -19,13 +19,11 @@ in {
   # https://github.com/immich-app/immich/blob/main/docker/docker-compose.yml
   imports = [
     ./environment.nix
-    ./immich-web.nix
     ./immich-redis.nix
     ./immich-typesense.nix
     ./immich-server.nix
     ./immich-microservices.nix
     ./immich-machine-learning.nix
-    ./immich-proxy.nix
   ];
 
 
@@ -113,13 +111,11 @@ in {
       wantedBy = [ "multi-user.target" ];
       after = [ "postgresql.service" ]; # run this after db
       before = [ # run this before the rest:
-        "docker-immich-web.service"
         "docker-immich-redis.service"
         "docker-immich-typesense.service"
         "docker-immich-machine-learning.service"
         "docker-immich-server.service"
         "docker-immich-microservices.service"
-        "docker-immich-proxy.service"
       ];
       wants = this.after ++ this.before; 
       serviceConfig = {
@@ -147,8 +143,6 @@ in {
         docker pull ${immich-redis.image};
         docker pull ${immich-machine-learning.image};
         docker pull ${immich-server.image};
-        docker pull ${immich-web.image};
-        docker pull ${immich-proxy.image};
       '';
     };
 
@@ -167,8 +161,6 @@ in {
     #     docker pull ${immich-redis.image};
     #     docker pull ${immich-machine-learning.image};
     #     docker pull ${immich-server.image};
-    #     docker pull ${immich-web.image};
-    #     docker pull ${immich-proxy.image};
     #   '';
     # };
 

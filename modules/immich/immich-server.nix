@@ -29,8 +29,15 @@ in {
         "${cfg.photosDir}:/usr/src/app/upload/library" 
       ]);
 
-      # Networking for docker containers
+      # Traefik labels
       extraOptions = [
+        "--label=traefik.enable=true"
+        "--label=traefik.http.routers.immich.rule=Host(`${cfg.hostName}`)"
+        "--label=traefik.http.routers.immich.tls.certresolver=resolver-dns"
+        "--label=traefik.http.routers.immich.middlewares=local@file"
+
+      # Networking for docker containers
+      ] ++ [
         "--add-host=host.docker.internal:host-gateway"
         "--network=immich"
       ];
@@ -40,9 +47,6 @@ in {
     # Extend systemd service
     systemd.services.docker-immich-server = {
       requires = [ "immich.service" ];
-
-      # This one sometimes needs extra encouragment to return when deploying an update
-      wants = [ "docker-immich-proxy.service" ]; 
 
       # Container will not stop gracefully, so kill it
       serviceConfig = {
