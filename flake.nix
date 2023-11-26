@@ -115,6 +115,18 @@
       nixosConfigurations = 
         builtins.mapAttrs (name: value: mkConfiguration value) 
         (import ./configurations inputs);
+
+      devShells = let 
+        system = "x86_64-linux";
+        pkgs = mkPkgs system;
+      in  {
+        "${system}".default = pkgs.mkShell { 
+          buildInputs = [ 
+            inputs.agenix.packages."${system}".default 
+            pkgs.nixos-cli
+          ]; 
+        };
+      };
     };
 
 }
