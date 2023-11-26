@@ -72,4 +72,6 @@ with (import ./keys); {
 
   "files/blobfuse-yaml.age".publicKeys = all;
 
+  "files/restic-azure-env.age".publicKeys = all;
+
 }

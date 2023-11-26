@@ -12,6 +12,7 @@
   password-hash = ./password-hash.age;
   password = ./password.age;
   rclone-conf = ./rclone-conf.age;
+  restic-azure-env = ./restic-azure-env.age;
   traefik-env = ./traefik-env.age;
 
 }
