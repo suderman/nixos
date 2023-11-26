@@ -49,4 +49,7 @@ in {
     gid = config.ids.gids.immich;
   }; 
 
+  ## Backup
+
+  modules.restic.enable = true;
 }
