@@ -29,6 +29,9 @@ in {
   # TODO: wrap this in a module/overlay/whatever is a smooth way to integrate it with existing modules
   # TODO: make mountpoint immutable so it is not accidently written
 
+  systemd.services.docker-ocis.unitConfig = {
+    RequiresMountsFor = "${config.modules.ocis.dataDir}/storage";
+  };
   modules.blobfuse.mounts."${config.modules.ocis.dataDir}/storage" = {
     configPath = config.age.secrets."blobfuse-yaml".path;
     container = "ocis";
