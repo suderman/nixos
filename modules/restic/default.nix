@@ -26,6 +26,7 @@ in {
       ];
       exclude = [
         "/nix/state/var/lib/docker/overlay2" # Do not keep the image overlays but all the rest, i.e. volumes
+        ".git" 
       ];
     in {      
       azureBlob =  {
