@@ -1,4 +1,4 @@
-{ config, ... }: let 
+{ config, pkgs ... }: let 
 
   automount = [ 
     "noauto"                       # do not mount on boot
