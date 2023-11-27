@@ -1,4 +1,18 @@
-{ self, super, ... }: let pkgs = super; lib = super.lib; in { 
+{ self, super, ... }: 
+
+let 
+
+  pkgs = super; 
+  lib = super.lib; 
+  inherit (builtins) map;
+  inherit (pkgs) symlinkJoin makeWrapper;
+  inherit (lib) unique;
+
+in { 
+
+  # List of app ids or packages plucked from a list of apps (see overlays/pkgs/app.nix)
+  appIds = list: unique (map (app: app.id) (list));
+  appPackages = list: unique (map (app: app.package) (list));
 
   # Force package to run in Wayland
   # example:
@@ -11,10 +25,10 @@
         --add-flags "--ozone-platform=wayland" \
         --add-flags "--force-device-scale-factor=2"
       '';
-    }; in pkgs.symlinkJoin {
+    }; in symlinkJoin {
       name = bin;
       paths = [ pkg ];
-      buildInputs = [ pkgs.makeWrapper ];
+      buildInputs = [ makeWrapper ];
       postBuild = ''
         wrapProgram $out/bin/${bin} ${args.${type}}\
       '';

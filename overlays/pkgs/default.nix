@@ -9,7 +9,7 @@ in {
   nixos-cli = self.callPackage ./nixos-cli {};
   isy = self.callPackage ./isy {};
   yo = self.callPackage ./yo.nix {};
-  appids = self.callPackage ./appids.nix {};
+  apps = self.callPackage ./apps.nix {};
 
   # Missing packages
   monica = self.callPackage ./monica {};

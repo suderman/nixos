@@ -6,9 +6,7 @@ let
   cfg = config.modules.gnome;
   inherit (lib) mkIf mkOption types unique;
   inherit (lib.options) mkEnableOption;
-
-  getPkgs = list: unique (map (item: item.pkg) (list));
-  getIds = list: unique (map (item: item.id) (list));
+  inherit (pkgs.lib) appIds appPackages;
 
 in {
 
@@ -18,7 +16,7 @@ in {
 
     dock = mkOption { 
       type = listOf attrs; 
-      default = with pkgs.appids; [
+      default = with pkgs.apps; [
         kitty
         nautilus
         firefox
@@ -42,7 +40,7 @@ in {
     # `gnome-extensions list` for a list
     extensions = mkOption { 
       type = listOf attrs; 
-      default = with pkgs.appids; [
+      default = with pkgs.apps; [
         auto-move-windows
         bluetooth-quick-connect
         blur-my-shell
@@ -60,21 +58,21 @@ in {
 
     # Helpful for debugging
     modules.gnome.apps = {
-      packages = unique( cfg.packages ++ (getPkgs cfg.extensions) );
-      enabled-extensions = getIds cfg.extensions; 
-      favorite-apps = getIds cfg.dock;
+      packages = unique( cfg.packages ++ (appPackages cfg.extensions) );
+      enabled-extensions = appIds cfg.extensions; 
+      favorite-apps = appIds cfg.dock;
     };
 
     # Install dconf & other apps + gnome extensions
-    home.packages = unique( cfg.packages ++ (getPkgs cfg.extensions) );
+    home.packages = unique( cfg.packages ++ (appPackages cfg.extensions) );
 
     # Configure dconf
     dconf.settings = {
 
       "org/gnome/shell" = {
         disable-user-extensions = false;
-        enabled-extensions = getIds cfg.extensions; 
-        favorite-apps = getIds cfg.dock;
+        enabled-extensions = appIds cfg.extensions; 
+        favorite-apps = appIds cfg.dock;
       };
 
       # Enable fractional scaling
