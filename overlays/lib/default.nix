@@ -1,9 +1,4 @@
-{ self, super, ... }: 
-
-let
-  lib = super.lib;
-
-in { 
+{ self, super, ... }: let pkgs = super; lib = super.lib; in { 
 
   # Force package to run in Wayland
   # example:
@@ -16,15 +11,16 @@ in {
         --add-flags "--ozone-platform=wayland" \
         --add-flags "--force-device-scale-factor=2"
       '';
-    }; in super.symlinkJoin {
+    }; in pkgs.symlinkJoin {
       name = bin;
       paths = [ pkg ];
-      buildInputs = [ super.makeWrapper ];
+      buildInputs = [ pkgs.makeWrapper ];
       postBuild = ''
         wrapProgram $out/bin/${bin} ${args.${type}}\
       '';
     };
 
-  jonny = "awake";
+  # Leave my mark
+  jonny = "wuz here";
 
 }

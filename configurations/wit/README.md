@@ -1,3 +1,3 @@
-# kit
+# wit
 
 Thinkpad T480s

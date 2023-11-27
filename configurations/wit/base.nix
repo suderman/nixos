@@ -1,5 +1,5 @@
 {
-  host = "kit"; 
+  host = "wit"; 
   domain = "suderman.org"; 
   user = "me"; 
   system = "x86_64-linux";

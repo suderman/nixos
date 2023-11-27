@@ -75,7 +75,6 @@
     git.enable = true;
     tmux.enable = true;
     zsh.enable = true;
-    dconf.enable = true;
 
     wezterm.enable = false;
     foot.enable = false;
@@ -103,6 +102,32 @@
 
   # modules.firefox-pwa.enable = true;
   # home.file.".ssh/id_ed25519".source = "/nix/keys/id_ed25519";
+
+  # modules.gnome = {
+  #   apps = {
+  #
+  #   };
+  # };
+
+  dconf.settings = {
+
+    "org/gnome/desktop/background" = let
+      dir = "file:///run/current-system/sw/share/backgrounds/gnome";
+    in {
+      picture-uri = "${dir}/keys-l.webp";
+      picture-uri-dark = "${dir}/keys-d.webp";
+    };
+
+    # "org/gnome/shell" = { 
+    #   favorite-apps = [
+    #     "org.gnome.Nautilus.desktop"
+    #     "firefox.desktop"
+    #     "org.telegram.desktop.desktop"
+    #     "kitty.desktop"
+    #   ];
+    # };
+
+  };
 
   systemd.user.services.foobar-hm = {
     Unit = {
