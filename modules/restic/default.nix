@@ -25,13 +25,14 @@ in {
         "/nix/state"
       ];
       exclude = [
-        "/nix/state/var/lib/docker/overlay2" # Do not keep the image overlays but all the rest, i.e. volumes
+        "/nix/state/var/lib/docker" # Docker state is kept in mounted volumes under /nix/state/var/lib/<name>
         "/nix/state/var/log" # logs are not required for a restore
-        ".git" 
+        "/nix/state/var/lib/systemd" # systemd is controlled via nix
+        ".git" # GIT repos are kept remotely
       ];
     in {      
       azureBlob =  {
-        paths = paths ++ cfg.paths;
+        paths = cfg.paths;
         exclude = exclude ++ cfg.exclude;
         environmentFile = secrets.restic-azure-env.path;
         passwordFile = secrets.alphanumeric-secret.path;
