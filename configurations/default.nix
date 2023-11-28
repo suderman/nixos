@@ -12,8 +12,8 @@ inputs: let
 
 in listToAttrs (
   map (directory: { 
-    name = (import ./${directory}/_.nix).host or "${directory}";
-    value = import ./${directory}/_.nix // {
+    name = (import ./${directory}).host or "${directory}";
+    value = import ./${directory} // {
       nixosConfig  = pathOrNull ./${directory}/configuration.nix;
       homeConfig   = pathOrNull ./${directory}/home.nix;
       nixosModules = pathOrNull ../modules;
