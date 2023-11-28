@@ -4,7 +4,7 @@
 let
 
   # https://github.com/silverbulletmd/silverbullet/releases
-  version = "0.5.7";
+  version = "0.5.6";
 
   cfg = config.modules.silverbullet;
   ownership = with config.ids; "${toString uids.silverbullet}:${toString gids.silverbullet}";
