@@ -1,32 +1,35 @@
-{ self, super, ... }: 
+{ self, super, _, ... }: let
 
-let
-  inherit (self.lib) callPackage enableWayland;
+  inherit (self) callPackage;
+  _' = _; # rename original _ (underscore)
 
-in { 
+in rec { 
+
+  # Personal library
+  _ = callPackage ../_ {} // _';
 
   # Personal scripts
-  nixos-cli = self.callPackage ./nixos-cli {};
-  isy = self.callPackage ./isy {};
-  yo = self.callPackage ./yo.nix {};
-  apps = self.callPackage ./apps.nix {};
+  nixos-cli = callPackage ./nixos-cli {};
+  isy = callPackage ./isy {};
+  yo = callPackage ./yo.nix {};
+  apps = callPackage ./apps.nix {};
 
   # Missing packages
-  monica = self.callPackage ./monica {};
-  firefox-pwa = self.callPackage ./firefox-pwa.nix {};
-  beeper = self.callPackage ./beeper.nix {};
-  anytype-wayland = self.callPackage ./anytype.nix {};
+  monica = callPackage ./monica {};
+  firefox-pwa = callPackage ./firefox-pwa.nix {};
+  beeper = callPackage ./beeper.nix {};
+  anytype-wayland = callPackage ./anytype.nix {};
 
   # These packages support Wayland but sometimes need to be persuaded
-  # _1password-gui  = enableWayland { type = "electron"; pkg = super._1password-gui; bin = "1password"; };
-  dolphin          = enableWayland { type = "qt"; pkg = super.dolphin; bin = "dolphin"; };
-  digikam          = enableWayland { type = "qt"; pkg = super.digikam; bin = "digikam"; };
-  element-desktop  = enableWayland { type = "electron"; pkg = super.element-desktop; bin = "element-desktop"; };
-  owncloud-client  = enableWayland { type = "qt"; pkg = super.owncloud-client; bin = "owncloud"; };
-  nextcloud-client = enableWayland { type = "qt"; pkg = super.nextcloud-client; bin = "nextcloud"; };
-  plexamp          = enableWayland { type = "electron"; pkg = super.plexamp; bin = "plexamp"; };
-  signal-desktop   = enableWayland { type = "electron"; pkg = super.signal-desktop; bin = "signal-desktop"; };
-  figma-linux      = enableWayland { type = "electron"; pkg = super.figma-linux; bin = "figma-linux"; };
-  # slack            = enableWayland { type = "electron"; pkg = super.slack; bin = "slack"; };
+  dolphin          = _.enableWayland { type = "qt"; pkg = super.dolphin; bin = "dolphin"; };
+  digikam          = _.enableWayland { type = "qt"; pkg = super.digikam; bin = "digikam"; };
+  element-desktop  = _.enableWayland { type = "electron"; pkg = super.element-desktop; bin = "element-desktop"; };
+  owncloud-client  = _.enableWayland { type = "qt"; pkg = super.owncloud-client; bin = "owncloud"; };
+  nextcloud-client = _.enableWayland { type = "qt"; pkg = super.nextcloud-client; bin = "nextcloud"; };
+  plexamp          = _.enableWayland { type = "electron"; pkg = super.plexamp; bin = "plexamp"; };
+  signal-desktop   = _.enableWayland { type = "electron"; pkg = super.signal-desktop; bin = "signal-desktop"; };
+  figma-linux      = _.enableWayland { type = "electron"; pkg = super.figma-linux; bin = "figma-linux"; };
+  # slack           = _.enableWayland { type = "electron"; pkg = super.slack; bin = "slack"; };
+  # _1password-gui  = _.enableWayland { type = "electron"; pkg = super._1password-gui; bin = "1password"; };
 
 }

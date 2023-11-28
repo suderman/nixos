@@ -76,8 +76,8 @@
       };
 
       # Get configured pkgs for a given system with overlays, nur and unstable baked in
-      mkPkgs = system: import inputs.nixpkgs rec {
-        inherit system;
+      mkPkgs = _: import inputs.nixpkgs rec {
+        system = _.system;
 
         # Accept agreements for unfree software
         config.allowUnfree = true;
@@ -87,26 +87,38 @@
         config.permittedInsecurePackages = [ ];
 
         # Include personal scripts and package modifications
-        overlays = with (import ./overlays { inherit inputs system config; } ); [ lib pkgs nur unstable ];
+        overlays = with (import ./overlays { inherit inputs config _; } ); [ pkgs nur unstable ];
 
       };
 
-      # Make a NixOS system configuration (with home-manager module, if user isn't "root")
-      mkConfiguration = base: inputs.nixpkgs.lib.nixosSystem {
-        inherit (base) system;
-        specialArgs = { inherit inputs outputs base; };
-        pkgs = mkPkgs base.system;
-        modules = with base; [ nixosConfig nixosModules secrets caches ] ++ (if user == "root" then [] else [
+      # Make a NixOS system configuration 
+      mkConfiguration = _: inputs.nixpkgs.lib.nixosSystem rec {
+
+        # Make nixpkgs for this system (with overlays)
+        pkgs = mkPkgs _;
+        system = pkgs._.system;
+        specialArgs = { inherit inputs outputs; inherit (pkgs) _; };
+
+        # Include NixOS configurations, modules, secrets and caches
+        modules = with _; [ nixosConfig nixosModules secrets caches ] ++ (if user == "root" then [] else [
+
+          # Include Home Manager module (if user isn't "root")
           inputs.home-manager.nixosModules.home-manager { 
             home-manager = {
+
+              # Inherit NixOS packages
               useGlobalPkgs = true;
               useUserPackages = true;
-              extraSpecialArgs = { inherit inputs outputs base; };
+              extraSpecialArgs = { inherit inputs outputs; inherit (pkgs) _; };
+
+              # Include Home Manager configuration, modules, secrets and caches
               users."${user}" = let home = { imports }: { inherit imports; }; in home { 
                 imports = [ homeConfig homeModules secrets caches ]; 
               };
+
             }; 
           } 
+
         ]);
       };
 

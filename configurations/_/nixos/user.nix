@@ -7,7 +7,7 @@ let
 
   ifTheyExist = groups: filter (group: hasAttr group config.users.groups) groups;
 
-  # Primary user defined in base
+  # Primary user defined in _.nix
   user = config.users.user; 
 
   # public keys from the secrets dir

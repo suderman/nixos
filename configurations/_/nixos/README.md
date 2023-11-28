@@ -1,4 +1,4 @@
-# Base configuration for NixOS systems
+# Underscore configuration shared by all NixOS systems
 
 Common defaults I like to use for each system:
 
@@ -55,8 +55,8 @@ Additional directories and files can be added in the configuration like so:
 
 ```nix
 {
-  modules.base.dirs = [ "/var/www" ];
-  modules.base.files = [ "/etc/passwd" ];
+  config._.dirs = [ "/var/www" ];
+  config._.files = [ "/etc/passwd" ];
 }
 ```
 

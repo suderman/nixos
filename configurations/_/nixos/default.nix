@@ -1,8 +1,8 @@
-{ config, lib, base, ... }:
+{ config, lib, _, ... }:
 
 let
 
-  cfg = config.modules.base;
+  cfg = config._;
   inherit (lib) mkIf mkOption optionalAttrs recursiveUpdate types;
 
 in {
@@ -16,40 +16,27 @@ in {
     ./state.nix
     ./user.nix 
   ];
+  
+  # Define underscore options
+  options._ = mkOption { 
+    type = types.attrs; 
+    default = _ // {
 
-  # Define base options
-  options.modules.base = {
+      # Persist state with Impermanence module";
+      stateDir = "/nix/state";
 
-    # Store copy of base config for reference
-    config = mkOption { type = types.attrs; default = base; };
+      # Persist files in relative to / root
+      files = [];
 
-    # Persist in /nix/state
-    stateDir = mkOption {
-      description = "Persist state with Impermanence module";
-      type = types.str;
-      default = "/nix/state";
-    };
+      # Persist directories relative to / root
+      dirs = [];
 
-    # Persist files in relative to / root
-    files = mkOption {
-      description = "System files to preserve";
-      type = with types; listOf (either str attrs);
-      default = [];
-      example = [ "/etc/machine-id" ];
-    };
-
-    # Persist directories relative to / root
-    dirs = mkOption {
-      description = "System directories to preserve";
-      type = with types; listOf (either str attrs);
-      default = [];
-      example = [ "/etc/nixos" ];
-    };
-
+    }; 
   };
 
-  # Create new users.user option to store user name defined in base
-  options.users.user = mkOption { type = types.str; default = base.user; };
+  # Create new users.user option to store user name defined in _.nix
+  options.users.user = mkOption { type = types.str; default = _.user; };
+
 
   # ---------------------------------------------------------------------------
   # Common Configuration for all NixOS systems
@@ -57,7 +44,7 @@ in {
   config = {
 
     # Get all modules settings from configuration's default.nix
-    modules = optionalAttrs (base ? modules) (recursiveUpdate base.modules {});
+    modules = optionalAttrs (_ ? modules) (recursiveUpdate _.modules {});
 
     # Set your time zone.
     time.timeZone = "America/Edmonton";

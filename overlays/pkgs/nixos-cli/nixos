@@ -1465,7 +1465,7 @@ nixos_bootstrap_command() {
     task cp -f $bootstrap/hardware-configuration.nix $nixos/
     echo
 
-    # Modify configuration.nix based on detcted linode, uefi, or bios boot
+    # Modify configuration.nix based on detected linode, uefi, or bios boot
     local cfg="$bootstrap/configuration.nix"
     info "Modifying configuration.nix with detected bootloader"
     task "sed -i '$ d' ${cfg}"

@@ -1,5 +1,10 @@
-{ config, pkgs, ... }: with pkgs; {
+{ config, lib, pkgs, ... }: with pkgs; {
 
+  # List of app ids or packages plucked from a list of apps (see overlays/pkgs/app.nix)
+  ids = list: lib.unique (map (app: app.id) (list));
+  packages = list: lib.unique (map (app: app.package) (list));
+
+  # List all apps below
   nautilus = {
     id = "org.gnome.Nautilus.desktop";
     package = gnome.nautilus;

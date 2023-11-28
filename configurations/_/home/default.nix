@@ -1,20 +1,19 @@
-{ config, lib, pkgs, base, ... }:
+{ config, lib, pkgs, _, ... }:
 
 let
 
-  cfg = config.modules.base;
+  cfg = config._;
   inherit (lib) mkIf mkOption optionalAttrs recursiveUpdate types;
 
 in {
 
   imports = [ 
-    ./home-packages.nix 
-    ./home-user.nix 
+    ./packages.nix 
+    ./user.nix 
   ];
 
-  options.modules.base = {
-    config = mkOption { type = types.attrs; default = base; };
-  };
+  # Define underscore options
+  options._ = mkOption { type = types.attrs; default = _; };
 
   # ---------------------------------------------------------------------------
   # Common Configuration for all Home Manager users
@@ -22,11 +21,11 @@ in {
   config = {
 
     # Get all modules settings from configuration's default.nix
-    modules = optionalAttrs (base ? modules) (recursiveUpdate base.modules {});
+    modules = optionalAttrs (_ ? modules) (recursiveUpdate _.modules {});
 
     # Set username and home directory
-    home.username = base.user;
-    home.homeDirectory = "/${if (pkgs.stdenv.isLinux) then "home" else "Users"}/${base.user}";
+    home.username = _.user;
+    home.homeDirectory = "/${if (pkgs.stdenv.isLinux) then "home" else "Users"}/${_.user}";
 
     # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
     home.stateVersion = "22.05";

@@ -4,6 +4,7 @@
     inputs.hardware.nixosModules.lenovo-thinkpad-t480s
     ./hardware-configuration.nix
     ./storage.nix
+    ../_/nixos
   ];
 
   # Use the systemd-boot EFI boot loader.
