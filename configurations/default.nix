@@ -1,14 +1,11 @@
 # Attribute set of NixOS configurations found in each directory
 inputs: caches: let 
 
-  inherit (builtins) attrNames listToAttrs map pathExists readDir;
+  inherit (builtins) attrNames listToAttrs map readDir;
   inherit (inputs.nixpkgs.lib) filterAttrs;
 
   # List all subdirectories in current directory
   dirNames = path: attrNames (filterAttrs (n: v: v == "directory") (readDir path));
-
-  # Null value for path that doesn't exist
-  pathOrNull = path: if pathExists path then path else null;
 
 in listToAttrs (
   map (directory: { 
