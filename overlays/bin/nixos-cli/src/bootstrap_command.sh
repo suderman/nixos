@@ -1,5 +1,5 @@
 local iso="https://channels.nixos.org/nixos-23.05/latest-nixos-minimal-x86_64-linux.iso"
-local cli="https://github.com/suderman/nixos/raw/main/overlays/pkgs/nixos-cli/nixos"
+local cli="https://github.com/suderman/nixos/raw/main/overlays/bin/nixos-cli/nixos"
 local dir="/etc/nixos" config hardware firmware swap default_swap
 
 function main {

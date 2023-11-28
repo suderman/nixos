@@ -6,22 +6,14 @@
   inherit (self) callPackage;
   inherit (this.lib) enableWayland;
 
-in { 
-
-  # Personal configuration and library
-  inherit this;
-
-  # Personal scripts
-  nixos-cli = callPackage ./nixos-cli {};
-  isy = callPackage ./isy {};
-  yo = callPackage ./yo.nix {};
-  apps = callPackage ./apps.nix {};
+# Personal library and scripts
+in { inherit this; } // (import ../bin { inherit self super this; }) // { 
 
   # Missing packages
   monica = callPackage ./monica {};
-  firefox-pwa = callPackage ./firefox-pwa.nix {};
-  beeper = callPackage ./beeper.nix {};
-  anytype-wayland = callPackage ./anytype.nix {};
+  firefox-pwa = callPackage ./firefox-pwa {};
+  beeper = callPackage ./beeper {};
+  anytype-wayland = callPackage ./anytype {};
 
   # These packages support Wayland but sometimes need to be persuaded
   dolphin          = enableWayland { type = "qt"; pkg = super.dolphin; bin = "dolphin"; };

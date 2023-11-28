@@ -1001,7 +1001,7 @@ nixos_rollback_command() {
 nixos_bootstrap_command() {
   # src/bootstrap_command.sh
   local iso="https://channels.nixos.org/nixos-23.05/latest-nixos-minimal-x86_64-linux.iso"
-  local cli="https://github.com/suderman/nixos/raw/main/overlays/pkgs/nixos-cli/nixos"
+  local cli="https://github.com/suderman/nixos/raw/main/overlays/bin/nixos-cli/nixos"
   local dir="/etc/nixos" config hardware firmware swap default_swap
 
   function main {
@@ -1989,7 +1989,7 @@ nixos_cache_command() {
 # :command.function
 nixos_bashly_generate_command() {
   # src/bashly_generate_command.sh
-  local dir=/etc/nixos/overlays/pkgs/nixos-cli
+  local dir=/etc/nixos/overlays/bin/nixos-cli
   local bashly="docker run --rm -it --user $(id -u):$(id -g) --volume $dir:/app dannyben/bashly"
   show "cd $dir && bashly generate"
   (cd $dir && $bashly generate)

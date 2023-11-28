@@ -15,7 +15,7 @@ This configuration comes with a helper CLI `nixos` for common commands. On a
 bare system, this can tool can be used by setting the following alias:
 
 ```bash
-alias nixos="bash <(curl -sL https://github.com/suderman/nixos/raw/main/overlays/pkgs/nixos-cli/nixos)"
+alias nixos="bash <(curl -sL https://github.com/suderman/nixos/raw/main/overlays/bin/nixos-cli/nixos)"
 ```
 
 Keep in mind this is meant to be run on NixOS and there a number of
