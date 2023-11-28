@@ -8,11 +8,11 @@ using the enable option.
 
 ```nix
 {
-  modules.neovim.enable = true;
+  config.modules.neovim.enable = true;
 }
 ```
 
 This can be done in `configuration.nix` for NixOS modules and `home.nix` for
 Home Manager modules. Alternatively, for any modules which support both NixOS
-and Home Manager, you can add the above snippet to `_.nix` and this will
-enable the module in both contexts.
+and Home Manager, you can add the above snippet to a configuration's
+`default.nix` and this will enable the module in both contexts.

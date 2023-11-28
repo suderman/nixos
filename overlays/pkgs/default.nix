@@ -3,7 +3,7 @@
   # Extend this with personal library
   this = { lib = callPackage ../lib {}; } // this';
 
-  inherit (self) callPackage;
+  inherit (self) lib callPackage;
   inherit (this.lib) enableWayland;
 
 # Personal library and scripts

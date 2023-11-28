@@ -1,7 +1,7 @@
 # Personal scripts
 { self, super, this, ... }: let
 
-  inherit (self) callPackage;
+  inherit (self) lib callPackage;
 
 in { 
 
