@@ -15,6 +15,7 @@ in {
     exclude =  mkOption { type = types.listOf (types.str); default = [];};
     # execStartPre = mkOption { type = types.str; }; # TODO: hook into this on order to prepare i.e. postgres backups
     # TODO: set services.restic.backups.<name>.repository destination repo from machine config
+    # TODO: create predefined "destinations" and make them configurable. SO i can have azure, borgbase, etc as destination
   };
 
   # Use restic to snapshot persistent states and home
@@ -42,5 +43,6 @@ in {
         timerConfig.RandomizedDelaySec = "5m";
       };
     };
+
   };
 }
