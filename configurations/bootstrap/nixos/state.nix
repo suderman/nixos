@@ -1,11 +1,11 @@
 # Add directories or files to persist
-# config._.dirs = [ "/var/lib/systemd" ];
-# config._.files = [ "/etc/machine-id" ];
+# config.this.dirs = [ "/var/lib/systemd" ];
+# config.this.files = [ "/etc/machine-id" ];
 { config, lib, inputs, ... }: 
 
 let 
 
-  cfg = config._;
+  cfg = config.this;
   inherit (lib) mkBefore mkIf;
 
 in {

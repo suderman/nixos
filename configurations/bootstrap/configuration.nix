@@ -2,7 +2,6 @@
 
   imports = [ 
     ./hardware-configuration.nix
-    ./nixos
   ];
 
   # UEFI boot 

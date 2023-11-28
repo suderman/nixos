@@ -1,12 +1,15 @@
-{ self, super, _, ... }: let
+{ self, super, this', ... }: let
+
+  # Extend this with personal library
+  this = { lib = callPackage ../lib {}; } // this';
 
   inherit (self) callPackage;
-  _' = _; # rename original _ (underscore)
+  inherit (this.lib) enableWayland;
 
-in rec { 
+in { 
 
-  # Personal library
-  _ = callPackage ../_ {} // _';
+  # Personal configuration and library
+  inherit this;
 
   # Personal scripts
   nixos-cli = callPackage ./nixos-cli {};
@@ -21,15 +24,15 @@ in rec {
   anytype-wayland = callPackage ./anytype.nix {};
 
   # These packages support Wayland but sometimes need to be persuaded
-  dolphin          = _.enableWayland { type = "qt"; pkg = super.dolphin; bin = "dolphin"; };
-  digikam          = _.enableWayland { type = "qt"; pkg = super.digikam; bin = "digikam"; };
-  element-desktop  = _.enableWayland { type = "electron"; pkg = super.element-desktop; bin = "element-desktop"; };
-  owncloud-client  = _.enableWayland { type = "qt"; pkg = super.owncloud-client; bin = "owncloud"; };
-  nextcloud-client = _.enableWayland { type = "qt"; pkg = super.nextcloud-client; bin = "nextcloud"; };
-  plexamp          = _.enableWayland { type = "electron"; pkg = super.plexamp; bin = "plexamp"; };
-  signal-desktop   = _.enableWayland { type = "electron"; pkg = super.signal-desktop; bin = "signal-desktop"; };
-  figma-linux      = _.enableWayland { type = "electron"; pkg = super.figma-linux; bin = "figma-linux"; };
-  # slack           = _.enableWayland { type = "electron"; pkg = super.slack; bin = "slack"; };
-  # _1password-gui  = _.enableWayland { type = "electron"; pkg = super._1password-gui; bin = "1password"; };
+  dolphin          = enableWayland { type = "qt"; pkg = super.dolphin; bin = "dolphin"; };
+  digikam          = enableWayland { type = "qt"; pkg = super.digikam; bin = "digikam"; };
+  element-desktop  = enableWayland { type = "electron"; pkg = super.element-desktop; bin = "element-desktop"; };
+  owncloud-client  = enableWayland { type = "qt"; pkg = super.owncloud-client; bin = "owncloud"; };
+  nextcloud-client = enableWayland { type = "qt"; pkg = super.nextcloud-client; bin = "nextcloud"; };
+  plexamp          = enableWayland { type = "electron"; pkg = super.plexamp; bin = "plexamp"; };
+  signal-desktop   = enableWayland { type = "electron"; pkg = super.signal-desktop; bin = "signal-desktop"; };
+  figma-linux      = enableWayland { type = "electron"; pkg = super.figma-linux; bin = "figma-linux"; };
+  # slack           = enableWayland { type = "electron"; pkg = super.slack; bin = "slack"; };
+  # _1password-gui  = enableWayland { type = "electron"; pkg = super._1password-gui; bin = "1password"; };
 
 }

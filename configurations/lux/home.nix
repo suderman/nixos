@@ -1,7 +1,5 @@
 { config, lib, pkgs, ... }: {
 
-  imports = [ ../_/home ];
-
   home.packages = with pkgs; [ 
     neofetch
     yo

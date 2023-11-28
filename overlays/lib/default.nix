@@ -1,5 +1,5 @@
 # Personal library of helper functions
-{ pkgs, lib, _, ... }: with pkgs; { 
+{ pkgs, lib, this, ... }: with pkgs; { 
 
   # Sanity check
   foo = "bar";

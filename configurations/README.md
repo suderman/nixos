@@ -1,6 +1,6 @@
 # NixOS configurations
 
-- `_` [Bootstrap configuration](https://github.com/suderman/nixos/tree/main/configurations/_)
+- `bootstrap` [Bootstrap configuration](https://github.com/suderman/nixos/tree/main/configurations/bootstrap)
 - `cog` [Framework laptop](https://github.com/suderman/nixos/tree/main/configurations/cog)
 - `eve` [2009 Mac Pro (at work)](https://github.com/suderman/nixos/tree/main/configurations/eve)
 - `hub` [Intel NUC home server](https://github.com/suderman/nixos/tree/main/configurations/hub)  

@@ -442,7 +442,7 @@ function stage1 {
 
   # Path to nixos flake and bootstrap configuration
   local nixos="/mnt/nix/state/etc/nixos" 
-  local bootstrap="$nixos/configurations/_"
+  local bootstrap="$nixos/configurations/bootstrap"
 
   # Clone git repo into persistant directory
   info "Cloning nixos git repo"
@@ -505,8 +505,8 @@ function stage2 {
     task "cd $dir; git pull" && echo
 
     info "Copying generated hardware-configuration to $config"
-    task mv -f $dir/configurations/_/hardware-configuration.nix $dir/configurations/$config/hardware-configuration.nix
-    task "cd $dir; git restore configurations/_"
+    task mv -f $dir/configurations/bootstrap/hardware-configuration.nix $dir/configurations/$config/hardware-configuration.nix
+    task "cd $dir; git restore configurations/bootstrap"
     task "chown -R 1000:100 $dir $dir/.git" && echo
 
     info "Rebuilding system to $config"

@@ -5,7 +5,6 @@
     ./framework.nix
     ./hardware-configuration.nix 
     ./storage.nix
-    ../_/nixos
   ];
 
   # Use freshest kernel

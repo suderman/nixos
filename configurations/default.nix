@@ -1,5 +1,5 @@
 # Attribute set of NixOS configurations found in each directory
-inputs: let 
+inputs: caches: let 
 
   inherit (builtins) attrNames listToAttrs map pathExists readDir;
   inherit (inputs.nixpkgs.lib) filterAttrs;
@@ -14,11 +14,20 @@ in listToAttrs (
   map (directory: { 
     name = (import ./${directory}).host or "${directory}";
     value = import ./${directory} // {
-      nixosConfig  = pathOrNull ./${directory}/configuration.nix;
-      homeConfig   = pathOrNull ./${directory}/home.nix;
-      nixosModules = pathOrNull ../modules;
-      homeModules  = pathOrNull ../modules/home.nix;
-      secrets      = pathOrNull ../secrets;
+      nixosModules = [
+        ./bootstrap/nixos
+        ./${directory}/configuration.nix
+        ../modules
+        ../secrets
+        caches
+      ];
+      homeModules = [
+        ./bootstrap/home
+        ./${directory}/home.nix
+        ../modules/home.nix
+        ../secrets
+        caches
+      ];
     };
   }) (dirNames ./.)
 )

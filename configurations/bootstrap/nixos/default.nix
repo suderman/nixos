@@ -1,8 +1,8 @@
-{ config, lib, _, ... }:
+{ config, lib, this, ... }:
 
 let
 
-  cfg = config._;
+  cfg = config.this;
   inherit (lib) mkIf mkOption optionalAttrs recursiveUpdate types;
 
 in {
@@ -17,10 +17,10 @@ in {
     ./user.nix 
   ];
   
-  # Define underscore options
-  options._ = mkOption { 
+  # Define this options
+  options.this = mkOption { 
     type = types.attrs; 
-    default = _ // {
+    default = this // {
 
       # Persist state with Impermanence module";
       stateDir = "/nix/state";
@@ -34,17 +34,14 @@ in {
     }; 
   };
 
-  # Create new users.user option to store user name defined in _.nix
-  options.users.user = mkOption { type = types.str; default = _.user; };
-
+  # Create new users.user option to store user name defined in this
+  options.users.user = mkOption { type = types.str; default = this.user; };
 
   # ---------------------------------------------------------------------------
   # Common Configuration for all NixOS systems
   # ---------------------------------------------------------------------------
-  config = {
-
-    # Get all modules settings from configuration's default.nix
-    modules = optionalAttrs (_ ? modules) (recursiveUpdate _.modules {});
+  # Get all modules settings from configuration's default.nix
+  config = (optionalAttrs (this ? config) (recursiveUpdate this.config {})) // {
 
     # Set your time zone.
     time.timeZone = "America/Edmonton";

@@ -76,8 +76,8 @@
       };
 
       # Get configured pkgs for a given system with overlays, nur and unstable baked in
-      mkPkgs = _: import inputs.nixpkgs rec {
-        system = _.system;
+      mkPkgs = this: import inputs.nixpkgs rec {
+        system = this.system;
 
         # Accept agreements for unfree software
         config.allowUnfree = true;
@@ -87,20 +87,20 @@
         config.permittedInsecurePackages = [ ];
 
         # Include personal scripts and package modifications
-        overlays = with (import ./overlays { inherit inputs config _; } ); [ pkgs nur unstable ];
+        overlays = with (import ./overlays { inherit inputs config this; } ); [ pkgs nur unstable ];
 
       };
 
       # Make a NixOS system configuration 
-      mkConfiguration = _: inputs.nixpkgs.lib.nixosSystem rec {
+      mkConfiguration = this: inputs.nixpkgs.lib.nixosSystem rec {
 
         # Make nixpkgs for this system (with overlays)
-        pkgs = mkPkgs _;
-        system = pkgs._.system;
-        specialArgs = { inherit inputs outputs; inherit (pkgs) _; };
+        pkgs = mkPkgs this;
+        system = pkgs.this.system;
+        specialArgs = { inherit inputs outputs; this = pkgs.this; };
 
         # Include NixOS configurations, modules, secrets and caches
-        modules = with _; [ nixosConfig nixosModules secrets caches ] ++ (if user == "root" then [] else [
+        modules = with pkgs.this; nixosModules ++ (if user == "root" then [] else [
 
           # Include Home Manager module (if user isn't "root")
           inputs.home-manager.nixosModules.home-manager { 
@@ -109,11 +109,11 @@
               # Inherit NixOS packages
               useGlobalPkgs = true;
               useUserPackages = true;
-              extraSpecialArgs = { inherit inputs outputs; inherit (pkgs) _; };
+              extraSpecialArgs = { inherit inputs outputs; this = pkgs.this; };
 
               # Include Home Manager configuration, modules, secrets and caches
               users."${user}" = let home = { imports }: { inherit imports; }; in home { 
-                imports = [ homeConfig homeModules secrets caches ]; 
+                imports = homeModules; 
               };
 
             }; 
@@ -126,7 +126,7 @@
     in {
       nixosConfigurations = 
         builtins.mapAttrs (name: value: mkConfiguration value) 
-        (import ./configurations inputs);
+        (import ./configurations inputs caches);
     };
 
 }
