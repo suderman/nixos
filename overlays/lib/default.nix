@@ -10,4 +10,7 @@
   # Force wayland on programs
   enableWayland = callPackage ./wayland.nix {};
 
+  # Home directory for this user
+  homeDir = "/${if (stdenv.isLinux) then "home" else "Users"}/${this.user}";
+
 }

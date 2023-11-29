@@ -2,8 +2,7 @@
 
 let
 
-  cfg = config.this;
-  inherit (lib) mkIf mkOption optionalAttrs recursiveUpdate types;
+  inherit (lib) optionalAttrs recursiveUpdate;
 
 in {
 
@@ -17,26 +16,6 @@ in {
     ./user.nix 
   ];
   
-  # Define this options
-  options.this = mkOption { 
-    type = types.attrs; 
-    default = this // {
-
-      # Persist state with Impermanence module";
-      stateDir = "/nix/state";
-
-      # Persist files in relative to / root
-      files = [];
-
-      # Persist directories relative to / root
-      dirs = [];
-
-    }; 
-  };
-
-  # Create new users.user option to store user name defined in this
-  options.users.user = mkOption { type = types.str; default = this.user; };
-
   # ---------------------------------------------------------------------------
   # Common Configuration for all NixOS systems
   # ---------------------------------------------------------------------------

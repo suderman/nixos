@@ -1,11 +1,13 @@
-# Add directories or files to persist
-# config.this.dirs = [ "/var/lib/systemd" ];
-# config.this.files = [ "/etc/machine-id" ];
 { config, lib, inputs, ... }: 
 
 let 
 
-  cfg = config.this;
+  # Persist state in this subvolume
+  stateDir = "/nix/state";
+
+  extraDirs = []; # [ "/var/lib/systemd" ];
+  extraFiles = []; # [ "/etc/machine-id" ];
+
   inherit (lib) mkBefore mkIf;
 
 in {
@@ -20,11 +22,11 @@ in {
   environment.persistence = {
 
     # State stored on subvolume
-    "${cfg.stateDir}" = {
+    "${stateDir}" = {
       hideMounts = true;
 
       # System files
-      files = cfg.files;
+      files = extraFiles;
 
       # System directories
       directories = [
@@ -33,7 +35,7 @@ in {
         "/var/lib"  
         "/var/log"  
         "/home"  
-      ] ++ cfg.dirs;
+      ] ++ extraDirs;
 
     };
   };
@@ -42,15 +44,15 @@ in {
   programs.fuse.userAllowOther = true;
 
   # Maintain machine identification
-  environment.etc."machine-id".source = "${cfg.stateDir}/etc/machine-id";
+  environment.etc."machine-id".source = "${stateDir}/etc/machine-id";
 
   # Maintain ssh host keys
   services.openssh = mkIf config.services.openssh.enable {
     hostKeys = [{
-      path = "${cfg.stateDir}/etc/ssh/ssh_host_ed25519_key";
+      path = "${stateDir}/etc/ssh/ssh_host_ed25519_key";
       type = "ed25519";
     } {
-      path = "${cfg.stateDir}/etc/ssh/ssh_host_rsa_key";
+      path = "${stateDir}/etc/ssh/ssh_host_rsa_key";
       type = "rsa";
       bits = 4096;
     }];

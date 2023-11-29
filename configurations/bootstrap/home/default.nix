@@ -2,8 +2,7 @@
 
 let
 
-  cfg = config.this;
-  inherit (lib) mkIf mkOption optionalAttrs recursiveUpdate types;
+  inherit (lib) optionalAttrs recursiveUpdate;
 
 in {
 
@@ -11,9 +10,6 @@ in {
     ./packages.nix 
     ./user.nix 
   ];
-
-  # Define this options
-  options.this = mkOption { type = types.attrs; default = this; };
 
   # ---------------------------------------------------------------------------
   # Common Configuration for all Home Manager users
@@ -23,7 +19,7 @@ in {
 
     # Set username and home directory
     home.username = this.user;
-    home.homeDirectory = "/${if (pkgs.stdenv.isLinux) then "home" else "Users"}/${this.user}";
+    home.homeDirectory = this.lib.homeDir;
 
     # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
     home.stateVersion = "22.05";
