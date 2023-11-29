@@ -1,19 +1,29 @@
 { self, super, this', ... }: let
 
   # Extend this with personal library
-  this = { lib = callPackage ../lib {}; } // this';
+  this = { lib = super.callPackage ../lib {}; } // this';
 
-  inherit (self) lib callPackage;
+  inherit (builtins) attrNames listToAttrs filter map pathExists readDir;
+  inherit (super.lib) filterAttrs;
   inherit (this.lib) enableWayland;
 
-# Personal library and scripts
-in { inherit this; } // (import ../bin { inherit self super this; }) // { 
+  # List of directory names
+  dirNames = path: attrNames (filterAttrs (n: v: v == "directory") (readDir path));
 
-  # Missing packages
-  monica = callPackage ./monica {};
-  firefox-pwa = callPackage ./firefox-pwa {};
-  beeper = callPackage ./beeper {};
-  anytype-wayland = callPackage ./anytype {};
+  # List of directory names containing default.nix
+  moduleDirNames = path: filter(dir: pathExists ("${path}/${dir}/default.nix")) (dirNames path);
+
+# Personal library found in overlays/lib
+in { inherit this; } 
+
+# Personal scripts found in overlays/bin
+// ( import ../bin { inherit self super this moduleDirNames; } )
+
+# Additional packages found in overlays/pkgs
+// listToAttrs( map( dir: { name = "${dir}"; value = super.callPackage ./${dir} {}; } ) (moduleDirNames ./.) ) 
+
+# Everything else
+// {
 
   # These packages support Wayland but sometimes need to be persuaded
   dolphin          = enableWayland { type = "qt"; pkg = super.dolphin; bin = "dolphin"; };

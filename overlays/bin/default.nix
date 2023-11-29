@@ -1,12 +1,7 @@
 # Personal scripts
-{ self, super, this, ... }: let
-
-  inherit (self) lib callPackage;
-
-in { 
-
-  nixos-cli = callPackage ./nixos-cli {};
-  isy = callPackage ./isy {};
-  yo = callPackage ./yo {};
-
-}
+{ self, super, this, moduleDirNames, ... }: let in builtins.listToAttrs (
+  builtins.map (dir: { 
+    name = "${dir}";
+    value = self.callPackage ./${dir} {};
+  }) (moduleDirNames ./.)
+)

@@ -1,5 +1,11 @@
 # Personal library of helper functions
-{ pkgs, lib, this, ... }: with pkgs; { 
+{ pkgs, lib, this, ... }: let 
+
+  inherit (builtins) attrNames listToAttrs filter map pathExists readDir;
+  inherit (pkgs) callPackage stdenv;
+  inherit (lib) filterAttrs;
+
+in rec { 
 
   # Sanity check
   foo = "bar";
@@ -12,5 +18,11 @@
 
   # Home directory for this user
   homeDir = "/${if (stdenv.isLinux) then "home" else "Users"}/${this.user}";
+
+  # List of directory names
+  dirNames = path: attrNames (filterAttrs (n: v: v == "directory") (readDir path));
+
+  # List of directory names containing default.nix
+  moduleDirNames = path: filter(dir: pathExists ("${path}/${dir}/default.nix")) (dirNames path);
 
 }
