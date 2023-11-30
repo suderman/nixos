@@ -6,21 +6,12 @@ let
 
 in {
 
-  imports = [ 
-    ./network.nix 
-    ./nix.nix 
-    ./packages.nix 
-    ./root.nix 
-    ./security.nix 
-    ./state.nix
-    ./user.nix 
-  ];
-  
   # ---------------------------------------------------------------------------
   # Common Configuration for all NixOS systems
+  # (configurations/default.nix auto imports all .nix files in this directory)
   # ---------------------------------------------------------------------------
-  # Get all modules settings from configuration's default.nix
-  config = (optionalAttrs (this ? config) (recursiveUpdate this.config {})) // {
+  # Inherit any config settings in configuration's default.nix
+  config = optionalAttrs (this ? config) (recursiveUpdate this.config {
 
     # Set your time zone.
     time.timeZone = "America/Edmonton";
@@ -33,6 +24,6 @@ in {
     # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
     system.stateVersion = "22.11"; # Did you read the comment?
 
-  };
+  });
 
 }

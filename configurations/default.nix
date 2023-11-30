@@ -1,30 +1,33 @@
 # Attribute set of NixOS configurations found in each directory
-inputs: caches: let 
+this: with this.lib; let 
 
-  inherit (builtins) attrNames listToAttrs map readDir;
-  inherit (inputs.nixpkgs.lib) filterAttrs;
+  # Import all modules and shared configuration
+  nixosShared = ls { path = ./bootstrap/nixos; filesExcept = []; };
+  nixosModules = ls { path = ../modules; };
+  homeShared = ls { path = ./bootstrap/home; filesExcept = []; };
+  homeModules = ls { path = ../modules; dirsWith = [ "home.nix" ]; };
 
-  # List all subdirectories in current directory
-  dirNames = path: attrNames (filterAttrs (n: v: v == "directory") (readDir path));
-
-in listToAttrs (
+in builtins.listToAttrs (
   map (directory: { 
+
+    # Get name from host attribute or directory name
     name = (import ./${directory}).host or "${directory}";
-    value = import ./${directory} // {
+
+    # Merge this with directory's default.nix
+    value = this // import ./${directory} // {
+
+      # Include all NixOS modules
       nixosModules = [
-        ./bootstrap/nixos
-        ./${directory}/configuration.nix
-        ../modules
-        ../secrets
-        caches
-      ];
+        ./${directory}/configuration.nix 
+        ../secrets this.caches
+      ] ++ nixosShared ++ nixosModules;
+
+      # Include all Home Manager modules
       homeModules = [
-        ./bootstrap/home
         ./${directory}/home.nix
-        ../modules/home.nix
-        ../secrets
-        caches
-      ];
+        ../secrets this.caches
+      ] ++ homeShared ++ homeModules;
+
     };
-  }) (dirNames ./.)
+  }) (ls { path = ./.; full = false; } )
 )

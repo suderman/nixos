@@ -1,4 +1,4 @@
-{ config, lib, pkgs, this, ... }:
+{ config, lib, this, ... }:
 
 let
 
@@ -6,16 +6,12 @@ let
 
 in {
 
-  imports = [ 
-    ./packages.nix 
-    ./user.nix 
-  ];
-
   # ---------------------------------------------------------------------------
   # Common Configuration for all Home Manager users
+  # (configurations/default.nix auto imports all .nix files in this directory)
   # ---------------------------------------------------------------------------
-  # Get all modules settings from configuration's default.nix
-  config = (optionalAttrs (this ? config) (recursiveUpdate this.config {})) // {
+  # Inherit any config settings in configuration's default.nix
+  config = optionalAttrs (this ? config) (recursiveUpdate this.config {
 
     # Set username and home directory
     home.username = this.user;
@@ -32,6 +28,6 @@ in {
       "nix/nix.conf".text = "experimental-features = nix-command flakes";
     };
 
-  };
+  });
 
 }

@@ -1,7 +1,7 @@
 # Personal scripts
-{ self, super, this, moduleDirNames, ... }: let in builtins.listToAttrs (
-  builtins.map (dir: { 
+{ self, super, this, ... }: builtins.listToAttrs (
+  map (dir: { 
     name = "${dir}";
-    value = self.callPackage ./${dir} {};
-  }) (moduleDirNames ./.)
+    value = super.callPackage ./${dir} {};
+  }) (this.lib.ls { path = ./.; full = false; })
 )

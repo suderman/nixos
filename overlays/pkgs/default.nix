@@ -1,26 +1,20 @@
 { self, super, this', ... }: let
 
   # Extend this with personal library
-  this = { lib = super.callPackage ../lib {}; } // this';
+  this = super.lib.recursiveUpdate { lib = super.callPackage ../lib {}; } this';
 
-  inherit (builtins) attrNames listToAttrs filter map pathExists readDir;
-  inherit (super.lib) filterAttrs;
   inherit (this.lib) enableWayland;
-
-  # List of directory names
-  dirNames = path: attrNames (filterAttrs (n: v: v == "directory") (readDir path));
-
-  # List of directory names containing default.nix
-  moduleDirNames = path: filter(dir: pathExists ("${path}/${dir}/default.nix")) (dirNames path);
 
 # Personal library found in overlays/lib
 in { inherit this; } 
 
 # Personal scripts found in overlays/bin
-// ( import ../bin { inherit self super this moduleDirNames; } )
+// ( import ../bin { inherit self super; this = this'; } )
+
+// { nftest = this.lib.ls { path = ../bin; }; }
 
 # Additional packages found in overlays/pkgs
-// listToAttrs( map( dir: { name = "${dir}"; value = super.callPackage ./${dir} {}; } ) (moduleDirNames ./.) ) 
+// builtins.listToAttrs( map( dir: { name = "${dir}"; value = super.callPackage ./${dir} {}; } ) (this'.lib.ls { path = ./.; full = false; } ) ) 
 
 # Everything else
 // {

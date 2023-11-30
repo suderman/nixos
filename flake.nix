@@ -87,7 +87,8 @@
         config.permittedInsecurePackages = [ ];
 
         # Include personal scripts and package modifications
-        overlays = with (import ./overlays { inherit inputs config this; } ); [ pkgs nur unstable ];
+        overlays = with (import ./overlays { inherit config this; }); [ pkgs nur unstable ];
+          # inherit inputs config; this = this // { lib = { inherit ls mkPkgs mkConfiguration; }; }; 
 
       };
 
@@ -122,11 +123,43 @@
         ]);
       };
 
+      # List directories and files that can be imported by nix
+      # ls { path = ./.; filesExcept = [ "flake.nix" ]; };
+      # ls { path = ./modules; dirsWith = [ "default.nix" "home.nix" ]; filesExcept = []; };
+      ls = with builtins; with inputs.nixpkgs.lib; let
+
+        # Return list of directory names (with default.nix) inside path
+        dirNames = path: dirsWith: full: let
+          dirs = attrNames (filterAttrs (n: v: v == "directory") (readDir path));
+          isVisible = (name: (!hasPrefix "." name));
+          dirsWithFiles = (dirs: concatMap (dir: concatMap (file: ["${dir}/${file}"] ) dirsWith) dirs);
+          isValid = dirFile: pathExists "${path}/${dirFile}";
+          format = paths: map (dirFile: (if (full == true) then path + "/${dirFile}" else dirOf dirFile)) paths;
+        in format (filter isValid (dirsWithFiles (filter isVisible dirs)));
+
+        # Return list of filenames (ending in .nix) inside path 
+        fileNames = path: filesExcept: full: let 
+          files = attrNames (filterAttrs (n: v: v == "regular") (readDir path)); 
+          isVisible = (name: (!hasPrefix "." name));
+          isNix = (name: (hasSuffix ".nix" name));
+          isAllowed = (name: !elem name filesExcept); 
+          format = paths: map (file: (if (full == true) then path + "/${file}" else file)) paths;
+        in format (filter isAllowed (filter isNix (filter isVisible files)));
+
+      # Return list of directory/file names if full is false, otherwise list of absolute paths
+      in { path, dirsWith ? [ "default.nix" ], filesExcept ? [ "default.nix" "home.nix" ], full ? true }: unique
+
+        # No dirs if dirsWith is false, no files if filesExcept is false
+        (if dirsWith == false then [] else (dirNames path dirsWith full)) ++
+        (if filesExcept == false then [] else (fileNames path filesExcept full)); 
+
+      # Save all these in this
+      this = { inherit inputs caches; lib = { inherit ls mkPkgs mkConfiguration; }; };
+
     # NixOS configurations found in configurations directory
     in {
       nixosConfigurations = 
-        builtins.mapAttrs (name: value: mkConfiguration value) 
-        (import ./configurations inputs caches);
+        builtins.mapAttrs (name: value: mkConfiguration value) (import ./configurations this);
     };
 
 }
