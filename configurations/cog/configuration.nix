@@ -52,12 +52,12 @@
   modules.backblaze.enable = false;
   modules.wallabag.enable = false;
 
-  modules.cockpit.enable = true;
+  modules.cockpit.enable = false;
 
   modules.nextcloud.enable = false;
 
   modules.ocis = {
-    enable = true;
+    enable = false;
     dataDir = "/tmp/ocis";
   };
 
@@ -72,7 +72,7 @@
   };
 
   services.xserver.desktopManager.retroarch = {
-    enable = true;
+    enable = false;
     package = pkgs.retroarchFull;
   };
 

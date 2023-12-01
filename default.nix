@@ -1,10 +1,9 @@
 # Attribute set of NixOS configurations found in each directory
-inputs: caches: let 
+{ inputs, caches ? [], ... }: let
 
   inherit (builtins) attrNames concatMap elem filter listToAttrs pathExists readDir;
   inherit (inputs.nixpkgs.lib) filterAttrs hasPrefix hasSuffix partition removeSuffix unique;
   inherit (lib) ls pathToAttrs;
-
 
   # Build cache module from list of pairs
   cacheModule = let 

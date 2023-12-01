@@ -50,7 +50,7 @@
     _1password-gui
     darktable
     digikam
-    firefox-wayland
+    firefox
     inkscape
     junction
     libreoffice 

@@ -50,7 +50,7 @@
     let inherit (self) outputs inputs; 
 
       # initialize this configuration with inputs and binary caches
-      this = import ./. inputs [
+      this = import ./. { inherit inputs; caches = [
         "https://suderman.cachix.org" "suderman.cachix.org-1:8lYeb2gOOVDPbUn1THnL5J3/L4tFWU30/uVPk7sCGmI="
         "https://nix-community.cachix.org" "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
         "https://hyprland.cachix.org" "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
@@ -58,7 +58,7 @@
         "https://nix-gaming.cachix.org" "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4="
         "https://anyrun.cachix.org" "anyrun.cachix.org-1:pqBobmOjI7nKlsUMV25u9QHa9btJK65/C8vnO3p346s="
         "https://cache.nixos.org" "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-      ];
+      ]; };
 
       # Get configured pkgs for a given system with overlays, nur and unstable baked in
       mkPkgs = this: import inputs.nixpkgs rec {
@@ -69,7 +69,7 @@
         config.joypixels.acceptLicense = true;
 
         # Add to-be-updated packages blocking builds (none right now)
-        config.permittedInsecurePackages = [ ];
+        config.permittedInsecurePackages = [];
 
         # Modify pkgs with this, sripts, packages, nur and unstable
         overlays = with this.lib; [ 
