@@ -1,5 +1,7 @@
 # NixOS & Home Manager Modules
 
+Each of these directories are automatically imported in each configuration.
+
 Every subdirectory with `default.nix` represents a module for NixOS and
 `home.nix` represents a module for Home Manager. All modules must be opted-in
 using the enable option.

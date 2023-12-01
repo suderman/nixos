@@ -5,14 +5,17 @@
 *Welcome to the NixOS configuration for all my personal infrastucture!*  
 
 Feel free to look around but realize this is an on-going work-in-progress.
-Although I'm a big fan, I'm by no means an expert in this world so there's
-probably always a better way to do what I'm trying to do. I have found [Nix](https://nixos.org/)
-to be super challenging, but almost always in a good way. :-)
+Although I'm a Nix enthusiast, I am *not* a Nix expert, so there's probably
+always a better way to do what I'm trying to do. I have found
+[Nix](https://nixos.org/) to be very challenging, but almost always in a good
+way. 🤓
 
 ## Usage 
 
-This configuration comes with a helper CLI `nixos` for common commands. On a
-bare system, this can tool can be used by setting the following alias:
+This configuration comes with a helper CLI
+[nixos](https://github.com/suderman/nixos/tree/main/overlays/bin/nixos-cli) for
+common commands. On a bare system, this can tool can be used by setting the
+following alias:
 
 ```bash
 alias nixos="bash <(curl -sL https://github.com/suderman/nixos/raw/main/overlays/bin/nixos-cli/nixos)"

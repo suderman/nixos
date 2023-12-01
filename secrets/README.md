@@ -1,4 +1,4 @@
-# secrets
+# NixOS Secrets
 
 Sensitive [files](https://github.com/suderman/nixos/tree/main/secrets/files)
 are age-encrypted using the [agenix](https://github.com/ryantm/agenix) CLI,

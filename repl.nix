@@ -1,11 +1,12 @@
 let
   flake = builtins.getFlake (toString ./.);
-  nixpkgs = import <nixpkgs> { };
+  default = import ./. { inherit (flake) inputs; };
+  this = flake.nixosConfigurations.cog.pkgs.this;
 in
-{ inherit flake; }
+{ inherit flake default this; }
 // flake
 // builtins
-// nixpkgs
-// nixpkgs.lib
+// flake.inputs.nixpkgs
+// flake.inputs.nixpkgs.lib
 // flake.nixosConfigurations
-
+// this.lib
