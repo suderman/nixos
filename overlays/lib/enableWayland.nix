@@ -1,3 +1,4 @@
+# enableWayland
 { pkgs, lib, this }:
 
   # Force package to run in Wayland

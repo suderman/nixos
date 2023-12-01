@@ -1,4 +1,4 @@
-{ config, lib, pkgs, this, ... }: with pkgs; {
+{ pkgs, lib, this, ... }: with pkgs; {
 
   # List of app ids or packages plucked from a list of apps (see overlays/pkgs/app.nix)
   ids = list: lib.unique (map (app: app.id) (list));

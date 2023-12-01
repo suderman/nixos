@@ -63,6 +63,9 @@
 
     libsForQt5.kdenlive
 
+    bin-foo
+    bin-bar
+
     # join-desktop
     # unstable.yuzu-mainline
     # dolphin-emu

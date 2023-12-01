@@ -1,28 +1,29 @@
-# Personal library of helper functions
-{ pkgs, lib, this, ... }: let 
+# Personal helper library
+{ final, prev, ... }: let 
 
-  inherit (builtins) attrNames listToAttrs readDir;
-  inherit (pkgs) callPackage stdenv;
-  inherit (lib) filterAttrs;
+  inherit (builtins) attrNames filter pathExists readDir;
+  inherit (prev) callPackage lib stdenv this;
+  inherit (lib) filterAttrs recursiveUpdate;
+  inherit (this.lib) pathToAttrs;
 
-in rec { 
+# Merge with existing this
+in recursiveUpdate this { 
 
-  # Sanity check
-  foo = "bar";
+  # Import each lib/*.nix as a lib function
+  lib = pathToAttrs ./. ( module: import ./${module} { pkgs = prev; inherit lib this; } ) // rec {
 
-  # List of programs/extensions with their application ID and package
-  apps = callPackage ./apps.nix {};
+    # Additional helper functions
+    foo = "bar";
 
-  # Force wayland on programs
-  enableWayland = callPackage ./wayland.nix {};
+    # Home directory for this user
+    homeDir = "/${if (stdenv.isLinux) then "home" else "Users"}/${this.user}";
 
-  # Home directory for this user
-  homeDir = "/${if (stdenv.isLinux) then "home" else "Users"}/${this.user}";
+    # List of directory names
+    dirNames = path: attrNames (filterAttrs (n: v: v == "directory") (readDir path));
 
-  # List of directory names
-  dirNames = path: attrNames (filterAttrs (n: v: v == "directory") (readDir path));
+    # List of directory names containing default.nix
+    moduleDirNames = path: filter(dir: pathExists ("${path}/${dir}/default.nix")) (dirNames path);
 
-  # # List of directory names containing default.nix
-  # moduleDirNames = path: filter(dir: pathExists ("${path}/${dir}/default.nix")) (dirNames path);
+  };  
 
 }

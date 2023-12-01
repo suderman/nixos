@@ -49,31 +49,16 @@
   outputs = { self, ... }: 
     let inherit (self) outputs inputs; 
 
-      # Additional binary caches and keys
-      caches = { ... }: let 
-        urls = [
-          "https://suderman.cachix.org"
-          "https://nix-community.cachix.org"
-          "https://hyprland.cachix.org"
-          "https://fufexan.cachix.org"
-          "https://nix-gaming.cachix.org"
-          "https://anyrun.cachix.org"
-          "https://cache.nixos.org"
-        ];
-        keys = [
-          "suderman.cachix.org-1:8lYeb2gOOVDPbUn1THnL5J3/L4tFWU30/uVPk7sCGmI="
-          "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-          "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
-          "fufexan.cachix.org-1:LwCDjCJNJQf5XD2BV+yamQIMZfcKWR9ISIFy5curUsY="
-          "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4="
-          "anyrun.cachix.org-1:pqBobmOjI7nKlsUMV25u9QHa9btJK65/C8vnO3p346s="
-          "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-        ];
-      in {
-        nix.settings.substituters = urls;  
-        nix.settings.trusted-substituters = urls;  
-        nix.settings.trusted-public-keys = keys;
-      };
+      # initialize this configuration with inputs and binary caches
+      this = import ./. inputs [
+        "https://suderman.cachix.org" "suderman.cachix.org-1:8lYeb2gOOVDPbUn1THnL5J3/L4tFWU30/uVPk7sCGmI="
+        "https://nix-community.cachix.org" "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+        "https://hyprland.cachix.org" "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
+        "https://fufexan.cachix.org" "fufexan.cachix.org-1:LwCDjCJNJQf5XD2BV+yamQIMZfcKWR9ISIFy5curUsY="
+        "https://nix-gaming.cachix.org" "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4="
+        "https://anyrun.cachix.org" "anyrun.cachix.org-1:pqBobmOjI7nKlsUMV25u9QHa9btJK65/C8vnO3p346s="
+        "https://cache.nixos.org" "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      ];
 
       # Get configured pkgs for a given system with overlays, nur and unstable baked in
       mkPkgs = this: import inputs.nixpkgs rec {
@@ -86,9 +71,28 @@
         # Add to-be-updated packages blocking builds (none right now)
         config.permittedInsecurePackages = [ ];
 
-        # Include personal scripts and package modifications
-        overlays = with (import ./overlays { inherit config this; }); [ pkgs nur unstable ];
-          # inherit inputs config; this = this // { lib = { inherit ls mkPkgs mkConfiguration; }; }; 
+        # Modify pkgs with this, sripts, packages, nur and unstable
+        overlays = with this.lib; [ 
+
+          # this and personal library
+          (final: prev: { inherit this; })
+          (final: prev: { this = import ./overlays/lib { inherit final prev; }; })
+
+          # Personal scripts
+          (final: prev: import ./overlays/bin { inherit final prev; } )
+          (final: prev: pathToAttrs ./overlays/bin ( name: prev.callPackage ./overlays/bin/${name} {} ))
+
+          # Additional packages
+          (final: prev: import ./overlays/pkgs { inherit final prev; } )
+          (final: prev: pathToAttrs ./overlays/pkgs ( name: prev.callPackage ./overlays/pkgs/${name} {} ))
+
+          # Nix User Repositories 
+          (final: prev: { nur = import inputs.nur { pkgs = final; nurpkgs = final; }; })
+
+          # Unstable nixpkgs channel
+          (final: prev: { unstable = import inputs.unstable { inherit system config; }; })
+
+        ];
 
       };
 
@@ -123,43 +127,20 @@
         ]);
       };
 
-      # List directories and files that can be imported by nix
-      # ls { path = ./.; filesExcept = [ "flake.nix" ]; };
-      # ls { path = ./modules; dirsWith = [ "default.nix" "home.nix" ]; filesExcept = []; };
-      ls = with builtins; with inputs.nixpkgs.lib; let
-
-        # Return list of directory names (with default.nix) inside path
-        dirNames = path: dirsWith: full: let
-          dirs = attrNames (filterAttrs (n: v: v == "directory") (readDir path));
-          isVisible = (name: (!hasPrefix "." name));
-          dirsWithFiles = (dirs: concatMap (dir: concatMap (file: ["${dir}/${file}"] ) dirsWith) dirs);
-          isValid = dirFile: pathExists "${path}/${dirFile}";
-          format = paths: map (dirFile: (if (full == true) then path + "/${dirFile}" else dirOf dirFile)) paths;
-        in format (filter isValid (dirsWithFiles (filter isVisible dirs)));
-
-        # Return list of filenames (ending in .nix) inside path 
-        fileNames = path: filesExcept: full: let 
-          files = attrNames (filterAttrs (n: v: v == "regular") (readDir path)); 
-          isVisible = (name: (!hasPrefix "." name));
-          isNix = (name: (hasSuffix ".nix" name));
-          isAllowed = (name: !elem name filesExcept); 
-          format = paths: map (file: (if (full == true) then path + "/${file}" else file)) paths;
-        in format (filter isAllowed (filter isNix (filter isVisible files)));
-
-      # Return list of directory/file names if full is false, otherwise list of absolute paths
-      in { path, dirsWith ? [ "default.nix" ], filesExcept ? [ "default.nix" "home.nix" ], full ? true }: unique
-
-        # No dirs if dirsWith is false, no files if filesExcept is false
-        (if dirsWith == false then [] else (dirNames path dirsWith full)) ++
-        (if filesExcept == false then [] else (fileNames path filesExcept full)); 
-
-      # Save all these in this
-      this = { inherit inputs caches; lib = { inherit ls mkPkgs mkConfiguration; }; };
-
-    # NixOS configurations found in configurations directory
+    # Flake outputs
     in {
-      nixosConfigurations = 
-        builtins.mapAttrs (name: value: mkConfiguration value) (import ./configurations this);
+
+      # NixOS configurations found in configurations directory
+      nixosConfigurations = this.lib.pathToAttrs ./configurations (
+
+        # Make configuration for each subdirectory 
+        dir: mkConfiguration (this // import ./configurations/${dir} // { 
+          nixosModules = this.nixosModules ++ [ ./configurations/${dir}/configuration.nix ];
+          homeModules = this.homeModules ++ [ ./configurations/${dir}/home.nix ];
+        })
+
+      );
+
     };
 
 }
