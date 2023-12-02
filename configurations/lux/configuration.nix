@@ -42,7 +42,7 @@
   modules.lidarr.enable = true;
   modules.ombi.enable = true;
 
-  modules.nextcloud.enable = true;
+  modules.nextcloud.enable = false;
   modules.ocis.enable = true;
   modules.gitea.enable = true;
   modules.tiddlywiki.enable = true;

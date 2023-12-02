@@ -8,7 +8,7 @@
 
     bat 
     cowsay
-    exa
+    eza
     fish
     killall
     lf 

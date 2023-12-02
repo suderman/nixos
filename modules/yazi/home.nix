@@ -8,9 +8,6 @@ let
 
 in {
 
-  # Taken from unstable, expected to be added in 23.11
-  imports = [ ./yazi.nix ];
-
   options = {
     modules.yazi.enable = lib.options.mkEnableOption "yazi"; 
   };

@@ -1,26 +1,22 @@
-{ description = "Jon Suderman's NixOS configuration";
+{ description = "NixOS system configuration & dotfiles";
 
   inputs = {
 
     # Nix Packages 
     # <https://search.nixos.org/packages>
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
     unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-
-    # Nix User Repository
-    # <https://nur.nix-community.org>
-    nur.url = "github:nix-community/NUR";                                   
 
     # Home Manager
     # <https://mipmip.github.io/home-manager-option-search>
-    home-manager.url = "github:nix-community/home-manager/release-23.05";
+    home-manager.url = "github:nix-community/home-manager/release-23.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     # NixOS profiles for different hardware
     # <https://github.com/NixOS/nixos-hardware>
     hardware.url = "github:nixos/nixos-hardware";
 
-    # Save state
+    # Persist state
     # <https://github.com/nix-community/impermanence>
     impermanence.url = "github:nix-community/impermanence";
 
@@ -35,6 +31,10 @@
     homeage.url = "github:jordanisaacs/homeage";
     homeage.inputs.nixpkgs.follows = "nixpkgs";
 
+    # Nix User Repository
+    # <https://nur.nix-community.org>
+    nur.url = "github:nix-community/NUR";                                   
+
     # Hyprland
     # <https://wiki.hyprland.org/Nix/Hyprland-on-NixOS>
     hyprland.url = "github:hyprwm/Hyprland";
@@ -47,6 +47,7 @@
   };
 
   outputs = { self, ... }: 
+
     let inherit (self) outputs inputs; 
 
       # initialize this configuration with inputs and binary caches
@@ -62,6 +63,8 @@
 
       # Get configured pkgs for a given system with overlays, nur and unstable baked in
       mkPkgs = this: import inputs.nixpkgs rec {
+
+        # System & other options is set in default.nix
         system = this.system;
 
         # Accept agreements for unfree software
@@ -71,7 +74,7 @@
         # Add to-be-updated packages blocking builds (none right now)
         config.permittedInsecurePackages = [];
 
-        # Modify pkgs with this, sripts, packages, nur and unstable
+        # Modify pkgs with this, scripts, packages, nur and unstable
         overlays = with this.lib; [ 
 
           # this and personal library
