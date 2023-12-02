@@ -12,7 +12,7 @@ let
   version = "2023.11.3";
 
   # https://github.com/zwave-js/zwave-js-ui/pkgs/container/zwave-js-ui/versions?filters%5Bversion_type%5D=tagged
-  zwaveVersion = "9.3.2";
+  zwaveVersion = "9.5.1";
 
 in {
 

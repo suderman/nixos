@@ -117,8 +117,8 @@
     "org/gnome/desktop/background" = let
       dir = "file:///run/current-system/sw/share/backgrounds/gnome";
     in {
-      picture-uri = "${dir}/keys-l.webp";
-      picture-uri-dark = "${dir}/keys-d.webp";
+      picture-uri = "${dir}/keys-l.jpg";
+      picture-uri-dark = "${dir}/keys-d.jpg";
     };
 
     # "org/gnome/shell" = { 
