@@ -1,4 +1,4 @@
-{ lib, writeShellApplication, curl, less, gnused, this }: (writeShellApplication {
+{ lib, this, writeShellApplication, curl, less, gnused }: (writeShellApplication {
   name = "yo";
   runtimeInputs = [ curl less gnused ];
 
