@@ -66,6 +66,8 @@
     bin-foo
     bin-bar
 
+    withings-sync
+
     # join-desktop
     # unstable.yuzu-mainline
     # dolphin-emu
