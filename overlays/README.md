@@ -25,7 +25,7 @@ extensions in that one file.
 ## lib
 
 Extends the `pkgs.this.lib` library (which begins early in my flake
-[here](https://github.com/suderman/nixos/blob/main/default.nix#L31)). Every
+[here](https://github.com/suderman/nixos/blob/main/default.nix#L9)). Every
 `overlays/lib/*.nix` and `overlays/lib/*/default.nix` gets automatically
 imported into `pkgs.this.lib.*` inheriting an attribute name from the file or
 directory. The `overlays/lib/default.nix` file is also imported and may contain
