@@ -1,12 +1,14 @@
 # NixOS configurations
 
+The `all` directory contains shared configuration automatically
+imported in every system below. Shared NixOS configuration files are found in
+`configurations/all/*.nix` and shared Home Manager configuration
+files are found in  `configurations/all/home/*.nix`.
+
+- `all` [Shared configuration](https://github.com/suderman/nixos/tree/main/configurations/all)
+
 Each of these directories are automatically imported and available in my
 flake's `outputs.nixosConfigurations.*`. 
-
-The `bootstrap` directory also contains shared configuration automatically
-imported in every system below. Shared NixOS configuration files are found in
-`configurations/bootstrap/nixos/*.nix` and shared Home Manager configuration
-files are found in  `configurations/bootstrap/home/*.nix`.
 
 - `bootstrap` [Bootstrap configuration](https://github.com/suderman/nixos/tree/main/configurations/bootstrap)
 - `cog` [Framework laptop](https://github.com/suderman/nixos/tree/main/configurations/cog)

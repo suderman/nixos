@@ -4,6 +4,7 @@ let
 
   inherit (lib) mkIf mkOption types;
   inherit (builtins) hasAttr filter;
+  inherit (this.lib) listToAttrs;
 
   # Filter list of groups to only those which exist
   ifTheyExist = groups: filter (group: hasAttr group config.users.groups) groups;
@@ -12,7 +13,7 @@ let
   user = this.user; 
 
   # public keys from the secrets dir
-  keys = config.modules.secrets.keys;
+  keys = config.modules.secrets.keys.users.all;
 
   # agenix secrets combined secrets toggle
   secrets = config.age.secrets // { inherit (config.modules.secrets) enable; };
@@ -24,18 +25,17 @@ in {
 
   config = {
 
-    users.users = mkIf (user != "root") {
-      "${user}" = {
-        isNormalUser = true;
-        shell = pkgs.zsh;
-        home = "/home/${user}";
-        description = user;
-        hashedPasswordFile = mkIf (secrets.enable) secrets.password-hash.path;
-        password = mkIf (!secrets.enable) "${user}";
-        extraGroups = [ "wheel" ] ++ ifTheyExist [ "networkmanager" "docker" "media" "photos" ]; 
-        openssh.authorizedKeys.keys = [ keys.users."${user}" ];
-      };
-    };
+    # Add all users found in configurations/*/home/*
+    users.users = listToAttrs this.users (user: { 
+      isNormalUser = true;
+      shell = pkgs.zsh;
+      home = "/home/${user}";
+      description = user;
+      hashedPasswordFile = mkIf (secrets.enable) secrets.password-hash.path;
+      password = mkIf (!secrets.enable) "${user}";
+      extraGroups = [ "wheel" ] ++ ifTheyExist [ "networkmanager" "docker" "media" "photos" ]; 
+      openssh.authorizedKeys.keys = keys;
+    }); 
 
     # GIDs 900-909 are custom shared groups in my flake                                                                                                                                   
     # UID/GIDs 910-999 are custom system users/groups in my flake                                                                                                                         

@@ -46,9 +46,11 @@
 
   };
 
-  outputs = { self, ... }: 
+  outputs = { self, ... }: let 
 
-    let inherit (self) outputs inputs; 
+      inherit (self) outputs inputs; 
+      inherit (builtins) length head;
+      inherit (this.lib) pathToAttrs mkModules mkUsers mkAdmins;
 
       # initialize this configuration with inputs and binary caches
       this = import ./. { inherit inputs; caches = [
@@ -75,7 +77,7 @@
         config.permittedInsecurePackages = [];
 
         # Modify pkgs with this, scripts, packages, nur and unstable
-        overlays = with this.lib; [ 
+        overlays = [ 
 
           # this and personal library
           (final: prev: { inherit this; })
@@ -108,9 +110,9 @@
         specialArgs = { inherit inputs outputs; this = pkgs.this; };
 
         # Include NixOS configurations, modules, secrets and caches
-        modules = with pkgs.this; nixosModules ++ (if user == "root" then [] else [
+        modules = with pkgs.this; this.modules.root ++ (if (length users < 1) then [] else [
 
-          # Include Home Manager module (if user isn't "root")
+          # Include Home Manager module (if there any users besides root)
           inputs.home-manager.nixosModules.home-manager { 
             home-manager = {
 
@@ -120,9 +122,11 @@
               extraSpecialArgs = { inherit inputs outputs; this = pkgs.this; };
 
               # Include Home Manager configuration, modules, secrets and caches
-              users."${user}" = let home = { imports }: { inherit imports; }; in home { 
-                imports = homeModules; 
-              };
+              users = lib.listToAttrs users ( 
+                user: ( ({ imports }: { inherit imports; }) { 
+                  imports = this.modules."${user}";
+                } )
+              ); 
 
             }; 
           } 
@@ -130,16 +134,19 @@
         ]);
       };
 
+
     # Flake outputs
     in {
 
       # NixOS configurations found in configurations directory
-      nixosConfigurations = this.lib.pathToAttrs ./configurations (
+      nixosConfigurations = pathToAttrs ./configurations (
 
         # Make configuration for each subdirectory 
         dir: mkConfiguration (this // import ./configurations/${dir} // { 
-          nixosModules = this.nixosModules ++ [ ./configurations/${dir}/configuration.nix ];
-          homeModules = this.homeModules ++ [ ./configurations/${dir}/home.nix ];
+          users = mkUsers dir;
+          admins = mkAdmins dir;
+          modules = mkModules dir;
+          user = head (mkAdmins dir);
         })
 
       );
