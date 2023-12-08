@@ -4,7 +4,6 @@
 let
 
   cfg = config.modules.sabnzbd;
-  inherit (config.users) user;
   inherit (lib) mkIf mkBefore mkOption options types;
   inherit (builtins) toString;
 
@@ -31,7 +30,7 @@ in {
       user = "sabnzbd";
       group = "media";
     };
-    users.groups.media.members = [ user config.services.sabnzbd.user ];
+    users.groups.media.members = [ config.services.sabnzbd.user ];
 
     # Modify ini file with specified port and host name
     systemd.services.sabnzbd-ini = {

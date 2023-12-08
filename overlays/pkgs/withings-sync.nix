@@ -12,7 +12,7 @@ in this.lib.mkShellScript {
   text = let command = 
     ''--name withings --rm '' +
     ''-e GARMIN_USERNAME -e GARMIN_PASSWORD '' +
-    ''-v "/home/${this.user}:/root" '' +
+    ''-v "/home/${builtins.head this.admins}:/root" '' +
     ''ghcr.io/jaroslawhartman/withings-sync:${tag}'';
 
   in ''

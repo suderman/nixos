@@ -1,12 +1,12 @@
 # modules.keyd.enable = true;
-{ config, lib, pkgs, ... }: 
+{ config, lib, pkgs, this, ... }: 
 
 let 
 
   cfg = config.modules.keyd;
-  inherit (config.users) user;
   inherit (lib) mkIf mkOption types;
   inherit (lib.options) mkEnableOption;
+  inherit (this.lib) extraGroups;
 
 in {
 
@@ -24,11 +24,15 @@ in {
     # Install keyd package
     environment.systemPackages = [ pkgs.keyd ];
 
-    # Create keyd group
-    users.groups.keyd.name = "keyd";
+    users = {
 
-    # Add user to the keyd group
-    users.users."${user}".extraGroups = [ "keyd" ]; 
+      # Create keyd group
+      groups.keyd.name = "keyd";
+
+      # Add users to the keyd group
+      users = extraGroups this.users [ "keyd" ];
+
+    };
 
     # Create service for daemon process
     systemd.services.keyd = {

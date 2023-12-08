@@ -1,11 +1,11 @@
 # modules.ydotool.enable = true;
-{ config, lib, pkgs, ... }: 
+{ config, lib, pkgs, this, ... }: 
 
 let 
 
   cfg = config.modules.ydotool;
-  inherit (config.users) user;
   inherit (lib) mkIf mkOption mkBefore types;
+  inherit (this.lib) extraGroups;
 
 in {
 
@@ -18,8 +18,8 @@ in {
     # Install ydotool package
     environment.systemPackages = [ pkgs.ydotool ];
 
-    # Add user to the input group
-    users.users."${user}".extraGroups = [ "input" ]; 
+    # Add admins to the input group
+    users.users = extraGroups this.admins [ "input" ];
 
     # Give the input group write access to the uinput device
     services.udev.extraRules = lib.mkAfter ''
@@ -35,7 +35,7 @@ in {
       wantedBy = [ "sysinit.target" ];
       serviceConfig = {
         Type = "simple";
-        User = user;
+        User = builtins.head this.admins;
         Group = "users";
         ExecStart = "${pkgs.ydotool}/bin/ydotoold";
         ExecReload = "${pkgs.util-linux}/bin/kill -HUP $MAINPID";

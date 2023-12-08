@@ -4,7 +4,6 @@
 let
 
   cfg = config.modules.sonarr;
-  inherit (config.users) user;
   inherit (lib) mkIf mkBefore mkOption options types;
   inherit (builtins) toString;
 
@@ -35,7 +34,7 @@ in {
       package = pkgs.sonarr;
       dataDir = cfg.dataDir;
     };
-    users.groups.media.members = [ user config.services.sonarr.user ];
+    users.groups.media.members = [ config.services.sonarr.user ];
 
     # Enable reverse proxy
     modules.traefik.enable = true;

@@ -4,7 +4,6 @@
 let
 
   cfg = config.modules.ombi;
-  inherit (config.users) user;
   inherit (lib) mkIf mkBefore mkOption options types;
   inherit (builtins) toString;
 
@@ -30,7 +29,7 @@ in {
       group = "media";
       port = cfg.port;
     };
-    users.groups.media.members = [ user config.services.ombi.user ];
+    users.groups.media.members = [ config.services.ombi.user ];
 
     # Enable reverse proxy
     modules.traefik.enable = true;

@@ -4,7 +4,6 @@
 let
 
   cfg = config.modules.radarr;
-  inherit (config.users) user;
   inherit (lib) mkIf mkBefore mkOption options types;
   inherit (builtins) toString;
 
@@ -35,7 +34,7 @@ in {
       package = pkgs.radarr;
       dataDir = cfg.dataDir;
     };
-    users.groups.media.members = [ user config.services.radarr.user ];
+    users.groups.media.members = [ config.services.radarr.user ];
 
     # Enable reverse proxy
     modules.traefik.enable = true;

@@ -1,5 +1,5 @@
 # modules.immich.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let
 
@@ -8,10 +8,10 @@ let
 
   cfg = config.modules.immich;
 
-  inherit (config.users) user;
   inherit (lib) mkIf mkOption mkBefore options types strings;
   inherit (builtins) toString;
   inherit (lib.strings) toInt;
+  inherit (this.lib) extraGroups;
 
 in {
 
@@ -70,20 +70,27 @@ in {
     ids.uids.immich = 911;
     ids.gids.immich = 911;
 
-    users.users.immich = {
-      isSystemUser = true;
-      group = "photos";
-      description = "Immich daemon user";
-      home = cfg.dataDir;
-      uid = config.ids.uids.immich;
-    };
+    users = {
+      users = {
 
-    users.groups.immich = {
-      gid = config.ids.gids.immich;
-    };
+        # Create immich user
+        immich = {
+          isSystemUser = true;
+          group = "photos";
+          description = "Immich daemon user";
+          home = cfg.dataDir;
+          uid = config.ids.uids.immich;
+        };
 
-    # Add user to the immich group
-    users.users."${user}".extraGroups = [ "immich" ]; 
+      # Add admins to the immich group
+      } // extraGroups this.admins [ "immich" ];
+
+      # Create immich group
+      groups.immich = {
+        gid = config.ids.gids.immich;
+      };
+
+    };
 
     # Enable database and reverse proxy
     modules.postgresql.enable = true;

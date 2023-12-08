@@ -1,5 +1,5 @@
 # modules.freshrss.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let
 
@@ -7,7 +7,6 @@ let
   secrets = config.age.secrets;
   port = toString config.services.nginx.defaultHTTPListenPort;
 
-  inherit (config.users) user;
   inherit (lib) mkIf mkOption types;
   inherit (lib.strings) toInt;
   inherit (builtins) toString;
@@ -30,7 +29,7 @@ in {
 
     services.freshrss = {
       enable = true;
-      defaultUser = user;
+      defaultUser = builtins.head this.admins;
       passwordFile = secrets.password.path;
       baseUrl = "https://${cfg.hostName}";
       virtualHost = "freshrss";

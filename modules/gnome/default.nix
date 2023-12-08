@@ -1,10 +1,10 @@
 # modules.gnome.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let 
 
   cfg = config.modules.gnome;
-  home = config.users.users."${config.users.user}".home;
+  home = config.users.users."${builtins.head this.admins}".home;
   inherit (lib) mkIf mkOption types;
   inherit (lib.options) mkEnableOption;
 

@@ -4,7 +4,6 @@
 let
 
   cfg = config.modules.lidarr;
-  inherit (config.users) user;
   inherit (lib) mkIf mkBefore mkOption options types;
   inherit (builtins) toString;
 
@@ -35,7 +34,7 @@ in {
       package = pkgs.lidarr;
       dataDir = cfg.dataDir;
     };
-    users.groups.media.members = [ user config.services.lidarr.user ];
+    users.groups.media.members = [ config.services.lidarr.user ];
 
     # Enable reverse proxy
     modules.traefik.enable = true;

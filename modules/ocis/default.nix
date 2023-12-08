@@ -1,5 +1,5 @@
 # modules.ocis.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
   
 let 
 
@@ -13,8 +13,8 @@ let
   signingKey = "idp-private-key.pem";
   encryptionSecret = "idp-encryption.key";
 
-  inherit (config.users) user;
   inherit (lib) mkIf mkOption mkBefore types;
+  inherit (this.lib) extraGroups;
 
 in {
 
@@ -37,20 +37,26 @@ in {
     ids.uids.ocis = 270;
     ids.gids.ocis = 270;
 
-    users.users.ocis = {
-      isSystemUser = true;
-      group = "ocis";
-      description = "ocis daemon user";
-      home = cfg.dataDir;
-      uid = config.ids.uids.ocis;
-    };
+    users = {
+      users = {
 
-    users.groups.ocis = {
-      gid = config.ids.gids.ocis;
-    };
+        # Create user
+        ocis = {
+          isSystemUser = true;
+          group = "ocis";
+          description = "ocis daemon user";
+          home = cfg.dataDir;
+          uid = config.ids.uids.ocis;
+        };
 
-    # Add user to the ocis group
-    users.users."${user}".extraGroups = [ "ocis" ]; 
+      # Add admins to the ocis group
+      } // extraGroups this.admins [ "ocis" ];
+
+      # Create group
+      groups.ocis = {
+        gid = config.ids.gids.ocis;
+      };
+    };
 
     # Enable reverse proxy
     modules.traefik.enable = true;

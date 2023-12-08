@@ -39,6 +39,7 @@
   modules.libimobiledevice.enable = true;
 
   modules.garmin.enable = true;
+  modules.silverbullet.enable = true;
 
   # # Database services
   # modules.mysql.enable = true;

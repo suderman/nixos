@@ -1,12 +1,12 @@
 # modules.plex.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let
 
   cfg = config.modules.plex;
   port = "32400"; 
-  inherit (config.users) user;
   inherit (lib) mkIf mkOption types;
+  inherit (this.lib) extraGroups;
 
 in {
 
@@ -52,8 +52,8 @@ in {
       ( pkgs.writeShellScriptBin "plex-claim-server" (builtins.readFile ./plex-claim-server.sh) )
     ];
 
-    # Add user to the plex group
-    users.users."${user}".extraGroups = [ "plex" ]; 
+    # Add admins to the plex group
+    users.users = extraGroups this.admins [ "plex" ];
 
   };
 

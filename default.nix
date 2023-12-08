@@ -1,9 +1,6 @@
 # Attribute set of NixOS configurations found in each directory
 { inputs, caches ? [], ... }: let
-
-  inherit (builtins) attrNames concatMap elem filter listToAttrs pathExists readDir;
-  inherit (inputs.nixpkgs.lib) filterAttrs hasPrefix hasSuffix intersectLists partition remove removeSuffix unique;
-  inherit (lib) ls pathToAttrs;
+  inherit (lib) ls mkAttrs mkList mkUsers;
 
   # Personal lib
   lib = {
@@ -11,6 +8,8 @@
     # List directories and files that can be imported by nix
     # ls { path = ./modules; dirsWith = [ "default.nix" "home.nix" ]; filesExcept = [ "default.nix" ]; };
     ls = let
+      inherit (builtins) attrNames concatMap elem filter pathExists readDir;
+      inherit (inputs.nixpkgs.lib) filterAttrs hasPrefix hasSuffix removeSuffix unique;
 
       # Return list of directory names (with default.nix) inside path
       dirNames = path: dirsWith: full: let
@@ -46,38 +45,58 @@
         )
       );
 
-    # Create attribute set from files and subdirectories of path
-    # pathToAttrs ./. ( name: { foo = "The directory or filename is ${name}"; } ); 
-    pathToAttrs = path: fn: if ! pathExists path then {} else listToAttrs (
-      map (filename: { 
-        name = removeSuffix ".nix" filename;
-        value = fn filename;
-      }) (ls { inherit path; full = false; } )
+    # Create list from path
+    mkList = x: ( let 
+      inherit (builtins) isPath pathExists;
+      inherit (inputs.nixpkgs.lib) removeSuffix;
+
+      # Create list from files and subdirectories of path
+      fromPath = path: if ! pathExists path then [] else map 
+        ( filename: removeSuffix ".nix" filename )
+        ( ls { inherit path; full = false; } );
+
+    in
+      if (isPath x) then (fromPath x)
+      else []
     );
 
-    # Create list from files and subdirectories of path
-    # pathToList ./. ( name: { foo = "The directory or filename is ${name}"; } ); 
-    pathToList = path: if ! pathExists path then [] else map 
-      ( filename: removeSuffix ".nix" filename )
-      ( ls { inherit path; full = false; } );
+    # Create attrs from list or path
+    mkAttrs = x: fn: ( let 
+      inherit (builtins) listToAttrs isPath isList pathExists;
+      inherit (inputs.nixpkgs.lib) removeSuffix;
 
-    # Convert a list to an attribute set using a callback to generate the value
-    # listToAttrs [ "foo" ] ( x: { name = "The name is ${x}"; } ); 
-    # -> { foo = "The name is foo"; }
-    listToAttrs = list: fn: listToAttrs ( 
-      map (name: { inherit name; value = fn name; }) list 
+      # Create attribute set from files and subdirectories of path
+      # fromPath = path: if ! pathExists path then {} else listToAttrs ( map 
+      fromPath = path: listToAttrs ( map 
+        (name: { name = (removeSuffix ".nix" name); value = (fn name); }) 
+        (ls { inherit path; filesExcept = [ "default.nix" ]; full = false; } )
+      );
+
+      # Create list from files and subdirectories of path
+      fromList = list: listToAttrs ( map 
+        (name: { inherit name; value = (fn name); }) 
+        (list) 
+      );
+
+    in
+      if (isPath x) then (fromPath x) 
+      else if (isList x) then (fromList x)
+      else {}
     );
 
     # List of users for a particular nixos configuration
-    mkUsers = host: lib.pathToList ./configurations/${host}/home;
+    mkUsers = host: mkList ./configurations/${host}/home;
 
     # List of users with a public key in the secrets directory
-    mkAdmins = host: intersectLists ( lib.mkUsers host ) (
+    mkAdmins = let 
+      inherit (inputs.nixpkgs.lib) attrNames intersectLists remove; 
+    in host: intersectLists ( mkUsers host ) (
       remove "all" ( attrNames (import ./secrets/keys).users )
     );
 
     # NixOS modules imported in each configuration
     mkModules = let 
+      inherit (inputs.nixpkgs.lib) hasPrefix partition; 
 
       # Prepare cache module from list of pairs
       cacheModule = let 
@@ -93,7 +112,7 @@
       in dir: 
 
       # Home Manager modules are organized under each user's name
-      pathToAttrs ./configurations/${dir}/home ( 
+      mkAttrs ./configurations/${dir}/home ( 
         home: 
           ls { path = ./configurations/all/home; } ++ # shared home-manager configuration
           ls { path = ./modules; dirsWith = [ "home.nix" ]; filesExcept = [ "default.nix" ]; } ++
@@ -122,7 +141,8 @@ in {
   domain = "suderman.org"; 
 
   users = []; # without users, only root exists
-  admins = []; # allow sudo and ssh powers for these users (if they exist)
+  admins = []; # allow sudo/ssh powers users with keys
+  modules = {}; # includes for nixos and home-manager
 
   system = "x86_64-linux";
   config = {};

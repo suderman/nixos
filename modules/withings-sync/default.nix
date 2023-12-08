@@ -9,13 +9,13 @@
 # Check the timer for the next run
 # systemctl list-timers --all 
 
-{ inputs, config, pkgs, lib, ... }:
+{ inputs, config, pkgs, lib, this, ... }:
   
 let 
 
   cfg = config.modules.withings-sync;
   secrets = config.age.secrets;
-  inherit (config.users) user;
+  user = builtins.head this.admins;
   inherit (lib) mkIf mkForce;
 
   # https://github.com/jaroslawhartman/withings-sync/releases/tag/v3.6.1

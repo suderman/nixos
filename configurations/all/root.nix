@@ -2,7 +2,6 @@
 
 let
 
-  inherit (config.users) user;
   inherit (lib) mkIf;
 
   # public keys from the secrets dir

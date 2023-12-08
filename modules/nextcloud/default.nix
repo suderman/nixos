@@ -1,11 +1,10 @@
 # modules.nextcloud.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let
 
   cfg = config.modules.nextcloud;
   secrets = config.age.secrets;
-  inherit (config.users) user;
   inherit (lib) mkIf mkOption types;
 
 in {
@@ -33,7 +32,7 @@ in {
       caching.apcu = true;
       https = true;
       config = {
-        adminuser = user;
+        adminuser = builtins.head this.admins;
         adminpassFile = secrets.password.path;
         dbtype = "pgsql";
         dbname = "nextcloud";

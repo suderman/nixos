@@ -49,8 +49,8 @@
   outputs = { self, ... }: let 
     
     inherit (self) outputs inputs; 
-    inherit (builtins) length head;
-    inherit (this.lib) pathToAttrs listToAttrs mkModules mkUsers mkAdmins;
+    inherit (builtins) length;
+    inherit (this.lib) mkAttrs mkUsers mkAdmins mkModules;
 
     # initialize this configuration with inputs and binary caches
     this = import ./. { inherit inputs; caches = [
@@ -85,11 +85,11 @@
 
         # Personal scripts
         (final: prev: import ./overlays/bin { inherit final prev; } )
-        (final: prev: pathToAttrs ./overlays/bin ( name: prev.callPackage ./overlays/bin/${name} {} ))
+        (final: prev: mkAttrs ./overlays/bin ( name: prev.callPackage ./overlays/bin/${name} {} ))
 
         # Additional packages
         (final: prev: import ./overlays/pkgs { inherit final prev; } )
-        (final: prev: pathToAttrs ./overlays/pkgs ( name: prev.callPackage ./overlays/pkgs/${name} {} ))
+        (final: prev: mkAttrs ./overlays/pkgs ( name: prev.callPackage ./overlays/pkgs/${name} {} ))
 
         # Nix User Repositories 
         (final: prev: { nur = import inputs.nur { pkgs = final; nurpkgs = final; }; })
@@ -122,7 +122,7 @@
             extraSpecialArgs = { inherit inputs outputs; this = pkgs.this; };
 
             # Include Home Manager configuration, modules, secrets and caches
-            users = listToAttrs this.users ( 
+            users = mkAttrs this.users ( 
               user: ( ({ imports }: { inherit imports; }) { 
                 imports = this.modules."${user}";
               } )
@@ -138,14 +138,13 @@
   in {
 
     # NixOS configurations found in configurations directory
-    nixosConfigurations = pathToAttrs ./configurations (
+    nixosConfigurations = mkAttrs ./configurations (
 
       # Make configuration for each subdirectory 
       dir: mkConfiguration (this // import ./configurations/${dir} // { 
         users = mkUsers dir;
         admins = mkAdmins dir;
         modules = mkModules dir;
-        user = head (mkAdmins dir);
       })
 
     );

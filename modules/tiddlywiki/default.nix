@@ -1,12 +1,12 @@
 # modules.tiddlywiki.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let
 
   cfg = config.modules.tiddlywiki;
-  inherit (config.users) user;
   inherit (lib) mkIf mkOption mkBefore types;
   inherit (builtins) toString;
+  inherit (this.lib) extraGroups;
 
 in {
 
@@ -30,8 +30,8 @@ in {
 
   config = mkIf cfg.enable {
 
-    # Add user to the tiddlywiki group
-    users.users."${user}".extraGroups = [ "tiddlywiki" ]; 
+    # Add admins to the tiddlywiki group
+    users.users = extraGroups this.admins [ "tiddlywiki" ];
 
     services.tiddlywiki = {
       enable = true;

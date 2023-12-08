@@ -1,10 +1,10 @@
 # modules.postgresql.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let
 
   cfg = config.modules.postgresql;
-  users = [ config.users.user "root" ]; 
+  users = this.admins ++ [ "root" ]; 
   inherit (lib) mkIf mkOrder options;
 
 in {

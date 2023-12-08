@@ -1,12 +1,12 @@
 # modules.home-assistant.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let
 
   cfg = config.modules.home-assistant;
-  inherit (config.users) user;
   inherit (lib) mkIf mkOption mkBefore options types strings;
   inherit (builtins) toString readFile;
+  inherit (this.lib) extraGroups;
 
   # https://github.com/home-assistant/core/pkgs/container/home-assistant/versions?filters%5Bversion_type%5D=tagged
   version = "2023.11.3";
@@ -94,20 +94,27 @@ in {
   config = mkIf cfg.enable {
 
     # Inspired from services.home-assistant
-    users.users.hass = {
-      isSystemUser = true;
-      group = "hass";
-      description = "Home Assistant daemon user";
-      home = "${cfg.dataDir}";
-      uid = config.ids.uids.hass;
-    };
+    users = {
+      users = {
 
-    users.groups.hass = {
-      gid = config.ids.gids.hass;
-    };
+        # Create user
+        hass = {
+          isSystemUser = true;
+          group = "hass";
+          description = "Home Assistant daemon user";
+          home = "${cfg.dataDir}";
+          uid = config.ids.uids.hass;
+        };
 
-    # Add user to the hass group
-    users.users."${user}".extraGroups = [ "hass" ]; 
+      # Add admins to the hass group
+      } // extraGroups this.admins [ "hass" ];
+
+      # Create group
+      groups.hass = {
+        gid = config.ids.gids.hass;
+      };
+
+    };
 
     # Enable database and reverse proxy
     modules.postgresql.enable = true;

@@ -1,5 +1,5 @@
 # modules.silverbullet.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let
 
@@ -9,9 +9,10 @@ let
   cfg = config.modules.silverbullet;
   ownership = with config.ids; "${toString uids.silverbullet}:${toString gids.silverbullet}";
 
-  inherit (config.users) user;
   inherit (lib) mkIf mkOption options types strings mkBefore;
   inherit (builtins) toString;
+  inherit (this.lib) extraGroups;
+
 
 in {
 
@@ -39,20 +40,27 @@ in {
     ids.uids.silverbullet = 913;
     ids.gids.silverbullet = 913;
 
-    users.users.silverbullet = {
-      isSystemUser = true;
-      group = "silverbullet";
-      description = "silverbullet daemon user";
-      home = cfg.dataDir;
-      uid = config.ids.uids.silverbullet;
-    };
+    users = {
+      users = {
 
-    users.groups.silverbullet = {
-      gid = config.ids.gids.silverbullet;
-    };
+        # Add user to the silverbullet group
+        silverbullet = {
+          isSystemUser = true;
+          group = "silverbullet";
+          description = "silverbullet daemon user";
+          home = cfg.dataDir;
+          uid = config.ids.uids.silverbullet;
+        };
 
-    # Add user to the silverbullet group
-    users.users."${user}".extraGroups = [ "silverbullet" ]; 
+      # Add admins to the silverbullet group
+      } // extraGroups this.admins [ "silverbullet" ];
+
+      # Create group
+      groups.silverbullet = {
+        gid = config.ids.gids.silverbullet;
+      };
+
+    };
 
     # Enable reverse proxy
     modules.traefik.enable = true;

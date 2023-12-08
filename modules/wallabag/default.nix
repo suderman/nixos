@@ -1,16 +1,15 @@
 # modules.wallabag.enable = true;
 # https://github.com/jtojnar/nixfiles/blob/0c3326906559fa3f8e876e251152f0532ab239c9/hosts/azazel/ogion.cz/bag/default.nix
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let
 
   cfg = config.modules.wallabag;
   secrets = config.age.secrets;
 
-  inherit (config.users) user;
-  inherit (lib) mkIf mkOption types;
-  inherit (lib.strings) toInt;
+  inherit (lib) mkIf mkOption types toInt;
   inherit (builtins) toString;
+  inherit (this.lib) extraGroups;
 
 in {
 
@@ -41,20 +40,26 @@ in {
     ids.uids.wallabag = 912;
     ids.gids.wallabag = 912;
 
-    users.users.wallabag = {
-      isSystemUser = true;
-      group = "wallabag";
-      description = "Wallabag daemon user";
-      home = cfg.dataDir;
-      uid = config.ids.uids.wallabag;
-    };
+    users = {
+      users = {
 
-    users.groups.wallabag = {
-      gid = config.ids.gids.wallabag;
-    };
+        wallabag = {
+          isSystemUser = true;
+          group = "wallabag";
+          description = "Wallabag daemon user";
+          home = cfg.dataDir;
+          uid = config.ids.uids.wallabag;
+        };
 
-    # Add user to the wallabag group
-    users.users."${user}".extraGroups = [ "wallabag" ]; 
+      # Add admins to the wallabag group
+      } // extraGroups this.admins [ "wallabag" ];
+
+      # Create group
+      groups.wallabag = {
+        gid = config.ids.gids.wallabag;
+      };
+
+    };
 
     # Enable database and reverse proxy
     modules.postgresql.enable = true;
