@@ -47,110 +47,109 @@
   };
 
   outputs = { self, ... }: let 
+    
+    inherit (self) outputs inputs; 
+    inherit (builtins) length head;
+    inherit (this.lib) pathToAttrs mkModules mkUsers mkAdmins;
 
-      inherit (self) outputs inputs; 
-      inherit (builtins) length head;
-      inherit (this.lib) pathToAttrs mkModules mkUsers mkAdmins;
+    # initialize this configuration with inputs and binary caches
+    this = import ./. { inherit inputs; caches = [
+      "https://suderman.cachix.org" "suderman.cachix.org-1:8lYeb2gOOVDPbUn1THnL5J3/L4tFWU30/uVPk7sCGmI="
+      "https://nix-community.cachix.org" "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "https://hyprland.cachix.org" "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
+      "https://fufexan.cachix.org" "fufexan.cachix.org-1:LwCDjCJNJQf5XD2BV+yamQIMZfcKWR9ISIFy5curUsY="
+      "https://nix-gaming.cachix.org" "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4="
+      "https://anyrun.cachix.org" "anyrun.cachix.org-1:pqBobmOjI7nKlsUMV25u9QHa9btJK65/C8vnO3p346s="
+      "https://cache.nixos.org" "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+    ]; };
 
-      # initialize this configuration with inputs and binary caches
-      this = import ./. { inherit inputs; caches = [
-        "https://suderman.cachix.org" "suderman.cachix.org-1:8lYeb2gOOVDPbUn1THnL5J3/L4tFWU30/uVPk7sCGmI="
-        "https://nix-community.cachix.org" "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-        "https://hyprland.cachix.org" "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
-        "https://fufexan.cachix.org" "fufexan.cachix.org-1:LwCDjCJNJQf5XD2BV+yamQIMZfcKWR9ISIFy5curUsY="
-        "https://nix-gaming.cachix.org" "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4="
-        "https://anyrun.cachix.org" "anyrun.cachix.org-1:pqBobmOjI7nKlsUMV25u9QHa9btJK65/C8vnO3p346s="
-        "https://cache.nixos.org" "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-      ]; };
+    # Get configured pkgs for a given system with overlays, nur and unstable baked in
+    mkPkgs = this: import inputs.nixpkgs rec {
 
-      # Get configured pkgs for a given system with overlays, nur and unstable baked in
-      mkPkgs = this: import inputs.nixpkgs rec {
+      # System & other options is set in default.nix
+      system = this.system;
 
-        # System & other options is set in default.nix
-        system = this.system;
+      # Accept agreements for unfree software
+      config.allowUnfree = true;
+      config.joypixels.acceptLicense = true;
 
-        # Accept agreements for unfree software
-        config.allowUnfree = true;
-        config.joypixels.acceptLicense = true;
+      # Add to-be-updated packages blocking builds (none right now)
+      config.permittedInsecurePackages = [];
 
-        # Add to-be-updated packages blocking builds (none right now)
-        config.permittedInsecurePackages = [];
+      # Modify pkgs with this, scripts, packages, nur and unstable
+      overlays = [ 
 
-        # Modify pkgs with this, scripts, packages, nur and unstable
-        overlays = [ 
+        # this and personal library
+        (final: prev: { inherit this; })
+        (final: prev: { this = import ./overlays/lib { inherit final prev; }; })
 
-          # this and personal library
-          (final: prev: { inherit this; })
-          (final: prev: { this = import ./overlays/lib { inherit final prev; }; })
+        # Personal scripts
+        (final: prev: import ./overlays/bin { inherit final prev; } )
+        (final: prev: pathToAttrs ./overlays/bin ( name: prev.callPackage ./overlays/bin/${name} {} ))
 
-          # Personal scripts
-          (final: prev: import ./overlays/bin { inherit final prev; } )
-          (final: prev: pathToAttrs ./overlays/bin ( name: prev.callPackage ./overlays/bin/${name} {} ))
+        # Additional packages
+        (final: prev: import ./overlays/pkgs { inherit final prev; } )
+        (final: prev: pathToAttrs ./overlays/pkgs ( name: prev.callPackage ./overlays/pkgs/${name} {} ))
 
-          # Additional packages
-          (final: prev: import ./overlays/pkgs { inherit final prev; } )
-          (final: prev: pathToAttrs ./overlays/pkgs ( name: prev.callPackage ./overlays/pkgs/${name} {} ))
+        # Nix User Repositories 
+        (final: prev: { nur = import inputs.nur { pkgs = final; nurpkgs = final; }; })
 
-          # Nix User Repositories 
-          (final: prev: { nur = import inputs.nur { pkgs = final; nurpkgs = final; }; })
+        # Unstable nixpkgs channel
+        (final: prev: { unstable = import inputs.unstable { inherit system config; }; })
 
-          # Unstable nixpkgs channel
-          (final: prev: { unstable = import inputs.unstable { inherit system config; }; })
-
-        ];
-
-      };
-
-      # Make a NixOS system configuration 
-      mkConfiguration = this: inputs.nixpkgs.lib.nixosSystem rec {
-
-        # Make nixpkgs for this system (with overlays)
-        pkgs = mkPkgs this;
-        system = pkgs.this.system;
-        specialArgs = { inherit inputs outputs; this = pkgs.this; };
-
-        # Include NixOS configurations, modules, secrets and caches
-        modules = with pkgs.this; this.modules.root ++ (if (length users < 1) then [] else [
-
-          # Include Home Manager module (if there any users besides root)
-          inputs.home-manager.nixosModules.home-manager { 
-            home-manager = {
-
-              # Inherit NixOS packages
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              extraSpecialArgs = { inherit inputs outputs; this = pkgs.this; };
-
-              # Include Home Manager configuration, modules, secrets and caches
-              users = lib.listToAttrs users ( 
-                user: ( ({ imports }: { inherit imports; }) { 
-                  imports = this.modules."${user}";
-                } )
-              ); 
-
-            }; 
-          } 
-
-        ]);
-      };
-
-
-    # Flake outputs
-    in {
-
-      # NixOS configurations found in configurations directory
-      nixosConfigurations = pathToAttrs ./configurations (
-
-        # Make configuration for each subdirectory 
-        dir: mkConfiguration (this // import ./configurations/${dir} // { 
-          users = mkUsers dir;
-          admins = mkAdmins dir;
-          modules = mkModules dir;
-          user = head (mkAdmins dir);
-        })
-
-      );
+      ];
 
     };
+
+    # Make a NixOS system configuration 
+    mkConfiguration = this: inputs.nixpkgs.lib.nixosSystem rec {
+
+      # Make nixpkgs for this system (with overlays)
+      pkgs = mkPkgs this;
+      system = pkgs.this.system;
+      specialArgs = { inherit inputs outputs; this = pkgs.this; };
+
+      # Include NixOS configurations, modules, secrets and caches
+      modules = with pkgs.this; this.modules.root ++ (if (length users < 1) then [] else [
+
+        # Include Home Manager module (if there any users besides root)
+        inputs.home-manager.nixosModules.home-manager { 
+          home-manager = {
+
+            # Inherit NixOS packages
+            useGlobalPkgs = true;
+            useUserPackages = true;
+            extraSpecialArgs = { inherit inputs outputs; this = pkgs.this; };
+
+            # Include Home Manager configuration, modules, secrets and caches
+            users = lib.listToAttrs users ( 
+              user: ( ({ imports }: { inherit imports; }) { 
+                imports = this.modules."${user}";
+              } )
+            ); 
+
+          }; 
+        } 
+
+      ]);
+    };
+
+  # Flake outputs
+  in {
+
+    # NixOS configurations found in configurations directory
+    nixosConfigurations = pathToAttrs ./configurations (
+
+      # Make configuration for each subdirectory 
+      dir: mkConfiguration (this // import ./configurations/${dir} // { 
+        users = mkUsers dir;
+        admins = mkAdmins dir;
+        modules = mkModules dir;
+        user = head (mkAdmins dir);
+      })
+
+    );
+
+  };
 
 }

@@ -122,7 +122,7 @@ in {
   domain = "suderman.org"; 
 
   users = []; # without users, only root exists
-  admins = []; # allow sudo and ssh powers to these users (if they exist)
+  admins = []; # allow sudo and ssh powers for these users (if they exist)
 
   system = "x86_64-linux";
   config = {};
