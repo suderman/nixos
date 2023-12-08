@@ -50,7 +50,7 @@
     
     inherit (self) outputs inputs; 
     inherit (builtins) length head;
-    inherit (this.lib) pathToAttrs mkModules mkUsers mkAdmins;
+    inherit (this.lib) pathToAttrs listToAttrs mkModules mkUsers mkAdmins;
 
     # initialize this configuration with inputs and binary caches
     this = import ./. { inherit inputs; caches = [
@@ -110,9 +110,9 @@
       specialArgs = { inherit inputs outputs; this = pkgs.this; };
 
       # Include NixOS configurations, modules, secrets and caches
-      modules = with pkgs.this; this.modules.root ++ (if (length users < 1) then [] else [
+      modules = this.modules.root ++ (if (length this.users < 1) then [] else [
 
-        # Include Home Manager module (if there any users besides root)
+        # Include Home Manager module (if there are any users besides root)
         inputs.home-manager.nixosModules.home-manager { 
           home-manager = {
 
@@ -122,7 +122,7 @@
             extraSpecialArgs = { inherit inputs outputs; this = pkgs.this; };
 
             # Include Home Manager configuration, modules, secrets and caches
-            users = lib.listToAttrs users ( 
+            users = listToAttrs this.users ( 
               user: ( ({ imports }: { inherit imports; }) { 
                 imports = this.modules."${user}";
               } )
