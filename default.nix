@@ -119,8 +119,10 @@
       mkAttrs ./configurations/${dir}/users ( 
         user: 
           ls { path = ./modules; dirsWith = [ "home.nix" ]; } ++ # home-manager modules
-          ls ./configurations/all/users/all/home.nix ++ # shared home-manager configuration
-          ls ./configurations/${dir}/users/${user} ++ # specific home-manager configuration
+          ls ./configurations/all/users/all/home.nix ++ # shared home-manager configuration for all users
+          ls ./configurations/all/users/${user} ++ # shared home-manager configuration for one user
+          ls ./configurations/all/users/${user}/home.nix ++
+          ls ./configurations/${dir}/users/${user} ++ # specific home-manager configuration for one user
           ls ./configurations/${dir}/users/${user}/home.nix ++
           [ ./secrets cacheModule ] # secrets, keys & caches
 
@@ -128,8 +130,8 @@
       ) // {
         root = 
           ls { path = ./modules; dirsWith = [ "default.nix" ]; } ++ # nixos modules
-          ls ./configurations/all/configuration.nix ++ # shared nixos configuration
-          ls ./configurations/${dir}/configuration.nix ++ # specific nixos configuration
+          ls ./configurations/all/configuration.nix ++ # shared nixos configuration for all systems
+          ls ./configurations/${dir}/configuration.nix ++ # specific nixos configuration for one system
           [ ./secrets cacheModule ] # secrets, keys & caches
         ;
       };
