@@ -1,7 +1,7 @@
 { config, lib, pkgs, this, inputs, ... }: {
 
   # Import all *.nix files in this directory
-  imports = this.lib.imports ./. ++ [
+  imports = this.lib.ls ./. ++ [
     inputs.hardware.nixosModules.framework-11th-gen-intel
   ];
 

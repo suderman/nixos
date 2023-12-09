@@ -3,11 +3,12 @@
 let
 
   inherit (lib) optionalAttrs recursiveUpdate;
+  inherit (this.lib) ls;
 
 in {
 
   # Import all *.nix files in this directory
-  imports = this.lib.imports ./.;
+  imports = ls ./.;
 
   # ---------------------------------------------------------------------------
   # Common Configuration for all NixOS systems

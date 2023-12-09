@@ -35,7 +35,7 @@
       fromPath = path: fromAttrs { inherit path; };
 
       # Return list of directory/file names if asPath is false, otherwise list of absolute paths
-      fromAttrs = { path, dirsWith ? [ "default.nix" ], filesExcept ? [ "default.nix" ], asPath ? true }: unique
+      fromAttrs = { path, dirsWith ? [ "default.nix" ], filesExcept ? [ "default.nix" "configuration.nix" "home.nix" ], asPath ? true }: unique
         (if ! pathExists path then [] else # If path doesn't exist, return an empty list
           (if hasSuffix ".nix" path then [ path ] else # If path is a nix file, return that path in a list
             (if dirsWith == false then [] else (dirNames path dirsWith asPath)) ++ # No subdirs if dirsWith is false, 
@@ -48,10 +48,6 @@
       else if (isAttrs x) then (fromAttrs x)
       else []
     );
-
-    imports = path: ls { inherit path; filesExcept = [ 
-      "configuration.nix" "home.nix" "default.nix" 
-    ]; };
 
     # Create list from path
     mkList = x: ( let 
