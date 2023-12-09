@@ -6,6 +6,9 @@ let
 
 in {
 
+  # Import all *.nix files in this directory
+  imports = this.lib.imports ./.;
+
   # ---------------------------------------------------------------------------
   # Common Configuration for all Home Manager users
   # (configurations/default.nix auto imports all .nix files in this directory)

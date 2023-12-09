@@ -6,44 +6,52 @@
   lib = {
 
     # List directories and files that can be imported by nix
-    # ls { path = ./modules; dirsWith = [ "default.nix" "home.nix" ]; filesExcept = [ "default.nix" ]; };
-    ls = let
-      inherit (builtins) attrNames concatMap elem filter pathExists readDir;
+    # ls ./modules;
+    # ls { path = ./modules; dirsWith = [ "default.nix" "home.nix" ]; filesExcept = [ "default.nix" ]; asPath = true; };
+    ls = x: ( let
+
+      inherit (builtins) attrNames concatMap elem filter isAttrs isPath pathExists readDir;
       inherit (inputs.nixpkgs.lib) filterAttrs hasPrefix hasSuffix removeSuffix unique;
 
       # Return list of directory names (with default.nix) inside path
-      dirNames = path: dirsWith: full: let
+      dirNames = path: dirsWith: asPath: let
         dirs = attrNames (filterAttrs (n: v: v == "directory") (readDir path));
         isVisible = (name: (!hasPrefix "." name));
         dirsWithFiles = (dirs: concatMap (dir: concatMap (file: ["${dir}/${file}"] ) dirsWith) dirs);
         isValid = dirFile: pathExists "${path}/${dirFile}";
-        format = paths: map (dirFile: (if (full == true) then path + "/${dirFile}" else dirOf dirFile)) paths;
+        format = paths: map (dirFile: (if (asPath == true) then path + "/${dirFile}" else dirOf dirFile)) paths;
       in format (filter isValid (dirsWithFiles (filter isVisible dirs)));
 
       # Return list of filenames (ending in .nix) inside path 
-      fileNames = path: filesExcept: full: let 
+      fileNames = path: filesExcept: asPath: let 
         files = attrNames (filterAttrs (n: v: v == "regular") (readDir path)); 
         isVisible = (name: (!hasPrefix "." name));
         isNix = (name: (hasSuffix ".nix" name));
         isAllowed = (name: !elem name filesExcept); 
-        format = paths: map (file: (if (full == true) then path + "/${file}" else file)) paths;
+        format = paths: map (file: (if (asPath == true) then path + "/${file}" else file)) paths;
       in format (filter isAllowed (filter isNix (filter isVisible files)));
 
-    # Return list of directory/file names if full is false, otherwise list of absolute paths
-    in { path, dirsWith ? [ "default.nix" ], filesExcept ? [], full ? true }: unique
+      # Shortcut to pass path directly with default options
+      fromPath = path: fromAttrs { inherit path; };
 
-      # If path doesn't exist, return an empty list
-      (if ! pathExists path then [] else 
+      # Return list of directory/file names if asPath is false, otherwise list of absolute paths
+      fromAttrs = { path, dirsWith ? [ "default.nix" ], filesExcept ? [ "default.nix" ], asPath ? true }: unique
+        (if ! pathExists path then [] else # If path doesn't exist, return an empty list
+          (if hasSuffix ".nix" path then [ path ] else # If path is a nix file, return that path in a list
+            (if dirsWith == false then [] else (dirNames path dirsWith asPath)) ++ # No subdirs if dirsWith is false, 
+            (if filesExcept == false then [] else (fileNames path filesExcept asPath)) # No files if filesExcept is false
+          )
+        );
 
-        # If path is a nix file, return that path in a list
-        (if hasSuffix ".nix" path then [ path ] else 
+    in 
+      if (isPath x) then (fromPath x)
+      else if (isAttrs x) then (fromAttrs x)
+      else []
+    );
 
-          # Assume path is a dir, no subdirs if dirsWith is false, no files if filesExcept is false
-          (if dirsWith == false then [] else (dirNames path dirsWith full)) ++
-          (if filesExcept == false then [] else (fileNames path filesExcept full))
-
-        )
-      );
+    imports = path: ls { inherit path; filesExcept = [ 
+      "configuration.nix" "home.nix" "default.nix" 
+    ]; };
 
     # Create list from path
     mkList = x: ( let 
@@ -53,7 +61,7 @@
       # Create list from files and subdirectories of path
       fromPath = path: if ! pathExists path then [] else map 
         ( filename: removeSuffix ".nix" filename )
-        ( ls { inherit path; full = false; } );
+        ( ls { inherit path; asPath = false; } );
 
     in
       if (isPath x) then (fromPath x)
@@ -69,7 +77,7 @@
       # fromPath = path: if ! pathExists path then {} else listToAttrs ( map 
       fromPath = path: listToAttrs ( map 
         (name: { name = (removeSuffix ".nix" name); value = (fn name); }) 
-        (ls { inherit path; filesExcept = [ "default.nix" ]; full = false; } )
+        (ls { inherit path; asPath = false; } )
       );
 
       # Create list from files and subdirectories of path
@@ -113,19 +121,21 @@
 
       # Home Manager modules are organized under each user's name
       mkAttrs ./configurations/${dir}/home ( 
-        home: 
-          ls { path = ./configurations/all/home; } ++ # shared home-manager configuration
-          ls { path = ./modules; dirsWith = [ "home.nix" ]; filesExcept = [ "default.nix" ]; } ++
-          [ ./secrets cacheModule ] ++
-          ls { path = ./configurations/${dir}/home/${home}; }
+        user: 
+          ls { path = ./modules; dirsWith = [ "home.nix" ]; } ++ # home-manager modules
+          ls ./configurations/all/home/home.nix ++ # shared home-manager configuration
+          ls ./configurations/${dir}/home/${user} ++ # specific home-manager configuration
+          ls ./configurations/${dir}/home/${user}/home.nix ++
+          [ ./secrets cacheModule ] # secrets, keys & caches
 
       # NixOS modules are organization under "root"
       ) // {
         root = 
-          ls { path = ./configurations/all; } ++ # shared nixos configuration
-          ls { path = ./modules; dirsWith = [ "default.nix" ]; filesExcept = [ "default.nix" ]; } ++ 
-          [ ./secrets cacheModule ] ++
-          [ ./configurations/${dir}/configuration.nix ];
+          ls { path = ./modules; dirsWith = [ "default.nix" ]; } ++ # nixos modules
+          ls ./configurations/all/configuration.nix ++ # shared nixos configuration
+          ls ./configurations/${dir}/configuration.nix ++ # specific nixos configuration
+          [ ./secrets cacheModule ] # secrets, keys & caches
+        ;
       };
 
   };

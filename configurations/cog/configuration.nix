@@ -1,10 +1,8 @@
-{ config, lib, pkgs, inputs, ... }: {
+{ config, lib, pkgs, this, inputs, ... }: {
 
-  imports = [ 
+  # Import all *.nix files in this directory
+  imports = this.lib.imports ./. ++ [
     inputs.hardware.nixosModules.framework-11th-gen-intel
-    ./framework.nix
-    ./hardware-configuration.nix 
-    ./storage.nix
   ];
 
   # Use freshest kernel
@@ -50,7 +48,7 @@
   modules.tandoor-recipes.enable = false;
   modules.home-assistant.enable = false;
   modules.rsshub.enable = false;
-  modules.backblaze.enable = false;
+  # modules.backblaze.enable = false;
   modules.wallabag.enable = false;
 
   modules.cockpit.enable = false;
