@@ -89,7 +89,7 @@
     );
 
     # List of users for a particular nixos configuration
-    mkUsers = host: mkList ./configurations/${host}/home;
+    mkUsers = host: mkList ./configurations/${host}/users;
 
     # List of users with a public key in the secrets directory
     mkAdmins = let 
@@ -116,12 +116,12 @@
       in dir: 
 
       # Home Manager modules are organized under each user's name
-      mkAttrs ./configurations/${dir}/home ( 
+      mkAttrs ./configurations/${dir}/users ( 
         user: 
           ls { path = ./modules; dirsWith = [ "home.nix" ]; } ++ # home-manager modules
-          ls ./configurations/all/home/home.nix ++ # shared home-manager configuration
-          ls ./configurations/${dir}/home/${user} ++ # specific home-manager configuration
-          ls ./configurations/${dir}/home/${user}/home.nix ++
+          ls ./configurations/all/users/all/home.nix ++ # shared home-manager configuration
+          ls ./configurations/${dir}/users/${user} ++ # specific home-manager configuration
+          ls ./configurations/${dir}/users/${user}/home.nix ++
           [ ./secrets cacheModule ] # secrets, keys & caches
 
       # NixOS modules are organization under "root"

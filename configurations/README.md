@@ -3,7 +3,7 @@
 The `all` directory contains shared configuration automatically
 imported in every system below. Shared NixOS configuration files are found in
 `configurations/all/*.nix` and shared Home Manager configuration
-files are found in  `configurations/all/home/*.nix`.
+files are found in  `configurations/all/users/all/*.nix`.
 
 - `all` [Shared configuration](https://github.com/suderman/nixos/tree/main/configurations/all)
 
