@@ -12,6 +12,10 @@
     home-manager.url = "github:nix-community/home-manager/release-23.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
+    # Nix Index Database
+    nix-index-database.url = "github:Mic92/nix-index-database";
+    nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
+
     # NixOS profiles for different hardware
     # <https://github.com/NixOS/nixos-hardware>
     hardware.url = "github:nixos/nixos-hardware";

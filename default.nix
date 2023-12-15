@@ -100,16 +100,28 @@
 
     # NixOS modules imported in each configuration
     mkModules = let 
-      inherit (inputs.nixpkgs.lib) hasPrefix partition; 
+      inherit (inputs.nixpkgs.lib) hasPrefix mkDefault partition; 
 
       # Prepare cache module from list of pairs
-      cacheModule = let 
+      nix-cache = let 
         pair = (partition (value: (hasPrefix "https://" value)) caches);
         urls = pair.right; keys = pair.wrong; 
-      in { ... }: {
+      in [( { ... }: {
         nix.settings.substituters = urls;  
         nix.settings.trusted-substituters = urls;  
         nix.settings.trusted-public-keys = keys;
+      }) ];
+
+      # Prepare nix-index module with weekly updated database and comma integration
+      nix-index = let config = { ... }: { 
+        programs.nix-index-database.comma.enable = mkDefault true; 
+        programs.nix-index.enableBashIntegration = mkDefault false; 
+        programs.nix-index.enableZshIntegration = mkDefault false; 
+        programs.nix-index.enableFishIntegration = mkDefault false;
+        programs.command-not-found.enable = mkDefault false;
+      }; in {
+        nixos = [ inputs.nix-index-database.nixosModules.nix-index config ];
+        home = [ inputs.nix-index-database.hmModules.nix-index config ];
       };
 
       # Include shared modules followed by dir-specific modules 
@@ -124,7 +136,7 @@
           ls ./configurations/all/users/${user}/home.nix ++
           ls ./configurations/${dir}/users/${user} ++ # specific home-manager configuration for one user
           ls ./configurations/${dir}/users/${user}/home.nix ++
-          [ ./secrets cacheModule ] # secrets, keys & caches
+          [ ./secrets ] ++ nix-cache ++ nix-index.home # secrets, keys, cache and index
 
       # NixOS modules are organization under "root"
       ) // {
@@ -132,7 +144,7 @@
           ls { path = ./modules; dirsWith = [ "default.nix" ]; } ++ # nixos modules
           ls ./configurations/all/configuration.nix ++ # shared nixos configuration for all systems
           ls ./configurations/${dir}/configuration.nix ++ # specific nixos configuration for one system
-          [ ./secrets cacheModule ] # secrets, keys & caches
+          [ ./secrets ] ++ nix-cache ++ nix-index.nixos # secrets, keys, cache and index
         ;
       };
 
