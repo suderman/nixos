@@ -25,6 +25,9 @@
   # Memory management
   modules.earlyoom.enable = true;
 
+
+  virtualisation.waydroid.enable = true;
+
   # Keyboard control
   modules.keyd = {
     enable = true;
@@ -35,6 +38,7 @@
 
   # Support iOS devices
   modules.libimobiledevice.enable = true;
+
 
   modules.garmin.enable = true;
   modules.silverbullet.enable = true;
@@ -61,8 +65,8 @@
   };
 
   modules.immich = {
-    enable = false;
-    photosDir = "/photos/immich";
+    enable = true;
+    # photosDir = "/photos/immich";
   };
 
   modules.photoprism = {
@@ -145,5 +149,12 @@
       date >> /tmp/foobar.txt
     '';
   };
+
+
+  file."/etc/foo-bar" = { text = "Hello world!"; };
+  file."/etc/foo-dir" = { type = "dir"; mode = "0775"; user = "me"; group = "users"; };
+  file."/etc/foo-symlink" = { type = "link"; source = "/etc/foo-bar"; };
+  file."/etc/foo-resolv" = { type = "file"; mode = "0775"; user = "me"; group = "users"; source = "/etc/resolv.conf"; };
+  file."/etc/foo-default" = { type = "dir"; source = "/etc/default"; };
 
 }
