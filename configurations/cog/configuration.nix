@@ -151,10 +151,10 @@
   };
 
 
-  file."/etc/foo-bar" = { text = "Hello world!"; };
-  file."/etc/foo-dir" = { type = "dir"; mode = "0775"; user = "me"; group = "users"; };
-  file."/etc/foo-symlink" = { type = "link"; source = "/etc/foo-bar"; };
-  file."/etc/foo-resolv" = { type = "file"; mode = "0775"; user = "me"; group = "users"; source = "/etc/resolv.conf"; };
-  file."/etc/foo-default" = { type = "dir"; source = "/etc/default"; };
+  file."/etc/foo" = { type = "dir"; };
+  file."/etc/foo/bar" = { text = "Hello world!"; mode = 665; user = 911; group = 911; };
+  file."/etc/foo/symlink" = { type = "link"; source = /etc/foo/bar; };
+  file."/etc/foo/resolv" = { type = "file"; mode = 775; user = "me"; group = "users"; source = /etc/resolv.conf; };
+  file."/etc/foo/srv" = { type = "dir"; source = /srv; };
 
 }

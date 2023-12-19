@@ -2,6 +2,7 @@
 # https://www.freedesktop.org/software/systemd/man/latest/tmpfiles.d.html
 { config, lib, ... }: let
 
+  inherit (builtins) toString stringLength;
   inherit (lib) attrNames forEach mkOption types;
 
   mkRule = {
@@ -46,6 +47,10 @@
 
   };
 
+  # Convert 3-digit mode (ie: 775) to 4-digit mode (ie: 0775) by padding a zero
+  toMode = mode: let mode' = toString mode; in 
+    if stringLength mode' == 3 then "0${mode'}" else mode'; 
+
   # All paths added to config.file.*
   paths = attrNames config.file;
 
@@ -62,8 +67,14 @@ in {
         type = ( if (attrs ? type) then attrs.type else "file" );
 
     # Build specified rule type
-    in mkRule."${type}" path attrs
+    in mkRule."${type}" path ( {}
+      // ( if attrs ? mode then { mode = toMode attrs.mode; } else {} )
+      // ( if attrs ? user then { user = toString attrs.user; } else {} )
+      // ( if attrs ? group then { group = toString attrs.group; } else {} )
+      // ( if attrs ? source then { source = toString attrs.source; } else {} )
+      // ( if attrs ? text then { text = toString attrs.text; } else {} )
+    )
 
-  ); 
+  );
 
 }
