@@ -56,26 +56,21 @@
   # Trim newlines from beginning and end of string
   trim = text: removePrefix "\n" ( removeSuffix "\n" text );
 
-in {
+# Convert attr set into list of rules: 
+# this.lib.mkRules file
+in file: forEach (attrNames file) (path: 
 
-  inherit (rules) file dir mode link;
+  # Default rule type is "file"
+  let attrs = file."${path}";
+      type = ( if attrs ? type then attrs.type else "file" );
 
-  # Convert attr set into list of rules
-  mkRules = file: forEach (attrNames file) ( path: 
+  # Build specified rule type
+  in rules."${type}" path ( {}
+    // ( if attrs ? mode then { mode = toMode attrs.mode; } else {} )
+    // ( if attrs ? user then { user = toString attrs.user; } else {} )
+    // ( if attrs ? group then { group = toString attrs.group; } else {} )
+    // ( if attrs ? source then { source = toString attrs.source; } else {} )
+    // ( if attrs ? text then { text = toString attrs.text; } else {} )
+  )
 
-    # Default rule type is "file"
-    let attrs = file."${path}";
-        type = ( if attrs ? type then attrs.type else "file" );
-
-    # Build specified rule type
-    in rules."${type}" path ( {}
-      // ( if attrs ? mode then { mode = toMode attrs.mode; } else {} )
-      // ( if attrs ? user then { user = toString attrs.user; } else {} )
-      // ( if attrs ? group then { group = toString attrs.group; } else {} )
-      // ( if attrs ? source then { source = toString attrs.source; } else {} )
-      // ( if attrs ? text then { text = toString attrs.text; } else {} )
-    )
-
-  );
-
-}
+)

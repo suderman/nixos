@@ -1,9 +1,7 @@
-# Use systemd tmpfiles rules to create files, directories, symlinks and permissions changes
-# https://www.freedesktop.org/software/systemd/man/latest/tmpfiles.d.html
 { config, lib, this, ... }: let
 
   inherit (lib) mkOption types;
-  inherit (this.lib.rules) mkRules;
+  inherit (this.lib) mkRules;
 
 in {
 

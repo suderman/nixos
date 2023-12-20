@@ -1,10 +1,8 @@
 { pkgs, lib, this, ... }: with pkgs; {
 
-  # List of app ids or packages plucked from a list of apps (see overlays/pkgs/app.nix)
+  # List of app ids or packages plucked from a list of apps
   ids = list: lib.unique (map (app: app.id) (list));
   packages = list: lib.unique (map (app: app.package) (list));
-
-  baz = this.lib.foo;
 
   # List all apps below
   nautilus = {
@@ -70,6 +68,16 @@
   user-themes = {
     id = "user-theme@gnome-shell-extensions.gcampax.github.com";
     package = gnomeExtensions.user-themes;
+  };
+
+  dash-to-dock = {
+    id = "dash-to-dock@micxgx.gmail.com";
+    package = gnomeExtensions.dash-to-dock;
+  };
+
+  dash2dock-lite = {
+    id = "dash2dock-lite@icedman.github.com";
+    package = gnomeExtensions.dash2dock-lite;
   };
 
 }

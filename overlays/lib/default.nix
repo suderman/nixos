@@ -28,8 +28,7 @@ in recursiveUpdate this {
     extraGroups = users: extraGroups: mkAttrs users (_: { inherit extraGroups; });
 
     # Convert 3-digit mode (ie: 775) to 4-digit mode (ie: 0775) by padding a zero
-    toMode = mode: let mode' = toString mode; in 
-      if stringLength mode' == 3 then "0${mode'}" else mode'; 
+    toMode = mode: let mode' = toString mode; in if stringLength mode' == 3 then "0${mode'}" else mode'; 
 
     # Format owner and group as "owner:group"
     toOwnership = owner: group: "${toString owner}:${toString group}";
