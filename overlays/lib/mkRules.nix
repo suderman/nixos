@@ -1,7 +1,8 @@
-{ pkgs, lib, ... }: let
+{ pkgs, lib, this, ... }: let
 
   inherit (builtins) attrNames stringLength;
   inherit (lib) forEach mkOption types removePrefix removeSuffix;
+  inherit (this.lib) toMode trim;
 
   # Use systemd tmpfiles rules to create files, directories, symlinks and permissions changes
   # https://www.freedesktop.org/software/systemd/man/latest/tmpfiles.d.html
@@ -48,13 +49,6 @@
       '';
 
   };
-
-  # Convert 3-digit mode (ie: 775) to 4-digit mode (ie: 0775) by padding a zero
-  toMode = mode: let mode' = toString mode; in 
-    if stringLength mode' == 3 then "0${mode'}" else mode'; 
-
-  # Trim newlines from beginning and end of string
-  trim = text: removePrefix "\n" ( removeSuffix "\n" text );
 
 # Convert attr set into list of rules: 
 # this.lib.mkRules file

@@ -1,16 +1,13 @@
-# Personal helper library
+# Personal helper library 
 { final, prev, ... }: let 
 
   inherit (builtins) attrNames filter pathExists readDir stringLength;
-  inherit (prev) callPackage lib stdenv this;
-  inherit (lib) filterAttrs recursiveUpdate removePrefix removeSuffix;
-  inherit (this.lib) mkAttrs;
+  inherit (prev) callPackage stdenv;
+  inherit (prev.lib) filterAttrs recursiveUpdate removePrefix removeSuffix;
+  inherit (prev.this.lib) mkAttrs;
 
-# Merge with existing this
-in recursiveUpdate this { 
-
-  # Import each lib/*.nix as a lib function
-  lib = mkAttrs ./. ( module: import ./${module} { pkgs = prev; inherit lib this; } ) // rec {
+  # Merge with existing this
+  this = recursiveUpdate prev.this { lib = rec {
 
     # Additional helper functions
     foo = "bar";
@@ -36,6 +33,9 @@ in recursiveUpdate this {
     # Trim newlines from beginning and end of string
     trim = text: removePrefix "\n" ( removeSuffix "\n" text );
 
-  };  
+  }; };
 
+# Import each lib/*.nix as a lib function
+in recursiveUpdate this { 
+  lib = mkAttrs ./. ( module: import ./${module} { pkgs = prev; lib = prev.lib; inherit this; } );  
 }
