@@ -4,7 +4,7 @@
 
   text = /* bash */ ''
     # comment
-    echo "Yo ${this.lib.foo} this is a shell script" "$@" "<end-of-line>"
+    echo "Yo this is a shell script" "$@" "<end-of-line>"
     pwd
   '';
 }) // {

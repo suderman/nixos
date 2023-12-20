@@ -1,16 +1,19 @@
 # Personal helper library 
-{ final, prev, ... }: let 
+{ final, prev, ... }: let pkgs = prev;
 
-  inherit (builtins) attrNames filter pathExists readDir stringLength;
-  inherit (prev) callPackage stdenv;
-  inherit (prev.lib) filterAttrs recursiveUpdate removePrefix removeSuffix;
-  inherit (prev.this.lib) mkAttrs;
+  inherit (pkgs) lib;
+  inherit (lib) recursiveUpdate;
+  inherit (pkgs.this.lib) mkAttrs;
 
   # Merge with existing this
-  this = recursiveUpdate prev.this { lib = rec {
+  this = recursiveUpdate pkgs.this { lib = let
 
-    # Additional helper functions
-    foo = "bar";
+    inherit (builtins) attrNames filter pathExists readDir stringLength;
+    inherit (lib) filterAttrs removePrefix removeSuffix;
+    inherit (pkgs) this callPackage stdenv;
+
+  # Additional helper functions this.lib.*
+  in rec {
 
     # Home directory for user
     homeDir = user: "/${if (stdenv.isLinux) then "home" else "Users"}/${user}";
@@ -35,7 +38,7 @@
 
   }; };
 
-# Import each lib/*.nix as a lib function
+# Also import each lib/*.nix as a lib function
 in recursiveUpdate this { 
-  lib = mkAttrs ./. ( module: import ./${module} { pkgs = prev; lib = prev.lib; inherit this; } );  
+  lib = mkAttrs ./. ( module: import ./${module} { inherit pkgs lib this; } );  
 }

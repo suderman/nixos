@@ -1,4 +1,5 @@
-{ pkgs, lib, this, ... }: with pkgs; {
+# this.lib.apps
+{ pkgs, lib, this }: with pkgs; {
 
   # List of app ids or packages plucked from a list of apps
   ids = list: lib.unique (map (app: app.id) (list));

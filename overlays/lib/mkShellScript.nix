@@ -1,4 +1,4 @@
-# mkShellScript
+# this.lib.mkShellScript
 { pkgs, lib, this }:
 
   { name, text, inputs ? [] }: pkgs.writeTextFile {

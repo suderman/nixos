@@ -1,4 +1,5 @@
-{ pkgs, lib, this, ... }: let
+# this.lib.mkRules
+{ pkgs, lib, this }: let
 
   inherit (builtins) attrNames stringLength;
   inherit (lib) forEach mkOption types removePrefix removeSuffix;
@@ -51,7 +52,6 @@
   };
 
 # Convert attr set into list of rules: 
-# this.lib.mkRules file
 in file: forEach (attrNames file) (path: 
 
   # Default rule type is "file"
