@@ -13,7 +13,7 @@
     # file "/etc/foo-resolv" { mode = "0775"; user = "me"; group = "users"; source = "/etc/resolv.conf"; };
     # C+ /etc/foo-resolv - - - - /etc/resolv.conf
     # z  /etc/foo-resolv 0775 me users - -
-    file = path: { mode ? "0775", user ? "root", group ? "root", source ? "-", text ? "-", ... }: 
+    file = path: { mode ? "0775", user ? "root", group ? user, source ? "-", text ? "-", ... }: 
       trim ( if source != "-" then ''
         C+ ${path} - - - - ${source}
         z  ${path} ${mode} ${user} ${group} - -
@@ -26,7 +26,7 @@
     # dir "/etc/foo-dir" { mode = "0775"; user = "me"; group = "users"; source = "/etc/default };
     # C+ /etc/foo-default - - - - /etc/default
     # Z  /etc/foo-default 0775 me users - -
-    dir = path: { mode ? "0775", user ? "root", group ? "root", source ? "-", ... }:
+    dir = path: { mode ? "0775", user ? "root", group ? user, source ? "-", ... }:
       trim ( if source != "-" then ''
         C+ ${path} - - - - ${source}
         Z  ${path} ${mode} ${user} ${group} - -
@@ -36,7 +36,7 @@
 
     # mode "/etc/foobar" { mode = "0775"; user = "me"; group = "users; };
     # Z /etc/foobar 0755 me users -
-    mode = path: { mode ? "-", user ? "-", group ? "-", ... }: 
+    mode = path: { mode ? "-", user ? "-", group ? user, ... }: 
       trim ''
         Z ${path} ${mode} ${user} ${group} - -
       '';
