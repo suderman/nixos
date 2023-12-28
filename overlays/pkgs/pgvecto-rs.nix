@@ -5,14 +5,16 @@
 #
 # A PostgreSQL extension needed for Immich.
 # This builds from the pre-compiled binary instead of from source.
+# https://github.com/diogotcorreia/dotfiles/blob/nixos/packages/pgvecto-rs.nix
 
-{ lib, stdenv, fetchurl, dpkg, postgresql }:
+{ lib, system, stdenv, fetchurl, dpkg, postgresql }:
 
 let
   versionHashes = {
     "14" = "sha256-8YRC1Cd9i0BGUJwLmUoPVshdD4nN66VV3p48ziy3ZbA=";
   };
   major = lib.versions.major postgresql.version;
+  system' = lib.removeSuffix "-linux" system;
 in stdenv.mkDerivation rec {
   pname = "pgvecto-rs";
   version = "0.1.11";
@@ -20,8 +22,11 @@ in stdenv.mkDerivation rec {
   buildInputs = [ dpkg ];
 
   src = fetchurl {
+    # For example:
+    # https://github.com/tensorchord/pgvecto.rs/releases/download/v0.1.11/vectors-pg14-v0.1.11-x86_64-unknown-linux-gnu.deb
+    # https://github.com/tensorchord/pgvecto.rs/releases/download/v0.1.11/vectors-pg14-v0.1.11-aarch64-unknown-linux-gnu.deb
     url =
-      "https://github.com/tensorchord/pgvecto.rs/releases/download/v${version}/vectors-pg${major}-v${version}-x86_64-unknown-linux-gnu.deb";
+      "https://github.com/tensorchord/pgvecto.rs/releases/download/v${version}/vectors-pg${major}-v${version}-${system'}-unknown-linux-gnu.deb";
     hash = versionHashes."${major}";
   };
 

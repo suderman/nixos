@@ -4,7 +4,7 @@
 let
 
   # https://github.com/immich-app/immich/releases
-  version = "1.91.0";
+  version = "1.91.4";
 
   cfg = config.modules.immich;
 
@@ -84,9 +84,24 @@ in {
 
     };
 
+    # Ensure data directory exists with expected ownership
+    file = let dir = {
+      type = "dir"; mode = 775; 
+      user = config.ids.uids.immich; 
+      group = config.ids.gids.immich;
+    }; in {
+      "${cfg.dataDir}" = dir;
+      "${cfg.dataDir}/geocoding" = dir;
+    };
+
     # Enable database and reverse proxy
     modules.postgresql.enable = true;
     modules.traefik.enable = true;
+
+    services.redis.servers.immich = {
+      enable = true;
+      user = "immich";
+    };
 
     # Postgres database configuration
     services.postgresql = {
@@ -115,7 +130,7 @@ in {
     # Init service
     systemd.services.immich = let this = config.systemd.services.immich; in {
       enable = true;
-      description = "Set up paths & database access";
+      description = "Set up network & database";
       wantedBy = [ "multi-user.target" ];
       after = [ "postgresql.service" ]; # run this after db
       before = [ # run this before the rest:
@@ -132,14 +147,14 @@ in {
       };
       path = with pkgs; [ docker postgresql sudo ];
       script = with config.virtualisation.oci-containers.containers; ''
-        sleep 5
+
+        # Pull all docker images v${version}
+        docker pull ${immich-redis.image};
+        docker pull ${immich-machine-learning.image};
+        docker pull ${immich-server.image};
         
         # Ensure docker network exists
         docker network create immich 2>/dev/null || true
-        
-        # Ensure data directory exists with expected ownership
-        mkdir -p ${cfg.dataDir}/geocoding
-        chown -R ${cfg.environment.PUID}:${cfg.environment.PGID} ${cfg.dataDir}
         
         # Ensure database user has expected password, temporarily become superuser
         sudo -u postgres psql postgres -c "\
@@ -157,22 +172,6 @@ in {
           ALTER USER immich WITH NOSUPERUSER; \
         "
         
-        # Pull all docker images
-        docker pull ${immich-redis.image};
-        docker pull ${immich-machine-learning.image};
-        docker pull ${immich-server.image};
-      '';
-    };
-
-    # sudo systemctl start immich-pull
-    systemd.services.immich-pull = {
-      description = "Pull docker images for Immich";
-      serviceConfig.Type = "oneshot";
-      path = with pkgs; [ docker ];
-      script = with config.virtualisation.oci-containers.containers; ''
-        docker pull ${immich-redis.image};
-        docker pull ${immich-machine-learning.image};
-        docker pull ${immich-server.image};
       '';
     };
 
