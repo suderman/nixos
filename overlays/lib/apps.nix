@@ -21,6 +21,16 @@
     package = gnome-text-editor;
   };
 
+  calculator = {
+    id = "org.gnome.Calculator.desktop";
+    package = gnome.gnome-calculator;
+  };
+
+  calendar = {
+    id = "org.gnome.Calendar.desktop";
+    package = gnome.gnome-calendar;
+  };
+
   kitty = {
     id = "kitty.desktop";
     package = kitty;

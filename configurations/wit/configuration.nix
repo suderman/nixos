@@ -27,4 +27,7 @@
   modules.whoami.enable = true;
   modules.cockpit.enable = true;
 
+  services.xserver.displayManager.autoLogin.enable = true;
+  services.xserver.displayManager.autoLogin.user = "ness";
+
 }

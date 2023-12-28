@@ -1,4 +1,4 @@
-{ config, lib, pkgs, this, inputs, ... }: {
+{ inputs, config, lib, pkgs, this, ... }: {
 
   # Import all *.nix files in this directory
   imports = this.lib.ls ./. ++ [
@@ -152,7 +152,7 @@
 
 
   file."/etc/foo" = { type = "dir"; };
-  file."/etc/foo/bar" = { text = "Hello world!"; mode = 665; user = 911; group = 911; };
+  file."/etc/foo/bar" = { text = "Hello world!"; mode = 665; user = 913; };
   file."/etc/foo/symlink" = { type = "link"; source = /etc/foo/bar; };
   file."/etc/foo/resolv" = { type = "file"; mode = 775; user = "me"; group = "users"; source = /etc/resolv.conf; };
   file."/etc/foo/srv" = { type = "dir"; source = /srv; };

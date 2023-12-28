@@ -45,10 +45,17 @@ in {
         bluetooth-quick-connect
         blur-my-shell
         caffeine
-        hot-edge
         native-window-placement
         runcat
         user-themes
+      ];
+    };
+
+    wallpapers = mkOption {
+      type = listOf (either str path);
+      default = let dir = "/run/current-system/sw/share/backgrounds/gnome"; in [
+        "${dir}/adwaita-l.jpg"
+        "${dir}/adwaita-d.jpg"
       ];
     };
 
@@ -75,6 +82,12 @@ in {
         enabled-extensions = apps.ids cfg.extensions; 
         favorite-apps = apps.ids cfg.dock;
       };
+
+      "org/gnome/desktop/background" = {
+        picture-uri = "file://" + builtins.toString(builtins.head cfg.wallpapers);
+        picture-uri-dark = "file://" + builtins.toString(builtins.tail cfg.wallpapers);
+      };
+
 
       # Enable fractional scaling
       "org/gnome/mutter" = {
