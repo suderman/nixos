@@ -47,6 +47,12 @@ in {
       description = "Photos directory for the Immich instance";
     };
 
+    externalDir = mkOption {
+      type = types.str;
+      default = "";
+      description = "External library directory for the Immich instance";
+    };
+
     environment = mkOption { 
       type = types.attrs; 
       default = {};

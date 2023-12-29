@@ -27,6 +27,8 @@ in {
         "${cfg.dataDir}:/usr/src/app/upload"
       ] ++ (if cfg.photosDir == "" then [] else [
         "${cfg.photosDir}:/usr/src/app/upload/library" 
+      ]) ++ (if cfg.externalDir == "" then [] else [
+        "${cfg.externalDir}:/external:ro" 
       ]);
 
       # Traefik labels

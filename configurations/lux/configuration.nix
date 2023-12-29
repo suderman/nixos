@@ -54,6 +54,7 @@
   modules.immich = {
     enable = true;
     photosDir = "/data/photos/immich";
+    externalDir = "/data/photos/collections";
   };
 
   modules.photoprism = {
