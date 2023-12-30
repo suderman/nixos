@@ -4,10 +4,9 @@
 let
 
   # https://github.com/silverbulletmd/silverbullet/releases
-  version = "0.5.3";
+  version = "0.5.10";
 
   cfg = config.modules.silverbullet;
-  ownership = with config.ids; "${toString uids.silverbullet}:${toString gids.silverbullet}";
 
   inherit (lib) mkIf mkOption options types strings mkBefore;
   inherit (builtins) toString;
@@ -62,6 +61,13 @@ in {
 
     };
 
+    # Ensure data directory exists
+    file."${cfg.dataDir}" = {
+      type = "dir"; mode = 775; 
+      user = config.users.users.silverbullet.uid; 
+      group = config.users.groups.silverbullet.gid;
+    };
+
     # Enable reverse proxy
     modules.traefik.enable = true;
 
@@ -70,7 +76,7 @@ in {
       autoStart = true;
 
       # Run as silverbullet user
-      user = ownership;
+      user = with config.ids; "${toString uids.silverbullet}:${toString gids.silverbullet}";
 
       # Traefik labels
       extraOptions = [
@@ -86,18 +92,11 @@ in {
 
     # Extend systemd service
     systemd.services.docker-silverbullet = {
-
-      preStart = mkBefore ''
-        mkdir -p ${cfg.dataDir}
-        chown -R ${ownership} ${cfg.dataDir}
-      '';
-
-      # traefik should be running before this service starts
       after = [ "traefik.service" ];
-
-      # If the proxy goes down, take down this service too
       requires = [ "traefik.service" ];
-
+      preStart = with config.virtualisation.oci-containers.containers; ''
+        docker pull ${silverbullet.image};
+      '';
     };
 
   };
