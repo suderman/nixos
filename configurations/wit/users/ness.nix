@@ -10,6 +10,8 @@ in {
     yo
     firefox-wayland
     dolphin
+    plex-media-player
+    plexamp
   ];
 
   programs = {
