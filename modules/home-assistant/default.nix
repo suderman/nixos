@@ -9,10 +9,10 @@ let
   inherit (this.lib) extraGroups;
 
   # https://github.com/home-assistant/core/pkgs/container/home-assistant/versions?filters%5Bversion_type%5D=tagged
-  version = "2023.11.3";
+  version = "2023.12.4";
 
   # https://github.com/zwave-js/zwave-js-ui/pkgs/container/zwave-js-ui/versions?filters%5Bversion_type%5D=tagged
-  zwaveVersion = "9.5.1";
+  zwaveVersion = "9.6.2";
 
 in {
 
@@ -116,6 +116,21 @@ in {
 
     };
 
+    # Ensure data directory exists
+    file = let dir = {
+      type = "dir"; mode = 775; 
+      user = config.users.users.hass.uid; 
+      group = config.users.groups.hass.gid;
+    }; in {
+      "${cfg.dataDir}" = { type = "dir"; };
+      "${cfg.dataDir}/.cloud" = dir;
+      "${cfg.dataDir}/.storage" = dir;
+      "${cfg.dataDir}/blueprints" = dir;
+      "${cfg.dataDir}/deps" = dir;
+      "${cfg.dataDir}/tts" = dir;
+      "${cfg.dataDir}/zwave" = dir;
+    };
+
     # Enable database and reverse proxy
     modules.postgresql.enable = true;
     modules.traefik.enable = true;
@@ -127,13 +142,13 @@ in {
     services.postgresql = {
       ensureUsers = [{
         name = "hass";
-        ensurePermissions = { "DATABASE hass" = "ALL PRIVILEGES"; };
+        ensureDBOwnership = true;
       }];
       ensureDatabases = [ "hass" ];
     };
 
     # Init service
-    systemd.services.home-assistant = let this = config.systemd.services.home-assistant; in {
+    systemd.services.home-assistant = let service = config.systemd.services.home-assistant; in {
       enable = true;
       description = "Initiate home assistant services";
       wantedBy = [ "multi-user.target" ];
@@ -142,12 +157,17 @@ in {
         "docker-home-assistant.service"
         "docker-zwave.service"
       ];
-      wants = this.after ++ this.before; 
+      wants = service.after ++ service.before; 
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = "yes";
       };
-      script = "mkdir -p ${cfg.dataDir}";
+      path = with pkgs; [ docker ];
+      script = with config.virtualisation.oci-containers.containers; ''
+        docker pull ${home-assistant.image};
+      '' + (if cfg.zwave == "" then "" else ''
+        docker pull ${zwave.image};
+      '');
     };
 
   };

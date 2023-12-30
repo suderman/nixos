@@ -46,21 +46,6 @@ in {
 
     };
 
-    # Extend systemd service
-    systemd.services.docker-zwave = {
-      requires = [ "home-assistant.service" ];
-
-      # Ensure directory and permissions
-      preStart = let 
-        uid = toString config.users.users.hass.uid;
-        gid = toString config.users.groups.hass.gid;
-      in mkBefore ''
-        mkdir -p ${cfg.dataDir}/zwave
-        chown -R ${uid}:${gid} ${cfg.dataDir}/zwave
-      '';
-
-    };
-
     # Open firewall
     networking.firewall = {
       allowedTCPPorts = [ 

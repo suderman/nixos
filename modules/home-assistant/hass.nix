@@ -5,6 +5,7 @@ let
   cfg = config.modules.home-assistant;
   inherit (lib) mkIf mkOption mkBefore options types strings;
   inherit (builtins) toString readFile;
+  inherit (pkgs) writeText;
 
 in {
 
@@ -48,22 +49,18 @@ in {
 
     };
 
-    # Extend systemd service
-    systemd.services.docker-home-assistant = {
-      requires = [ "home-assistant.service" ];
-
-      # Copy configuration to data directory before container starts up
-      preStart = let 
-        configuration_yaml = pkgs.writeText "configuration.yaml" (readFile ./configuration.yaml);
-        uid = toString config.users.users.hass.uid;
-        gid = toString config.users.groups.hass.gid;
-      in mkBefore ''
-        mkdir -p ${cfg.dataDir}
-        rm -rf ${cfg.dataDir}/configuration.yaml
-        cp -f ${configuration_yaml} ${cfg.dataDir}/configuration.yaml
-        chown -R ${uid}:${gid} ${cfg.dataDir}
-      '';
-
+    # Copy configuration yaml and ensure includes exist
+    file = let yaml = {
+      type = "file"; mode = 775; 
+      user = config.users.users.hass.uid; 
+      group = config.users.groups.hass.gid;
+    }; in  {
+      "${cfg.dataDir}/automations.yaml" = yaml; 
+      "${cfg.dataDir}/scripts.yaml" = yaml; 
+      "${cfg.dataDir}/scenes.yaml" = yaml; 
+      "${cfg.dataDir}/configuration.yaml" = yaml // { 
+        source = ( writeText "configuration.yaml" (readFile ./configuration.yaml) );
+      };
     };
 
     # Open firewall
