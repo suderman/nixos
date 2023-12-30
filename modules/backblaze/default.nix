@@ -33,6 +33,10 @@ in {
 
   config = mkIf cfg.enable {
 
+    # Ensure data directory exists
+    file."${cfg.dataDir}" = { type = "dir"; };
+
+    # Docker container
     virtualisation.oci-containers.containers."backblaze" = {
       image = "tessypowder/backblaze-personal-wine:latest";
       autoStart = true;
@@ -71,7 +75,6 @@ in {
     # > docker restart backblaze
     # This will ensure Backblaze can see the volumes/drive letters
     systemd.services.docker-backblaze = {
-      preStart = mkBefore "mkdir -p ${cfg.dataDir}";
       postStart = let dir = "${cfg.dataDir}/wine/dosdevices"; in mkBefore ''
         while [ ! -d "${dir}" ]; do sleep 1; done
         [ -h "${dir}/d:" ] || ln -s /drive_d "${dir}/d:"
