@@ -123,7 +123,7 @@ in {
     services.postgresql = {
       ensureUsers = [{
         name = "tandoor_recipes";
-        ensurePermissions = { "DATABASE tandoor_recipes" = "ALL PRIVILEGES"; };
+        ensureDBOwnership = true;
       }];
       ensureDatabases = [ "tandoor_recipes" ];
     };

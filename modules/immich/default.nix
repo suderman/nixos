@@ -115,7 +115,7 @@ in {
       enable = true;
       ensureUsers = [{
         name = "immich";
-        ensurePermissions = { "DATABASE immich" = "ALL PRIVILEGES"; };
+        ensureDBOwnership = true;
       }];
       ensureDatabases = [ "immich" ];
 

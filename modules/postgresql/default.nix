@@ -4,27 +4,39 @@
 let
 
   cfg = config.modules.postgresql;
-  users = this.admins ++ [ "root" ]; 
-  inherit (lib) mkIf mkOrder options;
+  admins = this.admins ++ [ "root" ]; 
+  databases = mkAttrs (unique config.services.postgresql.ensureDatabases) ( database: admins );
+  inherit (lib) mkIf mkOrder mkOption options types unique;
+  inherit (this.lib) mkAttrs;
 
 in {
 
-  options.modules.postgresql.enable = options.mkEnableOption "postgresql"; 
+  options.modules.postgresql = {
+
+    enable = options.mkEnableOption "postgresql"; 
+
+    # 14 was default package as of 22.11
+    # 15 is default package as of 23.11
+    package = mkOption {
+      type = types.package;
+      default = pkgs.postgresql_14;
+    };
+
+  };
+
 
   config = mkIf cfg.enable {
 
     services.postgresql = {
 
       enable = true;
+      package = cfg.package; 
 
-      # Default package as of 22.11
-      package = pkgs.postgresql_14; 
-
-      # Full access for personal and root user
-      ensureDatabases = users;
+      # Database & role for each admin
+      ensureDatabases = admins;
       ensureUsers = (map (name: 
-        { inherit name; ensurePermissions = { "ALL TABLES IN SCHEMA public" = "ALL PRIVILEGES"; }; }
-      ) users);
+        { inherit name; ensureDBOwnership = true; }
+      ) admins);
 
       # Listen everywhere
       enableTCPIP = true;
@@ -35,6 +47,20 @@ in {
       '';
 
     };
+
+    systemd.services.postgresql.postStart = let 
+      inherit (lib) concatLines flatten mapAttrsToList mkAfter ;
+      sql = unique( flatten( 
+        mapAttrsToList( database: admins: ([ 
+            # Grant all priveleges for this database to the database user
+            "$PSQL -d \"${database}\" -tAc 'GRANT ALL PRIVILEGES ON SCHEMA public TO \"${database}\";'"
+          ] ++ ( map( admin: 
+            # Grant all priveleges for this database to each admin user
+            "$PSQL -d \"${database}\" -tAc 'GRANT ALL PRIVILEGES ON SCHEMA public TO \"${admin}\";'"
+          ) admins ) 
+        )) databases 
+      ));
+    in mkAfter (concatLines sql);
 
     # ident is equivalent to peer, but requires identd daemon
     services.oidentd.enable = true;

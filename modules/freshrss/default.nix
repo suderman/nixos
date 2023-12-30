@@ -61,7 +61,7 @@ in {
       enable = true;
       ensureUsers = [{
         name = "freshrss";
-        ensurePermissions = { "DATABASE freshrss" = "ALL PRIVILEGES"; };
+        ensureDBOwnership = true;
       }];
       ensureDatabases = [ "freshrss" ];
     };

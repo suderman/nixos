@@ -73,7 +73,7 @@ in {
     services.postgresql = {
       ensureUsers = [{
         name = "wallabag";
-        ensurePermissions = { "DATABASE wallabag" = "ALL PRIVILEGES"; };
+        ensureDBOwnership = true;
       }];
       ensureDatabases = [ "wallabag" ];
     };

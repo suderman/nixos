@@ -85,7 +85,7 @@ in {
     # services.postgresql = {
     #   ensureUsers = [{
     #     name = "gitea";
-    #     ensurePermissions = { "DATABASE gitea" = "ALL PRIVILEGES"; };
+    #     ensureDBOwnership = true;
     #   }];
     #   ensureDatabases = [ "gitea" ];
     # };
