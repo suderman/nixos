@@ -18,9 +18,12 @@
       trim ( if source != "-" then ''
         C+ ${path} - - - - ${source}
         z  ${path} ${mode} ${user} ${group} - -
-      '' else ''
+      '' else ( if text != "-" then ''
         f+ ${path} ${mode} ${user} ${group} - ${text}
-      '' );
+      '' else '' 
+        f ${path} ${mode} ${user} ${group} -
+      ''
+      ) );
 
     # dir "/etc/foo-dir" { mode = "0775"; user = "me"; group = "users"; };
     # d /etc/foobaz 0755 me users - -
