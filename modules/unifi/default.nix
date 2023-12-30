@@ -53,6 +53,13 @@ in {
       gid = config.ids.gids.unifi;
     };
 
+    # Ensure data directory exists
+    file."${cfg.dataDir}" = {
+      type = "dir"; mode = 775; 
+      user = config.users.users.unifi.uid; 
+      group = config.users.groups.unifi.gid;
+    };
+
     # Enable reverse proxy
     modules.traefik.enable = true;
 
@@ -66,13 +73,6 @@ in {
         Type = "oneshot";
         RemainAfterExit = "yes";
       };
-      script = let
-        uid = toString config.users.users.unifi.uid;
-        gid = toString config.users.groups.unifi.gid;
-      in ''
-        mkdir -p ${cfg.dataDir}
-        chown -R ${uid}:${gid} ${cfg.dataDir}
-      '';
     };
 
   };

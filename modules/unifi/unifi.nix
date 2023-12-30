@@ -3,7 +3,7 @@
 let
 
   # https://hub.docker.com/r/jacobalberty/unifi/tags
-  version = "7.3";
+  version = "7.5";
 
   cfg = config.modules.unifi;
   inherit (lib) mkIf;
