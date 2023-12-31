@@ -33,6 +33,11 @@ in {
       default = ""; 
     };
 
+    package = mkOption {
+      type = types.package;
+      default = pkgs.tandoor-recipes;
+    };
+
   };
 
   config = mkIf cfg.enable {
@@ -81,6 +86,7 @@ in {
     services.tandoor-recipes = {
 
       enable = true;
+      package = cfg.package; 
 
       # Service port
       port = toInt port;

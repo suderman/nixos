@@ -33,13 +33,12 @@
   modules.rsshub.enable = true;
   modules.freshrss.enable = true;
   modules.wallabag.enable = false;
-
-  # modules.tandoor-recipes.enable = false;
   # modules.nextcloud.enable = false;
 
-  # modules.tandoor-recipes = {
-  #   enable = true;
-  #   public = "tandoor.suderman.net";
-  # };
+  modules.tandoor-recipes = {
+    enable = true;
+    package = pkgs.unstable.tandoor-recipes;
+    # public = "tandoor.suderman.net";
+  };
 
 }

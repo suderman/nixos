@@ -48,8 +48,9 @@ in {
 
     };
 
+    # Ensure privileges for all database users and admins
     systemd.services.postgresql.postStart = let 
-      inherit (lib) concatLines flatten mapAttrsToList mkAfter ;
+      inherit (lib) concatLines flatten mapAttrsToList;
       sql = unique( flatten( 
         mapAttrsToList( database: admins: ([ 
             # Grant all priveleges for this database to the database user
@@ -60,7 +61,7 @@ in {
           ) admins ) 
         )) databases 
       ));
-    in mkAfter (concatLines sql);
+    in mkOrder 1400 (concatLines sql);
 
     # ident is equivalent to peer, but requires identd daemon
     services.oidentd.enable = true;
