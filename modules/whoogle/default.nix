@@ -3,6 +3,9 @@
   
 let 
 
+  # https://github.com/benbusby/whoogle-search/releases
+  version = "0.8.4";
+
   cfg = config.modules.whoogle;
   inherit (lib) mkIf mkOption mkBefore types;
 
@@ -22,8 +25,11 @@ in {
 
   config = mkIf cfg.enable {
 
+    # Enable reverse proxy
+    modules.traefik.enable = true;
+
     virtualisation.oci-containers.containers."whoogle" = {
-      image = "benbusby/whoogle-search";
+      image = "benbusby/whoogle-search:${version}";
       extraOptions = [
         "--label=traefik.enable=true"
         "--label=traefik.http.routers.whoogle.rule=Host(`${cfg.hostName}`)"
@@ -32,14 +38,19 @@ in {
       ];
     };
 
-    # Container will not stop gracefully, so kill it
-    systemd.services.docker-whoogle.serviceConfig = {
-      KillSignal = "SIGKILL";
-      SuccessExitStatus = "0 SIGKILL";
+    # Extend systemd service
+    systemd.services.docker-whoogle = {
+      after = [ "traefik.service" ];
+      requires = [ "traefik.service" ];
+      preStart = with config.virtualisation.oci-containers.containers; ''
+        docker pull ${whoogle.image};
+      '';
+      # Container will not stop gracefully, so kill it
+      serviceConfig = {
+        KillSignal = "SIGKILL";
+        SuccessExitStatus = "0 SIGKILL";
+      };
     };
-
-    # Enable reverse proxy
-    modules.traefik.enable = true;
 
   }; 
 
