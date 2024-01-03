@@ -19,6 +19,7 @@ in {
 
   config = mkIf cfg.enable {
 
+    modules.kitty.enable = true;
     modules.eww.enable = true;
     modules.waybar.enable = true;
     # modules.anyrun.enable = true;
@@ -34,6 +35,7 @@ in {
       # ncpamixer
 
       font-awesome
+      firefox
 
       gnome.nautilus
       wezterm
@@ -58,7 +60,7 @@ in {
     wayland.windowManager.hyprland = {
       enable = true;
       # plugins = [ inputs.hyprland-plugins.packages.${pkgs.system}.hyprbars ];
-      recommendedEnvironment = true;
+      # recommendedEnvironment = true;
       extraConfig = builtins.readFile ./hyprland.conf + "\n\n" + ''
         source = ~/.config/hypr/local.conf
       '';
