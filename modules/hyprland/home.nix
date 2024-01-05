@@ -1,20 +1,26 @@
 # modules.hyprland.enable = true;
-{ config, pkgs, lib, inputs, ... }: 
+{ config, pkgs, lib, inputs, this, ... }: 
 
 let 
 
   cfg = config.modules.hyprland;
-  inherit (lib) mkIf;
+  inherit (lib.options) mkEnableOption;
+  inherit (lib) mkIf mkOption types;
+  inherit (this.lib) destabilize mkShellScript;
+
+  # Unstable home-manager hyprland module
+  # https://github.com/nix-community/home-manager/blob/master/modules/services/window-managers/hyprland.nix
+  module = destabilize inputs.home-manager-unstable "services/window-managers/hyprland.nix";
 
 in {
 
-  # Import hyprland module
-  imports = [ 
-    inputs.hyprland.homeManagerModules.default 
-  ];
+  # Import unstable module and hyprland settings
+  imports = module ++ [ ./settings.nix ];
 
-  options.modules.hyprland = {
-    enable = lib.options.mkEnableOption "hyprland"; 
+  options.modules.hyprland = with types; {
+    enable = mkEnableOption "hyprland"; 
+    preSettings = mkOption { type = anything; default = {}; };
+    settings = mkOption { type = anything; default = {}; };
   };
 
   config = mkIf cfg.enable {
@@ -50,6 +56,8 @@ in {
       grim # taking screenshots
       slurp # selecting a region to screenshot
 
+      ( mkShellScript { name = "focus"; text = ./bin/focus.sh; } )
+
     ];
 
     # I'll never remember the H
@@ -60,16 +68,16 @@ in {
     wayland.windowManager.hyprland = {
       enable = true;
       # plugins = [ inputs.hyprland-plugins.packages.${pkgs.system}.hyprbars ];
-      # recommendedEnvironment = true;
-      extraConfig = builtins.readFile ./hyprland.conf + "\n\n" + ''
-        source = ~/.config/hypr/local.conf
+      # extraConfig = builtins.readFile ./hyprland.conf + "\n\n" + ''
+      extraConfig = ''
+        source = ~/.config/hypr/extra.conf
       '';
     };
 
-    # Local override config
+    # Extra config
     home.activation.hyprland = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       $DRY_RUN_CMD mkdir -p $HOME/.config/hypr
-      $DRY_RUN_CMD touch $HOME/.config/hypr/local.conf
+      $DRY_RUN_CMD touch $HOME/.config/hypr/extra.conf
     '';
 
   };

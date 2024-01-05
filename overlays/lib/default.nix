@@ -8,7 +8,7 @@
   # Merge with existing this
   this = recursiveUpdate pkgs.this { lib = let
 
-    inherit (builtins) attrNames filter pathExists readDir stringLength;
+    inherit (builtins) attrNames filter hasAttr pathExists readDir stringLength;
     inherit (lib) filterAttrs removePrefix removeSuffix;
     inherit (pkgs) this callPackage stdenv;
 
@@ -35,6 +35,15 @@
 
     # Trim newlines from beginning and end of string
     trim = text: removePrefix "\n" ( removeSuffix "\n" text );
+
+    # Return pair of modules to import which disables the stable module and replaces it with unstable
+    destabilize = input: path: [
+      { disabledModules = [ path ]; } # first disable stable module
+      ( if hasAttr "darwinModules" input 
+        then "${input}/modules/${path}" # then add unstable home-manager module
+        else "${input}/nixos/modules/${path}" # or add unstable nixos module
+      ) 
+    ];
 
   }; };
 

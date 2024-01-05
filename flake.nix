@@ -11,6 +11,7 @@
     # <https://mipmip.github.io/home-manager-option-search>
     home-manager.url = "github:nix-community/home-manager/release-23.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    home-manager-unstable.url = "github:nix-community/home-manager";
 
     # Nix Index Database
     nix-index-database.url = "github:Mic92/nix-index-database";
@@ -75,6 +76,7 @@
 
       # Accept agreements for unfree software
       config.allowUnfree = true;
+      config.nvidia.acceptLicense = true;
       config.joypixels.acceptLicense = true;
 
       # Add to-be-updated packages blocking builds (none right now)
@@ -145,10 +147,10 @@
     nixosConfigurations = mkAttrs ./configurations (
 
       # Make configuration for each subdirectory 
-      dir: mkConfiguration (this // import ./configurations/${dir} // { 
-        users = mkUsers dir;
-        admins = mkAdmins dir;
-        modules = mkModules dir;
+      host: mkConfiguration (this // import ./configurations/${host} // { 
+        users = mkUsers host;
+        admins = mkAdmins host;
+        modules = mkModules host;
       })
 
     );

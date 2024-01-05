@@ -1,17 +1,13 @@
-# modules.hyprland.enable = true;
-{ config, lib, pkgs, inputs, ... }: 
+{ config, lib, ... }: let 
 
-let 
   cfg = config.modules.hyprland;
-  inherit (lib) mkIf mkDefault;
+  inherit (lib) mkDefault mkMerge;
 
 in {
 
-  wayland.windowManager.hyprland.settings = mkIf cfg.enable {
+  wayland.windowManager.hyprland.settings = mkMerge [ cfg.preSettings {
 
-    monitor = mkDefault [
-      # embedded display (laptop)
-      "eDP-1, 2256x1504@59.9990001, 500x1440, 1.4"
+    monitor = [
       # default display
       ", preferred, 0x0, 1"
     ];
@@ -25,7 +21,7 @@ in {
       "mako"
     ];
 
-    env = mkDefault [
+    env = [
       "XCURSO_SIZE,84"
     ];
 
@@ -46,48 +42,46 @@ in {
     # "device:epic-mouse-v1" = { sensitivity = -0.5; };
 
     general = {
-      gaps_in = 4;
-      gaps_out = 8;
-      border_size = 2;
-      "col.active_border" = "rgb(89b4fa) rgb(cba6f7) 270deg";
-      "col.inactive_border" = "rgb(11111b) rgb(b4befe) 270deg";
-      "col.group_border" = "rgb(313244)";
-      "col.group_border_active" = "rgb(f5c2e7)";
-      layout = "master";
-      no_cursor_warps = false;
-      resize_on_border = true;
+      gaps_in = mkDefault 4;
+      gaps_out = mkDefault 8;
+      border_size = mkDefault 2;
+      "col.active_border" = mkDefault "rgb(89b4fa) rgb(cba6f7) 270deg";
+      "col.inactive_border" = mkDefault "rgb(11111b) rgb(b4befe) 270deg";
+      layout = mkDefault "master";
+      no_cursor_warps = mkDefault false;
+      resize_on_border = mkDefault true;
     };
 
-    gestures.workspace_swipe = true;
-    master.new_is_master = true;
+    gestures.workspace_swipe = mkDefault true;
+    master.new_is_master = mkDefault true;
 
     misc = {
-      disable_hyprland_logo = true;
-      disable_splash_rendering = true;
-      mouse_move_enables_dpms = true;
-      key_press_enables_dpms = true;
-      enable_swallow = true;
-      swallow_regex = "^(Alacritty|kitty|footclient)$";
-      focus_on_activate = true;
-      animate_manual_resizes = true;
-      animate_mouse_windowdragging = true;
+      disable_hyprland_logo = mkDefault true;
+      disable_splash_rendering = mkDefault true;
+      mouse_move_enables_dpms = mkDefault true;
+      key_press_enables_dpms = mkDefault true;
+      enable_swallow = mkDefault true;
+      swallow_regex = mkDefault "^(Alacritty|kitty|footclient)$";
+      focus_on_activate = mkDefault true;
+      animate_manual_resizes = mkDefault true;
+      animate_mouse_windowdragging = mkDefault true;
       # suppress_portal_warnings = true;
     };
 
     decoration = {
-      rounding = 15;
-      drop_shadow = true;
-      shadow_range = 4;
-      shadow_render_power = 3;
-      col.shadow = "rgba(1a1a1aee)";
-      dim_inactive = false;
-      dim_strength = 0.1;
-      dim_special = 0;
+      rounding = mkDefault 15;
+      drop_shadow = mkDefault true;
+      shadow_range = mkDefault 4;
+      shadow_render_power = mkDefault 3;
+      "col.shadow" = mkDefault "rgba(1a1a1aee)";
+      dim_inactive = mkDefault false;
+      dim_strength = mkDefault 0.1;
+      dim_special = mkDefault 0;
     };
 
     animations = {
-      enabled = true;
-      bezier =  [
+      enabled = mkDefault true;
+      bezier = mkDefault [
         "md3_standard, 0.2, 0.0, 0, 1.0"
         "md3_decel, 0.05, 0.7, 0.1, 1"
         "md3_accel, 0.3, 0, 0.8, 0.15"
@@ -97,11 +91,11 @@ in {
         "gnome, 0, 0.85, 0.3, 1"
         "funky, 0.46, 0.35, -0.2, 1.2"
       ];
-      animation = [
-        "windows, 1, 2, md3_decel, slide"
-        "animation = border, 1, 10, default"
-        "animation = fade, 1, 0.0000001, default"
-        "animation = workspaces, 1, 4, md3_decel, slide"
+      animation = mkDefault [
+       "windows, 1, 2, md3_decel, slide"
+       "border, 1, 10, default"
+       "fade, 1, 0.0000001, default"
+       "workspaces, 1, 4, md3_decel, slide"
       ];
     };
 
@@ -181,6 +175,6 @@ in {
       "SUPERSHIFT, mouse:272, resizewindow"
     ];
 
-  };
+  } cfg.settings ];
 
 }

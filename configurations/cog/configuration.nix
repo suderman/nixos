@@ -20,7 +20,7 @@
   '';
 
   # Broken? Prevents boot.
-  # modules.sunshine.enable = false;
+  modules.sunshine.enable = true;
 
   # Memory management
   modules.earlyoom.enable = true;
@@ -50,7 +50,7 @@
   # Web services
   modules.whoami.enable = true;
   modules.tandoor-recipes.enable = false;
-  modules.home-assistant.enable = false;
+  modules.home-assistant.enable = true;
   modules.rsshub.enable = false;
   # modules.backblaze.enable = false;
   modules.wallabag.enable = false;
@@ -68,6 +68,8 @@
     enable = true;
     # photosDir = "/photos/immich";
   };
+
+  modules.gitea.enable = true;
 
   modules.photoprism = {
     enable = false;

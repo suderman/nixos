@@ -1,0 +1,57 @@
+{ pkgs, this, ... }: let 
+
+  inherit (this.lib) apps ls mkShellScript;
+  coffee = mkShellScript { name = "coffee"; text = ./bin/coffee.sh; };
+
+in {
+
+  # Packages
+  home.packages = with pkgs; [ 
+
+    bat cowsay eza fish killall lf 
+    linode-cli lsd mosh nano ncdu neofetch
+    nnn owofetch rclone ripgrep sl sysz
+    tealdeer wget yo lazygit lazydocker parted
+    imagemagick
+
+    # yt-dlp -f mp4-240p -x --audio-format mp3 https://rumble.com/...
+    yt-dlp 
+
+    beeper tdesktop slack
+    isy lapce micro quickemu xorg.xeyes
+    joypixels jetbrains-mono
+    gst_all_1.gst-libav
+    libsForQt5.kdenlive
+
+    _1password _1password-gui darktable digikam
+    firefox inkscape junction libreoffice newsflash
+    unstable.nodePackages_latest.immich
+
+    withings-sync zwift coffee
+    bin-foo bin-bar
+
+  ];
+
+  programs.chromium.enable = true;
+  programs.git.enable = true;
+  programs.tmux.enable = true;
+  programs.zsh.enable = true;
+  # programs.neovim.enable = true;
+
+  programs.wezterm.enable = false;
+  programs.foot.enable = false;
+  # pipewire-alsa pipewire-audio pipewire-docs pipewire-jack pipewire-media-session pipewire-pulse
+
+  programs.obs-studio = with pkgs.unstable; {
+    enable = true;
+    package = obs-studio;
+    # plugins = [ obs-studio-plugins.wlrobs ];
+  };
+
+  # terminal du jour
+  modules.kitty.enable = true;
+  modules.yazi.enable = true;
+  modules.gimp.enable = true;
+
+
+}

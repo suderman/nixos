@@ -1,25 +1,29 @@
 # this.lib.mkShellScript
-{ pkgs, lib, this }:
+{ pkgs, lib, this }: let
 
-  { name, text, inputs ? [] }: pkgs.writeTextFile {
+  inherit (builtins) isPath readFile;
+  inherit (pkgs) runtimeShell writeTextFile;
+  inherit (lib) concatLines makeBinPath mapAttrsToList optionalString;
 
-    inherit name;
-    executable = true;
-    destination = "/bin/${name}";
+in { name, text ? "", inputs ? [], env ? {} }: writeTextFile {
 
-    text = ''
-      #!${pkgs.runtimeShell}
-    '' + lib.optionalString (inputs != []) ''
-      export PATH="${lib.makeBinPath inputs}:$PATH"
-    '' + ''
-      ${text}
-    '';
+  inherit name;
+  executable = true;
+  destination = "/bin/${name}";
 
-    meta = with lib; {
-      mainProgram = name;
-      description = "Personal shell script";
-      license = licenses.mit;
-      platforms = platforms.all;
-    };
+  text = ''
+    #!${runtimeShell}
+  '' + optionalString ( inputs != [] ) ''
+    export PATH="${makeBinPath inputs}:$PATH"
+  '' + concatLines ( mapAttrsToList (n: v: "export ${n}=\"${v}\"") env ) + ''
+    ${if (isPath text) then readFile text else text}
+  '';
 
-  }
+  meta = with lib; {
+    mainProgram = name;
+    description = "Personal shell script";
+    license = licenses.mit;
+    platforms = platforms.all;
+  };
+
+}
