@@ -1,19 +1,24 @@
 # modules.hyprland.enable = true;
-{ config, lib, pkgs, inputs, this, ... }: 
+{ config, lib, pkgs, this, inputs, ... }: 
 
 let 
+
   cfg = config.modules.hyprland;
   inherit (lib) mkIf mkOption mkBefore types;
   inherit (this.lib) destabilize;
 
-  # Unstable nixos hyprland module
-  # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/nixos/modules/programs/hyprland.nix
-  module = destabilize inputs.unstable "programs/hyprland.nix";
-
 in {
 
-  # Import unstable module
-  imports = module ++ [];
+  imports = 
+
+    # Flake nixos module
+    # https://github.com/hyprwm/Hyprland/blob/main/nix/module.nix
+    [ inputs.hyprland.nixosModules.default ] ++
+
+    # Unstable upstream nixos module
+    # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/nixos/modules/programs/hyprland.nix
+    ( destabilize inputs.nixpkgs-unstable "programs/hyprland.nix" );
+
 
   options.modules.hyprland = {
     enable = lib.options.mkEnableOption "hyprland"; 
@@ -23,7 +28,6 @@ in {
 
     programs.hyprland = {
       enable = true;
-      package = inputs.hyprland.packages.${pkgs.system}.hyprland;
     };
 
     programs.light.enable = true;
