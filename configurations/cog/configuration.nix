@@ -1,100 +1,47 @@
-{ inputs, config, lib, pkgs, this, ... }: {
+{ config, lib, pkgs, this, inputs, ... }: {
 
   # Import all *.nix files in this directory
   imports = this.lib.ls ./. ++ [
     inputs.hardware.nixosModules.framework-11th-gen-intel
   ];
 
-  # Use freshest kernel
-  boot.kernelPackages = pkgs.linuxPackages_latest;
-
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  # Use freshest kernel
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+
+  # Good graphics
+  hardware.opengl.extraPackages = with pkgs; [
+    mesa.drivers
+    vaapiVdpau
+  ];
+
+  # Sound & Bluetooth
+  sound.enable = true;
+  services.pipewire.enable = true;
+  security.rtkit.enable = true;
+  hardware.bluetooth.enable = true;
+
+  # framework_tool
+  environment.systemPackages = with pkgs; [
+    framework-tool
+  ];
+
   # Network
   modules.tailscale.enable = true;
   modules.ddns.enable = true;
+  networking.networkmanager.enable = true;
   networking.extraHosts = ''
     127.0.0.1 example.com
   '';
 
-  # Broken? Prevents boot.
-  modules.sunshine.enable = true;
-
-  # Memory management
-  modules.earlyoom.enable = true;
-
-
-  virtualisation.waydroid.enable = true;
-
-  # Keyboard control
-  modules.keyd = {
-    enable = true;
-    quirks = true;
-    settings = ./keyd.conf;
-  };
-  modules.ydotool.enable = true;
-
-  # Support iOS devices
-  modules.libimobiledevice.enable = true;
-
-
-  modules.garmin.enable = true;
-  modules.silverbullet.enable = true;
-
-  # # Database services
-  # modules.mysql.enable = true;
-  # modules.postgresql.enable = true;
-  
-  # Web services
-  modules.whoami.enable = true;
-  modules.tandoor-recipes.enable = false;
-  modules.home-assistant.enable = true;
-  modules.rsshub.enable = false;
-  # modules.backblaze.enable = false;
-  modules.wallabag.enable = false;
-
-  modules.cockpit.enable = false;
-
-  modules.nextcloud.enable = false;
-
-  modules.ocis = {
-    enable = false;
-    dataDir = "/tmp/ocis";
-  };
-
-  modules.immich = {
-    enable = true;
-    # photosDir = "/photos/immich";
-  };
-
-  modules.gitea.enable = true;
-
-  modules.photoprism = {
-    enable = false;
-    photosDir = "/photos";
-  };
-
-  services.xserver.desktopManager.retroarch = {
-    enable = false;
-    package = pkgs.retroarchFull;
-  };
-
-  modules.dolphin.enable = true;
-
-  # Apps
-  modules.flatpak.enable = true;
-  modules.neovim.enable = true;
-  modules.steam.enable = false;
-
-  programs.mosh.enable = true;
-  programs.kdeconnect.enable = true;
-
-  programs.evolution.enable = true;
-
   # sudo fwupdmgr update
   services.fwupd.enable = true;
+
+  # Lower fan noise 
+  services.thermald.enable = true;
 
   # Power management
   services.power-profiles-daemon.enable = false;
@@ -107,32 +54,61 @@
     # STOP_CHARGE_THRESH_BAT0 = 97;
     # RUNTIME_PM_ON_BAT = "auto";
   };
-
-  # # Suspend-then-hibernate after two hours
-  # services.logind = {
-  #   lidSwitch = "suspend-then-hibernate";
-  #   lidSwitchExternalPower = "suspend";
-  #   extraConfig = ''
-  #     HandlePowerKey=suspend-then-hibernate
-  #     IdleAction=suspend-then-hibernate
-  #     IdleActionSec=2m
-  #   '';
-  # };
-  # systemd.sleep.extraConfig = "HibernateDelaySec=2h";
   services.logind = {
     lidSwitch = "suspend";
     lidSwitchExternalPower = "suspend";
     lidSwitchDocked = "ignore";
-    # extraConfig = ''
-    #   IdleActionSec=30m
-    #   IdleAction=hibernate
-    #   HandlePowerKey=hibernate
-    # '';
   };
-  # services.udev.extraRules = lib.mkAfter ''
-  #   ACTION=="add", SUBSYSTEM=="usb", DRIVER=="usb", ATTR{power/wakeup}="enabled"
-  # '';
 
+  # Memory management
+  modules.earlyoom.enable = true;
+
+
+  # Keyboard control
+  modules.keyd = {
+    enable = true;
+    quirks = true;
+    settings = ./keyd.conf;
+  };
+  modules.ydotool.enable = true;
+
+  modules.garmin.enable = true;
+  modules.sunshine.enable = true;
+  virtualisation.waydroid.enable = true;
+
+  # Support iOS devices
+  modules.libimobiledevice.enable = true;
+
+  # Web services
+  modules.whoami.enable = true;
+  modules.tandoor-recipes.enable = false;
+  modules.home-assistant.enable = true;
+  modules.rsshub.enable = false;
+  modules.backblaze.enable = false;
+  modules.wallabag.enable = false;
+  modules.cockpit.enable = false;
+  modules.gitea.enable = true;
+  modules.nextcloud.enable = false;
+  modules.ocis = { enable = false; dataDir = "/tmp/ocis"; };
+  modules.immich.enable = true;
+  modules.photoprism = { enable = false; photosDir = "/photos"; };
+  modules.silverbullet.enable = true;
+
+  # Apps & Games
+  modules.flatpak.enable = true;
+  modules.neovim.enable = true;
+  modules.steam.enable = false;
+  programs.mosh.enable = true;
+  programs.kdeconnect.enable = true;
+  programs.evolution.enable = true;
+  modules.dolphin.enable = true;
+  services.xserver.desktopManager.retroarch = {
+    enable = false;
+    package = pkgs.retroarchFull;
+  };
+
+
+  # Experiments
   systemd.user.services.foobar = {
     description = "Foobar NixOS";
     after = [ "graphical-session.target" ];
@@ -151,7 +127,6 @@
       date >> /tmp/foobar.txt
     '';
   };
-
 
   file."/etc/foo" = { type = "dir"; };
   file."/etc/foo/bar" = { text = "Hello world!"; mode = 665; user = 913; };

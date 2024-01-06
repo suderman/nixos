@@ -1,6 +1,6 @@
 # Attribute set of NixOS configurations found in each directory
 { inputs, caches ? [], ... }: let
-  inherit (lib) ls mkAttrs mkHomes mkList mkUsers;
+  inherit (lib) ls mkAttrs mkHomeAttrs mkList mkUsers;
 
   # Personal lib
   lib = {
@@ -92,6 +92,12 @@
       else {}
     );
 
+    # Like mkAttrs but only includes user nix files or directories with home.nix
+    mkHomeAttrs = path: fn: mkAttrs ( ls { 
+      inherit path; 
+      asPath = false; dirsWith = [ "home.nix" ]; 
+    }) fn;
+
     # List of users for a particular nixos configuration
     mkUsers = host: mkList( ls { 
       path = ./configurations/${host}/users; 
@@ -104,12 +110,6 @@
     in host: intersectLists ( mkUsers host ) (
       remove "all" ( attrNames (import ./secrets/keys).users )
     );
-
-    # Like mkAttrs but only includes user nix files or directories with home.nix
-    mkHomes = host: fn: mkAttrs ( ls { 
-      path = ./configurations/${host}/users; 
-      asPath = false; dirsWith = [ "home.nix" ]; 
-    }) fn;
 
     # NixOS modules imported in each configuration
     mkModules = let 
@@ -141,7 +141,7 @@
       in host: 
 
         # Home Manager modules are organized under each user's name
-        mkHomes host (
+        mkHomeAttrs ./configurations/${host}/users (
           user: 
             ls { path = ./modules; dirsWith = [ "home.nix" ]; } ++ # home-manager modules
             ls ./configurations/all/users/all/home.nix ++ # shared home-manager configuration for all users

@@ -4,8 +4,8 @@
 
     # Nix Packages 
     # <https://search.nixos.org/packages>
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
-    unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     # Home Manager
     # <https://mipmip.github.io/home-manager-option-search>
@@ -19,7 +19,7 @@
 
     # NixOS profiles for different hardware
     # <https://github.com/NixOS/nixos-hardware>
-    hardware.url = "github:nixos/nixos-hardware";
+    hardware.url = "github:NixOS/nixos-hardware";
 
     # Persist state
     # <https://github.com/nix-community/impermanence>
@@ -43,11 +43,8 @@
     # Hyprland
     # <https://wiki.hyprland.org/Nix/Hyprland-on-NixOS>
     hyprland.url = "github:hyprwm/Hyprland";
-    # hyprland.inputs.nixpkgs.follows = "nixpkgs";
     hyprland-plugins.url = "github:hyprwm/hyprland-plugins";
-    # hyprland-plugins.inputs.hyprland.follows = "hyprland";
     anyrun.url = "github:Kirottu/anyrun";
-    # anyrun.inputs.nixpkgs.follows = "nixpkgs";
 
   };
 
@@ -57,7 +54,7 @@
     inherit (builtins) length;
     inherit (this.lib) mkAttrs mkUsers mkAdmins mkModules;
 
-    # initialize this configuration with inputs and binary caches
+    # Initialize this configuration with inputs and binary caches
     this = import ./. { inherit inputs; caches = [
       "https://suderman.cachix.org" "suderman.cachix.org-1:8lYeb2gOOVDPbUn1THnL5J3/L4tFWU30/uVPk7sCGmI="
       "https://nix-community.cachix.org" "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
@@ -101,7 +98,7 @@
         (final: prev: { nur = import inputs.nur { pkgs = final; nurpkgs = final; }; })
 
         # Unstable nixpkgs channel
-        (final: prev: { unstable = import inputs.unstable { inherit system config; }; })
+        (final: prev: { unstable = import inputs.nixpkgs-unstable { inherit system config; }; })
 
       ];
 
