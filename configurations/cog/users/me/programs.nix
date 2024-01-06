@@ -30,6 +30,8 @@ in {
     withings-sync zwift coffee
     bin-foo bin-bar
 
+    tauon # jellyfin/plex/local music player
+
   ];
 
   programs.chromium.enable = true;
