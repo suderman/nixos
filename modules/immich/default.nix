@@ -8,7 +8,7 @@ let
 
   cfg = config.modules.immich;
 
-  inherit (lib) mkIf mkOption mkBefore options types strings;
+  inherit (lib) mkIf mkOption mkAfter mkBefore options types strings;
   inherit (builtins) toString;
   inherit (lib.strings) toInt;
   inherit (this.lib) extraGroups ls;
@@ -24,39 +24,45 @@ in {
     enable = options.mkEnableOption "immich"; 
 
     version = mkOption {
+      description = "Version of the Immich instance";
       type = types.str;
       default = version;
-      description = "Version of the Immich instance";
     };
 
     hostName = mkOption {
+      description = "FQDN for the Immich instance";
       type = types.str;
       default = "immich.${config.networking.fqdn}";
-      description = "FQDN for the Immich instance";
     };
 
     dataDir = mkOption {
+      description = "Data directory for the Immich instance";
       type = types.path;
       default = "/var/lib/immich";
-      description = "Data directory for the Immich instance";
     };
 
     photosDir = mkOption {
+      description = "Photos directory for the Immich instance";
       type = types.str;
       default = "";
-      description = "Photos directory for the Immich instance";
     };
 
     externalDir = mkOption {
+      description = "External library directory for the Immich instance";
       type = types.str;
       default = "";
-      description = "External library directory for the Immich instance";
     };
 
     environment = mkOption { 
-      type = types.attrs; 
-      default = {};
       description = "Shared environment across Immich services";
+      type = types.anything; 
+      default = {
+        PUID = toString config.ids.uids.immich;
+        PGID = toString config.ids.gids.immich;
+        DB_URL = "socket://immich:@/run/postgresql?db=immich";
+        REDIS_SOCKET = "/run/redis-immich/redis.sock";
+        REVERSE_GEOCODING_DUMP_DIRECTORY = "/usr/src/app/geocoding";
+      };
     };
 
   };
@@ -100,10 +106,8 @@ in {
       "${cfg.dataDir}/geocoding" = dir;
     };
 
-    # Enable database and reverse proxy
+    # Enable database
     modules.postgresql.enable = true;
-    modules.traefik.enable = true;
-
     services.redis.servers.immich = {
       enable = true;
       user = "immich";
@@ -129,58 +133,41 @@ in {
           stdenv = postgresql.stdenv;
         })
       ];
-      settings = { shared_preload_libraries = "vectors.so"; };
+      settings.shared_preload_libraries = "vectors.so";
 
     };
 
+    # Create extensions in database
+    systemd.services.postgresql.postStart = mkAfter ''
+      $PSQL -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS cube;'
+      $PSQL -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS earthdistance;'
+      $PSQL -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS vectors;'
+    '';
+
+
     # Init service
-    systemd.services.immich = let this = config.systemd.services.immich; in {
+    systemd.services.immich = let service = config.systemd.services.immich; in {
       enable = true;
       description = "Set up network & database";
       wantedBy = [ "multi-user.target" ];
       after = [ "postgresql.service" ]; # run this after db
       before = [ # run this before the rest:
-        "docker-immich-redis.service"
         "docker-immich-machine-learning.service"
         "docker-immich-server.service"
         "docker-immich-microservices.service"
       ];
-      wants = this.after ++ this.before; 
+      wants = service.after ++ service.before; 
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = "yes";
-        EnvironmentFile = cfg.environment.file;
       };
       path = with pkgs; [ docker postgresql sudo ];
       script = with config.virtualisation.oci-containers.containers; ''
-
-        # Pull all docker images v${version}
-        docker pull ${immich-redis.image};
         docker pull ${immich-machine-learning.image};
         docker pull ${immich-server.image};
-        
-        # Ensure docker network exists
         docker network create immich 2>/dev/null || true
-        
-        # Ensure database user has expected password, temporarily become superuser
-        sudo -u postgres psql postgres -c "\
-          ALTER USER immich WITH PASSWORD '$DB_PASSWORD'; \
-          ALTER USER immich WITH SUPERUSER; \
-        "
-        # Create extensions as database user
-        sudo -u immich psql immich -c "\
-          CREATE EXTENSION IF NOT EXISTS cube; \
-          CREATE EXTENSION IF NOT EXISTS earthdistance; \
-          CREATE EXTENSION IF NOT EXISTS vectors; \
-        "
-        # Revoke superuser
-        sudo -u postgres psql postgres -c "\
-          ALTER USER immich WITH NOSUPERUSER; \
-        "
-        
       '';
     };
 
-  };
 
-}
+  }; }

@@ -16,7 +16,6 @@ in {
 
       # Environment variables
       environment = cfg.environment;
-      environmentFiles =  [ cfg.environment.file ];
 
       # Map volumes to host
       volumes = [ 
@@ -25,9 +24,7 @@ in {
 
       # Networking for docker containers
       extraOptions = [
-        "--add-host=host.docker.internal:host-gateway"
         "--network=immich"
-        # "--cpus=0.9"
       ];
 
     };

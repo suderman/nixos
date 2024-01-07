@@ -54,9 +54,6 @@ with (import ./keys); {
   # > ssh-keygen -t ed25519 -C btrbk -f /tmp/btrbk
   "files/btrbk-key.age".publicKeys = all;
 
-  # Environment variables used by Immich
-  "files/immich-env.age".publicKeys = all;
-
   # Withings / Garmin auth
   "files/withings-env.age".publicKeys = all;
 

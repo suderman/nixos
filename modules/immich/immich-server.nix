@@ -9,6 +9,9 @@ in {
 
   config = mkIf cfg.enable {
 
+    # Enable reverse proxy
+    modules.traefik.enable = true;
+
     # Server back-end
     virtualisation.oci-containers.containers.immich-server = {
       image = "ghcr.io/immich-app/immich-server:v${cfg.version}";
@@ -20,10 +23,12 @@ in {
 
       # Environment variables
       environment = cfg.environment;
-      environmentFiles =  [ cfg.environment.file ];
 
       # Map volumes to host
       volumes = [ 
+        "/run/postgresql:/run/postgresql"
+        "/run/redis-immich:/run/redis-immich"
+      ] ++ [
         "${cfg.dataDir}:/usr/src/app/upload"
       ] ++ (if cfg.photosDir == "" then [] else [
         "${cfg.photosDir}:/usr/src/app/upload/library" 
@@ -40,7 +45,6 @@ in {
 
       # Networking for docker containers
       ] ++ [
-        "--add-host=host.docker.internal:host-gateway"
         "--network=immich"
       ];
 
