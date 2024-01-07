@@ -7,7 +7,6 @@
   basic-auth = ./basic-auth.age;
   btrbk-key = ./btrbk-key.age;
   cloudflare-env = ./cloudflare-env.age;
-  immich-env = ./immich-env.age;
   ocis-env = ./ocis-env.age;
   password = ./password.age;
   password-hash = ./password-hash.age;
