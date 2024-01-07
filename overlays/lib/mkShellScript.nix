@@ -5,15 +5,16 @@
   inherit (pkgs) runtimeShell writeTextFile;
   inherit (lib) concatLines makeBinPath mapAttrsToList optionalString;
 
-in { name, text ? "", inputs ? [], env ? {} }: writeTextFile {
+in { name ? "script", text ? "", inputs ? [], env ? {} }: writeTextFile {
 
   inherit name;
   executable = true;
-  destination = "/bin/${name}";
+  destination = if name == "script" then "" else "/bin/${name}";
 
   text = ''
     #!${runtimeShell}
   '' + optionalString ( inputs != [] ) ''
+    set -euxo pipefail
     export PATH="${makeBinPath inputs}:$PATH"
   '' + concatLines ( mapAttrsToList (n: v: "export ${n}=\"${v}\"") env ) + ''
     ${if (isPath text) then readFile text else text}
