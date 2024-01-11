@@ -91,4 +91,18 @@
     package = gnomeExtensions.dash2dock-lite;
   };
 
+  gsconnect = {
+    id = "gsconnect@andyholmes.github.io";
+    package = gnomeExtensions.gsconnect;
+  };
+
+  bluebubbles = {
+    id = "app.bluebubbles.BlueBubbles.desktop";
+  };
+
+  tauon = {
+    id = "tauonmb.desktop";
+    package = tauon;
+  };
+
 }

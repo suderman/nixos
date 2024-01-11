@@ -31,4 +31,10 @@
   modules.whoami.enable = true;
   modules.cockpit.enable = true;
 
+  # Reverse proxy bluebubbles server on nearby Mac Mini
+  modules.bluebubbles = {
+    enable = true;
+    ip = "192.168.0.38"; # pom
+  };
+
 }

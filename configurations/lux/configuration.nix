@@ -27,8 +27,6 @@
 
   modules.cockpit.enable = true;
 
-  modules.bluebubbles.enable = true;
-
   modules.plex.enable = true;
   modules.tautulli.enable = true;
   modules.jellyfin.enable = true;

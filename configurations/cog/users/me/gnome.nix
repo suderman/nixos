@@ -8,10 +8,13 @@ in {
       firefox
       nautilus
       telegram
+      bluebubbles
+      tauon
       text-editor
     ];
     extensions = options.modules.gnome.extensions.default ++ [
       dash-to-dock
+      gsconnect
     ];
     wallpapers = let dir = config.home.homeDirectory; in [ 
       "${dir}/.light.jpg" "${dir}/.dark.jpg" 
