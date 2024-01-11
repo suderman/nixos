@@ -1,30 +1,36 @@
 # modules.flatpak.enable = true;
-{ config, pkgs, lib, ... }:
+{ config, lib, pkgs, this, inputs, ... }:
 
 let
 
   cfg = config.modules.flatpak;
-  inherit (lib) mkIf;
+  inherit (lib) mkIf mkOption types;
+  inherit (lib.options) mkEnableOption;
 
 in {
 
+  imports = [ inputs.nix-flatpak.nixosModules.nix-flatpak ];
+
   options.modules.flatpak = {
-    enable = lib.options.mkEnableOption "flatpak"; 
+    enable = mkEnableOption "flatpak"; 
+    packages = mkOption { type = with types; (listOf str); default = []; }; 
+    betaPackages = mkOption { type = with types; (listOf str); default = []; }; 
   };
 
   config = mkIf cfg.enable {
 
-    services.flatpak.enable = true;
-
-    systemd.services.flatpak = {
-      wantedBy = [ "multi-user.target" ];
-      serviceConfig = {
-        Type = "oneshot";
-        Restart = "on-failure";
-        RestartSec = "5";
-      };
-      path = with pkgs; [ iputils flatpak ];
-      script = builtins.readFile ./flatpak.sh;
+    services.flatpak = {
+      enable = true;
+      update.auto.enable = true;
+      remotes = [
+        { name = "flathub"; location = "https://dl.flathub.org/repo/flathub.flatpakrepo"; }
+        { name = "flathub-beta"; location = "https://dl.flathub.org/beta-repo/flathub-beta.flatpakrepo"; }
+      ];
+      packages = (
+        map ( appId: { inherit appId; origin = "flathub"; } ) cfg.packages
+      ) ++ (
+        map ( appId: { inherit appId; origin = "flathub-beta"; } ) cfg.betaPackages
+      );
     };
 
     xdg.portal.enable = true;

@@ -40,6 +40,10 @@
     # <https://nur.nix-community.org>
     nur.url = "github:nix-community/NUR";                                   
 
+    # Declarative flatpak manager
+    # <https://github.com/gmodena/nix-flatpak>
+    nix-flatpak.url = "github:gmodena/nix-flatpak"; 
+
     # Hyprland
     # <https://wiki.hyprland.org/Nix/Hyprland-on-NixOS>
     hyprland.url = "github:hyprwm/Hyprland";

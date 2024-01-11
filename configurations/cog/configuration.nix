@@ -95,7 +95,6 @@
   modules.silverbullet.enable = true;
 
   # Apps & Games
-  modules.flatpak.enable = true;
   modules.neovim.enable = true;
   modules.steam.enable = false;
   programs.mosh.enable = true;
@@ -107,6 +106,17 @@
     package = pkgs.retroarchFull;
   };
 
+  modules.flatpak = {
+    enable = true;
+    packages = [
+      "app.bluebubbles.BlueBubbles" # https://flathub.org/apps/app.bluebubbles.BlueBubbles
+      "io.github.dvlv.boxbuddyrs" # https://flathub.org/apps/io.github.dvlv.boxbuddyrs
+      "io.gitlab.zehkira.Monophony" # https://flathub.org/apps/io.gitlab.zehkira.Monophony
+    ];
+    betaPackages = [
+      "org.gimp.GIMP" # https://www.gimp.org/downloads/devel
+    ];
+  };
 
   # Experiments
   systemd.user.services.foobar = {
@@ -133,5 +143,6 @@
   file."/etc/foo/symlink" = { type = "link"; source = /etc/foo/bar; };
   file."/etc/foo/resolv" = { type = "file"; mode = 775; user = "me"; group = "users"; source = /etc/resolv.conf; };
   file."/etc/foo/srv" = { type = "dir"; source = /srv; };
+
 
 }

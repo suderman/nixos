@@ -53,7 +53,5 @@ in {
   # terminal du jour
   modules.kitty.enable = true;
   modules.yazi.enable = true;
-  modules.gimp.enable = true;
-
 
 }
