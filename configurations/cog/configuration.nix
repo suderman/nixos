@@ -107,7 +107,6 @@
   };
 
   modules.flatpak = {
-    enable = true;
     packages = [
       "app.bluebubbles.BlueBubbles"
       "io.github.dvlv.boxbuddyrs"

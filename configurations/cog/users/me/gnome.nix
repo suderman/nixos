@@ -1,6 +1,4 @@
-{ config, options, lib, pkgs, this, ... }: let 
-  # inherit (this.lib) apps;
-in {
+{ config, options, lib, pkgs, ... }: {
   
   modules.gnome = with pkgs; {
     dock = [
@@ -12,6 +10,7 @@ in {
       tauon
       gnome-text-editor
       "org.gimp.GIMP"
+      # "com.cassidyjames.butler"
     ];
     extensions = options.modules.gnome.extensions.default ++ [
       gnomeExtensions.dash-to-dock

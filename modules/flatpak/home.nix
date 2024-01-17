@@ -8,28 +8,21 @@ let
 
 in {
 
-  # https://github.com/gmodena/nix-flatpak/blob/main/modules/nixos.nix
-  imports = [ inputs.nix-flatpak.nixosModules.nix-flatpak ];
+  # https://github.com/gmodena/nix-flatpak/blob/main/modules/home-manager.nix
+  imports = [ inputs.nix-flatpak.homeManagerModules.nix-flatpak ];
 
-  # options shared with home-manager module
+  # options shared with nixos module
   options.modules.flatpak = import ./options.nix { 
     inherit lib;  
     inherit (cfg) packages betaPackages;
   };
 
-  # config (mostly) shared with home-manager module
+  # config (mostly) shared with nixos module
   config = mkIf cfg.enable {
-
     services.flatpak = import ./config.nix { 
       inherit lib;  
       inherit (cfg) packages betaPackages; 
-    } // { 
-      enable = true; 
-    };
-
-    # portal required for flatpak
-    xdg.portal.enable = true;
-
+    }; 
   };
 
 }

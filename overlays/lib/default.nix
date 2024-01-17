@@ -49,11 +49,11 @@
     appId = appId: package: recursiveUpdate package { meta = { inherit appId; }; };
 
     # Get appId from pkg.meta, config.services.flatpak.packages, or appId string
-    toAppId = package: 
-      let appId = if isString package then "${package}.desktop" else (
-        if hasAttr "appId" package then package.appId 
-        else if hasAttr "meta" package && hasAttr "appId" package.meta then package.meta.appId else ""
-      ); 
+    toAppId = pkg: 
+      let appId = 
+        if isString pkg && pkg != "" then "${pkg}.desktop" # flatpak str (append .desktop)
+        else ( if hasAttr "appId" pkg && pkg.appId != "" then "${pkg.appId}.desktop" # flatpak attr (append .desktop)
+        else if hasAttr "meta" pkg && hasAttr "appId" pkg.meta then pkg.meta.appId else "" ); # package with meta (as-is)
       in appId;
 
     # Unique list of appIds from list of packages
