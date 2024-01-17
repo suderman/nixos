@@ -1,20 +1,21 @@
 { config, options, lib, pkgs, this, ... }: let 
-  inherit (this.lib) apps;
+  # inherit (this.lib) apps;
 in {
   
-  modules.gnome = with apps; {
+  modules.gnome = with pkgs; {
     dock = [
       kitty
       firefox
-      nautilus
-      telegram
-      bluebubbles
+      gnome.nautilus
+      telegram-desktop
+      "app.bluebubbles.BlueBubbles"
       tauon
-      text-editor
+      gnome-text-editor
+      "org.gimp.GIMP"
     ];
     extensions = options.modules.gnome.extensions.default ++ [
-      dash-to-dock
-      gsconnect
+      gnomeExtensions.dash-to-dock
+      gnomeExtensions.gsconnect
     ];
     wallpapers = let dir = config.home.homeDirectory; in [ 
       "${dir}/.light.jpg" "${dir}/.dark.jpg" 

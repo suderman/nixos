@@ -8,8 +8,8 @@
   # Merge with existing this
   this = recursiveUpdate pkgs.this { lib = let
 
-    inherit (builtins) attrNames filter hasAttr pathExists readDir stringLength;
-    inherit (lib) filterAttrs removePrefix removeSuffix;
+    inherit (builtins) attrNames filter hasAttr hasSuffix isString pathExists readDir stringLength;
+    inherit (lib) filterAttrs flatten removePrefix removeSuffix unique;
     inherit (pkgs) this callPackage stdenv;
 
   # Additional helper functions this.lib.*
@@ -44,6 +44,22 @@
         else "${input}/nixos/modules/${path}" # or add unstable nixos module
       ) 
     ];
+
+    # Set appId to package meta
+    appId = appId: package: recursiveUpdate package { meta = { inherit appId; }; };
+
+    # Get appId from pkg.meta, config.services.flatpak.packages, or appId string
+    toAppId = package: 
+      let appId = if isString package then "${package}.desktop" else (
+        if hasAttr "appId" package then package.appId 
+        else if hasAttr "meta" package && hasAttr "appId" package.meta then package.meta.appId else ""
+      ); 
+      in appId;
+
+    # Unique list of appIds from list of packages
+    appIds = list: let 
+      appIds = filter (appId: appId != "") ( map (package: toAppId package) list );
+    in unique appIds;
 
   }; };
 

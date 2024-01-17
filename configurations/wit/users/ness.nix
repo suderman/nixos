@@ -1,8 +1,5 @@
 { config, options, lib, pkgs, this, ... }: let 
-
   inherit (lib) mkOptionDefault;
-  inherit (this.lib) apps;
-
 in {
 
   home.packages = with pkgs; [ 
@@ -23,16 +20,16 @@ in {
   # terminal du jour
   modules.kitty.enable = true;
 
-  modules.gnome = with apps; {
+  modules.gnome = with pkgs; {
     extensions = options.modules.gnome.extensions.default ++ [
-      dash-to-dock
+      gnomeExtensions.dash-to-dock
     ];
-    dock = with apps; [
+    dock = [
       firefox
-      nautilus
-      telegram
+      gnome.nautilus
+      telegram-desktop
       calendar
-      text-editor
+      gnome-text-editor
       calculator
     ];
     wallpapers = let dir = config.home.homeDirectory; in [ 

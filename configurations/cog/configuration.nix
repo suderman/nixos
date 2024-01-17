@@ -82,17 +82,17 @@
   # Web services
   modules.whoami.enable = true;
   modules.tandoor-recipes.enable = false;
-  modules.home-assistant.enable = true;
+  modules.home-assistant.enable = false;
   modules.rsshub.enable = false;
   modules.backblaze.enable = false;
   modules.wallabag.enable = false;
   modules.cockpit.enable = false;
-  modules.gitea.enable = true;
+  modules.gitea.enable = false;
   modules.nextcloud.enable = false;
   modules.ocis = { enable = false; dataDir = "/tmp/ocis"; };
-  modules.immich.enable = true;
+  modules.immich.enable = false;
   modules.photoprism = { enable = false; photosDir = "/photos"; };
-  modules.silverbullet.enable = true;
+  modules.silverbullet.enable = false;
 
   # Apps & Games
   modules.neovim.enable = true;
@@ -109,9 +109,9 @@
   modules.flatpak = {
     enable = true;
     packages = [
-      "app.bluebubbles.BlueBubbles" # https://flathub.org/apps/app.bluebubbles.BlueBubbles
-      "io.github.dvlv.boxbuddyrs" # https://flathub.org/apps/io.github.dvlv.boxbuddyrs
-      "io.gitlab.zehkira.Monophony" # https://flathub.org/apps/io.gitlab.zehkira.Monophony
+      "app.bluebubbles.BlueBubbles"
+      "io.github.dvlv.boxbuddyrs"
+      "io.gitlab.zehkira.Monophony"
     ];
     betaPackages = [
       "org.gimp.GIMP" # https://www.gimp.org/downloads/devel
@@ -143,6 +143,34 @@
   file."/etc/foo/symlink" = { type = "link"; source = /etc/foo/bar; };
   file."/etc/foo/resolv" = { type = "file"; mode = 775; user = "me"; group = "users"; source = /etc/resolv.conf; };
   file."/etc/foo/srv" = { type = "dir"; source = /srv; };
+
+
+  # # services.wordpress.webserver = "nginx";
+  # services.wordpress.sites."wpcog" = {
+  #   database.name = "wpcog";
+  #   # virtualHost.documentRoot = "/var/lib/wordpress/wpcog/root";
+  #   # virtualHost.serverAliases = [
+  #   #   "wp.cog.suderman.org"
+  #   #   "wp.cog.suderman.org:8080"
+  #   #   "example.org"
+  #   # ];
+  #   # virtualHost.listen = [{
+  #   #   ip = "*";
+  #   #   port = 8080;
+  #   # }];
+  # };
+  # services.httpd.virtualHosts."wpcog" = {
+  #   documentRoot = lib.mkOverride 40 "/var/lib/wordpress/wpcog/root";
+  #   serverAliases = [
+  #     "wp.cog.suderman.org"
+  #     "wp.cog.suderman.org:8080"
+  #     "example.org"
+  #   ];
+  #   listen = [{
+  #     ip = "*";
+  #     port = 8080;
+  #   }];
+  # };
 
 
 }

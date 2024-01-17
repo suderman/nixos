@@ -1,27 +1,27 @@
 # modules.gnome.enable = true;
-{ config, lib, pkgs, this, ... }:
+{ config, lib, pkgs, osConfig, this, ... }:
 
 let 
 
   cfg = config.modules.gnome;
   inherit (lib) mkIf mkOption types unique;
   inherit (lib.options) mkEnableOption;
-  inherit (this.lib) apps;
+  inherit (this.lib) appIds;
 
 in {
 
   options.modules.gnome = with types; {
     enable = mkEnableOption "gnome"; 
-    apps = mkOption { type = attrs; default = {}; };
+    meta = mkOption { type = anything; default = {}; };
 
     dock = mkOption { 
-      type = listOf attrs; 
-      default = with apps; [
+      type = listOf (either package str);
+      default = with pkgs; [
         kitty
         firefox
-        nautilus
-        telegram
-        text-editor
+        gnome.nautilus
+        telegram-desktop
+        gnome-text-editor
       ]; 
     };
 
@@ -39,8 +39,8 @@ in {
 
     # `gnome-extensions list` for a list
     extensions = mkOption { 
-      type = listOf attrs; 
-      default = with apps; [
+      type = listOf package; 
+      default = with pkgs.gnomeExtensions; [
         auto-move-windows
         bluetooth-quick-connect
         blur-my-shell
@@ -64,23 +64,24 @@ in {
   config = mkIf cfg.enable { 
 
     # Helpful for debugging
-    modules.gnome.apps = {
-      packages = unique( cfg.packages ++ (apps.packages cfg.extensions) );
-      enabled-extensions = apps.ids cfg.extensions; 
-      favorite-apps = apps.ids cfg.dock;
+    modules.gnome.meta = {
+      packages = unique( cfg.packages ++ cfg.extensions );
+      enabled-extensions = appIds cfg.extensions; 
+      favorite-apps = appIds cfg.dock;
+      flatpaks = appIds osConfig.services.flatpak.packages;
       inherit lib this;
     };
 
     # Install dconf & other apps + gnome extensions
-    home.packages = unique( cfg.packages ++ (apps.packages cfg.extensions) );
+    home.packages = unique( cfg.packages ++ cfg.extensions );
 
     # Configure dconf
     dconf.settings = {
 
       "org/gnome/shell" = {
         disable-user-extensions = false;
-        enabled-extensions = apps.ids cfg.extensions; 
-        favorite-apps = apps.ids cfg.dock;
+        enabled-extensions = appIds cfg.extensions; 
+        favorite-apps = appIds cfg.dock;
       };
 
       "org/gnome/desktop/background" = {
