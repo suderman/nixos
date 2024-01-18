@@ -33,9 +33,9 @@ Common defaults I like to use for each system:
 ## Secrets
 
 Use [agenix](https://github.com/ryantm/agenix) to encrypt/decrypt files for use
-in NixOS configuration.  Use
+in NixOS configurations.  Use
 [homeage](https://github.com/jordanisaacs/homeage/) to do the same in
-home-manager configuration.
+home-manager configurations.
 
 See `nixos secrets` CLI usage [here](https://github.com/suderman/nixos/tree/main/secrets).
 
@@ -57,17 +57,6 @@ or link certain directories and files in `/nix/state`:
 - `/etc/machine-id`
 - `/etc/ssh/ssh_host_ed25519_key`
 - `/etc/ssh/ssh_host_rsa_key`
-
-### Usage
-
-Additional directories and files can be added in the configuration like so:
-
-```nix
-{
-  config.this.dirs = [ "/var/www" ];
-  config.this.files = [ "/etc/passwd" ];
-}
-```
 
 ### Resources
 - <https://grahamc.com/blog/erase-your-darlings>
