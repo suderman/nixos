@@ -3,12 +3,8 @@
 let
 
   inherit (lib) mkIf;
-
-  # public keys from the secrets dir
-  keys = config.modules.secrets.keys.users.all;
-
-  # agenix secrets combined secrets toggle
-  secrets = config.age.secrets // { inherit (config.modules.secrets) enable; };
+  inherit (config) age;
+  inherit (config.age) keys secrets;
 
 in {
 
@@ -18,9 +14,9 @@ in {
   # Configure root user
   users.users.root = {
     shell = pkgs.zsh;
-    hashedPasswordFile = mkIf (secrets.enable) secrets.password-hash.path;
-    password = mkIf (!secrets.enable) "root";
-    openssh.authorizedKeys.keys = keys;
+    hashedPasswordFile = mkIf (age.enable) secrets.password-hash.path;
+    password = mkIf (!age.enable) "root";
+    openssh.authorizedKeys.keys = keys.users.all;
   };
 
   # Default shell

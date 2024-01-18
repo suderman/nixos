@@ -5,18 +5,14 @@ let
   inherit (lib) mkIf mkOption types;
   inherit (builtins) hasAttr filter;
   inherit (this.lib) mkAttrs;
+  inherit (config) age;
+  inherit (config.age) secrets keys;
 
   # Filter list of groups to only those which exist
   ifTheyExist = groups: filter (group: hasAttr group config.users.groups) groups;
 
   # Return passed list if user is admin, else return empty list
   ifAdmin = user: list: if builtins.elem user this.admins then list else [];
-
-  # public keys from the secrets dir
-  keys = config.modules.secrets.keys.users.all;
-
-  # agenix secrets combined secrets toggle
-  secrets = config.age.secrets // { inherit (config.modules.secrets) enable; };
 
 in {
 
@@ -26,10 +22,10 @@ in {
     shell = pkgs.zsh;
     home = "/home/${user}";
     description = user;
-    hashedPasswordFile = mkIf (secrets.enable) secrets.password-hash.path;
-    password = mkIf (!secrets.enable) "${user}";
+    hashedPasswordFile = mkIf (age.enable) secrets.password-hash.path;
+    password = mkIf (!age.enable) "${user}";
     extraGroups = ifAdmin user ([ "wheel" ] ++ ifTheyExist [ "networkmanager" "docker" "media" "photos" ]);
-    openssh.authorizedKeys.keys = keys;
+    openssh.authorizedKeys.keys = keys.users.all;
   }); 
 
   # GIDs 900-909 are custom shared groups in my flake                                                                                                                                   

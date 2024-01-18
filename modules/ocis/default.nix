@@ -7,7 +7,6 @@ let
   version = "4.0.3";
 
   cfg = config.modules.ocis;
-  secrets = config.age.secrets;
 
   ownership = "${toString config.ids.uids.ocis}:${toString config.ids.gids.ocis}";
   signingKey = "idp-private-key.pem";
@@ -15,6 +14,7 @@ let
 
   inherit (lib) mkIf mkOption mkBefore types;
   inherit (this.lib) extraGroups;
+  inherit (config.age) secrets;
 
 in {
 

@@ -4,11 +4,11 @@
 let
 
   cfg = config.modules.photoprism;
-  secrets = config.age.secrets;
 
   inherit (lib) mkIf mkOption mkBefore mkForce types;
   inherit (lib.strings) toInt;
   inherit (builtins) toString;
+  inherit (config.age) secrets;
 
 in {
 

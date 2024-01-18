@@ -4,8 +4,8 @@
 let
 
   cfg = config.modules.ddns;
-  secrets = config.age.secrets;
   inherit (lib) mkIf;
+  inherit (config.age) secrets;
 
 in {
 

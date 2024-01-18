@@ -31,7 +31,7 @@ in {
 
   nix.sshServe = {
     enable = true;
-    keys = config.modules.secrets.keys.all;
+    keys = config.secrets.keys.all;
   };
 
   # Automatic garbage collection

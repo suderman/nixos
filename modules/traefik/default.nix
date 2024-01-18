@@ -3,8 +3,8 @@
 
 let
   cfg = config.modules.traefik;
-  secrets = config.age.secrets;
   inherit (lib) mkIf options;
+  inherit (config.age) secrets;
 
 in {
 

@@ -9,23 +9,14 @@ file is not imported into my NixOS configuration, but strictly used by the `agen
 
 ## Module Usage
 
-By default, secrets are not enabled for a host configuration. This is to avoid 
-problems installing this repo onto a new system that hasn't yet been authenticated 
-(had their host key added). To have access to these secrets, the host configuration 
-should include the following:
+By default, secrets are only enabled for system configurations with at least
+one user. This is to avoid problems bootstrapping this repo onto a new system
+that hasn't yet been authenticated (had their host key added). 
 
-```nix
-{ config, ... }: {
-
-    # Enable secrets
-    modules.secrets.enable = true;
-}
-```
-
-Enabling the secrets NixOS module will automatically extend the
-`config.age.secrets` with every encrypted file found in
-`config.modules.secrets.files`. In other modules, the file path to a decrypted
-example secret will be available at `config.age.secrets.example.path`.
+Enabled, the secrets NixOS module will automatically extend the
+`config.age.secrets` with every encrypted file found in `config.secrets.files`.
+In other modules, the file path to a decrypted example secret will be available
+at `config.age.secrets.example.path`.
 
 The details of `config.age` is available in the [agenix
 documentation](https://github.com/ryantm/agenix#reference).

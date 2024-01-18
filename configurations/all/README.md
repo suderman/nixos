@@ -30,6 +30,15 @@ Common defaults I like to use for each system:
 - Use password from secrets
 - Set ssh public key
 
+## Secrets
+
+Use [agenix](https://github.com/ryantm/agenix) to encrypt/decrypt files for use
+in NixOS configuration.  Use
+[homeage](https://github.com/jordanisaacs/homeage/) to do the same in
+home-manager configuration.
+
+See `nixos secrets` CLI usage [here](https://github.com/suderman/nixos/tree/main/secrets).
+
 ## State configuration for NixOS systems
 
 Use [impermanence](https://github.com/nix-community/impermanence) to mount

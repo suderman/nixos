@@ -4,7 +4,7 @@
 let 
 
   cfg = config.modules.btrbk;
-  secrets = config.age.secrets;
+  inherit (config.age) secrets;
   inherit (lib) mkIf mkOption mkForce types recursiveUpdate;
 
 in {

@@ -4,12 +4,12 @@
 let
 
   cfg = config.modules.freshrss;
-  secrets = config.age.secrets;
   port = toString config.services.nginx.defaultHTTPListenPort;
 
   inherit (lib) mkIf mkOption types;
   inherit (lib.strings) toInt;
   inherit (builtins) toString;
+  inherit (config.age) secrets;
 
 in {
 

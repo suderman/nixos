@@ -3,7 +3,7 @@
   
 let 
   cfg = config.modules.whoami;
-  secrets = config.age.secrets;
+  inherit (config.age) secrets;
   inherit (lib) mkIf;
 
 in {

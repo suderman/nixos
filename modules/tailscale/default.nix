@@ -18,7 +18,7 @@
 let
 
   cfg = config.modules.tailscale;
-  secrets = config.age.secrets;
+  inherit (config.age) secrets;
   inherit (lib) mkIf;
 
 in {

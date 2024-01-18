@@ -4,11 +4,11 @@
 let
 
   cfg = config.modules.gitea;
-  secrets = config.age.secrets;
 
   inherit (lib) mkIf mkOption types;
   inherit (lib.strings) toInt;
   inherit (builtins) toString;
+  inherit (config.age) secrets;
 
 in {
 

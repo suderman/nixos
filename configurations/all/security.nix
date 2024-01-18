@@ -47,7 +47,7 @@ in {
 
   # Start ssh agent and add all configurations as known hosts
   programs.ssh = let 
-    keys = filterAttrs (k: v: k != "all") config.modules.secrets.keys.systems;
+    keys = filterAttrs (k: v: k != "all") config.secrets.keys.systems;
     knownHost = name: { 
       inherit name;
       value.publicKey = keys.${name};

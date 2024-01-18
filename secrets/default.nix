@@ -1,20 +1,39 @@
 # Compatible as both nixos and home-manager module
-{ config, lib, ... }: 
+{ config, lib, this, ... }: 
 
 let
 
-  cfg = config.modules.secrets;
-  inherit (lib) mkIf;
+  # Public keys
+  # { users.all = []; systems.all = []; all = []; };
+  keys = import ./keys;
+
+  # Encrypted files
+  # { my-password = ./files/password.age; ... }
+  files = import ./files;
+
+  hasUsers = length this.users > 0;
+  inherit (lib) length mkOption types;
 
 in {
 
-  modules.secrets = mkIf cfg.enable {
+  options.secrets = {
+
+    # Automatically enable if there is at least 1 user (skip bootstrap)
+    enable = mkOption { type = types.bool; default = hasUsers; };
 
     # Public keys
-    keys = import ./keys;
+    keys = mkOption {
+      type = types.anything;
+      description = "Import secrets/keys/default.nix";
+      default = keys;
+    };
 
     # Encrypted files
-    files = import ./files;
+    files = mkOption {
+      type = types.anything;
+      description = "Import secrets/files/default.nix";
+      default = files;
+    };
 
   };
 

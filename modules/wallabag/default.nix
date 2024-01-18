@@ -5,11 +5,11 @@
 let
 
   cfg = config.modules.wallabag;
-  secrets = config.age.secrets;
 
   inherit (lib) mkIf mkOption types toInt;
   inherit (builtins) toString;
   inherit (this.lib) extraGroups;
+  inherit (config.age) secrets;
 
 in {
 

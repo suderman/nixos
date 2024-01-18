@@ -4,8 +4,8 @@
 let
 
   cfg = config.modules.nextcloud;
-  secrets = config.age.secrets;
   inherit (lib) mkIf mkOption types;
+  inherit (config.age) secrets;
 
 in {
 
