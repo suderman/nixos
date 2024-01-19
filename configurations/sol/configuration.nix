@@ -37,7 +37,7 @@
 
   modules.tandoor-recipes = {
     enable = true;
-    package = pkgs.unstable.tandoor-recipes;
+    # package = pkgs.unstable.tandoor-recipes;
     # public = "tandoor.suderman.net";
   };
 
