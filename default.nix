@@ -69,9 +69,9 @@
       else []
     );
 
-    # Create attrs from list or path
+    # Create attrs from list, attr names, or path
     mkAttrs = x: fn: ( let 
-      inherit (builtins) listToAttrs isPath isList pathExists;
+      inherit (builtins) attrNames listToAttrs isAttrs isPath isList pathExists;
       inherit (inputs.nixpkgs.lib) removeSuffix;
 
       # Create attribute set from files and subdirectories of path
@@ -86,9 +86,13 @@
         ( list ) 
       );
 
+      # Do the same as above using the attrNames
+      fromAttrs = attrs: fromList (attrNames attrs);
+
     in
       if (isPath x) then (fromPath x) 
       else if (isList x) then (fromList x)
+      else if (isAttrs x) then (fromAttrs x)
       else {}
     );
 

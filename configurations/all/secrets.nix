@@ -4,7 +4,7 @@ let
 
   cfg = config.secrets;
   age = config.age;
-  inherit (lib) attrNames mkIf mkOption types;
+  inherit (lib) mkIf mkOption types;
   inherit (this.lib) mkAttrs;
 
 in {
@@ -31,11 +31,11 @@ in {
     ];
 
     # Set agenix secrets
-    age.secrets = mkAttrs ( attrNames cfg.files ) ( key: {
+    age.secrets = mkAttrs cfg.files (key: {
       file = cfg.files."${key}"; 
       group = "secrets"; 
       mode = "440";
-    } );
+    });
     
     # Secrets group
     ids.gids.secrets = 900;
