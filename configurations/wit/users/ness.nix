@@ -28,9 +28,9 @@ in {
       firefox
       gnome.nautilus
       telegram-desktop
-      calendar
+      gnome.gnome-calendar
       gnome-text-editor
-      calculator
+      gnome.gnome-calculator
     ];
     wallpapers = let dir = config.home.homeDirectory; in [ 
       "${dir}/.light.jpg" "${dir}/.dark.jpg" 
