@@ -60,11 +60,6 @@ in {
     options = bind ++ automount;
   };
 
-  # # Services that depend on this mount may need the following
-  # systemd.services.my-app = {
-  #   requires = [ "mnt-pool.mount" ];
-  # };
-
   # Snapshots & backup
   modules.btrbk.enable = true;
 

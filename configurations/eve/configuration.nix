@@ -37,4 +37,34 @@
     ip = "192.168.0.38"; # pom
   };
 
+  # Backup media server
+  modules.jellyfin.enable = true;
+
+  # Point /media to /backups/lux/media.* (latest version) 
+  systemd.services.media-symlink = {
+    description = "Update /media to point to latest lux backup";
+    after = [ "multi-user.target" ];
+    requires = [ "multi-user.target" ];
+    wantedBy = [ "sysinit.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = "yes";
+    };
+    path = with pkgs; [ coreutils ];
+    script = ''
+      rm -f /media
+      ln -s "$(ls -td /backups/lux/media.* | head -n1)" /media
+    '';
+  };
+
+  # Run this script every day
+  systemd.timers."media-symlink" = {
+    wantedBy = [ "timers.target" ];
+    partOf = [ "media-symlink.service" ];
+    timerConfig = {
+      OnCalendar = "daily";
+      Unit = "media-symlink.service";
+    };
+  };
+
 }
