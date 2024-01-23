@@ -6,6 +6,7 @@
   alphanumeric-secret = ./alphanumeric-secret.age;
   basic-auth = ./basic-auth.age;
   btrbk-key = ./btrbk-key.age;
+  ca-key = ./ca-key.age;
   cloudflare-env = ./cloudflare-env.age;
   ocis-env = ./ocis-env.age;
   password = ./password.age;

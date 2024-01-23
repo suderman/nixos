@@ -45,8 +45,8 @@
     nix-flatpak.url = "github:gmodena/nix-flatpak"; 
 
     # Hyprland
-    # <https://wiki.hyprland.org/Nix/Hyprland-on-NixOS>
-    hyprland.url = "github:hyprwm/Hyprland";
+    # <https://github.com/hyprwm/Hyprland/releases>
+    hyprland.url = "github:hyprwm/Hyprland/v0.34.0";
     hyprland-plugins.url = "github:hyprwm/hyprland-plugins";
     anyrun.url = "github:Kirottu/anyrun";
 
@@ -56,7 +56,7 @@
     
     inherit (self) outputs inputs; 
     inherit (builtins) length;
-    inherit (this.lib) mkAttrs mkUsers mkAdmins mkModules;
+    inherit (this.lib) mkAttrs mkUsers mkAdmins mkModules mkNetwork;
 
     # Initialize this configuration with inputs and binary caches
     this = import ./. { inherit inputs; caches = [
@@ -152,6 +152,7 @@
         users = mkUsers host;
         admins = mkAdmins host;
         modules = mkModules host;
+        network = mkNetwork host;
       })
 
     );

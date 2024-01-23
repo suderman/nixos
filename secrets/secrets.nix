@@ -66,4 +66,6 @@ with (import ./keys); {
   # NOTIFICATIONS_SMTP_PASSWORD=xxxxxxxxxxxx
   "files/ocis-env.age".publicKeys = all;
 
+  "files/ca-key.age".publicKeys = all;
+
 }

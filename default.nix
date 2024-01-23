@@ -165,6 +165,27 @@
           ;
         };
 
+    # Attribute set describing my domains, hostnames and IP addresses  
+    mkNetwork = let
+      inherit (builtins) attrNames filter foldl' isAttrs isString concatStringsSep;
+      inherit (inputs.nixpkgs.lib) hasPrefix; 
+
+      # https://github.com/nix-community/ethereum.nix/blob/main/lib.nix#L20
+      flatten = tree: let
+        op = sum: path: val:
+          if isString val then (sum // { "${concatStringsSep "." path}" = val; })
+          else if isAttrs val then (recurse sum path val)
+          else sum;
+        recurse = sum: path: val:
+          foldl' (sum: key: op sum ([key] ++ path) val.${key}) sum (attrNames val);
+      in recurse {} [] tree;
+
+    in host: rec {
+      dns = import ./network.nix;
+      mapping = flatten dns;
+      hosts = filter (name: hasPrefix host name) (attrNames mapping);
+    };
+
   };
 
 in {
@@ -179,6 +200,7 @@ in {
   users = []; # without users, only root exists
   admins = []; # allow sudo/ssh powers users with keys
   modules = {}; # includes for nixos and home-manager
+  network = {}; # hostnames and IP addresses 
 
   system = "x86_64-linux";
   config = {};
