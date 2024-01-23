@@ -9,6 +9,7 @@ in {
     dolphin
     plex-media-player
     plexamp
+    telegram-desktop
   ];
 
   programs = {
