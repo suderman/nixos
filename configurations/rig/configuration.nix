@@ -1,12 +1,13 @@
-{ config, pkgs, ... }: {
+{ config, pkgs, inputs, ... }: {
 
   imports = [ 
     ./hardware-configuration.nix
     ./storage.nix
+    inputs.hardware.nixosModules.common-gpu-amd
   ];
 
   # Use freshest kernel
-  # boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -39,9 +40,5 @@
     driSupport = true;
     driSupport32Bit = true;
   };
-
-  # boot.initrd.kernelModules = [ "amdgpu" ];
-  services.xserver.enable = true;
-  services.xserver.videoDrivers = [ "modesetting" ];
 
 }
