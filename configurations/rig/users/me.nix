@@ -4,6 +4,7 @@
     neofetch
     yo
     firefox-wayland
+    zwift 
   ];
 
   programs = {
