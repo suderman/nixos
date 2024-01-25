@@ -1,4 +1,4 @@
-{ config, pkgs, ... }: {
+{ config, pkgs, this, ... }: {
 
   imports = [ 
     ./hardware-configuration.nix
@@ -32,9 +32,19 @@
   modules.cockpit.enable = true;
 
   # Reverse proxy bluebubbles server on nearby Mac Mini
-  modules.bluebubbles = {
+  modules.bluebubbles = with this.network.dns; {
     enable = true;
-    ip = "192.168.0.38"; # pom
+    ip = work.pom;
+  };
+
+  # Reverse proxy for router
+  services.traefik.dynamicConfigOptions.http = with this.network.dns; {
+    routers.rt = {
+      rule = "Host(`rt.${config.networking.fqdn}`)";
+      tls.certresolver = "resolver-dns";
+      service = "rt";
+    };
+    services.rt.loadBalancer.servers = [{ url = "https://${work.rt2}:10443"; }];
   };
 
   # Backup media server
