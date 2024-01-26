@@ -40,7 +40,7 @@ in {
 
     ip = mkOption {
       type = types.str;
-      default = "192.168.1.4";
+      default = "10.1.0.4";
       description = "IP address for the Home Assistant instance";
     };
 

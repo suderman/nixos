@@ -27,8 +27,8 @@
     # Force adoption of unifi devices
     adopt = ''
       for x in 1 2 3; do
-        echo "192.168.1.$x set-inform http://192.168.1.4:8080/inform"
-        ssh $USER@192.168.1.$x "/usr/bin/mca-cli-op set-inform http://192.168.1.4:8080/inform; exit"
+        echo "10.1.0.$x set-inform http://10.1.0.4:8080/inform"
+        ssh $USER@10.1.0.$x "/usr/bin/mca-cli-op set-inform http://10.1.0.4:8080/inform; exit"
       done
     '';
 

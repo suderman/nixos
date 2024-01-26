@@ -3,8 +3,8 @@
 let
 
   cfg = config.modules.unifi;
-  ip = "192.168.1.1";
-  hostName = "gateway.${config.networking.fqdn}";
+  ip = "10.1.0.1";
+  hostName = "rt.${config.networking.fqdn}";
   inherit (lib) mkIf;
 
 in {

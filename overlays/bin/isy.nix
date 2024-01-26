@@ -5,7 +5,7 @@ let
   description = "ISY994i Admin Console";
   runtimeInputs = [ adoptopenjdk-icedtea-web ];
   text = ''
-    javaws http://192.168.2.3/admin.jnlp
+    javaws http://10.1.0.8/admin.jnlp
   '';
 in 
 
