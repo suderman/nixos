@@ -4,7 +4,7 @@
 let
 
   # https://github.com/silverbulletmd/silverbullet/releases
-  version = "0.5.10";
+  version = "0.6.0";
 
   cfg = config.modules.silverbullet;
 
