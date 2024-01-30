@@ -7,6 +7,10 @@ with (import ./keys); {
   # Plain-text password (typically used in web services)
   "files/password.age".publicKeys = all;
 
+  # Key for self-signed Certificate Authority
+  # openssl genrsa -out ca-key.pem 4096
+  "files/ca-key.age".publicKeys = all;
+
   # Traefik Environment Variables
   # ---------------------------------------------------------------------------
   # CloudFlare DNS API Token 
@@ -66,6 +70,6 @@ with (import ./keys); {
   # NOTIFICATIONS_SMTP_PASSWORD=xxxxxxxxxxxx
   "files/ocis-env.age".publicKeys = all;
 
-  "files/ca-key.age".publicKeys = all;
+
 
 }

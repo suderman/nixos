@@ -17,8 +17,16 @@ in {
   signal-desktop   = enableWayland { type = "electron"; pkg = prev.signal-desktop; bin = "signal-desktop"; };
   # _1password-gui  = enableWayland { type = "electron"; pkg = prev._1password-gui; bin = "1password"; };
 
+  # firefox = appId "firefox.desktop" prev.firefox;
+  firefox = let firefox' = prev.firefox.override {
+      extraPolicies = {
+        DontCheckDefaultBrowser = true;
+        DisablePocket = true;
+        Certificates = { ImportEnterpriseRoots = true; Install = [ ../../modules/traefik/ca-cert.pem ]; };
+      };
+    }; in appId "firefox.desktop" firefox';
+
   # Add appId to existing packages meta
-  firefox = appId "firefox.desktop" prev.firefox;
   gnome-text-editor = appId "org.gnome.TextEditor.desktop" prev.gnome-text-editor;
   gnome = with prev.gnome; prev.gnome // {
     gnome-calculator = appId "org.gnome.Calculator.desktop" gnome-calendar;

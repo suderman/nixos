@@ -11,5 +11,6 @@
 
   # terminal du jour
   modules.kitty.enable = true;
+  # modules.firefox.enable = true;
 
 }

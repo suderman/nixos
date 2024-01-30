@@ -1,10 +1,12 @@
 # modules.whoami.enable = true;
-{ inputs, config, pkgs, lib, ... }:
+{ inputs, config, lib, pkgs, this, ... }:
   
 let 
   cfg = config.modules.whoami;
   inherit (config.age) secrets;
   inherit (lib) mkIf;
+
+  domain = "whoami.${this.host}";
 
 in {
 
@@ -15,12 +17,12 @@ in {
   config = mkIf cfg.enable {
 
     # service
-    virtualisation.oci-containers.containers."whoami" = with config.networking; {
+    virtualisation.oci-containers.containers."whoami" = {
       image = "traefik/whoami";
       extraOptions = [
         "--label=traefik.enable=true"
-        "--label=traefik.http.routers.whoami.rule=Host(`whoami.${hostName}.${domain}`) || Host(`whoami.local.${domain}`)"
-        "--label=traefik.http.routers.whoami.tls.certresolver=resolver-dns"
+        "--label=traefik.http.routers.whoami.rule=Host(`${domain}`)"
+        "--label=traefik.http.routers.whoami.tls=true"
         "--label=traefik.http.routers.whoami.middlewares=local@file"
       ];
       environmentFiles = [ secrets.traefik-env.path ];
@@ -31,6 +33,7 @@ in {
 
     # Enable reverse proxy
     modules.traefik.enable = true;
+    modules.traefik.certificates = [ domain ];
 
   }; 
 

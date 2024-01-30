@@ -24,7 +24,7 @@ in {
     libsForQt5.kdenlive
 
     _1password _1password-gui darktable digikam
-    firefox inkscape junction libreoffice newsflash
+    inkscape junction libreoffice newsflash
     unstable.nodePackages_latest.immich
 
     withings-sync zwift coffee
@@ -34,6 +34,7 @@ in {
 
   ];
 
+  # modules.firefox.enable = true;
   programs.chromium.enable = true;
   programs.git.enable = true;
   programs.tmux.enable = true;

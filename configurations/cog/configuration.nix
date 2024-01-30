@@ -35,6 +35,8 @@
   networking.networkmanager.enable = true;
   networking.extraHosts = ''
     127.0.0.1 example.com
+    127.0.0.1 local
+    127.0.0.1 cog whoami.cog traefik.cog
   '';
 
   # sudo fwupdmgr update
@@ -116,6 +118,29 @@
       "org.gimp.GIMP" # https://www.gimp.org/downloads/devel
     ];
   };
+
+  # systemd.services.traefik.preStart = let 
+  #   key = config.age.secrets.ca-key.path;
+  #   cert = config.age.secrets.ca-cert.path;
+  #   openssl = "${pkgs.openssl}/bin/openssl";
+  #   dir = "${config.services.traefik.dataDir}/certificates";
+  # in lib.mkBefore ''
+  #   ${openssl} req -new -key ${key} -out ${dir}/csr.pem -subj "/CN=test.cog"
+  #   ${openssl} x509 -req -days 365 -CA ${cert} -CAkey ${key} -in ${dir}/csr.pem -out ${dir}/cert.pem
+  # '';
+
+  # environment.etc."my-cert.pem".source = let 
+  #   key = config.age.secrets.ca-key.path;
+  #   cert = config.age.secrets.ca-cert.path;
+  # in pkgs.runCommand "cert" { buildInputs = [ pkgs.openssl ]; } ''
+  #   mkdir $out
+  #   ls -lah /run/agenix/
+  #   cat ${key}
+  #   # openssl req -new -key ${key} -out /tmp/csr.pem -subj \"/CN=test.cog\"
+  #   # openssl x509 -req -days 365 -CAcreateserial -CA ${cert} -CAkey ${key} -in $out/csr.pem -out $out/cert.pem
+  # '';
+
+  
 
   # Experiments
   systemd.user.services.foobar = {
