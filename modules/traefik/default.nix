@@ -1,16 +1,8 @@
 # modules.traefik.enable = true;
-{ config, lib, pkgs, this, ... }:
+{ config, lib, pkgs, this, ... }: let
 
-let
   cfg = config.modules.traefik;
-
-  # Self-signed CA certificate (with ca-key in secrets)
-  # openssl req -new -x509 -nodes -extensions v3_ca -days 25568 -subj "/CN=Suderman CA" -key ca-key.pem -out ca-cert.pem  
-  ca-cert = ./ca-cert.pem;
-  ca-key = config.age.secrets.ca-key.path;
-
-  # Directory for self-signed certificates
-  certs = "${config.services.traefik.dataDir}/certs";
+  certs = "${config.services.traefik.dataDir}/certs"; # dir for self-signed certificates
 
   inherit (lib) mkBefore mkForce mkIf mkOption options types;
   inherit (config.age) secrets;
@@ -23,18 +15,17 @@ in {
       type = with types; listOf str;
       default = [ this.host "local" ];
     };
-    ca = mkOption { type = types.path; default = ca-cert; };
   };
 
   config = mkIf cfg.enable {
 
-    modules.traefik.certificates = [ this.host "traefik.${this.host}" ];
-
-    # agenix
+    # Give traefik user permission to read secrets
     users.users.traefik.extraGroups = [ "secrets" ]; 
 
-    # Add CA certificate to trusted root store
-    security.pki.certificateFiles = [ ca-cert ];
+    # Import the env file containing the CloudFlare token for cert renewal
+    systemd.services.traefik.serviceConfig = {
+      EnvironmentFile = [ secrets.traefik-env.path ];
+    };
 
     # Self-signed certificate directory
     file."${certs}" = {
@@ -43,22 +34,21 @@ in {
       group = "traefik";
     };
 
-    # Import the env file containing the CloudFlare token for cert renewal
-    systemd.services.traefik.serviceConfig = {
-      EnvironmentFile = [ secrets.traefik-env.path ];
-    };
-
     # Generate certificates with openssl
     systemd.services.traefik.preStart = let openssl = "${pkgs.openssl}/bin/openssl"; in mkBefore ''
-      [[ -e ${certs}/key.pem ]] || ${openssl} genrsa -out ${certs}/key.pem 4096 
-      [[ -e ${certs}/serial ]] || echo "01" > ${certs}/serial 
+      [[ -e ${certs}/key ]] || ${openssl} genrsa -out ${certs}/key 4096 
+      echo "01" > ${certs}/serial 
       for NAME in ${builtins.toString cfg.certificates}; do
         export NAME
-        ${openssl} req -new -key ${certs}/key.pem -config ${./openssl.cnf} -extensions v3_req -subj "/CN=$NAME" -out ${certs}/csr.pem 
-        ${openssl} x509 -req -days 365 -in ${certs}/csr.pem -extfile ${./openssl.cnf} -extensions v3_req -CA ${ca-cert} -CAkey ${ca-key} -CAserial ${certs}/serial -out ${certs}/cert.pem 
-        cat ${certs}/cert.pem ${ca-cert} > ${certs}/$NAME.pem
+        ${openssl} req -new -key ${certs}/key -config ${./openssl.cnf} -extensions v3_req -subj "/CN=$NAME" -out ${certs}/csr 
+        ${openssl} x509 -req -days 365 -in ${certs}/csr -extfile ${./openssl.cnf} -extensions v3_req -CA ${this.ca} -CAkey ${secrets.ca-key.path} -CAserial ${certs}/serial -out ${certs}/crt
+        cat ${certs}/crt ${this.ca} > ${certs}/$NAME.crt
       done;
+      rm -f ${certs}/csr ${certs}/crt
     '';
+
+    # Create certificates for traefik dashboard
+    modules.traefik.certificates = [ this.host "traefik.${this.host}" ];
 
     services.traefik = with config.networking; {
 
@@ -101,7 +91,7 @@ in {
         certificatesResolvers.resolver-dns.acme = {
           dnsChallenge.provider = "cloudflare";
           storage = "/var/lib/traefik/cert.json";
-          email = "${hostName}@${domain}";
+          email = "${this.host}@${domain}";
         };
 
         global = {
@@ -143,14 +133,14 @@ in {
 
         # Add every module certificate into the default store
         tls.certificates = map (name: { 
-          certFile = "${certs}/${name}.pem"; 
-          keyFile = "${certs}/key.pem"; 
+          certFile = "${certs}/${name}.crt"; 
+          keyFile = "${certs}/key"; 
         }) cfg.certificates;
 
         # Also change the default certificate
         tls.stores.default.defaultCertificate = {
-          certFile = "${certs}/${hostName}.pem"; 
-          keyFile = "${certs}/key.pem"; 
+          certFile = "${certs}/${this.host}.crt"; 
+          keyFile = "${certs}/key"; 
         };
 
       };

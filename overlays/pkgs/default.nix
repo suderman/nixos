@@ -22,7 +22,7 @@ in {
       extraPolicies = {
         DontCheckDefaultBrowser = true;
         DisablePocket = true;
-        Certificates = { ImportEnterpriseRoots = true; Install = [ ../../modules/traefik/ca-cert.pem ]; };
+        Certificates = { ImportEnterpriseRoots = true; Install = [ this.ca ]; };
       };
     }; in appId "firefox.desktop" firefox';
 

@@ -36,7 +36,7 @@
   networking.extraHosts = ''
     127.0.0.1 example.com
     127.0.0.1 local
-    127.0.0.1 cog whoami.cog traefik.cog
+    127.0.0.1 cog whoami.cog traefik.cog immich.cog
   '';
 
   # sudo fwupdmgr update
@@ -92,7 +92,8 @@
   modules.gitea.enable = false;
   modules.nextcloud.enable = false;
   modules.ocis = { enable = false; dataDir = "/tmp/ocis"; };
-  modules.immich.enable = false;
+  modules.immich.enable = true;
+  modules.immich.hostName = "immich.${this.host}";
   modules.photoprism = { enable = false; photosDir = "/photos"; };
   modules.silverbullet.enable = false;
 

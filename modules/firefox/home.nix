@@ -1,5 +1,5 @@
 # modules.firefox.enable = true;
-{ config, lib, pkgs, inputs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let
 
@@ -24,7 +24,7 @@ in {
     #   #     DisableTelemetry = true;
     #   #     DisableSetDesktopBackground = true;
     #   #     DontCheckDefaultBrowser = true;
-    #   #     Certificates = { ImportEnterpriseRoots = true; Install = [ ../traefik/ca-cert.pem ]; };
+    #   #     Certificates = { ImportEnterpriseRoots = true; Install = [ this.ca ]; };
     #   #   };
     #   # };
     #

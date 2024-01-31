@@ -197,6 +197,10 @@ in {
   host = "nixos";  
   domain = "suderman.org"; 
 
+  # Self-signed CA certificate (with ca-key in secrets)
+  # openssl req -new -x509 -nodes -extensions v3_ca -days 25568 -subj "/CN=Suderman CA" -key ca.key -out ca.crt  
+  ca = ./ca.crt;
+
   users = []; # without users, only root exists
   admins = []; # allow sudo/ssh powers users with keys
   modules = {}; # includes for nixos and home-manager

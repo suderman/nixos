@@ -25,6 +25,9 @@ in {
     # Passwordless sudo when SSH'ing with keys
     pam.enableSSHAgentAuth = true;
 
+    # Add CA certificate to trusted root store
+    pki.certificateFiles = [ this.ca ];
+
   };
 
   services.openssh = {

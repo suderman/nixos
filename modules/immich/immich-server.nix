@@ -11,6 +11,7 @@ in {
 
     # Enable reverse proxy
     modules.traefik.enable = true;
+    modules.traefik.certificates = [ cfg.hostName ];
 
     # Server back-end
     virtualisation.oci-containers.containers.immich-server = {
@@ -41,6 +42,7 @@ in {
         "--label=traefik.enable=true"
         "--label=traefik.http.routers.immich.rule=Host(`${cfg.hostName}`)"
         "--label=traefik.http.routers.immich.tls.certresolver=resolver-dns"
+        "--label=traefik.http.routers.immich.entrypoints=websecure"
         "--label=traefik.http.routers.immich.middlewares=local@file"
 
       # Networking for docker containers
