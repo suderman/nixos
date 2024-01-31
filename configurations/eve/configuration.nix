@@ -44,7 +44,7 @@
       tls.certresolver = "resolver-dns";
       service = "rt";
     };
-    services.rt.loadBalancer.servers = [{ url = "https://${work.rt2}:10443"; }];
+    services.rt.loadBalancer.servers = [{ url = "https://${work.rt}:10443"; }];
   };
 
   # Backup media server

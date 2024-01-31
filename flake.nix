@@ -86,23 +86,27 @@
       # Modify pkgs with this, scripts, packages, nur and unstable
       overlays = [ 
 
-        # this and personal library
+        # this and personal lib functions
         (final: prev: { inherit this; })
         (final: prev: { this = import ./overlays/lib { inherit final prev; }; })
 
-        # Personal scripts
-        (final: prev: import ./overlays/bin { inherit final prev; } )
-        (final: prev: mkAttrs ./overlays/bin ( name: prev.callPackage ./overlays/bin/${name} {} ))
-
-        # Additional packages
-        (final: prev: import ./overlays/pkgs { inherit final prev; } )
-        (final: prev: mkAttrs ./overlays/pkgs ( name: prev.callPackage ./overlays/pkgs/${name} {} ))
+        # Unstable nixpkgs channel
+        (final: prev: { unstable = import inputs.nixpkgs-unstable { inherit system config; }; })
 
         # Nix User Repositories 
         (final: prev: { nur = import inputs.nur { pkgs = final; nurpkgs = final; }; })
 
-        # Unstable nixpkgs channel
-        (final: prev: { unstable = import inputs.nixpkgs-unstable { inherit system config; }; })
+        # Package overrides
+        (final: prev: mkAttrs ./overlays/mods ( name: import ./overlays/mods/${name} { inherit final prev; } ))
+        (final: prev: import ./overlays/mods { inherit final prev; } )
+
+        # Additional packages
+        (final: prev: mkAttrs ./overlays/pkgs ( name: prev.callPackage ./overlays/pkgs/${name} {} ))
+        (final: prev: import ./overlays/pkgs { inherit final prev; } )
+
+        # Personal scripts
+        (final: prev: mkAttrs ./overlays/bin ( name: prev.callPackage ./overlays/bin/${name} {} ))
+        (final: prev: import ./overlays/bin { inherit final prev; } )
 
       ];
 
