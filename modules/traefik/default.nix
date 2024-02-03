@@ -9,8 +9,7 @@
 
   # Generate traefik labels for use with OCI container
   labels = x: ( let
-    inherit (builtins) head isAttrs isString replaceStrings toString;
-    inherit (lib) splitString;
+    inherit (builtins) isAttrs isString toString;
     fromString = name: fromAttrs { inherit name; };
     fromAttrs = { name, hostName ? name, port ? 0, scheme ? "" }: [
       "--label=traefik.enable=true"

@@ -14,9 +14,9 @@ in {
 
   options.modules.cockpit = {
     enable = lib.options.mkEnableOption "cockpit"; 
-    hostName = mkOption {
+    name = mkOption {
       type = types.str;
-      default = "cockpit.${this.hostName}";
+      default = "cockpit";
     };
     port = mkOption {
       type = types.port;
@@ -31,7 +31,7 @@ in {
       package = pkgs.unstable.cockpit;
       port = cfg.port;
       settings = {
-        WebService.Origins = "https://${cfg.hostName}";
+        WebService.Origins = "https://${cfg.name}.${this.hostName}";
       };
     };
 
@@ -43,18 +43,9 @@ in {
     services.udisks2.enable = true;
     services.packagekit.enable = true;
 
-    # Enable database and reverse proxy
-    modules.traefik.enable = true;
-
-    # traefik proxy 
-    services.traefik.dynamicConfigOptions.http = {
-      routers.cockpit = {
-        rule = "Host(`${cfg.hostName}`)";
-        tls.certresolver = "resolver-dns";
-        middlewares = [ "local@file" ];
-        service = "cockpit";
-      };
-      services.cockpit.loadBalancer.servers = [{ url = "http://127.0.0.1:${toString cfg.port}"; }];
+    modules.traefik = {
+      enable = true;
+      routers.${cfg.name} = "http://127.0.0.1:${toString cfg.port}";
     };
 
   };

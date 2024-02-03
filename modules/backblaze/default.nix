@@ -11,6 +11,7 @@ let
 
   # https://github.com/JonathanTreffler/backblaze-personal-wine-container
   cfg = config.modules.backblaze;
+  inherit (config.modules) traefik;
   inherit (lib) mkIf mkOption mkBefore types;
 
 in {
@@ -19,7 +20,7 @@ in {
     enable = lib.options.mkEnableOption "backblaze"; 
     hostName = mkOption {
       type = types.str;
-      default = "backblaze.${this.hostName}";
+      default = "backblaze";
     };
     dataDir = mkOption {
       type = types.path;
@@ -42,14 +43,10 @@ in {
       autoStart = true;
 
       # Traefik labels
-      extraOptions = [
-        "--label=traefik.enable=true"
-        "--label=traefik.http.routers.backblaze.rule=Host(`${cfg.hostName}`)"
-        "--label=traefik.http.routers.backblaze.tls.certresolver=resolver-dns"
-        "--label=traefik.http.routers.backblaze.middlewares=local@file"
+      extraOptions = traefik.labels cfg.hostName
 
       # Additional flags
-      ] ++ [ "--init" ];
+      ++ [ "--init" ];
 
       # https://github.com/JonathanTreffler/backblaze-personal-wine-container#environment-variables
       environment = {

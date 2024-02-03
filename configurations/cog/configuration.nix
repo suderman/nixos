@@ -96,7 +96,7 @@
   modules.rsshub.enable = false;
   modules.backblaze.enable = false;
   modules.wallabag.enable = false;
-  modules.cockpit.enable = false;
+  modules.cockpit.enable = true;
   modules.gitea.enable = true;
   modules.whoogle = { enable = true; name = "g"; };
   modules.nextcloud.enable = false;
@@ -104,6 +104,7 @@
   modules.immich.enable = true;
   modules.photoprism = { enable = false; photosDir = "/photos"; };
   modules.silverbullet.enable = false;
+  modules.bluebubbles.enable = true;
 
   # Apps & Games
   modules.neovim.enable = true;
