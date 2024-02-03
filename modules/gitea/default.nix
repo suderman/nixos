@@ -14,9 +14,9 @@ in {
 
   options.modules.gitea = {
     enable = lib.options.mkEnableOption "gitea"; 
-    hostName = mkOption {
+    name = mkOption {
       type = types.str;
-      default = "git.${this.hostName}";
+      default = "git";
     };
     port = mkOption {
       type = types.port;
@@ -32,8 +32,8 @@ in {
       database.type = "postgres";
       database.socket = "/run/postgresql";
       settings = {
-        server.DOMAIN = cfg.hostName;
-        server.ROOT_URL = "https://${cfg.hostName}/";
+        server.DOMAIN = "${cfg.name}.${this.hostName}";
+        server.ROOT_URL = "https://${cfg.name}.${this.hostName}/";
         server.HTTP_PORT = cfg.port;
         session.COOKIE_SECURE = true;
         service.DISABLE_REGISTRATION = false;
@@ -69,17 +69,17 @@ in {
     # Enable database and reverse proxy
     modules.postgresql.enable = true;
     modules.traefik.enable = true;
+    modules.traefik.proxies.git = "http://127.0.0.1:${toString cfg.port}";
 
-    # traefik proxy 
-    services.traefik.dynamicConfigOptions.http = {
-      routers.gitea = {
-        rule = "Host(`${cfg.hostName}`)";
-        tls.certresolver = "resolver-dns";
-        middlewares = [ "local@file" ];
-        service = "gitea";
-      };
-      services.gitea.loadBalancer.servers = [{ url = "http://127.0.0.1:${toString cfg.port}"; }];
-    };
+    # services.traefik.dynamicConfigOptions.http = {
+    #   routers.gitea = {
+    #     rule = "Host(`${cfg.hostName}`)";
+    #     tls.certresolver = "resolver-dns";
+    #     middlewares = [ "local@file" ];
+    #     service = "gitea";
+    #   };
+    #   services.gitea.loadBalancer.servers = [{ url = "http://127.0.0.1:${toString cfg.port}"; }];
+    # };
 
   };
 

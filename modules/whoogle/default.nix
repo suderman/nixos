@@ -8,15 +8,15 @@ let
 
   cfg = config.modules.whoogle;
   inherit (lib) mkIf mkOption mkBefore types;
-  inherit (this.lib) traefikLabels;
+  inherit (config.modules) traefik;
 
 in {
 
   options.modules.whoogle = {
     enable = lib.options.mkEnableOption "whoogle"; 
-    hostName = mkOption {
+    name = mkOption {
       type = types.str;
-      default = "whoogle.${this.hostName}";
+      default = "whoogle";
     };
   };
 
@@ -28,7 +28,7 @@ in {
     # Configure OCI container
     virtualisation.oci-containers.containers."whoogle" = {
       image = "benbusby/whoogle-search:${version}";
-      extraOptions = traefikLabels cfg.hostName;
+      extraOptions = traefik.labels cfg.name;
     };
 
     # Extend systemd service

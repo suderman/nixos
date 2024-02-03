@@ -102,7 +102,8 @@
   modules.backblaze.enable = false;
   modules.wallabag.enable = false;
   modules.cockpit.enable = false;
-  modules.gitea.enable = false;
+  modules.gitea.enable = true;
+  modules.whoogle = { enable = true; name = "g"; };
   modules.nextcloud.enable = false;
   modules.ocis = { enable = false; dataDir = "/tmp/ocis"; };
   modules.immich.enable = true;
