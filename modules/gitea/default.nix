@@ -68,8 +68,10 @@ in {
 
     # Enable database and reverse proxy
     modules.postgresql.enable = true;
-    modules.traefik.enable = true;
-    modules.traefik.proxies.git = "http://127.0.0.1:${toString cfg.port}";
+    modules.traefik = {
+      enable = true;
+      routers.git = "http://127.0.0.1:${toString cfg.port}";
+    };
 
     # services.traefik.dynamicConfigOptions.http = {
     #   routers.gitea = {

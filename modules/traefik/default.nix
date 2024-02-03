@@ -4,7 +4,7 @@
   cfg = config.modules.traefik;
   certs = "${config.services.traefik.dataDir}/certs"; # dir for self-signed certificates
 
-  inherit (lib) attrNames mapAttrs mkForce mkIf mkOption options types;
+  inherit (lib) attrNames mapAttrs mkForce mkIf mkOption options recursiveUpdate types;
   inherit (config.age) secrets;
 
   # Generate traefik labels for use with OCI container
@@ -32,17 +32,19 @@ in {
 
   options.modules.traefik = {
     enable = options.mkEnableOption "traefik"; 
-    certificates = mkOption { 
-      type = with types; listOf str;
-      default = [ this.hostName "local" ];
+    http = mkOption { 
+      type = with types; anything; default = {};
     };
-    proxies = mkOption { 
+    routers = mkOption { 
       type = with types; anything; default = {};
     };
     labels = mkOption {
       type = types.anything; readOnly = true; default = labels;
     };
-
+    certificates = mkOption { 
+      type = with types; listOf str;
+      default = [ this.hostName "local" ];
+    };
   };
 
   config = mkIf cfg.enable {
@@ -84,7 +86,7 @@ in {
       inherit (builtins) attrValues concatMap filter split;
       inherit (lib) flatten hasInfix hasPrefix hasSuffix;
 
-      configHostNames = let
+      routerHostNames = let
         # Collect router rules from traefik dynamic configuration options
         rules = flatten (map (router: [router.rule]) (attrValues config.services.traefik.dynamicConfigOptions.http.routers));
         # Filter rules to the server's host name, starting with a period & ending with backtick parenthesis: .HOSTNAME`)
@@ -106,7 +108,7 @@ in {
         hostNames = filter (elm: hasSuffix ".${this.hostName}" elm) (flatten (map (rule: (split "`" rule)) hostRules));
       in hostNames;
 
-    in [ this.hostName ] ++ configHostNames ++ labelHostNames;
+    in [ this.hostName ] ++ routerHostNames ++ labelHostNames;
 
 
     # Configure traefik service
@@ -163,46 +165,50 @@ in {
       # Dynamic configuration
       dynamicConfigOptions = {
 
-        http.middlewares = {
+        http = recursiveUpdate { 
+          middlewares = {
 
-          # Basic Authentication is available. User/passwords are encrypted by agenix.
-          login.basicAuth.usersFile = secrets.basic-auth.path;
+            # Basic Authentication is available. User/passwords are encrypted by agenix.
+            login.basicAuth.usersFile = secrets.basic-auth.path;
 
-          # Whitelist local network and VPN addresses
-          local.ipWhiteList.sourceRange = [ 
-            "127.0.0.1/32"   # local host
-            "192.168.0.0/16" # local network
-            "10.0.0.0/8"     # local network
-            "172.16.0.0/12"  # docker network
-            "100.64.0.0/10"  # vpn network
-          ];
+            # Whitelist local network and VPN addresses
+            local.ipWhiteList.sourceRange = [ 
+              "127.0.0.1/32"   # local host
+              "192.168.0.0/16" # local network
+              "10.0.0.0/8"     # local network
+              "172.16.0.0/12"  # docker network
+              "100.64.0.0/10"  # vpn network
+            ];
 
-        };
+          };
 
-        # Generate traefik services from configuration proxies
-        http.services = { "noop" = {}; } // 
-          ( mapAttrs ( name: url: {
-            loadBalancer.servers = [{ inherit url; }];
-          }) cfg.proxies );
+          # Generate traefik services from configuration routers
+          services = { "noop" = {}; } // 
+            ( mapAttrs ( name: url: {
+              loadBalancer.servers = [{ inherit url; }];
+            }) cfg.routers );
 
-        # Generate traefik routers from configuration proxies
-        http.routers = (
-          mapAttrs ( name: url: {
-            rule = "Host(`${name}.${this.hostName}`)";
-            entrypoints = "websecure"; tls = true;
-            middlewares = "local@file";
-            service = name;
-          }) cfg.proxies 
+          # Generate traefik routers from configuration routers
+          routers = (
+            mapAttrs ( name: url: {
+              rule = "Host(`${name}.${this.hostName}`)";
+              entrypoints = "websecure"; tls = true;
+              middlewares = "local";
+              service = name;
+            }) cfg.routers 
 
-        # Make available the traefik dashboard
-        ) // {
-          traefik = {
-            entrypoints = "websecure"; tls = {};
-            rule = "Host(`${this.hostName}`) || Host(`traefik.${this.hostName}`)";
-            middlewares = "local@file";
-            service = "api@internal";
-          }; 
-        };
+          # Make available the traefik dashboard
+          ) // {
+            traefik = {
+              entrypoints = "websecure"; tls = {};
+              rule = "Host(`${this.hostName}`) || Host(`traefik.${this.hostName}`)";
+              middlewares = "local";
+              service = "api@internal";
+            }; 
+          };
+
+        # Merge with http option from traefik module 
+        } cfg.http; 
 
         # Add every module certificate into the default store
         tls.certificates = map (name: { 

@@ -64,19 +64,14 @@
   # Memory management
   modules.earlyoom.enable = true;
 
-  services.traefik.dynamicConfigOptions.http = {
-    middlewares.isy = {
-      headers.customRequestHeaders.authorization = "Basic {{ env `ISY_BASIC_AUTH` }}";
+  modules.traefik = { 
+    routers.isy = "http://${this.network.dns.home.isy}:80";
+    http = {
+      middlewares.isy.headers.customRequestHeaders.authorization = "Basic {{ env `ISY_BASIC_AUTH` }}";
+      routers.isy.middlewares = [ "isy" ];
     };
-    routers.isy = {
-      rule = "Host(`isy.cog`)";
-      middlewares = [ "local@file" "isy@file" ];
-      tls = true;
-      service = "isy";
-    };
-    services.isy.loadBalancer.servers = [{ url = "http://${this.network.dns.home.isy}:80"; }];
   };
-  modules.traefik.proxies.udi = "http://${this.network.dns.home.isy}:80";
+
 
   # Keyboard control
   modules.keyd = {
