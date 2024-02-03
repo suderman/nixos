@@ -1,5 +1,5 @@
 # modules.ombi.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let
 
@@ -13,7 +13,7 @@ in {
     enable = options.mkEnableOption "ombi"; 
     hostName = mkOption {
       type = types.str; 
-      default = "ombi.${config.networking.fqdn}";
+      default = "ombi.${this.hostName}";
     };
     port = mkOption {
       type = types.port;

@@ -1,5 +1,5 @@
 # modules.gitea.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let
 
@@ -16,7 +16,7 @@ in {
     enable = lib.options.mkEnableOption "gitea"; 
     hostName = mkOption {
       type = types.str;
-      default = "git.${config.networking.fqdn}";
+      default = "git.${this.hostName}";
     };
     port = mkOption {
       type = types.port;

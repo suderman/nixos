@@ -16,12 +16,10 @@ in {
 
     hostName = mkOption {
       type = types.str;
-      default = "wiki.${config.networking.fqdn}";
-      description = "FQDN for the Tiddlywiki instance";
+      default = "wiki.${this.hostName}";
     };
 
     port = mkOption {
-      description = "Port for Tiddlywiki instance";
       default = 3456;
       type = types.port;
     };

@@ -36,7 +36,6 @@
   networking.extraHosts = ''
     127.0.0.1 example.com
     127.0.0.1 local
-    127.0.0.1 cog whoami.cog traefik.cog immich.cog
   '';
 
   # sudo fwupdmgr update
@@ -65,6 +64,19 @@
   # Memory management
   modules.earlyoom.enable = true;
 
+  services.traefik.dynamicConfigOptions.http = {
+    middlewares.isy = {
+      headers.customRequestHeaders.authorization = "Basic {{ env `ISY_BASIC_AUTH` }}";
+    };
+    routers.isy = {
+      rule = "Host(`isy.cog`)";
+      middlewares = [ "local@file" "isy@file" ];
+      tls = true;
+      service = "isy";
+    };
+    services.isy.loadBalancer.servers = [{ url = "http://${this.network.dns.home.isy}:80"; }];
+  };
+  modules.traefik.proxies.udi = "http://${this.network.dns.home.isy}:80";
 
   # Keyboard control
   modules.keyd = {
@@ -82,6 +94,7 @@
   modules.libimobiledevice.enable = true;
 
   # Web services
+  modules.traefik.enable = true;
   modules.whoami.enable = true;
   modules.tandoor-recipes.enable = false;
   modules.home-assistant.enable = false;
@@ -93,7 +106,6 @@
   modules.nextcloud.enable = false;
   modules.ocis = { enable = false; dataDir = "/tmp/ocis"; };
   modules.immich.enable = true;
-  modules.immich.hostName = "immich.${this.host}";
   modules.photoprism = { enable = false; photosDir = "/photos"; };
   modules.silverbullet.enable = false;
 

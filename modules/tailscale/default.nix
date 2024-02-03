@@ -13,7 +13,7 @@
 #     local.mydomain.org -> A     -> 127.0.0.1
 #   *.local.mydomain.org -> CNAME -> local.mydomain.org
 #
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let
 
@@ -36,31 +36,55 @@ in {
       allowedUDPPorts = [ 41641 ]; # Facilitate firewall punching
     };
 
-    systemd.services."tailscale-dns" = {
-      serviceConfig = {
-        Type = "oneshot";
-        EnvironmentFile = secrets.cloudflare-env.path;
-      };
-      environment = with config.networking; {
-        DOMAIN = domain;
-      };
-      path = with pkgs; [ coreutils curl gawk jq tailscale ];
-      script = builtins.readFile ./tailscale-dns.sh;
-    };
+    # systemd.services."tailscale-web" = {
+    #   serviceConfig.Type = "simple";
+    #   wantedBy = [ "multi-user.target" ];
+    #   after = [ "network.target" ];
+    #   path = with pkgs; [ tailscale ];
+    #   script = ''tailscale web --prefix https://${hostName}'';
+    # };
 
-    # Run this script every day
-    systemd.timers."tailscale-dns" = {
-      wantedBy = [ "timers.target" ];
-      partOf = [ "tailscale-dns.service" ];
-      timerConfig = {
-        OnCalendar = "daily";
-        Unit = "tailscale-dns.service";
-      };
-    };
+    # # Enable reverse proxy
+    # modules.traefik = {
+    #   enable = true;
+    #   certificates = [ hostName ];
+    # };
+    #
+    # services.traefik.dynamicConfigOptions.http = {
+    #   routers.tailscale = {
+    #     rule = "Host(`${hostName}`)";
+    #     middlewares = "local@file"; tls = {};
+    #     service = "tailscale";
+    #   };
+    #   services.tailscale.loadBalancer.servers = [{ url = "http://100.100.100.100"; }];
+    # };
 
     systemd.extraConfig = ''
       DefaultTimeoutStopSec=30s
     '';
+
+    # # Tailscale IP in Cloudflare DNS
+    # systemd.services."tailscale-dns" = {
+    #   serviceConfig = {
+    #     Type = "oneshot";
+    #     EnvironmentFile = secrets.cloudflare-env.path;
+    #   };
+    #   environment = with config.networking; {
+    #     DOMAIN = domain;
+    #   };
+    #   path = with pkgs; [ coreutils curl gawk jq tailscale ];
+    #   script = builtins.readFile ./tailscale-dns.sh;
+    # };
+    #
+    # # Run this script every day
+    # systemd.timers."tailscale-dns" = {
+    #   wantedBy = [ "timers.target" ];
+    #   partOf = [ "tailscale-dns.service" ];
+    #   timerConfig = {
+    #     OnCalendar = "daily";
+    #     Unit = "tailscale-dns.service";
+    #   };
+    # };
 
     # # If tailscale is enabled, provide convenient hostnames to each IP address
     # # These records also exist in Cloudflare DNS, so it's a duplicated effort here.

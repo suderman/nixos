@@ -1,5 +1,5 @@
 # modules.jellyfin.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 
 let
@@ -16,8 +16,7 @@ in {
 
     hostName = mkOption {
       type = types.str;
-      default = "jellyfin.${config.networking.fqdn}";
-      description = "FQDN for the Jellyfin instance";
+      default = "jellyfin.${this.hostName}";
     };
 
   };

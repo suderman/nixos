@@ -4,6 +4,7 @@ let
 
   cfg = config.modules.immich;
   inherit (lib) mkIf;
+  inherit (config.modules) traefik;
 
 in {
 
@@ -11,7 +12,6 @@ in {
 
     # Enable reverse proxy
     modules.traefik.enable = true;
-    modules.traefik.certificates = [ cfg.hostName ];
 
     # Server back-end
     virtualisation.oci-containers.containers.immich-server = {
@@ -38,17 +38,10 @@ in {
       ]);
 
       # Traefik labels
-      extraOptions = [
-        "--label=traefik.enable=true"
-        "--label=traefik.http.routers.immich.rule=Host(`${cfg.hostName}`)"
-        "--label=traefik.http.routers.immich.tls.certresolver=resolver-dns"
-        "--label=traefik.http.routers.immich.entrypoints=websecure"
-        "--label=traefik.http.routers.immich.middlewares=local@file"
+      extraOptions = ( traefik.labels cfg.name ) ++ 
 
       # Networking for docker containers
-      ] ++ [
-        "--network=immich"
-      ];
+      [ "--network=immich" ];
 
     };
 

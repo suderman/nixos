@@ -194,8 +194,8 @@ in {
   inherit inputs lib;
 
   # Default values, overridden in configuration/*/default.nix
-  host = "nixos";  
-  domain = "suderman.org"; 
+  hostName = "nixos";  
+  domain = "tail"; 
 
   # Self-signed CA certificate (with ca-key in secrets)
   # openssl req -new -x509 -nodes -extensions v3_ca -days 25568 -subj "/CN=Suderman CA" -key ca.key -out ca.crt  

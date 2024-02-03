@@ -9,6 +9,22 @@ in prev.firefox.override {
     DontCheckDefaultBrowser = true;
     DisablePocket = true;
     DisableFirefoxStudies = true;
+
     Certificates = { ImportEnterpriseRoots = true; Install = [ this.ca ]; };
+    
+    # SearchEngines = {
+    #   Add = [
+    #     {
+    #       Name = "Whoogle";
+    #       URLTemplate = "https://g.sol/search?q={searchTerms}";
+    #       Method = "POST";
+    #       IconURL = "https://g.sol/static/img/favicon/apple-icon-144x144.png";
+    #       Alias = "whoogle";
+    #     }
+    #   ];
+    #   Default = "Whoogle";
+    #   Remove = [ "Bing" "Amazon" "Wikipedia (en)" ];
+    # };
+
   };
 } 

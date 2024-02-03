@@ -29,45 +29,38 @@ in {
     version = mkOption {
       type = types.str;
       default = version;
-      description = "Version of the Home Asssistant instance";
     };
 
     hostName = mkOption {
       type = types.str;
-      default = "hass.${config.networking.fqdn}";
-      description = "FQDN for the Home Assistant instance";
+      default = "hass.${this.hostName}";
     };
 
     ip = mkOption {
       type = types.str;
-      default = "10.1.0.4";
-      description = "IP address for the Home Assistant instance";
+      default = "10.1.0.4"; # IP address for the Home Assistant instance
     };
 
     dataDir = mkOption {
       type = types.path;
-      default = "/var/lib/hass";
-      description = "Data directory for the Home Assistant instance";
+      default = "/var/lib/hass"; # Data directory for the Home Assistant instance
     };
 
     zigbee = mkOption {
-      description = "Path to Zigbee USB device";
       type = types.str;
-      default = "";
+      default = ""; # Path to Zigbee USB device
       example = [ "/dev/serial/by-id/usb-Nabu_Casa_SkyConnect_v1.0_28b77f55258dec11915068e883c5466d-if00-port0" ];
     };
 
     zwave = mkOption {
-      description = "Path to Z-Wave USB device";
       type = types.str;
-      default = "";
+      default = ""; # Path to Z-Wave USB device
       example = [ "/dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_3e535b346625ed11904d6ac2f9a97352-if00-port0" ];
     };
 
     zwaveHostName = mkOption {
       type = types.str;
-      default = "zwave.${config.networking.fqdn}";
-      description = "FQDN for the Z-Wave UI instance";
+      default = "zwave.${this.hostName}";
     };
 
     zwaveVersion = mkOption {
@@ -84,8 +77,7 @@ in {
 
     isyHostName = mkOption {
       type = types.str;
-      default = "isy.${config.networking.fqdn}";
-      description = "FQDN for the ISY device";
+      default = "isy.${this.hostName}";
     };
 
 
@@ -131,9 +123,8 @@ in {
       "${cfg.dataDir}/zwave" = dir;
     };
 
-    # Enable database and reverse proxy
+    # Enable database 
     modules.postgresql.enable = true;
-    modules.traefik.enable = true;
 
     # Postgres database configuration
     # This "hass" postgres user isn't actually being used to access the database.

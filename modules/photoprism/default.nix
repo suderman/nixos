@@ -16,7 +16,7 @@ in {
     enable = lib.options.mkEnableOption "photoprism"; 
     hostName = mkOption {
       type = types.str;
-      default = "photoprism.${config.networking.fqdn}";
+      default = "photoprism.${this.hostName}";
     };
     port = mkOption {
       type = types.port;

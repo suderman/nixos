@@ -11,6 +11,10 @@ in {
 
   config = mkIf cfg.enable {
 
+    # Enable reverse proxy
+    modules.traefik.enable = true;
+    modules.traefik.certificates = [ cfg.hostName ];
+
     # Home Assistant container
     virtualisation.oci-containers.containers.home-assistant = {
       image = "ghcr.io/home-assistant/home-assistant:${cfg.version}";

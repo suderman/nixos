@@ -19,8 +19,7 @@ in {
 
     hostName = mkOption {
       type = types.str;
-      default = "freshrss.${config.networking.fqdn}";
-      description = "FQDN for the FreshRSS instance";
+      default = "freshrss.${this.hostName}";
     };
 
   };

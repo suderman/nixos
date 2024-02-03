@@ -10,6 +10,10 @@ in {
 
   config = mkIf (cfg.enable && cfg.zwave != "") {
 
+    # Enable reverse proxy
+    modules.traefik.enable = true;
+    modules.traefik.certificates = [ cfg.zwaveHostName ];
+
     # Z-Wave JS UI container
     virtualisation.oci-containers.containers.zwave = {
       image = "ghcr.io/zwave-js/zwave-js-ui:${cfg.zwaveVersion}";

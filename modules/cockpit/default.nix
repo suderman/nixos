@@ -1,5 +1,5 @@
 # modules.cockpit.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let
 
@@ -16,7 +16,7 @@ in {
     enable = lib.options.mkEnableOption "cockpit"; 
     hostName = mkOption {
       type = types.str;
-      default = "cockpit.${config.networking.fqdn}";
+      default = "cockpit.${this.hostName}";
     };
     port = mkOption {
       type = types.port;

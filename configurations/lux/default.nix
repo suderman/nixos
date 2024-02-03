@@ -1,3 +1,3 @@
 {
-  host = "lux"; 
+  hostName = "lux"; 
 }

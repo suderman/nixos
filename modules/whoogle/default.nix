@@ -1,5 +1,5 @@
 # modules.whoogle.enable = true;
-{ inputs, config, pkgs, lib, ... }:
+{ config, lib, this, ... }:
   
 let 
 
@@ -8,19 +8,16 @@ let
 
   cfg = config.modules.whoogle;
   inherit (lib) mkIf mkOption mkBefore types;
+  inherit (this.lib) traefikLabels;
 
 in {
 
   options.modules.whoogle = {
-
     enable = lib.options.mkEnableOption "whoogle"; 
-
     hostName = mkOption {
       type = types.str;
-      default = "whoogle.${config.networking.fqdn}";
-      description = "FQDN for the Whoogle instance";
+      default = "whoogle.${this.hostName}";
     };
-
   };
 
   config = mkIf cfg.enable {
@@ -28,14 +25,10 @@ in {
     # Enable reverse proxy
     modules.traefik.enable = true;
 
+    # Configure OCI container
     virtualisation.oci-containers.containers."whoogle" = {
       image = "benbusby/whoogle-search:${version}";
-      extraOptions = [
-        "--label=traefik.enable=true"
-        "--label=traefik.http.routers.whoogle.rule=Host(`${cfg.hostName}`)"
-        "--label=traefik.http.routers.whoogle.tls.certresolver=resolver-dns"
-        "--label=traefik.http.routers.whoogle.middlewares=local@file"
-      ];
+      extraOptions = traefikLabels cfg.hostName;
     };
 
     # Extend systemd service

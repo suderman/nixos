@@ -1,5 +1,5 @@
 # modules.unifi.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let
 
@@ -20,14 +20,22 @@ in {
 
     hostName = mkOption {
       type = types.str;
-      default = "unifi.${config.networking.fqdn}";
-      description = "FQDN for the Unifi Controller instance";
+      default = "unifi.${this.hostName}";
     };
 
     dataDir = mkOption {
       type = types.path;
       default = "/var/lib/unifi";
-      description = "Data directory the Unifi Controller instance";
+    };
+
+    gateway = mkOption {
+      type = types.str;
+      default = ""; # IP address for the gateway
+    };
+
+    gatewayHostName = mkOption {
+      type = types.str;
+      default = "rt.${this.hostName}";
     };
 
   };
@@ -59,9 +67,6 @@ in {
       user = config.users.users.unifi.uid; 
       group = config.users.groups.unifi.gid;
     };
-
-    # Enable reverse proxy
-    modules.traefik.enable = true;
 
     # Init service
     systemd.services.unifi = {

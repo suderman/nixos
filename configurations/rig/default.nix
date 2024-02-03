@@ -1,4 +1,4 @@
 {
-  host = "rig"; 
+  hostName = "rig"; 
   config.modules.hyprland.enable = true;
 }

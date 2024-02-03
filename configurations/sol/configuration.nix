@@ -28,7 +28,10 @@
   # Web services
   modules.cockpit.enable = true;
   modules.whoogle.enable = true;
-  modules.gitea.enable = true;
+  modules.gitea = {
+    hostName = "git.sol";
+    enable = true;
+  };
   modules.tiddlywiki.enable = true;
   modules.rsshub.enable = true;
   modules.freshrss.enable = true;

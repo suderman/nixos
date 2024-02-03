@@ -13,3 +13,11 @@ Intel NUC Panther Canyon PAHi7 With 11th Gen Core Processors i7 1165G7 RNUC11PAH
 I recorded my initial installation of this server to help out forgetful future-me:
 
 <https://www.youtube.com/watch?v=Uoii8733sIo>
+
+## Setup
+
+```bash
+# Authenticate Tailscale and expose home subnet
+sudo tailscale up --accept-routes --advertise-routes=10.1.0.0/16 
+```
+

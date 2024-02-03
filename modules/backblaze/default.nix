@@ -5,7 +5,7 @@
 #   driveF = "/mnt/ssd/data";
 #   driveG = "/mnt/raid/media";
 # };
-{ inputs, config, pkgs, lib, ... }:
+{ inputs, config, lib, pkgs, this, ... }:
   
 let 
 
@@ -19,7 +19,7 @@ in {
     enable = lib.options.mkEnableOption "backblaze"; 
     hostName = mkOption {
       type = types.str;
-      default = "backblaze.${config.networking.fqdn}";
+      default = "backblaze.${this.hostName}";
     };
     dataDir = mkOption {
       type = types.path;

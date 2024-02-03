@@ -9,6 +9,10 @@ in {
 
   config = mkIf (cfg.enable && cfg.isy != "") {
 
+    # Enable reverse proxy
+    modules.traefik.enable = true;
+    modules.traefik.certificates = [ cfg.isyHostName ];
+
     services.traefik.dynamicConfigOptions.http = {
       middlewares.isy = {
         headers.customRequestHeaders.authorization = "Basic {{ env `ISY_BASIC_AUTH` }}";

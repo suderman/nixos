@@ -124,9 +124,12 @@ in {
       "/mnt/ssd".target."/backups/${hostName}" = {};
 
       # Remote backup to "eve" server using ssh
-      "/nix".target."ssh://eve.${domain}/backups/${hostName}" = {};
-      "/mnt/ssd".target."ssh://eve.${domain}/backups/${hostName}" = {};
-      "/mnt/raid".target."ssh://eve.${domain}/backups/${hostName}" = {};
+      # "/nix".target."ssh://eve.${domain}/backups/${hostName}" = {};
+      # "/mnt/ssd".target."ssh://eve.${domain}/backups/${hostName}" = {};
+      # "/mnt/raid".target."ssh://eve.${domain}/backups/${hostName}" = {};
+      "/nix".target."ssh://eve/backups/${hostName}" = {};
+      "/mnt/ssd".target."ssh://eve/backups/${hostName}" = {};
+      "/mnt/raid".target."ssh://eve/backups/${hostName}" = {};
 
     };
   };

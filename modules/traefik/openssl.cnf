@@ -13,3 +13,4 @@ subjectAltName = @alt_names
 [ alt_names ]
 DNS.1 = $ENV::NAME
 DNS.2 = *.$ENV::NAME
+IP.1 = $ENV::IP

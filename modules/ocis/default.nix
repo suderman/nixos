@@ -22,7 +22,7 @@ in {
     enable = lib.options.mkEnableOption "ocis"; 
     hostName = mkOption {
       type = types.str;
-      default = "ocis.${config.networking.fqdn}";
+      default = "ocis.${this.hostName}";
     };
     dataDir = mkOption {
       type = types.path;

@@ -1,5 +1,5 @@
 # modules.tautulli.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let
 
@@ -15,12 +15,10 @@ in {
 
     hostName = mkOption {
       type = types.str;
-      default = "tautulli.${config.networking.fqdn}";
-      description = "FQDN for the Tautulli instance";
+      default = "tautulli.${this.hostName}";
     };
 
     port = mkOption {
-      description = "Port for Tautulli instance";
       default = 8181;
       type = types.port;
     };

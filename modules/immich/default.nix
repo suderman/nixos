@@ -24,33 +24,28 @@ in {
     enable = options.mkEnableOption "immich"; 
 
     version = mkOption {
-      description = "Version of the Immich instance";
       type = types.str;
       default = version;
     };
 
-    hostName = mkOption {
-      description = "FQDN for the Immich instance";
+    name = mkOption {
       type = types.str;
-      default = "immich.${config.networking.fqdn}";
+      default = "immich";
     };
 
     dataDir = mkOption {
-      description = "Data directory for the Immich instance";
       type = types.path;
-      default = "/var/lib/immich";
+      default = "/var/lib/immich"; # Data directory for the Immich instance
     };
 
     photosDir = mkOption {
-      description = "Photos directory for the Immich instance";
       type = types.str;
-      default = "";
+      default = ""; # Photos directory for the Immich instance
     };
 
     externalDir = mkOption {
-      description = "External library directory for the Immich instance";
       type = types.str;
-      default = "";
+      default = ""; # External library directory for the Immich instance
     };
 
     environment = mkOption { 

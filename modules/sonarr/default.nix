@@ -1,5 +1,5 @@
 # modules.sonarr.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let
 
@@ -13,7 +13,7 @@ in {
     enable = options.mkEnableOption "sonarr"; 
     hostName = mkOption {
       type = types.str; 
-      default = "sonarr.${config.networking.fqdn}";
+      default = "sonarr.${this.hostName}";
     };
     port = mkOption {
       type = types.port;

@@ -27,6 +27,7 @@
 
   # Web services
   modules.tailscale.enable = true;
+  modules.blocky.enable = true;
   modules.ddns.enable = true;
   modules.whoami.enable = true;
   modules.cockpit.enable = true;
@@ -34,14 +35,17 @@
   # Reverse proxy bluebubbles server on nearby Mac Mini
   modules.bluebubbles = with this.network.dns; {
     enable = true;
+    hostName = "bb.${this.hostName}";
     ip = work.pom;
   };
 
   # Reverse proxy for router
+  modules.traefik.enable = true;
+  modules.traefik.certificates = [ "rt.${this.hostName}" ];
   services.traefik.dynamicConfigOptions.http = with this.network.dns; {
     routers.rt = {
-      rule = "Host(`rt.${config.networking.fqdn}`)";
-      tls.certresolver = "resolver-dns";
+      rule = "Host(`rt.${this.hostName}`)";
+      tls = {};
       service = "rt";
     };
     services.rt.loadBalancer.servers = [{ url = "https://${work.rt}:10443"; }];

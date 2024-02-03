@@ -4,8 +4,29 @@
   cfg = config.modules.traefik;
   certs = "${config.services.traefik.dataDir}/certs"; # dir for self-signed certificates
 
-  inherit (lib) mkBefore mkForce mkIf mkOption options types;
+  inherit (lib) attrNames mapAttrs mkForce mkIf mkOption options types;
   inherit (config.age) secrets;
+
+  # Generate traefik labels for use with OCI container
+  labels = x: ( let
+    inherit (builtins) head isAttrs isString replaceStrings toString;
+    inherit (lib) splitString;
+    fromString = name: fromAttrs { inherit name; };
+    fromAttrs = { name, hostName ? name, port ? 0, scheme ? "" }: [
+      "--label=traefik.enable=true"
+      "--label=traefik.http.routers.${name}.rule=Host(`${hostName}.${this.hostName}`)"
+      "--label=traefik.http.routers.${name}.tls=true"
+      "--label=traefik.http.routers.${name}.middlewares=local@file" 
+    ] ++ ( if port <= 0 then [] else [
+      "--label=traefik.http.services.${name}.loadbalancer.server.port=${toString port}"
+    ]) ++ ( if scheme == "" then [] else [
+      "--label=traefik.http.services.${name}.loadbalancer.server.scheme=${scheme}"
+    ]);
+  in
+    if (isString x) then (fromString x)
+    else if (isAttrs x) then (fromAttrs x)
+    else []
+  );
 
 in {
 
@@ -13,8 +34,15 @@ in {
     enable = options.mkEnableOption "traefik"; 
     certificates = mkOption { 
       type = with types; listOf str;
-      default = [ this.host "local" ];
+      default = [ this.hostName "local" ];
     };
+    proxies = mkOption { 
+      type = with types; anything; default = {};
+    };
+    labels = mkOption {
+      type = types.anything; readOnly = true; default = labels;
+    };
+
   };
 
   config = mkIf cfg.enable {
@@ -35,11 +63,15 @@ in {
     };
 
     # Generate certificates with openssl
-    systemd.services.traefik.preStart = let openssl = "${pkgs.openssl}/bin/openssl"; in mkBefore ''
+    systemd.services.traefik.preStart = let 
+      inherit (builtins) toString;
+      inherit (lib) mkBefore unique;
+      openssl = "${pkgs.openssl}/bin/openssl"; 
+    in mkBefore ''
       [[ -e ${certs}/key ]] || ${openssl} genrsa -out ${certs}/key 4096 
-      echo "01" > ${certs}/serial 
-      for NAME in ${builtins.toString cfg.certificates}; do
-        export NAME
+      [[ -e ${certs}/serial ]] || echo "01" > ${certs}/serial 
+      for NAME in ${toString (unique cfg.certificates)}; do
+        export NAME IP=${this.network.dns.${this.hostName}}
         ${openssl} req -new -key ${certs}/key -config ${./openssl.cnf} -extensions v3_req -subj "/CN=$NAME" -out ${certs}/csr 
         ${openssl} x509 -req -days 365 -in ${certs}/csr -extfile ${./openssl.cnf} -extensions v3_req -CA ${this.ca} -CAkey ${secrets.ca-key.path} -CAserial ${certs}/serial -out ${certs}/crt
         cat ${certs}/crt ${this.ca} > ${certs}/$NAME.crt
@@ -47,11 +79,38 @@ in {
       rm -f ${certs}/csr ${certs}/crt
     '';
 
-    # Create certificates for traefik dashboard
-    modules.traefik.certificates = [ this.host "traefik.${this.host}" ];
+    # Create list of host names including host, reverse proxies and OCI container labels
+    modules.traefik.certificates = let
+      inherit (builtins) attrValues concatMap filter split;
+      inherit (lib) flatten hasInfix hasPrefix hasSuffix;
 
-    services.traefik = with config.networking; {
+      configHostNames = let
+        # Collect router rules from traefik dynamic configuration options
+        rules = flatten (map (router: [router.rule]) (attrValues config.services.traefik.dynamicConfigOptions.http.routers));
+        # Filter rules to the server's host name, starting with a period & ending with backtick parenthesis: .HOSTNAME`)
+        hostRules = filter (rule: hasInfix ".${this.hostName}`)" rule) rules;
+        # Split each rule by backtick and collect list elements that end with server's hostname (starting with a period) 
+        hostNames = filter (elm: hasSuffix ".${this.hostName}" elm) (flatten (map (rule: (split "`" rule)) hostRules));
+      in hostNames;
 
+      labelHostNames = let
+        # Collect extraOptions from all OCI containers 
+        options = concatMap (container: container.extraOptions) (attrValues config.virtualisation.oci-containers.containers);
+        # Filter to only include traefik labels
+        labels = filter (option: hasPrefix "--label=traefik.http.routers" option) options;
+        # Filter further to only include router rules
+        rules = filter (label: hasInfix ".rule=Host(`" label) labels;
+        # Filter rules to the server's host name, starting with a period & ending with backtick parenthesis: .HOSTNAME`)
+        hostRules = filter (label: hasInfix ".${this.hostName}`)" label) labels;
+        # Split each rule by backtick and collect list elements that end with server's hostname (starting with a period) 
+        hostNames = filter (elm: hasSuffix ".${this.hostName}" elm) (flatten (map (rule: (split "`" rule)) hostRules));
+      in hostNames;
+
+    in [ this.hostName ] ++ configHostNames ++ labelHostNames;
+
+
+    # Configure traefik service
+    services.traefik = {
       enable = true;
 
       # Required so traefik is permitted to watch docker events
@@ -76,10 +135,10 @@ in {
         # Listen on port 80 and redirect to port 443
         entryPoints.web = {
           address = ":80";
-          # http.redirections.entrypoint = {
-          #   to = "websecure";
-          #   scheme = "https";
-          # };
+          http.redirections.entrypoint = {
+            to = "websecure";
+            scheme = "https";
+          };
         };
 
         # Run everything on 443
@@ -91,7 +150,7 @@ in {
         certificatesResolvers.resolver-dns.acme = {
           dnsChallenge.provider = "cloudflare";
           storage = "/var/lib/traefik/cert.json";
-          email = "${this.host}@${domain}";
+          email = "${this.hostName}@${config.networking.domain}";
         };
 
         global = {
@@ -120,15 +179,29 @@ in {
 
         };
 
-        http.routers = {
+        # Generate traefik services from configuration proxies
+        http.services = { "noop" = {}; } // 
+          ( mapAttrs ( name: url: {
+            loadBalancer.servers = [{ inherit url; }];
+          }) cfg.proxies );
+
+        # Generate traefik routers from configuration proxies
+        http.routers = (
+          mapAttrs ( name: url: {
+            rule = "Host(`${name}.${this.hostName}`)";
+            entrypoints = "websecure"; tls = true;
+            middlewares = "local@file";
+            service = name;
+          }) cfg.proxies 
+
+        # Make available the traefik dashboard
+        ) // {
           traefik = {
-            entrypoints = "websecure";
-            rule = "Host(`${this.host}`) || Host(`traefik.${this.host}`)";
-            tls = {};
+            entrypoints = "websecure"; tls = {};
+            rule = "Host(`${this.hostName}`) || Host(`traefik.${this.hostName}`)";
             middlewares = "local@file";
             service = "api@internal";
-          };
-          
+          }; 
         };
 
         # Add every module certificate into the default store
@@ -139,11 +212,12 @@ in {
 
         # Also change the default certificate
         tls.stores.default.defaultCertificate = {
-          certFile = "${certs}/${this.host}.crt"; 
+          certFile = "${certs}/${this.hostName}.crt"; 
           keyFile = "${certs}/key"; 
         };
 
       };
+
     };
 
     # Enable Docker and set to backend (over podman default)

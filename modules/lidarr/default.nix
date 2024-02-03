@@ -1,5 +1,5 @@
 # modules.lidarr.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let
 
@@ -13,7 +13,7 @@ in {
     enable = options.mkEnableOption "lidarr"; 
     hostName = mkOption {
       type = types.str; 
-      default = "lidarr.${config.networking.fqdn}";
+      default = "lidarr.${this.hostName}";
     };
     port = mkOption {
       type = types.port;

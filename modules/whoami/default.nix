@@ -1,39 +1,37 @@
 # modules.whoami.enable = true;
-{ inputs, config, lib, pkgs, this, ... }:
+{ config, lib, this, ... }:
   
 let 
-  cfg = config.modules.whoami;
-  inherit (config.age) secrets;
-  inherit (lib) mkIf;
 
-  domain = "whoami.${this.host}";
+  cfg = config.modules.whoami;
+  inherit (lib) mkIf mkOption types;
+  inherit (config.modules) traefik;
 
 in {
 
   options.modules.whoami = {
     enable = lib.options.mkEnableOption "whoami"; 
+    name = mkOption {
+      type = types.str;
+      default = "whoami";
+    };
   };
 
   config = mkIf cfg.enable {
 
-    # service
-    virtualisation.oci-containers.containers."whoami" = {
-      image = "traefik/whoami";
-      extraOptions = [
-        "--label=traefik.enable=true"
-        "--label=traefik.http.routers.whoami.rule=Host(`${domain}`)"
-        "--label=traefik.http.routers.whoami.tls=true"
-        "--label=traefik.http.routers.whoami.middlewares=local@file"
-      ];
-      environmentFiles = [ secrets.traefik-env.path ];
-      environment = {
-        FOO = "BAR";
-      };
-    };
-
     # Enable reverse proxy
     modules.traefik.enable = true;
-    modules.traefik.certificates = [ domain ];
+
+    # Configure OCI container
+    virtualisation.oci-containers.containers."whoami" = {
+      image = "traefik/whoami";
+      cmd = [ "--port=2001" ];
+      extraOptions = ( traefik.labels {
+        name = cfg.name;
+        port = 2001;
+        scheme = "http";
+      } ) ++ [ "--network=host" ];
+    };
 
   }; 
 

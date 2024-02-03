@@ -1,5 +1,5 @@
 # modules.radarr.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let
 
@@ -13,7 +13,7 @@ in {
     enable = options.mkEnableOption "radarr"; 
     hostName = mkOption {
       type = types.str; 
-      default = "radarr.${config.networking.fqdn}";
+      default = "radarr.${this.hostName}";
     };
     port = mkOption {
       type = types.port;

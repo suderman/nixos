@@ -1,5 +1,5 @@
 # modules.sabnzbd.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let
 
@@ -13,11 +13,9 @@ in {
     enable = options.mkEnableOption "sabnzbd"; 
     hostName = mkOption {
       type = types.str;
-      default = "sab.${config.networking.fqdn}";
-      description = "FQDN for the sabnzd instance";
+      default = "sab.${this.hostName}";
     };
     port = mkOption {
-      description = "Port for sabnzbd instance";
       default = 8008; # package default is 8080
       type = types.port;
     };

@@ -13,6 +13,10 @@ in {
 
   config = mkIf cfg.enable {
 
+    # Enable reverse proxy
+    modules.traefik.enable = true;
+    modules.traefik.certificates = [ cfg.hostName ];
+
     # This docker image is more reliable than the nixpkgs version, at least for now.
     # The controller requires a dated version of mongodb that nixpkgs has dropped.
     # https://github.com/NixOS/nixpkgs/commit/45d27d43c4dfc0eb6f6b55aa9fbdfb90513271df

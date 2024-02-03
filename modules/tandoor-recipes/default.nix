@@ -1,5 +1,5 @@
 # modules.tandoor-recipes.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let
 
@@ -24,8 +24,7 @@ in {
 
     hostName = mkOption {
       type = types.str;
-      default = "tandoor.${config.networking.fqdn}";
-      description = "FQDN for the FreshRSS instance";
+      default = "tandoor.${this.hostName}";
     };
 
     public = mkOption { 

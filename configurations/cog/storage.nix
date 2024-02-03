@@ -73,7 +73,8 @@ in {
 
     # Nightly backups over SSH
     backups = {
-      "/nix".target."ssh://eve.${domain}/backups/${hostName}" = {};
+      # "/nix".target."ssh://eve.${domain}/backups/${hostName}" = {};
+      "/nix".target."ssh://eve/backups/${hostName}" = {};
     };
 
   };

@@ -21,8 +21,7 @@ in {
 
     hostName = mkOption {
       type = types.str;
-      default = "silverbullet.${config.networking.fqdn}";
-      description = "FQDN for the SilverBullet instance";
+      default = "silverbullet.${this.hostName}";
     };
 
     dataDir = mkOption {

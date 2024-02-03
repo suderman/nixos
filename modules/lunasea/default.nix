@@ -1,5 +1,5 @@
 # modules.lunasea.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let
 
@@ -15,8 +15,7 @@ in {
 
     hostName = mkOption {
       type = types.str;
-      default = "lunasea.${config.networking.fqdn}";
-      description = "FQDN for the LunaSea instance";
+      default = "lunasea.${this.hostName}";
     };
 
   };

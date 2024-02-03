@@ -17,7 +17,7 @@ in {
    enable = lib.options.mkEnableOption "wallabag"; 
     hostName = mkOption {
       type = types.str;
-      default = "bag.${config.networking.fqdn}";
+      default = "bag.${this.hostName}";
     };
     dataDir = mkOption {
       type = types.path;

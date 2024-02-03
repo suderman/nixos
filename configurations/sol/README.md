@@ -119,3 +119,11 @@ sudo tailscale up
 sudo systemctl start tailscale-dns
 ```
 </details>
+
+## Setup
+
+```bash
+# Authenticate Tailscale
+sudo tailscale up --accept-routes
+```
+

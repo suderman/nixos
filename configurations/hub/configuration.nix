@@ -1,4 +1,4 @@
-{ config, pkgs, ... }: {
+{ config, pkgs, this, ... }: {
 
   imports = [ 
     ./hardware-configuration.nix
@@ -27,12 +27,27 @@
   modules.cockpit.enable = true;
   modules.withings-sync.enable = true;
 
-  modules.unifi.enable = true;
-  modules.home-assistant = {
-    enable = true; ip = "10.1.0.4";
+  # Custom DNS
+  modules.blocky.enable = true;
+
+  # LAN controller
+  modules.unifi = with this.network.dns; {
+    enable = true;
+    hostName = "unifi.${this.hostName}";
+    gateway = home.logos;
+    gatewayHostName = "rt.${this.hostName}";
+  };
+
+  # Home automation
+  modules.home-assistant = with this.network.dns; {
+    enable = true; 
+    ip = home.hub;
+    hostName = "hass.${this.hostName}";
     zigbee = "/dev/serial/by-id/usb-Nabu_Casa_SkyConnect_v1.0_28b77f55258dec11915068e883c5466d-if00-port0";
     zwave = "/dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_3e535b346625ed11904d6ac2f9a97352-if00-port0";
-    isy = "10.1.0.8";
+    isy = home.isy;
+    isyHostName = "isy.${this.hostName}";
+    zwaveHostName = "zwave.${this.hostName}";
   };
 
   # Test services

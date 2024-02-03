@@ -82,3 +82,11 @@ nixos-generate-config --root /mnt
 # Run nixos installer
 nixos-install --flake /mnt/nix/state/etc/nixos#cog
 ```
+
+## Setup
+
+```bash
+# Authenticate Tailscale
+sudo tailscale up --accept-routes
+```
+
