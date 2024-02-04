@@ -15,9 +15,9 @@ in {
 
   options.modules.wallabag = {
    enable = lib.options.mkEnableOption "wallabag"; 
-    hostName = mkOption {
+    name = mkOption {
       type = types.str;
-      default = "bag.${this.hostName}";
+      default = "bag";
     };
     dataDir = mkOption {
       type = types.path;
@@ -78,24 +78,16 @@ in {
       ensureDatabases = [ "wallabag" ];
     };
 
-    # traefik proxy 
-    services.traefik.dynamicConfigOptions.http = {
-      routers.wallabag = {
-        rule = "Host(`${cfg.hostName}`)";
-        tls.certresolver = "resolver-dns";
-        middlewares = [ "local@file" "wallabag@file" ];
-        service = "wallabag";
+    modules.traefik = { 
+      routers.bag = "https://127.0.0.1:${toString cfg.port}";
+      http = {
+        middlewares.wallabag.headers.customRequestHeaders.Host = "${cfg.name}.${this.hostName}";
+        routers.bag.middlewares = [ "wallabag" ];
       };
-      middlewares.wallabag.headers = {
-        customRequestHeaders.Host = cfg.hostName;
-      };
-      services.wallabag.loadBalancer.servers = [{ 
-        url = "https://127.0.0.1:${toString cfg.port}"; 
-      }];
     };
 
     # nginx server for php fpm
-    services.nginx.virtualHosts."${cfg.hostName}" = {
+    services.nginx.virtualHosts."${cfg.name}" = {
       root = "${cfg.package}/web";
       extraConfig = ''
         add_header X-Frame-Options SAMEORIGIN;
@@ -154,7 +146,7 @@ in {
       PATH=$PATH:${lib.makeBinPath [ pkgs.envsubst ]}
       source "${secrets.smtp-env.path}"
       export EMAIL_HOST EMAIL_PORT EMAIL_HOST_USER EMAIL_HOST_PASSWORD SECRET_KEY
-      export HOST_NAME="${cfg.hostName}"
+      export HOST_NAME="${cfg.name}.${this.hostName}"
 
       # Populate parameters configuration with secrets
       cat ${dir}/parameters.template.yml | envsubst > ${dir}/parameters.yml

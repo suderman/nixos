@@ -8,9 +8,10 @@ let
 
   cfg = config.modules.silverbullet;
 
-  inherit (lib) mkIf mkOption options types strings mkBefore;
   inherit (builtins) toString;
+  inherit (lib) mkIf mkOption options types strings mkBefore;
   inherit (this.lib) extraGroups;
+  inherit (config.modules) traefik;
 
 
 in {
@@ -19,9 +20,9 @@ in {
 
     enable = options.mkEnableOption "silverbullet"; 
 
-    hostName = mkOption {
+    name = mkOption {
       type = types.str;
-      default = "silverbullet.${this.hostName}";
+      default = "silverbullet";
     };
 
     dataDir = mkOption {
@@ -78,12 +79,7 @@ in {
       user = with config.ids; "${toString uids.silverbullet}:${toString gids.silverbullet}";
 
       # Traefik labels
-      extraOptions = [
-        "--label=traefik.enable=true"
-        "--label=traefik.http.routers.silverbullet.rule=Host(`${cfg.hostName}`)"
-        "--label=traefik.http.routers.silverbullet.tls.certresolver=resolver-dns"
-        "--label=traefik.http.routers.silverbullet.middlewares=local@file"
-      ];
+      extraOptions = traefik.labels cfg.name;
 
       volumes = [ "${cfg.dataDir}:/space" ];
 

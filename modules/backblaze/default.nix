@@ -18,7 +18,7 @@ in {
 
   options.modules.backblaze = {
     enable = lib.options.mkEnableOption "backblaze"; 
-    hostName = mkOption {
+    name = mkOption {
       type = types.str;
       default = "backblaze";
     };
@@ -43,7 +43,7 @@ in {
       autoStart = true;
 
       # Traefik labels
-      extraOptions = traefik.labels cfg.hostName
+      extraOptions = traefik.labels cfg.name
 
       # Additional flags
       ++ [ "--init" ];

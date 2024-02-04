@@ -15,14 +15,15 @@ let
   inherit (lib) mkIf mkOption mkBefore types;
   inherit (this.lib) extraGroups;
   inherit (config.age) secrets;
+  inherit (config.modules) traefik;
 
 in {
 
   options.modules.ocis = {
     enable = lib.options.mkEnableOption "ocis"; 
-    hostName = mkOption {
+    name = mkOption {
       type = types.str;
-      default = "ocis.${this.hostName}";
+      default = "ocis";
     };
     dataDir = mkOption {
       type = types.path;
@@ -73,15 +74,10 @@ in {
       user = ownership;
 
       # Traefik labels
-      extraOptions = [
-        "--label=traefik.enable=true"
-        "--label=traefik.http.routers.ocis.rule=Host(`${cfg.hostName}`)"
-        "--label=traefik.http.routers.ocis.tls.certresolver=resolver-dns"
-        "--label=traefik.http.routers.ocis.middlewares=local@file"
-      ];
+      extraOptions = traefik.labels cfg.name;
 
       environment = {
-        OCIS_URL = "https://${cfg.hostName}";
+        OCIS_URL = "https://${cfg.name}.${this.hostName}";
         OCIS_LOG_LEVEL = "debug";
         PROXY_TLS = "false"; 
         OCIS_INSECURE = "false";

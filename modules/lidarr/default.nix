@@ -11,9 +11,9 @@ in {
 
   options.modules.lidarr = {
     enable = options.mkEnableOption "lidarr"; 
-    hostName = mkOption {
+    name = mkOption {
       type = types.str; 
-      default = "lidarr.${this.hostName}";
+      default = "lidarr";
     };
     port = mkOption {
       type = types.port;
@@ -34,21 +34,12 @@ in {
       package = pkgs.lidarr;
       dataDir = cfg.dataDir;
     };
+
     users.groups.media.members = [ config.services.lidarr.user ];
 
-    # Enable reverse proxy
-    modules.traefik.enable = true;
-
-    # Traefik proxy
-    services.traefik.dynamicConfigOptions.http = {
-      routers.lidarr = {
-        entrypoints = "websecure";
-        rule = "Host(`${cfg.hostName}`)";
-        tls.certresolver = "resolver-dns";
-        middlewares = "local@file";
-        service = "lidarr";
-      };
-      services.lidarr.loadBalancer.servers = [{ url = "http://127.0.0.1:${toString cfg.port}"; }];
+    modules.traefik = {
+      enable = true;
+      routers.${cfg.name} = "http://127.0.0.1:${toString cfg.port}";
     };
 
   };

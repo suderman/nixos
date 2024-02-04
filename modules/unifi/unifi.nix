@@ -6,8 +6,9 @@ let
   version = "7.5";
 
   cfg = config.modules.unifi;
-  inherit (lib) mkIf;
   inherit (builtins) toString;
+  inherit (lib) mkIf;
+  inherit (config.modules) traefik;
 
 in {
 
@@ -15,7 +16,6 @@ in {
 
     # Enable reverse proxy
     modules.traefik.enable = true;
-    modules.traefik.certificates = [ cfg.hostName ];
 
     # This docker image is more reliable than the nixpkgs version, at least for now.
     # The controller requires a dated version of mongodb that nixpkgs has dropped.
@@ -25,18 +25,14 @@ in {
       autoStart = false;
 
       # Traefik labels
-      extraOptions = [
-        "--label=traefik.enable=true"
-        "--label=traefik.http.routers.unifi.rule=Host(`${cfg.hostName}`)"
-        "--label=traefik.http.routers.unifi.tls.certresolver=resolver-dns"
-        "--label=traefik.http.routers.unifi.middlewares=local@file"
-        "--label=traefik.http.services.unifi.loadbalancer.server.port=8443"
-        "--label=traefik.http.services.unifi.loadbalancer.server.scheme=https"
+      extraOptions = traefik.labels { 
+        name = cfg.name;
+        port = 8443;
+        scheme = "https";
+      } ++
 
       # Networking
-      ] ++ [
-        "--network=host"
-      ];
+      [ "--network=host" ];
 
       # Run as unifi user instead of root:
       # https://github.com/jacobalberty/unifi-docker/issues/509#issuecomment-1003727345

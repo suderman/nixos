@@ -17,9 +17,9 @@ in {
 
     enable = lib.options.mkEnableOption "freshrss"; 
 
-    hostName = mkOption {
+    name = mkOption {
       type = types.str;
-      default = "freshrss.${this.hostName}";
+      default = "freshrss";
     };
 
   };
@@ -30,7 +30,7 @@ in {
       enable = true;
       defaultUser = builtins.head this.admins;
       passwordFile = secrets.password.path;
-      baseUrl = "https://${cfg.hostName}";
+      baseUrl = "https://${cfg.name}.${this.hostName}";
       virtualHost = "freshrss";
       database.type = "pgsql";
       database.host = "127.0.0.1";
@@ -70,21 +70,15 @@ in {
 
     # Enable database and reverse proxies
     modules.postgresql.enable = true;
-    modules.traefik.enable = true;
     modules.nginx.enable = true;
 
-    # traefik proxy serving nginx proxy
-    services.traefik.dynamicConfigOptions.http = {
-      routers.freshrss = {
-        rule = "Host(`${cfg.hostName}`)";
-        tls.certresolver = "resolver-dns";
-        middlewares = [ "local@file" "freshrss@file" ];
-        service = "freshrss";
+    modules.traefik = { 
+      enable = true;
+      routers."${cfg.name}" = "http://127.0.0.1:${port}";
+      http = {
+        middlewares.freshrss.headers.customRequestHeaders.Host = cfg.name;
+        routers."${cfg.name}".middlewares = [ "freshrss" ];
       };
-      middlewares.freshrss = {
-        headers.customRequestHeaders.Host = "freshrss";
-      };
-      services.freshrss.loadBalancer.servers = [{ url = "http://127.0.0.1:${port}"; }];
     };
 
   };

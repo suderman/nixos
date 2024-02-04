@@ -3,9 +3,10 @@
 let
 
   cfg = config.modules.home-assistant;
-  inherit (lib) mkIf mkOption mkBefore options types strings;
   inherit (builtins) toString readFile;
+  inherit (lib) mkIf mkOption mkBefore options types strings;
   inherit (pkgs) writeText;
+  inherit (config.modules) traefik;
 
 in {
 
@@ -13,7 +14,6 @@ in {
 
     # Enable reverse proxy
     modules.traefik.enable = true;
-    modules.traefik.certificates = [ cfg.hostName ];
 
     # Home Assistant container
     virtualisation.oci-containers.containers.home-assistant = {
@@ -21,17 +21,14 @@ in {
       autoStart = false;
 
       # Traefik labels
-      extraOptions = [
-        "--label=traefik.enable=true"
-        "--label=traefik.http.routers.hass.rule=Host(`${cfg.hostName}`)"
-        "--label=traefik.http.routers.hass.tls.certresolver=resolver-dns"
-        "--label=traefik.http.routers.hass.middlewares=local@file"
-        "--label=traefik.http.services.hass.loadbalancer.server.port=8123"
-        "--label=traefik.http.services.hass.loadbalancer.server.scheme=http"
+      extraOptions = ( traefik.labels {
+        name = cfg.name;
+        port = 8123;
+        scheme = "http";
+      } ) ++
 
       # Networking and devices
-      ] ++ [
-        "--privileged" 
+      [ "--privileged" 
         "--network=host"
       ] ++ (if cfg.zigbee == "" then [] else [
         "--device=${cfg.zigbee}:/dev/zigbee"
@@ -40,8 +37,8 @@ in {
       # Environment variables
       environment = {
         TZ = config.time.timeZone;
-        ISY_URL = "https://${cfg.isyHostName}";
-        ZWAVE_URL = "https://${cfg.zwaveHostName}";
+        ISY_URL = "https://${cfg.isyName}";
+        ZWAVE_URL = "https://${cfg.zwaveName}";
         HOST_IP = cfg.ip;
       };
 

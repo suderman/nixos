@@ -11,9 +11,9 @@ in {
 
   options.modules.nextcloud = {
     enable = lib.options.mkEnableOption "nextcloud"; 
-    hostName = mkOption {
+    name = mkOption {
       type = types.str;
-      default = "nextcloud.${this.hostName}";
+      default = "nextcloud";
     };
     dataDir = mkOption {
       type = types.path;
@@ -25,7 +25,7 @@ in {
 
     services.nextcloud = {
       enable = true;
-      hostName = cfg.hostName;
+      hostName = "${cfg.name}.${this.hostName}";
       home = cfg.dataDir;
       package = pkgs.nextcloud26;
       autoUpdateApps.enable = true;
@@ -74,13 +74,13 @@ in {
     # traefik proxy serving nginx proxy
     services.traefik.dynamicConfigOptions.http = {
       routers.nextcloud = {
-        rule = "Host(`${cfg.hostName}`)";
+        rule = "Host(`${cfg.name}.${this.hostName}`)";
         tls.certresolver = "resolver-dns";
         middlewares = [ "local@file" "nextcloud@file" ];
         service = "nextcloud";
       };
       middlewares.nextcloud = {
-        headers.customRequestHeaders.Host = cfg.hostName;
+        headers.customRequestHeaders.Host = "${cfg.name}.${this.hostName}";
       };
       services.nextcloud.loadBalancer.servers = [{  
         url = "http://127.0.0.1:${toString config.services.nginx.defaultHTTPListenPort}"; 

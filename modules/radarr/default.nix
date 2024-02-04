@@ -11,9 +11,9 @@ in {
 
   options.modules.radarr = {
     enable = options.mkEnableOption "radarr"; 
-    hostName = mkOption {
+    name = mkOption {
       type = types.str; 
-      default = "radarr.${this.hostName}";
+      default = "radarr";
     };
     port = mkOption {
       type = types.port;
@@ -34,21 +34,12 @@ in {
       package = pkgs.radarr;
       dataDir = cfg.dataDir;
     };
+
     users.groups.media.members = [ config.services.radarr.user ];
 
-    # Enable reverse proxy
-    modules.traefik.enable = true;
-
-    # Traefik proxy
-    services.traefik.dynamicConfigOptions.http = {
-      routers.radarr = {
-        entrypoints = "websecure";
-        rule = "Host(`${cfg.hostName}`)";
-        tls.certresolver = "resolver-dns";
-        middlewares = "local@file";
-        service = "radarr";
-      };
-      services.radarr.loadBalancer.servers = [{ url = "http://127.0.0.1:${toString cfg.port}"; }];
+    modules.traefik = { 
+      enable = true;
+      routers."${cfg.name}" = "http://127.0.0.1:${toString cfg.port}";
     };
 
   };

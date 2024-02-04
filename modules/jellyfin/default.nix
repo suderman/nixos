@@ -14,9 +14,9 @@ in {
 
     enable = lib.options.mkEnableOption "jellyfin"; 
 
-    hostName = mkOption {
+    name = mkOption {
       type = types.str;
-      default = "jellyfin.${this.hostName}";
+      default = "jellyfin";
     };
 
   };
@@ -32,19 +32,9 @@ in {
 
     users.groups.media.members = [ config.services.jellyfin.user ];
 
-    # Enable reverse proxy
-    modules.traefik.enable = true;
-
-    services.traefik.dynamicConfigOptions.http = {
-      routers.jellyfin = {
-        entrypoints = "websecure";
-        rule = "Host(`${cfg.hostName}`)";
-        tls.certresolver = "resolver-dns";
-        middlewares = "local@file";
-        service = "jellyfin";
-      };
-      services.jellyfin.loadBalancer.servers = [{ url = "http://127.0.0.1:${port}"; }];
-
+    modules.traefik = { 
+      enable = true;
+      routers."${cfg.name}" = "http://127.0.0.1:${port}";
     };
 
   };

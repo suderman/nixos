@@ -31,9 +31,9 @@ in {
       default = version;
     };
 
-    hostName = mkOption {
+    name = mkOption {
       type = types.str;
-      default = "hass.${this.hostName}";
+      default = "hass";
     };
 
     ip = mkOption {
@@ -58,9 +58,9 @@ in {
       example = [ "/dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_3e535b346625ed11904d6ac2f9a97352-if00-port0" ];
     };
 
-    zwaveHostName = mkOption {
+    zwaveName = mkOption {
       type = types.str;
-      default = "zwave.${this.hostName}";
+      default = "zwave";
     };
 
     zwaveVersion = mkOption {
@@ -75,9 +75,9 @@ in {
       description = "IP address for the ISY device";
     };
 
-    isyHostName = mkOption {
+    isyName = mkOption {
       type = types.str;
-      default = "isy.${this.hostName}";
+      default = "isy";
     };
 
 

@@ -92,18 +92,26 @@
   modules.traefik.enable = true;
   modules.whoami.enable = true;
   modules.tandoor-recipes.enable = false;
-  modules.home-assistant.enable = false;
-  modules.rsshub.enable = false;
+  modules.home-assistant.enable = true;
+  modules.rsshub.enable = true;
   modules.backblaze.enable = false;
   modules.wallabag.enable = false;
+  modules.jellyfin.enable = true;
   modules.cockpit.enable = true;
   modules.gitea.enable = true;
+  modules.radarr.enable = true;
+  modules.sonarr.enable = true;
+  modules.lidarr.enable = true;
+  modules.sabnzbd.enable = true;
+  modules.lunasea.enable = true;
+  modules.freshrss.enable = true;
   modules.whoogle = { enable = true; name = "g"; };
   modules.nextcloud.enable = false;
-  modules.ocis = { enable = false; dataDir = "/tmp/ocis"; };
+  modules.tiddlywiki.enable = true;
+  modules.ocis = { enable = true; dataDir = "/tmp/ocis"; };
   modules.immich.enable = true;
   modules.photoprism = { enable = false; photosDir = "/photos"; };
-  modules.silverbullet.enable = false;
+  modules.silverbullet.enable = true;
   modules.bluebubbles.enable = true;
 
   # Apps & Games

@@ -26,9 +26,9 @@ in {
       type = types.str;
       default = tag;
     };
-    hostName = mkOption {
+    name = mkOption {
       type = types.str;
-      default = "rsshub.${this.hostName}";
+      default = "rsshub";
     };
   };
 

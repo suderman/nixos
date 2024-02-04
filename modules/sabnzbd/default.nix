@@ -11,9 +11,9 @@ in {
 
   options.modules.sabnzbd = {
     enable = options.mkEnableOption "sabnzbd"; 
-    hostName = mkOption {
+    name = mkOption {
       type = types.str;
-      default = "sab.${this.hostName}";
+      default = "sab";
     };
     port = mkOption {
       default = 8008; # package default is 8080
@@ -28,6 +28,7 @@ in {
       user = "sabnzbd";
       group = "media";
     };
+
     users.groups.media.members = [ config.services.sabnzbd.user ];
 
     # Modify ini file with specified port and host name
@@ -40,7 +41,7 @@ in {
       script = let 
         ini = toString config.services.sabnzbd.configFile; 
         port = toString cfg.port; 
-        host = toString cfg.hostName; 
+        host = toString "${cfg.name}.${this.hostName}"; 
       in ''
         # Give it 5 seconds to get going
         sleep 5 
@@ -68,19 +69,9 @@ in {
       after = [ "sabnzbd.service" ];
     };
 
-    # Enable reverse proxy
-    modules.traefik.enable = true;
-
-    # Traefik proxy
-    services.traefik.dynamicConfigOptions.http = {
-      routers.sabnzbd = {
-        entrypoints = "websecure";
-        rule = "Host(`${cfg.hostName}`)";
-        tls.certresolver = "resolver-dns";
-        middlewares = "local@file";
-        service = "sabnzbd";
-      };
-      services.sabnzbd.loadBalancer.servers = [{ url = "http://127.0.0.1:${toString cfg.port}"; }];
+    modules.traefik = { 
+      enable = true;
+      routers."${cfg.name}" = "http://127.0.0.1:${toString cfg.port}";
     };
 
   };

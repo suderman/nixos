@@ -4,6 +4,7 @@ let
 
   cfg = config.modules.rsshub;
   inherit (lib) mkIf mkBefore;
+  inherit (config.modules) traefik;
 
 in {
 
@@ -22,14 +23,10 @@ in {
       };
 
       # Traefik labels
-      extraOptions = [
-        "--label=traefik.enable=true"
-        "--label=traefik.http.routers.rsshub.rule=Host(`${cfg.hostName}`)"
-        "--label=traefik.http.routers.rsshub.tls.certresolver=resolver-dns"
-        "--label=traefik.http.routers.rsshub.middlewares=local@file"
+      extraOptions = traefik.labels cfg.name
 
       # Networking for docker containers
-      ] ++ [
+      ++ [
         "--network=rsshub"
       ];
 

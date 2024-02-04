@@ -12,9 +12,9 @@ in {
 
   options.modules.plex = {
     enable = lib.options.mkEnableOption "plex"; 
-    hostName = mkOption {
+    name = mkOption {
       type = types.str;
-      default = "plex.${this.hostName}";
+      default = "plex";
     };
   };
 
@@ -30,19 +30,9 @@ in {
       package = pkgs.plex;
     };
 
-    # Enable reverse proxy
-    modules.traefik.enable = true;
-
-    # Traefik configuration
-    services.traefik.dynamicConfigOptions.http = {
-      routers.plex = {
-        entrypoints = "websecure";
-        rule = "Host(`${cfg.hostName}`)";
-        tls.certresolver = "resolver-dns";
-        middlewares = "local@file";
-        service = "plex";
-      };
-      services.plex.loadBalancer.servers = [{ url = "http://127.0.0.1:${port}"; }];
+    modules.traefik = { 
+      enable = true;
+      routers."${cfg.name}" = "http://127.0.0.1:${port}";
     };
 
     # https://www.plex.tv/claim/

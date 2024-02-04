@@ -14,9 +14,9 @@ in {
 
   options.modules.photoprism = {
     enable = lib.options.mkEnableOption "photoprism"; 
-    hostName = mkOption {
+    name = mkOption {
       type = types.str;
-      default = "photoprism.${this.hostName}";
+      default = "photoprism";
     };
     port = mkOption {
       type = types.port;
@@ -93,19 +93,9 @@ in {
     # Allow photoprism user to read password file and photos
     users.users.photoprism.extraGroups = [ "secrets" ]; 
 
-    # Enable database and reverse proxy
-    # modules.postgresql.enable = true;
-    modules.traefik.enable = true;
-
-    # traefik proxy 
-    services.traefik.dynamicConfigOptions.http = {
-      routers.photoprism = {
-        rule = "Host(`${cfg.hostName}`)";
-        tls.certresolver = "resolver-dns";
-        middlewares = [ "local@file" ];
-        service = "photoprism";
-      };
-      services.photoprism.loadBalancer.servers = [{ url = "http://127.0.0.1:${toString cfg.port}"; }];
+    modules.traefik = { 
+      enable = true;
+      routers."${cfg.name}" = "http://127.0.0.1:${toString cfg.port}";
     };
 
   };

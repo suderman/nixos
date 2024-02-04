@@ -11,9 +11,9 @@ in {
 
   options.modules.ombi = {
     enable = options.mkEnableOption "ombi"; 
-    hostName = mkOption {
+    name = mkOption {
       type = types.str; 
-      default = "ombi.${this.hostName}";
+      default = "ombi";
     };
     port = mkOption {
       type = types.port;
@@ -29,21 +29,12 @@ in {
       group = "media";
       port = cfg.port;
     };
+
     users.groups.media.members = [ config.services.ombi.user ];
 
-    # Enable reverse proxy
-    modules.traefik.enable = true;
-
-    # Traefik proxy
-    services.traefik.dynamicConfigOptions.http = {
-      routers.ombi = {
-        entrypoints = "websecure";
-        rule = "Host(`${cfg.hostName}`)";
-        tls.certresolver = "resolver-dns";
-        middlewares = "local@file";
-        service = "ombi";
-      };
-      services.ombi.loadBalancer.servers = [{ url = "http://127.0.0.1:${toString cfg.port}"; }];
+    modules.traefik = {
+      enable = true;
+      routers.${cfg.name} = "http://127.0.0.1:${toString cfg.port}";
     };
 
   };

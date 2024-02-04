@@ -18,9 +18,9 @@ in {
 
     enable = options.mkEnableOption "unifi"; 
 
-    hostName = mkOption {
+    name = mkOption {
       type = types.str;
-      default = "unifi.${this.hostName}";
+      default = "unifi";
     };
 
     dataDir = mkOption {
@@ -33,9 +33,9 @@ in {
       default = ""; # IP address for the gateway
     };
 
-    gatewayHostName = mkOption {
+    gatewayName = mkOption {
       type = types.str;
-      default = "rt.${this.hostName}";
+      default = "rt";
     };
 
   };
