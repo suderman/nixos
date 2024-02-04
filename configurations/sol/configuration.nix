@@ -27,22 +27,16 @@
 
   # Web services
   modules.cockpit.enable = true;
-  modules.whoogle = {
-    enable = true;
-    name = "g";
-  };
-  modules.gitea = {
-    name = "git";
-    enable = true;
-  };
-  modules.tiddlywiki.enable = true;
+  modules.whoogle = { enable = true; name = "g"; };
+  modules.gitea = { enable = true; name = "git"; };
+  modules.tiddlywiki = { enable = true; name = "wiki"; };
   modules.rsshub.enable = true;
   modules.freshrss.enable = true;
   modules.wallabag.enable = false;
   # modules.nextcloud.enable = false;
 
   modules.tandoor-recipes = {
-    enable = true;
+    enable = false;
     # package = pkgs.unstable.tandoor-recipes;
     # public = "tandoor.suderman.net";
   };

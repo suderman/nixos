@@ -35,20 +35,14 @@
   # Reverse proxy bluebubbles server on nearby Mac Mini
   modules.bluebubbles = with this.network.dns; {
     enable = true;
-    hostName = "bb.${this.hostName}";
+    name = "bb";
     ip = work.pom;
   };
 
   # Reverse proxy for router
-  modules.traefik.enable = true;
-  modules.traefik.certificates = [ "rt.${this.hostName}" ];
-  services.traefik.dynamicConfigOptions.http = with this.network.dns; {
-    routers.rt = {
-      rule = "Host(`rt.${this.hostName}`)";
-      tls = {};
-      service = "rt";
-    };
-    services.rt.loadBalancer.servers = [{ url = "https://${work.rt}:10443"; }];
+  modules.traefik = with this.network.dns; {
+    enable = true;
+    routers.rt = "https://${work.rt}:10443";
   };
 
   # Backup media server
