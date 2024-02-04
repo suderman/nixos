@@ -26,11 +26,8 @@ in {
     virtualisation.oci-containers.containers."whoami" = {
       image = "traefik/whoami";
       cmd = [ "--port=2001" ];
-      extraOptions = ( traefik.labels {
-        name = cfg.name;
-        port = 2001;
-        scheme = "http";
-      } ) ++ [ "--network=host" ];
+      extraOptions = traefik.labels [ cfg.name 2001 ]
+      ++ [ "--network=host" ];
     };
 
   }; 

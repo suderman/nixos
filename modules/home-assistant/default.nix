@@ -33,12 +33,12 @@ in {
 
     name = mkOption {
       type = types.str;
-      default = "hass";
+      default = "home-assistant";
     };
 
     ip = mkOption {
       type = types.str;
-      default = "10.1.0.4"; # IP address for the Home Assistant instance
+      default = "127.0.0.1"; # IP address for the Home Assistant instance
     };
 
     dataDir = mkOption {

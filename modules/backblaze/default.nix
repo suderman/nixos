@@ -43,7 +43,7 @@ in {
       autoStart = true;
 
       # Traefik labels
-      extraOptions = traefik.labels cfg.name
+      extraOptions = traefik.labels [ cfg.name ]
 
       # Additional flags
       ++ [ "--init" ];

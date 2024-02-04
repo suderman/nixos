@@ -9,21 +9,25 @@
 
   # Generate traefik labels for use with OCI container
   labels = x: ( let
-    inherit (builtins) isAttrs isString toString;
-    fromString = name: fromAttrs { inherit name; };
-    fromAttrs = { name, hostName ? name, port ? 0, scheme ? "" }: [
+    inherit (builtins) elemAt isList isString length toString;
+    fromString = name: fromList [ name ];
+    fromList = args: let 
+      name = (elemAt args 0);
+      port = if (length args > 1) then toString (elemAt args 1) else "";
+      scheme = if (length args > 2) then toString (elemAt args 2) else "";
+    in [
       "--label=traefik.enable=true"
-      "--label=traefik.http.routers.${name}.rule=Host(`${hostName}.${this.hostName}`)"
+      "--label=traefik.http.routers.${name}.rule=Host(`${name}.${this.hostName}`)"
       "--label=traefik.http.routers.${name}.tls=true"
       "--label=traefik.http.routers.${name}.middlewares=local@file" 
-    ] ++ ( if port <= 0 then [] else [
-      "--label=traefik.http.services.${name}.loadbalancer.server.port=${toString port}"
+    ] ++ ( if port == "" then [] else [
+      "--label=traefik.http.services.${name}.loadbalancer.server.port=${port}"
     ]) ++ ( if scheme == "" then [] else [
       "--label=traefik.http.services.${name}.loadbalancer.server.scheme=${scheme}"
     ]);
   in
     if (isString x) then (fromString x)
-    else if (isAttrs x) then (fromAttrs x)
+    else if (isList x) then (fromList x)
     else []
   );
 

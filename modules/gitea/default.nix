@@ -16,7 +16,7 @@ in {
     enable = lib.options.mkEnableOption "gitea"; 
     name = mkOption {
       type = types.str;
-      default = "git";
+      default = "gitea";
     };
     port = mkOption {
       type = types.port;
@@ -70,18 +70,8 @@ in {
     modules.postgresql.enable = true;
     modules.traefik = {
       enable = true;
-      routers.git = "http://127.0.0.1:${toString cfg.port}";
+      routers.${cfg.name} = "http://127.0.0.1:${toString cfg.port}";
     };
-
-    # services.traefik.dynamicConfigOptions.http = {
-    #   routers.gitea = {
-    #     rule = "Host(`${cfg.hostName}`)";
-    #     tls.certresolver = "resolver-dns";
-    #     middlewares = [ "local@file" ];
-    #     service = "gitea";
-    #   };
-    #   services.gitea.loadBalancer.servers = [{ url = "http://127.0.0.1:${toString cfg.port}"; }];
-    # };
 
   };
 

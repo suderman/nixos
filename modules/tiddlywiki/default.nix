@@ -16,7 +16,7 @@ in {
 
     name = mkOption {
       type = types.str;
-      default = "wiki";
+      default = "tiddlywiki";
     };
 
     port = mkOption {
@@ -42,7 +42,7 @@ in {
 
     modules.traefik = { 
       enable = true;
-      routers."${cfg.name}" = "http://127.0.0.1:${toString cfg.port}";
+      routers.${cfg.name} = "http://127.0.0.1:${toString cfg.port}";
     };
 
   };

@@ -21,14 +21,10 @@ in {
       autoStart = false;
 
       # Traefik labels
-      extraOptions = ( traefik.labels {
-        name = cfg.name;
-        port = 8123;
-        scheme = "http";
-      } ) ++
+      extraOptions = traefik.labels [ cfg.name 8123 ]
 
       # Networking and devices
-      [ "--privileged" 
+      ++ [ "--privileged" 
         "--network=host"
       ] ++ (if cfg.zigbee == "" then [] else [
         "--device=${cfg.zigbee}:/dev/zigbee"

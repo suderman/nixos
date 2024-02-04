@@ -11,7 +11,7 @@ in {
 
     modules.traefik = { 
       enable = true;
-      routers."${cfg.gatewayName}" = "https://${cfg.gateway}:443";
+      routers.${cfg.gatewayName} = "https://${cfg.gateway}:443";
     };
 
   };

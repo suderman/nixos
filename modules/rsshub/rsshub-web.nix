@@ -26,9 +26,7 @@ in {
       extraOptions = traefik.labels cfg.name
 
       # Networking for docker containers
-      ++ [
-        "--network=rsshub"
-      ];
+      ++ [ "--network=rsshub" ];
 
     };
       

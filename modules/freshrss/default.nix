@@ -4,7 +4,7 @@
 let
 
   cfg = config.modules.freshrss;
-  port = toString config.services.nginx.defaultHTTPListenPort;
+  port = config.services.nginx.defaultHTTPListenPort;
 
   inherit (lib) mkIf mkOption types;
   inherit (lib.strings) toInt;
@@ -74,10 +74,10 @@ in {
 
     modules.traefik = { 
       enable = true;
-      routers."${cfg.name}" = "http://127.0.0.1:${port}";
+      routers.${cfg.name} = "http://127.0.0.1:${toString port}";
       http = {
-        middlewares.freshrss.headers.customRequestHeaders.Host = cfg.name;
-        routers."${cfg.name}".middlewares = [ "freshrss" ];
+        middlewares.freshrss.headers.customRequestHeaders.Host = "${cfg.name}.${this.hostName}";
+        routers.${cfg.name}.middlewares = [ "freshrss" ];
       };
     };
 

@@ -4,7 +4,6 @@
 let
 
   cfg = config.modules.plex;
-  port = "32400"; 
   inherit (lib) mkIf mkOption types;
   inherit (this.lib) extraGroups;
 
@@ -15,6 +14,10 @@ in {
     name = mkOption {
       type = types.str;
       default = "plex";
+    };
+    port = mkOption {
+      type = types.port;
+      default = 32400; 
     };
   };
 
@@ -32,7 +35,7 @@ in {
 
     modules.traefik = { 
       enable = true;
-      routers."${cfg.name}" = "http://127.0.0.1:${port}";
+      routers.${cfg.name} = "http://127.0.0.1:${toString cfg.port}";
     };
 
     # https://www.plex.tv/claim/

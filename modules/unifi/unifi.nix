@@ -25,14 +25,10 @@ in {
       autoStart = false;
 
       # Traefik labels
-      extraOptions = traefik.labels { 
-        name = cfg.name;
-        port = 8443;
-        scheme = "https";
-      } ++
+      extraOptions = traefik.labels [ cfg.name 8443 "https" ]
 
       # Networking
-      [ "--network=host" ];
+      ++ [ "--network=host" ];
 
       # Run as unifi user instead of root:
       # https://github.com/jacobalberty/unifi-docker/issues/509#issuecomment-1003727345

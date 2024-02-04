@@ -78,6 +78,10 @@ in {
         Type = "oneshot";
         RemainAfterExit = "yes";
       };
+      path = with pkgs; [ docker ];
+      script = with config.virtualisation.oci-containers.containers; ''
+        docker pull ${unifi.image};
+      '';
     };
 
   };

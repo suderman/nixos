@@ -20,14 +20,10 @@ in {
       autoStart = false;
 
       # Traefik labels
-      extraOptions = ( traefik.labels {
-        name = cfg.zwaveName;
-        port = 8091;
-        scheme = "http";
-      } ) ++
+      extraOptions = traefik.labels [ cfg.zwaveName 8091 ]
 
       # Networking and devices
-      [ "--privileged"
+      ++ [ "--privileged"
         "--network=host"
       ] ++ [
         "--device=${cfg.zwave}:/dev/zwave"

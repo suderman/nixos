@@ -103,6 +103,10 @@
   modules.sonarr.enable = true;
   modules.lidarr.enable = true;
   modules.sabnzbd.enable = true;
+  modules.unifi = with this.network.dns; {
+    enable = true;
+    gateway = home.logos;
+  };
   modules.lunasea.enable = true;
   modules.freshrss.enable = true;
   modules.whoogle = { enable = true; name = "g"; };

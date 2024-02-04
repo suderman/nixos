@@ -20,7 +20,7 @@ in {
 
     ip = mkOption {
       type = types.str;
-      default = "10.2.0.3";
+      default = "127.0.0.1";
       description = "IP address for the bluebubbles server";
     };
 

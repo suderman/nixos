@@ -13,7 +13,7 @@ in {
     enable = options.mkEnableOption "sabnzbd"; 
     name = mkOption {
       type = types.str;
-      default = "sab";
+      default = "sabnzbd";
     };
     port = mkOption {
       default = 8008; # package default is 8080
@@ -71,7 +71,7 @@ in {
 
     modules.traefik = { 
       enable = true;
-      routers."${cfg.name}" = "http://127.0.0.1:${toString cfg.port}";
+      routers.${cfg.name} = "http://127.0.0.1:${toString cfg.port}";
     };
 
   };

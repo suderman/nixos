@@ -17,7 +17,7 @@ in {
    enable = lib.options.mkEnableOption "wallabag"; 
     name = mkOption {
       type = types.str;
-      default = "bag";
+      default = "wallabag";
     };
     dataDir = mkOption {
       type = types.path;
@@ -79,10 +79,10 @@ in {
     };
 
     modules.traefik = { 
-      routers.bag = "https://127.0.0.1:${toString cfg.port}";
+      routers.${cfg.name} = "https://127.0.0.1:${toString cfg.port}";
       http = {
         middlewares.wallabag.headers.customRequestHeaders.Host = "${cfg.name}.${this.hostName}";
-        routers.bag.middlewares = [ "wallabag" ];
+        routers.${cfg.name}.middlewares = [ "wallabag" ];
       };
     };
 

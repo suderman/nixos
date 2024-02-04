@@ -38,10 +38,10 @@ in {
       ]);
 
       # Traefik labels
-      extraOptions = ( traefik.labels cfg.name ) ++ 
+      extraOptions = traefik.labels cfg.name
 
       # Networking for docker containers
-      [ "--network=immich" ];
+      ++ [ "--network=immich" ];
 
     };
 
