@@ -17,7 +17,8 @@ I recorded my initial installation of this server to help out forgetful future-m
 ## Setup
 
 ```bash
-# Authenticate Tailscale and expose home subnet
-sudo tailscale up --accept-routes --advertise-routes=10.1.0.0/16 
+# Authenticate Tailscale (skip accept-routes as it messed with local routing)
+# https://github.com/tailscale/tailscale/issues/1227
+sudo tailscale up 
 ```
 
