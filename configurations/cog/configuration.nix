@@ -31,7 +31,7 @@
 
   # Network
   modules.tailscale.enable = true;
-  modules.ddns.enable = true;
+  # modules.ddns.enable = true;
   networking.networkmanager.enable = true;
   networking.extraHosts = ''
     127.0.0.1 example.com

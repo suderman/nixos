@@ -21,8 +21,11 @@
   modules.neovim.enable = true;
 
   # Web services
-  modules.tailscale.enable = true;
-  modules.ddns.enable = true;
+  modules.tailscale = {
+    enable = true;
+    deleteRoute = "10.1.0.0/16";
+  };
+  # modules.ddns.enable = true;
   modules.whoami.enable = true;
 
   # Custom DNS

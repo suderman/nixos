@@ -19,12 +19,14 @@ let
 
   cfg = config.modules.tailscale;
   inherit (config.age) secrets;
-  inherit (lib) mkIf;
+  inherit (lib) mkAfter mkIf mkOption types;
+  inherit (lib.options) mkEnableOption;
 
 in {
 
   options.modules.tailscale = {
     enable = lib.options.mkEnableOption "tailscale"; 
+    deleteRoute = mkOption { type = types.str; default = ""; };
   };
 
   config = mkIf cfg.enable {
@@ -34,6 +36,21 @@ in {
     networking.firewall = {
       checkReversePath = "loose";  # https://github.com/tailscale/tailscale/issues/4432
       allowedUDPPorts = [ 41641 ]; # Facilitate firewall punching
+    };
+
+    # systemd.services.tailscaled.postStart = let
+    #   ip = "${pkgs.iproute2}/bin/ip";
+    # in mkAfter ( 
+    #   if cfg.deleteRoute == "" then ""
+    #   else "sleep 3; ${ip} route del ${cfg.deleteRoute} dev tailscale0 table 52 2>/dev/null"
+    # );
+
+    systemd.services."tailscale-delete-route" = {
+      serviceConfig.Type = "simple";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "tailscaled.service" ];
+      path = with pkgs; [ iproute2 ];
+      script = "sleep 5; " + ( if cfg.deleteRoute == "" then "" else "ip route del ${cfg.deleteRoute} dev tailscale0 table 52" );
     };
 
     # systemd.services."tailscale-web" = {

@@ -28,7 +28,7 @@
   # Web services
   modules.tailscale.enable = true;
   modules.blocky.enable = true;
-  modules.ddns.enable = true;
+  # modules.ddns.enable = true;
   modules.whoami.enable = true;
   modules.cockpit.enable = true;
 
