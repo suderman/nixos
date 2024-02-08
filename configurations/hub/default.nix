@@ -1,3 +1,4 @@
 {
   hostName = "hub"; 
+  domain = "home";
 }

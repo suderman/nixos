@@ -1,3 +1,4 @@
 {
   hostName = "lux"; 
+  domain = "home";
 }

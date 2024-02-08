@@ -1,13 +1,4 @@
-rec {
-
-  # Reverse proxies
-  cog = tail.cog;
-  lux = home.lux;
-  hub = home.hub;
-  rig = home.rig;
-  eve = work.eve;
-  sol = tail.sol;
-  wit = tail.wit;
+{
 
   # Home network: Unifi Controller
   home = {
@@ -32,6 +23,7 @@ rec {
   };
 
   # VPN: Tailscale
+  # https://login.tailscale.com/admin/machines
   tail = {
     hub      = "100.115.119.94";
     lux      = "100.90.63.125";

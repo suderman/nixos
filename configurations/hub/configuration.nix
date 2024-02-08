@@ -31,13 +31,13 @@
   modules.blocky.enable = true;
 
   # LAN controller
-  modules.unifi = with this.network.dns; {
+  modules.unifi = with this.network; {
     enable = true;
     gateway = home.logos;
   };
 
   # Home automation
-  modules.home-assistant = with this.network.dns; {
+  modules.home-assistant = with this.network; {
     enable = true; 
     name = "hass";
     ip = home.hub;

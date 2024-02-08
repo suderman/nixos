@@ -167,23 +167,29 @@
 
     # Attribute set describing my domains, hostnames and IP addresses  
     mkNetwork = let
-      inherit (builtins) attrNames filter foldl' isAttrs isString concatStringsSep;
-      inherit (inputs.nixpkgs.lib) hasPrefix; 
+      inherit (builtins) attrNames filter;
+      inherit (inputs.nixpkgs.lib) foldl filterAttrs mapAttrsToList mapAttrs' nameValuePair hasPrefix; 
 
-      # https://github.com/nix-community/ethereum.nix/blob/main/lib.nix#L20
-      flatten = tree: let
-        op = sum: path: val:
-          if isString val then (sum // { "${concatStringsSep "." path}" = val; })
-          else if isAttrs val then (recurse sum path val)
-          else sum;
-        recurse = sum: path: val:
-          foldl' (sum: key: op sum ([key] ++ path) val.${key}) sum (attrNames val);
-      in recurse {} [] tree;
+      # Centralized list of IP addresses
+      network = import ./network.nix;
 
-    in host: rec {
-      dns = import ./network.nix;
-      mapping = flatten dns;
-      hosts = filter (name: hasPrefix host name) (attrNames mapping);
+      # Flatten the tree into a "hostName.domain = address" set
+      flatten = tree: foldl (a: b: a // b) {}  ( 
+        mapAttrsToList (domain: hostNames: 
+        (mapAttrs' (hostName: ip: nameValuePair ("${hostName}.${domain}") ip) hostNames)) tree
+      );
+
+      # Determine IP address for each host from configuration domain
+      domains = filterAttrs (n: v: v != "") ( mkAttrs ./configurations ( hostName: let
+        config = import ./configurations/${hostName};
+        domain = if config ? domain then config.domain else "";
+        ip = if network ? ${domain} then ( if network.${domain} ? ${hostName} then network.${domain}.${hostName} else "" ) else "";
+      in ip ) );
+
+    in host: network // rec {
+      inherit domains;
+      mapping = (flatten network ) // domains;
+      hostNames = filter (name: hasPrefix host name) (attrNames mapping);
     };
 
   };

@@ -76,7 +76,7 @@ in {
       [[ -e ${certs}/key ]] || ${openssl} genrsa -out ${certs}/key 4096 
       [[ -e ${certs}/serial ]] || echo "01" > ${certs}/serial 
       for NAME in ${toString (unique cfg.certificates)}; do
-        export NAME IP=${this.network.dns.${this.hostName}}
+        export NAME IP=${this.network.domains.${this.hostName}}
         ${openssl} req -new -key ${certs}/key -config ${./openssl.cnf} -extensions v3_req -subj "/CN=$NAME" -out ${certs}/csr 
         ${openssl} x509 -req -days 365 -in ${certs}/csr -extfile ${./openssl.cnf} -extensions v3_req -CA ${this.ca} -CAkey ${secrets.ca-key.path} -CAserial ${certs}/serial -out ${certs}/crt
         cat ${certs}/crt ${this.ca} > ${certs}/$NAME.crt

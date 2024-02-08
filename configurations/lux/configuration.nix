@@ -29,7 +29,7 @@
   modules.whoami.enable = true;
 
   # Custom DNS
-  modules.blocky.enable = true;
+  # modules.blocky.enable = true;
 
   modules.cockpit.enable = true;
 

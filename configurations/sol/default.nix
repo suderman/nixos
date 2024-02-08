@@ -1,3 +1,4 @@
 {
   hostName = "sol"; 
+  domain = "tail";
 }

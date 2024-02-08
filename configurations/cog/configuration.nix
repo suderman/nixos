@@ -31,7 +31,6 @@
 
   # Network
   modules.tailscale.enable = true;
-  # modules.ddns.enable = true;
   networking.networkmanager.enable = true;
   networking.extraHosts = ''
     127.0.0.1 example.com
@@ -64,15 +63,6 @@
   # Memory management
   modules.earlyoom.enable = true;
 
-  modules.traefik = { 
-    routers.isy = "http://${this.network.dns.home.isy}:80";
-    http = {
-      middlewares.isy.headers.customRequestHeaders.authorization = "Basic {{ env `ISY_BASIC_AUTH` }}";
-      routers.isy.middlewares = [ "isy" ];
-    };
-  };
-
-
   # Keyboard control
   modules.keyd = {
     enable = true;
@@ -91,32 +81,7 @@
   # Web services
   modules.traefik.enable = true;
   modules.whoami.enable = true;
-  modules.tandoor-recipes.enable = false;
-  modules.home-assistant.enable = true;
-  modules.rsshub.enable = true;
-  modules.backblaze.enable = false;
-  modules.wallabag.enable = false;
-  modules.jellyfin.enable = true;
   modules.cockpit.enable = true;
-  modules.gitea.enable = true;
-  modules.radarr.enable = true;
-  modules.sonarr.enable = true;
-  modules.lidarr.enable = true;
-  modules.sabnzbd.enable = true;
-  modules.unifi = with this.network.dns; {
-    enable = true;
-    gateway = home.logos;
-  };
-  modules.lunasea.enable = true;
-  modules.freshrss.enable = true;
-  modules.whoogle = { enable = true; name = "g"; };
-  modules.nextcloud.enable = false;
-  modules.tiddlywiki.enable = true;
-  modules.ocis = { enable = true; dataDir = "/tmp/ocis"; };
-  modules.immich.enable = true;
-  modules.photoprism = { enable = false; photosDir = "/photos"; };
-  modules.silverbullet.enable = true;
-  modules.bluebubbles.enable = true;
 
   # Apps & Games
   modules.neovim.enable = true;
@@ -135,6 +100,8 @@
       "app.bluebubbles.BlueBubbles"
       "io.github.dvlv.boxbuddyrs"
       "io.gitlab.zehkira.Monophony"
+      "org.emptyflow.ArdorQuery"
+      "com.github.treagod.spectator"
     ];
     betaPackages = [
       "org.gimp.GIMP" # https://www.gimp.org/downloads/devel
@@ -166,6 +133,39 @@
   file."/etc/foo/symlink" = { type = "link"; source = /etc/foo/bar; };
   file."/etc/foo/resolv" = { type = "file"; mode = 775; user = "me"; group = "users"; source = /etc/resolv.conf; };
   file."/etc/foo/srv" = { type = "dir"; source = /srv; };
+
+  # modules.gitea.enable = true;
+  # modules.radarr.enable = true;
+  # modules.sonarr.enable = true;
+  # modules.lidarr.enable = true;
+  # modules.sabnzbd.enable = true;
+  # modules.tandoor-recipes.enable = false;
+  # modules.home-assistant.enable = true;
+  # modules.rsshub.enable = true;
+  # modules.backblaze.enable = false;
+  # modules.wallabag.enable = false;
+  # modules.jellyfin.enable = true;
+  # modules.unifi = with this.network.dns; {
+  #   enable = true;
+  #   gateway = home.logos;
+  # };
+  # modules.lunasea.enable = true;
+  # modules.freshrss.enable = true;
+  # modules.whoogle = { enable = true; name = "g"; };
+  # modules.nextcloud.enable = false;
+  # modules.tiddlywiki.enable = true;
+  # modules.ocis = { enable = true; dataDir = "/tmp/ocis"; };
+  # modules.immich.enable = true;
+  # modules.photoprism = { enable = false; photosDir = "/photos"; };
+  # modules.silverbullet.enable = true;
+  # modules.bluebubbles.enable = true;
+  # modules.traefik = { 
+  #   routers.isy = "http://${this.network.dns.home.isy}:80";
+  #   http = {
+  #     middlewares.isy.headers.customRequestHeaders.authorization = "Basic {{ env `ISY_BASIC_AUTH` }}";
+  #     routers.isy.middlewares = [ "isy" ];
+  #   };
+  # };
 
 
   # # services.wordpress.webserver = "nginx";

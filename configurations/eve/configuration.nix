@@ -33,14 +33,14 @@
   modules.cockpit.enable = true;
 
   # Reverse proxy bluebubbles server on nearby Mac Mini
-  modules.bluebubbles = with this.network.dns; {
+  modules.bluebubbles = with this.network; {
     enable = true;
     name = "bb";
     ip = work.pom;
   };
 
   # Reverse proxy for router
-  modules.traefik = with this.network.dns; {
+  modules.traefik = with this.network; {
     enable = true;
     routers.rt = "https://${work.rt}:10443";
   };
