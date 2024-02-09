@@ -46,7 +46,7 @@
 
     # Hyprland
     # <https://github.com/hyprwm/Hyprland/releases>
-    hyprland.url = "github:hyprwm/Hyprland/v0.34.0";
+    hyprland.url = "github:hyprwm/Hyprland/v0.35.0";
     hyprland-plugins.url = "github:hyprwm/hyprland-plugins";
     anyrun.url = "github:Kirottu/anyrun";
 

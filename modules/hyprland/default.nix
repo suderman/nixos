@@ -16,8 +16,9 @@ in {
     [ inputs.hyprland.nixosModules.default ] ++
 
     # Unstable upstream nixos module
-    # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/nixos/modules/programs/hyprland.nix
-    ( destabilize inputs.nixpkgs-unstable "programs/hyprland.nix" );
+    # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/nixos/modules/programs/wayland/hyprland.nix
+    # Note: unstable hyprland module was moved from programs/hyprland.nix to programs/wayland/hyprland.nix
+    ( destabilize inputs.nixpkgs-unstable [ "programs/hyprland.nix" "programs/wayland/hyprland.nix" ] );
 
 
   options.modules.hyprland = {

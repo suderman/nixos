@@ -37,11 +37,15 @@
     trim = text: removePrefix "\n" ( removeSuffix "\n" text );
 
     # Return pair of modules to import which disables the stable module and replaces it with unstable
-    destabilize = input: path: [
-      { disabledModules = [ path ]; } # first disable stable module
+    destabilize = input: path: let 
+      inherit (builtins) isList head tail toString;
+      stablePath = toString( if (isList path) then (head path) else path ); 
+      unstablePath = toString( if (isList path) then (tail path) else path ); 
+    in [
+      { disabledModules = [ stablePath ]; } # first disable stable module
       ( if hasAttr "darwinModules" input 
-        then "${input}/modules/${path}" # then add unstable home-manager module
-        else "${input}/nixos/modules/${path}" # or add unstable nixos module
+        then "${input}/modules/${unstablePath}" # then add unstable home-manager module
+        else "${input}/nixos/modules/${unstablePath}" # or add unstable nixos module
       ) 
     ];
 
