@@ -188,7 +188,7 @@
 
     in host: network // rec {
       inherit domains;
-      mapping = (flatten network ) // domains;
+      mapping = (flatten network) // domains;
       hostNames = filter (name: hasPrefix host name) (attrNames mapping);
     };
 
@@ -201,7 +201,7 @@ in {
 
   # Default values, overridden in configuration/*/default.nix
   hostName = "nixos";  
-  domain = "tail"; 
+  domain = ""; 
 
   # Self-signed CA certificate (with ca-key in secrets)
   # openssl req -new -x509 -nodes -extensions v3_ca -days 25568 -subj "/CN=Suderman CA" -key ca.key -out ca.crt  

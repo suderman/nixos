@@ -111,6 +111,10 @@ in {
               "https://zerodot1.gitlab.io/CoinBlockerLists/hosts_browser"
               "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-only/hosts"
             ];
+            porn = [
+              "https://raw.githubusercontent.com/chadmayfield/my-pihole-blocklists/master/lists/pi_blocklist_porn_top1m.list"
+              "https://v.firebog.net/hosts/Prigent-Adult.txt"
+            ];
             catchall = [
               "https://big.oisd.nl/domainswild"
             ];
@@ -125,7 +129,7 @@ in {
           blockType = "zeroIp";
           clientGroupsBlock = {
             # default = [ "ads" "tracking" "malicious" "misc" "catchall" ];
-            default = [ "malicious" ];
+            default = [ "malicious" "porn" ];
           };
         };
       };
