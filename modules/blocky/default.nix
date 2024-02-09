@@ -66,9 +66,9 @@ in {
         }];
 
         customDNS = {
-          customTTL = "1h";
+          inherit (this.network) mapping;
           filterUnmappedTypes = true;
-          mapping = this.network.mapping; 
+          customTTL = "1h";
         };
 
         blocking = {
@@ -78,58 +78,23 @@ in {
             refreshPeriod = "4h";
           };
           blackLists = {
-            ads = [
-              "https://blocklistproject.github.io/Lists/ads.txt"
-              "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
-              "https://adaway.org/hosts.txt"
-              "https://v.firebog.net/hosts/AdguardDNS.txt"
-              "https://v.firebog.net/hosts/Admiral.txt"
-              "https://raw.githubusercontent.com/anudeepND/blacklist/master/adservers.txt"
-              "https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt"
-              "https://v.firebog.net/hosts/Easylist.txt"
-              "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext"
-              "https://raw.githubusercontent.com/FadeMind/hosts.extras/master/UncheckyAds/hosts"
-              "https://raw.githubusercontent.com/bigdargon/hostsVN/master/hosts"
-            ];
-            tracking = [
-              "https://v.firebog.net/hosts/Easyprivacy.txt"
-              "https://v.firebog.net/hosts/Prigent-Ads.txt"
-              "https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.2o7Net/hosts"
-              "https://raw.githubusercontent.com/crazy-max/WindowsSpyBlocker/master/data/hosts/spy.txt"
-              "https://hostfiles.frogeye.fr/firstparty-trackers-hosts.txt"
-            ];
-            malicious = [
-              "https://raw.githubusercontent.com/DandelionSprout/adfilt/master/Alternate%20versions%20Anti-Malware%20List/AntiMalwareHosts.txt"
-              "https://osint.digitalside.it/Threat-Intel/lists/latestdomains.txt"
-              "https://s3.amazonaws.com/lists.disconnect.me/simple_malvertising.txt"
-              "https://v.firebog.net/hosts/Prigent-Crypto.txt"
-              "https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.Risk/hosts"
-              "https://v.firebog.net/hosts/RPiList-Phishing.txt"
-              "https://v.firebog.net/hosts/RPiList-Malware.txt"
-            ];
-            misc = [
-              "https://zerodot1.gitlab.io/CoinBlockerLists/hosts_browser"
-              "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-only/hosts"
-            ];
-            porn = [
-              "https://raw.githubusercontent.com/chadmayfield/my-pihole-blocklists/master/lists/pi_blocklist_porn_top1m.list"
-              "https://v.firebog.net/hosts/Prigent-Adult.txt"
-            ];
-            catchall = [
-              "https://big.oisd.nl/domainswild"
+            main = [ 
+              "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light.txt" 
+              "https://nsfw.oisd.nl/domainswild"
+              "https://raw.githubusercontent.com/suderman/nixos/main/modules/blocky/blacklist.nix"
             ];
           };
           whiteLists = {
-            ads = [
+            main = [
               "https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt"
               "https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/optional-list.txt"
+              "https://raw.githubusercontent.com/suderman/nixos/main/modules/blocky/whitelist.nix"
             ];
           };
           blockTTL = "1m";
           blockType = "zeroIp";
           clientGroupsBlock = {
-            # default = [ "ads" "tracking" "malicious" "misc" "catchall" ];
-            default = [ "malicious" "porn" ];
+            default = [ "main" ];
           };
         };
       };
