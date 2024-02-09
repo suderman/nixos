@@ -41,17 +41,15 @@ in {
 
         ports = {
           dns = 53;
-          # http = "127.0.0.1:4000";
           http = "0.0.0.0:4000";
+          # http = "127.0.0.1:4000";
         };
 
         redis = {
-          # address = "hub:6379";
           address = "127.0.0.1:6379";
           password = "blocky";
           connectionAttempts = 10;
           connectionCooldown = "5s";
-          # sentinelAddresses = [ "eve:26379" ];
         };
 
         connectIPVersion = "v4";
@@ -81,14 +79,14 @@ in {
             main = [ 
               "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light.txt" 
               "https://nsfw.oisd.nl/domainswild"
-              "https://raw.githubusercontent.com/suderman/nixos/main/modules/blocky/blacklist.nix"
+              "https://raw.githubusercontent.com/suderman/nixos/main/modules/blocky/blacklist.txt"
             ];
           };
           whiteLists = {
             main = [
               "https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt"
               "https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/optional-list.txt"
-              "https://raw.githubusercontent.com/suderman/nixos/main/modules/blocky/whitelist.nix"
+              "https://raw.githubusercontent.com/suderman/nixos/main/modules/blocky/whitelist.txt"
             ];
           };
           blockTTL = "1m";
