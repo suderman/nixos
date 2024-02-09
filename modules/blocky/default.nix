@@ -14,9 +14,13 @@ in {
       type = types.str;
       default = "blocky";
     };
+    dataDir = mkOption {
+      type = types.path;
+      default = "/var/lib/blocky"; 
+    };
   };
 
-  # Use btrbk to snapshot persistent states and home
+  # Use blocky to add custom domains and block unwanted domains
   config = mkIf cfg.enable {
 
     # Enable reverse proxy for api
@@ -24,6 +28,41 @@ in {
     modules.traefik = {
       enable = true;
       routers.${cfg.name} = "http://127.0.0.1:4000";
+    };
+
+    # Ensure directory exists for downloaded lists
+    file."${cfg.dataDir}" = {
+      type = "dir"; mode = 775; 
+    };
+
+    # Blocky supports downloading lists automatically, but sometimes timeouts on slow connections. 
+    # Get around that by downloading these lists separately as a systemd service
+    systemd.services.blocky-download-lists = {
+      description = "Download copy of lists for Blocky";
+      after = [ "multi-user.target" ];
+      requires = [ "multi-user.target" ];
+      wantedBy = [ "sysinit.target" ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = "yes";
+      };
+      path = with pkgs; [ curl ];
+      script = ''
+        curl https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light.txt > ${cfg.dataDir}/blacklist.txt
+        curl https://nsfw.oisd.nl/domainswild > ${cfg.dataDir}/nsfw.txt
+        curl https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt > ${cfg.dataDir}/whitelist.txt
+        curl https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/optional-list.txt > ${cfg.dataDir}/whitelist-optional.txt
+      '';
+    };
+
+    # Run this script every day
+    systemd.timers.blocky-download-lists = {
+      wantedBy = [ "timers.target" ];
+      partOf = [ "blocky-download-lists.service" ];
+      timerConfig = {
+        OnCalendar = "daily";
+        Unit = "blocky-download-lists.service";
+      };
     };
 
     services.redis.servers.blocky = {
@@ -77,15 +116,15 @@ in {
           };
           blackLists = {
             main = [ 
-              "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light.txt" 
-              "https://nsfw.oisd.nl/domainswild"
+              "${cfg.dataDir}/blacklist.txt"
+              "${cfg.dataDir}/nsfw.txt"
               "https://raw.githubusercontent.com/suderman/nixos/main/modules/blocky/blacklist.txt"
             ];
           };
           whiteLists = {
             main = [
-              "https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt"
-              "https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/optional-list.txt"
+              "${cfg.dataDir}/whitelist.txt"
+              "${cfg.dataDir}/whitelist-optional.txt"
               "https://raw.githubusercontent.com/suderman/nixos/main/modules/blocky/whitelist.txt"
             ];
           };
