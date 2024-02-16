@@ -30,6 +30,9 @@
   # Custom DNS
   modules.blocky.enable = true;
 
+  # Serve CA cert on http://10.1.0.4:1234
+  modules.traefik.caPort = 1234;
+
   # LAN controller
   modules.unifi = with this.networks; {
     enable = true;

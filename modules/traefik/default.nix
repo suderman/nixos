@@ -5,6 +5,7 @@
   certs = "${config.services.traefik.dataDir}/certs"; # dir for self-signed certificates
 
   inherit (lib) attrNames mapAttrs mkForce mkIf mkOption options recursiveUpdate types;
+  inherit (this.lib) ls;
   inherit (config.age) secrets;
 
   # Generate traefik labels for use with OCI container
@@ -32,6 +33,9 @@
   );
 
 in {
+
+  # imports = ls ./.;
+  imports = [ ./ca.nix ];
 
   options.modules.traefik = {
     enable = options.mkEnableOption "traefik"; 
