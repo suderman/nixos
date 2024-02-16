@@ -38,19 +38,17 @@ in {
       allowedUDPPorts = [ 41641 ]; # Facilitate firewall punching
     };
 
-    # systemd.services.tailscaled.postStart = let
-    #   ip = "${pkgs.iproute2}/bin/ip";
-    # in mkAfter ( 
-    #   if cfg.deleteRoute == "" then ""
-    #   else "sleep 3; ${ip} route del ${cfg.deleteRoute} dev tailscale0 table 52 2>/dev/null"
-    # );
-
     systemd.services."tailscale-delete-route" = {
       serviceConfig.Type = "simple";
       wantedBy = [ "multi-user.target" ];
       after = [ "tailscaled.service" ];
-      path = with pkgs; [ iproute2 ];
-      script = "sleep 5; " + ( if cfg.deleteRoute == "" then "" else "ip route del ${cfg.deleteRoute} dev tailscale0 table 52" );
+      path = with pkgs; [ gnugrep iproute2 ];
+      script = let route = if cfg.deleteRoute == "" then "SKIP" else cfg.deleteRoute; in ''
+        sleep 30
+        if [[ ! -z "$(ip route show table 52 | grep ${route})" ]]; then
+          ip route del ${route} dev tailscale0 table 52
+        fi
+      '';
     };
 
     # systemd.services."tailscale-web" = {

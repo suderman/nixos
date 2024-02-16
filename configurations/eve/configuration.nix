@@ -33,16 +33,22 @@
   modules.cockpit.enable = true;
 
   # Reverse proxy bluebubbles server on nearby Mac Mini
-  modules.bluebubbles = with this.network; {
+  modules.bluebubbles = with this.networks; {
     enable = true;
     name = "bb";
     ip = work.pom;
   };
 
   # Reverse proxy for router
-  modules.traefik = with this.network; {
+  modules.traefik = with this.networks; {
     enable = true;
     routers.rt = "https://${work.rt}:10443";
+    http = {
+      middlewares.asus.headers.customRequestHeaders.Host = "${work.rt}:10443";
+      middlewares.asus.headers.customRequestHeaders.X-Forwarded-For = work.eve;
+      middlewares.asus.headers.customResponseHeaders.Access-Control-Allow-Origin = "${work.rt}:10443";
+      routers.rt.middlewares = [ "asus" ];
+    };
   };
 
   # Backup media server

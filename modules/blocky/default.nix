@@ -65,13 +65,22 @@ in {
       };
     };
 
-    services.redis.servers.blocky = {
-      enable = true;
-      openFirewall = true;
-      port = 6379;
-      bind = null;
-      databases = 16;
-      settings.protected-mode = "no";
+    # services.redis.servers.blocky = {
+    #   enable = true;
+    #   openFirewall = true;
+    #   port = 6379;
+    #   bind = null;
+    #   databases = 16;
+    #   settings.protected-mode = "no";
+    # };
+
+    services.prometheus = {
+      # enable = true;
+      scrapeConfigs = [{ 
+        job_name = "blocky"; static_configs = [ 
+          { targets = [ "127.0.0.1:${toString config.services.blocky.settings.httpPort}" ]; } 
+        ]; 
+      }];
     };
 
     services.blocky = {
@@ -84,26 +93,38 @@ in {
           # http = "127.0.0.1:4000";
         };
 
-        redis = {
-          address = "127.0.0.1:6379";
-          password = "blocky";
-          connectionAttempts = 10;
-          connectionCooldown = "5s";
+        # redis = {
+        #   address = "127.0.0.1:6379";
+        #   password = "blocky";
+        #   connectionAttempts = 10;
+        #   connectionCooldown = "5s";
+        # };
+
+        prometheus = {
+          enable = true;
+          path = "/metrics";
         };
 
-        connectIPVersion = "v4";
-        upstream.default = [
-          "https://dns.quad9.net/dns-query"
-          "https://one.one.one.one/dns-query"
-        ];
-
+        upstreams = {
+          init.strategy = "fast";
+          groups.default = [
+            "https://dns.quad9.net/dns-query"
+            "https://one.one.one.one/dns-query"
+          ];
+        };
         bootstrapDns = [{
           upstream = "https://dns.quad9.net/dns-query";
           ips = [ "9.9.9.9" "149.112.112.112" ];
         }];
+        connectIPVersion = "v4";
+
+        # upstream.default = [
+        #   "https://dns.quad9.net/dns-query"
+        #   "https://one.one.one.one/dns-query"
+        # ];
 
         customDNS = {
-          inherit (this.network) mapping;
+          inherit (this) mapping;
           filterUnmappedTypes = true;
           customTTL = "1h";
         };

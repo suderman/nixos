@@ -11,6 +11,6 @@ Intel NUC Kit D34010WYK1, Mini HDMI, Mini DisplayPort, USB 3.0, 4th Gen Intel Co
 
 ```bash
 # Authenticate Tailscale and expose home subnet
-sudo tailscale up --accept-routes --advertise-routes=10.1.0.0/16 
+sudo tailscale up --accept-routes --advertise-routes=10.1.0.0/16
 ```
 

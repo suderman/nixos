@@ -165,33 +165,6 @@
           ;
         };
 
-    # Attribute set describing my domains, hostnames and IP addresses  
-    mkNetwork = let
-      inherit (builtins) attrNames filter;
-      inherit (inputs.nixpkgs.lib) foldl filterAttrs mapAttrsToList mapAttrs' nameValuePair hasPrefix; 
-
-      # Centralized list of IP addresses
-      network = import ./network.nix;
-
-      # Flatten the tree into a "hostName.domain = address" set
-      flatten = tree: foldl (a: b: a // b) {}  ( 
-        mapAttrsToList (domain: hostNames: 
-        (mapAttrs' (hostName: ip: nameValuePair ("${hostName}.${domain}") ip) hostNames)) tree
-      );
-
-      # Determine IP address for each host from configuration domain
-      domains = filterAttrs (n: v: v != "") ( mkAttrs ./configurations ( hostName: let
-        config = import ./configurations/${hostName};
-        domain = if config ? domain then config.domain else "";
-        ip = if network ? ${domain} then ( if network.${domain} ? ${hostName} then network.${domain}.${hostName} else "" ) else "";
-      in ip ) );
-
-    in host: network // rec {
-      inherit domains;
-      mapping = (flatten network) // domains;
-      hostNames = filter (name: hasPrefix host name) (attrNames mapping);
-    };
-
   };
 
 in {
@@ -203,14 +176,9 @@ in {
   hostName = "nixos";  
   domain = ""; 
 
-  # Self-signed CA certificate (with ca-key in secrets)
-  # openssl req -new -x509 -nodes -extensions v3_ca -days 25568 -subj "/CN=Suderman CA" -key ca.key -out ca.crt  
-  ca = ./ca.crt;
-
   users = []; # without users, only root exists
   admins = []; # allow sudo/ssh powers users with keys
   modules = {}; # includes for nixos and home-manager
-  network = {}; # hostnames and IP addresses 
 
   system = "x86_64-linux";
   config = {};
