@@ -34,8 +34,7 @@
 
 in {
 
-  # imports = ls ./.;
-  imports = [ ./ca.nix ];
+  imports = ls ./.;
 
   options.modules.traefik = {
     enable = options.mkEnableOption "traefik"; 
