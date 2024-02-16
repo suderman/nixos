@@ -9,7 +9,7 @@
 <details>
 <summary><b>LAN IP</b></summary>
   
-| https://10.2.0.1:8443/Advanced_LAN_Content.asp |             |
+|             | https://10.2.0.1:8443/Advanced_LAN_Content.asp |
 |-------------|------------------------------------------------|
 | IP Address  | `10.2.0.1`                                     |
 | Subnet Mask | `255.255.255.0`                                |
@@ -19,7 +19,7 @@
 <details>
 <summary><b>DHCP Server</b></summary>
 
-| https://10.2.0.1:8443/Advanced_DHCP_Content.asp         |                                                                                                    |
+|                                                         |    https://10.2.0.1:8443/Advanced_DHCP_Content.asp                                                 |
 |---------------------------------------------------------|----------------------------------------------------------------------------------------------------|
 | Enable the DHCP Server                                  | `Yes`                                                                                              |
 | RT-AC66U's Domain Name                                  | `work`                                                                                             |
@@ -37,9 +37,9 @@
 <details>
 <summary><b>Route</b></summary>
 
-| https://10.2.0.1:8443/Advanced_GWStaticRoute_Content.asp |          |
-|-----------------------|---------------------------------------------|
-| Enable static routes  | `Yes`                                       |
+|                       | https://10.2.0.1:8443/Advanced_GWStaticRoute_Content.asp | 
+|-----------------------|----------------------------------------------------------|
+| Enable static routes  | `Yes`                                                    |
 
 | Network/Host IP | Netmask       | Gateway  | Metric | Interface |
 |-----------------|---------------|----------|--------|-----------|
@@ -51,7 +51,7 @@
 <details>
 <summary><b>System</b></summary>
 
-| https://10.2.0.1:8443/Advanced_System_Content.asp           |                                                                                                  |
+|                                                             | https://10.2.0.1:8443/Advanced_System_Content.asp                                                |
 |-------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
 | Router Login Name                                           | `suderman`                                                                                       |
 | Enable SSH                                                  | `LAN only`                                                                                       |
