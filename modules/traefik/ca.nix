@@ -1,7 +1,7 @@
 { config, lib, this, ... }: let
 
   cfg = config.modules.traefik;
-  inherit (builtins) toString;
+  inherit (builtins) dirOf toString;
   inherit (lib) mkIf mkOption types;
 
 in {
@@ -23,7 +23,7 @@ in {
       listen = [{ addr = "0.0.0.0"; port = cfg.caPort; }];
       locations."/" = let index = "ca.crt"; in {
         inherit index;
-        root = builtins.dirOf this.ca;
+        root = dirOf this.ca;
         extraConfig = ''
           add_header Content-disposition "attachment; filename=${index}";
         '';
