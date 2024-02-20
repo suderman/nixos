@@ -10,19 +10,18 @@
 
 ## Router Configuration
 
-
-
 <details>
 <summary><b>Unifi Devices</b></summary>
 
-|                         | https://10.1.0.4:8443/manage/default/devices |
-| ----------------------- | -------------------------------------------- |
-| Static IP - _USG 3P_    | `10.1.0.1`                                   |
-| Static IP - _US 8 150W_ | `10.1.0.2`                                   |
-| Static IP - _nanoHD_    | `10.1.0.3`                                   |
-| Subnet Mask             | `255.255.255.0`                              |
-| Gateway                 | `10.1.0.1`                                   |
-| Preferred DNS           | `8.8.8.8`                                    |
+|               | https://10.1.0.4:8443/manage/default/devices |
+| ------------- | ----------------------------------------------------- |
+| Unifi Devices |  _(see below)_                                        |
+  
+| Name   | Device    | Static IP | Subnet Mask   | Gateway  | Preferred DNS |
+| ------ | --------- | --------- | ------------- | -------- | ------------- |
+| logos  | USG 3P    | 10.1.0.1  | -             | -        | -             |
+| ethos  | US 8 150W | 10.1.0.2  | 255.255.255.0 | 10.1.0.1 | 8.8.8.8       |
+| pathos | nanoHD    | 10.1.0.3  | 255.255.255.0 | 10.1.0.1 | 8.8.8.8       |
 
 </details>
 
