@@ -4,6 +4,7 @@
 let 
 
   cfg = config.modules.blocky;
+  inherit (builtins) toString;
   inherit (lib) mkIf mkOption mkForce types;
 
 in {
@@ -18,6 +19,14 @@ in {
       type = types.path;
       default = "/var/lib/blocky"; 
     };
+    dnsPort = mkOption {
+      type = types.port;
+      default = 53; 
+    };
+    httpPort = mkOption {
+      type = types.port;
+      default = 4000; 
+    };
   };
 
   # Use blocky to add custom domains and block unwanted domains
@@ -27,7 +36,7 @@ in {
     # https://blocky.hub/api/blocking/status
     modules.traefik = {
       enable = true;
-      routers.${cfg.name} = "http://127.0.0.1:4000";
+      routers.${cfg.name} = "http://127.0.0.1:${toString cfg.httpPort}";
     };
 
     # Ensure directory exists for downloaded lists
@@ -75,10 +84,9 @@ in {
     # };
 
     services.prometheus = {
-      # enable = true;
       scrapeConfigs = [{ 
         job_name = "blocky"; static_configs = [ 
-          { targets = [ "127.0.0.1:${toString config.services.blocky.settings.httpPort}" ]; } 
+          { targets = [ "127.0.0.1:${toString cfg.httpPort}" ]; } 
         ]; 
       }];
     };
@@ -88,9 +96,8 @@ in {
       settings = {
 
         ports = {
-          dns = 53;
-          http = "0.0.0.0:4000";
-          # http = "127.0.0.1:4000";
+          dns = map (ip: "${ip}:${toString cfg.dnsPort}") this.addresses;
+          http = map (ip: "${ip}:${toString cfg.httpPort}") this.addresses;
         };
 
         # redis = {
@@ -117,11 +124,6 @@ in {
           ips = [ "9.9.9.9" "149.112.112.112" ];
         }];
         connectIPVersion = "v4";
-
-        # upstream.default = [
-        #   "https://dns.quad9.net/dns-query"
-        #   "https://one.one.one.one/dns-query"
-        # ];
 
         customDNS = {
           inherit (this) mapping;
@@ -159,14 +161,8 @@ in {
     };
 
     networking.firewall = {
-      allowedTCPPorts = [
-        config.services.blocky.settings.ports.dns
-        4000
-        # config.services.grafana.settings.server.http_port
-      ];
-      allowedUDPPorts = [
-        config.services.blocky.settings.ports.dns
-      ];
+      allowedTCPPorts = [ cfg.dnsPort cfg.httpPort ];
+      allowedUDPPorts = [ cfg.dnsPort ];
     };
 
   };

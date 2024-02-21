@@ -17,7 +17,7 @@
   networking.extraHosts = "";
 
   # Custom DNS
-  # modules.blocky.enable = true;
+  modules.blocky.enable = true;
 
   # Memory management
   modules.earlyoom.enable = true;

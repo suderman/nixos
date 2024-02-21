@@ -30,6 +30,6 @@ in this // rec {
   inherit networks domains;
   mapping = (flatten networks) // domains;
   hostNames = filter (name: hasPrefix this.hostName name) (attrNames mapping);
-  addresses = unique( naturalSort( attrValues( filterAttrs (name: ip: hasPrefix this.hostName name) mapping )));
+  addresses = [ "127.0.0.1" ] ++ unique( naturalSort( attrValues( filterAttrs (name: ip: hasPrefix this.hostName name) mapping )));
 
 }

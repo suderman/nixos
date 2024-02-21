@@ -20,7 +20,7 @@ in {
     };
     port = mkOption {
       type = types.port;
-      default = 9090; 
+      default = 9999; # default port is 9090
     };
   };
 
