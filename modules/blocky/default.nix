@@ -91,6 +91,10 @@ in {
       }];
     };
 
+    services.grafana.settings.panels = {
+      disable_sanitize_html = true;
+    };
+
     services.blocky = {
       enable = true;
       settings = {

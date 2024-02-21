@@ -28,6 +28,7 @@
   # Custom DNS
   modules.blocky.enable = true;
   modules.prometheus.enable = true;
+  modules.grafana.enable = true;
 
   # Serve CA cert on http://10.1.0.4:1234
   modules.traefik = {
