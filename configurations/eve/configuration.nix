@@ -1,9 +1,7 @@
 { config, pkgs, this, ... }: {
 
-  imports = [ 
-    ./hardware-configuration.nix
-    ./storage.nix
-  ];
+  # Import all *.nix files in this directory
+  imports = this.lib.ls ./.;
 
   # Use freshest kernel
   boot.kernelPackages = pkgs.linuxPackages_latest;
@@ -27,28 +25,23 @@
 
   # Web services
   modules.tailscale.enable = true;
-  modules.blocky.enable = true;
-  # modules.ddns.enable = true;
   modules.whoami.enable = true;
   modules.cockpit.enable = true;
+
+  # Custom DNS
+  modules.blocky.enable = true;
+
+  # Serve CA cert on http://10.2.0.2:1234
+  modules.traefik = {
+    enable = true;
+    caPort = 1234;
+  };
 
   # Reverse proxy bluebubbles server on nearby Mac Mini
   modules.bluebubbles = with this.networks; {
     enable = true;
     name = "bb";
     ip = work.pom;
-  };
-
-  # Reverse proxy for router
-  modules.traefik = with this.networks; {
-    enable = true;
-    routers.rt = "https://${work.rt}:10443";
-    http = {
-      middlewares.asus.headers.customRequestHeaders.Host = "${work.rt}:10443";
-      middlewares.asus.headers.customRequestHeaders.X-Forwarded-For = work.eve;
-      middlewares.asus.headers.customResponseHeaders.Access-Control-Allow-Origin = "${work.rt}:10443";
-      routers.rt.middlewares = [ "asus" ];
-    };
   };
 
   # Backup media server

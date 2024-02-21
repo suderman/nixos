@@ -1,9 +1,7 @@
-{ config, lib, pkgs, ... }: {
+{ config, lib, pkgs, this, ... }: {
 
-  imports = [
-    ./hardware-configuration.nix
-    ./storage.nix
-  ];
+  # Import all *.nix files in this directory
+  imports = this.lib.ls ./.;
 
   # Use freshest kernel
   boot.kernelPackages = pkgs.linuxPackages_latest;
@@ -13,9 +11,13 @@
 
   # Network
   modules.tailscale.enable = true;
-  modules.ddns.enable = true;
+  # modules.ddns.enable = true;
+  modules.traefik.enable = true;
   modules.whoami.enable = true;
   networking.extraHosts = "";
+
+  # Custom DNS
+  # modules.blocky.enable = true;
 
   # Memory management
   modules.earlyoom.enable = true;

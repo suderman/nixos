@@ -1,9 +1,8 @@
-{ config, pkgs, inputs, ... }: {
+{ config, pkgs, inputs, this, ... }: {
 
-  imports = [ 
+  # Import all *.nix files in this directory
+  imports = this.lib.ls ./. ++ [
     inputs.hardware.nixosModules.lenovo-thinkpad-t480s
-    ./hardware-configuration.nix
-    ./storage.nix
   ];
 
   # Use the systemd-boot EFI boot loader.

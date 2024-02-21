@@ -1,9 +1,7 @@
-{ config, pkgs, ... }: {
+{ config, pkgs, this, ... }: {
 
-  imports = [ 
-    ./hardware-configuration.nix
-    ./storage.nix
-  ];
+  # Import all *.nix files in this directory
+  imports = this.lib.ls ./.;
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -25,20 +23,14 @@
     enable = true;
     deleteRoute = "10.1.0.0/16";
   };
-  # modules.ddns.enable = true;
+  modules.traefik.enable = true;
   modules.whoami.enable = true;
-
-  # Custom DNS
-  # modules.blocky.enable = true;
-
   modules.cockpit.enable = true;
 
   modules.plex.enable = true;
   # modules.tautulli.enable = true;
   modules.jellyfin.enable = true;
-  #
   modules.silverbullet.enable = true;
-  #
   modules.lunasea.enable = true;
   modules.sabnzbd = { enable = true; name = "sab"; };
   modules.radarr.enable = true;

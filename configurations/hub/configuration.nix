@@ -1,9 +1,7 @@
 { config, pkgs, this, ... }: {
 
-  imports = [ 
-    ./hardware-configuration.nix
-    ./storage.nix
-  ];
+  # Import all *.nix files in this directory
+  imports = this.lib.ls ./.;
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -31,7 +29,10 @@
   modules.blocky.enable = true;
 
   # Serve CA cert on http://10.1.0.4:1234
-  modules.traefik.caPort = 1234;
+  modules.traefik = {
+    enable = true;
+    caPort = 1234;
+  };
 
   # LAN controller
   modules.unifi = with this.networks; {

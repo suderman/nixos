@@ -1,9 +1,9 @@
 # Attribute set describing my domains, hostnames and IP addresses  
 this: let
 
-  inherit (builtins) attrNames filter;
+  inherit (builtins) attrNames attrValues filter;
   inherit (this.lib) mkAttrs;
-  inherit (this.inputs.nixpkgs.lib) foldl filterAttrs mapAttrsToList mapAttrs' nameValuePair hasPrefix; 
+  inherit (this.inputs.nixpkgs.lib) foldl filterAttrs hasPrefix mapAttrsToList mapAttrs' nameValuePair naturalSort unique; 
 
   # Centralized list of IP addresses
   networks = mkAttrs ./. ( network: import ./${network} );
@@ -30,5 +30,6 @@ in this // rec {
   inherit networks domains;
   mapping = (flatten networks) // domains;
   hostNames = filter (name: hasPrefix this.hostName name) (attrNames mapping);
+  addresses = unique( naturalSort( attrValues( filterAttrs (name: ip: hasPrefix this.hostName name) mapping )));
 
 }

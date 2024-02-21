@@ -1,8 +1,7 @@
-{ config, pkgs, inputs, ... }: {
+{ config, pkgs, inputs, this, ... }: {
 
-  imports = [ 
-    ./hardware-configuration.nix
-    ./storage.nix
+  # Import all *.nix files in this directory
+  imports = this.lib.ls ./. ++ [
     inputs.hardware.nixosModules.common-gpu-amd
   ];
 
