@@ -40,9 +40,6 @@ in {
     # Convince node to trust CA certificate
     NODE_EXTRA_CA_CERTS = this.ca;
 
-    # Convince git to trust CA certificate
-    GIT_SSL_CAINFO = this.ca;
-
   };
 
   # Enable passwordless ssh access

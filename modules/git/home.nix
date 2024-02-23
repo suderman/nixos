@@ -1,5 +1,5 @@
 # programs.git.enable = true;
-{ config, lib, this, ... }: 
+{ config, lib, ... }: 
 
 let
   cfg = config.programs.git;
@@ -14,10 +14,6 @@ in {
         user = {
           name = "Jon Suderman";
           email = "jon@suderman.net";
-        };
-        http = {
-          sslVerify = true;
-          sslCAInfo = toString this.ca;
         };
         core = {
           autocrlf = "input";
