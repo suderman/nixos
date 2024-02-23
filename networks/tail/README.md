@@ -26,6 +26,6 @@
 | Override local DNS | `Yes`                                 |
 | Global nameservers | `100.115.119.94` _(hub)_              |
 | Global nameservers | `100.88.52.75` _(eve)_                |
-| Global nameservers | `100.69.160.76 _(sol)_                |
+| Global nameservers | `100.69.160.76` _(sol)_               |
 
 </details>
