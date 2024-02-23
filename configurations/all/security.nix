@@ -33,15 +33,12 @@ in {
   # Set environment variables for every service
   systemd.globalEnvironment = {
 
-    # Convince OpenSSL to trust CA certificate
-    SSL_CERT_FILE = this.ca;
-
-    # Convince node to trust CA certificate
-    NODE_EXTRA_CA_CERTS = this.ca;
-
     # Convince python to trust CA certificate
     REQUESTS_CA_BUNDLE = this.ca;
     PIP_CERT = this.ca;
+
+    # Convince node to trust CA certificate
+    NODE_EXTRA_CA_CERTS = this.ca;
 
     # Convince git to trust CA certificate
     GIT_SSL_CAINFO = this.ca;

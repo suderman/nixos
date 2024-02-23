@@ -29,7 +29,7 @@ in {
     services.jellyfin = {
       enable = true;
       user = "jellyfin";
-      group = "jellyfin";
+      group = "media";
       openFirewall = true;
     };
 
