@@ -1,4 +1,4 @@
-{ config, pkgs, ... }: {
+{ config, pkgs, this, ... }: {
 
   # ---------------------------------------------------------------------------
   # User Configuration
@@ -10,6 +10,7 @@
 
   # Attempts to make Wayland work. Was needed at the time, probably not anymore. Need to clean this up.
   home.sessionVariables = {
+
     NIXOS_OZONE_WL = "1";
     MOZ_ENABLE_WAYLAND = "1";
     MOZ_USE_XINPUT2 = "1";
@@ -21,6 +22,7 @@
     # QT_SCALE_FACTOR = "1.25";
     # QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
     # SAL_USE_VCLPLUGIN = "gtk3";
+
   };
 
 }
