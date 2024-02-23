@@ -24,6 +24,7 @@
     deleteRoute = "10.1.0.0/16";
   };
   modules.traefik.enable = true;
+  modules.prometheus.enable = true;
   modules.whoami.enable = true;
   modules.cockpit.enable = true;
 

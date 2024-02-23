@@ -4,6 +4,7 @@
 let
 
   cfg = config.modules.nginx;
+  inherit (config.services.prometheus) exporters;
   inherit (lib) mkIf mkOption types;
 
 in {
@@ -29,10 +30,40 @@ in {
   config = mkIf cfg.enable {
 
     # 80 and 443 are already taken by traefik
-    services.nginx = {
-      enable = true;
-      defaultHTTPListenPort = 9080;
-      defaultSSLListenPort = 9443;
+    services = let
+      httpPort = 9080;
+      httpsPort = 9443;
+    in {
+
+      nginx = {
+        enable = true;
+        statusPage = true;
+        defaultHTTPListenPort = httpPort;
+        defaultSSLListenPort = httpsPort;
+      };
+
+      prometheus = {
+
+        exporters = {
+          nginx = { 
+            enable = true; 
+            scrapeUri = "http://127.0.0.1:${toString httpPort}/nginx_status";
+          };
+          nginxlog.enable = true; 
+        };
+
+        scrapeConfigs = [{ 
+          job_name = "nginx"; static_configs = [ 
+            { targets = [ "127.0.0.1:${toString exporters.nginx.port}" ]; } 
+          ]; 
+        } {
+          job_name = "nginxlog"; static_configs = [ 
+            { targets = [ "127.0.0.1:${toString exporters.nginxlog.port}" ]; } 
+          ]; 
+        }];
+
+      };
+
     };
 
   };

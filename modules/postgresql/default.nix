@@ -6,6 +6,7 @@ let
   cfg = config.modules.postgresql;
   admins = this.admins ++ [ "root" ]; 
   databases = mkAttrs (unique config.services.postgresql.ensureDatabases) ( database: admins );
+  inherit (config.services.prometheus) exporters;
   inherit (lib) mkIf mkOrder mkOption options types unique;
   inherit (this.lib) mkAttrs;
 
@@ -68,6 +69,19 @@ in {
 
     # Allow docker containers to connect
     networking.firewall.allowedTCPPorts = [ config.services.postgresql.port ];
+
+    # Metrics
+    services.prometheus = {
+      exporters.postgres = {
+        enable = true;
+        runAsLocalSuperUser = true;
+      };
+      scrapeConfigs = [{ 
+        job_name = "postgresql"; static_configs = [ 
+          { targets = [ "127.0.0.1:${toString exporters.postgres.port}" ]; } 
+        ]; 
+      }];
+    };
 
   };
 

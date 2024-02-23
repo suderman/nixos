@@ -3,6 +3,7 @@
 
   cfg = config.modules.traefik;
   certs = "${config.services.traefik.dataDir}/certs"; # dir for self-signed certificates
+  metricsPort = 81;
 
   inherit (lib) attrNames mapAttrs mkForce mkIf mkOption options recursiveUpdate types;
   inherit (this.lib) ls;
@@ -141,17 +142,28 @@ in {
         };
 
         # Listen on port 80 and redirect to port 443
-        entryPoints.web = {
-          address = ":80";
-          http.redirections.entrypoint = {
+        entryPoints = {
+
+          # Run everything on 443
+          websecure.address = ":443";
+
+          # Redirect http to https
+          web.address = ":80";
+          web.http.redirections.entrypoint = {
             to = "websecure";
             scheme = "https";
           };
+
+          # Metrics for prometheus
+          metrics.address = ":${toString metricsPort}";
+
         };
 
-        # Run everything on 443
-        entryPoints.websecure = {
-          address = ":443";
+        metrics.prometheus = {
+          entryPoint = "metrics";
+          buckets = [ "0.100000" "0.300000" "1.200000" "5.000000" ];
+          addServicesLabels = true;
+          addEntryPointsLabels = true;
         };
 
         # Let's Encrypt will check CloudFlare's DNS
@@ -232,6 +244,14 @@ in {
 
     };
 
+    services.prometheus = {
+      scrapeConfigs = [{ 
+        job_name = "traefik"; static_configs = [ 
+          { targets = [ "127.0.0.1:${toString metricsPort}" ]; } 
+        ]; 
+      }];
+    };
+
     # Enable Docker and set to backend (over podman default)
     virtualisation = {
       docker.enable = true;
@@ -240,7 +260,7 @@ in {
     };
 
     # Open up the firewall for http and https
-    networking.firewall.allowedTCPPorts = [ 80 443 ];
+    networking.firewall.allowedTCPPorts = [ 80 443 metricsPort ];
 
   };
 

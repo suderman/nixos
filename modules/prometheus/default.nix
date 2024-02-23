@@ -4,6 +4,7 @@
 let
 
   cfg = config.modules.prometheus;
+  inherit (config.services.prometheus) exporters;
   inherit (lib) mkIf mkOption options types;
   inherit (builtins) toString;
 
@@ -13,7 +14,7 @@ in {
     enable = options.mkEnableOption "prometheus"; 
     name = mkOption {
       type = types.str;
-      default = "prometheus";
+     default = "prometheus";
     };
     port = mkOption {
       default = 9090;
@@ -28,6 +29,19 @@ in {
       port = cfg.port;
       retentionTime = "30d";
       webExternalUrl = "https://${cfg.name}.${this.hostName}";
+
+      exporters.node = {
+        enable = true;
+        enabledCollectors = [ "systemd" ];
+      };
+
+      # https://github.com/prometheus/prometheus/wiki/Default-port-allocations
+      scrapeConfigs = [{ 
+        job_name = "node"; static_configs = [ 
+          { targets = [ "127.0.0.1:${toString exporters.node.port}" ]; } 
+        ]; 
+      }];
+
     };
 
     modules.traefik = { 
