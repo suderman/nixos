@@ -4,7 +4,7 @@
 let
 
   # https://github.com/immich-app/immich/releases
-  version = "1.94.1";
+  version = "1.95.1";
 
   cfg = config.modules.immich;
 
@@ -132,13 +132,18 @@ in {
 
     };
 
-    # Create extensions in database
+    # Immich expects its postgres user to be a "superuser"
+    # ...not ideal, but getting tired of fighting against this...
     systemd.services.postgresql.postStart = mkAfter ''
-      $PSQL -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS cube;'
-      $PSQL -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS earthdistance;'
-      $PSQL -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS vectors;'
+      $PSQL -tAc 'ALTER USER immich WITH SUPERUSER;'
     '';
 
+    # # Create extensions in database
+    # systemd.services.postgresql.postStart = mkAfter ''
+    #   $PSQL -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS cube;'
+    #   $PSQL -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS earthdistance;'
+    #   $PSQL -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS vectors;'
+    # '';
 
     # Init service
     systemd.services.immich = let service = config.systemd.services.immich; in {
