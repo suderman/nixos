@@ -12,7 +12,11 @@
   # Network
   modules.tailscale.enable = true;
   # modules.ddns.enable = true;
-  modules.traefik.enable = true;
+  # modules.traefik.enable = true;
+  modules.traefik = {
+    enable = true;
+    routers.whoislux = "https://whoami.lux";
+  };
   modules.whoami.enable = true;
   networking.extraHosts = "";
 
@@ -30,7 +34,7 @@
   # Web services
   modules.cockpit.enable = true;
   modules.whoogle = { enable = true; name = "g"; };
-  modules.gitea = { enable = true; name = "git"; };
+  # modules.gitea = { enable = true; name = "git"; };
   modules.tiddlywiki = { enable = true; name = "wiki"; };
   modules.rsshub.enable = true;
   modules.freshrss.enable = true;
@@ -42,5 +46,24 @@
     # package = pkgs.unstable.tandoor-recipes;
     # public = "tandoor.suderman.net";
   };
+
+  # services.traefik.dynamicConfigOptions.http = let
+  #   hostName = "git.jons.ca";
+  #   origin = "gitea.lux";
+  # in {
+  #   routers.gitea = {
+  #     rule = "Host(`${hostName}`)";
+  #     entrypoints = "websecure"; 
+  #     tls.certresolver = "resolver-dns";
+  #     tls.domains = [{
+  #       main = "${hostName}"; 
+  #       sans = "*.${hostName}"; 
+  #     }];
+  #     middlewares = "gitea";
+  #     service = "gitea";
+  #   };
+  #   middlewares.gitea.headers.customRequestHeaders.Host = origin;
+  #   services.gitea.loadBalancer.servers = [{ url = "https://${origin}:443"; }];
+  # };
 
 }

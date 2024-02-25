@@ -23,7 +23,18 @@
     enable = true;
     deleteRoute = "10.1.0.0/16";
   };
-  modules.traefik.enable = true;
+  # modules.traefik.enable = true;
+  modules.traefik = { 
+    enable = true;
+    # routers.jelly = { 
+    #   hostName = "jelly.suderman.org"; 
+    #   url = "https://jellyfin.lux"; 
+    #   tls.certresolver = "resolver-dns";
+    #   middlewares = false;
+    # };
+    routers."jelly.suderman.org" = "https://jellyfin.lux"; 
+  };
+
   modules.prometheus.enable = true;
   modules.whoami.enable = true;
   modules.cockpit.enable = true;
@@ -42,6 +53,7 @@
   # modules.nextcloud.enable = false;
   modules.ocis.enable = true;
   # modules.gitea = { enable = true; name = "git"; };
+  modules.gitea.enable = true; 
   # modules.tiddlywiki = { enable = true; name = "wiki"; };
   # modules.wallabag.enable = false;
   #

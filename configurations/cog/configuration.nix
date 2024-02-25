@@ -79,7 +79,7 @@
   modules.libimobiledevice.enable = true;
 
   # Web services
-  modules.traefik.enable = true;
+  # modules.traefik.enable = true;
   modules.whoami.enable = true;
   modules.cockpit.enable = true;
 
@@ -159,13 +159,14 @@
   # modules.photoprism = { enable = false; photosDir = "/photos"; };
   # modules.silverbullet.enable = true;
   # modules.bluebubbles.enable = true;
-  # modules.traefik = { 
-  #   routers.isy = "http://${this.network.dns.home.isy}:80";
-  #   http = {
-  #     middlewares.isy.headers.customRequestHeaders.authorization = "Basic {{ env `ISY_BASIC_AUTH` }}";
-  #     routers.isy.middlewares = [ "isy" ];
-  #   };
-  # };
+  modules.traefik = { 
+    routers.isy = "http://${this.networks.home.isy}:80";
+    http = {
+      middlewares.isy.headers.customRequestHeaders.authorization = "Basic {{ env `ISY_BASIC_AUTH` }}";
+      routers.isy.middlewares = [ "isy" ];
+    };
+    # routers."foo.bar" = "https://whoami.cog";
+  };
 
 
   # # services.wordpress.webserver = "nginx";
