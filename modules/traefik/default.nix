@@ -5,7 +5,7 @@
   certs = "${config.services.traefik.dataDir}/certs"; # dir for self-signed certificates
   metricsPort = 81;
 
-  inherit (lib) attrNames mapAttrs mapAttrs' mkForce mkIf mkOption options recursiveUpdate types;
+  inherit (lib) attrNames mapAttrs' mkForce mkIf mkOption options recursiveUpdate types;
   inherit (this.lib) ls;
   inherit (config.age) secrets;
 
@@ -116,19 +116,69 @@ in {
 
   options.modules.traefik = {
     enable = options.mkEnableOption "traefik"; 
-    http = mkOption { 
+
+    # Shortcut for adding reverse proxies
+    routers = mkOption { 
       type = with types; anything; default = {};
     };
-    routers = mkOption { 
-      type = with types; anything; default = { "noop" = {}; };
-    };
+    # modules.traefik.routers.foo = "http://bar.otherhost:80";
+    # --becomes-->
+    # services.traefik.dynamicConfigOptions.http = {
+    #   routers.foo = {
+    #     rule = "Host(`foo.thishost`)";
+    #     entrypoints = "websecure";
+    #     middlewares = [ "foo" ];
+    #     service = "foo";
+    #     tls = true;
+    #   };
+    #   middlewares.foo = {
+    #     headers.customRequestHeaders.Host = "bar.otherhost";
+    #   };
+    #   services.foo = {
+    #     loadBalancer.servers = [{ url = "http://bar.otherhost:80"; }];
+    #   };
+    # };
+    #
+    # modules.traefik.routers."foo.com" = "https://baz.otherhost:443";
+    # --becomes-->
+    # services.traefik.dynamicConfigOptions.http = {
+    #   routers.foo_com = {
+    #     rule = "Host(`foo.com`)";
+    #     entrypoints = "websecure";
+    #     middlewares = [ "foo_com" ];
+    #     service = "foo_com";
+    #     tls = {
+    #       certresolver = "resolver-dns"; 
+    #       domains = [{
+    #         main = "foo.com";
+    #         sans = "*.foo.com";
+    #       }];
+    #     };
+    #   };
+    #   middlewares.foo_com = {
+    #     headers.customRequestHeaders.Host = "baz.otherhost";
+    #   };
+    #   services.foo_com = {
+    #     loadBalancer.servers = [{ url = "https://baz.otherhost:443"; }];
+    #   };
+    # };
+
+    # Helper function to automatically add traefik labels to OCI containers
     labels = mkOption {
       type = types.anything; readOnly = true; default = labels;
     };
+
+    # Attributes merged with services.traefik.dynamicConfigOptions.http
+    http = mkOption { 
+      type = with types; anything; default = {};
+    };
+
+    # List of certificates to generate
     certificates = mkOption { 
       type = with types; listOf str;
       default = [ this.hostName "local" ];
     };
+
   };
 
   config = mkIf cfg.enable {
