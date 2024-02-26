@@ -5,16 +5,13 @@
   certs = "${config.services.traefik.dataDir}/certs"; # dir for self-signed certificates
   metricsPort = 81;
 
-  inherit (lib) attrNames mapAttrs' mkForce mkIf mkOption options recursiveUpdate types;
+  inherit (lib) attrNames mapAttrs mkForce mkIf mkOption options recursiveUpdate types;
   inherit (this.lib) ls;
   inherit (config.age) secrets;
 
-  # nameValuePair but replaces periods with underscores
-  mkConfig = name: value: lib.nameValuePair (builtins.replaceStrings ["."] ["_"] name) value;
-
   # Generate a hostName from a url or name
   mkHostName = args: let
-    inherit (builtins) elemAt isList isBool isString hasAttr;
+    inherit (builtins) elemAt isList isNull isString hasAttr;
     inherit (lib) hasInfix removePrefix splitString;
     # Extract some.url hostName from https://some.url:443 
     fromString = url: let
@@ -42,9 +39,9 @@
       loadBalancer.servers = [{ inherit url; }];
     };
     in 
-      if isString url then mkConfig name (fromString url)
-      else if isAttrs url then mkConfig name (fromAttrs url)
-      else mkConfig name {};
+      if isString url then fromString url
+      else if isAttrs url then fromAttrs url
+      else {};
 
   # Generate traefik middleware
   mkMiddleware = name: url: let
@@ -52,17 +49,17 @@
     fromString = url: fromAttrs { inherit url; };
     fromAttrs = { url, ... }: { headers.customRequestHeaders.Host = mkHostName url; };
     in 
-      if isString url then mkConfig name (fromString url)
-      else if isAttrs url then mkConfig name (fromAttrs url)
-      else mkConfig name {};
+      if isString url then fromString url
+      else if isAttrs url then fromAttrs url
+      else {};
 
   # Generate traefik router
   mkRouter = name: url: let
-    inherit (builtins) isAttrs isBool isString hasAttr;
+    inherit (builtins) isAttrs isNull isString hasAttr;
     inherit (lib) hasInfix;
     fromString = url: fromAttrs { inherit url; };
-    fromAttrs = { hostName ? null, tls ? null, service ? null, middlewares ? [ "local" ], ... }: let
-      name' = (mkConfig name {}).name;
+    fromAttrs = { hostName ? null, tls ? null, public ? null, middlewares ? [], ... }: let
+      inherit name;
       hostName' = mkHostName [ name hostName ];
       tls' = if ! isNull tls then tls # if tls {} exists, just use that
         else if ! hasInfix "." name then true # if the name hasn't a dot, assume a private hostname boolean tls
@@ -73,17 +70,19 @@
             sans = "*.${hostName'}"; 
           }];
         };
+      public' = if ! isNull public then public # if publis is boolean, just use that
+        else if hasInfix "." name then true else false; # if the name has a dot, assume public
       in {
         entrypoints = "websecure";
         rule = "Host(`${hostName'}`)";
         tls = tls';
-        service = name';
-        middlewares = [ name' ] ++ middlewares; # default middlewares include [ "local" ]
+        service = name; # if NOT public (default), middlewares include [ "local" ] to whitelist IPs
+        middlewares = middlewares ++ ( if public' == false then [ "local" name ] else [ name ] );
       };   
       in 
-        if isString url then mkConfig name (fromString url)
-        else if isAttrs url then mkConfig name (fromAttrs url)
-        else mkConfig name {};
+        if isString url then fromString url
+        else if isAttrs url then fromAttrs url
+        else {};
 
   # Generate traefik labels for use with OCI container
   labels = args: ( let
@@ -127,7 +126,7 @@ in {
     #   routers.foo = {
     #     rule = "Host(`foo.thishost`)";
     #     entrypoints = "websecure";
-    #     middlewares = [ "foo" ];
+    #     middlewares = [ "foo" "local" ];
     #     service = "foo";
     #     tls = true;
     #   };
@@ -142,11 +141,11 @@ in {
     # modules.traefik.routers."foo.com" = "https://baz.otherhost:443";
     # --becomes-->
     # services.traefik.dynamicConfigOptions.http = {
-    #   routers.foo_com = {
+    #   routers."foo.com" = {
     #     rule = "Host(`foo.com`)";
     #     entrypoints = "websecure";
-    #     middlewares = [ "foo_com" ];
-    #     service = "foo_com";
+    #     middlewares = [ "foo.com" ];
+    #     service = "foo.com";
     #     tls = {
     #       certresolver = "resolver-dns"; 
     #       domains = [{
@@ -155,10 +154,10 @@ in {
     #       }];
     #     };
     #   };
-    #   middlewares.foo_com = {
+    #   middlewares."foo.com" = {
     #     headers.customRequestHeaders.Host = "baz.otherhost";
     #   };
-    #   services.foo_com = {
+    #   services."foo.com" = {
     #     loadBalancer.servers = [{ url = "https://baz.otherhost:443"; }];
     #   };
     # };
@@ -314,7 +313,7 @@ in {
 
           # Generate traefik middlewares from configuration routers
           middlewares = ( 
-            mapAttrs' mkMiddleware cfg.routers 
+            mapAttrs mkMiddleware cfg.routers 
 
           # Include a couple extra middlewares often used
           ) // {
@@ -334,14 +333,14 @@ in {
 
           # Generate traefik services from configuration routers
           services = ( 
-            mapAttrs' mkService cfg.routers
+            mapAttrs mkService cfg.routers
 
           # Avoid a config error ensuring at least one service defined
           ) // { "noop" = {}; };
 
           # Generate traefik routers from configuration routers
           routers = (
-            mapAttrs' mkRouter cfg.routers
+            mapAttrs mkRouter cfg.routers
                 
           # Make available the traefik dashboard
           ) // {
