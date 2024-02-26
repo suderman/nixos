@@ -165,7 +165,7 @@
       middlewares.isy.headers.customRequestHeaders.authorization = "Basic {{ env `ISY_BASIC_AUTH` }}";
       routers.isy.middlewares = [ "isy" ];
     };
-    # routers."foo.bar" = "https://whoami.cog";
+    routers."foo.bar" = "https://whoami.cog";
   };
 
 
