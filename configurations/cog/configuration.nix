@@ -163,7 +163,6 @@
     routers.isy = "http://${this.networks.home.isy}:80";
     http = {
       middlewares.isy.headers.customRequestHeaders.authorization = "Basic {{ env `ISY_BASIC_AUTH` }}";
-      routers.isy.middlewares = [ "isy" ];
     };
     routers."foo.bar" = "https://whoami.cog";
   };
