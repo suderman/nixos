@@ -4,7 +4,7 @@
 let 
 
   # https://github.com/owncloud/ocis/releases
-  version = "4.0.5";
+  version = "4.0.6";
 
   cfg = config.modules.ocis;
 
@@ -80,8 +80,7 @@ in {
         OCIS_URL = "https://${cfg.name}.${this.hostName}";
         OCIS_LOG_LEVEL = "debug";
         PROXY_TLS = "false"; 
-        OCIS_INSECURE = "false";
-        GRAPH_LDAP_INSECURE = "true"; # https://github.com/owncloud/ocis/issues/3812
+        OCIS_INSECURE = "true";
         PROXY_ENABLE_BASIC_AUTH = "true";
         IDP_SIGNING_PRIVATE_KEY_FILES = "/etc/ocis/${signingKey}";
         IDP_ENCRYPTION_SECRET_FILE = "/etc/ocis/${encryptionSecret}";
