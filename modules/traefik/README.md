@@ -4,7 +4,7 @@ Configured just the way I likes it.
 
 ## Examples
 
-### Route a private service to private network
+### Route private service to private network
 
 ```nix
 {
@@ -34,11 +34,11 @@ Configured just the way I likes it.
 }
 ```
 
-### Route a private service to public internet
+### Route private service to public internet
 
 ```nix
 {
-    modules.traefik.routers.foo = "http://baz.eve:80";
+    modules.traefik.routers."foo.com" = "http://baz.eve:80";
 }
 ```
 ...becomes...  
