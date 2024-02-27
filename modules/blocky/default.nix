@@ -5,7 +5,7 @@ let
 
   cfg = config.modules.blocky;
   inherit (builtins) toString;
-  inherit (lib) mkIf mkOption mkForce types;
+  inherit (lib) concatStringsSep mkIf mkOption mkForce types;
 
 in {
 
@@ -26,6 +26,10 @@ in {
     httpPort = mkOption {
       type = types.port;
       default = 4000; 
+    };
+    public = mkOption {
+      type = types.bool;
+      default = false; 
     };
   };
 
@@ -74,6 +78,52 @@ in {
       };
     };
 
+    services.prometheus = {
+      scrapeConfigs = [{ 
+        job_name = "blocky"; static_configs = [ 
+          { targets = [ "127.0.0.1:${toString cfg.httpPort}" ]; } 
+        ]; 
+      }];
+    };
+
+    # Public firewall rules
+    networking.firewall = if cfg.public == true then {
+      allowedTCPPorts = [ cfg.dnsPort cfg.httpPort ];
+      allowedUDPPorts = [ cfg.dnsPort ];
+
+    # Private firewall rules (default)
+    } else {
+
+      extraCommands = let
+        dnsPort = toString cfg.dnsPort;
+        httpPort = toString cfg.httpPort;
+
+        # We only want blocky to be available to local and VPN requests
+        localRanges = [
+          "127.0.0.1/32"   # local host
+          "192.168.0.0/16" # local network
+          "10.0.0.0/8"     # local network
+          "172.16.0.0/12"  # docker network
+          "100.64.0.0/10"  # vpn network
+        ];
+
+      in concatStringsSep "\n" (
+
+        # Only allow UDP DNS traffic from local IP ranges
+        map ( range: "iptables -A INPUT -p udp --dport ${dnsPort} -s ${range} -j ACCEPT" ) localRanges ++
+        [ "iptables -A INPUT -p udp --dport ${dnsPort} -j DROP" ] ++
+
+        # Only allow TCP DNS traffic from local IP ranges
+        map ( range: "iptables -A INPUT -p tcp --dport ${dnsPort} -s ${range} -j ACCEPT" ) localRanges ++
+        [ "iptables -A INPUT -p tcp --dport ${dnsPort} -j DROP" ] ++
+
+        # Only allow TCP HTTP traffic from local IP ranges
+        map ( range: "iptables -A INPUT -p tcp --dport ${httpPort} -s ${range} -j ACCEPT" ) localRanges ++
+        [ "iptables -A INPUT -p tcp --dport ${httpPort} -j DROP" ]
+
+      );
+    };
+
     # services.redis.servers.blocky = {
     #   enable = true;
     #   openFirewall = true;
@@ -83,21 +133,13 @@ in {
     #   settings.protected-mode = "no";
     # };
 
-    services.prometheus = {
-      scrapeConfigs = [{ 
-        job_name = "blocky"; static_configs = [ 
-          { targets = [ "127.0.0.1:${toString cfg.httpPort}" ]; } 
-        ]; 
-      }];
-    };
-
     services.blocky = {
       enable = true;
       settings = {
 
         ports = {
-          dns = map (ip: "${ip}:${toString cfg.dnsPort}") this.addresses;
-          http = map (ip: "${ip}:${toString cfg.httpPort}") this.addresses;
+          dns = cfg.dnsPort;
+          http = cfg.httpPort;
         };
 
         # redis = {
@@ -158,11 +200,6 @@ in {
           };
         };
       };
-    };
-
-    networking.firewall = {
-      allowedTCPPorts = [ cfg.dnsPort cfg.httpPort ];
-      allowedUDPPorts = [ cfg.dnsPort ];
     };
 
   };
