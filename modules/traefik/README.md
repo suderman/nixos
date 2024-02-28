@@ -8,7 +8,7 @@ Configured just the way I likes it.
 
 ```nix
 {
-    modules.traefik.routers.foo = "http://bar.hub:80";
+  modules.traefik.routers.foo = "http://bar.hub:80";
 }
 ```
 
@@ -16,21 +16,21 @@ Configured just the way I likes it.
 
 ```nix
 {
-    services.traefik.dynamicConfigOptions.http = {
-      routers.foo = {
-        rule = "Host(`foo.lux`)";
-        entrypoints = "websecure";
-        middlewares = [ "foo" "local" ];
-        service = "foo";
-        tls = true;
-      };
-      middlewares.foo = {
-        headers.customRequestHeaders.Host = "bar.hub";
-      };
-      services.foo = {
-        loadBalancer.servers = [{ url = "http://bar.hub:80"; }];
-      };
+  services.traefik.dynamicConfigOptions.http = {
+    routers.foo = {
+      rule = "Host(`foo.lux`)";
+      entrypoints = "websecure";
+      middlewares = [ "foo" "local" ];
+      service = "foo";
+      tls = true;
     };
+    middlewares.foo = {
+      headers.customRequestHeaders.Host = "bar.hub";
+    };
+    services.foo = {
+      loadBalancer.servers = [{ url = "http://bar.hub:80"; }];
+    };
+  };
 }
 ```
 
@@ -38,7 +38,7 @@ Configured just the way I likes it.
 
 ```nix
 {
-    modules.traefik.routers."foo.com" = "http://baz.eve:80";
+  modules.traefik.routers."foo.com" = "http://baz.eve:80";
 }
 ```
 ...becomes...  
@@ -116,7 +116,7 @@ Configured just the way I likes it.
 {
   virtualisation.oci-containers.containers.lunasea = {
     image = "ghcr.io/jagandeepbrar/lunasea:stable";
-    extraOptions = config.modules.traefik.labels "lunasea.domain.com";
+    extraOptions = config.modules.traefik.labels "example.com";
   };
 }
 ```
@@ -129,12 +129,11 @@ Configured just the way I likes it.
     image = "ghcr.io/jagandeepbrar/lunasea:stable";
     extraOptions = [ 
       "--label=traefik.enable=true" 
-      "--label=traefik.http.routers.lunasea_domain_com.entrypoints=websecure"
-      "--label=traefik.http.routers.lunasea_domain_com.rule=Host(`lunasea.domain.com`)" 
-      "--label=traefik.http.routers.lunasea_domain_com.tls=true" 
-      "--label=traefik.http.routers.lunasea_domain_com.tls.certresolver=resolver-dns"
-      "--label=traefik.http.routers.lunasea_domain_com.tls.domains[0].main=lunasea.domain.com"
-      "--label=traefik.http.routers.lunasea_domain_com.tls.domains[1].sans=*.lunasea.domain.com"
+      "--label=traefik.http.routers.example_com.entrypoints=websecure"
+      "--label=traefik.http.routers.example_com.rule=Host(`example.com`)" 
+      "--label=traefik.http.routers.example_com.tls.certresolver=resolver-dns"
+      "--label=traefik.http.routers.example_com.tls.domains[0].main=example.com"
+      "--label=traefik.http.routers.example_com.tls.domains[1].sans=*.example.com"
     ];
   };
 }
