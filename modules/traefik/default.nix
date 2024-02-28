@@ -92,7 +92,7 @@
       else {};
 
   # Generate traefik labels for use with OCI container
-  labels = args: ( let
+  mkLabels = args: ( let
     inherit (builtins) elemAt head isAttrs isList isString length toBool toString;
     inherit (lib) hasSuffix replaceStrings;
 
@@ -174,7 +174,7 @@ in {
 
     # Helper function to automatically add traefik labels to OCI containers
     labels = mkOption {
-      type = types.anything; readOnly = true; default = labels;
+      type = types.anything; readOnly = true; default = mkLabels;
     };
 
     # Attributes merged with services.traefik.dynamicConfigOptions.http
@@ -399,7 +399,7 @@ in {
     };
 
     # Open up the firewall for http and https
-    networking.firewall.allowedTCPPorts = [ 80 443 metricsPort ];
+    networking.firewall.allowedTCPPorts = [ 80 443 ];
 
   };
 

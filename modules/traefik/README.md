@@ -1,6 +1,12 @@
 # Traefik
 
-Configured just the way I likes it.
+Custom CA certificates are automatically generated with OpenSSL for each
+private host name discovered in the Traefik configuration. Private host names
+have an IP whitelist middleware to filter out any publicly routable IP
+addresses. 
+
+Let's Encrypt will issue certificates for public host names using
+DNS validation against Cloudflare's API.
 
 ## Examples
 
