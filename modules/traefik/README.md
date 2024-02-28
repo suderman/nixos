@@ -101,6 +101,7 @@ Configured just the way I likes it.
     image = "ghcr.io/jagandeepbrar/lunasea:stable";
     extraOptions = [ 
       "--label=traefik.enable=true" 
+      "--label=traefik.http.routers.lunasea.entrypoints=websecure"
       "--label=traefik.http.routers.lunasea.rule=Host(`lunasea.lux`)" 
       "--label=traefik.http.routers.lunasea.tls=true" 
       "--label=traefik.http.routers.lunasea.middlewares=local@file" 
@@ -109,3 +110,32 @@ Configured just the way I likes it.
 }
 ```
 
+### Public domain example
+
+```nix
+{
+  virtualisation.oci-containers.containers.lunasea = {
+    image = "ghcr.io/jagandeepbrar/lunasea:stable";
+    extraOptions = config.modules.traefik.labels "lunasea.domain.com";
+  };
+}
+```
+
+...becomes...  
+
+```nix
+{
+  virtualisation.oci-containers.containers.lunasea = {
+    image = "ghcr.io/jagandeepbrar/lunasea:stable";
+    extraOptions = [ 
+      "--label=traefik.enable=true" 
+      "--label=traefik.http.routers.lunasea_domain_com.entrypoints=websecure"
+      "--label=traefik.http.routers.lunasea_domain_com.rule=Host(`lunasea.domain.com`)" 
+      "--label=traefik.http.routers.lunasea_domain_com.tls=true" 
+      "--label=traefik.http.routers.lunasea_domain_com.tls.certresolver=resolver-dns"
+      "--label=traefik.http.routers.lunasea_domain_com.tls.domains[0].main=lunasea.domain.com"
+      "--label=traefik.http.routers.lunasea_domain_com.tls.domains[1].sans=*.lunasea.domain.com"
+    ];
+  };
+}
+```
