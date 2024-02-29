@@ -8,7 +8,6 @@ let
   inherit (lib) mkIf mkForce;
   inherit (this.lib) mkShellScript;
 
-
 in {
 
   options.modules.ocis = {
@@ -17,13 +16,16 @@ in {
 
   config = mkIf cfg.enable {
 
-    home.packages = with pkgs; [ owncloud-client qt6.qtwayland ];
-    services.owncloud-client.enable = true;
+    home.packages = with pkgs; [ unstable.owncloud-client qt6.qtwayland ];
+    services.owncloud-client = with pkgs; {
+      enable = true;
+      package = unstable.owncloud-client;
+    };
 
     systemd.user.services.owncloud-client.Service = {
       Restart = "always";
       ExecStart = mkForce( mkShellScript { 
-        inputs = with pkgs; [ coreutils owncloud-client ];
+        inputs = with pkgs; [ coreutils unstable.owncloud-client ];
         text = ''
           sleep 10 
           owncloud;

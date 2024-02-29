@@ -8,14 +8,14 @@ let
 
   cfg = config.modules.ocis;
 
-  ownership = "${toString config.ids.uids.ocis}:${toString config.ids.gids.ocis}";
   signingKey = "idp-private-key.pem";
   encryptionSecret = "idp-encryption.key";
 
   inherit (lib) mkIf mkOption mkBefore types;
-  inherit (this.lib) extraGroups;
+  inherit (this.lib) extraGroups toOwnership;
   inherit (config.age) secrets;
   inherit (config.modules) traefik;
+  inherit (config.ids) uids gids;
 
 in {
 
@@ -47,7 +47,7 @@ in {
           group = "ocis";
           description = "ocis daemon user";
           home = cfg.dataDir;
-          uid = config.ids.uids.ocis;
+          uid = uids.ocis;
         };
 
       # Add admins to the ocis group
@@ -55,7 +55,7 @@ in {
 
       # Create group
       groups.ocis = {
-        gid = config.ids.gids.ocis;
+        gid = gids.ocis;
       };
     };
 
@@ -71,7 +71,7 @@ in {
       cmd = [ "-c" "ocis init || true; ocis server" ];
 
       # Run as ocis user
-      user = ownership;
+      user = toOwnership uids.ocis gids.ocis;
 
       # Traefik labels
       extraOptions = traefik.labels cfg.name;
@@ -110,7 +110,7 @@ in {
         mkdir -p ${etc}
         [ -e ${etc}/${encryptionSecret} ] || ${openssl} rand -out ${etc}/${encryptionSecret} 32 
         [ -e ${etc}/${signingKey} ] || ${openssl} genpkey -algorithm RSA -out ${etc}/${signingKey} -pkeyopt rsa_keygen_bits:4096
-        chown -R ${ownership} ${cfg.dataDir}
+        chown -R ${toOwnership uids.ocis gids.ocis} ${cfg.dataDir}
       '';
 
       # traefik should be running before this service starts
