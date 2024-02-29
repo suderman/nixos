@@ -175,7 +175,7 @@
       # If public is boolean (explicitly set), just use that value. Otherwise, match with external.
       public' = if ! isNull public then public else external';
 
-      # If public or external, then flag the rule
+      # If public then flag the rule
       rule' = let
         publicFlag = if public' == true then ",`PUBLIC`" else "";
       in "Host(`${hostName}`${publicFlag})";
