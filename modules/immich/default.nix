@@ -33,6 +33,11 @@ in {
       default = "immich";
     };
 
+    alias = mkOption { 
+      type = types.anything; 
+      default = null;
+    };
+
     dataDir = mkOption {
       type = types.path;
       default = "/var/lib/immich"; # Data directory for the Immich instance

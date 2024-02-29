@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let
 
@@ -9,9 +9,6 @@ let
 in {
 
   config = mkIf cfg.enable {
-
-    # Enable reverse proxy
-    modules.traefik.enable = true;
 
     # Server back-end
     virtualisation.oci-containers.containers.immich-server = {
@@ -43,6 +40,12 @@ in {
       # Networking for docker containers
       ++ [ "--network=immich" ];
 
+    };
+
+    # Enable reverse proxy
+    modules.traefik = {
+      enable = true;
+      routers = traefik.alias cfg.name cfg.alias;
     };
 
     # Extend systemd service
