@@ -7,10 +7,10 @@ CloudFlare's API.
 
 Private host names have an IP whitelist middleware to filter out any publicly
 routable IP addresses, and their private IP will be added to Blocky's custom
-DNS mapping. Public host names will get their public IP address added as DNS
+DNS mapping. Public host names will get their public IP address added as a DNS
 record to CloudFlare.
 
-Host names that do not end with the current system's name will considered
+Host names that do not end with the current system's name will be considered
 external and assumed public by default.
 
 ## Examples
