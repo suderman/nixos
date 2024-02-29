@@ -248,28 +248,32 @@ in {
     privateHostNames = mkOption { 
       type = with types; listOf str; 
       readOnly = true;
-      default = [ "local" this.hostName ] ++ filter ( hostName: this.hostName != hostName ) ( mkHostNames { public = false; } );
+      default = if cfg.enable == false then [] else
+        [ "local" this.hostName ] ++ filter ( hostName: this.hostName != hostName ) ( mkHostNames { public = false; } );
     };
 
     # List of public hostNames that require external DNS records and have certificates issued by Let's Encrypt 
     publicHostNames = mkOption { 
       type = with types; listOf str; 
       readOnly = true;
-      default = filter ( hostName: ( ! hasSuffix ".${this.hostName}" hostName ) && ( this.hostName != hostName ) ) ( mkHostNames { public = true; } );
+      default = if cfg.enable == false then [] else
+        filter ( hostName: ( ! hasSuffix ".${this.hostName}" hostName ) && ( this.hostName != hostName ) ) ( mkHostNames { public = true; } );
     };
 
     # List of ALL hostNames this server is aware of
     hostNames = mkOption { 
       type = with types; listOf str; 
       readOnly = true;
-      default = [ "local" this.hostName ] ++ filter ( hostName: ( this.hostName != hostName ) ) ( mkHostNames { public = null; } );
+      default = if cfg.enable == false then [] else 
+        [ "local" this.hostName ] ++ filter ( hostName: ( this.hostName != hostName ) ) ( mkHostNames { public = null; } );
     };
 
     # Collection of hostName to IP addresses from this Traefik configuration
     mapping = mkOption { 
       type = with types; anything; 
       readOnly = true;
-      default = if cfg.enable == false then {} else mkAttrs cfg.privateHostNames ( _: this.domains.${this.hostName} );
+      default = if cfg.enable == false then {} else 
+        mkAttrs cfg.privateHostNames ( _: this.domains.${this.hostName} );
     };
 
   };
