@@ -1,12 +1,17 @@
 # Traefik
 
 Custom CA certificates are automatically generated with OpenSSL for each
-private host name discovered in the Traefik configuration. Private host names
-have an IP whitelist middleware to filter out any publicly routable IP
-addresses. 
+internal host name discovered in the Traefik configuration. External host names
+will get certificates from Let's Encrypt using DNS validation against
+CloudFlare's API. 
 
-Let's Encrypt will issue certificates for public host names using
-DNS validation against Cloudflare's API.
+Private host names have an IP whitelist middleware to filter out any publicly
+routable IP addresses, and their private IP will be added to Blocky's custom
+DNS mapping. Public host names will get their public IP address added as DNS
+record to CloudFlare.
+
+Host names that do not end with the current system's name will considered
+external and assumed public by default.
 
 ## Examples
 
@@ -136,7 +141,7 @@ DNS validation against Cloudflare's API.
     extraOptions = [ 
       "--label=traefik.enable=true" 
       "--label=traefik.http.routers.example_com.entrypoints=websecure"
-      "--label=traefik.http.routers.example_com.rule=Host(`example.com`)" 
+      "--label=traefik.http.routers.example_com.rule=Host(`example.com`,`PUBLIC`)" 
       "--label=traefik.http.routers.example_com.tls.certresolver=resolver-dns"
       "--label=traefik.http.routers.example_com.tls.domains[0].main=example.com"
       "--label=traefik.http.routers.example_com.tls.domains[1].sans=*.example.com"

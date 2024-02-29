@@ -30,19 +30,23 @@
         else fromName arg;
 
   # Retrieve all hostNames that Traefik knows about 
-  mkHostNames = { public ? null }: let
+  mkHostNames = { public ? null, external ? null }: let
     inherit (builtins) attrValues concatMap filter replaceStrings split;
     inherit (lib) flatten hasInfix hasPrefix hasSuffix;
 
-    # Get public (true), private (false), or all (null) hostName rules
-    getRules = if public == null then rule: ( hasInfix "Host(`" rule ) else (
-      if public == true 
-        then rule: ( hasInfix "Host(`" rule ) && ( hasInfix "`_public`" rule )
-        else rule: ( hasInfix "Host(`" rule ) && ( ! hasInfix "`_public`" rule )
-    );
+    # Extract different types of hostNames depending how they are "tagged" in the rule
+    rules' = rule: hasInfix "Host(`" rule; 
+    publicRules' = rule: ( hasInfix "Host(`" rule ) && ( hasInfix "`PUBLIC`" rule );
+    privateRules' = rule: ( hasInfix "Host(`" rule ) && ( ! hasInfix "`PUBLIC`" rule );
+    externalRules' = rule: ( hasInfix "Host(`" rule ) && ( ! hasInfix ".${this.hostName}`" rule );
+    internalRules' = rule: ( hasInfix "Host(`" rule ) && ( hasInfix ".${this.hostName}`" rule );
 
-    # Remove "_public" from all hostName rules
-    cleanRules = rule: replaceStrings [ ",`_public`" ] [ "" ] rule;
+    # First and second pass of filters
+    certRules = if external == null then rules' else ( if external == true then externalRules' else internalRules' );
+    domainRules = if public == null then rules' else ( if public == true then publicRules' else privateRules' );
+
+    # Remove "PUBLIC" from all hostName rules
+    cleanRules = rule: replaceStrings [ ",`PUBLIC`" ] [ "" ] rule;
 
     # Extract hostName from inside ( parenthesis )
     onlyHostNames = (elm: ( 
@@ -56,7 +60,7 @@
       # Collect router rules from traefik dynamic configuration options
       rules = flatten (map (router: [router.rule]) (attrValues config.services.traefik.dynamicConfigOptions.http.routers));
       # Filter further to only include router rules
-      hostRules = map cleanRules (filter getRules rules);
+      hostRules = map cleanRules (filter domainRules (filter certRules rules) );
       # Split each rule by backtick and collect list of hostNames
       hostNames = filter onlyHostNames (flatten (map (rule: (split "`" rule)) hostRules));
     in hostNames;
@@ -67,12 +71,15 @@
       # Filter to only include traefik labels
       rules = filter (option: hasPrefix "--label=traefik.http.routers" option) options;
       # Filter further to only include router rules
-      hostRules = map cleanRules (filter getRules rules);
+      hostRules = map cleanRules (filter domainRules (filter certRules rules) );
       # Split each rule by backtick and collect list of hostNames
       hostNames = filter onlyHostNames (flatten (map (rule: (split "`" rule)) hostRules));
     in hostNames;
 
-    in routerHostNames ++ labelHostNames;
+    # Include "local" hostName when non-public and non-external 
+    localHostName = if public != true && external != true then [ "local" ] else [];
+
+  in localHostName ++ routerHostNames ++ labelHostNames;
 
   # Generate traefik service
   mkService = name: url: let
@@ -103,21 +110,21 @@
     fromString = url: fromAttrs { inherit url; };
     fromAttrs = { hostName ? mkHostName name, tls ? null, public ? null, middlewares ? [], ... }: let
 
-      # If public is boolean (explicitly set), just use that value
-      public' = if ! isNull public then public
-        # If the hostName DOES end with this system's hostName, assume private
-        # If the hostName DOESN'T end with this system's hostName, assume public
-        else if hasSuffix ".${this.hostName}" hostName then false else true;  
+      # If the hostName is or ends with this system's hostName, assume internal DNS and private CA
+      # If the hostName is anything else, assume external and needs public DNS with a certresolver
+      external' = if hostName == this.hostName || hasSuffix ".${this.hostName}" hostName then false else true;  
+      # If public is boolean (explicitly set), just use that value. Otherwise, match with external.
+      public' = if ! isNull public then public else external';
 
-      # If public, "mark" the rule with _public
-      rule' = if public' == true 
-        then "Host(`${hostName}`,`_public`)" 
-        else "Host(`${hostName}`)";
+      # If public, then flag the rule
+      rule' = let
+        publicFlag = if public' == true then ",`PUBLIC`" else "";
+      in "Host(`${hostName}`${publicFlag})";
 
       # If tls is boolean (explicitly set), just use that value
       tls' = if ! isNull tls then tls 
-        # Public hostNames will need a certresolver like Let's Encrypt to issue a certificate
-        else if public' == true then { 
+        # External hostNames will need a certresolver like Let's Encrypt to issue a certificate
+        else if external' == true then { 
           certresolver = "resolver-dns";
           domains = [{
             main = "${hostName}"; 
@@ -161,27 +168,26 @@
 
       # Replace all dots with underscores
       name' = replaceStrings ["."] ["_"] name;
-    
-      # If public is boolean (explicitly set), just use that value
-      public' = if ! isNull public then public
-        # If the hostName DOES end with this system's hostName, assume private
-        # If the hostName DOESN'T end with this system's hostName, assume public
-        else if hasSuffix ".${this.hostName}" hostName then false else true;  
 
-      # If public, then "mark" the rule with _public
-      rule' = if public' == true 
-        then "Host(`${hostName}`,`_public`)" 
-        else "Host(`${hostName}`)";
+      # If the hostName is or ends with this system's hostName, assume internal DNS and private CA
+      # If the hostName is anything else, assume external and needs public DNS with a certresolver
+      external' = if hostName == this.hostName || hasSuffix ".${this.hostName}" hostName then false else true;  
+      # If public is boolean (explicitly set), just use that value. Otherwise, match with external.
+      public' = if ! isNull public then public else external';
+
+      # If public or external, then flag the rule
+      rule' = let
+        publicFlag = if public' == true then ",`PUBLIC`" else "";
+      in "Host(`${hostName}`${publicFlag})";
 
       # If tls is boolean (explicitly set), just use that value
       tls' = if ! isNull tls then tls 
-        # Public hostNames will need a certresolver like Let's Encrypt to issue a certificate
-        else if public' == true then [ 
+        # External hostNames will need a certresolver like Let's Encrypt to issue a certificate
+        else if external' == true then [
           "--label=traefik.http.routers.${name'}.tls.certresolver=resolver-dns"
           "--label=traefik.http.routers.${name'}.tls.domains[0].main=${hostName}"
-          "--label=traefik.http.routers.${name'}.tls.domains[1].sans=*.${hostName}"
-        # Private hostNames will use certificates generated by the custom CA
-        ] else [
+          "--label=traefik.http.routers.${name'}.tls.domains[0].sans=*.${hostName}"
+        ] else [ # Internal hostNames will use certificates generated by the custom CA
           "--label=traefik.http.routers.${name'}.tls=true"
         ];
 
@@ -244,28 +250,47 @@ in {
       default = {};
     };
 
-    # List of private hostNames using local DNS which will have certificates generated by custom CA (and optionally Let's Encrypt)
-    privateHostNames = mkOption { 
-      type = with types; listOf str; 
-      readOnly = true;
-      default = if cfg.enable == false then [] else
-        [ "local" this.hostName ] ++ filter ( hostName: this.hostName != hostName ) ( mkHostNames { public = false; } );
-    };
-
-    # List of public hostNames that require external DNS records and have certificates issued by Let's Encrypt 
-    publicHostNames = mkOption { 
-      type = with types; listOf str; 
-      readOnly = true;
-      default = if cfg.enable == false then [] else
-        filter ( hostName: ( ! hasSuffix ".${this.hostName}" hostName ) && ( this.hostName != hostName ) ) ( mkHostNames { public = true; } );
-    };
-
-    # List of ALL hostNames this server is aware of
+    # Combinations:
+    # External / Public:  public service on Internet, using CloudFlare & Let's Encrypt
+    # External / Private: personal service on LAN/VPN, using CloudFlare & Let's Encrypt
+    # Internal / Private: personal service on LAN/VPN, using Blocky & OpenSSL (most common)
+    # Internal / Public: invalid combination
     hostNames = mkOption { 
       type = with types; listOf str; 
       readOnly = true;
-      default = if cfg.enable == false then [] else 
-        [ "local" this.hostName ] ++ filter ( hostName: ( this.hostName != hostName ) ) ( mkHostNames { public = null; } );
+      default = if cfg.enable == false then [] else mkHostNames {};
+    };
+
+    # List of private hostNames using local DNS which will have certificates generated by custom CA
+    # - OpenSSL certificates are created from this
+    internalHostNames = mkOption { 
+      type = with types; listOf str; 
+      readOnly = true;
+      default = if cfg.enable == false then [] else mkHostNames { external = false; };
+    };
+
+    # List of external hostNames that need certificates generated externally by Let's Encrypt 
+    # - LetsEncrypt certificates are created from this
+    externalHostNames = mkOption { 
+      type = with types; listOf str; 
+      readOnly = true;
+      default = if cfg.enable == false then [] else mkHostNames { external = true; };
+    };
+
+    # List of private hostNames using local DNS which will have certificates generated by custom CA or Let's Encrypt
+    # - BlockyDNS mappings are created from this
+    privateHostNames = mkOption { 
+      type = with types; listOf str; 
+      readOnly = true;
+      default = if cfg.enable == false then [] else mkHostNames { public = false; };
+    };
+
+    # List of public hostNames that require external DNS records in CloudFlare and certificates by Let's Encrypt
+    # - CloudFlare DNS records are created from this
+    publicHostNames = mkOption { 
+      type = with types; listOf str; 
+      readOnly = true;
+      default = if cfg.enable == false then [] else mkHostNames { public = true; };
     };
 
     # Collection of hostName to IP addresses from this Traefik configuration
@@ -304,7 +329,7 @@ in {
     in mkBefore ''
       [[ -e ${certs}/key ]] || ${openssl} genrsa -out ${certs}/key 4096 
       [[ -e ${certs}/serial ]] || echo "01" > ${certs}/serial 
-      for NAME in ${toString (unique cfg.privateHostNames)}; do
+      for NAME in ${toString (unique cfg.internalHostNames)}; do
         export NAME IP=${this.domains.${this.hostName}}
         ${openssl} req -new -key ${certs}/key -config ${./openssl.cnf} -extensions v3_req -subj "/CN=$NAME" -out ${certs}/csr 
         ${openssl} x509 -req -days 365 -in ${certs}/csr -extfile ${./openssl.cnf} -extensions v3_req -CA ${this.ca} -CAkey ${secrets.ca-key.path} -CAserial ${certs}/serial -out ${certs}/crt
@@ -428,7 +453,7 @@ in {
         tls.certificates = map (name: { 
           certFile = "${certs}/${name}.crt"; 
           keyFile = "${certs}/key"; 
-        }) cfg.privateHostNames;
+        }) cfg.internalHostNames;
 
         # Also change the default certificate
         tls.stores.default.defaultCertificate = {
