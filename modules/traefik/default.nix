@@ -220,6 +220,27 @@
     else []
   );
 
+  # Helper function to quickly add alias routers
+  mkAlias = name: args: ( let
+    inherit (builtins) head isList isString tail;
+    hostName = mkHostName name;
+
+    # If only passing a single argument, accept a string
+    fromString = alias: fromList [ alias true ];
+
+    # If passing name, port and scheme, accept a list
+    fromList = args: let
+      alias = head args;
+      url = "https://${hostName}";
+      public = head (tail args);
+    in { "${alias}" = { inherit url public; }; };
+
+  in
+    if isString args then fromString args
+    else if isList args then fromList args
+    else {}
+  );
+
 in {
 
   # Import all *.nix files in this directory
@@ -242,6 +263,13 @@ in {
       type = types.anything; 
       readOnly = true; 
       default = mkLabels;
+    };
+
+    # Helper function to quickly add alias routers
+    alias = mkOption {
+      type = types.anything; 
+      readOnly = true; 
+      default = mkAlias;
     };
 
     # Attributes merged with services.traefik.dynamicConfigOptions.http
