@@ -23,18 +23,7 @@
     enable = true;
     deleteRoute = "10.1.0.0/16";
   };
-  # modules.traefik.enable = true;
-  modules.traefik = { 
-    enable = true;
-    # routers.jelly = { 
-    #   hostName = "jelly.suderman.org"; 
-    #   url = "https://jellyfin.lux"; 
-    #   tls.certresolver = "resolver-dns";
-    #   middlewares = false;
-    # };
-    routers."jelly.suderman.org" = "https://jellyfin.lux"; 
-  };
-
+  modules.traefik.enable = true;
   modules.prometheus.enable = true;
   modules.whoami.enable = true;
   modules.cockpit.enable = true;
@@ -64,6 +53,7 @@
     enable = true;
     photosDir = "/data/photos/immich";
     externalDir = "/data/photos/collections";
+    alias = [ "immich.suderman.org" false ];
   };
   
   # modules.photoprism = {

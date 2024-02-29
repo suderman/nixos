@@ -12,14 +12,7 @@
   # Network
   modules.tailscale.enable = true;
   # modules.ddns.enable = true;
-  # modules.traefik.enable = true;
-
-  modules.traefik = {
-    enable = true;
-    routers.whoishub = "https://whoami.hub";
-    routers."whoislux.suderman.org" = "https://whoami.lux"; 
-  };
-
+  modules.traefik.enable = true;
   modules.whoami.enable = true;
   networking.extraHosts = "";
 
@@ -44,10 +37,10 @@
   modules.wallabag.enable = false;
   # modules.nextcloud.enable = false;
 
-  modules.tandoor-recipes = {
-    enable = false;
-    # package = pkgs.unstable.tandoor-recipes;
-    # public = "tandoor.suderman.net";
-  };
+  # modules.tandoor-recipes = {
+  #   enable = false;
+  #   # package = pkgs.unstable.tandoor-recipes;
+  #   # public = "tandoor.suderman.net";
+  # };
 
 }
