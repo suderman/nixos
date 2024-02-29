@@ -1,11 +1,11 @@
 # modules.blocky.enable = true;
-{ config, lib, pkgs, this, ... }: 
+{ config, lib, pkgs, this, outputs, ... }: 
 
 let 
 
   cfg = config.modules.blocky;
-  inherit (builtins) toString;
-  inherit (lib) concatStringsSep mkIf mkOption mkForce types;
+  inherit (builtins) attrValues mapAttrs toString;
+  inherit (lib) concatStringsSep flatten foldl mkIf mkOption mkForce types;
 
 in {
 
@@ -27,10 +27,22 @@ in {
       type = types.port;
       default = 4000; 
     };
+
+    # Default is to not provide DNS services to the public Internet
     public = mkOption {
       type = types.bool;
       default = false; 
     };
+
+    # Collection of hostName to IP addresses from all Traefik configurations
+    mapping = mkOption { 
+      type = with types; anything; 
+      readOnly = true;
+      default = foldl (a: b: a // b) {} ( 
+        attrValues ( mapAttrs ( name: host: host.config.modules.traefik.mapping ) outputs.nixosConfigurations )
+      );
+    };
+
   };
 
   # Use blocky to add custom domains and block unwanted domains
@@ -167,8 +179,9 @@ in {
         }];
         connectIPVersion = "v4";
 
+        # Combine mappings from networks directory and Traefik configurations
         customDNS = {
-          inherit (this) mapping;
+          mapping = this.mapping // cfg.mapping;
           filterUnmappedTypes = true;
           customTTL = "1h";
         };
