@@ -8,6 +8,7 @@
   btrbk-key = ./btrbk-key.age;
   ca-key = ./ca-key.age;
   cloudflare-env = ./cloudflare-env.age;
+  isy-env = ./isy-env.age;
   ocis-env = ./ocis-env.age;
   password = ./password.age;
   password-hash = ./password-hash.age;

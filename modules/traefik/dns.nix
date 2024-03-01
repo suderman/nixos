@@ -19,7 +19,7 @@ in {
       wantedBy = [ "sysinit.target" ];
       serviceConfig = {
         Type = "oneshot";
-        EnvironmentFile = secrets.traefik-env.path;
+        EnvironmentFile = [ secrets.cloudflare-env.path ];
       };
       path = with pkgs; [ cfdyndns ];
       script = concatStringsSep "\n" (

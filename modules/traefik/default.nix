@@ -337,9 +337,13 @@ in {
     # Give traefik user permission to read secrets
     users.users.traefik.extraGroups = [ "secrets" ]; 
 
-    # Import the env file containing the CloudFlare token for cert renewal
+    # CloudFlare DNS API Token 
+    # > https://dash.cloudflare.com/profile/api-tokens
+    # ---------------------------------------------------------------------------
+    # CF_DNS_API_TOKEN=xxxxxx
+    # ---------------------------------------------------------------------------
     systemd.services.traefik.serviceConfig = {
-      EnvironmentFile = [ secrets.traefik-env.path ];
+      EnvironmentFile = [ secrets.cloudflare-env.path ];
     };
 
     # Self-signed certificate directory

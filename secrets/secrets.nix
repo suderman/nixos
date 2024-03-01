@@ -38,6 +38,13 @@ with (import ./keys); {
   # ---------------------------------------------------------------------------
   "files/cloudflare-env.age".publicKeys = all;
 
+  # Encoded ISY authentication header
+  # > echo -n $ISY_USERNAME:$ISY_PASSWORD | base64
+  # ---------------------------------------------------------------------------
+  # ISY_BASIC_AUTH=xxxxxx
+  # ---------------------------------------------------------------------------
+  "files/isy-env.age".publicKeys = all;
+
   # SMTP Email Server + Secret Key
   # ---------------------------------------------------------------------------
   # EMAIL_HOST=smtp.example.com
@@ -69,6 +76,7 @@ with (import ./keys); {
   # NOTIFICATIONS_SMTP_SENDER=user@example.com
   # NOTIFICATIONS_SMTP_PASSWORD=xxxxxxxxxxxx
   "files/ocis-env.age".publicKeys = all;
+
 
 
 

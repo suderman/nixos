@@ -20,7 +20,7 @@ in {
     systemd.services."ddns" = {
       serviceConfig = {
         Type = "oneshot";
-        EnvironmentFile = secrets.cloudflare-env.path;
+        EnvironmentFile = [ secrets.cloudflare-env.path ];
       };
       environment = with config.networking; {
         HOSTNAME = hostName;
