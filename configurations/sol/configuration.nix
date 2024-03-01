@@ -12,7 +12,14 @@
   # Network
   modules.tailscale.enable = true;
   # modules.ddns.enable = true;
-  modules.traefik.enable = true;
+  # modules.traefik.enable = true;
+
+  modules.traefik = {
+    enable = true;
+    routers."wiki.zz" = "https://wiki.sol";
+    extraInternalHostNames = [ "wiki.zz" ];
+  };
+
   modules.whoami.enable = true;
   networking.extraHosts = "";
 
