@@ -39,6 +39,8 @@
   modules.lidarr.enable = true;
   modules.ombi.enable = true;
   
+  modules.ollama.enable = true;
+
   # modules.nextcloud.enable = false;
   modules.ocis.enable = true;
   # modules.gitea = { enable = true; name = "git"; };
