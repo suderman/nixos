@@ -77,7 +77,7 @@ in {
       extraOptions = traefik.labels cfg.name;
 
       environment = {
-        OCIS_URL = "https://${cfg.name}.${this.hostName}";
+        OCIS_URL = "https://${traefik.hostName cfg.name}";
         OCIS_LOG_LEVEL = "debug";
         PROXY_TLS = "false"; 
         OCIS_INSECURE = "true";

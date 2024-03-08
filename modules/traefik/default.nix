@@ -269,6 +269,13 @@ in {
       default = mkAlias;
     };
 
+    # Expose mkHostName function
+    hostName = mkOption {
+      type = types.anything; 
+      readOnly = true; 
+      default = mkHostName;
+    };
+
     # Attributes merged with services.traefik.dynamicConfigOptions.http
     http = mkOption { 
       type = with types; anything; 
