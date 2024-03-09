@@ -222,22 +222,27 @@
 
   # Helper function to quickly add alias routers
   mkAlias = name: args: ( let
-    inherit (builtins) head isList isString tail;
-    hostName = mkHostName name;
+    inherit (builtins) head isAttrs isList isString tail;
+    origin = mkHostName name;
 
     # If only passing a single argument, accept a string
-    fromString = alias: fromList [ alias true ];
+    fromString = hostName: fromAttrs { inherit hostName; public = true; };
 
-    # If passing name, port and scheme, accept a list
+    # First element is hostName, second is public
     fromList = args: let
-      alias = head args;
-      url = "https://${hostName}";
+      hostName = head args;
       public = head (tail args);
-    in { "${alias}" = { inherit url public; }; };
+    in fromAttrs { inherit hostName public; };
+
+    # Require hostName, public defaults to true
+    fromAttrs = { hostName, public ? true, ... }: let
+      url = "https://${origin}";
+    in { "${hostName}" =  { inherit url public; }; };
 
   in
     if isString args then fromString args
     else if isList args then fromList args
+    else if isAttrs args then fromAttrs args
     else {}
   );
 

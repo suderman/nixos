@@ -29,7 +29,6 @@
   modules.cockpit.enable = true;
 
   modules.plex.enable = true;
-  # modules.tautulli.enable = true;
   modules.jellyfin.enable = true;
   modules.silverbullet.enable = true;
   modules.lunasea.enable = true;
@@ -38,29 +37,28 @@
   modules.sonarr.enable = true;
   modules.lidarr.enable = true;
   modules.ombi.enable = true;
-  
   modules.ollama.enable = true;
-
-  # modules.nextcloud.enable = false;
   modules.ocis.enable = true;
-  # modules.gitea = { enable = true; name = "git"; };
   modules.gitea.enable = true; 
-  # modules.tiddlywiki = { enable = true; name = "wiki"; };
-  # modules.wallabag.enable = false;
-  #
-  # modules.freshrss.enable = true;
-  # modules.tandoor-recipes.enable = false;
   
   modules.immich = {
     enable = true;
     photosDir = "/data/photos/immich";
     externalDir = "/data/photos/collections";
-    alias = [ "immich.suderman.org" false ];
+    alias = { 
+      hostName = "immich.suderman.org"; 
+      public = false; 
+    };
   };
   
   # modules.photoprism = {
   #   enable = false;
   #   photosDir = "/data/photos";
   # };
+  # modules.tiddlywiki = { enable = true; name = "wiki"; };
+  # modules.wallabag.enable = false;
+  # modules.freshrss.enable = true;
+  # modules.tandoor-recipes.enable = false;
+  # modules.nextcloud.enable = false;
 
 }
