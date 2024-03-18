@@ -16,7 +16,7 @@ in {
 
   config = mkIf cfg.enable {
 
-    home.packages = with pkgs; [ unstable.owncloud-client qt6.qtwayland ];
+    home.packages = with pkgs; [ unstable.owncloud-client unstable.qt6.qtwayland ];
     services.owncloud-client = with pkgs; {
       enable = true;
       package = unstable.owncloud-client;

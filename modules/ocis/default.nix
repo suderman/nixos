@@ -4,7 +4,7 @@
 let 
 
   # https://github.com/owncloud/ocis/releases
-  version = "4.0.6";
+  version = "5.0.0";
 
   cfg = config.modules.ocis;
 
