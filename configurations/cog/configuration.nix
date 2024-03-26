@@ -67,6 +67,7 @@
   modules.keyd = {
     enable = true;
     quirks = true;
+    settings = config.modules.keyd.configs.framework;
   };
   modules.ydotool.enable = true;
 

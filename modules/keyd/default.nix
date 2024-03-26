@@ -17,6 +17,12 @@ in {
       type = types.path;
       default = ./default.conf;
     };
+    configs = mkOption {
+      type = types.anything;
+      default = {
+        framework = ./framework.conf;
+      };
+    };
   };
 
   config = mkIf cfg.enable {
@@ -50,7 +56,6 @@ in {
 
     # Configuration for keyd
     environment.etc."keyd/default.conf".source = cfg.settings;
-    environment.etc."keyd/framework.conf".source = ./framework.conf;
     environment.etc."keyd/g600.conf".source = ./g600.conf;
     environment.etc."keyd/hhkb.conf".source = ./hhkb.conf;
 
