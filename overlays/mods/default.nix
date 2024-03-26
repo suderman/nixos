@@ -40,6 +40,6 @@ in {
   };
   kitty = appId "kitty.desktop" prev.kitty;
   tauon = appId "tauonmb.desktop" prev.tauon;
-  telegram-desktop = appId "org.telegram.desktop.desktop" prev.telegram-desktop;
+  telegram-desktop = appId "org.telegram.desktop.desktop" prev.unstable.telegram-desktop;
 
 } 

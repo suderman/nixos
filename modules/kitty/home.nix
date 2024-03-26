@@ -77,8 +77,8 @@ in {
         "super+t" = "new_tab";
         "super+]" = "next_tab";
         "super+[" = "previous_tab";
-        "super+equal" = "change_font_size all +2.0";
-        "super+minus" = "change_font_size all -2.0";
+        "super+equal" = "change_font_size all +1.0";
+        "super+minus" = "change_font_size all -1.0";
         "super+0" = "change_font_size all 0";
         "super+r" = "load_config_file";
       };
