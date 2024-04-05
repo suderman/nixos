@@ -19,6 +19,6 @@ flake's `outputs.nixosConfigurations.*`. NixOS configuration files can be found 
 - `eve` [2009 Mac Pro (at work)](https://github.com/suderman/nixos/tree/main/configurations/eve)
 - `hub` [Intel NUC home server](https://github.com/suderman/nixos/tree/main/configurations/hub)  
 - `lux` [Intel NUC media server](https://github.com/suderman/nixos/tree/main/configurations/lux)  
-- `rig` [2009 Mac Pro (at home)](https://github.com/suderman/nixos/tree/main/configurations/rig) 
+- `pod` [2009 Mac Pro (at home)](https://github.com/suderman/nixos/tree/main/configurations/pod) 
 - `sol` [Linode VPS](https://github.com/suderman/nixos/tree/main/configurations/sol)
 - `wit` [Thinkpad T480s laptop](https://github.com/suderman/nixos/tree/main/configurations/wit)

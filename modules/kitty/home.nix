@@ -73,7 +73,7 @@ in {
         "ctrl+insert" = "copy_to_clipboard";
         "shift+insert" = "paste_from_clipboard";
         "super+w" = "close_window";
-        "super+shift+t" = "new_window";
+        "super+n" = "new_window";
         "super+t" = "new_tab";
         "super+]" = "next_tab";
         "super+[" = "previous_tab";

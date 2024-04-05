@@ -85,7 +85,7 @@
 
   # Apps & Games
   modules.neovim.enable = true;
-  modules.steam.enable = false;
+  modules.steam.enable = true;
   programs.mosh.enable = true;
   programs.kdeconnect.enable = true;
   programs.evolution.enable = true;

@@ -14,8 +14,12 @@ in {
 
   config = mkIf cfg.enable {
 
-    programs.steam.remotePlay.openFirewall = true;
-    hardware.steam-hardware.enable = true;
+    programs.steam = {
+      enable = true;
+      remotePlay.openFirewall = true; 
+      dedicatedServer.openFirewall = true;
+      gamescopeSession.enable = true;
+    };
 
   };
 

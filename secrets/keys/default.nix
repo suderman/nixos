@@ -12,10 +12,10 @@ rec {
   systems.eve = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILVIFHAdEcejD3y6+KsZQsHxfvn6xGBy+zDZGET20Bv4";
   systems.hub = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINkT/YqlPNy1SgDyx2SLJWYR5JrBBvbSQtOxEa0j5JFe";
   systems.lux = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH4vCpdLog563yCJ1epf/CaWhQKNvvMYvC5gTe/QfaX2";
-  systems.rig = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHJbuVdWrt3P1OdK5nc2Arek8VWn4cCz3S8nZahDc1rt";
+  systems.pod = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHJbuVdWrt3P1OdK5nc2Arek8VWn4cCz3S8nZahDc1rt";
   systems.sol = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEVjSYCtJ0VAslez3CdPwu4ZWE1hRHb6ceT7+I/+6yqL";
   systems.wit = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC4f+NINUJDtSUK/z0GKLy5/bDsamiq5p7tRQ6rVfLjy";
-  systems.all = [ systems.cog systems.eve systems.hub systems.lux systems.rig systems.sol systems.wit ];
+  systems.all = [ systems.cog systems.eve systems.hub systems.lux systems.pod systems.sol systems.wit ];
 
   all = users.all ++ systems.all;
 
