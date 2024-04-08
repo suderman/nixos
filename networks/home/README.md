@@ -5,7 +5,7 @@
 - `10.1.0.3` Unifi Access Point - nanoHD
 - `10.1.0.4` 2013 Intel NUC - NixOS 23.11 ([hub](https://github.com/suderman/nixos/tree/main/configurations/hub))
 - `10.1.0.5` 2021 Intel NUC - NixOS 23.11 ([lux](https://github.com/suderman/nixos/tree/main/configurations/lux))
-- `10.1.0.6` 2009 Mac Pro - NixOS 23.11 ([pod](https://github.com/suderman/nixos/tree/main/configurations/pod))
+- `10.1.0.7` 2009 Mac Pro - NixOS 23.11 ([pod](https://github.com/suderman/nixos/tree/main/configurations/pod))
 - `10.1.0.8` Universal Devices - ISY-944i
 
 ## Router Configuration
