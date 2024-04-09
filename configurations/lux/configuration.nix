@@ -28,18 +28,31 @@
   modules.whoami.enable = true;
   modules.cockpit.enable = true;
 
-  modules.plex.enable = true;
-  modules.jellyfin.enable = true;
   modules.silverbullet.enable = true;
+  modules.gitea.enable = true; 
+  modules.ollama.enable = true;
+
+  modules.jellyfin.enable = true;
+  modules.plex.enable = true;
+
   modules.lunasea.enable = true;
   modules.sabnzbd = { enable = true; name = "sab"; };
   modules.radarr.enable = true;
   modules.sonarr.enable = true;
   modules.lidarr.enable = true;
-  modules.ombi.enable = true;
-  modules.ollama.enable = true;
-  modules.ocis.enable = true;
-  modules.gitea.enable = true; 
+  modules.ombi = {
+    enable = true;
+    alias = { 
+      hostName = "ombi.suderman.org"; 
+      public = false; 
+    };
+  };
+
+  modules.ocis = {
+    enable = true;
+    hostName = "ocis.suderman.org";
+    public = false;
+  };
   
   modules.immich = {
     enable = true;

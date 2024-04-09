@@ -7,7 +7,6 @@ let
   version = "5.0.0";
 
   cfg = config.modules.ocis;
-
   signingKey = "idp-private-key.pem";
   encryptionSecret = "idp-encryption.key";
 
@@ -24,6 +23,14 @@ in {
     name = mkOption {
       type = types.str;
       default = "ocis";
+    };
+    hostName = mkOption {
+      type = types.str;
+      default = (traefik.hostName cfg.name);
+    };
+    public = mkOption {
+      type = with lib.types; nullOr bool;
+      default = null;
     };
     dataDir = mkOption {
       type = types.path;
@@ -74,10 +81,14 @@ in {
       user = toOwnership uids.ocis gids.ocis;
 
       # Traefik labels
-      extraOptions = traefik.labels cfg.name;
+      extraOptions = traefik.labels {
+        name = cfg.name;
+        hostName = cfg.hostName;
+        public = cfg.public;
+      };
 
       environment = {
-        OCIS_URL = "https://${traefik.hostName cfg.name}";
+        OCIS_URL = "https://${cfg.hostName}";
         OCIS_LOG_LEVEL = "debug";
         PROXY_TLS = "false"; 
         OCIS_INSECURE = "true";

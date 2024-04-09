@@ -72,8 +72,8 @@
   modules.ydotool.enable = true;
 
   modules.garmin.enable = true;
-  modules.sunshine.enable = true;
-  virtualisation.waydroid.enable = true;
+  modules.sunshine.enable = false;
+  virtualisation.waydroid.enable = false;
 
   # Support iOS devices
   modules.libimobiledevice.enable = true;
@@ -131,7 +131,7 @@
   file."/etc/foo" = { type = "dir"; };
   file."/etc/foo/bar" = { text = "Hello world!"; mode = 665; user = 913; };
   file."/etc/foo/symlink" = { type = "link"; source = /etc/foo/bar; };
-  file."/etc/foo/resolv" = { type = "file"; mode = 775; user = "me"; group = "users"; source = /etc/resolv.conf; };
+  file."/etc/foo/resolv" = { type = "file"; mode = 775; user = "jon"; group = "users"; source = /etc/resolv.conf; };
   file."/etc/foo/srv" = { type = "dir"; source = /srv; };
 
   # modules.gitea.enable = true;
