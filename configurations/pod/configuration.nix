@@ -60,6 +60,7 @@
 
   # https://wiki.nixos.org/wiki/AMD_GPU
   environment.variables = {
+    VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json";
     ROC_ENABLE_PRE_VEGA = "1";
   };
 
@@ -73,9 +74,14 @@
   #   rocmPackages.clr.icd
   # ];
 
-  systemd.tmpfiles.rules = [
-    "L+    /opt/rocm/hip   -    -    -     -    ${pkgs.rocmPackages.clr}"
-  ];
+  file."/opt/rocm/hip" = { 
+    type = "link"; 
+    source = "${pkgs.rocmPackages.clr}";
+  };
+
+  # systemd.tmpfiles.rules = [
+  #   "L+    /opt/rocm/hip   -    -    -     -    ${pkgs.rocmPackages.clr}"
+  # ];
 
   environment.systemPackages = with pkgs; [ 
     vulkan-tools
