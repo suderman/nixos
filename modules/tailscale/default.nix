@@ -44,8 +44,12 @@ in {
       after = [ "tailscaled.service" ];
       path = with pkgs; [ gnugrep iproute2 ];
       script = let route = if cfg.deleteRoute == "" then "SKIP" else cfg.deleteRoute; in ''
-        sleep 30
+        while [[ -z $(ip route show table all | grep "table 52") ]]; do
+          echo "Table 52 is empty. Waiting for 10 seconds..."
+          sleep 10
+        done
         if [[ ! -z "$(ip route show table 52 | grep ${route})" ]]; then
+          echo "Delete route ${route} from table 52"
           ip route del ${route} dev tailscale0 table 52
         fi
       '';
