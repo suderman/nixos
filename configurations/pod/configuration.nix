@@ -60,9 +60,76 @@
 
   # https://wiki.nixos.org/wiki/AMD_GPU
   environment.variables = {
-    VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json";
+    # VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json";
     ROC_ENABLE_PRE_VEGA = "1";
   };
+
+  hardware.opengl = {
+    enable = true;
+    extraPackages = with pkgs; [
+      libvdpau-va-gl
+      vaapiVdpau
+      # amdvlk
+    ];
+    extraPackages32 = with pkgs; [
+      libvdpau-va-gl
+      vaapiVdpau
+      # driversi686Linux.amdvlk
+    ];
+  };
+
+  # services.xserver = {
+  #   enable = true;
+  #   deviceSection = ''
+  #     Option "DRI" "3"
+  #     Option "TearFree" "on"
+  #   '';
+  # };
+
+
+
+  programs.hyprland = {
+    enable = true;
+  };
+
+  # -------------------------
+  programs.sway = {
+    enable = true; 
+    wrapperFeatures.gtk = true;
+  };
+
+  services.gnome.gnome-keyring.enable = true;
+
+  environment.systemPackages = with pkgs; [
+    grim # screenshot functionality
+    slurp # screenshot functionality
+    wl-clipboard # wl-copy and wl-paste for copy/paste from stdin / stdout
+    mako # notification system developed by swaywm maintainer
+    vulkan-tools
+  ];
+
+  services.xserver = {
+    enable = true;
+    # videoDrivers = [ "amdgpu" ];
+    # Option "DRI3" "1"
+    deviceSection = ''
+      Option "DRI" "3"
+      Option "TearFree" "on"
+    '';
+    displayManager.lightdm.enable = true;
+
+    windowManager.i3 = {
+      enable = true;
+      extraPackages = with pkgs; [
+        dmenu #application launcher most people use
+        i3status # gives you the default i3 status bar
+        i3lock #default i3 screen locker
+        i3blocks #if you are planning on using i3blocks over i3status
+      ];
+    };
+
+  };
+  # -------------------------
 
   # hardware.amdgpu = {
   #   loadInInitrd = true;
@@ -83,8 +150,9 @@
   #   "L+    /opt/rocm/hip   -    -    -     -    ${pkgs.rocmPackages.clr}"
   # ];
 
-  environment.systemPackages = with pkgs; [ 
-    vulkan-tools
-  ];
+  # environment.systemPackages = with pkgs; [ 
+  #   vulkan-tools
+  # ];
+
 
 }

@@ -1,5 +1,6 @@
 {
   hostName = "pod"; 
   domain = "home";
-  config.modules.hyprland.enable = true;
+  stable = false;
+  # config.modules.hyprland.enable = true;
 }

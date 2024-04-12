@@ -103,21 +103,23 @@
     }) fn;
 
     # List of users for a particular nixos configuration
-    mkUsers = host: mkList( ls { 
-      path = ./configurations/${host}/users; 
+    mkUsers = this: mkList( ls { 
+      path = ./configurations/${this.hostName}/users; 
       asPath = false; dirsWith = [ "home.nix" ]; 
     });
 
     # List of users with a public key in the secrets directory
-    mkAdmins = let 
-      inherit (inputs.nixpkgs.lib) attrNames intersectLists remove; 
-    in host: intersectLists ( mkUsers host ) (
+    mkAdmins = this: let 
+      inherit (this.inputs.nixpkgs.lib) attrNames intersectLists remove; 
+    in intersectLists ( mkUsers this ) (
       remove "all" ( attrNames (import ./secrets/keys).users )
     );
 
     # NixOS modules imported in each configuration
-    mkModules = let 
-      inherit (inputs.nixpkgs.lib) hasPrefix mkDefault partition; 
+    mkModules = this: let 
+      inherit (this) hostName;
+      inherit (this.inputs) nix-index-database;
+      inherit (this.inputs.nixpkgs.lib) hasPrefix mkDefault partition; 
 
       # Prepare cache module from list of pairs
       nix-cache = let 
@@ -137,22 +139,21 @@
         programs.nix-index.enableFishIntegration = mkDefault false;
         programs.command-not-found.enable = mkDefault false;
       }; in {
-        nixos = [ inputs.nix-index-database.nixosModules.nix-index config ];
-        home = [ inputs.nix-index-database.hmModules.nix-index config ];
+        nixos = [ nix-index-database.nixosModules.nix-index config ];
+        home = [ nix-index-database.hmModules.nix-index config ];
       };
 
       # Include shared modules followed by dir-specific modules 
-      in host: 
-
+      in
         # Home Manager modules are organized under each user's name
-        mkHomeAttrs ./configurations/${host}/users (
+        mkHomeAttrs ./configurations/${hostName}/users (
           user: 
             ls { path = ./modules; dirsWith = [ "home.nix" ]; } ++ # home-manager modules
             ls ./configurations/all/users/all/home.nix ++ # shared home-manager configuration for all users
             ls ./configurations/all/users/${user} ++ # shared home-manager configuration for one user
             ls ./configurations/all/users/${user}/home.nix ++
-            ls ./configurations/${host}/users/${user} ++ # specific home-manager configuration for one user
-            ls ./configurations/${host}/users/${user}/home.nix ++
+            ls ./configurations/${hostName}/users/${user} ++ # specific home-manager configuration for one user
+            ls ./configurations/${hostName}/users/${user}/home.nix ++
             [ ./secrets ] ++ nix-cache ++ nix-index.home # secrets, keys, cache and index
 
         # NixOS modules are organization under "root"
@@ -160,7 +161,7 @@
           root = 
             ls { path = ./modules; dirsWith = [ "default.nix" ]; } ++ # nixos modules
             ls ./configurations/all/configuration.nix ++ # shared nixos configuration for all systems
-            ls ./configurations/${host}/configuration.nix ++ # specific nixos configuration for one system
+            ls ./configurations/${hostName}/configuration.nix ++ # specific nixos configuration for one system
             [ ./secrets ] ++ nix-cache ++ nix-index.nixos # secrets, keys, cache and index
           ;
         };
@@ -181,6 +182,7 @@ in {
   modules = {}; # includes for nixos and home-manager
 
   system = "x86_64-linux";
+  stable = true;
   config = {};
 
 }

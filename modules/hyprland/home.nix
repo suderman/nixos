@@ -18,7 +18,8 @@ in {
 
     # Unstable upstream home-manager module
     # https://github.com/nix-community/home-manager/blob/master/modules/services/window-managers/hyprland.nix
-    ( destabilize inputs.home-manager-unstable "services/window-managers/hyprland.nix" );
+    # ( if this.stable then ( destabilize inputs.home-manager-unstable "services/window-managers/hyprland.nix" ) else [] );
+    [];
 
 
   options.modules.hyprland = with types; {

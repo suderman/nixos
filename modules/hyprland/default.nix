@@ -18,7 +18,8 @@ in {
     # Unstable upstream nixos module
     # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/nixos/modules/programs/wayland/hyprland.nix
     # Note: unstable hyprland module was moved from programs/hyprland.nix to programs/wayland/hyprland.nix
-    ( destabilize inputs.nixpkgs-unstable [ "programs/hyprland.nix" "programs/wayland/hyprland.nix" ] );
+    # ( if this.stable then ( destabilize inputs.nixpkgs-unstable [ "programs/hyprland.nix" "programs/wayland/hyprland.nix" ] ) else [] );
+    [];
 
 
   options.modules.hyprland = {
@@ -56,7 +57,7 @@ in {
     # Login screen
     services.xserver = {
       enable = true;
-      desktopManager.xterm.enable = false;
+      # desktopManager.xterm.enable = false;
       displayManager = {
         defaultSession = "hyprland";
         lightdm.enable = true;
@@ -78,6 +79,7 @@ in {
       ncmpcpp # a mpd client with a UI
       networkmanagerapplet # provide GUI app: nm-connection-editor
       wl-clipboard
+      vulkan-tools
     ];
 
 

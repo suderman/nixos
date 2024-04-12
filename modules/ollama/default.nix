@@ -19,7 +19,7 @@ in {
 
     # Unstable upstream nixos module
     # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/nixos/modules/services/misc/ollama.nix
-    ( destabilize inputs.nixpkgs-unstable "services/misc/ollama.nix" );
+    if this.stable then ( destabilize inputs.nixpkgs-unstable "services/misc/ollama.nix" ) else [];
 
   options.modules.ollama = {
     enable = lib.options.mkEnableOption "ollama"; 

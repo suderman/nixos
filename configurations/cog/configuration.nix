@@ -1,8 +1,8 @@
-{ config, lib, pkgs, this, inputs, ... }: {
+{ config, lib, pkgs, this, ... }: {
 
   # Import all *.nix files in this directory
   imports = this.lib.ls ./. ++ [
-    inputs.hardware.nixosModules.framework-11th-gen-intel
+    this.inputs.hardware.nixosModules.framework-11th-gen-intel
   ];
 
   # Use the systemd-boot EFI boot loader.
