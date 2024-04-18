@@ -21,6 +21,7 @@ in {
       type = types.anything;
       default = {
         framework = ./framework.conf;
+        t480s = ./t480s.conf;
       };
     };
   };
