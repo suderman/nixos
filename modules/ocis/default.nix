@@ -4,7 +4,7 @@
 let 
 
   # https://github.com/owncloud/ocis/releases
-  version = "5.0.0";
+  version = "5.0.2";
 
   cfg = config.modules.ocis;
   signingKey = "idp-private-key.pem";
