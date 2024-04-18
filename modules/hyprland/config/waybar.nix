@@ -1,17 +1,12 @@
-# modules.waybar.enable = true;
-{ config, pkgs, lib, ... }: 
+{ config, lib, pkgs, ... }: let 
 
-let 
-
-  cfg = config.modules.waybar;
-  systemMonitor = "${pkgs.kitty}/bin/kitty htop";
+  cfg = config.modules.hyprland;
+  inherit (builtins) readFile;
   inherit (lib) mkIf;
 
-in {
+  systemMonitor = "${pkgs.kitty}/bin/kitty htop";
 
-  options.modules.waybar = {
-    enable = lib.options.mkEnableOption "waybar"; 
-  };
+in {
 
   config = mkIf cfg.enable {
 
@@ -110,7 +105,7 @@ in {
         };
       };
 
-      style = builtins.readFile ./style.css;
+      style = readFile ./waybar.css;
 
     };
 

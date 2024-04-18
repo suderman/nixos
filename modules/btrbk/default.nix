@@ -1,5 +1,5 @@
 # modules.btrbk.enable = true;
-{ config, lib, pkgs, ... }: 
+{ config, lib, pkgs, this, ... }: 
 
 let 
 
@@ -26,7 +26,7 @@ in {
     }];
 
     # Enable compression
-    services.btrbk.extraPackages = [ pkgs.lz4 pkgs.mbuffer ];
+    services.btrbk.extraPackages = if this.stable then [ pkgs.lz4 pkgs.mbuffer ] else [];
 
     services.btrbk.instances = let
 

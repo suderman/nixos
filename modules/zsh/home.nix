@@ -1,5 +1,5 @@
 # programs.zsh.enable = true;
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, this, ... }:
 
 let 
   cfg = config.programs.zsh;
@@ -10,7 +10,7 @@ in {
 
     programs.zsh = {
       autocd = true;
-      enableAutosuggestions = true;
+      # enableAutosuggestions = true;
       enableCompletion = true;
       defaultKeymap = "viins"; # emacs, vicmd, or viins
 
@@ -55,7 +55,10 @@ in {
         [[ -e /var/lib/rust-motd/motd ]] && cat /var/lib/rust-motd/motd
       '';
 
-    };
+    } // ( if this.stable 
+      then { enableAutosuggestions = true; }
+      else { autosuggestion.enable = true; }
+    );
 
     home.packages = [ pkgs.zsh-fzf-tab ];
 

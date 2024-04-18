@@ -1,0 +1,75 @@
+window#waybar {
+  background-color: #11111b;
+  color: #f5e0dc;
+  border-bottom: none;
+}
+#workspaces {
+  font-family: "Material Design Icons Desktop";
+  font-size: 20px;
+  background-color: #151521;
+  margin : 4px 0;
+  border-radius : 5px;
+}
+#workspaces button {
+  font-size: 18px;
+  background-color: transparent;
+  color: #c669cc;
+  transition: all 0.1s ease;
+}
+#workspaces button.focused {
+  font-size: 18px;
+  color: #e0875f;
+}
+#workspaces button.persistent {
+  color: #d05759;
+  font-size: 12px;
+}
+#custom-launcher {
+  background-color: #151521;
+  color: #6481d0;
+  margin : 4px 4.5px;
+  padding : 5px 12px;
+  font-size: 18px;
+  border-radius : 5px;
+}
+#custom-power {
+  color : #d05759;
+  background-color: #151521;
+  margin : 4px 4.5px 4px 4.5px;
+  padding : 5px 11px 5px 13px;
+  border-radius : 5px;
+}
+
+#clock {
+  background-color: #151521;
+  color: #B5BFE2;
+  margin : 4px 9px;
+  padding : 5px 12px;
+  border-radius : 5px;
+}
+
+#network {
+  color : #B5BFE2;
+  background-color: #151521;
+  margin : 4px 0 4px 4.5px;
+  padding : 5px 12px;
+  border-radius : 5px 0 0 5px;
+}
+#battery {
+  color : #5fbf70;
+  background-color: #151521;
+  margin : 4px 0px;
+  padding : 5px 12px;
+  border-radius : 5px 0 0 5px;
+}
+#custom-swallow {
+  background-color: #151521;
+  margin : 4px 4.5px;
+  padding : 5px 12px;
+  border-radius : 5px;
+}
+* {
+  font-size: 16px;
+  min-height: 0;
+  font-family: "Iosevka Nerd Font", "Material Design Icons Desktop";
+}

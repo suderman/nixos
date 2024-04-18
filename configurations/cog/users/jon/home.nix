@@ -17,4 +17,15 @@ in {
     # publicShare = "${homeDirectory}/public";
   };
 
+  # # TUI bluetooth management
+  # modules.bluetuith.enable = true;
+
+  # # Audio visualizer
+  # home.packages = with pkgs; [ cava ];
+  # xdg.configFile."cava/config".text = ''
+  #   [input]
+  #   method = pulse
+  #   source = auto
+  # '';
+
 }

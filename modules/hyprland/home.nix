@@ -6,21 +6,15 @@ let
   cfg = config.modules.hyprland;
   inherit (lib) mkIf mkDefault mkMerge mkOption types;
   inherit (lib.options) mkEnableOption;
-  inherit (this.lib) destabilize mkShellScript;
+  inherit (this.lib) destabilize ls mkShellScript;
 
 in {
 
-  imports =
+  imports = ls ./config ++
 
     # Flake home-manager module
     # https://github.com/hyprwm/Hyprland/blob/main/nix/hm-module.nix
-    [ inputs.hyprland.homeManagerModules.default ] ++
-
-    # Unstable upstream home-manager module
-    # https://github.com/nix-community/home-manager/blob/master/modules/services/window-managers/hyprland.nix
-    # ( if this.stable then ( destabilize inputs.home-manager-unstable "services/window-managers/hyprland.nix" ) else [] );
-    [];
-
+    [ inputs.hyprland.homeManagerModules.default ];
 
   options.modules.hyprland = with types; {
     enable = mkEnableOption "hyprland"; 
@@ -31,8 +25,8 @@ in {
   config = mkIf cfg.enable {
 
     modules.kitty.enable = true;
-    modules.eww.enable = true;
-    modules.waybar.enable = true;
+    # modules.eww.enable = true;
+    # modules.waybar.enable = true;
     # modules.anyrun.enable = true;
 
     home.packages = with pkgs; [ 

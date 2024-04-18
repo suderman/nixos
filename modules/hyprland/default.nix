@@ -13,14 +13,7 @@ in {
 
     # Flake nixos module
     # https://github.com/hyprwm/Hyprland/blob/main/nix/module.nix
-    [ inputs.hyprland.nixosModules.default ] ++
-
-    # Unstable upstream nixos module
-    # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/nixos/modules/programs/wayland/hyprland.nix
-    # Note: unstable hyprland module was moved from programs/hyprland.nix to programs/wayland/hyprland.nix
-    # ( if this.stable then ( destabilize inputs.nixpkgs-unstable [ "programs/hyprland.nix" "programs/wayland/hyprland.nix" ] ) else [] );
-    [];
-
+    [ inputs.hyprland.nixosModules.default ];
 
   options.modules.hyprland = {
     enable = lib.options.mkEnableOption "hyprland"; 
