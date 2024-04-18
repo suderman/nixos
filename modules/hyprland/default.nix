@@ -48,16 +48,18 @@ in {
     services.tumbler.enable = true;
 
     # Login screen
-    services.xserver = {
-      enable = true;
-      # desktopManager.xterm.enable = false;
-      displayManager = {
-        defaultSession = "hyprland";
-        lightdm.enable = true;
-        # gdm = {
-        #   enable = true;
-        #   wayland = true;
-        # };
+    services = {
+      # displayManager.defaultSession = "hyprland";
+      xserver = {
+        enable = true;
+        # desktopManager.xterm.enable = false;
+        displayManager = {
+          lightdm.enable = true;
+          # gdm = {
+          #   enable = true;
+          #   wayland = true;
+          # };
+        };
       };
     };
 
