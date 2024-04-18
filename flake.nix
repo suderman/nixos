@@ -58,9 +58,8 @@
 
     # Hyprland (only unstable)
     # <https://github.com/hyprwm/Hyprland/releases>
-    hyprland.url = "github:hyprwm/Hyprland/v0.38.1";
+    hyprland.url = "github:hyprwm/Hyprland/v0.39.1";
     hyprland-plugins.url = "github:hyprwm/hyprland-plugins";
-    anyrun.url = "github:Kirottu/anyrun";
 
   };
 
