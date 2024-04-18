@@ -56,8 +56,10 @@ in {
 
     # Configuration for keyd
     environment.etc."keyd/default.conf".source = cfg.settings;
+    environment.etc."keyd/apple.conf".source = ./apple.conf;
     environment.etc."keyd/g600.conf".source = ./g600.conf;
     environment.etc."keyd/hhkb.conf".source = ./hhkb.conf;
+    environment.etc."keyd/k811.conf".source = ./k811.conf;
 
     # Add quirks to make touchpad's "disable-while-typing" work properly
     environment.etc."libinput/local-overrides.quirks" = mkIf cfg.quirks { source = ./local-overrides.quirks; };
