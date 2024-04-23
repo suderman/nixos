@@ -1,6 +1,6 @@
 {
   hostName = "kit"; 
-  domain = "home";
+  domain = "nest";
   stable = true;
   # config.modules.hyprland.enable = true;
 }
