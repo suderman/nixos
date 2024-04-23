@@ -35,13 +35,8 @@
   modules.cockpit.enable = true;
 
   # modules.sunshine.enable = true;
-  modules.dolphin.enable = true;
-  modules.steam.enable = true;
-
-  # https://wiki.nixos.org/wiki/AMD_GPU
-  environment.variables = {
-    ROC_ENABLE_PRE_VEGA = "1";
-  };
+  # modules.dolphin.enable = true;
+  # modules.steam.enable = true;
 
   # hardware.opengl = {
   #   enable = true;
