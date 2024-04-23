@@ -29,17 +29,17 @@ in {
 
     # Enable sound.
     sound.enable = true;
-    services.pipewire.enable = true;
+    # services.pipewire.enable = true;
 
     # # Enable audio
     # sound.enable = true;
-    # services.pipewire = {
-    #   enable = true;
-    #   alsa.enable = true;
-    #   alsa.support32Bit = true;
-    #   pulse.enable = true;
-    #   wireplumber.enable = true;
-    # };
+    services.pipewire = {
+      enable = true;
+      alsa.enable = true;
+      alsa.support32Bit = true;
+      pulse.enable = true;
+      wireplumber.enable = true;
+    };
 
     # Mount, trash, and other functionalities
     services.gvfs.enable = true;

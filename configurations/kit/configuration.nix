@@ -1,9 +1,7 @@
 { config, pkgs, this, inputs, ... }: {
 
   # Import all *.nix files in this directory
-  imports = this.lib.ls ./. ++ [
-    inputs.hardware.nixosModules.common-gpu-amd
-  ];
+  imports = this.lib.ls ./. ++ [];
 
   # Use freshest kernel
   boot.kernelPackages = pkgs.linuxPackages_latest;
@@ -30,7 +28,7 @@
   # Web services
   modules.tailscale = {
     enable = true;
-    deleteRoute = "10.1.0.0/16";
+    # deleteRoute = "10.1.0.0/16";
   };
   # modules.ddns.enable = true;
   modules.whoami.enable = true;
@@ -45,23 +43,19 @@
     ROC_ENABLE_PRE_VEGA = "1";
   };
 
-  hardware.opengl = {
-    enable = true;
-    extraPackages = with pkgs; [
-      libvdpau-va-gl
-      vaapiVdpau
-      # amdvlk
-    ];
-    extraPackages32 = with pkgs; [
-      libvdpau-va-gl
-      vaapiVdpau
-      # driversi686Linux.amdvlk
-    ];
-  };
+  # hardware.opengl = {
+  #   enable = true;
+  #   extraPackages = with pkgs; [
+  #     libvdpau-va-gl
+  #     vaapiVdpau
+  #     # amdvlk
+  #   ];
+  #   extraPackages32 = with pkgs; [
+  #     libvdpau-va-gl
+  #     vaapiVdpau
+  #     # driversi686Linux.amdvlk
+  #   ];
+  # };
 
-  file."/opt/rocm/hip" = { 
-    type = "link"; 
-    source = "${pkgs.rocmPackages.clr}";
-  };
 
 }

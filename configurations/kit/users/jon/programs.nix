@@ -17,22 +17,20 @@ in {
     # yt-dlp -f mp4-240p -x --audio-format mp3 https://rumble.com/...
     yt-dlp 
 
-    beeper tdesktop slack
+    tdesktop slack
     isy lapce micro quickemu xorg.xeyes
     joypixels jetbrains-mono
     gst_all_1.gst-libav
     libsForQt5.kdenlive
 
-    _1password _1password-gui darktable digikam
-    inkscape junction libreoffice newsflash
-    unstable.nodePackages_latest.immich
+    _1password _1password-gui 
+    junction 
 
-    withings-sync zwift coffee
+    zwift coffee
     bin-foo bin-bar
 
     tauon # jellyfin/plex/local music player
 
-    pavucontrol ncpamixer pamixer pamix
   ];
 
   # modules.firefox.enable = true;
@@ -45,12 +43,6 @@ in {
   programs.wezterm.enable = false;
   programs.foot.enable = false;
   # pipewire-alsa pipewire-audio pipewire-docs pipewire-jack pipewire-media-session pipewire-pulse
-
-  programs.obs-studio = with pkgs.unstable; {
-    enable = true;
-    package = obs-studio;
-    # plugins = [ obs-studio-plugins.wlrobs ];
-  };
 
   # terminal du jour
   modules.kitty.enable = true;
