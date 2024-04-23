@@ -107,8 +107,8 @@
         # Unstable nixpkgs channel
         (final: prev: { unstable = import this.inputs.nixpkgs-unstable { inherit system config; }; })
 
-        # Nix User Repositories 
-        (final: prev: { nur = import this.inputs.nur { pkgs = final; nurpkgs = final; }; })
+        # # Nix User Repositories 
+        # (final: prev: { nur = import this.inputs.nur { pkgs = final; nurpkgs = final; }; })
 
         # Package overrides
         (final: prev: mkAttrs ./overlays/mods ( name: import ./overlays/mods/${name} { inherit final prev; } ))

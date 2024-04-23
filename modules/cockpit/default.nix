@@ -36,8 +36,8 @@ in {
     };
 
     environment.systemPackages = [
-      pkgs.nur.repos.dukzcry.cockpit-machines
-      pkgs.nur.repos.dukzcry.libvirt-dbus
+      # pkgs.nur.repos.dukzcry.cockpit-machines
+      # pkgs.nur.repos.dukzcry.libvirt-dbus
     ];
 
     services.udisks2.enable = true;
