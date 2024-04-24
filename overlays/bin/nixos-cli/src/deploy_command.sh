@@ -21,7 +21,8 @@ fi
 for target in $targets; do
   if [[ "${target}" == "$(hostname)" ]]; then
     # https://github.com/NixOS/nixpkgs/issues/195777#issuecomment-1324378856
-    task "sudo systemctl restart systemd-udev-trigger.service" 
+    # Commented this out because it's messing with Hyprland
+    # task "sudo systemctl restart systemd-udev-trigger.service" 
     task "sudo nixos-rebuild --flake ${dir}#${target} ${action}"
   else
     task "nixos-rebuild --build-host ${USER}@${target}.$(domainname) --target-host ${USER}@${target}.$(domainname) --flake ${dir}#${target} --use-remote-sudo ${action}"

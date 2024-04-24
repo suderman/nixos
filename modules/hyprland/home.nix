@@ -162,6 +162,12 @@ in {
           ];
         };
 
+        windowrulev2 = [
+          # forbid windows from maximizing/fullscreening themselves
+          "suppressevent maximize, class:.*"
+          "suppressevent fullscreen, class:.*"
+        ];
+
         bind = [
           "SUPER, Return, exec, kitty"
           "SUPER, Q, killactive,"
