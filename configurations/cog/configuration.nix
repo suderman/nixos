@@ -68,7 +68,7 @@
   modules.keyd = {
     enable = true;
     quirks = true;
-    settings = config.modules.keyd.configs.framework;
+    keyboard = config.modules.keyd.keyboards.framework;
   };
   modules.ydotool.enable = true;
 
@@ -89,7 +89,7 @@
   modules.steam.enable = true;
   programs.mosh.enable = true;
   programs.kdeconnect.enable = true;
-  programs.evolution.enable = true;
+  # programs.evolution.enable = true;
   modules.dolphin.enable = true;
   # services.xserver.desktopManager.retroarch = {
   #   enable = false;
