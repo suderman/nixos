@@ -14,14 +14,12 @@
   boot.extraModulePackages = [ ];
 
   fileSystems."/" =
-    # { device = "/dev/nvme0n1p3";
     { device = "/dev/disk/by-uuid/b5546767-b520-44aa-883b-d5059aa83d5b";
       fsType = "btrfs";
       options = [ "subvol=root" ];
     };
 
   fileSystems."/nix" =
-    # { device = "/dev/nvme0n1p3";
     { device = "/dev/disk/by-uuid/b5546767-b520-44aa-883b-d5059aa83d5b";
       fsType = "btrfs";
     };

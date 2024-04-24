@@ -3,7 +3,7 @@
 in {
 
   # Import all *.nix files in this directory
-  # imports = ls ./.;
+  imports = ls ./.;
 
   xdg.userDirs = with config.home; {
     enable = true;

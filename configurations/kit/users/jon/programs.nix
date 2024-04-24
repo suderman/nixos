@@ -31,6 +31,8 @@ in {
 
     tauon # jellyfin/plex/local music player
 
+    pavucontrol ncpamixer pamixer pamix
+
   ];
 
   # modules.firefox.enable = true;
