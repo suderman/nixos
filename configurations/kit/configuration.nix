@@ -27,7 +27,7 @@
   networking.networkmanager.enable = true;
   modules.tailscale = {
     enable = true;
-    # deleteRoute = "10.1.0.0/16";
+    deleteRoute = "10.1.0.0/16";
   };
 
   modules.garmin.enable = true;
