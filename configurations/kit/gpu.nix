@@ -1,3 +1,4 @@
+# Nvidia GeForce RTX 4070 Ti Super
 { config, pkgs, inputs, ... }: {
 
   # https://github.com/NixOS/nixos-hardware/tree/master/common/gpu/nvidia
@@ -39,33 +40,17 @@
     package = config.boot.kernelPackages.nvidiaPackages.production;
   };
 
-  environment.systemPackages = with pkgs; [ 
-    nvidia-docker
-  ];
-
   hardware.opengl = {
     enable = true;
     driSupport = true;
     driSupport32Bit = true;
   };
 
-  # hardware.opengl.extraPackages = with pkgs; [
-  #   mesa.drivers
-  #   vaapiVdpau
-  # ];
-
-  # hardware.opengl = {
-  #   enable = true;
-  #   extraPackages = with pkgs; [
-  #     libvdpau-va-gl
-  #     vaapiVdpau
-  #     # amdvlk
-  #   ];
-  #   extraPackages32 = with pkgs; [
-  #     libvdpau-va-gl
-  #     vaapiVdpau
-  #     # driversi686Linux.amdvlk
-  #   ];
-  # };
+  virtualisation = {
+    containers.enable = true;
+    container.cdi.dynamic.nvidia.enable = true;
+    docker.package = pkgs.docker_25; # CDI is feature-gated and only available from Docker 25 and onwards
+    docker.daemon.settings.features.cdi = true;
+  };
 
 }
