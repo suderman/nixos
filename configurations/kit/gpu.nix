@@ -48,7 +48,7 @@
 
   virtualisation = {
     containers.enable = true;
-    container.cdi.dynamic.nvidia.enable = true;
+    containers.cdi.dynamic.nvidia.enable = true;
     docker.package = pkgs.docker_25; # CDI is feature-gated and only available from Docker 25 and onwards
     docker.daemon.settings.features.cdi = true;
   };
