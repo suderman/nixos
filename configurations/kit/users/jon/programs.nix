@@ -24,6 +24,8 @@ in {
     libsForQt5.kdenlive
 
     _1password _1password-gui 
+    inkscape junction libreoffice newsflash
+    unstable.nodePackages_latest.immich
     junction 
 
     zwift coffee

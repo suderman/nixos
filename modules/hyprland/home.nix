@@ -46,6 +46,8 @@ in {
       gnome.nautilus
       wezterm
 
+      swww
+
       swaybg # the wallpaper
       swayidle # the idle timeout
       swaylock # locking the screen

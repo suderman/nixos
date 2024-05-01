@@ -10,8 +10,9 @@
 
   # Execute your favorite apps at launch
   exec-once = [
-    "hyprpaper"
+    # "hyprpaper"
     "mako"
+    "swww-daemon"
   ];
 
   input = {

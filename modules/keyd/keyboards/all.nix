@@ -14,7 +14,7 @@
     tab = "swapm(switcher, M-tab)";
 
     # esc: Switch to next window in the application group
-    esc = "A-f6";
+    # esc = "A-f6";
 
     # Cut/Copy/Paste clipboard
     x = "S-delete";

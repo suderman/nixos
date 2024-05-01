@@ -51,6 +51,10 @@
     # Scroll through existing workspaces with mainMod + scroll
     "SUPER, mouse_down, workspace, e+1"
     "SUPER, mouse_up, workspace, e-1"
+
+    # Navigation existing workspaces (don't wrap-around)
+    "SUPER ALT, right, workspace, +1"
+    "SUPER ALT, left, workspace, -1"
   ];
 
   binde = [

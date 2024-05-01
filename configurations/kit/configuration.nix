@@ -48,6 +48,9 @@
   programs.kdeconnect.enable = true;
   # programs.evolution.enable = true;
 
+  modules.ollama.enable = true;
+  services.ollama.acceleration = "cuda";
+
   modules.flatpak = {
     packages = [
       "app.bluebubbles.BlueBubbles"
