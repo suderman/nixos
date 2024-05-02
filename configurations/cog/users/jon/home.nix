@@ -17,6 +17,8 @@ in {
     # publicShare = "${homeDirectory}/public";
   };
 
+  modules.keyd.enable = true;
+
   # # TUI bluetooth management
   # modules.bluetuith.enable = true;
 
@@ -27,5 +29,25 @@ in {
   #   method = pulse
   #   source = auto
   # '';
+
+  home.pointerCursor = {
+    gtk.enable = true;
+    package = pkgs.gnome.adwaita-icon-theme;
+    name = "Adwaita";
+    size = 16;
+  };
+  
+  home.packages = with pkgs; [ 
+    loupe
+    hyprpicker
+    hyprshot
+    hyprlock
+    hypridle
+    hyprnome
+    # hyprspace
+    hyprpaper
+    hyprcursor
+  ];
+
 
 }

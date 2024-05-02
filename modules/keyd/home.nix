@@ -4,14 +4,16 @@
 with pkgs; 
 
 let 
-  cfg = config.services.keyd;
+  cfg = config.modules.keyd;
 
 in {
   options = {
-    services.keyd.enable = lib.options.mkEnableOption "keyd"; 
+    modules.keyd.enable = lib.options.mkEnableOption "keyd"; 
   };
 
   config = lib.mkIf cfg.enable {
+
+    home.packages = [ pkgs.keyd ];
 
     xdg.configFile = {
       "keyd/app.conf".text = ''
@@ -32,9 +34,9 @@ in {
         alt.r = f2
         alt.i = C-i
 
-        [org-wezfurlong-wezterm]
+        #[org-wezfurlong-wezterm]
 
-        leftalt = layer(meta_cmd)
+        #leftalt = layer(meta_cmd)
 
         [firefox]
 

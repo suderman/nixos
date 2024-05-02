@@ -6,7 +6,16 @@
     "SUPERSHIFT, Q, exit,"
     "SUPER, E, exec, nautilus"
     "SUPER, F, exec, firefox"
-    "SUPER, Escape, togglefloating,"
+    "SUPER ALT, z, togglefloating"
+    "SUPER, z, fullscreen"
+
+    "SUPER, Escape, togglespecialworkspace"
+    "SUPER ALT, Escape, movetoworkspacesilent, special"
+
+    # "numlock, exec, sleep 1 && hyprctl dispatch dpms off"
+    # "f9, exec, sleep 1 && hyprctl dispatch dpms off"
+    # "f10, exec, sleep 1 && hyprctl dispatch dpms on"
+
     "SUPER, Space, exec, tofi-drun --drun-launch=true"
     "SUPER, N, layoutmsg, swapnext"
     "SUPER, P, layoutmsg, swapprev"
@@ -53,8 +62,10 @@
     "SUPER, mouse_up, workspace, e-1"
 
     # Navigation existing workspaces (don't wrap-around)
-    "SUPER ALT, right, workspace, +1"
     "SUPER ALT, left, workspace, -1"
+    "SUPER ALT, right, workspace, +1"
+    "SUPER, comma, workspace, -1"
+    "SUPER, period, workspace, +1"
   ];
 
   binde = [
@@ -78,6 +89,7 @@
     "SUPER, mouse:272, movewindow"
     "SUPER, mouse:273, resizewindow"
     "SUPERSHIFT, mouse:272, resizewindow"
+    "SUPER ALT, mouse:272, resizewindow"
   ];
 
 }

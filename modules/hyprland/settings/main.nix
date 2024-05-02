@@ -19,6 +19,7 @@
     kb_layout = "us";
     follow_mouse = 1;
     natural_scroll = true;
+    scroll_factor = 1.5;
     touchpad = {
       natural_scroll = true;
       disable_while_typing = true;
@@ -32,13 +33,22 @@
   # "device:epic-mouse-v1" = { sensitivity = -0.5; };
 
   general = {
-    layout = mkDefault "master";
+    # layout = mkDefault "master";
+    layout = mkDefault "dwindle";
     no_cursor_warps = mkDefault false;
     resize_on_border = mkDefault true;
   };
 
-  gestures.workspace_swipe = mkDefault true;
   master.new_is_master = mkDefault true;
+
+  dwindle = {
+    preserve_split = true;
+    smart_split = false;
+    pseudotile = true;
+    special_scale_factor = 0.9;
+  };
+
+  gestures.workspace_swipe = mkDefault true;
 
   misc = {
     mouse_move_enables_dpms = mkDefault true;
@@ -49,3 +59,50 @@
   };
 
 }
+
+
+# bind = SUPER, z, fullscreen
+# bind = SUPER ALT, z, togglefloating
+# # bind=SUPER,F,fullscreen
+#
+# bindm = SUPER ALT, mouse:272, resizewindow
+#
+# bind = , f8, togglefloating
+# bind = , f9, exec, sleep 1 && hyprctl dispatch dpms off
+# bind = , f10, exec, sleep 1 && hyprctl dispatch dpms on
+# # bind = SUPER SHIFT, z, exec, sleep 1 && hyprctl dispatch dpms toggle
+#
+# # bind=SUPER,grave,togglespecialworkspace,
+#
+# workspace = special:term, on-created-empty:kitty
+# workspace = special:lf, on-created-empty:kitty -e lf
+# # workspace = special:dots, on-created-empty:foot --working-directory=$HOME/dotfiles/ -e nvim # This seems overkill
+# workspace = special:term, gapsout:30
+# workspace = special:lf, gapsout:20
+# workspace = special:dots, gapsout:20
+#
+# workspace = special, gapsout:30,gapsin:30
+# bind = SUPER, S, togglespecialworkspace
+# bind = SUPER ALT, S, movetoworkspace, special
+# bind = SUPER ALT, T, togglespecialworkspace, term
+# bind = SUPER ALT, L, togglespecialworkspace, lf
+# bind = SUPER ALT, N, togglespecialworkspace, dots
+#
+# animation = specialWorkspace, 1, 3, default, slidefadevert -50%
+#
+# general { 
+#   layout = dwindle
+#   # layout = master
+# }
+#
+# master {
+#   orientation = center;
+#   always_center_master = true;
+# }
+#
+# dwindle {
+#   preserve_split = true
+#   smart_split = true 
+#   pseudotile = true
+#   special_scale_factor = 0.9
+# }

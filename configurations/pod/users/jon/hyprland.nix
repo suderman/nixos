@@ -27,7 +27,6 @@
       rounding = 10;
       dim_inactive = false;
       dim_strength = 0.1;
-      dim_special = 0;
     };
 
     bind = [ "SUPER SHIFT, m, exec, zwift" ];
