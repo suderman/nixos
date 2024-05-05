@@ -15,7 +15,7 @@
   };
 
   group = {
-    groupbar.enable = false;
+    groupbar.enabled = mkDefault false;
     "col.border_active" = mkDefault "rgba(F1C40Fcc) rgba(16A085cc) 270deg";
     "col.border_inactive" = mkDefault "rgba(F1C40F80) rgba(16A08580) 270deg";
     "col.border_locked_active" = mkDefault "rgba(F1C40Fcc) rgba(E74C3Ccc) 270deg";
