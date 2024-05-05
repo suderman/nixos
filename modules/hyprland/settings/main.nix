@@ -10,14 +10,17 @@
 
   # Execute your favorite apps at launch
   exec-once = [
+    "ln -sf $XDG_RUNTIME_DIR/hypr /tmp/hypr"
     # "hyprpaper"
+    "waybar"
     "mako"
     "swww-daemon"
   ];
 
   input = {
     kb_layout = "us";
-    follow_mouse = 1;
+    # follow_mouse = mkDefault 1;
+    follow_mouse = mkDefault 2;
     natural_scroll = true;
     scroll_factor = 1.5;
     touchpad = {
@@ -56,6 +59,11 @@
     enable_swallow = mkDefault true;
     swallow_regex = mkDefault "^(Alacritty|kitty|footclient)$";
     focus_on_activate = mkDefault true;
+    cursor_zoom_factor = mkDefault 1;
+  };
+
+  binds = {
+     workspace_back_and_forth = mkDefault true;
   };
 
 }

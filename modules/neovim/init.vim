@@ -81,6 +81,10 @@ cnoremap <c-x> <Del>
 cnoremap <c-z> <BS>
 cnoremap <c-v> <c-r>"
 
+" Tab navigation with Ctrl-[]
+noremap <c-,> :tabprevious<CR>
+noremap <c-.> :tabnext<CR>
+
 " Searching
 set hlsearch
 set ignorecase

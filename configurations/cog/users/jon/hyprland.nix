@@ -31,7 +31,7 @@
     #   dim_strength = 0.1;
     # };
 
-    bind = [ "SUPER SHIFT, m, exec, zwift" ];
+    bind = [ "SUPER SHIFT ALT, m, exec, zwift" ];
     binde = [ ];
     bindm = [ ];
 

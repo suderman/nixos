@@ -7,7 +7,7 @@
   modules.hyprland.settings = {
 
     # Execute your favorite apps at launch
-    exec-once = [ "waybar" ];
+    exec-once = [];
 
     general = {
       gaps_in = 4;

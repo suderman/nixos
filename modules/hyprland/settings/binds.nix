@@ -2,36 +2,49 @@
 
   bind = [
     "SUPER, Return, exec, kitty"
-    "SUPER, Q, killactive,"
+    "SUPER, w, killactive,"
     "SUPERSHIFT, Q, exit,"
     "SUPER, E, exec, nautilus"
     "SUPER, F, exec, firefox"
-    "SUPER ALT, z, togglefloating"
-    "SUPER, z, fullscreen"
 
     "SUPER, Escape, togglespecialworkspace"
     "SUPER ALT, Escape, movetoworkspacesilent, special"
+
+    "SUPER, Tab, cyclenext,"
+    "SUPER SHIFT, Tab, cyclenext, prev"
+    "SUPER, backslash, workspace, previous"
+
+    "SUPER, bracketleft, workspace, -1"
+    "SUPER, bracketright, workspace, +1"
+
+    "SUPER ALT, h,  movewindoworgroup, l"
+    "SUPER ALT, j,  movewindoworgroup, d"
+    "SUPER ALT, k,  movewindoworgroup, u"
+    "SUPER ALT, l,  movewindoworgroup, r"
+
+    "SUPER ALT, G,  togglegroup,"
+    "SUPER, G, lockactivegroup, toggle"
+    "SUPER, N, changegroupactive, f"
+    "SUPER SHIFT, N, changegroupactive, b"
+
+    "SUPER, i, togglesplit"
+    "SUPER, p, pseudo"
+    "SUPER, o, togglefloating"
+    "SUPER, p, pin"
+    "SUPER, z, fullscreen, 1"
+    "SUPER ALT, z, fullscreen, 0"
 
     # "numlock, exec, sleep 1 && hyprctl dispatch dpms off"
     # "f9, exec, sleep 1 && hyprctl dispatch dpms off"
     # "f10, exec, sleep 1 && hyprctl dispatch dpms on"
 
     "SUPER, Space, exec, tofi-drun --drun-launch=true"
-    "SUPER, N, layoutmsg, swapnext"
-    "SUPER, P, layoutmsg, swapprev"
-    "SUPER, B, layoutmsg, swapwithmaster master"
-    "SUPER, G, layoutmsg, addmaster "
-    "SUPER+SHIFT, G, layoutmsg, removemaster"
 
     # Move focus with mainMod + arrow keys
     "SUPER, H, movefocus, l"
     "SUPER, J, movefocus, d"
     "SUPER, K, movefocus, u"
     "SUPER, L, movefocus, r"
-
-    "SUPERSHIFTCONTROL, J, layoutmsg, swapnext"
-    "SUPERSHIFTCONTROL, K, layoutmsg, swapprev"
-    "SUPER, M, layoutmsg, swapwithmaster master"
 
     # Switch workspaces with mainMod + [0-9]
     "SUPER, 1, workspace, 1"
@@ -64,15 +77,13 @@
     # Navigation existing workspaces (don't wrap-around)
     "SUPER ALT, left, workspace, -1"
     "SUPER ALT, right, workspace, +1"
-    "SUPER, comma, workspace, -1"
-    "SUPER, period, workspace, +1"
   ];
 
   binde = [
-    "SUPERSHIFT, H, resizeactive, -80 0"
-    "SUPERSHIFT, J, resizeactive, 0 80"
-    "SUPERSHIFT, K, resizeactive, 0 -80"
-    "SUPERSHIFT, L, resizeactive, 80 0"
+    "SUPER SHIFT, H, resizeactive, -80 0"
+    "SUPER SHIFT, J, resizeactive, 0 80"
+    "SUPER SHIFT, K, resizeactive, 0 -80"
+    "SUPER SHIFT, L, resizeactive, 80 0"
 
     # Screen brightness
     ", XF86MonBrightnessUp,exec,brightnessctl set +5%"

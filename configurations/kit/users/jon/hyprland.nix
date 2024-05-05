@@ -8,7 +8,7 @@
   modules.hyprland.settings = {
 
     # Execute your favorite apps at launch
-    exec-once = [ "waybar" ];
+    exec-once = [ ];
 
     general = {
       gaps_in = 4;
@@ -30,7 +30,7 @@
       dim_strength = 0.1;
     };
 
-    bind = [ "SUPER SHIFT, m, exec, zwift" ];
+    bind = [ ];
     binde = [ ];
     bindm = [ ];
 

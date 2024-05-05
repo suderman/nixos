@@ -5,11 +5,25 @@
   ];
 
   general = {
-    gaps_in = mkDefault 4;
-    gaps_out = mkDefault 8;
-    border_size = mkDefault 2;
-    "col.active_border" = mkDefault "rgb(89b4fa) rgb(cba6f7) 270deg";
-    "col.inactive_border" = mkDefault "rgb(11111b) rgb(b4befe) 270deg";
+    gaps_in = mkDefault 15;
+    gaps_out = mkDefault 15;
+    gaps_workspaces = mkDefault 20;
+    border_size = mkDefault 5;
+    "col.active_border" = mkDefault "rgba(89b4facc) rgba(cba6f7cc) 270deg";
+    "col.inactive_border" = mkDefault "rgba(11111b66) rgba(b4befe66) 270deg";
+    extend_border_grab_area = 100;
+  };
+
+  group = {
+    groupbar.enable = false;
+    "col.border_active" = mkDefault "rgba(F1C40Fcc) rgba(16A085cc) 270deg";
+    "col.border_inactive" = mkDefault "rgba(F1C40F80) rgba(16A08580) 270deg";
+    "col.border_locked_active" = mkDefault "rgba(F1C40Fcc) rgba(E74C3Ccc) 270deg";
+    "col.border_locked_inactive" = mkDefault "rgba(F1C40F80) rgba(E74C3C80) 270deg";
+  };
+
+  dwindle = {
+    no_gaps_when_only = mkDefault true;
   };
 
   misc = {
@@ -28,8 +42,12 @@
     dim_inactive = mkDefault false;
     dim_strength = mkDefault 0.1;
     dim_special = mkDefault 0.5;
-    blur.special = mkDefault false;
+    blur.special = mkDefault true;
+    blur.size = mkDefault 1;
+    blur.passes = mkDefault 2;
+    blur.xray = mkDefault true;
   };
+
 
   animations = {
     enabled = mkDefault true;
@@ -55,9 +73,10 @@
      "windows, 1, 5, win, slide"
      "windowsIn, 1, 6, winIn, slide"
      "windowsOut, 1, 5, winOut, slide"
-     # "border, 1, 1, liner"
-     "border, 1, 1, default"
-     "borderangle, 1, 30, liner, loop"
+     # "border, 1, 1, default"
+     "border, 1, 20, overshot"
+     # "borderangle, 1, 30, liner, loop"
+     "borderangle, 1, 20, liner, once"
      "fade, 1, 10, default"
      "workspaces, 1, 5, win"
      "specialWorkspace, 1, 3, default, slidefadevert -50%"
