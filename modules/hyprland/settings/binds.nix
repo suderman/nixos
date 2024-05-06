@@ -14,6 +14,64 @@
     '';
   };
 
+
+  cycleFloatingPositions = mkShellScript {
+    inputs = with pkgs; [ coreutils hyprland jq ]; text = ''
+
+      # Get the cache directory and active window name
+      cache_dir="$XDG_RUNTIME_DIR/hypr/cyclefloating"
+      window_address="$(hyprctl activewindow -j | jq -r .address)"
+
+      mkdir -p $cache_dir
+      touch $cache_dir/$window_address
+
+      # top_left    top_center    top_right
+      # middle_left               middle_right
+      # bottom_left bottom_center bottom_right
+      pos="$(cat $cache_dir/$window_address)" 
+      next_pos="top_left"
+
+      # forward or reverse
+      dir="''${1:-forward}"
+
+      if [[ "$pos" == "top_left" ]]; then 
+        hyprctl --batch "dispatch movewindow u ; dispatch movewindow l"
+        [[ "$dir" == "forward" ]] && next_pos="top_center" || next_pos="middle_left"
+
+      elif [[ "$pos" == "top_center" ]]; then 
+        hyprctl --batch "dispatch centerwindow 1; dispatch movewindow u"
+        [[ "$dir" == "forward" ]] && next_pos="top_right" || next_pos="top_left"
+
+      elif [[ "$pos" == "top_right" ]]; then 
+        hyprctl --batch "dispatch movewindow u ; dispatch movewindow r"
+        [[ "$dir" == "forward" ]] && next_pos="middle_right" || next_pos="top_center"
+
+      elif [[ "$pos" == "middle_right" ]]; then 
+        hyprctl --batch "dispatch centerwindow 1 ; dispatch movewindow r"
+        [[ "$dir" == "forward" ]] && next_pos="bottom_right" || next_pos="top_right"
+
+      elif [[ "$pos" == "bottom_right" ]]; then 
+        hyprctl --batch "dispatch movewindow d ; dispatch movewindow r"
+        [[ "$dir" == "forward" ]] && next_pos="bottom_center" || next_pos="middle_right"
+
+      elif [[ "$pos" == "bottom_center" ]]; then 
+        hyprctl --batch "dispatch centerwindow 1 ; dispatch movewindow d"
+        [[ "$dir" == "forward" ]] && next_pos="bottom_left" || next_pos="bottom_right"
+
+      elif [[ "$pos" == "bottom_left" ]]; then 
+        hyprctl --batch "dispatch movewindow d ; dispatch movewindow l"
+        [[ "$dir" == "forward" ]] && next_pos="middle_left" || next_pos="bottom_center"
+
+      elif [[ "$pos" == "middle_left" ]]; then 
+        hyprctl --batch "dispatch centerwindow 1 ; dispatch movewindow l"
+        [[ "$dir" == "forward" ]] && next_pos="top_left" || next_pos="bottom_left"
+      fi
+
+      # Save the next position to file
+      echo "$next_pos" > $cache_dir/$window_address
+    '';
+  };
+
   moveWindowOrGroupOrActive = mkShellScript {
     inputs = with pkgs; [ hyprland jq ]; text = ''
       is_floating="$(hyprctl activewindow -j | jq -r .floating)"
@@ -49,7 +107,7 @@ in {
     "SUPER, bracketleft, workspace, -1"
     "SUPER, bracketright, workspace, +1"
 
-    "SUPER ALT, G,  togglegroup,"
+    "SUPER SHIFT, G,  togglegroup,"
     "SUPER, G, exec, ${toggleGroupOrLock}"
     "SUPER, N, changegroupactive, f"
     "SUPER SHIFT, N, changegroupactive, b"
@@ -97,18 +155,38 @@ in {
     "SUPER ALT, 9, movetoworkspace, 9"
     "SUPER ALT, 0, movetoworkspace, 10"
 
-    "SUPER SHIFT, 1, movewindow, u"
-    "SUPER SHIFT, 1, movewindow, l"
-    "SUPER SHIFT, 2, movewindow, u"
-    "SUPER SHIFT, 2, movewindow, r"
-    "SUPER SHIFT, 3, movewindow, d"
-    "SUPER SHIFT, 3, movewindow, l"
-    "SUPER SHIFT, 4, movewindow, d"
-    "SUPER SHIFT, 4, movewindow, r"
-    "SUPER SHIFT, 4, movewindow, r"
+    "SUPER SHIFT, 1, resizeactive, exact 10% 10%"
+    "SUPER SHIFT, 1, centerwindow, 1"
+    "SUPER SHIFT, 2, resizeactive, exact 20% 20%"
+    "SUPER SHIFT, 2, centerwindow, 1"
+    "SUPER SHIFT, 3, resizeactive, exact 30% 30%"
+    "SUPER SHIFT, 3, centerwindow, 1"
+    "SUPER SHIFT, 4, resizeactive, exact 40% 40%"
+    "SUPER SHIFT, 4, centerwindow, 1"
+    "SUPER SHIFT, 5, resizeactive, exact 50% 50%"
+    "SUPER SHIFT, 5, centerwindow, 1"
+    "SUPER SHIFT, 6, resizeactive, exact 60% 60%"
+    "SUPER SHIFT, 6, centerwindow, 1"
+    "SUPER SHIFT, 7, resizeactive, exact 70% 70%"
+    "SUPER SHIFT, 7, centerwindow, 1"
+    "SUPER SHIFT, 8, resizeactive, exact 80% 80%"
+    "SUPER SHIFT, 8, centerwindow, 1"
+    "SUPER SHIFT, 9, resizeactive, exact 90% 90%"
+    "SUPER SHIFT, 9, centerwindow, 1"
 
     "SUPER SHIFT, 0, centerwindow, 1"
     "SUPER SHIFT, O, resizeactive, exact 600 400"
+
+    "SUPER ALT, O, centerwindow, 1"
+    "SUPER ALT, I, exec, ${cycleFloatingPositions}"
+    "SUPER SHIFT ALT, I, exec, ${cycleFloatingPositions} reverse"
+
+    # Super+m to minimize window, Super+m to bring it back (possibly on a different workspace)
+    "SUPER, m, togglespecialworkspace, mover"
+    "SUPER, m, movetoworkspace, +0"
+    "SUPER, m, togglespecialworkspace, mover"
+    "SUPER, m, movetoworkspace, special:mover"
+    "SUPER, m, togglespecialworkspace, mover"
 
     # Scroll through existing workspaces with mainMod + scroll
     "SUPER, mouse_down, workspace, e+1"
@@ -125,10 +203,15 @@ in {
     "SUPER ALT, K, exec, ${moveWindowOrGroupOrActive} u 0 -40"
     "SUPER ALT, L, exec, ${moveWindowOrGroupOrActive} r 40 0"
 
+    # Resize window
     "SUPER SHIFT, H, resizeactive, -80 0"
     "SUPER SHIFT, J, resizeactive, 0 80"
     "SUPER SHIFT, K, resizeactive, 0 -80"
     "SUPER SHIFT, L, resizeactive, 80 0"
+
+    # Cycle floating windows
+    "SUPER, U, cyclenext, floating"
+    "SUPER SHIFT, U, cyclenext, prev floating"
 
     # Screen brightness
     ", XF86MonBrightnessUp,exec,brightnessctl set +5%"

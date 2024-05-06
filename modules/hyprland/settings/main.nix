@@ -19,8 +19,8 @@
 
   input = {
     kb_layout = "us";
-    # follow_mouse = mkDefault 1;
-    follow_mouse = mkDefault 2;
+    # follow_mouse = mkDefault 2;
+    follow_mouse = mkDefault 1;
     natural_scroll = true;
     scroll_factor = 1.5;
     touchpad = {
