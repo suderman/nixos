@@ -78,11 +78,11 @@ in {
 
       settings = mkMerge [ 
         cfg.preSettings 
-        ( import ./settings/main.nix { inherit lib; } )
-        ( import ./settings/graphics.nix { inherit lib; } )
-        ( import ./settings/rules.nix { inherit lib; } )
-        ( import ./settings/binds.nix { inherit lib; } )
-        ( if cfg.nvidia then import ./settings/nvidia.nix { inherit lib; } else {} )
+        ( import ./settings/main.nix { inherit lib pkgs this; } )
+        ( import ./settings/graphics.nix { inherit lib pkgs this; } )
+        ( import ./settings/rules.nix { inherit lib pkgs this; } )
+        ( import ./settings/binds.nix { inherit lib pkgs this; } )
+        ( if cfg.nvidia then import ./settings/nvidia.nix { inherit lib pkgs this; } else {} )
         cfg.settings 
       ];
 

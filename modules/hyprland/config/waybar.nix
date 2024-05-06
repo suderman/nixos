@@ -34,8 +34,8 @@ in {
 
         # modules layout
         modules-left = [ "custom/launcher" "hyprland/workspaces" ];
-        modules-center = [ "clock" ];
-        modules-right = [ "idle_inhibitor" "network" "cpu" "battery" "custom/power" "tray" ];
+        modules-center = [ "clock" "hyprland/window" ];
+        modules-right = [ "idle_inhibitor" "network" "temperature" "cpu" "battery" "custom/power" "tray" ];
 
         # modules config
         "custom/launcher" = {
@@ -45,7 +45,8 @@ in {
         "hyprland/workspaces" = {
           on-click = "activate";
           all-outputs = true;
-          format = "{icon}";
+          # format = "{icon} {name}";
+          format = "{name}";
           disable-scroll = true;
           active-only = false;
           format-icons = {
@@ -53,6 +54,7 @@ in {
             persistent = "󰊠 ";
             focused = "󰮯 ";
           };
+          show-special = true;
         };
         clock = {
           format = " {:%I:%M %p}";
@@ -82,8 +84,15 @@ in {
           '';
         };
         cpu = {
-          format = " {usage0}%/{usage1}%/{usage2}%/{usage3}%/{usage4}%/{usage5}%/{usage6}%/{usage7}%";
+          # format = " {usage0}%/{usage1}%/{usage2}%/{usage3}%/{usage4}%/{usage5}%/{usage6}%/{usage7}%";
+          format = " {load} / {usage}%";
           on-click = systemMonitor;
+        };
+        temperature = {
+          thermal-zone = 2;
+          critical-threshold = 80;
+          format-critical = "{temperatureC}°C ";
+          format = "{temperatureC}°C ";
         };
         battery = {
           interval = 60;
