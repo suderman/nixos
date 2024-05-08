@@ -85,6 +85,46 @@
     '';
   };
 
+  newWindowInGroup = mkShellScript {
+    inputs = with pkgs; [ coreutils hyprland jq ]; text = ''
+
+      win() { hyprctl clients -j | jq ".[] | select(.address == \"$1\")"; }
+      group_count() { echo "$(win $1)" | jq '.grouped | length'; }
+      is_group() { [[ "$(group_count $1)" == "0" ]] && return 1 || return 0; }
+
+      # Get the active window
+      window="$(hyprctl activewindow -j)"
+
+      # Find address, pid and command for active window
+      addr="$(echo $window | jq -r .address)"
+      pid="$(echo $window | jq -r .pid)"
+      cmd=$(ps -p $pid -o command | tail -1)
+
+      # Unlock existing group or create new unlocked group
+      if $(is_group $addr); then
+        hyprctl dispatch lockactivegroup unlock 
+      else
+        hyprctl dispatch togglegroup 
+      fi
+
+      # Wait until window is part of a group
+      while ! $(is_group $addr); do sleep 0.2; done
+
+      # Store the current group count
+      count="$(group_count "$addr")"
+
+      # Run the command
+      hyprctl dispatch exec $cmd
+
+      # Wait for the group count to increase
+      while [[ "$count" -ge "$(group_count $addr)" ]]; do sleep 0.2; done
+
+      # Lock the group
+      hyprctl dispatch lockactivegroup lock
+      
+    '';
+  };
+
 in {
 
   bind = [
@@ -93,6 +133,8 @@ in {
     "SUPERSHIFT, Q, exit,"
     "SUPER, E, exec, nautilus"
     "SUPER, F, exec, firefox"
+
+    "SUPER, T, exec, ${newWindowInGroup}"
 
     "SUPER, Escape, togglespecialworkspace"
     "SUPER ALT, Escape, movetoworkspacesilent, special"
