@@ -125,6 +125,61 @@
     '';
   };
 
+
+  screenshot = mkShellScript {
+    inputs = with pkgs; [ coreutils slurp grim swappy hyprpicker libnotify wl-clipboard ]; text = ''
+      # Flags:
+      #
+      # r: region
+      # s: screen
+      # c: clipboard
+      # f: file
+      # i: interactive
+      # p: pixel
+
+      # Region to clipboard
+      if [[ $1 == rc ]]; then
+          grim -g "$(slurp -b '#000000b0' -c '#00000000')" - | wl-copy
+          notify-send 'Copied to Clipboard' Screenshot
+
+      # Region to file
+      elif [[ $1 == rf ]]; then
+          mkdir -p ~/Pictures/Screenshots
+          filename=~/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png
+          grim -g "$(slurp -b '#000000b0' -c '#00000000')" $filename
+          notify-send 'Screenshot Taken' $filename
+
+      # Region to interactive
+      elif [[ $1 == ri ]]; then
+          grim -g "$(slurp -b '#000000b0' -c '#00000000')" - | tee >(wl-copy) | swappy -f -
+          # grim -g "$(slurp -b '#000000b0' -c '#00000000')" - | swappy -f -
+
+      # Screen to clipboard
+      elif [[ $1 == sc ]]; then
+          filename=~/Pictures/Screenshots/%Y-%m-%d_%H-%M-%S.png
+          grim - | wl-copy
+          notify-send 'Copied to Clipboard' Screenshot
+
+      # Screen to file
+      elif [[ $1 == sf ]]; then
+          mkdir -p ~/Pictures/Screenshots
+          filename=~/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png
+          grim $filename
+          notify-send 'Screenshot Taken' $filename
+
+      # Screen to interactive
+      elif [[ $1 == si ]]; then
+          grim - | swappy -f -
+
+      # Colour to clipboard
+      elif [[ $1 == p ]]; then
+          color=$(hyprpicker -a)
+          wl-copy $color
+          notify-send 'Copied to Clipboard' $color
+      fi
+    '';
+  };
+
 in {
 
   bind = [
@@ -229,6 +284,16 @@ in {
     "SUPER, m, togglespecialworkspace, mover"
     "SUPER, m, movetoworkspace, special:mover"
     "SUPER, m, togglespecialworkspace, mover"
+
+    # Screenshot a region
+    # ", PRINT, exec, hyprshot -m region"
+    ", Print, exec, ${screenshot} ri"
+    "SUPER, Print, exec, ${screenshot} rf"
+    "CTRL, Print, exec, ${screenshot} rc"
+    "SHIFT, Print, exec, ${screenshot} sc"
+    "SUPER SHIFT, Print, exec, ${screenshot} sf"
+    "CTRL SHIFT, Print, exec, ${screenshot} si"
+    "ALT, Print, exec, ${screenshot} p"
 
     # Scroll through existing workspaces with mainMod + scroll
     "SUPER, mouse_down, workspace, e+1"
