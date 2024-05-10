@@ -1,17 +1,26 @@
-{ lib, ... }: let inherit (lib) mkDefault; in {
+{ lib, pkgs, this, ... }: let 
 
-  monitor = [
-    # default display
-    ", preferred, 0x0, 1"
-  ];
+  inherit (lib) mkDefault; 
+  inherit (this.lib) mkShellScript;
+
+  init = mkShellScript {
+    inputs = with pkgs; [ coreutils ]; text = ''
+      # Temporary symlink
+      "ln -sf $XDG_RUNTIME_DIR/hypr /tmp/hypr"
+    '';
+  };
+
+in {
+
+  # default display
+  monitor = [ ", preferred, 0x0, 1" ];
 
   # Let xwayland be tiny, not blurry
   xwayland.force_zero_scaling = true;
 
   # Execute your favorite apps at launch
   exec-once = [
-    "ln -sf $XDG_RUNTIME_DIR/hypr /tmp/hypr"
-    # "hyprpaper"
+    "${init}"
     "waybar"
     "mako"
     "swww-daemon"

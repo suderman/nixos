@@ -47,6 +47,8 @@ in {
     # hyprspace
     hyprpaper
     hyprcursor
+
+    cantarell-fonts
   ];
 
 

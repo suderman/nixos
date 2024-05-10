@@ -69,22 +69,26 @@ in {
 
     wayland.windowManager.hyprland = {
       enable = true;
-      # plugins = [ inputs.hyprland-plugins.packages.${pkgs.system}.hyprbars ];
       plugins = [ 
         # inputs.hyprland-plugins.packages.${pkgs.system}.hyprbars
         # inputs.hyprland-plugins.packages.${pkgs.system}.hyprexpo 
         # inputs.hyprland-plugins.packages.${pkgs.system}.hyprwinwrap 
       ];
 
-      settings = mkMerge [ 
-        cfg.preSettings 
-        ( import ./settings/main.nix { inherit lib pkgs this; } )
-        ( import ./settings/graphics.nix { inherit lib pkgs this; } )
-        ( import ./settings/rules.nix { inherit lib pkgs this; } )
-        ( import ./settings/binds.nix { inherit lib pkgs this; } )
-        ( if cfg.nvidia then import ./settings/nvidia.nix { inherit lib pkgs this; } else {} )
-        cfg.settings 
-      ];
+      settings = let
+        args = { 
+          inherit lib this; 
+          pkgs = pkgs // { inherit (inputs.hyprland.packages.${pkgs.system}) hyprland; };
+        };
+        mainSettings = ( ls { path = ./settings; filesExcept = [ "default.nix" "nvidia.nix" ]; } );  
+        nvidiaSettings = if cfg.nvidia then [ ./settings/nvidia.nix ] else []; 
+
+      in mkMerge (
+        [ cfg.preSettings ] ++  
+        ( map ( f: import f args ) mainSettings ) ++
+        ( map ( f: import f args ) nvidiaSettings ) ++
+        [ cfg.settings ]
+      );
 
       # extraConfig = builtins.readFile ./hyprland.conf + "\n\n" + ''
       extraConfig = ''

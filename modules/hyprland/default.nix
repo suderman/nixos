@@ -21,18 +21,11 @@ in {
 
   config = mkIf cfg.enable {
 
-    programs.hyprland = {
-      enable = true;
-    };
-
+    programs.hyprland.enable = true;
     programs.light.enable = true;
 
-    # Enable sound.
+    # Enable audio
     sound.enable = true;
-    # services.pipewire.enable = true;
-
-    # # Enable audio
-    # sound.enable = true;
     services.pipewire = {
       enable = true;
       alsa.enable = true;
@@ -47,21 +40,17 @@ in {
     # Thumbnail support for images
     services.tumbler.enable = true;
 
-    # Login screen
-    services = {
-      # displayManager.defaultSession = "hyprland";
-      xserver = {
-        enable = true;
-        # desktopManager.xterm.enable = false;
-        displayManager = {
-          lightdm.enable = true;
-          # gdm = {
-          #   enable = true;
-          #   wayland = true;
-          # };
-        };
-      };
-    };
+    # # Login screen
+    # services = {
+    #   # displayManager.defaultSession = "hyprland";
+    #   xserver = {
+    #     enable = true;
+    #     # desktopManager.xterm.enable = false;
+    #     displayManager = {
+    #       lightdm.enable = true;
+    #     };
+    #   };
+    # };
 
     environment.sessionVariables = {
       NIXOS_OZONE_WL = "1";
@@ -77,13 +66,9 @@ in {
       vulkan-tools
     ];
 
-
-    xdg.portal = {
-      enable = true;
-      wlr.enable = true;
-      extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-      # extraPortals = [ pkgs.xdg-desktop-portal-wlr ];
-    };
+    # https://wiki.hyprland.org/Useful-Utilities/xdg-desktop-portal-hyprland/
+    # > XDPH doesn’t implement a file picker. For that, I recommend installing xdg-desktop-portal-gtk alongside XDPH.
+    xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
 
     # fix https://github.com/ryan4yin/nix-config/issues/10
     security.pam.services.swaylock = {};
