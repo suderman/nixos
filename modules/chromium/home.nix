@@ -47,6 +47,15 @@ in {
       '')
     ];
 
+    # Remap keyboard
+    modules.keyd.applications = {
+      chromium-browser = {
+        "alt.[" = "C-S-tab";
+        "alt.]" = "macro(C-tab)";
+        "alt.f" = "C-f";
+      };
+    };
+
   };
 
 }
