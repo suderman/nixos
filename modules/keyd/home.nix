@@ -1,66 +1,41 @@
-# services.keyd.enable = true;
+# modules.keyd.enable = true;
 { config, lib, pkgs, ... }: 
 
 with pkgs; 
 
 let 
   cfg = config.modules.keyd;
+  inherit (lib) mkIf;
+  inherit (this.lib) mkShellScript;
 
 in {
   options = {
     modules.keyd.enable = lib.options.mkEnableOption "keyd"; 
   };
 
-  config = lib.mkIf cfg.enable {
+  config = mkIf cfg.enable {
 
-    # home.packages = [ pkgs.keyd ];
+    # User service runs keyd-application-mapper
+    systemd.user.services.keyd = {
+      Unit = {
+        Description = "Keyd Application Mapper";
+        After = [ "graphical-session.target" ];
+        Requires = [ "graphical-session.target" ];
+      };
+      Install.WantedBy = [ "default.target" ];
+      Service = {
+        Type = "simple";
+        Restart = "always";
+        ExecStart = mkShellScript {
+          inputs = [ pkgs.keyd ];
+          text = "keyd-application-mapper";
+        };
+      };
+    };
 
+    # Configuration for each application
     xdg.configFile = {
-      "keyd/app.conf".text = ''
-
-        [alacritty]
-
-        alt.] = macro(C-g n)
-        alt.[ = macro(C-g p)
-
-        [chromium]
-
-        alt.[ = C-S-tab
-        alt.] = macro(C-tab)
-
-        [org-gnome-nautilus]
-
-        alt.enter = f2
-        alt.r = f2
-        alt.i = C-i
-
-        #[org-wezfurlong-wezterm]
-
-        #leftalt = layer(meta_cmd)
-
-        [firefox]
-
-        # control.a = home
-        # control.e = end
-        # control.f = right
-        # control.b = left
-        # control.w = C-right
-        alt.f = C-f
-
-        [geary]
-
-        [telegramdesktop]
-
-        [1password]
-
-        [fluffychat]
-
-        [gimp-2-9]
-
-        [obsidian]
-
-        [slack]
-      '';
+      "keyd/app.conf".text = builtins.readFile ./app.conf;
     };
 
   };

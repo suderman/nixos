@@ -43,16 +43,6 @@ in {
     # Install keyd package
     environment.systemPackages = [ pkgs.keyd ];
 
-    # users = {
-    #
-    #   # Create keyd group
-    #   groups.keyd.name = "keyd";
-    #
-    #   # Add users to the keyd group
-    #   users = extraGroups this.users [ "keyd" ];
-    #
-    # };
-
     # Enable systemd service with keyboard configuration
     services.keyd = {
       enable = true;
@@ -61,11 +51,17 @@ in {
       };
     };
 
-    # systemd.services.keyd.serviceConfig.RestrictSUIDSGID = mkForce false;
+    # https://github.com/NixOS/nixpkgs/issues/290161
+    systemd.services.keyd.serviceConfig.CapabilityBoundingSet = [ "CAP_SETGID" ];
+
+    # Create keyd group
+    users.groups.keyd = {};
+
+    # Add flake's users to the keyd group
+    users.users = extraGroups this.users [ "keyd" ];
 
     # Add quirks to make touchpad's "disable-while-typing" work properly
     environment.etc."libinput/local-overrides.quirks" = mkIf cfg.quirks { source = ./local-overrides.quirks; };
-
 
   };
 
