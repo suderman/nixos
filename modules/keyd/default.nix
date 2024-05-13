@@ -4,7 +4,7 @@
 let 
 
   cfg = config.modules.keyd;
-  inherit (lib) mkIf mkOption types;
+  inherit (lib) mkIf mkForce mkOption types;
   inherit (lib.options) mkEnableOption;
   inherit (this.lib) extraGroups;
 
@@ -40,6 +40,20 @@ in {
 
   config = mkIf cfg.enable {
 
+    # Install keyd package
+    environment.systemPackages = [ pkgs.keyd ];
+
+    # users = {
+    #
+    #   # Create keyd group
+    #   groups.keyd.name = "keyd";
+    #
+    #   # Add users to the keyd group
+    #   users = extraGroups this.users [ "keyd" ];
+    #
+    # };
+
+    # Enable systemd service with keyboard configuration
     services.keyd = {
       enable = true;
       keyboards = cfg.externalKeyboards // { 
@@ -47,8 +61,11 @@ in {
       };
     };
 
+    # systemd.services.keyd.serviceConfig.RestrictSUIDSGID = mkForce false;
+
     # Add quirks to make touchpad's "disable-while-typing" work properly
     environment.etc."libinput/local-overrides.quirks" = mkIf cfg.quirks { source = ./local-overrides.quirks; };
+
 
   };
 

@@ -13,7 +13,7 @@ in {
 
   config = lib.mkIf cfg.enable {
 
-    home.packages = [ pkgs.keyd ];
+    # home.packages = [ pkgs.keyd ];
 
     xdg.configFile = {
       "keyd/app.conf".text = ''
@@ -45,7 +45,7 @@ in {
         # control.f = right
         # control.b = left
         # control.w = C-right
-        # alt.f = C-f
+        alt.f = C-f
 
         [geary]
 
