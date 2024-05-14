@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }: let 
+{ config, lib, pkgs, this, ... }: let 
 
   cfg = config.modules.hyprland;
   inherit (lib) mkIf;
@@ -12,7 +12,8 @@ in {
       wdisplays
     ];
 
-    services.kanshi = {
+    # services.kanshi.settings doesn not exist until 24.05
+    services.kanshi = if this.stable then {} else {
       enable = true;
       systemdTarget = "hyprland-session.target";
       settings = [{ 
