@@ -89,7 +89,8 @@ in {
           on-click = systemMonitor;
         };
         temperature = {
-          thermal-zone = 2;
+          # thermal-zone = 2;
+          thermal-zone = 1;
           critical-threshold = 80;
           format-critical = "{temperatureC}°C ";
           format = "{temperatureC}°C ";

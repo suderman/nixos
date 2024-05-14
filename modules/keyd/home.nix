@@ -10,6 +10,7 @@ in {
 
   options.modules.keyd = {
     enable = lib.options.mkEnableOption "keyd"; 
+    service = lib.options.mkEnableOption "keyd-application-mapper"; 
     applications = mkOption {
       type = types.anything;
       default = {};
@@ -17,24 +18,6 @@ in {
   };
 
   config = mkIf cfg.enable {
-
-    # User service runs keyd-application-mapper
-    systemd.user.services.keyd = {
-      Unit = {
-        Description = "Keyd Application Mapper";
-        After = [ "graphical-session.target" ];
-        Requires = [ "graphical-session.target" ];
-      };
-      Install.WantedBy = [ "default.target" ];
-      Service = {
-        Type = "simple";
-        Restart = "always";
-        ExecStart = mkShellScript {
-          inputs = [ pkgs.keyd ];
-          text = "keyd-application-mapper";
-        };
-      };
-    };
 
     # Configuration for each application
     xdg.configFile = {
@@ -61,6 +44,24 @@ in {
 
       } // cfg.applications );
 
+    };
+
+    # User service runs keyd-application-mapper
+    systemd.user.services = mkIf cfg.service {
+      keyd.Unit = {
+        Description = "Keyd Application Mapper";
+        After = [ "graphical-session.target" ];
+        Requires = [ "graphical-session.target" ];
+      };
+      keyd.Install.WantedBy = [ "default.target" ];
+      keyd.Service = {
+        Type = "simple";
+        Restart = "always";
+        ExecStart = mkShellScript {
+          inputs = [ pkgs.keyd ];
+          text = "keyd-application-mapper";
+        };
+      };
     };
 
   };

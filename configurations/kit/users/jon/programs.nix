@@ -52,4 +52,6 @@ in {
   modules.kitty.enable = true;
   modules.yazi.enable = true;
 
+  modules.keyd.enable = true;
+
 }

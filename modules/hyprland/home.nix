@@ -25,6 +25,9 @@ in {
 
   config = mkIf cfg.enable {
 
+    # If keyd is enabled, also enable systemd service
+    modules.keyd.service = true;
+
     modules.kitty.enable = true;
     # modules.eww.enable = true;
     # modules.waybar.enable = true;
