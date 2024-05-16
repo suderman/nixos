@@ -62,6 +62,10 @@
     hyprland-plugins.url = "github:hyprwm/hyprland-plugins";
     hyprland-plugins.inputs.hyprland.follows = "hyprland";
 
+    # Aylur's Gtk Shell (AGS)
+    # <https://github.com/Aylur/ags
+    ags.url = "github:Aylur/ags";
+
   };
 
   outputs = { self, ... }: let 

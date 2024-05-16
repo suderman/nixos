@@ -10,7 +10,7 @@ let
 
 in {
 
-  imports = ls ./config ++
+  imports = ls { path = ./config; dirsWith = [ "home.nix" ]; } ++
 
     # Flake home-manager module
     # https://github.com/hyprwm/Hyprland/blob/main/nix/hm-module.nix

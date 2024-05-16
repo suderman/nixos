@@ -73,6 +73,9 @@ in {
     # fix https://github.com/ryan4yin/nix-config/issues/10
     security.pam.services.swaylock = {};
 
+    # https://aylur.github.io/ags-docs/config/utils/#authentication
+    security.pam.services.ags = {};
+
   };
 
 }
