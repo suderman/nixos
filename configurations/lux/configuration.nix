@@ -30,7 +30,7 @@
 
   modules.silverbullet.enable = true;
   modules.gitea.enable = true; 
-  modules.ollama.enable = true;
+  # modules.ollama.enable = true;
 
   modules.jellyfin.enable = true;
   modules.plex.enable = true;

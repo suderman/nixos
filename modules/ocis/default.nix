@@ -4,7 +4,7 @@
 let 
 
   # https://github.com/owncloud/ocis/releases
-  version = "5.0.2";
+  version = "5.0.4";
 
   cfg = config.modules.ocis;
   signingKey = "idp-private-key.pem";
@@ -108,6 +108,7 @@ in {
       volumes = [
         "${cfg.dataDir}:/var/lib/ocis"
         "${cfg.dataDir}/config:/etc/ocis"
+        "/etc/localtime:/etc/localtime:ro"
       ];
 
     };
