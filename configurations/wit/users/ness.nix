@@ -10,6 +10,7 @@ in {
     plex-media-player
     plexamp
     telegram-desktop
+    libreoffice
   ];
 
   programs = {
