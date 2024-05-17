@@ -9,7 +9,7 @@ let
   inherit (this.lib) extraGroups;
 
   # https://github.com/home-assistant/core/pkgs/container/home-assistant/versions?filters%5Bversion_type%5D=tagged
-  version = "2024.5.3";
+  version = "2024.5.4";
 
   # https://github.com/zwave-js/zwave-js-ui/pkgs/container/zwave-js-ui/versions?filters%5Bversion_type%5D=tagged
   zwaveVersion = "9.12.0";

@@ -400,6 +400,9 @@ in {
     services.traefik = {
       enable = true;
 
+      # v2.10.6
+      package = pkgs.stable.traefik;
+
       # Required so traefik is permitted to watch docker events
       group = "docker"; 
 
