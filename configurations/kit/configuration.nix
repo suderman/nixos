@@ -1,4 +1,4 @@
-{ config, pkgs, this, inputs, ... }: {
+{ config, pkgs, lib, this, inputs, ... }: {
 
   # Import all *.nix files in this directory
   imports = this.lib.ls ./.;
@@ -16,6 +16,15 @@
   hardware.bluetooth.enable = true;
   services.pipewire.enable = true;
   security.rtkit.enable = true;
+
+  # services.xserver = {
+  #   enable = true;
+  #   desktopManager.xterm.enable = true;
+  #   desktopManager.xfce.enable = true;
+  #   displayManager.defaultSession = "xfce";
+  # };
+  # xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+  # # xdg.portal.enable = lib.mkForce false;
 
   # Memory management
   modules.earlyoom.enable = true;

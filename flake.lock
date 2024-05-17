@@ -242,16 +242,18 @@
         "hyprcursor": "hyprcursor",
         "hyprlang": "hyprlang",
         "hyprwayland-scanner": "hyprwayland-scanner",
-        "nixpkgs": "nixpkgs_2",
+        "nixpkgs": [
+          "nixpkgs-unstable"
+        ],
         "systems": "systems_3",
         "xdph": "xdph"
       },
       "locked": {
-        "lastModified": 1715972045,
-        "narHash": "sha256-BxVQCuA+aJ033EM8P70qZdqZHUdAuPFwP0eN+K26FIc=",
+        "lastModified": 1715972853,
+        "narHash": "sha256-medEslUynA9952HeEdYNxGYZyyMz+hEEgV6RV31pvvc=",
         "ref": "refs/heads/main",
-        "rev": "fe23d2b639f13db852adb5f10812f308b38d7e9b",
-        "revCount": 4715,
+        "rev": "2ead1fd22103ce065661555513bace5897083ded",
+        "revCount": 4717,
         "submodules": true,
         "type": "git",
         "url": "https://github.com/hyprwm/Hyprland"
@@ -468,22 +470,6 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1715787315,
-        "narHash": "sha256-cYApT0NXJfqBkKcci7D9Kr4CBYZKOQKDYA23q8XNuWg=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "33d1e753c82ffc557b4a585c77de43d4c922ebb5",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixos-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs_3": {
-      "locked": {
         "lastModified": 1715668745,
         "narHash": "sha256-xp62OkRkbUDNUc6VSqH02jB0FbOS+MsfMb7wL1RJOfA=",
         "owner": "NixOS",
@@ -500,11 +486,11 @@
     },
     "nur": {
       "locked": {
-        "lastModified": 1715971582,
-        "narHash": "sha256-B/Bkw5Ioj1ej/dg41iIE3vblx9fhuW/Y6opOMRUm7Sg=",
+        "lastModified": 1715978753,
+        "narHash": "sha256-oz7AZNGTMf131b0c2fAF8o6XD6mENx8a7VFQ33/ZtbQ=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "7612bdeb4817ad336e583519e69977a9aafbf8cb",
+        "rev": "31ea80cf3f4da3ed081964a513508741aea3ed7d",
         "type": "github"
       },
       "original": {
@@ -529,7 +515,7 @@
         "nix-flatpak": "nix-flatpak",
         "nix-index-database": "nix-index-database",
         "nix-index-database-unstable": "nix-index-database-unstable",
-        "nixpkgs": "nixpkgs_3",
+        "nixpkgs": "nixpkgs_2",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "nur": "nur"
       }
