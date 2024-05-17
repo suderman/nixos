@@ -23,6 +23,11 @@ in {
     xdg.configFile = {
       "keyd/app.conf".source = ini.generate "app.conf" ( {
 
+        "*" = {
+          "meta.a" = "C-a";
+          "meta.z" = "C-z";
+        };
+
         firefox = {
           "alt.f" = "C-f";
           "alt.l" = "C-l";

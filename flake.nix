@@ -72,13 +72,13 @@
     
     inherit (self) outputs inputs; 
     inherit (builtins) hasAttr mapAttrs length;
-    inherit (this'.lib) mkAttrs mkUsers mkAdmins mkModules;
+    inherit (this'.lib) lsAdmins lsUsers mkAttrs mkConfigurations mkModules;
 
     # Replace stable inputs with unstable (if available)
     unstableInputs = mapAttrs (k: v: if hasAttr "${k}-unstable" inputs then inputs."${k}-unstable" else v) inputs;
 
     # Initialize this configuration with inputs and binary caches
-    this' = import ./. { inherit inputs; caches = [
+    this' = import ./this.nix { inherit inputs; caches = [
       "https://suderman.cachix.org" "suderman.cachix.org-1:8lYeb2gOOVDPbUn1THnL5J3/L4tFWU30/uVPk7sCGmI="
       "https://nix-community.cachix.org" "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "https://hyprland.cachix.org" "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
@@ -169,14 +169,14 @@
   in {
 
     # NixOS configurations found in configurations directory
-    nixosConfigurations = mkAttrs ./configurations (
+    nixosConfigurations = mkConfigurations (
 
       # Make configuration for each subdirectory 
-      hostName: let
-        this = import ./networks ( this' // import ./configurations/${hostName} );
+      path: let
+        this = import ./networks/this.nix ( this' // import path );
       in mkConfiguration ( this // { 
-        users = mkUsers this;
-        admins = mkAdmins this;
+        users = lsUsers this;
+        admins = lsAdmins this;
         modules = mkModules this;
         inputs = if this.stable then inputs else unstableInputs;
       })

@@ -1,6 +1,6 @@
 # Attribute set of NixOS configurations found in each directory
 { inputs, caches ? [], ... }: let
-  inherit (lib) ls mkAttrs mkHomeAttrs mkList mkUsers;
+  inherit (lib) ls mkAttrs mkUsers mkList lsUsers configurationNameFromPath userNameFromPath;
 
   # Personal lib
   lib = {
@@ -35,7 +35,7 @@
       fromPath = path: fromAttrs { inherit path; };
 
       # Return list of directory/file names if asPath is false, otherwise list of absolute paths
-      fromAttrs = { path, dirsWith ? [ "default.nix" ], filesExcept ? [ "default.nix" "configuration.nix" "home.nix" ], asPath ? true }: unique
+      fromAttrs = { path, dirsWith ? [ "default.nix" ], filesExcept ? [ "flake.nix" "default.nix" "configuration.nix" "home.nix" "this.nix" ], asPath ? true }: unique
         (if ! pathExists path then [] else # If path doesn't exist, return an empty list
           (if hasSuffix ".nix" path then [ path ] else # If path is a nix file, return that path in a list
             (if dirsWith == false then [] else (dirNames path dirsWith asPath)) ++ # No subdirs if dirsWith is false, 
@@ -96,22 +96,40 @@
       else {}
     );
 
-    # Like mkAttrs but only includes user nix files or directories with home.nix
-    mkHomeAttrs = path: fn: mkAttrs ( ls { 
-      inherit path; 
-      asPath = false; dirsWith = [ "home.nix" ]; 
-    }) fn;
+    # Convert a user path to a user name
+    userNameFromPath = path: let
+      inherit (builtins) toString;
+      inherit (inputs.nixpkgs.lib) removeSuffix;
+    in baseNameOf( removeSuffix ".nix" (removeSuffix "/home.nix" (toString path) ) );
+
+    # Convert a configuration path to a configuration name
+    configurationNameFromPath = path: let
+      inherit (builtins) toString;
+      inherit (inputs.nixpkgs.lib) removeSuffix;
+    in baseNameOf( removeSuffix "/this.nix" (removeSuffix "/configuration.nix" (removeSuffix "/default.nix" (toString path) ) ) );
+
+    # Like mkAttrs but only includes paths to configuration directories with this.nix
+    mkConfigurations = fn: builtins.listToAttrs ( map 
+      ( path: { name = configurationNameFromPath path; value = (fn path); } )
+      ( ls { path = ./configurations; asPath = true; dirsWith = [ "this.nix" ]; } )
+    );
+
+    # Like mkAttrs but only includes paths to user nix files or user directories with home.nix
+    mkUsers = hostName: fn: builtins.listToAttrs ( map
+      ( path: { name = userNameFromPath path; value = (fn path); } )
+      ( ls { path = ./configurations/${hostName}/users; asPath = true; dirsWith = [ "home.nix" ]; } )
+    );  
 
     # List of users for a particular nixos configuration
-    mkUsers = this: mkList( ls { 
+    lsUsers = this: mkList( ls { 
       path = ./configurations/${this.hostName}/users; 
       asPath = false; dirsWith = [ "home.nix" ]; 
     });
 
     # List of users with a public key in the secrets directory
-    mkAdmins = this: let 
+    lsAdmins = this: let 
       inherit (this.inputs.nixpkgs.lib) attrNames intersectLists remove; 
-    in intersectLists ( mkUsers this ) (
+    in intersectLists ( lsUsers this ) (
       remove "all" ( attrNames (import ./secrets/keys).users )
     );
 
@@ -146,14 +164,14 @@
       # Include shared modules followed by dir-specific modules 
       in
         # Home Manager modules are organized under each user's name
-        mkHomeAttrs ./configurations/${hostName}/users (
-          user: 
+        mkUsers hostName (
+          userPath: let userName = userNameFromPath userPath; in 
             ls { path = ./modules; dirsWith = [ "home.nix" ]; } ++ # home-manager modules
             ls ./configurations/all/users/all/home.nix ++ # shared home-manager configuration for all users
-            ls ./configurations/all/users/${user} ++ # shared home-manager configuration for one user
-            ls ./configurations/all/users/${user}/home.nix ++
-            ls ./configurations/${hostName}/users/${user} ++ # specific home-manager configuration for one user
-            ls ./configurations/${hostName}/users/${user}/home.nix ++
+            ls ./configurations/all/users/${userName} ++ # shared home-manager configuration for one user
+            ls ./configurations/all/users/${userName}/home.nix ++
+            ls ./configurations/${hostName}/users/${userName} ++ # specific home-manager configuration for one user
+            ls ./configurations/${hostName}/users/${userName}/home.nix ++
             [ ./secrets ] ++ nix-cache ++ nix-index.home # secrets, keys, cache and index
 
         # NixOS modules are organization under "root"

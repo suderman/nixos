@@ -187,7 +187,12 @@ in {
     "SUPER, W, killactive,"
     "SUPERSHIFT, Q, exit,"
     "SUPER, E, exec, nautilus"
-    "SUPER, F, exec, firefox"
+
+    "SUPER, B, exec, firefox"
+    "SUPER SHIFT, B, exec, firefox --private-window"
+
+    "SUPER ALT, B, exec, chromium-browser"
+    "SUPER SHIFT ALT, B, exec, chromium-browser --incognito"
 
     "SUPER, T, exec, ${newWindowInGroup}"
 
@@ -213,8 +218,8 @@ in {
     "SUPER, P, pseudo"
     "SUPER, O, togglefloating"
     "SUPER, P, pin"
-    "SUPER, Z, fullscreen, 1"
-    "SUPER ALT, Z, fullscreen, 0"
+    "SUPER, F, fullscreen, 1"
+    "SUPER ALT, F, fullscreen, 0"
 
     # "numlock, exec, sleep 1 && hyprctl dispatch dpms off"
     # "f9, exec, sleep 1 && hyprctl dispatch dpms off"
