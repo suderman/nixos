@@ -47,7 +47,7 @@ in {
   general = {
     # layout = mkDefault "master";
     layout = mkDefault "dwindle";
-    no_cursor_warps = mkDefault false;
+    # no_cursor_warps = mkDefault false;
     resize_on_border = mkDefault true;
   };
 
@@ -68,7 +68,7 @@ in {
     enable_swallow = mkDefault true;
     swallow_regex = mkDefault "^(Alacritty|kitty|footclient)$";
     focus_on_activate = mkDefault true;
-    cursor_zoom_factor = mkDefault 1;
+    # cursor_zoom_factor = mkDefault 1;
   };
 
   binds = {
