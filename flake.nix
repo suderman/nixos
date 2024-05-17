@@ -110,11 +110,12 @@
         (final: prev: { inherit this; })
         (final: prev: { this = import ./overlays/lib { inherit final prev; }; })
 
-        # Unstable nixpkgs channel
-        (final: prev: { unstable = import this.inputs.nixpkgs-unstable { inherit system config; }; })
+        # Unstable/stable nixpkgs channel
+        (final: prev: { unstable = import inputs.nixpkgs-unstable { inherit system config; }; })
+        (final: prev: { stable = import inputs.nixpkgs { inherit system config; }; })
 
-        # # Nix User Repositories 
-        # (final: prev: { nur = import this.inputs.nur { pkgs = final; nurpkgs = final; }; })
+        # Nix User Repositories 
+        (final: prev: { nur = import this.inputs.nur { pkgs = final; nurpkgs = final; }; })
 
         # Package overrides
         (final: prev: mkAttrs ./overlays/mods ( name: import ./overlays/mods/${name} { inherit final prev; } ))
