@@ -5,6 +5,10 @@ const audio = await Service.import("audio")
 const battery = await Service.import("battery")
 const systemtray = await Service.import("systemtray")
 
+import { NotificationPopups } from "./notificationPopups.js"
+import { applauncher } from "./applauncher.js"
+
+
 const date = Variable("", {
     poll: [1000, 'date "+%H:%M:%S %b %e."'],
 })
@@ -205,10 +209,23 @@ function Bar(monitor = 0) {
     })
 }
 
+Utils.timeout(100, () => Utils.notify({
+    summary: "Notification Popup Example",
+    iconName: "info-symbolic",
+    body: "Lorem ipsum dolor sit amet, qui minim labore adipisicing "
+        + "minim sint cillum sint consectetur cupidatat.",
+    actions: {
+        "Cool": () => print("pressed Cool"),
+    },
+}))
+
 App.config({
-    style: "./style.css",
+    // style: "./style.css",
+    style: App.configDir + "/style.css",
     windows: [
         Bar(),
+        NotificationPopups(),
+        applauncher
 
         // you can call it, for each monitor
         // Bar(0),

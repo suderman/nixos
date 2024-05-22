@@ -67,7 +67,7 @@ in {
     key_press_enables_dpms = mkDefault true;
     enable_swallow = mkDefault true;
     swallow_regex = mkDefault "^(Alacritty|kitty|footclient)$";
-    focus_on_activate = mkDefault true;
+    focus_on_activate = mkDefault false;
     # cursor_zoom_factor = mkDefault 1;
   };
 
