@@ -1,11 +1,12 @@
 # Nvidia GeForce RTX 4070 Ti Super
-{ config, pkgs, inputs, ... }: {
+{ config, pkgs, lib, inputs, ... }: {
 
   # https://github.com/NixOS/nixos-hardware/tree/master/common/gpu/nvidia
   imports = [ inputs.hardware.nixosModules.common-gpu-nvidia-nonprime ];
 
   boot.initrd.kernelModules = [ "nvidia" ];
   boot.extraModulePackages = [ config.boot.kernelPackages.nvidia_x11 ];
+  # boot.kernelParams = [ "nvidia-drm.modeset=1" "nvidia-drm.fbdev=1" ];
 
   # Good graphics
   hardware.nvidia = {
@@ -37,7 +38,19 @@
     nvidiaSettings = true;
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
+    # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/os-specific/linux/nvidia-x11/default.nix
     package = config.boot.kernelPackages.nvidiaPackages.production;
+
+    # https://raw.githubusercontent.com/aaronp24/nvidia-versions/master/nvidia-versions.txt
+    # package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
+    #   version = "555.42.02";
+    #   sha256_64bit = "sha256-k7cI3ZDlKp4mT46jMkLaIrc2YUx1lh1wj/J4SVSHWyk=";
+    #   sha256_aarch64 = lib.fakeSha256;
+    #   openSha256 = "sha256-rtDxQjClJ+gyrCLvdZlT56YyHQ4sbaL+d5tL4L4VfkA=";
+    #   settingsSha256 = "sha256-rtDxQjClJ+gyrCLvdZlT56YyHQ4sbaL+d5tL4L4VfkA=";
+    #   persistencedSha256 = lib.fakeSha256;
+    # };
+
   };
 
   hardware.opengl = {
@@ -48,12 +61,18 @@
 
   hardware.nvidia-container-toolkit.enable = true;
   virtualisation = {
+    docker.enableNvidia = true;
     docker.package = pkgs.docker_25; # CDI is feature-gated and only available from Docker 25 and onwards
     docker.daemon.settings.features.cdi = true;
   };
 
+  # libnvidia-container does not support cgroups v2 (prior to 1.8.0)
+  # https://github.com/NVIDIA/nvidia-docker/issues/1447
+  systemd.enableUnifiedCgroupHierarchy = false;
+
   environment.systemPackages = with pkgs; [ 
     nvitop
   ];
+
 
 }
