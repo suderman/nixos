@@ -63,7 +63,10 @@ in {
       # Map volumes to host
       volumes = [ 
         "${cfg.dataDir}/webui:/app/backend/data"
+        "${this.ca}:/app/ca.crt"
       ];
+
+      environment.REQUESTS_CA_BUNDLE = "/app/ca.crt";
 
       # Env variables
       environmentFiles = [ 
