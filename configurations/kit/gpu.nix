@@ -5,7 +5,8 @@
   imports = [ inputs.hardware.nixosModules.common-gpu-nvidia-nonprime ];
 
   boot.initrd.kernelModules = [ "nvidia" ];
-  boot.extraModulePackages = [ config.boot.kernelPackages.nvidia_x11 ];
+  # boot.extraModulePackages = [ config.boot.kernelPackages.nvidia_x11 ];
+  boot.extraModulePackages = [ config.boot.kernelPackages.nvidia_x11_beta ];
   # boot.kernelParams = [ "nvidia-drm.modeset=1" "nvidia-drm.fbdev=1" ];
 
   # Good graphics
@@ -39,7 +40,8 @@
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
     # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/os-specific/linux/nvidia-x11/default.nix
-    package = config.boot.kernelPackages.nvidiaPackages.production;
+    # package = config.boot.kernelPackages.nvidiaPackages.production;
+    package = config.boot.kernelPackages.nvidiaPackages.beta;
 
     # https://raw.githubusercontent.com/aaronp24/nvidia-versions/master/nvidia-versions.txt
     # package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
