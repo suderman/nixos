@@ -1,5 +1,6 @@
 window#waybar {
   background-color: #11111b;
+  /* background-color: @theme_base_color; */
   color: #f5e0dc;
   border-bottom: none;
 }

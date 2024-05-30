@@ -180,9 +180,30 @@
     '';
   };
 
+  toggleMoveMode = mkShellScript {
+    inputs = with pkgs; [ coreutils hyprland ]; text = ''
+      if [[ -e /tmp/movemode ]]; then 
+        hyprctl keyword unbind , mouse:272
+        hyprctl keyword unbind , mouse:273
+        hyprctl keyword unbind , mouse:274
+        rm -f /tmp/movemode
+      else
+        hyprctl keyword bindm , mouse:272, movewindow
+        hyprctl keyword bindm , mouse:273, resizewindow
+        hyprctl keyword bind , mouse:274, exec, ${toggleGroupOrLock}
+        touch /tmp/movemode
+      fi
+    '';
+  };
+
 in {
 
   bind = [
+
+    "SUPER, F6, exec, ${toggleMoveMode}"
+    "SHIFT, F6, exec, ${toggleMoveMode}"
+    "ALT, F6, exec, ${toggleMoveMode}"
+
     "SUPER, Return, exec, kitty"
     "SUPER, W, killactive,"
     "SUPERSHIFT, Q, exit,"

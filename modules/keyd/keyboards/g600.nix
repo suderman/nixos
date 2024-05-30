@@ -11,7 +11,7 @@
       f5 = "M-A-left";
 
       # Far-right mouse button is command layer
-      f6 = "layer(meta)";
+      # f6 = "layer(meta)";
 
       # Middle lower (G7) is meta-leftclick (move windows)
       f7 = "M-leftmouse";

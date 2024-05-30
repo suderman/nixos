@@ -24,6 +24,7 @@ in {
     "waybar"
     "mako"
     "swww-daemon"
+    "hypridle"
   ];
 
   input = {
