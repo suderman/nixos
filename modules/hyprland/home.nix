@@ -70,6 +70,9 @@ in {
       hyprland = "Hyprland";
     };
 
+    # gtk.theme.package = pkgs.dracula-theme;
+    # gtk.theme.name = "dracula";
+
     wayland.windowManager.hyprland = {
       enable = true;
       plugins = [ 
