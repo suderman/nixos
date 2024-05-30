@@ -27,6 +27,10 @@ in {
 
     # If keyd is enabled, also enable systemd service
     modules.keyd.service = true;
+    systemd.user.services.keyd.Unit = {
+      After = [ "hyprland-session.target" ];
+      Requires = [ "hyprland-session.target" ];
+    };
 
     modules.kitty.enable = true;
     # modules.eww.enable = true;

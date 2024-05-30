@@ -3,7 +3,7 @@
 
   cfg = config.modules.keyd;
   ini = pkgs.formats.ini {};
-  inherit (lib) mkIf mkOption types;
+  inherit (lib) mkDefault mkIf mkOption types;
   inherit (this.lib) mkShellScript;
 
 in {
@@ -55,8 +55,8 @@ in {
     systemd.user.services = mkIf cfg.service {
       keyd.Unit = {
         Description = "Keyd Application Mapper";
-        After = [ "graphical-session.target" ];
-        Requires = [ "graphical-session.target" ];
+        After = mkDefault [ "graphical-session.target" ];
+        Requires = mkDefault [ "graphical-session.target" ];
       };
       keyd.Install.WantedBy = [ "default.target" ];
       keyd.Service = {
