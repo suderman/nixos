@@ -37,7 +37,14 @@ in {
 
     modules.traefik = { 
       enable = true;
-      routers.${cfg.name} = "http://127.0.0.1:${toString cfg.port}";
+      routers = let router = {
+        hostName = config.modules.traefik.hostName cfg.name;
+        url = "http://127.0.0.1:${toString cfg.port}";
+        public = false;
+      }; in {
+        jellyfin-websecure = router;
+        jellyfin-web = router // { tls = false; };
+      };
     };
 
   };
