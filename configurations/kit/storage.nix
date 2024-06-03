@@ -21,12 +21,56 @@ in {
   fileSystems."/".options = btrfs;
   fileSystems."/nix".options = btrfs;
 
+  # Additional SSD disk
+  # -------------------------------------------------------------------------
+  # Become root, insert disk and lookup the device name:
+  # > sudo -s
+  # > lsblk -f
+  #
+  # Assuming the disk is "nvme1n1", create the parition table and new partition:
+  # > parted -s /dev/nvme1n1 mklabel gpt
+  # > parted -s /dev/nvme1n1 mkpart data btrfs 1MiB 100%
+  #
+  # Verify it worked and take note of the partition name and UUID. 
+  # Update the device attribute in the configuration below to match the UUID.
+  # > lsblk -f
+  #
+  # Assuming the parition is "nvme1n1p1", format the partition as btrfs:
+  # > mkfs.btrfs -fL data /dev/nvme1n1p1
+  #
+  # Create the mountpoint and mount the partition:
+  # > mkdir -p /mnt/ssd
+  # > mount /dev/nvme1n1p1 /mnt/ssd
+  #
+  # Create two subvolumes:
+  # > btrfs subvolume create /mnt/ssd/snapshots
+  # > btrfs subvolume create /mnt/ssd/data
+  #
+  fileSystems."/mnt/ssd" = {
+    fsType = "btrfs"; 
+    device = "/dev/disk/by-uuid/be48bf4a-6fc1-492c-bdf9-4e361c912e8c";
+    options = btrfs ++ automount;
+  };
+
+  fileSystems."/data" = {
+    device = "/mnt/ssd/data"; 
+    options = bind ++ automount;
+  };
+
   # Snapshots & backups
   modules.btrbk = {
     enable = true;
+    snapshots = {
+      "/mnt/ssd".subvolume."data" = {};
+    };
     backups = with config.networking; {
       "/nix".target."ssh://eve/backups/${hostName}" = {};
     };
+  };
+  
+  # Additional filesystems in motd
+  programs.rust-motd.settings.filesystems = {
+    ssd = "/mnt/ssd";
   };
 
 }
