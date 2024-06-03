@@ -9,6 +9,9 @@
   
 let 
 
+  # https://hub.docker.com/r/tessypowder/backblaze-personal-wine/tags
+  version = "1.9";
+
   # https://github.com/JonathanTreffler/backblaze-personal-wine-container
   cfg = config.modules.backblaze;
   inherit (config.modules) traefik;
@@ -39,7 +42,7 @@ in {
 
     # Docker container
     virtualisation.oci-containers.containers."backblaze" = {
-      image = "tessypowder/backblaze-personal-wine:latest";
+      image = "tessypowder/backblaze-personal-wine:v${version}";
       autoStart = true;
 
       # Traefik labels
