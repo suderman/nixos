@@ -54,7 +54,8 @@ in {
     services.ollama = {
       enable = true;
       package = pkgs.unstable.ollama;
-      listenAddress = "0.0.0.0:${toString cfg.port}";
+      host = "0.0.0.0";
+      port = toString cfg.port;
     };
 
     virtualisation.oci-containers.containers.open-webui = {
