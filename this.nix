@@ -168,9 +168,9 @@
           userPath: let userName = userNameFromPath userPath; in 
             ls { path = ./modules; dirsWith = [ "home.nix" ]; } ++ # home-manager modules
             ls ./configurations/all/users/all/home.nix ++ # shared home-manager configuration for all users
-            ls ./configurations/all/users/${userName} ++ # shared home-manager configuration for one user
+            ls ./configurations/all/users/${userName}.nix ++ # shared home-manager configuration for one user
             ls ./configurations/all/users/${userName}/home.nix ++
-            ls ./configurations/${hostName}/users/${userName} ++ # specific home-manager configuration for one user
+            ls ./configurations/${hostName}/users/${userName}.nix ++ # specific home-manager configuration for one user
             ls ./configurations/${hostName}/users/${userName}/home.nix ++
             [ ./secrets ] ++ nix-cache ++ nix-index.home # secrets, keys, cache and index
 

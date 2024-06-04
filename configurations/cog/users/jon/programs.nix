@@ -19,7 +19,7 @@ in {
 
     beeper tdesktop slack
     isy lapce micro quickemu xorg.xeyes
-    joypixels jetbrains-mono
+    jetbrains-mono
     gst_all_1.gst-libav
     libsForQt5.kdenlive
 

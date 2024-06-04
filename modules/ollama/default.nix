@@ -51,11 +51,12 @@ in {
       group = "ollama";
     };
 
-    services.ollama = {
+    services.ollama = ( 
+      if this.stable then { listenAddress = "0.0.0.0:${toString cfg.port}"; } 
+      else { host = "0.0.0.0"; port = cfg.port; }
+    ) // {
       enable = true;
-      package = pkgs.unstable.ollama;
-      host = "0.0.0.0";
-      port = toString cfg.port;
+      package = pkgs.ollama;
     };
 
     virtualisation.oci-containers.containers.open-webui = {

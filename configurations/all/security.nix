@@ -17,25 +17,16 @@ in {
     '';
 
     # Increase open file limit for sudoers
-    pam = let 
-
-      loginLimits = [
-        { domain = "@wheel"; item = "nofile"; type = "soft"; value = "524288"; }
-        { domain = "@wheel"; item = "nofile"; type = "hard"; value = "1048576"; }
-      ]; 
+    pam.loginLimits = [
+      { domain = "@wheel"; item = "nofile"; type = "soft"; value = "524288"; }
+      { domain = "@wheel"; item = "nofile"; type = "hard"; value = "1048576"; }
+    ]; 
 
     # Passwordless sudo when SSH'ing with keys
-    in if this.stable then {
-      inherit loginLimits;
-      enableSSHAgentAuth = true;
-
-    } else {
-      inherit loginLimits;
-      sshAgentAuth = {
-        enable = true;
-        # https://github.com/NixOS/nixpkgs/issues/31611
-        authorizedKeysFiles = lib.mkForce [ "/etc/ssh/authorized_keys.d/%u" ];
-      };
+    pam.sshAgentAuth = {
+      enable = true;
+      # https://github.com/NixOS/nixpkgs/issues/31611
+      authorizedKeysFiles = lib.mkForce [ "/etc/ssh/authorized_keys.d/%u" ];
     };
 
     # Add CA certificate to system's trusted root store

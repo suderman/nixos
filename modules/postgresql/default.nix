@@ -18,6 +18,7 @@ in {
 
     # 14 was default package as of 22.11
     # 15 is default package as of 23.11
+    # 15 remains default package as of 24.05
     package = mkOption {
       type = types.package;
       default = pkgs.postgresql_14;
@@ -68,7 +69,7 @@ in {
     services.oidentd.enable = true;
 
     # Allow docker containers to connect
-    networking.firewall.allowedTCPPorts = [ config.services.postgresql.port ];
+    networking.firewall.allowedTCPPorts = [ config.services.postgresql.settings.port ];
 
     # Metrics
     services.prometheus = {

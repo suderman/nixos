@@ -7,7 +7,9 @@
   boot.initrd.kernelModules = [ "nvidia" ];
   # boot.extraModulePackages = [ config.boot.kernelPackages.nvidia_x11 ];
   boot.extraModulePackages = [ config.boot.kernelPackages.nvidia_x11_beta ];
-  # boot.kernelParams = [ "nvidia-drm.modeset=1" "nvidia-drm.fbdev=1" ];
+
+  # Fix extra screen
+  # boot.kernelParams = [ "nvidia-drm.fbdev=1" ];
 
   # Good graphics
   hardware.nvidia = {
@@ -61,9 +63,11 @@
     driSupport32Bit = true;
   };
 
+  # Enable dynamic CDI configuration for NVidia devices by running nvidia-container-toolkit on boot
   hardware.nvidia-container-toolkit.enable = true;
+
   virtualisation = {
-    docker.enableNvidia = true;
+    docker.enableNvidia = true; # This is supposedly depecrated, replaced by the hardware line above?
     docker.package = pkgs.docker_25; # CDI is feature-gated and only available from Docker 25 and onwards
     docker.daemon.settings.features.cdi = true;
   };

@@ -12,8 +12,7 @@ in {
       wdisplays
     ];
 
-    # services.kanshi.settings doesn not exist until 24.05
-    services.kanshi = if this.stable then {} else {
+    services.kanshi = {
       enable = true;
       systemdTarget = "hyprland-session.target";
       settings = [{ 

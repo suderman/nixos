@@ -25,9 +25,6 @@ in {
       roles = [ "info" "source" "target" "delete" "snapshot" "send" "receive" ];
     }];
 
-    # Enable compression
-    services.btrbk.extraPackages = if this.stable then [ pkgs.lz4 pkgs.mbuffer ] else [];
-
     services.btrbk.instances = let
 
       shared = {

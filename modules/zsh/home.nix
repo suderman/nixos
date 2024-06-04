@@ -55,10 +55,8 @@ in {
         [[ -e /var/lib/rust-motd/motd ]] && cat /var/lib/rust-motd/motd
       '';
 
-    } // ( if this.stable 
-      then { enableAutosuggestions = true; }
-      else { autosuggestion.enable = true; }
-    );
+      autosuggestion.enable = true;
+    };  
 
     home.packages = [ pkgs.zsh-fzf-tab ];
 

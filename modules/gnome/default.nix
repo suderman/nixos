@@ -17,9 +17,9 @@ in {
   config = mkIf cfg.enable {
 
     services = {
+      libinput.enable = true; # enable touchpad support
       xserver = {
         enable = true;
-        libinput.enable = true; # enable touchpad support
         desktopManager.gnome.enable = true;
         displayManager.gdm.enable = true;
         displayManager.gdm.autoSuspend = true;
