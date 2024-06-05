@@ -209,6 +209,8 @@ in {
     "SUPERSHIFT, Q, exit,"
     "SUPER, E, exec, nautilus"
 
+    "SUPER, Period, exec, 1password"
+
     "SUPER, B, exec, firefox"
     "SUPER SHIFT, B, exec, firefox --private-window"
 
