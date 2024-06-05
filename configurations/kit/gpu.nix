@@ -9,7 +9,7 @@
   boot.extraModulePackages = [ config.boot.kernelPackages.nvidia_x11_beta ];
 
   # Fix extra screen
-  # boot.kernelParams = [ "nvidia-drm.fbdev=1" ];
+  boot.kernelParams = [ "nvidia-drm.fbdev=1" ];
 
   # Good graphics
   hardware.nvidia = {
