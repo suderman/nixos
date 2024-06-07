@@ -31,6 +31,12 @@
     "tag +pwd, class:(1Password), title:(1Password)$"
     "float, tag:pwd"
     "size 1024 768, tag:pwd"
+
+    "tag +pwd_dialog, class:(1Password), title:^(.*)Password — 1Password$"
+    "float, tag:pwd_dialog"
+    "size 1280 340, tag:pwd_dialog"
+    "pin, tag:pwd_dialog"
+
     # "float, class:(1Password), title:(1Password)$"
     # "size 1024 768, class:(1Password), title:(1Password)"
     # "stayfocused,title:^(Quick Access — 1Password)$"
