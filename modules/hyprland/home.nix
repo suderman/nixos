@@ -1,32 +1,24 @@
-# modules.hyprland.enable = true;
+# wayland.windowManager.hyprland.enable = true; 
 { config, lib, pkgs, this, inputs, ... }: 
 
 let 
 
-  cfg = config.modules.hyprland;
+  cfg = config.wayland.windowManager.hyprland;
   inherit (lib) mkIf mkDefault mkMerge mkOption types;
   inherit (lib.options) mkEnableOption;
   inherit (this.lib) destabilize ls mkShellScript;
 
 in {
 
-  imports = ls { path = ./config; dirsWith = [ "home.nix" ]; } ++
+  imports = ls { path = ./programs; dirsWith = [ "home.nix" ]; } ++
 
     # Flake home-manager module
     # https://github.com/hyprwm/Hyprland/blob/main/nix/hm-module.nix
     [ inputs.hyprland.homeManagerModules.default ];
 
-  options.modules.hyprland = with types; {
-    enable = mkEnableOption "hyprland"; 
-    nvidia = mkEnableOption "hyprland"; 
-    preSettings = mkOption { type = anything; default = {}; };
-    settings = mkOption { type = anything; default = {}; };
-  };
-
   config = mkIf cfg.enable {
 
-    # If keyd is enabled, also enable systemd service
-    modules.keyd.service = true;
+    # If keyd is used, also update systemd target
     systemd.user.services.keyd.Unit = {
       After = [ "hyprland-session.target" ];
       Requires = [ "hyprland-session.target" ];
@@ -48,7 +40,6 @@ in {
       # ncpamixer
 
       font-awesome
-      firefox
 
       gnome.nautilus
       wezterm
@@ -78,7 +69,9 @@ in {
     # gtk.theme.name = "dracula";
 
     wayland.windowManager.hyprland = {
-      enable = true;
+      systemd.variables = ["--all"];
+      systemd.enableXdgAutostart = true;
+
       plugins = [ 
         # inputs.hyprland-plugins.packages.${pkgs.system}.hyprbars
         # inputs.hyprland-plugins.packages.${pkgs.system}.hyprexpo 
@@ -90,15 +83,7 @@ in {
           inherit lib this; 
           pkgs = pkgs // { inherit (inputs.hyprland.packages.${pkgs.system}) hyprland; };
         };
-        mainSettings = ( ls { path = ./settings; filesExcept = [ "default.nix" "nvidia.nix" ]; } );  
-        nvidiaSettings = if cfg.nvidia then [ ./settings/nvidia.nix ] else []; 
-
-      in mkMerge (
-        [ cfg.preSettings ] ++  
-        ( map ( f: import f args ) mainSettings ) ++
-        ( map ( f: import f args ) nvidiaSettings ) ++
-        [ cfg.settings ]
-      );
+      in mkMerge ( map ( f: import f args ) ( ls ./settings ) );
 
       # extraConfig = builtins.readFile ./hyprland.conf + "\n\n" + ''
       extraConfig = ''

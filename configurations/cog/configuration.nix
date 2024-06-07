@@ -53,7 +53,6 @@
     # CPU_SCALING_GOVERNOR_ON_BATTERY = "powersave";
     # START_CHARGE_THRESH_BAT0 = 90;
     # STOP_CHARGE_THRESH_BAT0 = 97;
-    # RUNTIME_PM_ON_BAT = "auto";
   };
   services.logind = {
     lidSwitch = "suspend";
@@ -65,12 +64,13 @@
   modules.earlyoom.enable = true;
 
   # Keyboard control
-  modules.keyd = {
+  services.keyd = {
     enable = true;
     quirks = true;
-    keyboard = config.modules.keyd.keyboards.framework;
+    keyboard = config.services.keyd.internalKeyboards.framework;
   };
-  modules.ydotool.enable = true;
+
+  programs.hyprland.enable = true;
 
   modules.garmin.enable = true;
   modules.sunshine.enable = false;

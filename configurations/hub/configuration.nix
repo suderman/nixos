@@ -11,8 +11,7 @@
   modules.earlyoom.enable = true;
 
   # Keyboard control
-  modules.keyd.enable = true;
-  modules.ydotool.enable = true;
+  services.keyd.enable = true;
 
   # Apps
   programs.mosh.enable = true;

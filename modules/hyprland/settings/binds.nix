@@ -1,6 +1,6 @@
 { lib, pkgs, this, ... }: let 
 
-  inherit (lib) mkDefault; 
+  inherit (lib) getExe mkDefault; 
   inherit (this.lib) mkShellScript;
 
   toggleGroupOrLock = mkShellScript {
@@ -248,7 +248,8 @@ in {
     # "f9, exec, sleep 1 && hyprctl dispatch dpms off"
     # "f10, exec, sleep 1 && hyprctl dispatch dpms on"
 
-    "SUPER, Space, exec, tofi-drun --drun-launch=true"
+    # "SUPER, Space, exec, tofi-drun --drun-launch=true"
+    "SUPER, Space, exec, ${getExe pkgs.fuzzel}"
 
     # Move focus with mainMod + arrow keys
     "SUPER, H, movefocus, l"

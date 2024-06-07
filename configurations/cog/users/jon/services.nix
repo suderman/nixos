@@ -1,5 +1,8 @@
 { config, lib, pkgs, this, ... }: {
 
+  # Keyboard control
+  services.keyd.enable = true;
+
   # File sync
   modules.ocis.enable = true;
 

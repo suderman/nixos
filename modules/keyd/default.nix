@@ -1,19 +1,19 @@
-# modules.keyd.enable = true;
+# services.keyd.enable = true;
 { config, lib, pkgs, this, ... }: 
 
 let 
 
-  cfg = config.modules.keyd;
+  cfg = config.services.keyd;
   inherit (lib) mkIf mkForce mkOption types;
   inherit (lib.options) mkEnableOption;
   inherit (this.lib) extraGroups;
 
 in {
 
-  options.modules.keyd = {
-    enable = mkEnableOption "keyd"; 
+  options.services.keyd = {
+    # enable = mkEnableOption "keyd"; 
     quirks = mkEnableOption "quirks"; 
-    keyboards = mkOption {
+    internalKeyboards = mkOption {
       type = types.anything;
       default = {
         framework = import ./keyboards/framework.nix;
@@ -45,7 +45,6 @@ in {
 
     # Enable systemd service with keyboard configuration
     services.keyd = {
-      enable = true;
       keyboards = cfg.externalKeyboards // { 
         default = cfg.keyboard; 
       };
@@ -54,14 +53,17 @@ in {
     # https://github.com/NixOS/nixpkgs/issues/290161
     systemd.services.keyd.serviceConfig.CapabilityBoundingSet = [ "CAP_SETGID" ];
 
+    # Add quirks to make touchpad's "disable-while-typing" work properly
+    environment.etc."libinput/local-overrides.quirks" = mkIf cfg.quirks { source = ./local-overrides.quirks; };
+
     # Create keyd group
     users.groups.keyd = {};
 
-    # Add flake's users to the keyd group
-    users.users = extraGroups this.users [ "keyd" ];
+    # Add flake's users to the keyd (and ydotool) group
+    users.users = extraGroups this.users [ "keyd" "ydotool" ];
 
-    # Add quirks to make touchpad's "disable-while-typing" work properly
-    environment.etc."libinput/local-overrides.quirks" = mkIf cfg.quirks { source = ./local-overrides.quirks; };
+    # Also enable ydotool 
+    programs.ydotool.enable = true;
 
   };
 

@@ -1,6 +1,6 @@
 { config, lib, pkgs, this, ... }: let 
 
-  cfg = config.modules.hyprland;
+  cfg = config.wayland.windowManager.hyprland;
   inherit (lib) mkIf;
 
 in {
