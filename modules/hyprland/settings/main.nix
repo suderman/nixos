@@ -21,10 +21,8 @@ in {
   # Execute your favorite apps at launch
   exec-once = [
     "${init}"
-    "waybar"
     "mako"
     "swww-daemon"
-    "hypridle"
   ];
 
   input = {
