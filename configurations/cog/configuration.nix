@@ -1,4 +1,8 @@
-{ config, lib, pkgs, this, inputs, ... }: {
+{ config, lib, pkgs, this, inputs, ... }: let 
+
+  inherit (builtins) toString;
+
+in {
 
   # Import all *.nix files in this directory
   imports = this.lib.ls ./. ++ [
@@ -129,6 +133,24 @@
     '';
   };
 
+  services.ocis = {
+    enable = true;
+    url = "http://127.0.0.1:9200";
+    environment = with config.services.ocis; {
+      OCIS_INSECURE = "true";
+      # OCIS_URL = "https://ocis.cog";
+      # PROXY_HTTP_ADDR = "${address}:${toString port}";
+      # PROXY_TLS = "false";
+    };
+  };
+
+  file."${config.services.ocis.stateDir}" = { 
+    type = "dir"; 
+    mode = 775; 
+    user = config.services.ocis.user; 
+    group = config.services.ocis.group; 
+  };
+
   file."/etc/foo" = { type = "dir"; };
   file."/etc/foo/bar" = { text = "Hello world!"; mode = 665; user = 913; };
   file."/etc/foo/symlink" = { type = "link"; source = /etc/foo/bar; };
@@ -145,7 +167,7 @@
   # modules.rsshub.enable = true;
   # modules.backblaze.enable = false;
   # modules.wallabag.enable = false;
-  # modules.jellyfin.enable = true;
+  # modules.jellyfin.enable = false;
   # modules.unifi = with this.network.dns; {
   #   enable = true;
   #   gateway = home.logos;
