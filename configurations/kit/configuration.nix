@@ -31,8 +31,7 @@
   modules.earlyoom.enable = true;
 
   # Keyboard control
-  modules.keyd.enable = true;
-  modules.ydotool.enable = true;
+  services.keyd.enable = true;
 
   # Network
   networking.networkmanager.enable = true;
@@ -40,6 +39,8 @@
     enable = true;
     deleteRoute = "10.1.0.0/16";
   };
+
+  programs.hyprland.enable = true;
 
   modules.garmin.enable = true;
 

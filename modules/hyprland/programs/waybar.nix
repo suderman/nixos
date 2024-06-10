@@ -1,8 +1,8 @@
 { config, lib, pkgs, ... }: let 
 
-  cfg = config.modules.hyprland;
+  cfg = config.wayland.windowManager.hyprland;
   inherit (builtins) readFile;
-  inherit (lib) mkIf;
+  inherit (lib) getExe mkIf;
 
   systemMonitor = "${pkgs.kitty}/bin/kitty htop";
 
@@ -30,6 +30,11 @@ in {
           "3" = [ ];
           "4" = [ ];
           "5" = [ ];
+          "6" = [ ];
+          "7" = [ ];
+          "8" = [ ];
+          "9" = [ ];
+          "10" = [ ];
         };
 
         # modules layout
@@ -39,7 +44,7 @@ in {
 
         # modules config
         "custom/launcher" = {
-          on-click = "tofi-drun --drun-launch=true";
+          on-click = "${getExe pkgs.fuzzel}";
           format = " ";
         };
         "hyprland/workspaces" = {
@@ -71,7 +76,7 @@ in {
         };
         network = {
           interval = 1;
-          on-click = "eww open --toggle control";
+          on-click = "${getExe pkgs.networkmanager_dmenu}";
           format-disconnected = "󰤮 ";
           format-wifi = "󰤨 ";
           format-ethernet = " {essid}";

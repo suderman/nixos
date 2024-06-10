@@ -1,9 +1,9 @@
-# modules.hyprland.enable = true;
+# programs.hyprland.enable = true;
 { config, lib, pkgs, this, inputs, ... }: 
 
 let 
 
-  cfg = config.modules.hyprland;
+  cfg = config.programs.hyprland;
   inherit (lib) mkIf mkOption mkBefore types;
   inherit (this.lib) destabilize;
 
@@ -15,13 +15,13 @@ in {
     # https://github.com/hyprwm/Hyprland/blob/main/nix/module.nix
     [ inputs.hyprland.nixosModules.default ];
 
-  options.modules.hyprland = {
-    enable = lib.options.mkEnableOption "hyprland"; 
-  };
+  # options.modules.hyprland = {
+  #   enable = lib.options.mkEnableOption "hyprland"; 
+  # };
 
   config = mkIf cfg.enable {
 
-    programs.hyprland.enable = true;
+    # programs.hyprland.enable = true;
     programs.light.enable = true;
 
     # Enable audio
@@ -39,18 +39,6 @@ in {
 
     # Thumbnail support for images
     services.tumbler.enable = true;
-
-    # # Login screen
-    # services = {
-    #   # displayManager.defaultSession = "hyprland";
-    #   xserver = {
-    #     enable = true;
-    #     # desktopManager.xterm.enable = false;
-    #     displayManager = {
-    #       lightdm.enable = true;
-    #     };
-    #   };
-    # };
 
     environment.sessionVariables = {
       NIXOS_OZONE_WL = "1";
@@ -75,6 +63,18 @@ in {
 
     # https://aylur.github.io/ags-docs/config/utils/#authentication
     security.pam.services.ags = {};
+
+    # # Login screen
+    # services = {
+    #   # displayManager.defaultSession = "hyprland";
+    #   xserver = {
+    #     enable = true;
+    #     # desktopManager.xterm.enable = false;
+    #     displayManager = {
+    #       lightdm.enable = true;
+    #     };
+    #   };
+    # };
 
   };
 

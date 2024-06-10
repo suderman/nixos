@@ -23,7 +23,6 @@ in {
     gst_all_1.gst-libav
     libsForQt5.kdenlive
 
-    _1password _1password-gui 
     inkscape junction libreoffice newsflash
     unstable.nodePackages_latest.immich
     junction 
@@ -37,8 +36,6 @@ in {
 
   ];
 
-  # modules.firefox.enable = true;
-  programs.chromium.enable = true;
   programs.git.enable = true;
   programs.tmux.enable = true;
   programs.zsh.enable = true;
@@ -51,7 +48,5 @@ in {
   # terminal du jour
   modules.kitty.enable = true;
   modules.yazi.enable = true;
-
-  modules.keyd.enable = true;
 
 }

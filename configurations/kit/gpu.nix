@@ -78,6 +78,7 @@
 
   environment.systemPackages = with pkgs; [ 
     nvitop
+    docker-nvidia-smi # test nvidia in docker container
   ];
 
 

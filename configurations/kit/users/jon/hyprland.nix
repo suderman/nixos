@@ -1,41 +1,33 @@
 { config, lib, pkgs, this, ... }: {
 
-  modules.hyprland.preSettings = {
-    monitor = [ 
-      ", 2560x1440@60.00Hz, 0x0, 1"
-    ];
-  };
+  config.wayland.windowManager.hyprland = {
+    enable = true;
+    settings = {
 
-  modules.hyprland.nvidia = true;
-  modules.hyprland.settings = {
+      # single monitor
+      monitor = [ ", 2560x1440@60.00Hz, 0x0, 1" ];
 
-    # # Execute your favorite apps at launch
-    # exec-once = [ ];
-    #
-    # general = {
-    #   gaps_in = 4;
-    #   gaps_out = 8;
-    #   border_size = 2;
-    # };
-    #
-    # misc = {
-    #   disable_hyprland_logo = false;
-    #   disable_splash_rendering = false;
-    #   swallow_regex = "^(Alacritty|kitty|footclient)$";
-    #   focus_on_activate = true;
-    #   # suppress_portal_warnings = true;
-    # };
-    #
-    # decoration = {
-    #   rounding = 10;
-    #   dim_inactive = false;
-    #   dim_strength = 0.1;
-    # };
+      # nvidia fixes
+      env = [
+        "LIBVA_DRIVER_NAME,nvidia"
+        "XDG_SESSION_TYPE,wayland"
+        "GBM_BACKEND,nvidia-drm"
+        "__GLX_VENDOR_LIBRARY_NAME,nvidia"
+      ];
 
-    bind = [ ];
-    binde = [ ];
-    bindm = [ ];
+      # env = SDL_VIDEODRIVER,wayland
+      # env = WLR_NO_HARDWARE_CURSORS,1
+      # env = __NV_PRIME_RENDER_OFFLOAD,1
+      # env = __VK_LAYER_NV_optimus,NVIDIA_only
+      # env = NVD_BACKEND,direct
+      # env = __GL_GSYNC_ALLOWED,1
+      # env = __GL_VRR_ALLOWED,1
+      # env = WLR_DRM_NO_ATOMIC,1
+      # env = __GL_MaxFramesAllowed,1
+      # env = WLR_RENDERER_ALLOW_SOFTWARE,1
+      # env = XWAYLAND_NO_GLAMOR,1 # with this you'll need to use gamescope for gaming
 
+    };
   };
 
 }

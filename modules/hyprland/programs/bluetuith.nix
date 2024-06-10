@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }: let 
 
-  cfg = config.modules.hyprland;
+  cfg = config.wayland.windowManager.hyprland;
   inherit (builtins) toJSON;
   inherit (lib) mkIf;
 

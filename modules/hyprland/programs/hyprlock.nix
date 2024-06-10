@@ -1,43 +1,9 @@
-{ config, lib, pkgs, ... }: let 
+{ config, lib, pkgs, ... }: {
+  config = lib.mkIf config.wayland.windowManager.hyprland.enable {
 
-  cfg = config.modules.hyprland;
-  inherit (lib) mkIf;
-
-  notify-send = "${pkgs.libnotify}/bin/notify-send";
-  hyprlock = "${pkgs.hyprlock}/bin/hyprlock";
-
-in {
-
-  config = mkIf cfg.enable {
-
-    home.packages = [ 
-      pkgs.hypridle
-      pkgs.hyprlock 
-    ];
-
-    xdg.configFile."hypr/hypridle.conf".text = ''
-      general {
-        ignore_dbus_inhibit = false
-        lock_cmd = pidof hyprlock || ${hyprlock} # avoid starting multiple hyprlock instances.
-        # unlock_cmd = ""
-        # before_sleep_cmd = ""
-        # after_sleep_cmd = ""
-      }
-
-      # Screenlock
-      listener {
-        timeout = 600
-        on-timeout = ${hyprlock}
-        on-resume = ${notify-send} "Welcome back ${config.home.username}!"
-      }
-
-      # Suspend (not working on my laptop)
-      #listener {
-      #    timeout = 660
-      #    on-timeout = systemctl suspend
-      #    on-resume = ${notify-send} "Welcome back to your desktop!"
-      #}
-    '';
+    programs.hyprlock = {
+      enable = true;
+    };
 
     xdg.configFile."hypr/hyprlock.conf".text = ''
       background {
@@ -109,7 +75,34 @@ in {
       }
     '';
 
-  };
+    # Timeout settings
+    xdg.configFile."hypr/hypridle.conf".text = let 
+      inherit (config.home) username;
+      notify-send = "${pkgs.libnotify}/bin/notify-send";
+      hyprlock = "${pkgs.hyprlock}/bin/hyprlock";
+    in ''
+      general {
+        ignore_dbus_inhibit = false
+        lock_cmd = pidof hyprlock || ${hyprlock} # avoid starting multiple hyprlock instances.
+        # unlock_cmd = ""
+        # before_sleep_cmd = ""
+        # after_sleep_cmd = ""
+      }
 
+      # Screenlock
+      listener {
+        timeout = 600
+        on-timeout = ${hyprlock}
+        # on-resume = ${notify-send} "Welcome back ${username}!"
+      }
+
+      # Suspend 
+      # listener {
+      #     timeout = 660
+      #     on-timeout = systemctl suspend
+      # }
+    '';
+
+  };
 
 }

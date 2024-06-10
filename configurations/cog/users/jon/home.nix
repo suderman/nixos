@@ -17,7 +17,7 @@ in {
     # publicShare = "${homeDirectory}/public";
   };
 
-  modules.keyd.enable = true;
+  services.keyd.enable = true;
 
   # # TUI bluetooth management
   # modules.bluetuith.enable = true;
