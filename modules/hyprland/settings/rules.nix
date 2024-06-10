@@ -35,6 +35,7 @@
     "tag +steam, class:[Ss]team"
     "tag +steam, class:^steam_app_(.*)$"
     "tag +steam, class:^(.*).bin.x86$"
+    "tag +steam, class:^(TurokEx)$"
 
     # Steam and games fullscreen on workspace 10
     "workspace 10, tag:steam"
