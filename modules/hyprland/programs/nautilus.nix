@@ -14,6 +14,7 @@ in {
     # keyboard shortcuts
     services.keyd.applications = {
       org-gnome-nautilus = {
+
         "alt.enter" = "f2";
         "alt.r" = "f2";
         "meta.r" = "f2";
@@ -24,6 +25,7 @@ in {
         "alt.l" = "A-left";
         "meta.t" = "C-t"; # new tab
         "meta.n" = "C-n"; # new window
+        "meta.w" = "C-w"; # close tab
         "meta+shift.n" = "C-S-n"; # new folder
         "meta.[" = "C-pageup"; # prev tab
         "meta.]" = "C-pagedown"; # next tab
