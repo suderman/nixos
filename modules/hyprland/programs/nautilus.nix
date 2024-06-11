@@ -16,9 +16,21 @@ in {
       org-gnome-nautilus = {
         "alt.enter" = "f2";
         "alt.r" = "f2";
+        "meta.r" = "f2";
         "alt.i" = "C-i";
-        "meta.t" = "C-t";
-        "meta.n" = "C-n";
+        "alt.h" = "A-left";
+        "alt.j" = "A-down";
+        "alt.k" = "A-up";
+        "alt.l" = "A-left";
+        "meta.t" = "C-t"; # new tab
+        "meta.n" = "C-n"; # new window
+        "meta+shift.n" = "C-S-n"; # new folder
+        "meta.[" = "C-pageup"; # prev tab
+        "meta.]" = "C-pagedown"; # next tab
+        "meta.c" = "C-c";
+        "meta.x" = "C-x";
+        "meta.v" = "C-v";
+
       };
     };
 

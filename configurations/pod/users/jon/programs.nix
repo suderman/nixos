@@ -44,8 +44,6 @@ in {
   programs.foot.enable = false;
   # pipewire-alsa pipewire-audio pipewire-docs pipewire-jack pipewire-media-session pipewire-pulse
 
-  # terminal du jour
-  modules.kitty.enable = true;
   modules.yazi.enable = true;
 
 }

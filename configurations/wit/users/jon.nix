@@ -15,7 +15,4 @@
     zsh.enable = true;
   };
 
-  # terminal du jour
-  modules.kitty.enable = true;
-
 }

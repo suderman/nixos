@@ -23,26 +23,14 @@ in {
 
   config = mkIf cfg.enable {
 
-    # # If keyd is used, also update systemd target
-    # systemd.user.services.keyd.Unit = {
-    #   After = [ "hyprland-session.target" ];
-    #   Requires = [ "hyprland-session.target" ];
-    # };
-    systemd.user.services.keyd = {
-      Install.WantedBy = mkForce [ cfg.systemd.target ];
-      Unit.Requires = mkForce [ cfg.systemd.target ]; 
-      Unit.After = mkForce [ cfg.systemd.target ]; 
-    };
-
+    # Add target that is enabled by exec-once at the top of the configuration
     systemd.user.targets."${removeSuffix ".target" cfg.systemd.target}".Unit = {
       Description = "Hyprland compositor session after dbus-update-activation-environment";
       Requires = [ "hyprland-session.target" ];
     };
 
 
-    modules.kitty.enable = true;
     # modules.eww.enable = true;
-    # modules.waybar.enable = true;
     # modules.anyrun.enable = true;
 
     home.packages = with pkgs; [ 
@@ -57,7 +45,6 @@ in {
 
       font-awesome
 
-      gnome.nautilus
       wezterm
 
       swww

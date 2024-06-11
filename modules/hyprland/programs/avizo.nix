@@ -37,8 +37,8 @@ in {
         ", XF86MonBrightnessDown, exec, lightctl down"
 
         # Volume control
-        ", XF86AudioRaiseVolume, exec, volumectl -ub up"
-        ", XF86AudioLowerVolume, exec, volumectl -b down"
+        ", XF86AudioRaiseVolume, exec, volumectl -pbu up"
+        ", XF86AudioLowerVolume, exec, volumectl -pb down"
         ", XF86AudioMute, exec, volumectl -a toggle-mute"
         # ", XF86AudioMute, exec, volumectl -am toggle-mute"
 

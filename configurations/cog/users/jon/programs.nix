@@ -52,8 +52,6 @@ in {
     # plugins = [ obs-studio-plugins.wlrobs ];
   };
 
-  # terminal du jour
-  modules.kitty.enable = true;
   modules.yazi.enable = true;
 
 }

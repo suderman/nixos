@@ -19,9 +19,6 @@ in {
     zsh.enable = true;
   };
 
-  # terminal du jour
-  modules.kitty.enable = true;
-
   modules.gnome = with pkgs; {
     extensions = options.modules.gnome.extensions.default ++ [
       gnomeExtensions.dash-to-dock

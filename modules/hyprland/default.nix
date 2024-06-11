@@ -15,13 +15,7 @@ in {
     # https://github.com/hyprwm/Hyprland/blob/main/nix/module.nix
     [ inputs.hyprland.nixosModules.default ];
 
-  # options.modules.hyprland = {
-  #   enable = lib.options.mkEnableOption "hyprland"; 
-  # };
-
   config = mkIf cfg.enable {
-
-    # programs.hyprland.enable = true;
     programs.light.enable = true;
 
     # Enable audio
@@ -56,10 +50,7 @@ in {
 
     # https://wiki.hyprland.org/Useful-Utilities/xdg-desktop-portal-hyprland/
     # > XDPH doesn’t implement a file picker. For that, I recommend installing xdg-desktop-portal-gtk alongside XDPH.
-    # xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-
-    # fix https://github.com/ryan4yin/nix-config/issues/10
-    security.pam.services.swaylock = {};
+    xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
 
     # https://aylur.github.io/ags-docs/config/utils/#authentication
     security.pam.services.ags = {};
