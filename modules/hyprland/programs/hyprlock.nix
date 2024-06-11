@@ -1,5 +1,11 @@
-{ config, lib, pkgs, ... }: {
-  config = lib.mkIf config.wayland.windowManager.hyprland.enable {
+{ config, lib, pkgs, ... }: let 
+
+  cfg = config.wayland.windowManager.hyprland;
+  inherit (lib) mkIf mkForce;
+
+in {
+
+  config = mkIf cfg.enable {
 
     programs.hyprlock = {
       enable = true;
@@ -108,6 +114,12 @@
         }];
 
       };
+    };
+
+    systemd.user.services.hypridle = {
+      Install.WantedBy = mkForce [ cfg.systemd.target ];
+      Unit.PartOf = mkForce [ cfg.systemd.target ];
+      Unit.After = mkForce [ cfg.systemd.target ]; 
     };
 
   };

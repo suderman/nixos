@@ -28,8 +28,8 @@ in {
     loupe
     hyprpicker
     hyprshot
-    hyprlock
-    hypridle
+    # hyprlock
+    # hypridle
     hyprnome
     # hyprspace
     hyprpaper

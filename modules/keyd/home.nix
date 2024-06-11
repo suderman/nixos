@@ -10,6 +10,10 @@ in {
 
   options.services.keyd = {
     enable = lib.options.mkEnableOption "keyd"; 
+    systemdTarget = mkOption {
+      type = types.str;
+      default = "";
+    };
     applications = mkOption {
       type = types.anything;
       default = {};
@@ -20,25 +24,8 @@ in {
   config.xdg.configFile = {
     "keyd/app.conf".source = ini.generate "app.conf" ( {
 
-      "*" = {
-        "meta.a" = "C-a";
-        "meta.z" = "C-z";
-      };
-
-      firefox = {
-        "alt.f" = "C-f";
-        "alt.l" = "C-l";
-      };
-
-      org-gnome-nautilus = {
-        "alt.enter" = "f2";
-        "alt.r" = "f2";
-        "alt.i" = "C-i";
-      };
-
       # [geary]
       # [telegramdesktop]
-      # [1password]
       # [fluffychat]
       # [gimp-2-9]
       # [obsidian]
@@ -49,13 +36,13 @@ in {
   };
 
   # User service runs keyd-application-mapper
-  config.systemd.user.services = mkIf cfg.enable {
+  config.systemd.user.services = (if cfg.systemdTarget == "" then {} else {
     keyd.Unit = {
       Description = "Keyd Application Mapper";
-      After = mkDefault [ "graphical-session.target" ];
-      Requires = mkDefault [ "graphical-session.target" ];
+      After = [ cfg.systemdTarget ];
+      Requires = [ cfg.systemdTarget ];
     };
-    keyd.Install.WantedBy = [ "default.target" ];
+    keyd.Install.WantedBy = [ cfg.systemdTarget ];
     keyd.Service = {
       Type = "simple";
       Restart = "always";
@@ -64,6 +51,6 @@ in {
         text = "keyd-application-mapper";
       };
     };
-  };
+  });
 
 }

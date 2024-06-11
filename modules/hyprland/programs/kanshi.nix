@@ -14,7 +14,7 @@ in {
 
     services.kanshi = {
       enable = true;
-      systemdTarget = "hyprland-session.target";
+      systemdTarget = cfg.systemd.target;
       settings = [{ 
 
         profile = {

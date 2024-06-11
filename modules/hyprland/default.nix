@@ -56,7 +56,7 @@ in {
 
     # https://wiki.hyprland.org/Useful-Utilities/xdg-desktop-portal-hyprland/
     # > XDPH doesn’t implement a file picker. For that, I recommend installing xdg-desktop-portal-gtk alongside XDPH.
-    xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+    # xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
 
     # fix https://github.com/ryan4yin/nix-config/issues/10
     security.pam.services.swaylock = {};

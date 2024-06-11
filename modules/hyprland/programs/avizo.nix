@@ -1,9 +1,17 @@
 { config, lib, pkgs, ... }: let 
+
   cfg = config.wayland.windowManager.hyprland;
-  inherit (lib) mkIf;
+  inherit (lib) mkIf mkForce;
+
 in {
 
   config = mkIf cfg.enable {
+
+    systemd.user.services.avizo = {
+      Install.WantedBy = mkForce [ cfg.systemd.target ];
+      Unit.PartOf = mkForce [ cfg.systemd.target ];
+      Unit.After = mkForce [ cfg.systemd.target ]; 
+    };
 
     services.avizo = {
       enable = true;

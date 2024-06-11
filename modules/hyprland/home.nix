@@ -4,7 +4,7 @@
 let 
 
   cfg = config.wayland.windowManager.hyprland;
-  inherit (lib) mkIf mkDefault mkMerge mkOption types;
+  inherit (lib) mkIf mkDefault mkForce mkMerge mkOption removeSuffix types;
   inherit (lib.options) mkEnableOption;
   inherit (this.lib) destabilize ls mkShellScript;
 
@@ -16,13 +16,29 @@ in {
     # https://github.com/hyprwm/Hyprland/blob/main/nix/hm-module.nix
     [ inputs.hyprland.homeManagerModules.default ];
 
+  options.wayland.windowManager.hyprland.systemd.target = mkOption {
+    type = types.str;
+    default = "hyprland-ready.target";
+  };
+
   config = mkIf cfg.enable {
 
-    # If keyd is used, also update systemd target
-    systemd.user.services.keyd.Unit = {
-      After = [ "hyprland-session.target" ];
+    # # If keyd is used, also update systemd target
+    # systemd.user.services.keyd.Unit = {
+    #   After = [ "hyprland-session.target" ];
+    #   Requires = [ "hyprland-session.target" ];
+    # };
+    systemd.user.services.keyd = {
+      Install.WantedBy = mkForce [ cfg.systemd.target ];
+      Unit.Requires = mkForce [ cfg.systemd.target ]; 
+      Unit.After = mkForce [ cfg.systemd.target ]; 
+    };
+
+    systemd.user.targets."${removeSuffix ".target" cfg.systemd.target}".Unit = {
+      Description = "Hyprland compositor session after dbus-update-activation-environment";
       Requires = [ "hyprland-session.target" ];
     };
+
 
     modules.kitty.enable = true;
     # modules.eww.enable = true;
@@ -46,9 +62,9 @@ in {
 
       swww
 
-      swaybg # the wallpaper
-      swayidle # the idle timeout
-      swaylock # locking the screen
+      # swaybg # the wallpaper
+      # swayidle # the idle timeout
+      # swaylock # locking the screen
       wlogout # logout menu
       wl-clipboard # copying and pasting
       hyprpicker  # color picker
@@ -69,8 +85,20 @@ in {
     # gtk.theme.name = "dracula";
 
     wayland.windowManager.hyprland = {
-      systemd.variables = ["--all"];
-      systemd.enableXdgAutostart = true;
+      systemd = {
+        enable = true;
+        enableXdgAutostart = true;
+        variables = [ 
+          "DISPLAY"
+          "HYPRLAND_INSTANCE_SIGNATURE"
+          "WAYLAND_DISPLAY"
+          "XDG_CURRENT_DESKTOP"
+        ];
+        extraCommands = [
+          "systemctl --user stop ${cfg.systemd.target}"
+          "systemctl --user start ${cfg.systemd.target}" 
+        ];
+      };
 
       plugins = [ 
         # inputs.hyprland-plugins.packages.${pkgs.system}.hyprbars

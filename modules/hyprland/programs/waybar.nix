@@ -2,7 +2,7 @@
 
   cfg = config.wayland.windowManager.hyprland;
   inherit (builtins) readFile;
-  inherit (lib) getExe mkIf;
+  inherit (lib) getExe mkIf mkForce;
 
   systemMonitor = "${pkgs.kitty}/bin/kitty htop";
 
@@ -10,13 +10,21 @@ in {
 
   config = mkIf cfg.enable {
 
+    systemd.user.services.waybar = {
+      Install.WantedBy = mkForce [ cfg.systemd.target ];
+      Unit = {
+        PartOf = mkForce [ cfg.systemd.target ];
+        After = mkForce [ cfg.systemd.target ]; 
+      };
+    };
+
     programs.waybar = {
       enable = true;
       package = pkgs.waybar; # need >= 0.9.22
 
       systemd = {
         enable = true;
-        target = "hyprland-session";
+        inherit (cfg.systemd) target;
       };
 
       settings.bar = {
