@@ -25,6 +25,7 @@ for target in $targets; do
     # task "sudo systemctl restart systemd-udev-trigger.service" 
     task "sudo nixos-rebuild --flake ${dir}#${target} ${action}"
   else
-    task "nixos-rebuild --build-host ${USER}@${target}.$(domainname) --target-host ${USER}@${target}.$(domainname) --flake ${dir}#${target} --use-remote-sudo ${action}"
+    # task "nixos-rebuild --build-host ${USER}@${target}.$(domainname) --target-host ${USER}@${target}.$(domainname) --flake ${dir}#${target} --use-remote-sudo ${action}"
+    task "nixos-rebuild --build-host ${USER}@$(hostname) --target-host root@${target} --flake ${dir}#${target} ${action}"
   fi
 done

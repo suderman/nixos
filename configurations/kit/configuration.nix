@@ -1,7 +1,9 @@
-{ config, pkgs, lib, this, inputs, ... }: {
+{ config, pkgs, lib, presets, ... }: {
 
   # Import all *.nix files in this directory
-  imports = this.lib.ls ./.;
+  imports = lib.ls ./. ++ [
+    presets.rtx-4070-ti-super
+  ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -45,11 +47,10 @@
   modules.garmin.enable = true;
 
   # Support iOS devices
-  modules.libimobiledevice.enable = true;
+  # modules.libimobiledevice.enable = true;
 
   # modules.ddns.enable = true;
   modules.whoami.enable = true;
-  modules.cockpit.enable = true;
 
   # Apps
   # modules.sunshine.enable = true;

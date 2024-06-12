@@ -33,7 +33,6 @@
   };
   # modules.ddns.enable = true;
   modules.whoami.enable = true;
-  modules.cockpit.enable = true;
 
   # modules.sunshine.enable = true;
   modules.dolphin.enable = true;

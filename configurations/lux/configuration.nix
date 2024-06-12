@@ -25,7 +25,6 @@
   modules.traefik.enable = true;
   modules.prometheus.enable = true;
   modules.whoami.enable = true;
-  modules.cockpit.enable = true;
 
   modules.silverbullet.enable = true;
   modules.gitea.enable = true; 

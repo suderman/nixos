@@ -1,12 +1,12 @@
-{ config, lib, pkgs, this, inputs, ... }: let 
+{ config, lib, pkgs, presets, ... }: let 
 
   inherit (builtins) toString;
 
 in {
 
   # Import all *.nix files in this directory
-  imports = this.lib.ls ./. ++ [
-    inputs.hardware.nixosModules.framework-11th-gen-intel
+  imports = lib.ls ./. ++ [
+    presets.framework-11th-gen-intel
   ];
 
   # Use the systemd-boot EFI boot loader.
@@ -81,12 +81,11 @@ in {
   virtualisation.waydroid.enable = false;
 
   # Support iOS devices
-  modules.libimobiledevice.enable = true;
+  # modules.libimobiledevice.enable = true;
 
   # Web services
   modules.traefik.enable = true;
   modules.whoami.enable = true;
-  modules.cockpit.enable = true;
 
   # Apps & Games
   modules.neovim.enable = true;

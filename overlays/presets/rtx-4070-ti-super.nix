@@ -1,8 +1,8 @@
 # Nvidia GeForce RTX 4070 Ti Super
-{ config, pkgs, lib, inputs, ... }: {
+{ config, pkgs, lib, presets, ... }: {
 
   # https://github.com/NixOS/nixos-hardware/tree/master/common/gpu/nvidia
-  imports = [ inputs.hardware.nixosModules.common-gpu-nvidia-nonprime ];
+  imports = [ presets.common-gpu-nvidia-nonprime ];
 
   boot.initrd.kernelModules = [ "nvidia" ];
   # boot.extraModulePackages = [ config.boot.kernelPackages.nvidia_x11 ];

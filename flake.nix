@@ -107,9 +107,10 @@
       # Modify pkgs with this, scripts, packages, nur and unstable
       overlays = [ 
 
-        # this and personal lib functions
+        # this, personal lib functions and presets
         (final: prev: { inherit this; })
         (final: prev: { this = import ./overlays/lib { inherit final prev; }; })
+        (final: prev: { this = import ./overlays/presets { inherit final prev; }; })
 
         # Unstable/stable nixpkgs channel
         (final: prev: { unstable = import inputs.nixpkgs-unstable { inherit system config; }; })
@@ -134,13 +135,20 @@
 
     };
 
+    # NixOS/Home-Manager special args with merged lib from nixpkgs, home-manager, and this
+    mkSpecialArgs = this: {
+      inherit outputs this;
+      inherit (this) inputs presets;
+      lib = this.inputs.nixpkgs.lib.extend (_: _: this.inputs.home-manager.lib // this.lib );
+    };
+
     # Make a NixOS system configuration 
     mkConfiguration = this: this.inputs.nixpkgs.lib.nixosSystem rec {
 
       # Make nixpkgs for this system (with overlays)
       pkgs = mkPkgs this;
       system = pkgs.this.system;
-      specialArgs = { inherit outputs; inputs = pkgs.this.inputs; this = pkgs.this; };
+      specialArgs = mkSpecialArgs pkgs.this;
 
       # Include NixOS configurations, modules, secrets and caches
       modules = this.modules.root ++ (if (length this.users < 1) then [] else [
@@ -152,7 +160,7 @@
             # Inherit NixOS packages
             useGlobalPkgs = true;
             useUserPackages = true;
-            extraSpecialArgs = { inherit outputs; inputs = pkgs.this.inputs; this = pkgs.this; };
+            extraSpecialArgs = mkSpecialArgs pkgs.this;
 
             # Include Home Manager configuration, modules, secrets and caches
             users = mkAttrs this.users ( 

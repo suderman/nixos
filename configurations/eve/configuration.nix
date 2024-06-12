@@ -25,7 +25,6 @@
   # Web services
   modules.tailscale.enable = true;
   modules.whoami.enable = true;
-  modules.cockpit.enable = true;
 
   # Custom DNS
   modules.blocky.enable = true;

@@ -1,13 +1,13 @@
-{ config, lib, pkgs, this, ... }: {
+{ config, lib, pkgs, presets, ... }: {
 
   # Import all *.nix files in this directory
-  imports = this.lib.ls ./.;
+  imports = lib.ls ./. ++ [ presets.linode ];
 
   # Use freshest kernel
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
-  # Hardware configuration
-  modules.linode.enable = true;
+  # # Hardware configuration
+  # modules.linode.enable = true;
 
   # Network
   modules.tailscale.enable = true;
@@ -35,13 +35,12 @@
   programs.tmux.enable = true;
 
   # Web services
-  modules.cockpit.enable = true;
   modules.whoogle = { enable = true; name = "g"; };
   # modules.gitea = { enable = true; name = "git"; };
   modules.tiddlywiki = { enable = true; name = "wiki"; };
   modules.rsshub.enable = true;
   modules.freshrss.enable = true;
-  modules.wallabag.enable = false;
+  # modules.wallabag.enable = false;
   # modules.nextcloud.enable = false;
 
   # modules.tandoor-recipes = {

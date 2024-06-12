@@ -1,9 +1,7 @@
-{ config, lib, pkgs, this, ... }: let 
-  inherit (this.lib) ls;
-in {
+{ config, lib, pkgs, ... }: {
 
   # Import all *.nix files in this directory
-  imports = ls ./.;
+  imports = lib.ls ./.;
 
   xdg.userDirs = with config.home; {
     enable = true;
