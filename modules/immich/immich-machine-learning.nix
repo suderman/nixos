@@ -2,7 +2,7 @@
 
 let
 
-  cfg = config.modules.immich;
+  cfg = config.services.immich;
   inherit (lib) mkIf;
 
 in {

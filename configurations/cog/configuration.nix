@@ -177,7 +177,6 @@ in {
   # modules.nextcloud.enable = false;
   # modules.tiddlywiki.enable = true;
   # modules.ocis = { enable = true; dataDir = "/tmp/ocis"; };
-  # modules.immich.enable = true;
   # modules.photoprism = { enable = false; photosDir = "/photos"; };
   # modules.silverbullet.enable = true;
   # modules.bluebubbles.enable = true;

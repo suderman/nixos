@@ -1,8 +1,8 @@
-{ config, lib, pkgs, this, ... }:
+{ config, lib, pkgs, ... }:
 
 let
 
-  cfg = config.modules.immich;
+  cfg = config.services.immich;
   inherit (lib) mkIf;
   inherit (config.modules) traefik;
 
@@ -13,7 +13,6 @@ in {
     # Server back-end
     virtualisation.oci-containers.containers.immich-server = {
       image = "ghcr.io/immich-app/immich-server:v${cfg.version}";
-      cmd = [ "start-server.sh" ];
       autoStart = false;
 
       # Run as immich user
@@ -27,6 +26,8 @@ in {
         "/run/postgresql:/run/postgresql"
         "/run/redis-immich:/run/redis-immich"
       ] ++ [
+        "${cfg.dataDir}/geocoding:/usr/src/app/geocoding"
+      ] ++ [
         "${cfg.dataDir}:/usr/src/app/upload"
       ] ++ (if cfg.photosDir == "" then [] else [
         "${cfg.photosDir}:/usr/src/app/upload/library" 
@@ -38,7 +39,11 @@ in {
       extraOptions = traefik.labels cfg.name
 
       # Networking for docker containers
-      ++ [ "--network=immich" ];
+      ++ [
+        "--network=immich"
+        # https://github.com/immich-app/immich/blob/main/docker/hwaccel.yml
+        "--device=/dev/dri:/dev/dri" 
+      ];
 
     };
 

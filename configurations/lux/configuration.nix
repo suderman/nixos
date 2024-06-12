@@ -52,7 +52,7 @@
     public = false;
   };
   
-  modules.immich = {
+  services.immich = {
     enable = true;
     photosDir = "/data/photos/immich";
     externalDir = "/data/photos/collections";

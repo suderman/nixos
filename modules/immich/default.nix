@@ -1,17 +1,16 @@
-# modules.immich.enable = true;
+# services.immich.enable = true;
 { config, lib, pkgs, this, ... }:
 
 let
 
   # https://github.com/immich-app/immich/releases
-  version = "1.105.1";
+  version = "1.106.3";
 
-  cfg = config.modules.immich;
+  cfg = config.services.immich;
 
-  inherit (lib) mkIf mkOption mkAfter mkBefore options types strings;
   inherit (builtins) toString;
+  inherit (lib) mkIf mkOption mkAfter mkBefore options types strings extraGroups ls;
   inherit (lib.strings) toInt;
-  inherit (this.lib) extraGroups ls;
 
 in {
 
@@ -19,7 +18,7 @@ in {
   # https://github.com/immich-app/immich/blob/main/docker/docker-compose.yml
   imports = ls ./.;
 
-  options.modules.immich = {
+  options.services.immich = {
 
     enable = options.mkEnableOption "immich"; 
 
