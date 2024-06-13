@@ -34,17 +34,14 @@
   modules.plex.enable = true;
 
   services.lunasea.enable = true;
-  modules.sabnzbd = { enable = true; name = "sab"; };
-  modules.radarr.enable = true;
-  modules.sonarr.enable = true;
-  modules.lidarr.enable = true;
-  modules.ombi = {
-    enable = true;
-    alias = { 
-      hostName = "ombi.suderman.org"; 
-      public = false; 
-    };
-  };
+
+  # modules.ombi = {
+  #   enable = true;
+  #   alias = { 
+  #     hostName = "ombi.suderman.org"; 
+  #     public = false; 
+  #   };
+  # };
 
   modules.ocis = {
     enable = true;

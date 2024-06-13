@@ -64,6 +64,7 @@
   modules.ollama.enable = true;
   services.ollama.acceleration = "cuda";
 
+
   modules.flatpak = {
     packages = [
       "app.bluebubbles.BlueBubbles"
