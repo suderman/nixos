@@ -33,7 +33,7 @@
   modules.jellyfin.enable = true;
   modules.plex.enable = true;
 
-  modules.lunasea.enable = true;
+  services.lunasea.enable = true;
   modules.sabnzbd = { enable = true; name = "sab"; };
   modules.radarr.enable = true;
   modules.sonarr.enable = true;

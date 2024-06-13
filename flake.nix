@@ -107,10 +107,12 @@
       # Modify pkgs with this, scripts, packages, nur and unstable
       overlays = [ 
 
-        # this, personal lib functions and presets
+        # this, and personal lib functions
         (final: prev: { inherit this; })
         (final: prev: { this = import ./overlays/lib { inherit final prev; }; })
-        (final: prev: { this = import ./overlays/presets { inherit final prev; }; })
+
+        # Preset configurations merged with nixos-hardware
+        (final: prev: { presets = import ./overlays/presets { inherit final prev; }; })
 
         # Unstable/stable nixpkgs channel
         (final: prev: { unstable = import inputs.nixpkgs-unstable { inherit system config; }; })
@@ -136,10 +138,11 @@
     };
 
     # NixOS/Home-Manager special args with merged lib from nixpkgs, home-manager, and this
-    mkSpecialArgs = this: {
-      inherit outputs this;
-      inherit (this) inputs presets;
-      lib = this.inputs.nixpkgs.lib.extend (_: _: this.inputs.home-manager.lib // this.lib );
+    mkSpecialArgs = pkgs: {
+      inherit outputs;
+      inherit (pkgs.this) inputs;
+      inherit (pkgs) this presets;
+      lib = pkgs.this.inputs.nixpkgs.lib.extend (_: _: pkgs.this.inputs.home-manager.lib // pkgs.this.lib );
     };
 
     # Make a NixOS system configuration 
@@ -148,7 +151,7 @@
       # Make nixpkgs for this system (with overlays)
       pkgs = mkPkgs this;
       system = pkgs.this.system;
-      specialArgs = mkSpecialArgs pkgs.this;
+      specialArgs = mkSpecialArgs pkgs;
 
       # Include NixOS configurations, modules, secrets and caches
       modules = this.modules.root ++ (if (length this.users < 1) then [] else [
@@ -160,7 +163,7 @@
             # Inherit NixOS packages
             useGlobalPkgs = true;
             useUserPackages = true;
-            extraSpecialArgs = mkSpecialArgs pkgs.this;
+            extraSpecialArgs = mkSpecialArgs pkgs;
 
             # Include Home Manager configuration, modules, secrets and caches
             users = mkAttrs this.users ( 

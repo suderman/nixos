@@ -3,6 +3,7 @@
   inherit (builtins) toString;
 
 in {
+  
 
   # Import all *.nix files in this directory
   imports = lib.ls ./. ++ [
@@ -171,7 +172,6 @@ in {
   #   enable = true;
   #   gateway = home.logos;
   # };
-  # modules.lunasea.enable = true;
   # modules.freshrss.enable = true;
   # modules.whoogle = { enable = true; name = "g"; };
   # modules.nextcloud.enable = false;
