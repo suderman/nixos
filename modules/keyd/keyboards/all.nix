@@ -1,12 +1,5 @@
 {
   
-  # Tapping both shift keys will activate capslock.
-  shift = {
-    leftshift = "capslock";
-    rightshift = "capslock";
-  };
-
-
   # Meta (Super) layer 
   meta = {
 
@@ -99,6 +92,9 @@
     "7" = "C-A-f7";
     "8" = "C-A-f8";
     "9" = "C-A-f9";
+
+    # Toggle capslock
+    rightshift = "capslock";
 
   };
 

@@ -10,8 +10,11 @@
   settings = {
     main = {
 
-      # Modifers
+      # Use tab (and left ctrl+meta) as custom modifier
       tab = "overload(nav, tab)";
+      "leftcontrol+leftmeta" = "layer(nav)";
+
+      # Leave the default modifiers as-is
       leftalt = "layer(alt)";
       leftmeta = "layer(meta)";
       rightmeta = "layer(meta)";
