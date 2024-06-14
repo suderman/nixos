@@ -40,7 +40,7 @@ in {
         ", XF86AudioRaiseVolume, exec, volumectl -pbu up"
         ", XF86AudioLowerVolume, exec, volumectl -pb down"
         ", XF86AudioMute, exec, volumectl -a toggle-mute"
-        # ", XF86AudioMute, exec, volumectl -am toggle-mute"
+        ", XF86AudioMicMute, exec, volumectl -am toggle-mute"
 
       ];
     };

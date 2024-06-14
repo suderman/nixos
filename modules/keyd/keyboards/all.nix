@@ -1,5 +1,5 @@
 {
-  
+
   # Meta (Super) layer 
   meta = {
 
@@ -45,15 +45,16 @@
     l = "right";
     j = "down";
     h = "left";
-    u = "pageup";
-    d = "pagedown";
+    # u = "pageup";
+    # d = "pagedown";
     w = "C-right";
     b = "C-left";
 
     # emacs keys
-    f = "right";
     q = "home"; # normally a
     e = "end";
+    # b = "left";
+    # f = "right";
     p = "pageup";
     n = "pagedown";
 
@@ -77,10 +78,9 @@
     # Media keys
     a = "volumedown";
     s = "volumeup";
-    # d = "mute";
-
-    # Simulate super with spacebar 
-    space = "layer(meta)";
+    d = "mute";
+    f = "micmute";
+    space = "playpause";
 
     # Switch TTYs
     "1" = "C-A-f1";
