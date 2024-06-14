@@ -17,10 +17,17 @@ window#waybar {
   color: #c669cc;
   transition: all 0.1s ease;
 }
+#workspaces button.active {
+  font-size: 18px;
+  background-color: #e0875f;
+  color: #000000;
+}
+
 #workspaces button.focused {
   font-size: 18px;
   color: #e0875f;
 }
+
 #workspaces button.persistent {
   color: #d05759;
   font-size: 12px;
