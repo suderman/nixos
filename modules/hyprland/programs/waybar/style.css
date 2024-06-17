@@ -40,6 +40,12 @@ window#waybar {
   font-size: 18px;
   border-radius : 5px;
 }
+
+#tray {
+  padding : 5px 11px 5px 13px;
+  margin : 4px 4.5px 4px 4.5px;
+}
+
 #custom-power {
   color : #d05759;
   background-color: #151521;

@@ -4,20 +4,20 @@
   settings = {
     main = {
 
-      # Move workspaces to the right (nudge scroll wheel) 
-      f4 = "M-A-right";
+      # G4 (nudge scroll wheel): super-tab 
+      f4 = "M-tab";
 
-      # Move workspaces to the left (nudge scroll wheel)
-      f5 = "M-A-left";
+      # G5 (nudge scroll wheel): super+shift-tab
+      f5 = "M-S-tab";
 
-      # Far-right mouse button is command layer
-      # f6 = "layer(super)";
+      # G6 (far-right mouse button): super
+      f6 = "layer(super)";
 
-      # Middle lower (G7) is super-leftclick (move windows)
-      f7 = "M-leftmouse";
+      # G7 (middle raised): is super-rightclick
+      f7 = "M-rightmouse";
 
-      # Middle upper (G8) is super-rightclick (resize windows)
-      f8 = "M-rightmouse";
+      # G8 (middle sunken): super-leftclick
+      f8 = "M-leftmouse";
 
       # Modifiers on mouse
       f9 = "layer(super)";

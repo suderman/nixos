@@ -48,7 +48,7 @@ in {
         # modules layout
         modules-left = [ "custom/launcher" "hyprland/workspaces" ];
         modules-center = [ "clock" "hyprland/window" ];
-        modules-right = [ "idle_inhibitor" "network" "temperature" "cpu" "battery" "custom/power" "tray" ];
+        modules-right = [ "idle_inhibitor" "custom/bluetooth" "network" "temperature" "cpu" "tray" "battery" "custom/power" ];
 
         # modules config
         "custom/launcher" = {
@@ -67,7 +67,7 @@ in {
             persistent = "󰊠 ";
             focused = "󰮯 ";
           };
-          show-special = true;
+          show-special = false;
         };
         clock = {
           format = " {:%I:%M %p}";
@@ -78,6 +78,10 @@ in {
           interval = 60;
           align = 0;
           rotate = 0;
+        };
+        "custom/bluetooth" = {
+          on-click = "${pkgs.kitty}/bin/kitty bluetuith";
+          format = "bt ";
         };
         idle_inhibitor = {
           format = "{icon}";
@@ -99,7 +103,7 @@ in {
         cpu = {
           # format = " {usage0}%/{usage1}%/{usage2}%/{usage3}%/{usage4}%/{usage5}%/{usage6}%/{usage7}%";
           format = " {load} / {usage}%";
-          on-click = systemMonitor;
+          on-click = "${pkgs.kitty}/bin/kitty htop";
         };
         temperature = {
           # thermal-zone = 2;
@@ -108,10 +112,14 @@ in {
           format-critical = "{temperatureC}°C ";
           format = "{temperatureC}°C ";
         };
+        tray = {
+          icon-size = 14;
+          spacing = 6;
+        };
         battery = {
           interval = 60;
           format = "{icon}";
-          on-click = "eww open --toggle control";
+          # on-click = "eww open --toggle control";
           format-charging = " ";
           format-icons = [ "󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹" ];
           format-plugged = "󰚦 ";
@@ -122,13 +130,9 @@ in {
           on-click = "powermenu &";
           format = " ";
         };
-        tray = {
-          icon-size = 14;
-          spacing = 6;
-        };
       };
 
-      style = readFile ./waybar.css;
+      style = readFile ./style.css;
 
     };
 

@@ -1,7 +1,6 @@
-{ lib, pkgs, this, ... }: let 
+{ lib, pkgs, ... }: let 
 
-  inherit (lib) getExe mkDefault; 
-  inherit (this.lib) mkShellScript;
+  inherit (lib) getExe mkDefault mkShellScript; 
 
   toggleGroupOrLock = mkShellScript {
     inputs = with pkgs; [ hyprland jq ]; text = ''
@@ -229,17 +228,9 @@ in {
     "super+alt+shift, b, exec, chromium-browser --incognito"
 
     # Navigate workspaces
-    "super, left, workspace, m-1"
-    "super, right, workspace, m+1"
-    "super, up, workspace, m-1"
-    "super, down, workspace, m+1"
-    "super+shift, tab, workspace, m-1" # cyclenext, prev
     "super, tab, workspace, m+1" # cyclenext
+    "super+shift, tab, workspace, m-1" # cyclenext, prev
     "super, backslash, workspace, previous"
-
-    # Navigation workspaces nudging my mouse's scroll wheel (triggers these commands)
-    "super+alt, left, workspace, m-1"
-    "super+alt, right, workspace, m+1"
 
     # Manage groups
     "super+shift, g, togglegroup,"
@@ -364,11 +355,15 @@ in {
   ];
 
   bindm = [
+
     # Move/resize windows with super + LMB/RMB and dragging
     "super, mouse:272, movewindow"
     "super, mouse:273, resizewindow"
-    "super+shift, mouse:272, resizewindow"
-    "super+alt, mouse:272, resizewindow"
+
+    # Move/resize windows with super + ctrl/shift and dragging
+    "super, contrl_l, movewindow"
+    "super, shift_l, resizewindow"
+
   ];
 
 }

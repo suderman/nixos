@@ -5,8 +5,8 @@
   ];
 
   general = {
-    gaps_in = mkDefault 15;
-    gaps_out = mkDefault 15;
+    gaps_in = mkDefault 5;
+    gaps_out = mkDefault 10;
     gaps_workspaces = mkDefault 20;
     border_size = mkDefault 5;
     "col.active_border" = mkDefault "rgba(89b4facc) rgba(cba6f7cc) 270deg";
