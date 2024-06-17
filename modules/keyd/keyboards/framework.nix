@@ -12,13 +12,13 @@
       ## Modifers after:  
       # [Nav/Tab]
       # [Control]
-      # [Control] [fn] [Alt] [Meta] [Space] [Meta] [Alt]
+      # [Control] [fn] [Alt] [Super] [Space] [Super] [Alt]
       tab = "overload(nav, tab)";
       capslock = "layer(control)";
       leftcontrol = "layer(control)";
       leftmeta = "layer(alt)";
-      leftalt = "layer(meta)";
-      rightalt = "layer(meta)";
+      leftalt = "layer(super)";
+      rightalt = "layer(super)";
       rightmeta = "layer(alt)";
 
     };

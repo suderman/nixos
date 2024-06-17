@@ -16,9 +16,10 @@
 
       # Leave the default modifiers as-is
       leftalt = "layer(alt)";
-      leftmeta = "layer(meta)";
-      rightmeta = "layer(meta)";
+      leftmeta = "layer(super)";
+      rightmeta = "layer(super)";
       rightalt = "layer(alt)";
+
 
       # Fn keypad as media keys
       # [+] next song

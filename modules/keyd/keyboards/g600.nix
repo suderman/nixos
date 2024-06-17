@@ -11,16 +11,16 @@
       f5 = "M-A-left";
 
       # Far-right mouse button is command layer
-      # f6 = "layer(meta)";
+      # f6 = "layer(super)";
 
-      # Middle lower (G7) is meta-leftclick (move windows)
+      # Middle lower (G7) is super-leftclick (move windows)
       f7 = "M-leftmouse";
 
-      # Middle upper (G8) is meta-rightclick (resize windows)
+      # Middle upper (G8) is super-rightclick (resize windows)
       f8 = "M-rightmouse";
 
       # Modifiers on mouse
-      f9 = "layer(meta)";
+      f9 = "layer(super)";
       f10 = "layer(alt)";
       f11 = "layer(shift)";
 

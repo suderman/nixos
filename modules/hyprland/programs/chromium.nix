@@ -41,10 +41,10 @@
     services.keyd.applications = {
       chromium-browser = {
         "alt.f" = "C-f"; # find in page
-        "alt.[" = "C-S-tab"; # prev tab
-        "alt.]" = "macro(C-tab)"; # next tab
-        "alt.w" = "C-w"; # close tab
-        "alt.t" = "C-t"; # new tab
+        "super.[" = "C-S-tab"; # prev tab
+        "super.]" = "macro(C-tab)"; # next tab
+        "super.w" = "C-w"; # close tab
+        "super.t" = "C-t"; # new tab
       };
     };
 

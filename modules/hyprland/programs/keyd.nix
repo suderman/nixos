@@ -14,8 +14,8 @@ in {
 
         # Map meta a/z to ctrl a/z
         "*" = {
-          "meta.a" = "C-a";
-          "meta.z" = "C-z";
+          "super.a" = "C-a";
+          "super.z" = "C-z";
         };
 
       };

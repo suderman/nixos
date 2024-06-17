@@ -122,6 +122,13 @@ in {
       Unit.After = mkForce [ cfg.systemd.target ]; 
     };
 
+    # Keyboard shortcut to turn off screen immediately with numlock
+    wayland.windowManager.hyprland.settings = {
+      bind = [
+        ", num_lock, exec, sleep 1 && hyprctl dispatch dpms off"
+      ];
+    };
+
   };
 
 }

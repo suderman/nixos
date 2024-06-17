@@ -19,16 +19,12 @@
       firefox = {
         "alt.f" = "C-f"; # find in page
         "alt.l" = "C-l"; # location bar
-        "alt.[" = "C-pageup"; # prev tab
-        "alt.]" = "C-pagedown"; # next tab
-        "alt.t" = "C-t"; # new tab
-        "alt.w" = "C-w"; # close tab
-        "meta.t" = "C-t"; # new tab
-        "meta.w" = "C-w"; # close tab
-        "meta.[" = "C-pageup"; # prev tab
-        "meta.]" = "C-pagedown"; # next tab
-        "meta.n" = "C-n"; # new window
-        "meta.r" = "C-r"; # reload
+        "super.t" = "C-t"; # new tab
+        "super.w" = "C-w"; # close tab
+        "super.[" = "C-pageup"; # prev tab
+        "super.]" = "C-pagedown"; # next tab
+        "super.n" = "C-n"; # new window
+        "super.r" = "C-r"; # reload
       };
     };
 

@@ -244,10 +244,6 @@ in {
     "SUPER, F, fullscreen, 1"
     "SUPER ALT, F, fullscreen, 0"
 
-    # "numlock, exec, sleep 1 && hyprctl dispatch dpms off"
-    # "f9, exec, sleep 1 && hyprctl dispatch dpms off"
-    # "f10, exec, sleep 1 && hyprctl dispatch dpms on"
-
     # "SUPER, Space, exec, tofi-drun --drun-launch=true"
     "SUPER, Space, exec, ${getExe pkgs.fuzzel}"
 

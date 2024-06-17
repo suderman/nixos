@@ -17,21 +17,21 @@ in {
 
         "alt.enter" = "f2";
         "alt.r" = "f2";
-        "meta.r" = "f2";
+        "super.r" = "f2";
         "alt.i" = "C-i";
         "alt.h" = "A-left";
         "alt.j" = "A-down";
         "alt.k" = "A-up";
         "alt.l" = "A-left";
-        "meta.t" = "C-t"; # new tab
-        "meta.n" = "C-n"; # new window
-        "meta.w" = "C-w"; # close tab
-        "meta+shift.n" = "C-S-n"; # new folder
-        "meta.[" = "C-pageup"; # prev tab
-        "meta.]" = "C-pagedown"; # next tab
-        "meta.c" = "C-c";
-        "meta.x" = "C-x";
-        "meta.v" = "C-v";
+        "super.t" = "C-t"; # new tab
+        "super.n" = "C-n"; # new window
+        "super.w" = "C-w"; # close tab
+        "super+shift.n" = "C-S-n"; # new folder
+        "super.[" = "C-pageup"; # prev tab
+        "super.]" = "C-pagedown"; # next tab
+        "super.c" = "C-c";
+        "super.x" = "C-x";
+        "super.v" = "C-v";
 
       };
     };

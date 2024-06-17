@@ -31,7 +31,7 @@
     services.keyd.applications = {
       freetube = {
         "alt.l" = "C-l"; # location bar
-        "meta.n" = "C-n"; # new window
+        "super.n" = "C-n"; # new window
       };
     };
 

@@ -1,7 +1,7 @@
 {
 
-  # Meta (Super) layer 
-  meta = {
+  # Super (meta) layer 
+  "super:M" = {
 
     # Open app switcher (command tab)
     tab = "swapm(switcher, M-tab)";
