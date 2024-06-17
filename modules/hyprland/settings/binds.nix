@@ -200,167 +200,169 @@ in {
 
   bind = [
 
-    "SUPER, F6, exec, ${toggleMoveMode}"
-    "SHIFT, F6, exec, ${toggleMoveMode}"
-    "ALT, F6, exec, ${toggleMoveMode}"
+    # Exit hyprland
+    "super+shift, q, exit,"
 
-    "SUPER, Return, exec, kitty"
-    "SUPER, W, killactive,"
-    "SUPERSHIFT, Q, exit,"
-    "SUPER, E, exec, nautilus"
+    # Both q and w kill the active window, but some programs override super+w to kill the current tab
+    "super, q, killactive,"
+    "super, w, killactive,"
 
-    "SUPER, Period, exec, 1password"
+    # Manage special workspace
+    "super, escape, togglespecialworkspace"
+    "super+alt, escape, movetoworkspacesilent, special"
 
-    "SUPER, B, exec, firefox"
-    "SUPER SHIFT, B, exec, firefox --private-window"
+    # Terminal
+    "super, return, exec, kitty"
 
-    "SUPER ALT, B, exec, chromium-browser"
-    "SUPER SHIFT ALT, B, exec, chromium-browser --incognito"
+    # File manager
+    "super, e, exec, nautilus"
 
-    "SUPER, T, exec, ${newWindowInGroup}"
+    # Password manager
+    "super, period, exec, 1password"
 
-    "SUPER, Escape, togglespecialworkspace"
-    "SUPER ALT, Escape, movetoworkspacesilent, special"
+    # Browser
+    "super, b, exec, firefox"
+    "super+shift, b, exec, firefox --private-window"
 
-    # "SUPER, Tab, cyclenext,"
-    # "SUPER SHIFT, Tab, cyclenext, prev"
-    "SUPER, Tab, workspace, m+1"
-    "SUPER SHIFT, Tab, workspace, m-1"
+    # Alt browser
+    "super+alt, b, exec, chromium-browser"
+    "super+alt+shift, b, exec, chromium-browser --incognito"
 
-    "SUPER, Backslash, workspace, previous"
+    # Navigate workspaces
+    "super, left, workspace, -1"
+    "super, right, workspace, +1"
+    "super, tab, workspace, m+1" # cyclenext
+    "super+shift, tab, workspace, m-1" # cyclenext, prev
+    "super, backslash, workspace, previous"
 
-    "SUPER, bracketleft, workspace, -1"
-    "SUPER, bracketright, workspace, +1"
+    # Manage groups
+    "super+shift, g, togglegroup,"
+    "super, g, exec, ${toggleGroupOrLock}"
+    "super, n, changegroupactive, f"
+    "super+shift, n, changegroupactive, b"
+    "super, t, exec, ${newWindowInGroup}"
 
-    "SUPER SHIFT, G,  togglegroup,"
-    "SUPER, G, exec, ${toggleGroupOrLock}"
-    "SUPER, N, changegroupactive, f"
-    "SUPER SHIFT, N, changegroupactive, b"
+    # Manage windows
+    "super, i, togglesplit"
+    "super, p, pseudo"
+    "super, o, togglefloating"
+    "super, p, pin"
+    "super, f, fullscreen, 1"
+    "super+alt, f, fullscreen, 0"
 
-    "SUPER, I, togglesplit"
-    "SUPER, P, pseudo"
-    "SUPER, O, togglefloating"
-    "SUPER, P, pin"
-    "SUPER, F, fullscreen, 1"
-    "SUPER ALT, F, fullscreen, 0"
+    # App launcher
+    "super, space, exec, ${getExe pkgs.fuzzel}"
 
-    # "SUPER, Space, exec, tofi-drun --drun-launch=true"
-    "SUPER, Space, exec, ${getExe pkgs.fuzzel}"
+    # Move focus with super [hjkl]
+    "super, h, movefocus, l"
+    "super, j, movefocus, d"
+    "super, k, movefocus, u"
+    "super, l, movefocus, r"
 
-    # Move focus with mainMod + arrow keys
-    "SUPER, H, movefocus, l"
-    "SUPER, J, movefocus, d"
-    "SUPER, K, movefocus, u"
-    "SUPER, L, movefocus, r"
+    # Switch workspaces with super [0-9]
+    "super, 1, workspace, 1"
+    "super, 2, workspace, 2"
+    "super, 3, workspace, 3"
+    "super, 4, workspace, 4"
+    "super, 5, workspace, 5"
+    "super, 6, workspace, 6"
+    "super, 7, workspace, 7"
+    "super, 8, workspace, 8"
+    "super, 9, workspace, 9"
+    "super, 0, workspace, 10"
 
-    # Switch workspaces with mainMod + [0-9]
-    "SUPER, 1, workspace, 1"
-    "SUPER, 2, workspace, 2"
-    "SUPER, 3, workspace, 3"
-    "SUPER, 4, workspace, 4"
-    "SUPER, 5, workspace, 5"
-    "SUPER, 6, workspace, 6"
-    "SUPER, 7, workspace, 7"
-    "SUPER, 8, workspace, 8"
-    "SUPER, 9, workspace, 9"
-    "SUPER, 0, workspace, 10"
+    # Move active window to a workspace with super+alt [0-9]
+    "super+alt, 1, movetoworkspace, 1"
+    "super+alt, 2, movetoworkspace, 2"
+    "super+alt, 3, movetoworkspace, 3"
+    "super+alt, 4, movetoworkspace, 4"
+    "super+alt, 5, movetoworkspace, 5"
+    "super+alt, 6, movetoworkspace, 6"
+    "super+alt, 7, movetoworkspace, 7"
+    "super+alt, 8, movetoworkspace, 8"
+    "super+alt, 9, movetoworkspace, 9"
+    "super+alt, 0, movetoworkspace, 10"
 
-    # Move active window to a workspace with mainMod + ALT + [0-9]
-    "SUPER ALT, 1, movetoworkspace, 1"
-    "SUPER ALT, 2, movetoworkspace, 2"
-    "SUPER ALT, 3, movetoworkspace, 3"
-    "SUPER ALT, 4, movetoworkspace, 4"
-    "SUPER ALT, 5, movetoworkspace, 5"
-    "SUPER ALT, 6, movetoworkspace, 6"
-    "SUPER ALT, 7, movetoworkspace, 7"
-    "SUPER ALT, 8, movetoworkspace, 8"
-    "SUPER ALT, 9, movetoworkspace, 9"
-    "SUPER ALT, 0, movetoworkspace, 10"
+    # Resize active window to various presets
+    "super+shift, 1, resizeactive, exact 10% 10%"
+    "super+shift, 1, centerwindow, 1"
+    "super+shift, 2, resizeactive, exact 20% 20%"
+    "super+shift, 2, centerwindow, 1"
+    "super+shift, 3, resizeactive, exact 30% 30%"
+    "super+shift, 3, centerwindow, 1"
+    "super+shift, 4, resizeactive, exact 40% 40%"
+    "super+shift, 4, centerwindow, 1"
+    "super+shift, 5, resizeactive, exact 50% 50%"
+    "super+shift, 5, centerwindow, 1"
+    "super+shift, 6, resizeactive, exact 60% 60%"
+    "super+shift, 6, centerwindow, 1"
+    "super+shift, 7, resizeactive, exact 70% 70%"
+    "super+shift, 7, centerwindow, 1"
+    "super+shift, 8, resizeactive, exact 80% 80%"
+    "super+shift, 8, centerwindow, 1"
+    "super+shift, 9, resizeactive, exact 90% 90%"
+    "super+shift, 9, centerwindow, 1"
 
-    "SUPER SHIFT, 1, resizeactive, exact 10% 10%"
-    "SUPER SHIFT, 1, centerwindow, 1"
-    "SUPER SHIFT, 2, resizeactive, exact 20% 20%"
-    "SUPER SHIFT, 2, centerwindow, 1"
-    "SUPER SHIFT, 3, resizeactive, exact 30% 30%"
-    "SUPER SHIFT, 3, centerwindow, 1"
-    "SUPER SHIFT, 4, resizeactive, exact 40% 40%"
-    "SUPER SHIFT, 4, centerwindow, 1"
-    "SUPER SHIFT, 5, resizeactive, exact 50% 50%"
-    "SUPER SHIFT, 5, centerwindow, 1"
-    "SUPER SHIFT, 6, resizeactive, exact 60% 60%"
-    "SUPER SHIFT, 6, centerwindow, 1"
-    "SUPER SHIFT, 7, resizeactive, exact 70% 70%"
-    "SUPER SHIFT, 7, centerwindow, 1"
-    "SUPER SHIFT, 8, resizeactive, exact 80% 80%"
-    "SUPER SHIFT, 8, centerwindow, 1"
-    "SUPER SHIFT, 9, resizeactive, exact 90% 90%"
-    "SUPER SHIFT, 9, centerwindow, 1"
+    "super+shift, 0, centerwindow, 1"
+    "super+shift, O, resizeactive, exact 600 400"
 
-    "SUPER SHIFT, 0, centerwindow, 1"
-    "SUPER SHIFT, O, resizeactive, exact 600 400"
-
-    "SUPER ALT, O, centerwindow, 1"
-    "SUPER ALT, I, exec, ${cycleFloatingPositions}"
-    "SUPER SHIFT ALT, I, exec, ${cycleFloatingPositions} reverse"
+    "super+alt, O, centerwindow, 1"
+    "super+alt, I, exec, ${cycleFloatingPositions}"
+    "super+alt+shift, I, exec, ${cycleFloatingPositions} reverse"
 
     # Super+m to minimize window, Super+m to bring it back (possibly on a different workspace)
-    "SUPER, m, togglespecialworkspace, mover"
-    "SUPER, m, movetoworkspace, +0"
-    "SUPER, m, togglespecialworkspace, mover"
-    "SUPER, m, movetoworkspace, special:mover"
-    "SUPER, m, togglespecialworkspace, mover"
+    "super, m, togglespecialworkspace, mover"
+    "super, m, movetoworkspace, +0"
+    "super, m, togglespecialworkspace, mover"
+    "super, m, movetoworkspace, special:mover"
+    "super, m, togglespecialworkspace, mover"
 
     # Screenshot a region
+    ", print, exec, ${screenshot} ri"
+    "super, print, exec, ${screenshot} rf"
+    "ctrl, print, exec, ${screenshot} rc"
+    "shift, print, exec, ${screenshot} sc"
+    "super+shift, print, exec, ${screenshot} sf"
+    "ctrl+shift, print, exec, ${screenshot} si"
+    "alt, print, exec, ${screenshot} p"
     # ", PRINT, exec, hyprshot -m region"
-    ", Print, exec, ${screenshot} ri"
-    "SUPER, Print, exec, ${screenshot} rf"
-    "CTRL, Print, exec, ${screenshot} rc"
-    "SHIFT, Print, exec, ${screenshot} sc"
-    "SUPER SHIFT, Print, exec, ${screenshot} sf"
-    "CTRL SHIFT, Print, exec, ${screenshot} si"
-    "ALT, Print, exec, ${screenshot} p"
 
-    # Scroll through existing workspaces with mainMod + scroll
-    "SUPER, mouse_down, workspace, e+1"
-    "SUPER, mouse_up, workspace, e-1"
+    # Scroll through existing workspaces with super + scroll
+    "super, mouse_down, workspace, e+1"
+    "super, mouse_up, workspace, e-1"
 
-    # Navigation existing workspaces (don't wrap-around)
-    "SUPER ALT, left, workspace, -1"
-    "SUPER ALT, right, workspace, +1"
+    # Experimental
+    "super, f6, exec, ${toggleMoveMode}"
+    "shift, f6, exec, ${toggleMoveMode}"
+    "alt, f6, exec, ${toggleMoveMode}"
   ];
 
   binde = [
-    "SUPER ALT, H, exec, ${moveWindowOrGroupOrActive} l -40 0"
-    "SUPER ALT, J, exec, ${moveWindowOrGroupOrActive} d 0 40"
-    "SUPER ALT, K, exec, ${moveWindowOrGroupOrActive} u 0 -40"
-    "SUPER ALT, L, exec, ${moveWindowOrGroupOrActive} r 40 0"
+
+    # Move window 
+    "super+alt, h, exec, ${moveWindowOrGroupOrActive} l -40 0"
+    "super+alt, j, exec, ${moveWindowOrGroupOrActive} d 0 40"
+    "super+alt, k, exec, ${moveWindowOrGroupOrActive} u 0 -40"
+    "super+alt, l, exec, ${moveWindowOrGroupOrActive} r 40 0"
 
     # Resize window
-    "SUPER SHIFT, H, resizeactive, -80 0"
-    "SUPER SHIFT, J, resizeactive, 0 80"
-    "SUPER SHIFT, K, resizeactive, 0 -80"
-    "SUPER SHIFT, L, resizeactive, 80 0"
+    "super+shift, h, resizeactive, -80 0"
+    "super+shift, j, resizeactive, 0 80"
+    "super+shift, k, resizeactive, 0 -80"
+    "super+shift, l, resizeactive, 80 0"
 
     # Cycle floating windows
-    "SUPER, U, cyclenext, floating"
-    "SUPER SHIFT, U, cyclenext, prev floating"
+    "super, u, cyclenext, floating"
+    "super+shift, u, cyclenext, prev floating"
 
-    # # Screen brightness
-    # ", XF86MonBrightnessUp,exec,brightnessctl set +5%"
-    # ", XF86MonBrightnessDown,exec,brightnessctl set 5%-"
-    #
-    # # Volume control
-    # ", XF86AudioRaiseVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
-    # ", XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
-    # ", XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
   ];
 
   bindm = [
-    # Move/resize windows with mainMod + LMB/RMB and dragging
-    "SUPER, mouse:272, movewindow"
-    "SUPER, mouse:273, resizewindow"
-    "SUPERSHIFT, mouse:272, resizewindow"
-    "SUPER ALT, mouse:272, resizewindow"
+    # Move/resize windows with super + LMB/RMB and dragging
+    "super, mouse:272, movewindow"
+    "super, mouse:273, resizewindow"
+    "super+shift, mouse:272, resizewindow"
+    "super+alt, mouse:272, resizewindow"
   ];
 
 }

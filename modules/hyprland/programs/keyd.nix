@@ -11,13 +11,16 @@ in {
       enable = true;
       systemdTarget = cfg.systemd.target;
       applications = {
-
-        # Map meta a/z to ctrl a/z
         "*" = {
+
+          # Map meta a/z to ctrl a/z
           "super.a" = "C-a";
           "super.z" = "C-z";
-        };
 
+          # Quick access to escape key
+          "j+k" = "esc";
+
+        };
       };
 
     };
