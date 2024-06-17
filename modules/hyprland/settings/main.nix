@@ -50,7 +50,7 @@ in {
     resize_on_border = mkDefault true;
   };
 
-  master.new_is_master = mkDefault true;
+  # master.new_is_master = mkDefault true;
 
   dwindle = {
     preserve_split = true;
