@@ -11,17 +11,17 @@ in {
     # keyboard shortcuts
     services.keyd.applications = {
       kitty = {
-        "meta.t" = "C-S-t"; # new tab
-        "meta.w" = "C-S-q"; # close tab
-        "meta.[" = "C-S-left"; # prev tab
-        "meta.]" = "C-S-right"; # next tab
-        "meta.n" = "C-S-n"; # new window
-        "meta.r" = "C-r"; # reload
-        "meta.c" = "C-insert"; # copy
-        "meta.p" = "S-insert"; # paste
-        "meta.equal" = "C-S-equal";
-        "meta.minus" = "C-S-minus";
-        "meta.slash" = "macro(C-S-h slash)"; # search scrollback
+        "super.t" = "C-S-t"; # new tab
+        "super.w" = "C-S-q"; # close tab
+        "super.[" = "C-S-left"; # prev tab
+        "super.]" = "C-S-right"; # next tab
+        "super.n" = "C-S-n"; # new window
+        "super.r" = "C-r"; # reload
+        "super.c" = "C-insert"; # copy
+        "super.p" = "S-insert"; # paste
+        "super.equal" = "C-S-equal";
+        "super.minus" = "C-S-minus";
+        "super.slash" = "macro(C-S-h slash)"; # search scrollback
       };
     };
 
