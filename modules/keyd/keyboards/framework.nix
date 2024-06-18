@@ -13,7 +13,7 @@
       # [Nav/Tab]
       # [Control]
       # [Control] [fn] [Alt] [Super] [Space] [Super] [Alt]
-      tab = "overload(nav, tab)";
+      tab = "overloadt2(nav, tab, 200)";
       capslock = "layer(control)";
       leftcontrol = "layer(control)";
       leftmeta = "layer(alt)";

@@ -11,7 +11,7 @@
     main = {
 
       # Use tab (and left ctrl+meta) as custom modifier
-      tab = "overload(nav, tab)";
+      tab = "overloadt2(nav, tab, 200)";
       "leftcontrol+leftmeta" = "layer(nav)";
 
       # Leave the default modifiers as-is
@@ -19,7 +19,6 @@
       leftmeta = "layer(super)";
       rightmeta = "layer(super)";
       rightalt = "layer(alt)";
-
 
       # Fn keypad as media keys
       # [+] next song
