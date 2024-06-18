@@ -19,7 +19,7 @@
       leftmeta = "layer(alt)";
       leftalt = "layer(super)";
       rightalt = "layer(super)";
-      rightmeta = "layer(alt)";
+      rightcontrol = "layer(alt)";
 
     };
 

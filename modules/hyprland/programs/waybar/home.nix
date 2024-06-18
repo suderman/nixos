@@ -46,7 +46,7 @@ in {
         };
 
         # modules layout
-        modules-left = [ "custom/launcher" "hyprland/workspaces" ];
+        modules-left = [ "custom/launcher" "hyprland/workspaces" "wlr/taskbar" ];
         modules-center = [ "clock" "hyprland/window" ];
         modules-right = [ "idle_inhibitor" "custom/bluetooth" "network" "temperature" "cpu" "tray" "battery" "custom/power" ];
 
@@ -111,6 +111,18 @@ in {
           critical-threshold = 80;
           format-critical = "{temperatureC}°C ";
           format = "{temperatureC}°C ";
+        };
+        "wlr/taskbar" = {
+          format = "{icon}";
+          icon-size = 14;
+          icon-theme = "Numix-Circle";
+          tooltip-format = "{title}";
+          on-click = "activate";
+          on-click-middle = "close";
+          ignore-list = [ "kitty" ];
+          rewrite = {
+            "Firefox Web Browser" = "Firefox";
+          };
         };
         tray = {
           icon-size = 14;
