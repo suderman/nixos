@@ -179,21 +179,21 @@
     '';
   };
 
-  toggleMoveMode = mkShellScript {
-    inputs = with pkgs; [ coreutils hyprland ]; text = ''
-      if [[ -e /tmp/movemode ]]; then 
-        hyprctl keyword unbind , mouse:272
-        hyprctl keyword unbind , mouse:273
-        hyprctl keyword unbind , mouse:274
-        rm -f /tmp/movemode
-      else
-        hyprctl keyword bindm , mouse:272, movewindow
-        hyprctl keyword bindm , mouse:273, resizewindow
-        hyprctl keyword bind , mouse:274, exec, ${toggleGroupOrLock}
-        touch /tmp/movemode
-      fi
-    '';
-  };
+  # toggleMoveMode = mkShellScript {
+  #   inputs = with pkgs; [ coreutils hyprland ]; text = ''
+  #     if [[ -e /tmp/movemode ]]; then 
+  #       hyprctl keyword unbind , mouse:272
+  #       hyprctl keyword unbind , mouse:273
+  #       hyprctl keyword unbind , mouse:274
+  #       rm -f /tmp/movemode
+  #     else
+  #       hyprctl keyword bindm , mouse:272, movewindow
+  #       hyprctl keyword bindm , mouse:273, resizewindow
+  #       hyprctl keyword bind , mouse:274, exec, ${toggleGroupOrLock}
+  #       touch /tmp/movemode
+  #     fi
+  #   '';
+  # };
 
 in {
 
@@ -231,6 +231,9 @@ in {
     "super, tab, workspace, m+1" # cyclenext
     "super+shift, tab, workspace, m-1" # cyclenext, prev
     "super, backslash, workspace, previous"
+
+    "alt, tab, exec, hyprswitch --sort-recent"
+    "alt+shift, tab, exec, hyprswitch --sort-recent -r"
 
     # Manage groups
     "super+shift, g, togglegroup,"
@@ -328,10 +331,10 @@ in {
     "super, mouse_down, workspace, e+1"
     "super, mouse_up, workspace, e-1"
 
-    # Experimental
-    "super, f6, exec, ${toggleMoveMode}"
-    "shift, f6, exec, ${toggleMoveMode}"
-    "alt, f6, exec, ${toggleMoveMode}"
+    # # Experimental
+    # "super, f6, exec, ${toggleMoveMode}"
+    # "shift, f6, exec, ${toggleMoveMode}"
+    # "alt, f6, exec, ${toggleMoveMode}"
   ];
 
   binde = [
@@ -359,10 +362,6 @@ in {
     # Move/resize windows with super + LMB/RMB and dragging
     "super, mouse:272, movewindow"
     "super, mouse:273, resizewindow"
-
-    # Move/resize windows with super + ctrl/shift and dragging
-    "super, contrl_l, movewindow"
-    "super, shift_l, resizewindow"
 
   ];
 

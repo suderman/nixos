@@ -37,6 +37,8 @@ in {
       wofi
       tofi
 
+      inputs.hyprswitch.packages."${pkgs.stdenv.system}".default
+
       hyprpaper
       brightnessctl
       mako
