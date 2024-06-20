@@ -29,6 +29,9 @@
       kpasterisk = "media";
       kpslash = "playpause";
 
+      # Both volume keys together trigger media key
+      "volumedown+volumeup" = "media";
+
     };
 
   } // import ./all.nix;

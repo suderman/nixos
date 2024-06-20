@@ -21,6 +21,9 @@
       rightmeta = "layer(super)";
       rightalt = "layer(alt)";
 
+      # Both volume keys together trigger media key
+      "volumedown+volumeup" = "media";
+      
     };
 
   } // import ./all.nix;

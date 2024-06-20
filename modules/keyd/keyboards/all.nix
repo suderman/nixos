@@ -82,6 +82,9 @@
     f = "micmute";
     space = "playpause";
 
+    # Both volume keys together trigger media key
+    "a+s" = "media";
+
     # Switch TTYs
     "1" = "C-A-f1";
     "2" = "C-A-f2";
@@ -96,6 +99,13 @@
     # Toggle capslock
     rightshift = "capslock";
 
+  };
+
+  # Shift+volume keys control tracks
+  shift = {
+    volumedown = "previoussong";
+    volumeup = "nextsong";
+    mute = "playpause";
   };
 
 }

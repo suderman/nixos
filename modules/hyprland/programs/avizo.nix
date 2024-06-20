@@ -7,6 +7,8 @@ in {
 
   config = mkIf cfg.enable {
 
+    home.packages = with pkgs; [ sinks ];
+
     systemd.user.services.avizo = {
       Install.WantedBy = mkForce [ cfg.systemd.target ];
       Unit.PartOf = mkForce [ cfg.systemd.target ];
@@ -39,8 +41,17 @@ in {
         # Volume control
         ", XF86AudioRaiseVolume, exec, volumectl -pbu up"
         ", XF86AudioLowerVolume, exec, volumectl -pb down"
+
+      ];
+      bind = [
+
+        # Mute toggle
         ", XF86AudioMute, exec, volumectl -a toggle-mute"
         ", XF86AudioMicMute, exec, volumectl -am toggle-mute"
+
+        # Sink selection
+        ", XF86AudioMedia, exec, sinks"
+        "shift, XF86AudioMedia, exec, sinks -i"
 
       ];
     };

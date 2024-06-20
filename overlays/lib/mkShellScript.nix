@@ -14,7 +14,7 @@ in { name ? "script", text ? "", inputs ? [], env ? {} }: writeTextFile {
   text = ''
     #!${runtimeShell}
   '' + optionalString ( inputs != [] ) ''
-    set -euxo pipefail
+    set -euo pipefail
     export PATH="${makeBinPath inputs}:$PATH"
   '' + concatLines ( mapAttrsToList (n: v: "export ${n}=\"${v}\"") env ) + ''
     ${if (isPath text) then readFile text else text}

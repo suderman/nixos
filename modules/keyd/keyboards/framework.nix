@@ -21,6 +21,9 @@
       rightalt = "layer(super)";
       rightcontrol = "layer(alt)";
 
+      # Both volume keys together trigger media key
+      "volumedown+volumeup" = "media";
+
     };
 
   } // import ./all.nix;
