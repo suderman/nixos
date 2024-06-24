@@ -4,7 +4,25 @@
   inherit (prev) lib this;
   inherit (this.lib) enableWayland appId;
 
+  # Uses in rofi plugins
+  rofi-wayland = { rofi-unwrapped = prev.rofi-wayland-unwrapped; };
+
 in {
+
+  # Rofi plugins
+  rofi-blezz = prev.rofi-blezz.override rofi-wayland;
+  # rofi-bluetooth = prev.rofi-bluetooth.override rofi-wayland;
+  rofi-calc = prev.rofi-calc.override rofi-wayland;
+  rofi-emoji = prev.rofi-emoji.override rofi-wayland;
+  rofi-file-browser = prev.rofi-file-browser.override rofi-wayland;
+  rofi-menugen = prev.rofi-menugen.override rofi-wayland;
+  rofi-obsidian = prev.rofi-obsidian.override rofi-wayland;
+  rofi-power-menu = prev.rofi-power-menu.override rofi-wayland;
+  rofi-pulse-select = prev.rofi-pulse-select.override rofi-wayland;
+  rofi-screenshot = prev.rofi-screenshot.override rofi-wayland;
+  # rofi-systemd = prev.rofi-systemd.override rofi-wayland;
+  rofi-top = prev.rofi-top.override rofi-wayland;
+  rofi-vpn = prev.rofi-vpn.override rofi-wayland;
 
   # These packages support Wayland but sometimes need to be persuaded
   digikam          = enableWayland { type = "qt"; pkg = prev.digikam; bin = "digikam"; };
@@ -41,5 +59,7 @@ in {
   kitty = appId "kitty.desktop" prev.kitty;
   tauon = appId "tauonmb.desktop" prev.tauon;
   telegram-desktop = appId "org.telegram.desktop.desktop" prev.unstable.telegram-desktop;
+
+
 
 } 

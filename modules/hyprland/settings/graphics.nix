@@ -24,7 +24,7 @@
   };
 
   dwindle = {
-    no_gaps_when_only = mkDefault 2; # 1 hides borders, but can crash hyprland
+    no_gaps_when_only = mkDefault 1; # 1 hides borders, but can crash hyprland
   };
 
   misc = {
@@ -85,6 +85,9 @@
       "workspaces, 1, 3, default"
       "specialWorkspace, 1, 3, overshot, slidefadevert -50%"
 
+      "layers, 1, 0.5, default, fade"
+      # "layers, 1, 1, fade, default"
+
       # "windows, 1, 5, win, slide"
       # "windowsIn, 1, 6, winIn, slide"
       # "windowsOut, 1, 5, winOut, slide"
@@ -105,8 +108,16 @@
       # "specialWorkspace, 1, 3, default, slidefadevert -50%"
 
     ];
-
   };
 
+  # animation slide/popin/fade
+  layerrule = [
+    "animation slide, notifications"
+    "animation slide, waybar"
+    "animation fade, swww-daemon"
+    "animation fade, wofi"
+    "animation slide, menu"
+    "dimaround, menu"
+  ];
 
 }

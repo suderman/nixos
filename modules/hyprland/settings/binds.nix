@@ -228,12 +228,16 @@ in {
     "super+alt+shift, b, exec, chromium-browser --incognito"
 
     # Navigate workspaces
-    "super, tab, workspace, m+1" # cyclenext
-    "super+shift, tab, workspace, m-1" # cyclenext, prev
-    "super, backslash, workspace, previous"
+    # "super, tab, workspace, m+1" # cyclenext
+    # "super+shift, tab, workspace, m-1" # cyclenext, prev
+    "super, right, workspace, m+1" # cyclenext
+    "super, left, workspace, m-1" # cyclenext, prev
 
-    "alt, tab, exec, hyprswitch --sort-recent"
-    "alt+shift, tab, exec, hyprswitch --sort-recent -r"
+    "super, backslash, focuscurrentorlast"
+    "super, tab, focuscurrentorlast"
+
+    # "alt, tab, exec, hyprswitch --sort-recent"
+    # "alt+shift, tab, exec, hyprswitch --sort-recent -r"
 
     # Manage groups
     "super+shift, g, togglegroup,"
@@ -251,7 +255,7 @@ in {
     "super+alt, f, fullscreen, 0"
 
     # App launcher
-    "super, space, exec, ${getExe pkgs.fuzzel}"
+    # "super, space, exec, ${getExe pkgs.fuzzel}"
 
     # Move focus with super [hjkl]
     "super, h, movefocus, l"

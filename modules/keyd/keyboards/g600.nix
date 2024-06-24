@@ -4,11 +4,11 @@
   settings = {
     main = {
 
-      # G4 (nudge scroll wheel): super-tab 
-      f4 = "M-tab";
+      # G4 (nudge scroll wheel): super-right 
+      f4 = "M-right";
 
-      # G5 (nudge scroll wheel): super+shift-tab
-      f5 = "M-S-tab";
+      # G5 (nudge scroll wheel): super+left
+      f5 = "M-left";
 
       # G6 (far-right mouse button): super
       f6 = "layer(super)";

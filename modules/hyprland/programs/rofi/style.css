@@ -1,0 +1,90 @@
+* {
+  background-color: transparent;
+  bg0: #252034E6;
+  bg1: #3C3B5480;
+  bg2: #01fdfeCC;
+  fg0: #DEDEDE;
+  fg1: #EEFAF2;
+  fg2: #252034;
+  fg3: #70788080;
+  margin: 0;
+  padding: 0;
+  spacing: 0;
+  text-color: @fg0;
+}
+
+element {
+  background-color: transparent;
+  padding: 8px 16px;
+  spacing: 16px;
+}
+
+element normal active {
+  text-color: @bg2;
+}
+
+element selected active {
+  background-color: @bg2;
+  text-color: @fg2;
+}
+
+element selected normal {
+  background-color: @bg2;
+  text-color: @fg2;
+}
+
+element-icon {
+  size: 32px;
+  vertical-align: 0.5;
+}
+
+element-text {
+  text-color: inherit;
+  vertical-align: 0.5;
+}
+
+entry {
+  placeholder: "Search";
+  placeholder-color: @fg3;
+  vertical-align: 0.5;
+}
+
+icon-search {
+  expand: false;
+  filename: "search";
+  size: 28px;
+  vertical-align: 0.5;
+}
+
+inputbar {
+  children: [ icon-search,entry ];
+  padding: 12px;
+  spacing: 12px;
+}
+
+listview {
+  border: 1px 0 0;
+  border-color: @bg1;
+  columns: 1;
+  fixed-height: false;
+  lines: 10;
+}
+
+message {
+  background-color: @bg1;
+  border: 2px 0 0;
+  border-color: @bg1;
+}
+
+textbox {
+  padding: 8px 24px;
+}
+
+window {
+  anchor: north;
+  background-color: @bg0;
+  border-radius: 8;
+  position: north;
+  width: 35%;
+  y-offset: -25%;
+}
