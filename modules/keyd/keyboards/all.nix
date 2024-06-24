@@ -79,7 +79,7 @@
     a = "volumedown";
     s = "volumeup";
     d = "mute";
-    f = "micmute";
+    # f = "micmute";
     space = "playpause";
 
     # Both volume keys together trigger media key
@@ -105,7 +105,7 @@
   shift = {
     volumedown = "previoussong";
     volumeup = "nextsong";
-    mute = "playpause";
+    mute = "micmute";
   };
 
 }

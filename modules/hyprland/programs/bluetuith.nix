@@ -2,13 +2,14 @@
 
   cfg = config.wayland.windowManager.hyprland;
   inherit (builtins) toJSON;
-  inherit (lib) mkIf;
+  inherit (lib) mkIf getExe;
 
 in {
 
   config = mkIf cfg.enable {
 
     home.packages = with pkgs; [ 
+      bluez
       bluetuith
     ];
 
@@ -27,6 +28,15 @@ in {
         };
         
       };
+    };
+
+    wayland.windowManager.hyprland.settings = {
+      bind = with pkgs; [
+
+        # Bluetooth connection
+        ", XF86AudioMedia, exec, bluetoothctl connect $(bluetoothctl devices | ${getExe fuzzel} -d | cut -d' ' -f2)"
+
+      ];
     };
 
   };

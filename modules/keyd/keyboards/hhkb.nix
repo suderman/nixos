@@ -32,6 +32,9 @@
       # Both volume keys together trigger media key
       "volumedown+volumeup" = "media";
 
+      # Fix media key labelled "Eject"
+      f20 = "eject";
+
     };
 
   } // import ./all.nix;
