@@ -87,7 +87,7 @@ in {
           "drun"
           "ssh"
         ];
-        combi-display-format = "{mode} <---> {text}";
+        # combi-display-format = "{mode} <---> {text}";
         separator-style = "dash";
         show-icons = true;
         icon-theme = "Papirus";
