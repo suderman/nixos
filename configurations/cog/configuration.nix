@@ -18,7 +18,7 @@ in {
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Good graphics
-  hardware.opengl.extraPackages = with pkgs; [
+  hardware.graphics.extraPackages = with pkgs; [
     mesa.drivers
     vaapiVdpau
   ];

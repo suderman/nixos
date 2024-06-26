@@ -57,10 +57,9 @@
 
   };
 
-  hardware.opengl = {
+  hardware.graphics = {
     enable = true;
-    driSupport = true;
-    driSupport32Bit = true;
+    enable32Bit = true;
   };
 
   # Enable dynamic CDI configuration for NVidia devices by running nvidia-container-toolkit on boot
