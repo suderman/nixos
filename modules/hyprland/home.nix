@@ -62,6 +62,7 @@ in {
       slurp # selecting a region to screenshot
 
       ( mkShellScript { name = "focus"; text = ./bin/focus.sh; } )
+      ( mkShellScript { name = "hyprwindow"; text = ./bin/hyprwindow.sh; } )
 
     ];
 
