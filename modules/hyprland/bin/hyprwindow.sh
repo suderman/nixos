@@ -3,7 +3,8 @@ if [ -z "${1-}" ]; then
   # hyprctl clients -j | jq -r 'sort_by(.focusHistoryID) | .[] | "\(.focusHistoryID) \(.class) :: \(.title)"'
   # echo -en "$(hyprctl clients -j | jq -r 'sort_by(.focusHistoryID) | .[] | "\(.focusHistoryID) \(.class) :: \(.title)\\0icon\\x1ffolder\\x1finfo\\x1f\(.focusHistoryID)"')\n"
   # echo -en "$(hyprctl clients -j | jq -r 'sort_by(.focusHistoryID) | .[] | "\(.class) :: \(.title)\\0icon\\x1ffolder\\x1finfo\\x1f\(.focusHistoryID)"')\n"
-  echo -en "$(hyprctl clients -j | jq -r 'sort_by(.focusHistoryID) | .[] | "\(.class) :: \(.title)\\0icon\\x1f\(.class)\\x1finfo\\x1f\(.focusHistoryID)"')\n"
+  # echo -en "$(hyprctl clients -j | jq -r 'sort_by(.focusHistoryID) | .[] | "\(.class) :: \(.title)\\0icon\\x1f\(.class)\\x1finfo\\x1f\(.focusHistoryID)"')\n"
+  echo -en "$(hyprctl clients -j | jq -r 'sort_by(.focusHistoryID) | .[] | "\(.class) \t \(.title)\\0icon\\x1f\(.class)\\x1finfo\\x1f\(.focusHistoryID)"')\n"
 else
   # env > /tmp/env.txt
   # printf -v id '%d\n' "$(echo "$@" | cut -d" " -f1)" 2>/dev/null

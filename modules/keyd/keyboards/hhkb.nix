@@ -14,10 +14,12 @@
       tab = "overloadt2(nav, tab, 200)";
 
       # Leave the default modifiers as-is
+      leftshift = "layer(shift)";
       leftalt = "layer(alt)";
       leftmeta = "layer(super)";
       rightmeta = "layer(super)";
       rightalt = "layer(alt)";
+      rightshift = "layer(shift)";
 
       # Fn keypad as media keys
       # [+] next song

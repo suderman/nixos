@@ -10,12 +10,21 @@ in {
 
   config = mkIf config.wayland.windowManager.hyprland.enable {
     
-    wayland.windowManager.hyprland.settings.bind = let
-      rofi = getExe config.programs.rofi.finalPackage;
-    in [
-      "super, space, exec, ${rofi} -show combi"
-      # ''alt, tab, exec, ${getExe config.programs.rofi.package} -show combi -kb-accept-entry "!Alt-Tab,!Alt+Alt_L" -kb-row-down "Alt+Tab" -selected-row 1''
-    ];
+    wayland.windowManager.hyprland.settings = let
+      rofi-combi = mkShellScript { 
+        inputs = with pkgs; [ gnugrep hyprland ];
+        text = ''
+          [[ -z "$(hyprctl layers | grep "namespace: rofi")" ]] && \
+          ${getExe config.programs.rofi.finalPackage} -show combi
+        ''; 
+      };
+    in {
+      bindrn = [ "super, Super_L, exec, ${rofi-combi}" ];
+      bind = [
+        "super, space, exec, ${rofi-combi}"
+        # ''alt, tab, exec, ${getExe config.programs.rofi.package} -show combi -kb-accept-entry "!Alt-Tab,!Alt+Alt_L" -kb-row-down "Alt+Tab" -selected-row 1''
+      ];
+    };
 
     programs.rofi = {
       enable = true;
@@ -41,12 +50,21 @@ in {
         ];
         separator-style = "dash";
         color-enabled = true;
-        me-select-entry = "MousePrimary";
-        me-accept-entry = "!MousePrimary";
         display-hyprwindow = "";
         display-window = "";
         display-drun = "";
         display-run = "run";
+
+        # kb-accept-entry = [ "space" "!Super+Super_L" ];
+        kb-cancel = [ "Super_L" "Escape" "Control+g" "Control+bracketleft" ];
+        kb-accept-entry = [ "space" "Return" ];
+        kb-mode-next = [ "Alt_L" "Shift+Right" "Control+Tab" ];
+        kb-mode-previous = [ "Shift+Alt_L" "Shift+Left" "Control+ISO_Left_Tab" ];
+        # kb-row-down = [ "Shift_R" "Down" "Control+n" "Super+j" ];
+        # kb-row-up = [ "Shift_L" "Up" "Control+p" "Super+k" ];
+        me-select-entry = "MousePrimary";
+        me-accept-entry = "!MousePrimary";
+
       };
 
       theme = let l = config.lib.formats.rasi.mkLiteral; in {
@@ -94,6 +112,7 @@ in {
           text-color =l "inherit";
           vertical-align =l "0.5";
           # tab-stops =l "[50px, 200px]";
+          tab-stops = map l [ "250px" ];
         };
 
         entry = {
@@ -138,7 +157,7 @@ in {
           background-color =l "@bg0";
           border-radius = 8;
           position =l "north";
-          width =l "35%";
+          width =l "45%";
           y-offset =l "-25%";
         };
 
