@@ -1,55 +1,83 @@
-# Search all data directories for desktop entry file
-function desktop_entry_path {
-  class=$1; class_alt=$(echo $class | awk '{print tolower($1)}')
+# Cache found names/icons
+CACHE="$XDG_RUNTIME_DIR/hyprwindow"
+mkdir -p $CACHE
+
+# Overrides for misnamed classes
+echo "org.gimp.GIMP" > $CACHE/gimp-2.99.class
+echo "app.bluebubbles.BlueBubbles" > $CACHE/bluebubbles.class
+
+# Init directories to search for desktop entries
+if [[ ! -e "$CACHE/appdirs" ]]; then
+  touch $CACHE/appdirs
   for share in $(echo $XDG_DATA_DIRS | tr ":" " "); do 
-    if [[ -e $share/applications/$class.desktop ]]; then
-      echo $share/applications/$class.desktop
-      return
-    elif [[ -e $share/applications/$class_alt.desktop ]]; then
-      echo $share/applications/$class_alt.desktop
-      return
-    fi
+    [[ -e $share/applications ]] && echo $share/applications >> $CACHE/appdirs
   done
-}
+fi
+APPDIRS="$(cat $CACHE/appdirs)"
 
-# Extract icon and name from desktop entry file
-function desktop_entry {
-  path="$(desktop_entry_path $1)"
-  if [[ -e $path ]]; then
-    awk -F= "/^$2=/{print \$2; exit}" $path
-  else
-    echo "$1"
-  fi
-}
 
+# Clear display prompt (don't show "hyprwindow")
 echo -en "\0prompt\x1f\n"
+
+# List all open windows if no arguments provided
 if [ -z "${1-}" ]; then
 
-  # Fetch all windows sorted by focus
-  hyprctl clients -j | jq -r 'sort_by(.focusHistoryID) | .[] | "\(.focusHistoryID) \(.class) \(.title)"' |\
-  while read line; do
-                
-    # Split line into 3 fields
-    id="$(echo $line | awk '{print $1}')"
-    class="$(echo $line | awk '{print $2}')"
-    title="$(echo $line | awk '{$1=""; $2=""; print}')"
+  # Look for all unique classes from running client windows
+  for class in $(hyprctl clients -j | jq -r '.[] | (if .class == "" then (.title | gsub("\\s";".")) else .class end)' | sort | uniq); do 
+    env="${CACHE}/${class}.env" 
+    name="$class" icon="$class" 
+    override="${CACHE}/${class}.class"
 
-    # Prepare options for row, extracted from desktop entry
-    name="$(desktop_entry $class Name)"
-    icon='\0icon\x1f'$(desktop_entry $class Icon)
-    meta='\x1fmeta\x1f'${class}
-    info='\x1finfo\x1f'${id}
+    # Check if env variable has been set yet
+    if [[ ! -e $env ]]; then
 
-    # Output the row
-    echo -en "${name}\t${title}${icon}${meta}${info}\n"
+      # Override class for *.desktop if override exists
+      desktop="${class}.desktop"
+      [[ -e $override ]] && desktop="$(cat $override).desktop"
 
+      # Search for a desktop entry by filename matching class
+      entry=""
+      for appdir in $APPDIRS; do 
+        if [[ -e $appdir/$desktop ]]; then
+          entry="${appdir}/${desktop}"
+          break
+        # Also check lowercase variation of class
+        elif [[ -e $appdir/${desktop,,} ]]; then
+          entry="${appdir}/${desktop,,}"
+          break
+        fi
+      done
+
+      # If desktop entry found, extract attribute
+      if [[ -e $entry ]]; then
+        name="$(awk -F= "/^Name=/{print \$2; exit}" $entry)"
+        icon="$(awk -F= "/^Icon=/{print \$2; exit}" $entry)"
+      fi
+
+      # Save env file to disk
+      echo -e "export NAME_${class}=${name}\nexport ICON_${class}=${icon}" > $env
+
+    fi
   done
 
+  # All env files together
+  cat $CACHE/*.env > $CACHE/env
+
+  # Load env variables into memory
+  echo -en "$(source $CACHE/env && \
+
+  # Order windows by MRU, Name falls back on title if class is empty, Tab separates title, Icon from class name, Class searchable as meta, Order passed as rofi info                
+  hyprctl clients -j | jq -r \
+    'sort_by(.focusHistoryID) | .[] | "${NAME_\(if .class == "" then .title else .class end)}\\t\(.title)\\0icon\\x1f${ICON_\(if .class == "" then .title else .class end)}\\x1fmeta\\x1f\(.class)\\x1finfo\\x1f\(.focusHistoryID)"' |\
+
+  # Replace all variables with values
+  envsubst)"
+
+# If there is an argument, focus on the selected window
 else
 
   # Focus selected window
-  id=''${ROFI_INFO-0}
-  addr="$(hyprctl clients -j | jq -r ".[] | select(.focusHistoryID==$id) | .address")"
+  addr="$(hyprctl clients -j | jq -r ".[] | select(.focusHistoryID==${ROFI_INFO-0}) | .address")"
   coproc hyprctl dispatch focuswindow address:$addr 2>&1
 
 fi

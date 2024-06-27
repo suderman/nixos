@@ -86,7 +86,10 @@
       "specialWorkspace, 1, 3, overshot, slidefadevert -50%"
 
       # "layers, 1, 0.4, default, fade"
-      "layers, 1, 0.4, default, fade"
+      "layers, 1, 0.1, default, fade"
+
+      # "layers, 1, 0.4, default, fade"
+      # "layers, 1, 0.4, default, fade"
       # "layers, 1, 0.8, rofi, fade"
       # "layers, 1, 1, fade, default"
 

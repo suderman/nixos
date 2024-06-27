@@ -4,7 +4,7 @@
   inherit (lib) getExe mkIf mkShellScript;
 
   hyprwindow = mkShellScript { 
-    inputs = with pkgs; [ hyprland jq libnotify ]; 
+    inputs = with pkgs; [ hyprland jq gawk gettext ]; 
     text = ../bin/hyprwindow.sh; 
   }; 
 
@@ -22,6 +22,8 @@ in {
       bindr = [ "super, Super_L, exec, ${rofi-toggle} -show combi" ];
       bind = [
         "super, space, exec, ${rofi-toggle} -show combi"
+        # "super, space, exec, ${getExe cfg.finalPackage} -show combi"
+        # "super+alt, space, exec, ${getExe cfg.finalPackage} -show emoji"
         # ''alt, tab, exec, ${rofi-toggle}  -show combi -kb-accept-entry "!Alt-Tab,!Alt+Alt_L" -kb-row-down "Alt+Tab" -selected-row 1''
       ];
     };
@@ -30,9 +32,9 @@ in {
       enable = true;
       package = pkgs.rofi-wayland;
       plugins = with pkgs; [ rofi-calc rofi-emoji rofimoji ];
-      cycle = true;
+      cycle = false;
       terminal = getExe pkgs.kitty;
-      font = "JetBrainsMono 16";
+      font = "JetBrainsMono 14";
       extraConfig = {
         icon-theme = "Papirus";
         show-icons = true;
@@ -41,8 +43,8 @@ in {
           "calc"
           "emoji"
           # "emoji:${getExe pkgs.rofimoji}"
-          "filebrowser"
-          "run"
+          # "filebrowser"
+          # "run"
         ];
         combi-modes = [
           "hyprwindow:${hyprwindow}"
@@ -117,8 +119,7 @@ in {
         element-text = {
           text-color =l "inherit";
           vertical-align =l "0.5";
-          # tab-stops =l "[50px, 200px]";
-          tab-stops = map l [ "250px" ];
+          tab-stops = map l [ "200px" ];
         };
 
         entry = {
