@@ -16,7 +16,7 @@
       # Leave the default modifiers as-is
       leftshift = "layer(shift)";
       leftalt = "layer(alt)";
-      leftmeta = "layer(super)";
+      leftmeta = "timeout(layer(super), 500, layerm(super, M-space))"; # if held for over 1/2 second, tap super-space
       rightmeta = "layer(super)";
       rightalt = "layer(alt)";
       rightshift = "layer(shift)";
@@ -33,9 +33,6 @@
 
       # Both volume keys together trigger media key
       "volumedown+volumeup" = "media";
-
-      # Fix media key labelled "Eject"
-      f20 = "eject";
 
     };
 

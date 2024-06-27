@@ -39,28 +39,28 @@ in {
       };
     };
 
-    # extra packages
-    home.packages = with pkgs; [ 
-      networkmanager_dmenu 
-      papirus-icon-theme
-    ];
-
-    xdg.configFile."networkmanager-dmenu/config.ini" = {
-      source = ini.generate "config.ini" {
-
-        dmenu = {
-          dmenu_command = "${getExe pkgs.fuzzel} -d";
-          compact = "True";
-          wifi_chars = "▂▄▆█";
-          list_saved = "True";
-        };
-
-        editor = {
-          terminal = "kitty";
-        };
-
-      }; 
-    };
+    # # extra packages
+    # home.packages = with pkgs; [ 
+    #   networkmanager_dmenu 
+    #   papirus-icon-theme
+    # ];
+    #
+    # xdg.configFile."networkmanager-dmenu/config.ini" = {
+    #   source = ini.generate "config.ini" {
+    #
+    #     dmenu = {
+    #       dmenu_command = "${getExe pkgs.fuzzel} -d";
+    #       compact = "True";
+    #       wifi_chars = "▂▄▆█";
+    #       list_saved = "True";
+    #     };
+    #
+    #     editor = {
+    #       terminal = "kitty";
+    #     };
+    #
+    #   }; 
+    # };
 
   };
 

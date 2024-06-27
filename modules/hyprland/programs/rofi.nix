@@ -1,6 +1,7 @@
 { config, lib, pkgs, ... }: let
 
   cfg = config.programs.rofi;
+  ini = pkgs.formats.ini {};
   inherit (lib) getExe mkIf mkShellScript;
 
   hyprwindow = mkShellScript { 
@@ -19,11 +20,9 @@ in {
   config = mkIf config.wayland.windowManager.hyprland.enable {
 
     wayland.windowManager.hyprland.settings = {
-      bindr = [ "super, Super_L, exec, ${rofi-toggle} -show combi" ];
+      bindr = [ "super, Super_L, exec, ${rofi-toggle}" ];
       bind = [
         "super, space, exec, ${rofi-toggle} -show combi"
-        # "super, space, exec, ${getExe cfg.finalPackage} -show combi"
-        # "super+alt, space, exec, ${getExe cfg.finalPackage} -show emoji"
         # ''alt, tab, exec, ${rofi-toggle}  -show combi -kb-accept-entry "!Alt-Tab,!Alt+Alt_L" -kb-row-down "Alt+Tab" -selected-row 1''
       ];
     };
@@ -169,6 +168,24 @@ in {
         };
 
       };
+    };
+
+    # extra packages
+    home.packages = with pkgs; [ 
+      networkmanager_dmenu 
+      papirus-icon-theme
+    ];
+
+    xdg.configFile."networkmanager-dmenu/config.ini" = {
+      source = ini.generate "config.ini" {
+        dmenu = {
+          dmenu_command = "${getExe cfg.finalPackage} -dmenu";
+          compact = "True";
+          wifi_chars = "▂▄▆█";
+          list_saved = "True";
+        };
+        editor.terminal = "kitty";
+      }; 
     };
 
   };
