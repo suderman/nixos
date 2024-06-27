@@ -1,4 +1,6 @@
 { config, lib, pkgs, ... }: let
+
+  cfg = config.programs.rofi;
   inherit (lib) getExe mkIf mkShellScript;
 
   hyprwindow = mkShellScript { 
@@ -6,30 +8,28 @@
     text = ../bin/hyprwindow.sh; 
   }; 
 
+  # Toggle
+  rofi-toggle = mkShellScript { 
+    inputs = with pkgs; [ cfg.finalPackage procps keyd ]; 
+    text = ../bin/rofi-toggle.sh; 
+  }; 
+
 in {
 
   config = mkIf config.wayland.windowManager.hyprland.enable {
-    
-    wayland.windowManager.hyprland.settings = let
-      rofi-combi = mkShellScript { 
-        inputs = with pkgs; [ gnugrep hyprland ];
-        text = ''
-          [[ -z "$(hyprctl layers | grep "namespace: rofi")" ]] && \
-          ${getExe config.programs.rofi.finalPackage} -show combi
-        ''; 
-      };
-    in {
-      bindrn = [ "super, Super_L, exec, ${rofi-combi}" ];
+
+    wayland.windowManager.hyprland.settings = {
+      bindr = [ "super, Super_L, exec, ${rofi-toggle} -show combi" ];
       bind = [
-        "super, space, exec, ${rofi-combi}"
-        # ''alt, tab, exec, ${getExe config.programs.rofi.package} -show combi -kb-accept-entry "!Alt-Tab,!Alt+Alt_L" -kb-row-down "Alt+Tab" -selected-row 1''
+        "super, space, exec, ${rofi-toggle} -show combi"
+        # ''alt, tab, exec, ${rofi-toggle}  -show combi -kb-accept-entry "!Alt-Tab,!Alt+Alt_L" -kb-row-down "Alt+Tab" -selected-row 1''
       ];
     };
 
     programs.rofi = {
       enable = true;
       package = pkgs.rofi-wayland;
-      plugins = with pkgs; [ rofi-calc rofi-emoji ];
+      plugins = with pkgs; [ rofi-calc rofi-emoji rofimoji ];
       cycle = true;
       terminal = getExe pkgs.kitty;
       font = "JetBrainsMono 16";
@@ -40,6 +40,7 @@ in {
           "combi"
           "calc"
           "emoji"
+          # "emoji:${getExe pkgs.rofimoji}"
           "filebrowser"
           "run"
         ];
@@ -55,8 +56,9 @@ in {
         display-drun = "";
         display-run = "run";
 
+
         # kb-accept-entry = [ "space" "!Super+Super_L" ];
-        kb-cancel = [ "Super_L" "Escape" "Control+g" "Control+bracketleft" ];
+        # kb-cancel = [ "Super_L" "Escape" "Control+g" "Control+bracketleft" ];
         kb-accept-entry = [ "space" "Return" ];
         kb-mode-next = [ "Alt_L" "Shift+Right" "Control+Tab" ];
         kb-mode-previous = [ "Shift+Alt_L" "Shift+Left" "Control+ISO_Left_Tab" ];
@@ -64,6 +66,10 @@ in {
         # kb-row-up = [ "Shift_L" "Up" "Control+p" "Super+k" ];
         me-select-entry = "MousePrimary";
         me-accept-entry = "!MousePrimary";
+
+        # rofi-calc
+        calc-command = "echo -n '{result}' | wl-copy";
+        kb-accept-custom = [ "backslash" "Control+Return" ];
 
       };
 
@@ -157,7 +163,7 @@ in {
           background-color =l "@bg0";
           border-radius = 8;
           position =l "north";
-          width =l "45%";
+          width =l "65%";
           y-offset =l "-25%";
         };
 

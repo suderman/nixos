@@ -85,7 +85,9 @@
       "workspaces, 1, 3, default"
       "specialWorkspace, 1, 3, overshot, slidefadevert -50%"
 
-      "layers, 1, 0.5, default, fade"
+      # "layers, 1, 0.4, default, fade"
+      "layers, 1, 0.4, default, fade"
+      # "layers, 1, 0.8, rofi, fade"
       # "layers, 1, 1, fade, default"
 
       # "windows, 1, 5, win, slide"
@@ -118,6 +120,8 @@
     "animation fade, wofi"
     "animation slide, menu"
     "dimaround, menu"
+    "animation fade, rofi"
+    "dimaround, rofi"
   ];
 
 }
