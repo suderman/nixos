@@ -3,11 +3,8 @@
   # Super (meta) layer 
   "super:M" = {
 
-    # Open app switcher (command tab)
+    # Open window switcher (super tab)
     tab = "swapm(switcher, M-tab)";
-
-    # esc: Switch to next window in the application group
-    # esc = "A-f6";
 
     # Cut/Copy/Paste clipboard
     x = "S-delete";
@@ -19,8 +16,11 @@
   # Switcher (while holding down meta/super-tab)
   "switcher:M" = {
 
-    # Meta-Backtick\Esc: Switch to previous application
-    grave = "M-S-tab"; # `
+    # Super-Tab: Switch to next window
+    tab = "M-A-tab";
+
+    # Super-Backtick\Esc: Switch to previous window
+    grave = "M-S-tab";
     esc = "M-S-tab";
 
     # vi keys
@@ -33,12 +33,6 @@
 
   # Nav (Vim & Emacs style navigation)
   nav = {
-
-    # Open app switcher (command tab)
-    tab = "swapm(switcher, M-tab)";
-
-    # esc: Switch to next window in the application group
-    esc = "A-f6";
 
     # vi keys
     k = "up";

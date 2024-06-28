@@ -228,15 +228,27 @@ in {
     "super+alt+shift, b, exec, chromium-browser --incognito"
 
     # Navigate workspaces
-    # "super, tab, workspace, m+1" # cyclenext
-    # "super+shift, tab, workspace, m-1" # cyclenext, prev
     "super, right, workspace, m+1" # cyclenext
     "super, left, workspace, m-1" # cyclenext, prev
 
-    # Navigation windows
+  ] ++ ( 
+
+    let supertab = mkShellScript { 
+      inputs = with pkgs; [ hyprland gawk ]; 
+      text = ../bin/supertab.sh; 
+    }; 
+
+  in [
+
+    # Navigation windows with super tab
+    "super, tab, exec, ${supertab}"
+    "super+alt, tab, exec, ${supertab} next"
+    "super+shift, tab, exec, ${supertab} prev"
+
+    # Back-and-forth with super \
     "super, backslash, focuscurrentorlast"
-    "super, tab, exec, hyprswitch --sort-recent"
-    "shift+super, tab, exec, hyprswitch --sort-recent -r"
+
+  ]) ++ [
 
     # Manage groups
     "super+shift, g, togglegroup,"
