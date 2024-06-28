@@ -23,11 +23,9 @@
     grave = "M-S-tab";
     esc = "M-S-tab";
 
-    # vi keys
-    k = "M-up";
-    l = "M-right";
-    j = "M-down";
-    h = "M-left";
+    # Next and back
+    n = "M-right";
+    b = "M-left";
 
   }; 
 
