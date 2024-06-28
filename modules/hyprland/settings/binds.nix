@@ -233,11 +233,10 @@ in {
     "super, right, workspace, m+1" # cyclenext
     "super, left, workspace, m-1" # cyclenext, prev
 
+    # Navigation windows
     "super, backslash, focuscurrentorlast"
-    "super, tab, focuscurrentorlast"
-
-    # "alt, tab, exec, hyprswitch --sort-recent"
-    # "alt+shift, tab, exec, hyprswitch --sort-recent -r"
+    "super, tab, exec, hyprswitch --sort-recent"
+    "shift+super, tab, exec, hyprswitch --sort-recent -r"
 
     # Manage groups
     "super+shift, g, togglegroup,"

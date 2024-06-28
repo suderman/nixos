@@ -29,41 +29,21 @@ in {
       Requires = [ "hyprland-session.target" ];
     };
 
-
-    # modules.eww.enable = true;
-    # modules.anyrun.enable = true;
-
     home.packages = with pkgs; [ 
-      wofi
-      tofi
-
       inputs.hyprswitch.packages."${pkgs.stdenv.system}".default
-
-      hyprpaper
       brightnessctl
       mako
       # pamixer
       # ncpamixer
-
       font-awesome
-
       wezterm
-
       swww
-
-      # swaybg # the wallpaper
-      # swayidle # the idle timeout
-      # swaylock # locking the screen
       wlogout # logout menu
       wl-clipboard # copying and pasting
       hyprpicker  # color picker
       wf-recorder # screen recording
       grim # taking screenshots
       slurp # selecting a region to screenshot
-
-      ( mkShellScript { name = "focus"; text = ./bin/focus.sh; } )
-      ( mkShellScript { name = "hyprwindow"; text = ./bin/hyprwindow.sh; } )
-
     ];
 
     # I'll never remember the H
@@ -103,7 +83,6 @@ in {
         };
       in mkMerge ( map ( f: import f args ) ( ls ./settings ) );
 
-      # extraConfig = builtins.readFile ./hyprland.conf + "\n\n" + ''
       extraConfig = ''
         source = ~/.config/hypr/extra.conf
       '';

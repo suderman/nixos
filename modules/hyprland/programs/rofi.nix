@@ -20,10 +20,11 @@ in {
   config = mkIf config.wayland.windowManager.hyprland.enable {
 
     wayland.windowManager.hyprland.settings = {
-      bindr = [ "super, Super_L, exec, ${rofi-toggle}" ];
+      bindr = [ "super, Super_L, exec, ${rofi-toggle} -show combi" ];
       bind = [
         "super, space, exec, ${rofi-toggle} -show combi"
         # ''alt, tab, exec, ${rofi-toggle}  -show combi -kb-accept-entry "!Alt-Tab,!Alt+Alt_L" -kb-row-down "Alt+Tab" -selected-row 1''
+        # ''super, tab, exec, ${rofi-toggle}  -show combi -kb-accept-entry "!Super-Tab,!Super+Super_L" -kb-row-down "Super+Tab" -selected-row 1''
       ];
     };
 

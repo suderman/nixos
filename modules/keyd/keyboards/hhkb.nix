@@ -16,7 +16,7 @@
       # Leave the default modifiers as-is
       leftshift = "layer(shift)";
       leftalt = "layer(alt)";
-      leftmeta = "timeout(layer(super), 500, layerm(super, M-space))"; # if held for over 1/2 second, tap super-space
+      leftmeta = "layer(super)";
       rightmeta = "layer(super)";
       rightalt = "layer(alt)";
       rightshift = "layer(shift)";

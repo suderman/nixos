@@ -40,8 +40,8 @@ in {
           text = ''
             handle() {
               if [[ "$1" == "openlayer>>rofi" ]]; then
-                keyd bind super.j=down super.k=up super.h=left super.l=right
-                keyd bind super.enter=enter super.space=space
+                keyd bind super.space=down super.tab=down super.grave=up super.j=down super.k=up super.h=left super.l=right
+                keyd bind super.enter=enter super.escape=escape super.q=escape super.x=escape
               elif [[ "$1" == "closelayer>>rofi" ]]; then
                 keyd bind reset
               fi

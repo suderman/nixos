@@ -3,7 +3,7 @@ CACHE="$XDG_RUNTIME_DIR/hyprwindow"
 mkdir -p $CACHE
 
 # Overrides for misnamed classes
-echo "org.gimp.GIMP" > $CACHE/gimp-2.99.class
+# echo "org.gimp.GIMP" > $CACHE/gimp-2.99.class
 echo "app.bluebubbles.BlueBubbles" > $CACHE/bluebubbles.class
 
 # Init directories to search for desktop entries
@@ -23,7 +23,7 @@ echo -en "\0prompt\x1f\n"
 if [ -z "${1-}" ]; then
 
   # Look for all unique classes from running client windows
-  for class in $(hyprctl clients -j | jq -r '.[] | (if .class == "" then (.title | gsub("\\s";".")) else .class end)' | sort | uniq); do 
+  for class in $(hyprctl clients -j | jq -r '.[] | if .class == "" then (.title | gsub("[^a-zA-Z0-9.]";".")) else .class end' | sort | uniq); do 
     env="${CACHE}/${class}.env" 
     name="$class" icon="$class" 
     override="${CACHE}/${class}.class"
@@ -40,8 +40,6 @@ if [ -z "${1-}" ]; then
       for appdir in $APPDIRS; do 
         if [[ -e $appdir/$desktop ]]; then
           entry="${appdir}/${desktop}"
-          break
-        # Also check lowercase variation of class
         elif [[ -e $appdir/${desktop,,} ]]; then
           entry="${appdir}/${desktop,,}"
           break
@@ -55,7 +53,8 @@ if [ -z "${1-}" ]; then
       fi
 
       # Save env file to disk
-      echo -e "export NAME_${class}=${name}\nexport ICON_${class}=${icon}" > $env
+      echo -e "export NAME_${class//[^a-zA-Z0-9_]/_}=${name}" >> $env
+      echo -e "export ICON_${class//[^a-zA-Z0-9_]/_}=${icon}" >> $env
 
     fi
   done
@@ -68,7 +67,7 @@ if [ -z "${1-}" ]; then
 
   # Order windows by MRU, Name falls back on title if class is empty, Tab separates title, Icon from class name, Class searchable as meta, Order passed as rofi info                
   hyprctl clients -j | jq -r \
-    'sort_by(.focusHistoryID) | .[] | "${NAME_\(if .class == "" then .title else .class end)}\\t\(.title)\\0icon\\x1f${ICON_\(if .class == "" then .title else .class end)}\\x1fmeta\\x1f\(.class)\\x1finfo\\x1f\(.focusHistoryID)"' |\
+    'sort_by(.focusHistoryID) | .[] | (if .class == "" then .title else .class end | gsub("[^a-zA-Z0-9_]";"_")) as $c | "${NAME_\($c)}\\t\(.title)\\0icon\\x1f${ICON_\($c)}\\x1fmeta\\x1f\(.class)\\x1finfo\\x1f\(.focusHistoryID)"' |\
 
   # Replace all variables with values
   envsubst)"
