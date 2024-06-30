@@ -21,13 +21,6 @@ in {
   config = mkIf config.wayland.windowManager.hyprland.enable {
     xdg.desktopEntries = {} //
 
-      # Sushi (Quick Look)
-      mkHidden {
-        name = "Sushi"; 
-        icon = "image-viewer"; 
-        class = "org.gnome.NautilusPreviewer";
-      } //
-
       # GIMP
       mkHidden {
         name = "GIMP"; 
@@ -35,15 +28,28 @@ in {
         class = "gimp-2.99";
       } //
 
+      # Sushi (Quick Look)
+      mkHidden {
+        name = "Sushi"; 
+        icon = "image-viewer"; 
+        class = "org.gnome.NautilusPreviewer";
+      } //
+
       mkPWA { 
         name = "Immich"; 
-        icon = "image-viewer"; 
+        icon = ../images/immich.png; 
         url = "https://immich.lux";
       } //
 
       mkPWA { 
+        name = "LunaSea"; 
+        icon = ../images/lunasea.png; 
+        url = "https://lunasea.lux";
+      } //
+
+      mkPWA { 
         name = "SilverBullet"; 
-        icon = "image-viewer"; 
+        icon = ../images/silverbullet.png; 
         url = "https://silverbullet.lux";
       } //
 
