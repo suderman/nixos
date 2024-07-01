@@ -26,7 +26,7 @@
   modules.prometheus.enable = true;
   modules.whoami.enable = true;
 
-  modules.silverbullet.enable = true;
+  services.silverbullet-docker.enable = true;
   modules.gitea.enable = true; 
   # modules.ollama.enable = true;
 

@@ -47,4 +47,19 @@ in {
 
   modules.yazi.enable = true;
 
+  programs.silverbullet = {
+    enable = true;
+    url = "https://silverbullet.lux";
+  };
+
+  programs.immich = {
+    enable = true;
+    url = "https://immich.lux";
+  };
+
+  programs.lunasea = {
+    enable = true;
+    url = "https://lunasea.lux";
+  };
+
 }

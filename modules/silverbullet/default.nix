@@ -1,12 +1,12 @@
-# modules.silverbullet.enable = true;
+# services.silverbullet-docker.enable = true;
 { config, lib, pkgs, this, ... }:
 
 let
 
   # https://github.com/silverbulletmd/silverbullet/releases
-  version = "0.7.6";
+  version = "0.7.7";
 
-  cfg = config.modules.silverbullet;
+  cfg = config.services.silverbullet-docker;
 
   inherit (builtins) toString;
   inherit (lib) mkIf mkOption options types strings mkBefore;
@@ -16,7 +16,7 @@ let
 
 in {
 
-  options.modules.silverbullet = {
+  options.services.silverbullet-docker = {
 
     enable = options.mkEnableOption "silverbullet"; 
 

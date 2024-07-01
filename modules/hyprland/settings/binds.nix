@@ -255,13 +255,13 @@ in {
     "super, g, exec, ${toggleGroupOrLock}"
     "super, n, changegroupactive, f"
     "super+shift, n, changegroupactive, b"
-    "super, t, exec, ${newWindowInGroup}"
+    "super+shift, t, exec, ${newWindowInGroup}"
 
     # Manage windows
     "super, i, togglesplit"
-    "super, p, pseudo"
-    "super, o, togglefloating"
-    "super, p, pin"
+    "super+shift, p, pseudo"
+    "super, u, togglefloating"
+    "super+shift, p, pin"
     "super, f, fullscreen, 1"
     "super+alt, f, fullscreen, 0"
 
@@ -321,7 +321,7 @@ in {
     "super+shift, 0, centerwindow, 1"
     "super+shift, O, resizeactive, exact 600 400"
 
-    "super+alt, O, centerwindow, 1"
+    "super+alt, U, centerwindow, 1"
     "super+alt, I, exec, ${cycleFloatingPositions}"
     "super+alt+shift, I, exec, ${cycleFloatingPositions} reverse"
 
@@ -367,8 +367,8 @@ in {
     "super+shift, l, resizeactive, 80 0"
 
     # Cycle floating windows
-    "super, u, cyclenext, floating"
-    "super+shift, u, cyclenext, prev floating"
+    # "super, u, cyclenext, floating"
+    # "super+shift, u, cyclenext, prev floating"
 
   ];
 

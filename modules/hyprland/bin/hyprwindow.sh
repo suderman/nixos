@@ -67,7 +67,7 @@ if [ -z "${1-}" ]; then
 
   # Order windows by MRU, Name falls back on title if class is empty, Tab separates title, Icon from class name, Class searchable as meta, Order passed as rofi info                
   hyprctl clients -j | jq -r \
-    'sort_by(.focusHistoryID) | .[] | (if .class == "" then .title else .class end | gsub("[^a-zA-Z0-9_]";"_")) as $c | "${NAME_\($c)}\\t\(.title)\\0icon\\x1f${ICON_\($c)}\\x1fmeta\\x1f\(.class)\\x1finfo\\x1f\(.focusHistoryID)"' |\
+    'sort_by(.focusHistoryID) | .[] | (if .class == "" then .title else .class end | gsub("[^a-zA-Z0-9_]";"_")) as $c | "${NAME_\($c)}\\t\( .title | gsub("_/$";"") )\\0icon\\x1f${ICON_\($c)}\\x1fmeta\\x1f\(.class)\\x1finfo\\x1f\(.focusHistoryID)"' |\
 
   # Replace all variables with values
   envsubst)"

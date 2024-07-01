@@ -23,6 +23,7 @@ in {
         "alt.j" = "A-down";
         "alt.k" = "A-up";
         "alt.l" = "A-left";
+        "super.o" = "C-l"; # location bar
         "super.t" = "C-t"; # new tab
         "super.n" = "C-n"; # new window
         "super.w" = "C-w"; # close tab

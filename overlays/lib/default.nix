@@ -9,7 +9,7 @@
   this = recursiveUpdate pkgs.this { lib = let
 
     inherit (builtins) attrNames filter hasAttr hasSuffix isString pathExists readDir stringLength;
-    inherit (lib) filterAttrs flatten removePrefix removeSuffix unique;
+    inherit (lib) filterAttrs flatten removePrefix removeSuffix replaceStrings unique;
     inherit (pkgs) this callPackage stdenv;
 
   # Additional helper functions this.lib.*
@@ -64,6 +64,11 @@
     appIds = list: let 
       appIds = filter (appId: appId != "") ( map (package: toAppId package) list );
     in unique appIds;
+
+    # https://silverbullet.lux --> chrome-silverbullet-lux-default
+    toKeydClass = url: let 
+      hostName = replaceStrings ["."] ["-"] (removeSuffix "/" ( removePrefix "http://" (removePrefix "https://" url) ));
+    in "chrome-${hostName}-default";
 
   }; };
 
