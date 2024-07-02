@@ -50,16 +50,19 @@ in {
   programs.silverbullet = {
     enable = true;
     url = "https://silverbullet.lux";
+    platform = "x11";
   };
 
   programs.immich = {
     enable = true;
     url = "https://immich.lux";
+    platform = "x11";
   };
 
   programs.lunasea = {
     enable = true;
     url = "https://lunasea.lux";
+    platform = "x11";
   };
 
 }

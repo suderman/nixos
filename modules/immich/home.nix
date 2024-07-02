@@ -9,6 +9,7 @@ in {
   options.programs.immich = {
     enable = options.mkEnableOption "immich"; 
     url = mkOption { type = types.str; default = "http://immich"; };
+    platform = mkOption { type = types.str; default = "wayland"; };
   };
 
   config = mkIf cfg.enable {
@@ -17,7 +18,7 @@ in {
     xdg.desktopEntries = mkWebApp {
       name = "Immich";
       icon = ./immich.png; 
-      inherit (cfg) url;
+      inherit (cfg) url platform;
     };
 
     # Keyboard shortcuts
