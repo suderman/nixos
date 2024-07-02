@@ -49,16 +49,17 @@
       ) 
     ];
 
-    # https://example.com --> chrome-example.com__-Default
-    urlToClass = url: let
-      removeProtocols = url: removePrefix "http://" (removePrefix "https://" url);
-      removeTrailingSlash = url: removeSuffix "/" url;
-      replaceSlashes = url: replaceStrings [ "/" ] [ "." ] url;
-      toClass = url: replaceSlashes( removeTrailingSlash( removeProtocols url ));
-    in "chrome-${toClass url}__-Default";
-
-    # chrome-example.com__-Default --> chrome-example-com-default
-    slugify = str: replaceStrings ["." "_" "/"]["-" "" ""] (toLower str);
+    # Create window class name from URL used by Chromium Web Apps 
+    # without slugify: https://example.com --> chrome-example.com__-Default
+    #    with slugify: https://example.com --> chrome-example-com-default
+    chromeClass = arg: let
+      toSlug = str: replaceStrings ["." "_" "/"] ["-" "" ""] (toLower str);
+      toClass = { url, slugify ? false }: let 
+        removeProtocols = url: removePrefix "http://" (removePrefix "https://" url);
+        removeSlashes = url: replaceStrings [ "/" ] [ "." ] (removeSuffix "/" url);
+        class = "chrome-${removeSlashes( removeProtocols url )}__-Default";
+      in if slugify == true then (toSlug class) else class;
+    in if isString arg then toClass { url = arg; slugify = true; } else toClass arg;
 
     # Set appId to package meta
     appId = appId: package: recursiveUpdate package { meta = { inherit appId; }; };

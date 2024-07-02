@@ -2,7 +2,7 @@
 { config, lib, pkgs, ... }: let
 
   cfg = config.programs.silverbullet;
-  inherit (lib) mkIf mkOption options types mkWebApp urlToClass slugify;
+  inherit (lib) mkIf mkOption options types mkWebApp chromeClass;
 
 in {
 
@@ -22,7 +22,7 @@ in {
 
     # Keyboard shortcuts
     services.keyd.applications = {
-      "${slugify (urlToClass cfg.url)}" = {
+      "${chromeClass cfg.url}" = {
         "super.o" = "C-k"; # page picker
         "super.slash" = "C-slash"; # command pallete
       };

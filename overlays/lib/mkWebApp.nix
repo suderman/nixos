@@ -1,7 +1,8 @@
 { pkgs, lib, this, ... }: let
   inherit (lib) mkIf getExe;
-  inherit (this.lib) urlToClass;
-in { name, url, icon ? "internet-web-browser", platform ? "x11", class ? urlToClass url }: {
+  inherit (this.lib) chromeClass;
+
+in { name, url, icon ? "internet-web-browser", platform ? "x11", class ? (chromeClass { inherit url; slugify = false; }) }: {
 
   # chrome-example.com__-Default
   "${class}" = {
