@@ -4,7 +4,7 @@
 let
 
   # https://github.com/immich-app/immich/releases
-  version = "1.106.4";
+  version = "1.107.0";
 
   cfg = config.services.immich;
 
@@ -127,10 +127,14 @@ in {
 
       # Postgres extension pgvecto.rs required since Immich 1.91.0
       extraPlugins = [
-        (pkgs.pgvecto-rs.override rec {
+        (pkgs.postgresqlPackages.pgvecto-rs.override rec {
           postgresql = config.services.postgresql.package;
-          stdenv = postgresql.stdenv;
         })
+        # # Used this before pgvecto-rs was packaged in nixpkgs
+        # (pkgs.pgvecto-rs.override rec {
+        #   postgresql = config.services.postgresql.package;
+        #   stdenv = postgresql.stdenv;
+        # })
       ];
       settings.shared_preload_libraries = "vectors.so";
 
