@@ -9,7 +9,7 @@
   this = recursiveUpdate pkgs.this { lib = let
 
     inherit (builtins) attrNames filter hasAttr hasSuffix isString pathExists readDir stringLength;
-    inherit (lib) filterAttrs flatten removePrefix removeSuffix replaceStrings unique;
+    inherit (lib) filterAttrs flatten removePrefix removeSuffix replaceStrings toLower unique;
     inherit (pkgs) this callPackage stdenv;
 
   # Additional helper functions this.lib.*
@@ -49,6 +49,17 @@
       ) 
     ];
 
+    # https://example.com --> chrome-example.com__-Default
+    urlToClass = url: let
+      removeProtocols = url: removePrefix "http://" (removePrefix "https://" url);
+      removeTrailingSlash = url: removeSuffix "/" url;
+      replaceSlashes = url: replaceStrings [ "/" ] [ "." ] url;
+      toClass = url: replaceSlashes( removeTrailingSlash( removeProtocols url ));
+    in "chrome-${toClass url}__-Default";
+
+    # chrome-example.com__-Default --> chrome-example-com-default
+    slugify = str: replaceStrings ["." "_" "/"]["-" "" ""] (toLower str);
+
     # Set appId to package meta
     appId = appId: package: recursiveUpdate package { meta = { inherit appId; }; };
 
@@ -64,11 +75,6 @@
     appIds = list: let 
       appIds = filter (appId: appId != "") ( map (package: toAppId package) list );
     in unique appIds;
-
-    # https://silverbullet.lux --> chrome-silverbullet-lux-default
-    toKeydClass = url: let 
-      hostName = replaceStrings ["."] ["-"] (removeSuffix "/" ( removePrefix "http://" (removePrefix "https://" url) ));
-    in "chrome-${hostName}-default";
 
   }; };
 

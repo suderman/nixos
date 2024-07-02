@@ -2,8 +2,7 @@
 { config, lib, pkgs, ... }: let
 
   cfg = config.programs.lunasea;
-  inherit (builtins) toString;
-  inherit (lib) mkIf mkOption options types strings mkBefore mkWebApp toKeydClass;
+  inherit (lib) mkIf mkOption options types mkWebApp urlToClass slugify;
 
 in {
 
@@ -23,7 +22,7 @@ in {
 
     # Keyboard shortcuts
     services.keyd.applications = {
-      "${toKeydClass cfg.url}" = {};
+      "${slugify (urlToClass cfg.url)}" = {};
     };
 
   };
