@@ -25,7 +25,9 @@ in {
     services.keyd.windows = {
       "${chromeClass cfg.url}" = {
         "super.o" = "C-k"; # page picker
-        "super.slash" = "C-slash"; # command pallete
+        "super.p" = "C-slash"; # command pallete
+        "super.r" = "C-A-r"; # reload system
+        "super.t" = "C-S-f"; # search space
       };
     };
 
