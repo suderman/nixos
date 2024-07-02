@@ -15,7 +15,7 @@
     };
 
     # keyboard shortcuts
-    services.keyd.applications = {
+    services.keyd.windows = {
       firefox = {
         "alt.f" = "C-f"; # find in page
         "alt.l" = "C-l"; # location bar

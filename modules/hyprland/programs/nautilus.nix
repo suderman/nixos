@@ -12,7 +12,7 @@ in {
     ];
 
     # keyboard shortcuts
-    services.keyd.applications = {
+    services.keyd.windows = {
       org-gnome-nautilus = {
 
         "alt.enter" = "f2";

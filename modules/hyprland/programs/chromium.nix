@@ -38,7 +38,7 @@
     ];
 
     # keyboard shortcuts
-    services.keyd.applications = {
+    services.keyd.windows = {
       chromium-browser = {
         "alt.f" = "C-f"; # find in page
         "super.[" = "C-S-tab"; # prev tab

@@ -22,7 +22,7 @@ in {
     };
 
     # Keyboard shortcuts
-    services.keyd.applications = {
+    services.keyd.windows = {
       "${chromeClass cfg.url}" = {};
     };
 

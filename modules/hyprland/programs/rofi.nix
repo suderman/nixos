@@ -28,6 +28,22 @@ in {
       ];
     };
 
+    services.keyd.layers = {
+      rofi = {
+        "super.space" = "down"; 
+        "super.tab" = "down"; 
+        "super.grave" = "up"; 
+        "super.j" = "down"; 
+        "super.k" = "up";
+        "super.h" = "left";
+        "super.l" = "right";
+        "super.enter" = "enter"; 
+        "super.escape" = "escape";
+        "super.q" = "escape";
+        "super.x" = "escape";
+      };
+    };
+
     programs.rofi = {
       enable = true;
       package = pkgs.rofi-wayland;

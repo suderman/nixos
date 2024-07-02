@@ -24,7 +24,7 @@
     };
 
     # keyboard shortcuts
-    services.keyd.applications = {
+    services.keyd.windows = {
       "1password" = {
         "esc" = "C-w";
       };

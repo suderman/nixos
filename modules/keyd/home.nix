@@ -3,8 +3,7 @@
 
   cfg = config.services.keyd;
   ini = pkgs.formats.ini {};
-  inherit (lib) mkDefault mkIf mkOption types;
-  inherit (this.lib) mkShellScript;
+  inherit (lib) mapAttrsToList mkDefault mkIf mkOption types concatStringsSep mkShellScript;
 
 in {
 
@@ -14,9 +13,13 @@ in {
       type = types.str;
       default = "";
     };
-    applications = mkOption {
+    windows = mkOption {
       type = types.anything;
-      default = {};
+      default = {}; # firefox = { "alt.f" = "C-f"; };
+    };
+    layers = mkOption {
+      type = types.anything;
+      default = {}; # rofi = { "super.j" = "down"; };
     };
   };
 
@@ -31,19 +34,20 @@ in {
       # [obsidian]
       # [slack]
 
-    } // cfg.applications );
+    } // cfg.windows );
 
   };
 
   # User service runs keyd-application-mapper
   config.systemd.user.services = (if cfg.systemdTarget == "" then {} else {
-    keyd.Unit = {
+
+    keyd-windows.Unit = {
       Description = "Keyd Application Mapper";
       After = [ cfg.systemdTarget ];
       Requires = [ cfg.systemdTarget ];
     };
-    keyd.Install.WantedBy = [ cfg.systemdTarget ];
-    keyd.Service = {
+    keyd-windows.Install.WantedBy = [ cfg.systemdTarget ];
+    keyd-windows.Service = {
       Type = "simple";
       Restart = "always";
       ExecStart = mkShellScript {
@@ -51,6 +55,36 @@ in {
         text = "keyd-application-mapper";
       };
     };
+
+    # Similar functionality as keyd-application-mapper, but watch for hyprland layer changes instead of windows
+    keyd-layers.Unit = {
+      Description = "Keyd Hyprland Layer Events";
+      After = [ cfg.systemdTarget ];
+      Requires = [ cfg.systemdTarget ];
+    };
+    keyd-layers.Install.WantedBy = [ cfg.systemdTarget ];
+    keyd-layers.Service = {
+      Type = "simple";
+      Restart = "always";
+      ExecStart = mkShellScript {
+        inputs = with pkgs; [ socat keyd ];
+        text = let
+          openlayers = concatStringsSep "\n" ( 
+            mapAttrsToList( layer: pairs: let 
+              binds = mapAttrsToList( from: to: "${from}=${to}" ) pairs; 
+            in "openlayer\\>\\>${layer}) keyd bind ${toString binds} ;;") cfg.layers );
+        in ''
+          handle() {
+            case $1 in 
+              closelayer\>\>*) keyd bind reset ;;
+              ${openlayers}
+            esac
+          }
+          socat -U - UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock | while read -r line; do handle "$line"; done
+        '';
+      };
+    };
+
   });
 
 }

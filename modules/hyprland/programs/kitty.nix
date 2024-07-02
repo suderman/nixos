@@ -9,7 +9,7 @@ in {
   config = mkIf cfg.enable {
 
     # keyboard shortcuts
-    services.keyd.applications = {
+    services.keyd.windows = {
       kitty = {
         "super.t" = "C-S-t"; # new tab
         "super.w" = "C-S-q"; # close tab
