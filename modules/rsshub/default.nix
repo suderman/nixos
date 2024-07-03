@@ -35,7 +35,7 @@ in {
   config = mkIf cfg.enable {
 
     # Enable reverse proxy
-    modules.traefik.enable = true;
+    services.traefik.enable = true;
 
     # Init service
     systemd.services.rsshub = {

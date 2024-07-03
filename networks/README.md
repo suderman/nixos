@@ -24,7 +24,7 @@ If a `caPort` is provided to a server's [Traefik module](https://github.com/sude
 For example, my [hub](https://github.com/suderman/nixos/tree/main/configurations/hub) configuration on my home network has a IP of `10.1.0.4` and has `caPort` set to `1234`:  
 
 ```nix
-modules.traefik = {
+services.traefik = {
   enable = true;
   caPort = 1234;
 };

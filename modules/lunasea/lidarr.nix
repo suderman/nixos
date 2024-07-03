@@ -25,7 +25,7 @@ in {
 
     users.groups.media.members = [ arr.user ];
 
-    modules.traefik = {
+    services.traefik = {
       enable = true;
       routers.${name} = "http://127.0.0.1:${toString port}";
     };

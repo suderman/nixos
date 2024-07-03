@@ -4,7 +4,7 @@ let
 
   cfg = config.modules.rsshub;
   inherit (lib) mkIf mkBefore;
-  inherit (config.modules) traefik;
+  inherit (config.services.traefik.lib) mkLabels;
 
 in {
 
@@ -23,7 +23,7 @@ in {
       };
 
       # Traefik labels
-      extraOptions = traefik.labels cfg.name
+      extraOptions = mkLabels cfg.name
 
       # Networking for docker containers
       ++ [ "--network=rsshub" ];

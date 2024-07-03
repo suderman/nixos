@@ -14,7 +14,7 @@ let
 
   # https://github.com/JonathanTreffler/backblaze-personal-wine-container
   cfg = config.modules.backblaze;
-  inherit (config.modules) traefik;
+  inherit (config.services.traefik.lib) mkLabels;
   inherit (lib) mkIf mkOption mkBefore types;
 
 in {
@@ -46,7 +46,7 @@ in {
       autoStart = true;
 
       # Traefik labels
-      extraOptions = traefik.labels [ cfg.name ]
+      extraOptions = mkLabels [ cfg.name ]
 
       # Additional flags
       ++ [ "--init" ];
@@ -85,7 +85,7 @@ in {
     };
 
     # Enable reverse proxy
-    modules.traefik.enable = true;
+    services.traefik.enable = true;
 
   }; 
 

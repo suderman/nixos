@@ -64,7 +64,7 @@ in {
     # };
 
     # # Enable reverse proxy
-    # modules.traefik = {
+    # services.traefik = {
     #   enable = true;
     #   certificates = [ hostName ];
     # };

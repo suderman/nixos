@@ -1,12 +1,12 @@
 { config, lib, this, ... }: let
 
-  cfg = config.modules.traefik;
+  cfg = config.services.traefik;
   inherit (builtins) dirOf toString;
   inherit (lib) mkIf mkOption types;
 
 in {
 
-  options.modules.traefik = {
+  options.services.traefik = {
    caPort = mkOption {
       type = types.port;
       default = 0; 
@@ -34,7 +34,7 @@ in {
     networking.firewall.allowedTCPPorts = [ cfg.caPort ];
 
     # Also serve the ca.crt via traefik
-    modules.traefik.routers.ca = "http://127.0.0.1:${toString cfg.caPort}";
+    services.traefik.routers.ca = "http://127.0.0.1:${toString cfg.caPort}";
 
   };
 

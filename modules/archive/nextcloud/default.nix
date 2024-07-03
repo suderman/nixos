@@ -92,7 +92,7 @@ in {
 
     # Enable database and reverse proxy
     modules.postgresql.enable = true;
-    modules.traefik.enable = true;
+    services.traefik.enable = true;
     modules.nginx.enable = true;
 
   };

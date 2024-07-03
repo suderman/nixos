@@ -30,7 +30,7 @@
   modules.blocky.enable = true;
 
   # Serve CA cert on http://10.2.0.2:1234
-  modules.traefik = {
+  services.traefik = {
     enable = true;
     caPort = 1234;
   };

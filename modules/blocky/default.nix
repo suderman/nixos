@@ -39,7 +39,7 @@ in {
       type = with types; anything; 
       readOnly = true;
       default = foldl (a: b: a // b) {} ( 
-        attrValues ( mapAttrs ( name: host: host.config.modules.traefik.mapping ) outputs.nixosConfigurations )
+        attrValues ( mapAttrs ( name: host: host.config.services.traefik.mapping ) outputs.nixosConfigurations )
       );
     };
 
@@ -50,7 +50,7 @@ in {
 
     # Enable reverse proxy for api
     # https://blocky.hub/api/blocking/status
-    modules.traefik = {
+    services.traefik = {
       enable = true;
       routers.${cfg.name} = "http://127.0.0.1:${toString cfg.httpPort}";
     };

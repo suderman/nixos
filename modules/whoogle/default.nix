@@ -8,7 +8,7 @@ let
 
   cfg = config.modules.whoogle;
   inherit (lib) mkIf mkOption mkBefore types;
-  inherit (config.modules) traefik;
+  inherit (config.services.traefik.lib) mkLabels;
 
 in {
 
@@ -23,12 +23,12 @@ in {
   config = mkIf cfg.enable {
 
     # Enable reverse proxy
-    modules.traefik.enable = true;
+    services.traefik.enable = true;
 
     # Configure OCI container
     virtualisation.oci-containers.containers."whoogle" = {
       image = "benbusby/whoogle-search:${version}";
-      extraOptions = traefik.labels cfg.name;
+      extraOptions = mkLabels cfg.name;
     };
 
     # Extend systemd service

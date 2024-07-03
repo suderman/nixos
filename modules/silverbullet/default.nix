@@ -11,7 +11,7 @@ let
   inherit (builtins) toString;
   inherit (lib) mkIf mkOption options types strings mkBefore;
   inherit (this.lib) extraGroups;
-  inherit (config.modules) traefik;
+  inherit (config.services.traefik.lib) mkLabels;
 
 
 in {
@@ -69,7 +69,7 @@ in {
     };
 
     # Enable reverse proxy
-    modules.traefik.enable = true;
+    services.traefik.enable = true;
 
     virtualisation.oci-containers.containers.silverbullet = {
       image = "zefhemel/silverbullet:${version}";
@@ -79,7 +79,7 @@ in {
       user = with config.ids; "${toString uids.silverbullet}:${toString gids.silverbullet}";
 
       # Traefik labels
-      extraOptions = traefik.labels cfg.name;
+      extraOptions = mkLabels cfg.name;
 
       volumes = [ "${cfg.dataDir}:/space" ];
 

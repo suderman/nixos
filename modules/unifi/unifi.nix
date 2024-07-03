@@ -8,7 +8,7 @@ let
   cfg = config.modules.unifi;
   inherit (builtins) toString;
   inherit (lib) mkIf;
-  inherit (config.modules) traefik;
+  inherit (config.services.traefik.lib) mkLabels;
   inherit (config.services.prometheus) exporters;
 
   httpsPort = 8443;
@@ -19,7 +19,7 @@ in {
   config = mkIf cfg.enable {
 
     # Enable reverse proxy
-    modules.traefik.enable = true;
+    services.traefik.enable = true;
 
     # This docker image is more reliable than the nixpkgs version, at least for now.
     # The controller requires a dated version of mongodb that nixpkgs has dropped.
@@ -29,7 +29,7 @@ in {
       autoStart = false;
 
       # Traefik labels
-      extraOptions = traefik.labels [ cfg.name httpsPort "https" ]
+      extraOptions = mkLabels [ cfg.name httpsPort "https" ]
 
       # Networking
       ++ [ "--network=host" ];

@@ -6,7 +6,7 @@ let
   cfg = config.modules.ombi;
   inherit (lib) mkIf mkBefore mkOption options types;
   inherit (builtins) toString;
-  inherit (config.modules) traefik;
+  inherit (config.services.traefik.lib) mkAlias;
 
 in {
 
@@ -38,11 +38,11 @@ in {
     users.groups.media.members = [ config.services.ombi.user ];
 
     # Enable reverse proxy
-    modules.traefik = {
+    services.traefik = {
       enable = true;
       routers = {
         "${cfg.name}" = "http://127.0.0.1:${toString cfg.port}";
-      } // traefik.alias cfg.name cfg.alias;
+      } // mkAlias cfg.name cfg.alias;
     };
 
   };

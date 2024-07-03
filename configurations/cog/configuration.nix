@@ -85,7 +85,7 @@ in {
   # modules.libimobiledevice.enable = true;
 
   # Web services
-  modules.traefik.enable = true;
+  services.traefik.enable = true;
   modules.whoami.enable = true;
 
   # Apps & Games
@@ -180,9 +180,9 @@ in {
   # modules.photoprism = { enable = false; photosDir = "/photos"; };
   # modules.silverbullet.enable = true;
   # modules.bluebubbles.enable = true;
-  # modules.traefik = { 
+  # services.traefik = { 
   #   routers.isy = "http://${this.networks.home.isy}:80";
-  #   http = {
+  #   dynamicConfigOptions.http = {
   #     middlewares.isy.headers.customRequestHeaders.authorization = "Basic {{ env `ISY_BASIC_AUTH` }}";
   #   };
   #   routers."foo.bar" = "https://whoami.cog";

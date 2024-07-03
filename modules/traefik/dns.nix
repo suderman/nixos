@@ -1,6 +1,6 @@
 { config, lib, pkgs, this, ... }: let
 
-  cfg = config.modules.traefik;
+  cfg = config.services.traefik;
   inherit (builtins) length;
   inherit (lib) mkIf concatStringsSep;
   inherit (config.age) secrets;

@@ -6,7 +6,7 @@ let
   cfg = config.services.lunasea;
   inherit (lib) ls mkIf mkOption options types strings;
   inherit (builtins) toString;
-  inherit (config.modules) traefik;
+  inherit (config.services.traefik.lib) mkLabels;
 
 in {
 
@@ -23,11 +23,11 @@ in {
 
   config = mkIf cfg.enable {
 
-    modules.traefik.enable = true;
+    services.traefik.enable = true;
 
     virtualisation.oci-containers.containers.lunasea = {
       image = "ghcr.io/jagandeepbrar/lunasea:stable";
-      extraOptions = traefik.labels cfg.name;
+      extraOptions = mkLabels cfg.name;
     };
 
   };

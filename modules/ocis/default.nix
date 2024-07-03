@@ -13,7 +13,7 @@ let
   inherit (lib) mkIf mkOption mkBefore types;
   inherit (this.lib) extraGroups toOwnership;
   inherit (config.age) secrets;
-  inherit (config.modules) traefik;
+  inherit (config.services.traefik.lib) mkHostName mkLabels;
   inherit (config.ids) uids gids;
 
 in {
@@ -26,7 +26,7 @@ in {
     };
     hostName = mkOption {
       type = types.str;
-      default = (traefik.hostName cfg.name);
+      default = (mkHostName cfg.name);
     };
     public = mkOption {
       type = with lib.types; nullOr bool;
@@ -67,7 +67,7 @@ in {
     };
 
     # Enable reverse proxy
-    modules.traefik.enable = true;
+    services.traefik.enable = true;
 
     # Docker container
     virtualisation.oci-containers.containers.ocis = {
@@ -81,7 +81,7 @@ in {
       user = toOwnership uids.ocis gids.ocis;
 
       # Traefik labels
-      extraOptions = traefik.labels {
+      extraOptions = mkLabels {
         name = cfg.name;
         hostName = cfg.hostName;
         public = cfg.public;

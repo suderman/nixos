@@ -63,7 +63,7 @@ in {
 
     # Enable database and reverse proxy
     modules.postgresql.enable = true;
-    modules.traefik.enable = true;
+    services.traefik.enable = true;
     modules.nginx.enable = true;
 
     # Enable redis service for wallabag
@@ -78,9 +78,9 @@ in {
       ensureDatabases = [ "wallabag" ];
     };
 
-    modules.traefik = { 
+    services.traefik = { 
       routers.${cfg.name} = "https://127.0.0.1:${toString cfg.port}";
-      http = {
+      dynamicConfigOptions.http = {
         middlewares.wallabag.headers.customRequestHeaders.Host = "${cfg.name}.${this.hostName}";
         routers.${cfg.name}.middlewares = [ "wallabag" ];
       };

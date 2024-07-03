@@ -4,7 +4,7 @@ let
 
   cfg = config.services.immich;
   inherit (lib) mkIf;
-  inherit (config.modules) traefik;
+  inherit (config.services.traefik.lib) mkAlias mkLabels;
 
 in {
 
@@ -36,7 +36,7 @@ in {
       ]);
 
       # Traefik labels
-      extraOptions = traefik.labels cfg.name
+      extraOptions = mkLabels cfg.name
 
       # Networking for docker containers
       ++ [
@@ -48,9 +48,9 @@ in {
     };
 
     # Enable reverse proxy
-    modules.traefik = {
+    services.traefik = {
       enable = true;
-      routers = traefik.alias cfg.name cfg.alias;
+      routers = mkAlias cfg.name cfg.alias;
     };
 
     # Extend systemd service

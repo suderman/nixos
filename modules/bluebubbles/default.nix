@@ -34,7 +34,7 @@ in {
 
   config = mkIf cfg.enable {
 
-    modules.traefik = {
+    services.traefik = {
       enable = true;
       routers.${cfg.name} = "http://${cfg.ip}:${toString cfg.port}";
     };

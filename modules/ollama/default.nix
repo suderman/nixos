@@ -7,7 +7,7 @@ let
   inherit (builtins) toString;
   inherit (lib) mkIf mkOption mkBefore types;
   inherit (config.age) secrets;
-  inherit (config.modules) traefik;
+  inherit (config.services.traefik.lib) mkLabels;
   inherit (this.lib) destabilize;
 
   # https://github.com/open-webui/open-webui/pkgs/container/open-webui
@@ -76,7 +76,7 @@ in {
       ];
 
       # Traefik labels
-      extraOptions = traefik.labels [ cfg.name cfg.webPort ]
+      extraOptions = mkLabels [ cfg.name cfg.webPort ]
 
       # Networking
       ++ [ "--add-host=host.docker.internal:host-gateway" ];

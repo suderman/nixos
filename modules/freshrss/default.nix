@@ -72,10 +72,10 @@ in {
     modules.postgresql.enable = true;
     modules.nginx.enable = true;
 
-    modules.traefik = { 
+    services.traefik = { 
       enable = true;
       routers.${cfg.name} = "http://127.0.0.1:${toString port}";
-      http = {
+      dynamicConfigOptions.http = {
         middlewares.freshrss.headers.customRequestHeaders.Host = "${cfg.name}.${this.hostName}";
         routers.${cfg.name}.middlewares = [ "freshrss" ];
       };

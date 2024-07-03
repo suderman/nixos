@@ -12,10 +12,10 @@
   # Network
   modules.tailscale.enable = true;
   # modules.ddns.enable = true;
-  # modules.traefik.enable = true;
 
-  modules.traefik = {
+  services.traefik = {
     enable = true;
+    routers."rss.suderman.net" = "https://rsshub.sol";
     routers."wiki.zz" = "https://wiki.sol";
     extraInternalHostNames = [ "wiki.zz" ];
   };
@@ -35,7 +35,8 @@
   programs.tmux.enable = true;
 
   # Web services
-  modules.whoogle = { enable = true; name = "g"; };
+  # modules.whoogle = { enable = true; name = "g"; };
+  modules.whoogle = { enable = true; name = "g.suderman.net"; };
   # modules.gitea = { enable = true; name = "git"; };
   modules.tiddlywiki = { enable = true; name = "wiki"; };
   modules.rsshub.enable = true;
@@ -43,10 +44,15 @@
   # modules.wallabag.enable = false;
   # modules.nextcloud.enable = false;
 
+  modules.tandoor-recipes = {
+    enable = false;
+    # package = pkgs.unstable.tandoor-recipes;
+    # public = "tandoor.suderman.net";
+  };
   # modules.tandoor-recipes = {
-  #   enable = false;
+  #   enable = true;
   #   # package = pkgs.unstable.tandoor-recipes;
-  #   # public = "tandoor.suderman.net";
+  #   public = "tandoor.suderman.net";
   # };
 
 }

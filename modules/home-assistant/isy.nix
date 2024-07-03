@@ -19,10 +19,10 @@ in {
       EnvironmentFile = [ secrets.isy-env.path ];
     };
 
-    modules.traefik = { 
+    services.traefik = { 
       enable = true;
       routers.${cfg.isyName} = "http://${cfg.isy}:80";
-      http = {
+      dynamicConfigOptions.http = {
         middlewares.isy.headers.customRequestHeaders.authorization = "Basic {{ env `ISY_BASIC_AUTH` }}";
         routers.${cfg.isyName}.middlewares = [ "isy" ];
       };

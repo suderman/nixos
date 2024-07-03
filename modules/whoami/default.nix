@@ -5,7 +5,7 @@ let
 
   cfg = config.modules.whoami;
   inherit (lib) mkIf mkOption types;
-  inherit (config.modules) traefik;
+  inherit (config.services.traefik.lib) mkLabels;
 
 in {
 
@@ -20,13 +20,13 @@ in {
   config = mkIf cfg.enable {
 
     # Enable reverse proxy
-    modules.traefik.enable = true;
+    services.traefik.enable = true;
 
     # Configure OCI container
     virtualisation.oci-containers.containers."whoami" = {
       image = "traefik/whoami";
       cmd = [ "--port=2001" ];
-      extraOptions = traefik.labels [ cfg.name 2001 ]
+      extraOptions = mkLabels [ cfg.name 2001 ]
       ++ [ "--network=host" ];
     };
 

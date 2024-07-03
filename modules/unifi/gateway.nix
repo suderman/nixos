@@ -9,7 +9,7 @@ in {
 
   config = mkIf cfg.enable {
 
-    modules.traefik = { 
+    services.traefik = { 
       enable = true;
       routers.${cfg.gatewayName} = "https://${cfg.gateway}:443";
     };

@@ -6,14 +6,14 @@ let
   inherit (builtins) toString readFile;
   inherit (lib) mkIf mkOption mkBefore options types strings;
   inherit (pkgs) writeText;
-  inherit (config.modules) traefik;
+  inherit (config.services.traefik.lib) mkLabels;
 
 in {
 
   config = mkIf cfg.enable {
 
     # Enable reverse proxy
-    modules.traefik.enable = true;
+    services.traefik.enable = true;
 
     # Home Assistant container
     virtualisation.oci-containers.containers.home-assistant = {
@@ -21,7 +21,7 @@ in {
       autoStart = false;
 
       # Traefik labels
-      extraOptions = traefik.labels [ cfg.name 8123 ]
+      extraOptions = mkLabels [ cfg.name 8123 ]
 
       # Networking and devices
       ++ [ "--privileged" 

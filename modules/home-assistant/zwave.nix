@@ -5,14 +5,14 @@ let
   cfg = config.modules.home-assistant;
   inherit (builtins) toString;
   inherit (lib) mkIf mkBefore;
-  inherit (config.modules) traefik;
+  inherit (config.services.traefik.lib) mkLabels;
 
 in {
 
   config = mkIf (cfg.enable && cfg.zwave != "") {
 
     # Enable reverse proxy
-    modules.traefik.enable = true;
+    services.traefik.enable = true;
 
     # Z-Wave JS UI container
     virtualisation.oci-containers.containers.zwave = {
@@ -20,7 +20,7 @@ in {
       autoStart = false;
 
       # Traefik labels
-      extraOptions = traefik.labels [ cfg.zwaveName 8091 ]
+      extraOptions = mkLabels [ cfg.zwaveName 8091 ]
 
       # Networking and devices
       ++ [ "--privileged"

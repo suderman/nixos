@@ -5,6 +5,7 @@ let
 
   cfg = config.modules.jellyfin;
   inherit (lib) mkIf mkOption types;
+  inherit (config.services.traefik.lib) mkHostName;
 
 in {
 
@@ -24,7 +25,7 @@ in {
 
   };
 
-  config = lib.mkIf cfg.enable {
+  config = mkIf cfg.enable {
 
     services.jellyfin = {
       enable = true;
@@ -35,10 +36,10 @@ in {
 
     users.groups.media.members = [ config.services.jellyfin.user ];
 
-    modules.traefik = { 
+    services.traefik = { 
       enable = true;
       routers = let router = {
-        hostName = config.modules.traefik.hostName cfg.name;
+        hostName = mkHostName cfg.name;
         url = "http://127.0.0.1:${toString cfg.port}";
         public = false;
       }; in {

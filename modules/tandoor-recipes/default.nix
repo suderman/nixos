@@ -43,7 +43,7 @@ in {
     
     # Enable database and reverse proxies
     modules.postgresql.enable = true;
-    modules.traefik.enable = true;
+    services.traefik.enable = true;
     modules.nginx.enable = true;
 
     # traefik proxy serving nginx proxy

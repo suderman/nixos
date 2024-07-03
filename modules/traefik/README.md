@@ -19,7 +19,7 @@ external and assumed public by default.
 
 ```nix
 {
-  modules.traefik.routers.foo = "http://bar.hub:80";
+  services.traefik.routers.foo = "http://bar.hub:80";
 }
 ```
 
@@ -49,7 +49,7 @@ external and assumed public by default.
 
 ```nix
 {
-  modules.traefik.routers."foo.com" = "http://baz.eve:80";
+  services.traefik.routers."foo.com" = "http://baz.eve:80";
 }
 ```
 ...becomes...  
@@ -80,13 +80,13 @@ external and assumed public by default.
 }
 ```
 
-### Add extra Traefik options through "http" attribute in module
+### Add extra Traefik options through "dynamicConfigOptions.http" attribute
 
 ```nix
 {
-  modules.traefik = { 
+  services.traefik = { 
     routers.isy = "http://${this.networks.home.isy}:80";
-    http = {
+    dynamicConfigOptions.http = {
       middlewares.isy.headers.customRequestHeaders.authorization = "Basic {{ env `ISY_BASIC_AUTH` }}";
     };
   };
@@ -99,7 +99,7 @@ external and assumed public by default.
 {
   virtualisation.oci-containers.containers.lunasea = {
     image = "ghcr.io/jagandeepbrar/lunasea:stable";
-    extraOptions = config.modules.traefik.labels "lunasea";
+    extraOptions = config.services.traefik.lib.mkLabels "lunasea";
   };
 }
 ```
@@ -127,7 +127,7 @@ external and assumed public by default.
 {
   virtualisation.oci-containers.containers.lunasea = {
     image = "ghcr.io/jagandeepbrar/lunasea:stable";
-    extraOptions = config.modules.traefik.labels "example.com";
+    extraOptions = config.services.traefik.lib.mkLabels "example.com";
   };
 }
 ```
