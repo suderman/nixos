@@ -10,7 +10,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Memory management
-  modules.earlyoom.enable = true;
+  services.earlyoom.enable = true;
 
   # Keyboard control
   services.keyd.enable = true;

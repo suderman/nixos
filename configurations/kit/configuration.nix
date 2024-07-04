@@ -20,17 +20,8 @@
   services.pipewire.enable = true;
   security.rtkit.enable = true;
 
-  # services.xserver = {
-  #   enable = true;
-  #   desktopManager.xterm.enable = true;
-  #   desktopManager.xfce.enable = true;
-  #   displayManager.defaultSession = "xfce";
-  # };
-  # xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-  # # xdg.portal.enable = lib.mkForce false;
-
   # Memory management
-  modules.earlyoom.enable = true;
+  services.earlyoom.enable = true;
 
   # Keyboard control
   services.keyd.enable = true;

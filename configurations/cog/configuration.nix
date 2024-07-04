@@ -66,7 +66,7 @@ in {
   };
 
   # Memory management
-  modules.earlyoom.enable = true;
+  services.earlyoom.enable = true;
 
   # Keyboard control
   services.keyd = {

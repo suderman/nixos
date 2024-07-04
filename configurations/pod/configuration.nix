@@ -13,11 +13,10 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.networkmanager.enable = true;
-
   hardware.bluetooth.enable = true;
 
   # Memory management
-  modules.earlyoom.enable = true;
+  services.earlyoom.enable = true;
 
   # Keyboard control
   services.keyd.enable = true;

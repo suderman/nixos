@@ -27,7 +27,7 @@
   modules.blocky.enable = true;
 
   # Memory management
-  modules.earlyoom.enable = true;
+  services.earlyoom.enable = true;
 
   # Apps
   modules.neovim.enable = true;
