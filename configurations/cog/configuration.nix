@@ -80,7 +80,7 @@ in {
 
   # Web services
   services.traefik.enable = true;
-  modules.whoami.enable = true;
+  services.whoami.enable = true;
 
   # Apps & Games
   modules.neovim.enable = true;

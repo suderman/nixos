@@ -24,7 +24,7 @@
   };
   services.traefik.enable = true;
   modules.prometheus.enable = true;
-  modules.whoami.enable = true;
+  services.whoami.enable = true;
 
   services.silverbullet-docker.enable = true;
   modules.gitea.enable = true; 

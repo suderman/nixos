@@ -35,7 +35,7 @@
 
   services.garmin.enable = true;
   programs.hyprland.enable = true;
-  modules.whoami.enable = true;
+  services.whoami.enable = true;
 
   # Apps
   modules.dolphin.enable = true;

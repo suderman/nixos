@@ -1,15 +1,15 @@
-# modules.whoami.enable = true;
+# services.whoami.enable = true;
 { config, lib, this, ... }:
   
 let 
 
-  cfg = config.modules.whoami;
+  cfg = config.services.whoami;
   inherit (lib) mkIf mkOption types;
   inherit (config.services.traefik.lib) mkLabels;
 
 in {
 
-  options.modules.whoami = {
+  options.services.whoami = {
     enable = lib.options.mkEnableOption "whoami"; 
     name = mkOption {
       type = types.str;

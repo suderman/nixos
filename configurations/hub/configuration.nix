@@ -19,8 +19,7 @@
 
   # Web services
   services.tailscale.enable = true;
-  # modules.ddns.enable = true;
-  modules.whoami.enable = true;
+  services.whoami.enable = true;
   modules.withings-sync.enable = true;
 
   # Custom DNS

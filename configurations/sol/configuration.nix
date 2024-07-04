@@ -20,7 +20,7 @@
     extraInternalHostNames = [ "wiki.zz" ];
   };
 
-  modules.whoami.enable = true;
+  services.whoami.enable = true;
   networking.extraHosts = "";
 
   # Custom DNS
