@@ -6,21 +6,11 @@
   # Use freshest kernel
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
-  # # Hardware configuration
-  # modules.linode.enable = true;
-
   # Network
-  services.tailscale.enable = true;
-
-  services.traefik = {
-    enable = true;
-    # routers."rss.suderman.net" = "https://rsshub.sol";
-    routers."wiki.zz" = "https://wiki.sol";
-    extraInternalHostNames = [ "wiki.zz" ];
-  };
-
-  services.whoami.enable = true;
   networking.extraHosts = "";
+  services.tailscale.enable = true;
+  services.traefik.enable = true;
+  services.whoami.enable = true;
 
   # Custom DNS
   modules.blocky.enable = true;
@@ -35,23 +25,8 @@
 
   # Web services
   modules.whoogle = { enable = true; name = "g"; };
-  # modules.whoogle = { enable = true; name = "g.suderman.net"; };
-  # modules.gitea = { enable = true; name = "git"; };
   modules.tiddlywiki = { enable = true; name = "wiki"; };
   modules.rsshub.enable = true;
   modules.freshrss.enable = true;
-  # modules.wallabag.enable = false;
-  # modules.nextcloud.enable = false;
-
-  modules.tandoor-recipes = {
-    enable = false;
-    # package = pkgs.unstable.tandoor-recipes;
-    # public = "tandoor.suderman.net";
-  };
-  # modules.tandoor-recipes = {
-  #   enable = true;
-  #   # package = pkgs.unstable.tandoor-recipes;
-  #   public = "tandoor.suderman.net";
-  # };
 
 }

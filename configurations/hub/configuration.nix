@@ -1,7 +1,7 @@
-{ config, pkgs, this, ... }: {
+{ config, lib, pkgs, this, ... }: {
 
   # Import all *.nix files in this directory
-  imports = this.lib.ls ./.;
+  imports = lib.ls ./.;
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -48,12 +48,5 @@
     zwave = "/dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_3e535b346625ed11904d6ac2f9a97352-if00-port0";
     isy = home.isy;
   };
-
-  # Test services
-  # modules.plex.enable = true;
-  # modules.tautulli.enable = true;
-  # modules.jellyfin.enable = true;
-  # modules.tiddlywiki.enable = true;
-  # modules.tandoor-recipes.enable = true;
 
 }

@@ -1,7 +1,7 @@
-{ config, pkgs, this, ... }: {
+{ config, lib, pkgs, this, ... }: {
 
   # Import all *.nix files in this directory
-  imports = this.lib.ls ./.;
+  imports = lib.ls ./.;
 
   # Use freshest kernel
   boot.kernelPackages = pkgs.linuxPackages_latest;
