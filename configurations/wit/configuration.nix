@@ -21,7 +21,6 @@
 
   # Web services
   services.tailscale.enable = true;
-  modules.ddns.enable = true;
   services.whoami.enable = true;
 
   services.displayManager.autoLogin.enable = true;

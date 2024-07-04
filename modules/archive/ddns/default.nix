@@ -1,15 +1,15 @@
-# modules.ddns.enable = true;
+# services.ddns.enable = true;
 { config, lib, pkgs, ... }:
 
 let
 
-  cfg = config.modules.ddns;
+  cfg = config.services.ddns;
   inherit (lib) mkIf;
   inherit (config.age) secrets;
 
 in {
 
-  options.modules.ddns = {
+  options.services.ddns = {
     enable = lib.options.mkEnableOption "ddns"; 
   };
 

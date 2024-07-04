@@ -11,7 +11,6 @@
 
   # Network
   services.tailscale.enable = true;
-  # modules.ddns.enable = true;
 
   services.traefik = {
     enable = true;
