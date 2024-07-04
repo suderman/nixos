@@ -20,7 +20,7 @@
   # Web services
   services.tailscale.enable = true;
   services.whoami.enable = true;
-  modules.withings-sync.enable = true;
+  services.withings-sync.enable = true;
 
   # Custom DNS
   services.blocky.enable = true;

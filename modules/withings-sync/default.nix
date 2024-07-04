@@ -1,4 +1,4 @@
-# modules.withings-sync.enable = true;
+# services.withings-sync.enable = true;
 
 # Manually sync today:
 # withings-sync
@@ -9,11 +9,9 @@
 # Check the timer for the next run
 # systemctl list-timers --all 
 
-{ inputs, config, pkgs, lib, this, ... }:
-  
-let 
+{ inputs, config, pkgs, lib, this, ... }: let 
 
-  cfg = config.modules.withings-sync;
+  cfg = config.services.withings-sync;
   user = builtins.head this.admins;
   inherit (config.age) secrets;
   inherit (lib) mkIf mkForce;
@@ -24,7 +22,7 @@ let
 
 in {
 
-  options.modules.withings-sync = {
+  options.services.withings-sync = {
     enable = lib.options.mkEnableOption "withings-sync"; 
   };
 
