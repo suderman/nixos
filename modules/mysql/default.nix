@@ -1,22 +1,13 @@
-# modules.mysql.enable = true;
-{ config, lib, pkgs, this, ... }:
+# services.mysql.enable = true;
+{ config, lib, pkgs, this, ... }: let
 
-let
-
-  cfg = config.modules.mysql;
+  cfg = config.services.mysql;
   inherit (lib) mkIf mkOption types;
 
 in {
 
-  options.modules.mysql = {
-    enable = lib.options.mkEnableOption "mysql"; 
-  };
-
   config = mkIf cfg.enable {
-
     services.mysql = {
-
-      enable = true;
 
       user = "mysql";
       group = "mysql";
