@@ -1,16 +1,13 @@
-# modules.blocky.enable = true;
-{ config, lib, pkgs, this, outputs, ... }: 
+# services.blocky.enable = true;
+{ config, lib, pkgs, this, outputs, ... }: let 
 
-let 
-
-  cfg = config.modules.blocky;
+  cfg = config.services.blocky;
   inherit (builtins) attrValues mapAttrs toString;
   inherit (lib) concatStringsSep flatten foldl mkIf mkOption mkForce types;
 
 in {
 
-  options.modules.blocky = {
-    enable = lib.options.mkEnableOption "blocky"; 
+  options.services.blocky = {
     name = mkOption {
       type = types.str;
       default = "blocky";
@@ -146,7 +143,6 @@ in {
     # };
 
     services.blocky = {
-      enable = true;
       settings = {
 
         ports = {

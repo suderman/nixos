@@ -23,7 +23,7 @@
   modules.withings-sync.enable = true;
 
   # Custom DNS
-  modules.blocky.enable = true;
+  services.blocky.enable = true;
   services.prometheus.enable = true;
   services.grafana.enable = true;
 

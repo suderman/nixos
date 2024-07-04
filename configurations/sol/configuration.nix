@@ -13,7 +13,7 @@
   services.whoami.enable = true;
 
   # Custom DNS
-  modules.blocky.enable = true;
+  services.blocky.enable = true;
 
   # Memory management
   services.earlyoom.enable = true;

@@ -27,7 +27,7 @@
   services.whoami.enable = true;
 
   # Custom DNS
-  modules.blocky.enable = true;
+  services.blocky.enable = true;
 
   # Serve CA cert on http://10.2.0.2:1234
   services.traefik = {
