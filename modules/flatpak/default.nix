@@ -1,9 +1,9 @@
-# modules.flatpak.enable = true;
+# services.flatpak.enable = true;
 { config, lib, inputs, ... }:
 
 let
 
-  cfg = config.modules.flatpak;
+  cfg = config.services.flatpak;
   inherit (lib) mkIf;
 
 in {
@@ -12,9 +12,9 @@ in {
   imports = [ inputs.nix-flatpak.nixosModules.nix-flatpak ];
 
   # options shared with home-manager module
-  options.modules.flatpak = import ./options.nix { 
+  options.services.flatpak = import ./options.nix {
     inherit lib;  
-    inherit (cfg) packages betaPackages;
+    inherit (cfg) apps beta;
   };
 
   # config (mostly) shared with home-manager module
@@ -22,14 +22,13 @@ in {
 
     services.flatpak = import ./config.nix { 
       inherit lib;  
-      inherit (cfg) packages betaPackages; 
-    } // { 
-      enable = true; 
+      inherit (cfg) apps beta all;
     };
 
     # portal required for flatpak
     xdg.portal.enable = true;
 
   };
+
 
 }

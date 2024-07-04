@@ -1,4 +1,4 @@
-{ lib, packages ? [], betaPackages ? [], ... }: {
+{ lib, apps ? [], beta ? [], all ? [], ... }: {
 
   # Weekly updates
   update.auto.enable = true;
@@ -11,9 +11,9 @@
 
   # Combine lists into one for services.flatpak.packages
   packages = (
-    map ( appId: { inherit appId; origin = "flathub"; } ) packages
+    map ( appId: { inherit appId; origin = "flathub"; } ) apps
   ) ++ (
-    map ( appId: { inherit appId; origin = "flathub-beta"; } ) betaPackages
+    map ( appId: { inherit appId; origin = "flathub-beta"; } ) beta
   );
 
 }

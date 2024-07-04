@@ -84,11 +84,11 @@ in {
     in subtractLists systemPkgs userPkgs;
 
     # Install all missing flatpak packages
-    modules.flatpak.packages = let
+    services.flatpak.packages = let
       inherit (lib) unique filter isString subtractLists;
       allPkgs = unique( cfg.packages ++ cfg.dock ++ cfg.extensions );
       userPkgs = filter (pkg: isString pkg) allPkgs;
-      systemPkgs = osConfig.modules.flatpak.allPackages;
+      systemPkgs = osConfig.services.flatpak.all;
     in subtractLists systemPkgs userPkgs;
 
 

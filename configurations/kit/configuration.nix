@@ -48,15 +48,16 @@
   services.ollama.acceleration = "cuda";
 
 
-  modules.flatpak = {
-    packages = [
+  services.flatpak = {
+    enable = true;
+    apps = [
       "app.bluebubbles.BlueBubbles"
       "io.github.dvlv.boxbuddyrs"
       "io.gitlab.zehkira.Monophony"
       "org.emptyflow.ArdorQuery"
       "com.github.treagod.spectator"
     ];
-    betaPackages = [
+    beta = [
       "org.gimp.GIMP" # https://www.gimp.org/downloads/devel
     ];
   };

@@ -88,15 +88,16 @@ in {
   programs.kdeconnect.enable = true;
   programs.dolphin.enable = true;
 
-  modules.flatpak = {
-    packages = [
+  services.flatpak = {
+    enable = true;
+    apps = [
       "app.bluebubbles.BlueBubbles"
       "io.github.dvlv.boxbuddyrs"
       "io.gitlab.zehkira.Monophony"
       "org.emptyflow.ArdorQuery"
       "com.github.treagod.spectator"
     ];
-    betaPackages = [
+    beta = [
       "org.gimp.GIMP" # https://www.gimp.org/downloads/devel
     ];
   };
