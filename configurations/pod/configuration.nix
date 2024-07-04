@@ -1,8 +1,8 @@
-{ config, pkgs, this, inputs, ... }: {
+{ config, lib, pkgs, presets, ... }: {
 
   # Import all *.nix files in this directory
-  imports = this.lib.ls ./. ++ [
-    inputs.hardware.nixosModules.common-gpu-amd
+  imports = lib.ls ./. ++ [
+    presets.common-gpu-amd
   ];
 
   # Use freshest kernel

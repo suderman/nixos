@@ -1,7 +1,7 @@
-{ config, pkgs, this, ... }: {
+{ config, lib, pkgs, this, ... }: {
 
   # Import all *.nix files in this directory
-  imports = this.lib.ls ./.;
+  imports = lib.ls ./.;
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
