@@ -48,10 +48,6 @@
   file."/etc/foo/srv" = { type = "dir"; source = /srv; };
 
   # modules.gitea.enable = true;
-  # modules.radarr.enable = true;
-  # modules.sonarr.enable = true;
-  # modules.lidarr.enable = true;
-  # modules.sabnzbd.enable = true;
   # modules.tandoor-recipes.enable = false;
   # modules.home-assistant.enable = true;
   # modules.rsshub.enable = true;
@@ -66,9 +62,8 @@
   # modules.nextcloud.enable = false;
   # modules.tiddlywiki.enable = true;
   # modules.ocis = { enable = true; dataDir = "/tmp/ocis"; };
-  # modules.photoprism = { enable = false; photosDir = "/photos"; };
   # modules.silverbullet.enable = true;
-  # modules.bluebubbles.enable = true;
+  # services.bluebubbles.enable = true;
   # services.traefik = { 
   #   routers.isy = "http://${this.networks.home.isy}:80";
   #   dynamicConfigOptions.http = {

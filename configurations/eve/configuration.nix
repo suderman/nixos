@@ -36,7 +36,7 @@
   };
 
   # Reverse proxy bluebubbles server on nearby Mac Mini
-  modules.bluebubbles = with this.networks; {
+  services.bluebubbles = with this.networks; {
     enable = true;
     name = "bb";
     ip = work.pom;

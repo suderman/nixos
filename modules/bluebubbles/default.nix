@@ -1,15 +1,15 @@
-# modules.bluebubbles.enable = true;
+# services.bluebubbles.enable = true;
 { config, lib, this, ... }:
   
 let 
 
-  cfg = config.modules.bluebubbles;
+  cfg = config.services.bluebubbles;
   inherit (lib) mkIf mkOption mkBefore types;
   inherit (builtins) toString;
 
 in {
 
-  options.modules.bluebubbles = {
+  options.services.bluebubbles = {
 
     enable = lib.options.mkEnableOption "bluebubbles"; 
 
