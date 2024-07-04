@@ -23,7 +23,7 @@
     deleteRoute = "10.1.0.0/16";
   };
   services.traefik.enable = true;
-  modules.prometheus.enable = true;
+  services.prometheus.enable = true;
   services.whoami.enable = true;
 
   services.silverbullet-docker.enable = true;

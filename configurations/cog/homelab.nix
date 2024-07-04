@@ -20,6 +20,9 @@
     '';
   };
 
+  # services.prometheus.enable = true;
+  # services.grafana.enable = true;
+
   # services.ocis = {
   #   enable = true;
   #   url = "http://127.0.0.1:9200";

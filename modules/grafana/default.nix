@@ -1,30 +1,23 @@
-# modules.grafana.enable = true;
+# services.grafana.enable = true;
 { config, lib, pkgs, this, ... }:
 
 let
 
-  cfg = config.modules.grafana;
+  cfg = config.services.grafana;
   inherit (lib) mkIf mkOption options types;
   inherit (builtins) toString;
 
 in {
 
-  options.modules.grafana = {
-    enable = options.mkEnableOption "grafana"; 
+  options.services.grafana = {
     name = mkOption {
       type = types.str;
       default = "grafana";
     };
-    port = mkOption {
-      default = 2342;
-      type = types.port;
-    };
   };
 
   config = mkIf cfg.enable {
-
     services.grafana = {
-      enable = true;
 
       declarativePlugins = with pkgs.grafanaPlugins; [
         grafana-piechart-panel
@@ -106,7 +99,7 @@ in {
 
     services.traefik = { 
       enable = true;
-      routers.${cfg.name} = "http://127.0.0.1:${toString cfg.port}";
+      routers.${cfg.name} = "http://127.0.0.1:${toString cfg.settings.server.http_port}";
     };
 
   };
