@@ -30,10 +30,8 @@
     enable = true;
     deleteRoute = "10.1.0.0/16";
   };
-  # modules.ddns.enable = true;
-  modules.whoami.enable = true;
 
-  # modules.sunshine.enable = true;
+  modules.whoami.enable = true;
   modules.dolphin.enable = true;
   modules.steam.enable = true;
 

@@ -75,14 +75,8 @@ in {
     keyboard = config.services.keyd.internalKeyboards.framework;
   };
 
+  services.garmin.enable = true;
   programs.hyprland.enable = true;
-
-  modules.garmin.enable = true;
-  modules.sunshine.enable = false;
-  virtualisation.waydroid.enable = false;
-
-  # Support iOS devices
-  # modules.libimobiledevice.enable = true;
 
   # Web services
   services.traefik.enable = true;

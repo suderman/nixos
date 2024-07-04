@@ -33,18 +33,11 @@
     deleteRoute = "10.1.0.0/16";
   };
 
+  services.garmin.enable = true;
   programs.hyprland.enable = true;
-
-  modules.garmin.enable = true;
-
-  # Support iOS devices
-  # modules.libimobiledevice.enable = true;
-
-  # modules.ddns.enable = true;
   modules.whoami.enable = true;
 
   # Apps
-  # modules.sunshine.enable = true;
   modules.dolphin.enable = true;
   modules.steam.enable = true;
   modules.neovim.enable = true;
