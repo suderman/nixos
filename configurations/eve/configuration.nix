@@ -43,7 +43,7 @@
   };
 
   # Backup media server
-  modules.jellyfin.enable = true;
+  services.jellyfin.enable = true;
 
   # Point /media to /backups/lux/media.* (latest version) 
   systemd.services.media-symlink = {

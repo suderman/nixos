@@ -54,7 +54,7 @@
   # modules.rsshub.enable = true;
   # modules.backblaze.enable = false;
   # modules.wallabag.enable = false;
-  # modules.jellyfin.enable = false;
+  # services.jellyfin.enable = false;
   # modules.unifi = with this.network.dns; {
   #   enable = true;
   #   gateway = home.logos;

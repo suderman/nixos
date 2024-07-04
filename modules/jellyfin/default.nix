@@ -1,34 +1,28 @@
-# modules.jellyfin.enable = true;
+# services.jellyfin.enable = true;
 { config, lib, pkgs, this, ... }:
 
 let
 
-  cfg = config.modules.jellyfin;
+  cfg = config.services.jellyfin;
   inherit (lib) mkIf mkOption types;
   inherit (config.services.traefik.lib) mkHostName;
 
 in {
 
-  options.modules.jellyfin = {
-
-    enable = lib.options.mkEnableOption "jellyfin"; 
-
+  options.services.jellyfin = {
     name = mkOption {
       type = types.str;
       default = "jellyfin";
     };
-
     port = mkOption {
       type = types.port;
       default = 8096; 
     };
-
   };
 
   config = mkIf cfg.enable {
 
     services.jellyfin = {
-      enable = true;
       user = "jellyfin";
       group = "media";
       openFirewall = true;

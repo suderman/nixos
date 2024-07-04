@@ -1,16 +1,15 @@
-# modules.plex.enable = true;
+# services.plex.enable = true;
 { config, lib, pkgs, this, ... }:
 
 let
 
-  cfg = config.modules.plex;
+  cfg = config.services.plex;
   inherit (lib) mkIf mkOption types;
   inherit (this.lib) extraGroups;
 
 in {
 
-  options.modules.plex = {
-    enable = lib.options.mkEnableOption "plex"; 
+  options.services.plex = {
     name = mkOption {
       type = types.str;
       default = "plex";
@@ -24,7 +23,6 @@ in {
   config = mkIf cfg.enable {
 
     services.plex = {
-      enable = true;
       user = "plex"; # default
       group = "plex"; # default
       extraPlugins = [];

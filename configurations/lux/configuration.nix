@@ -28,20 +28,10 @@
 
   services.silverbullet-docker.enable = true;
   modules.gitea.enable = true; 
-  # modules.ollama.enable = true;
 
-  modules.jellyfin.enable = true;
-  modules.plex.enable = true;
-
+  services.jellyfin.enable = true;
+  services.plex.enable = true;
   services.lunasea.enable = true;
-
-  # modules.ombi = {
-  #   enable = true;
-  #   alias = { 
-  #     hostName = "ombi.suderman.org"; 
-  #     public = false; 
-  #   };
-  # };
 
   modules.ocis = {
     enable = true;
@@ -58,15 +48,5 @@
       public = false; 
     };
   };
-  
-  # modules.photoprism = {
-  #   enable = false;
-  #   photosDir = "/data/photos";
-  # };
-  # modules.tiddlywiki = { enable = true; name = "wiki"; };
-  # modules.wallabag.enable = false;
-  # modules.freshrss.enable = true;
-  # modules.tandoor-recipes.enable = false;
-  # modules.nextcloud.enable = false;
 
 }
