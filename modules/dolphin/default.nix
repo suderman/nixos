@@ -1,25 +1,21 @@
-# modules.dolphin.enable = true;
+# programs.dolphin.enable = true;
 { config, pkgs, lib, ... }:
 
 let
 
-  cfg = config.modules.dolphin;
+  cfg = config.programs.dolphin;
   inherit (lib) mkIf;
 
 in {
 
-  options.modules.dolphin = {
+  options.programs.dolphin = {
     enable = lib.options.mkEnableOption "dolphin"; 
   };
 
   config = mkIf cfg.enable {
 
-    environment.systemPackages = with pkgs; [
-      # dolphin-emu-beta
-      dolphin-emu
-    ];
-
-    services.udev.packages = [ pkgs.dolphinEmu ];
+    environment.systemPackages = [ pkgs.dolphin-emu ];
+    services.udev.packages = [ pkgs.dolphin-emu ];
 
     # https://github.com/dolphin-emu/dolphin/blob/master/Data/51-usb-device.rules
     services.udev.extraRules = lib.mkAfter ''

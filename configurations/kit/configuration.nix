@@ -38,12 +38,11 @@
   services.whoami.enable = true;
 
   # Apps
-  modules.dolphin.enable = true;
-  modules.steam.enable = true;
+  programs.dolphin.enable = true;
+  programs.steam.enable = true;
   programs.neovim.enable = true;
   programs.mosh.enable = true;
   programs.kdeconnect.enable = true;
-  # programs.evolution.enable = true;
 
   modules.ollama.enable = true;
   services.ollama.acceleration = "cuda";

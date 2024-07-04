@@ -32,8 +32,8 @@
   };
 
   services.whoami.enable = true;
-  modules.dolphin.enable = true;
-  modules.steam.enable = true;
+  programs.dolphin.enable = true;
+  programs.steam.enable = true;
 
   # https://wiki.nixos.org/wiki/AMD_GPU
   environment.variables = {

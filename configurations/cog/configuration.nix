@@ -83,10 +83,10 @@ in {
 
   # Apps & Games
   programs.neovim.enable = true;
-  modules.steam.enable = true;
+  programs.steam.enable = true;
   programs.mosh.enable = true;
   programs.kdeconnect.enable = true;
-  modules.dolphin.enable = true;
+  programs.dolphin.enable = true;
 
   modules.flatpak = {
     packages = [
