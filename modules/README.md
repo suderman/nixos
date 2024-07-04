@@ -10,7 +10,7 @@ using the enable option.
 
 ```nix
 {
-  config.modules.neovim.enable = true;
+  config.programs.neovim.enable = true;
 }
 ```
 

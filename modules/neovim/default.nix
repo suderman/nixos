@@ -1,21 +1,14 @@
-# modules.neovim.enable = true;
-{ config, lib, pkgs, ... }: 
+# programs.neovim.enable = true;
+{ config, lib, pkgs, ... }: let
 
-let
-
-  cfg = config.modules.neovim;
-  inherit (lib) mkIf mkOption types;
+  cfg = config.programs.neovim;
+  inherit (lib) mkIf;
 
 in {
 
-  options.modules.neovim = {
-    enable = lib.options.mkEnableOption "neovim"; 
-  };
-
   config = mkIf cfg.enable {
-
     programs.neovim = {
-      enable = true;
+
       viAlias = true;
       vimAlias = true;
 
@@ -212,8 +205,8 @@ in {
 
     };
 
-    # ALso make default editor
-    environment.variables.EDITOR = lib.mkIf cfg.enable "vim";
+    # Also make default editor
+    environment.variables.EDITOR = "nvim";
 
   };
 

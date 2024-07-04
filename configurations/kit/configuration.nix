@@ -40,7 +40,7 @@
   # Apps
   modules.dolphin.enable = true;
   modules.steam.enable = true;
-  modules.neovim.enable = true;
+  programs.neovim.enable = true;
   programs.mosh.enable = true;
   programs.kdeconnect.enable = true;
   # programs.evolution.enable = true;

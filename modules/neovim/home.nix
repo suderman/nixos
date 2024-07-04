@@ -1,21 +1,19 @@
 # programs.neovim.enable = true;
-{ config, lib, pkgs, ... }: 
+{ config, lib, pkgs, ... }: let
 
-let
-
-  inherit (pkgs.vimUtils) buildVimPluginFrom2Nix;
+  cfg = config.programs.neovim;
   inherit (pkgs) fetchFromGitHub;
+  inherit (lib) mkIf;
 
 in {
 
-  config = lib.mkIf config.programs.neovim.enable {
-
+  config = mkIf cfg.enable {
     programs.neovim = {
-
-      package = pkgs.unstable.neovim-unwrapped;
 
       viAlias = true;
       vimAlias = true;
+
+      package = pkgs.unstable.neovim-unwrapped;
 
       plugins = with pkgs.unstable.vimPlugins; [ 
         { plugin = vim-sensible; config = builtins.readFile ./init.vim; }
@@ -44,7 +42,6 @@ in {
         tcomment_vim
         align
 
-        # buildVimPluginFrom2Nix {
         (pkgs.vimUtils.buildVimPlugin {
           name = "hyprland-vim-syntax";
           src = pkgs.fetchFromGitHub {
@@ -55,7 +52,6 @@ in {
           };
         })
 
-        # { plugin = vim-plug; config = builtins.readFile ./vim-plug.vim; }
       ]; 
 
     };

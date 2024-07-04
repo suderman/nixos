@@ -20,7 +20,7 @@
 
   # Apps
   programs.mosh.enable = true;
-  modules.neovim.enable = true;
+  programs.neovim.enable = true;
 
   # Web services
   services.tailscale.enable = true;

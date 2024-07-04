@@ -28,7 +28,6 @@ in {
   services.pipewire.enable = true;
   security.rtkit.enable = true;
   hardware.bluetooth.enable = true;
-  # hardware.pulseaudio.enable = true;
 
   # framework_tool
   environment.systemPackages = with pkgs; [
@@ -83,16 +82,11 @@ in {
   services.whoami.enable = true;
 
   # Apps & Games
-  modules.neovim.enable = true;
+  programs.neovim.enable = true;
   modules.steam.enable = true;
   programs.mosh.enable = true;
   programs.kdeconnect.enable = true;
-  # programs.evolution.enable = true;
   modules.dolphin.enable = true;
-  # services.xserver.desktopManager.retroarch = {
-  #   enable = false;
-  #   package = pkgs.retroarchFull;
-  # };
 
   modules.flatpak = {
     packages = [

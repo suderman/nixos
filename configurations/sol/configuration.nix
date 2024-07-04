@@ -29,7 +29,7 @@
   services.earlyoom.enable = true;
 
   # Apps
-  modules.neovim.enable = true;
+  programs.neovim.enable = true;
   programs.mosh.enable = true;
   programs.tmux.enable = true;
 
