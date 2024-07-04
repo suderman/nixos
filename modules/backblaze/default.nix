@@ -1,4 +1,4 @@
-# modules.backblaze = {
+# services.backblaze = {
 #   enable = true;
 #   driveD = "/nix/state/home";
 #   driveE = "/nix/state/var/lib";
@@ -13,13 +13,13 @@ let
   version = "1.9";
 
   # https://github.com/JonathanTreffler/backblaze-personal-wine-container
-  cfg = config.modules.backblaze;
+  cfg = config.services.backblaze;
   inherit (config.services.traefik.lib) mkLabels;
   inherit (lib) mkIf mkOption mkBefore types;
 
 in {
 
-  options.modules.backblaze = {
+  options.services.backblaze = {
     enable = lib.options.mkEnableOption "backblaze"; 
     name = mkOption {
       type = types.str;

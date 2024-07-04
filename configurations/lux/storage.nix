@@ -132,7 +132,7 @@ in {
   };
 
   # Send everything to backblaze
-  modules.backblaze = {
+  services.backblaze = {
     enable = true;
     driveD = "/nix/state/home";
     driveE = "/nix/state/var/lib";
