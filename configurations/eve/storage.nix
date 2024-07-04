@@ -61,7 +61,7 @@ in {
   };
 
   # Snapshots & backup
-  modules.btrbk.enable = true;
+  services.btrbk.enable = true;
 
   # Additional filesystems in motd
   programs.rust-motd.settings.filesystems = {

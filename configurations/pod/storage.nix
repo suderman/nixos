@@ -22,7 +22,7 @@ in {
   fileSystems."/nix".options = btrfs;
 
   # # Snapshots & backups
-  # modules.btrbk = {
+  # services.btrbk = {
   #   enable = true;
   #   backups = with config.networking; {
   #     "/nix".target."ssh://eve.${domain}/backups/${hostName}" = {};

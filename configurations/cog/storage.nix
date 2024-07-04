@@ -62,7 +62,7 @@ in {
 
 
   # Snapshots & backups
-  modules.btrbk = with config.networking; {
+  services.btrbk = with config.networking; {
     enable = true;
 
     # # Backup snapshots to USB drive when attached

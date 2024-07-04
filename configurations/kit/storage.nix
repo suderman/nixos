@@ -58,7 +58,7 @@ in {
   };
 
   # Snapshots & backups
-  modules.btrbk = {
+  services.btrbk = {
     enable = true;
     snapshots = {
       "/mnt/ssd".subvolume."data" = {};

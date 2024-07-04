@@ -1,15 +1,15 @@
-# modules.btrbk.enable = true;
-{ config, lib, pkgs, this, ... }: 
+# services.btrbk.enable = true;
+{ config, lib, ... }: 
 
 let 
 
-  cfg = config.modules.btrbk;
+  cfg = config.services.btrbk;
   inherit (config.age) secrets;
   inherit (lib) mkIf mkOption mkForce types recursiveUpdate;
 
 in {
 
-  options.modules.btrbk = {
+  options.services.btrbk = {
     enable = lib.options.mkEnableOption "btrbk"; 
     snapshots = mkOption { type = types.attrs; default = {}; };
     backups = mkOption { type = types.attrs; default = {}; };
