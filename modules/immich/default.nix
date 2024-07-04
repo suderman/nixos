@@ -105,8 +105,7 @@ in {
       "${cfg.dataDir}/geocoding" = dir;
     };
 
-    # Enable database
-    modules.postgresql.enable = true;
+    # Enable redis
     services.redis.servers.immich = {
       enable = true;
       user = "immich";
@@ -114,7 +113,6 @@ in {
 
     # Postgres database configuration
     services.postgresql = {
-
       enable = true;
       ensureUsers = [{
         name = "immich";

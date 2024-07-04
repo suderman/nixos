@@ -1,9 +1,9 @@
-# modules.postgresql.enable = true;
+# services.postgresql.enable = true;
 { config, lib, pkgs, this, ... }:
 
 let
 
-  cfg = config.modules.postgresql;
+  cfg = config.services.postgresql;
   admins = this.admins ++ [ "root" ]; 
   databases = mkAttrs (unique config.services.postgresql.ensureDatabases) ( database: admins );
   inherit (config.services.prometheus) exporters;
@@ -12,27 +12,13 @@ let
 
 in {
 
-  options.modules.postgresql = {
-
-    enable = options.mkEnableOption "postgresql"; 
-
-    # 14 was default package as of 22.11
-    # 15 is default package as of 23.11
-    # 15 remains default package as of 24.05
-    package = mkOption {
-      type = types.package;
-      default = pkgs.postgresql_14;
-    };
-
-  };
-
-
   config = mkIf cfg.enable {
-
     services.postgresql = {
-
-      enable = true;
-      package = cfg.package; 
+      
+      # 14 was default package as of 22.11
+      # 15 is default package as of 23.11
+      # 15 remains default package as of 24.05
+      package = pkgs.postgresql_14; 
 
       # Database & role for each admin
       ensureDatabases = admins;

@@ -56,6 +56,7 @@ in {
 
     # Postgres database configuration
     services.postgresql = {
+      enable = true;
       ensureUsers = [{
         name = "gitea";
         ensureDBOwnership = true;
@@ -66,8 +67,7 @@ in {
     # Allow gitea user to read password file
     users.users.gitea.extraGroups = [ "secrets" ]; 
 
-    # Enable database and reverse proxy
-    modules.postgresql.enable = true;
+    # Enable reverse proxy
     services.traefik = {
       enable = true;
       routers.${cfg.name} = "http://127.0.0.1:${toString cfg.port}";

@@ -42,7 +42,7 @@ in {
   config = mkIf cfg.enable {
     
     # Enable database and reverse proxies
-    modules.postgresql.enable = true;
+    services.postgresql.enable = true;
     services.traefik.enable = true;
     modules.nginx.enable = true;
 

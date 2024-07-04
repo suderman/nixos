@@ -123,14 +123,13 @@ in {
       "${cfg.dataDir}/zwave" = dir;
     };
 
-    # Enable database 
-    modules.postgresql.enable = true;
 
     # Postgres database configuration
     # This "hass" postgres user isn't actually being used to access the database.
     # Since the docker is running the container as root, the "root" postgres user
     # is what needs access, but that account already has access to all databases.
     services.postgresql = {
+      enable = true;
       ensureUsers = [{
         name = "hass";
         ensureDBOwnership = true;

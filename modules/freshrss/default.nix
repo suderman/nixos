@@ -68,10 +68,8 @@ in {
     # Allow freshrss user to read password file
     users.users.freshrss.extraGroups = [ "secrets" ]; 
 
-    # Enable database and reverse proxies
-    modules.postgresql.enable = true;
+    # Enable reverse proxies
     modules.nginx.enable = true;
-
     services.traefik = { 
       enable = true;
       routers.${cfg.name} = "http://127.0.0.1:${toString port}";
