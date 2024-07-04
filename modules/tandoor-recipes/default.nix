@@ -1,9 +1,7 @@
-# modules.tandoor-recipes.enable = true;
-{ config, lib, pkgs, this, ... }:
+# services.tandoor-recipes.enable = true;
+{ config, lib, pkgs, this, ... }: let
 
-let
-
-  cfg = config.modules.tandoor-recipes;
+  cfg = config.services.tandoor-recipes;
 
   isPublic = if cfg.public == "" then false else true;
   hostName = if isPublic then cfg.public else cfg.hostName;
@@ -18,25 +16,15 @@ let
 
 in {
 
-  options.modules.tandoor-recipes = {
-
-    enable = lib.options.mkEnableOption "tandoor-recipes"; 
-
+  options.services.tandoor-recipes = {
     hostName = mkOption {
       type = types.str;
       default = "tandoor.${this.hostName}";
     };
-
     public = mkOption { 
       type = types.str; 
       default = ""; 
     };
-
-    package = mkOption {
-      type = types.package;
-      default = pkgs.tandoor-recipes;
-    };
-
   };
 
   config = mkIf cfg.enable {
@@ -85,9 +73,6 @@ in {
     # Tandoor configuration
     services.tandoor-recipes = {
 
-      enable = true;
-      package = cfg.package; 
-
       # Service port
       port = toInt port;
 
@@ -134,7 +119,6 @@ in {
       }];
       ensureDatabases = [ "tandoor_recipes" ];
     };
-
 
   };
 

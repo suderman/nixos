@@ -24,9 +24,9 @@
   programs.tmux.enable = true;
 
   # Web services
-  modules.whoogle = { enable = true; name = "g"; };
-  modules.tiddlywiki = { enable = true; name = "wiki"; };
-  modules.rsshub.enable = true;
-  modules.freshrss.enable = true;
+  services.whoogle = { enable = true; name = "g"; };
+  services.tiddlywiki = { enable = true; name = "wiki"; };
+  services.rsshub.enable = true;
+  services.freshrss.enable = true;
 
 }

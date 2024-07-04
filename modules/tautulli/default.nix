@@ -1,9 +1,7 @@
-# modules.tautulli.enable = true;
-{ config, lib, pkgs, this, ... }:
+# services.tautulli.enable = true;
+{ config, lib, pkgs, this, ... }: let
 
-let
-
-  cfg = config.modules.tautulli;
+  cfg = config.services.tautulli;
   inherit (lib) mkIf mkOption mkBefore types;
   inherit (builtins) toString;
 
@@ -28,7 +26,6 @@ in {
   config = mkIf cfg.enable {
 
     services.tautulli = {
-      enable = true;
       user = "plexpy";
       group = "nogroup";
       port = cfg.port;

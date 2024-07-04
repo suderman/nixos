@@ -1,9 +1,7 @@
-# modules.freshrss.enable = true;
-{ config, lib, pkgs, this, ... }:
+# services.freshrss.enable = true;
+{ config, lib, pkgs, this, ... }: let
 
-let
-
-  cfg = config.modules.freshrss;
+  cfg = config.services.freshrss;
   port = config.services.nginx.defaultHTTPListenPort;
 
   inherit (lib) mkIf mkOption types;
@@ -13,21 +11,16 @@ let
 
 in {
 
-  options.modules.freshrss = {
-
-    enable = lib.options.mkEnableOption "freshrss"; 
-
+  options.services.freshrss = {
     name = mkOption {
       type = types.str;
       default = "freshrss";
     };
-
   };
 
   config = mkIf cfg.enable {
 
     services.freshrss = {
-      enable = true;
       defaultUser = builtins.head this.admins;
       passwordFile = secrets.password.path;
       baseUrl = "https://${cfg.name}.${this.hostName}";

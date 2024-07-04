@@ -1,4 +1,4 @@
-# modules.rsshub.enable = true;
+# services.rsshub.enable = true;
 { config, lib, pkgs, this, ... }:
 
 let
@@ -7,7 +7,7 @@ let
   tag = "chromium-bundled";
 
   # https://docs.rsshub.app/en/install/#docker-compose-deployment-install
-  cfg = config.modules.rsshub;
+  cfg = config.services.rsshub;
 
   inherit (lib) mkIf mkOption mkBefore options types strings;
   inherit (builtins) toString;
@@ -20,7 +20,7 @@ in {
     ./rsshub-web.nix
   ];
 
-  options.modules.rsshub = {
+  options.services.rsshub = {
     enable = options.mkEnableOption "rsshub"; 
     tag = mkOption {
       type = types.str;

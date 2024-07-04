@@ -1,8 +1,6 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, ... }: let
 
-let
-
-  cfg = config.modules.rsshub;
+  cfg = config.services.rsshub;
   inherit (lib) mkIf;
 
 in {

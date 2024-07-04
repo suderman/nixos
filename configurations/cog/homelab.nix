@@ -48,19 +48,18 @@
   file."/etc/foo/srv" = { type = "dir"; source = /srv; };
 
   # services.gitea.enable = true;
-  # modules.tandoor-recipes.enable = false;
-  # modules.home-assistant.enable = true;
-  # modules.rsshub.enable = true;
-  # modules.wallabag.enable = false;
+  # services.tandoor-recipes.enable = false;
+  # services.rsshub.enable = true;
   # services.jellyfin.enable = false;
+  # modules.home-assistant.enable = true;
   # modules.unifi = with this.network.dns; {
   #   enable = true;
   #   gateway = home.logos;
   # };
-  # modules.freshrss.enable = true;
-  # modules.whoogle = { enable = true; name = "g"; };
+  # services.freshrss.enable = true;
+  # services.whoogle = { enable = true; name = "g"; };
+  # services.tiddlywiki.enable = true;
   # modules.nextcloud.enable = false;
-  # modules.tiddlywiki.enable = true;
   # modules.ocis = { enable = true; dataDir = "/tmp/ocis"; };
   # modules.silverbullet.enable = true;
   # services.bluebubbles.enable = true;
