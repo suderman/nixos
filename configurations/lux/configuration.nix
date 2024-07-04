@@ -22,12 +22,13 @@
     enable = true;
     deleteRoute = "10.1.0.0/16";
   };
+
   services.traefik.enable = true;
   services.prometheus.enable = true;
   services.whoami.enable = true;
 
   services.silverbullet-docker.enable = true;
-  modules.gitea.enable = true; 
+  services.gitea.enable = true; 
 
   services.jellyfin.enable = true;
   services.plex.enable = true;

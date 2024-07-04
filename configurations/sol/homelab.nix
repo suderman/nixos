@@ -2,7 +2,7 @@
 
   # Experiments
   # modules.whoogle = { enable = true; name = "g.suderman.net"; };
-  # modules.gitea = { enable = true; name = "git"; };
+  # services.gitea = { enable = true; name = "git"; };
   # modules.wallabag.enable = false;
   # modules.nextcloud.enable = false;
   modules.tandoor-recipes = {

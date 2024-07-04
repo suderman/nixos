@@ -1,9 +1,9 @@
-# modules.gitea.enable = true;
+# services.gitea.enable = true;
 { config, lib, pkgs, this, ... }:
 
 let
 
-  cfg = config.modules.gitea;
+  cfg = config.services.gitea;
 
   inherit (lib) mkIf mkOption types;
   inherit (lib.strings) toInt;
@@ -12,8 +12,7 @@ let
 
 in {
 
-  options.modules.gitea = {
-    enable = lib.options.mkEnableOption "gitea"; 
+  options.services.gitea = {
     name = mkOption {
       type = types.str;
       default = "gitea";
@@ -27,7 +26,6 @@ in {
   config = mkIf cfg.enable {
 
     services.gitea = {
-      enable = true;
       package = pkgs.gitea;
       database.type = "postgres";
       database.socket = "/run/postgresql";

@@ -47,7 +47,7 @@
   file."/etc/foo/resolv" = { type = "file"; mode = 775; user = "jon"; group = "users"; source = /etc/resolv.conf; };
   file."/etc/foo/srv" = { type = "dir"; source = /srv; };
 
-  # modules.gitea.enable = true;
+  # services.gitea.enable = true;
   # modules.tandoor-recipes.enable = false;
   # modules.home-assistant.enable = true;
   # modules.rsshub.enable = true;
