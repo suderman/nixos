@@ -16,7 +16,7 @@ in {
   config = mkIf (cfg.caPort > 0) {
 
     # Use nginx to serve the certificate
-    modules.nginx.enable = true;
+    services.nginx.enable = true;
 
     # Configure virtual host on specified port
     services.nginx.virtualHosts.ca = {

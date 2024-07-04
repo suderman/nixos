@@ -50,6 +50,7 @@ in {
 
     # Postgres database configuration
     services.postgresql = {
+      enable = true;
       ensureUsers = [{
         name = "nextcloud";
         ensureDBOwnership = true;
@@ -72,28 +73,27 @@ in {
     };
 
     # traefik proxy serving nginx proxy
-    services.traefik.dynamicConfigOptions.http = {
-      routers.nextcloud = {
-        rule = "Host(`${cfg.name}.${this.hostName}`)";
-        tls.certresolver = "resolver-dns";
-        middlewares = [ "local@file" "nextcloud@file" ];
-        service = "nextcloud";
+    services.nginx.enable = true;
+    services.traefik = {
+      enable = true;
+      dynamicConfigOptions.http = {
+        routers.nextcloud = {
+          rule = "Host(`${cfg.name}.${this.hostName}`)";
+          tls.certresolver = "resolver-dns";
+          middlewares = [ "local@file" "nextcloud@file" ];
+          service = "nextcloud";
+        };
+        middlewares.nextcloud = {
+          headers.customRequestHeaders.Host = "${cfg.name}.${this.hostName}";
+        };
+        services.nextcloud.loadBalancer.servers = [{  
+          url = "http://127.0.0.1:${toString config.services.nginx.defaultHTTPListenPort}"; 
+        }];
       };
-      middlewares.nextcloud = {
-        headers.customRequestHeaders.Host = "${cfg.name}.${this.hostName}";
-      };
-      services.nextcloud.loadBalancer.servers = [{  
-        url = "http://127.0.0.1:${toString config.services.nginx.defaultHTTPListenPort}"; 
-      }];
     };
 
     # Allow nextcloud user to read password file
     users.users.nextcloud.extraGroups = [ "secrets" ]; 
-
-    # Enable database and reverse proxy
-    services.postgresql.enable = true;
-    services.traefik.enable = true;
-    modules.nginx.enable = true;
 
   };
 

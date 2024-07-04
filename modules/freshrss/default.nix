@@ -69,7 +69,7 @@ in {
     users.users.freshrss.extraGroups = [ "secrets" ]; 
 
     # Enable reverse proxies
-    modules.nginx.enable = true;
+    services.nginx.enable = true;
     services.traefik = { 
       enable = true;
       routers.${cfg.name} = "http://127.0.0.1:${toString port}";

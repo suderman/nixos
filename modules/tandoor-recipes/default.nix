@@ -41,39 +41,40 @@ in {
 
   config = mkIf cfg.enable {
     
-    # Enable database and reverse proxies
-    services.postgresql.enable = true;
-    services.traefik.enable = true;
-    modules.nginx.enable = true;
-
     # traefik proxy serving nginx proxy
-    services.traefik.dynamicConfigOptions.http = {
-      routers.tandoor = {
-        rule = "Host(`${hostName}`)";
-        tls.certresolver = "resolver-dns";
-        tls.domains = mkIf (isPublic) [{ main = "${hostName}"; sans = "*.${hostName}"; }];
-        middlewares = [ "tandoor@file" ] ++ ( if isPublic then [] else [ "local@file" ] );
-        service = "tandoor";
+    services.traefik = {
+      enable = true;
+      dynamicConfigOptions.http = {
+        routers.tandoor = {
+          rule = "Host(`${hostName}`)";
+          tls.certresolver = "resolver-dns";
+          tls.domains = mkIf (isPublic) [{ main = "${hostName}"; sans = "*.${hostName}"; }];
+          middlewares = [ "tandoor@file" ] ++ ( if isPublic then [] else [ "local@file" ] );
+          service = "tandoor";
+        };
+        middlewares.tandoor = {
+          headers.customRequestHeaders.Host = "tandoor";
+        };
+        services.tandoor.loadBalancer.servers = [{ 
+          url = "http://127.0.0.1:${toString config.services.nginx.defaultHTTPListenPort}"; 
+        }];
       };
-      middlewares.tandoor = {
-        headers.customRequestHeaders.Host = "tandoor";
-      };
-      services.tandoor.loadBalancer.servers = [{ 
-        url = "http://127.0.0.1:${toString config.services.nginx.defaultHTTPListenPort}"; 
-      }];
     };
 
     # nginx reverse proxy to statically host recipe images, proxy pass for python app
-    services.nginx.virtualHosts."tandoor".extraConfig = ''
-      location /media/recipes/ {
-        alias ${runDir}/;
-      }
-      location / {
-        proxy_pass http://127.0.0.1:${port};
-        proxy_set_header X-Forwarded-Proto https;
-        proxy_set_header Host ${hostName};
-      }
-    '';
+    services.nginx = {
+      enable = true;
+      virtualHosts."tandoor".extraConfig = ''
+        location /media/recipes/ {
+          alias ${runDir}/;
+        }
+        location / {
+          proxy_pass http://127.0.0.1:${port};
+          proxy_set_header X-Forwarded-Proto https;
+          proxy_set_header Host ${hostName};
+        }
+      '';
+    };
 
     # Bind mount of private recipes directory to a location accessible for nginx
     systemd.services.nginx = {
@@ -126,6 +127,7 @@ in {
 
     # Postgres database configuration
     services.postgresql = {
+      enable = true;
       ensureUsers = [{
         name = "tandoor_recipes";
         ensureDBOwnership = true;

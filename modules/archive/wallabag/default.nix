@@ -61,16 +61,16 @@ in {
 
     };
 
-    # Enable database and reverse proxy
-    services.postgresql.enable = true;
+    # Enable reverse proxies
     services.traefik.enable = true;
-    modules.nginx.enable = true;
+    services.nginx.enable = true;
 
     # Enable redis service for wallabag
     services.redis.servers.wallabag.enable = true;
 
     # Postgres database configuration
     services.postgresql = {
+      enable = true;
       ensureUsers = [{
         name = "wallabag";
         ensureDBOwnership = true;
@@ -107,7 +107,7 @@ in {
         internal;
       '';
       locations."~ /(?!app)\\.php$".extraConfig = "return 404;";
-    } // config.modules.nginx.ssl; # use self-signed certificates
+    } // config.services.nginx.lib.ssl; # use self-signed certificates
 
     # make php magic happen
     services.phpfpm.pools.wallabag = with pkgs; { 

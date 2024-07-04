@@ -1,20 +1,16 @@
-# modules.nginx.enable = true;
-{ config, lib, pkgs, ... }:
+# services.nginx.enable = true;
+{ config, lib, pkgs, ... }: let
 
-let
-
-  cfg = config.modules.nginx;
+  cfg = config.services.nginx;
   inherit (config.services.prometheus) exporters;
   inherit (lib) mkIf mkOption types;
 
 in {
 
-  options.modules.nginx = {
-
-    enable = lib.options.mkEnableOption "nginx"; 
+  options.services.nginx.lib = {
 
     # Enable self-signed certificate https:
-    # config.services.nginx.virtualHosts."foo" = { ... } // config.modules.nginx.ssl
+    # config.services.nginx.virtualHosts."foo" = { ... } // config.services.nginx.lib.ssl
     ssl = mkOption { 
       type = types.attrs; 
       default = {
@@ -36,7 +32,6 @@ in {
     in {
 
       nginx = {
-        enable = true;
         statusPage = true;
         defaultHTTPListenPort = httpPort;
         defaultSSLListenPort = httpsPort;
