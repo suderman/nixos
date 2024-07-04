@@ -47,6 +47,10 @@ in {
       slurp # selecting a region to screenshot
     ];
 
+    programs = {
+      kitty.enable = true;
+    };
+
     # I'll never remember the H
     home.shellAliases = {
       hyprland = "Hyprland";
