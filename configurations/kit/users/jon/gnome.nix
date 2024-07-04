@@ -4,7 +4,7 @@
     dock = [
       kitty
       firefox
-      gnome.nautilus
+      nautilus
       telegram-desktop
       tauon
       gnome-text-editor

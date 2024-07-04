@@ -14,8 +14,7 @@
     git.enable = true;
     tmux.enable = true;
     zsh.enable = true;
+    yazi.enable = true;
   };
-
-  modules.yazi.enable = true;
 
 }

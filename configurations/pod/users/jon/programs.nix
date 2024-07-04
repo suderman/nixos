@@ -33,17 +33,12 @@ in {
 
   ];
 
-  # modules.firefox.enable = true;
   programs.chromium.enable = true;
   programs.git.enable = true;
   programs.tmux.enable = true;
   programs.zsh.enable = true;
-  # programs.neovim.enable = true;
-
   programs.wezterm.enable = false;
   programs.foot.enable = false;
-  # pipewire-alsa pipewire-audio pipewire-docs pipewire-jack pipewire-media-session pipewire-pulse
-
-  modules.yazi.enable = true;
+  programs.yazi.enable = true;
 
 }

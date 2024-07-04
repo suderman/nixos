@@ -4,7 +4,7 @@
     dock = [
       kitty
       firefox
-      gnome.nautilus
+      nautilus
       telegram-desktop
       "app.bluebubbles.BlueBubbles"
       tauon

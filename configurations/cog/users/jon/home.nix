@@ -19,35 +19,15 @@ in {
 
   services.keyd.enable = true;
 
-  # # TUI bluetooth management
-  # modules.bluetuith.enable = true;
-
-  # # Audio visualizer
-  # home.packages = with pkgs; [ cava ];
-  # xdg.configFile."cava/config".text = ''
-  #   [input]
-  #   method = pulse
-  #   source = auto
-  # '';
-
   home.pointerCursor = {
     gtk.enable = true;
-    package = pkgs.gnome.adwaita-icon-theme;
+    package = pkgs.adwaita-icon-theme;
     name = "Adwaita";
     size = 16;
   };
   
   home.packages = with pkgs; [ 
     loupe
-    hyprpicker
-    hyprshot
-    hyprlock
-    hypridle
-    hyprnome
-    # hyprspace
-    hyprpaper
-    hyprcursor
-
     cantarell-fonts
   ];
 

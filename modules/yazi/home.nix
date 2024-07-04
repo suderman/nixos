@@ -1,21 +1,14 @@
-# modules.yazi.enable = true;
-{ config, lib, pkgs, ... }: 
+# programs.yazi.enable = true;
+{ config, lib, pkgs, ... }: let 
 
-with pkgs; 
-
-let 
-  cfg = config.modules.yazi;
+  cfg = config.programs.yazi;
+  inherit (lib) mkIf;
 
 in {
 
-  options = {
-    modules.yazi.enable = lib.options.mkEnableOption "yazi"; 
-  };
-
-  config = lib.mkIf cfg.enable {
+  config = mkIf cfg.enable {
 
     programs.yazi = {
-      enable = true;
       package = pkgs.unstable.yazi;
       enableBashIntegration = true;
       enableZshIntegration = true;

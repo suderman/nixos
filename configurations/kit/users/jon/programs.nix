@@ -43,9 +43,7 @@ in {
 
   programs.wezterm.enable = false;
   programs.foot.enable = false;
-  # pipewire-alsa pipewire-audio pipewire-docs pipewire-jack pipewire-media-session pipewire-pulse
-
-  modules.yazi.enable = true;
+  programs.yazi.enable = true;
 
   programs.silverbullet = {
     enable = true;

@@ -35,24 +35,19 @@ in {
     pavucontrol ncpamixer pamixer pamix
   ];
 
-  # modules.firefox.enable = true;
   programs.chromium.enable = true;
   programs.git.enable = true;
   programs.tmux.enable = true;
   programs.zsh.enable = true;
-  # programs.neovim.enable = true;
-
   programs.wezterm.enable = false;
   programs.foot.enable = false;
-  # pipewire-alsa pipewire-audio pipewire-docs pipewire-jack pipewire-media-session pipewire-pulse
+  programs.yazi.enable = true;
 
   programs.obs-studio = with pkgs.unstable; {
     enable = true;
     package = obs-studio;
     # plugins = [ obs-studio-plugins.wlrobs ];
   };
-
-  modules.yazi.enable = true;
 
   programs.silverbullet = {
     enable = true;

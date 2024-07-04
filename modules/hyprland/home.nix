@@ -41,6 +41,7 @@ in {
       wlogout # logout menu
       wl-clipboard # copying and pasting
       hyprpicker  # color picker
+      hyprcursor
       wf-recorder # screen recording
       grim # taking screenshots
       slurp # selecting a region to screenshot

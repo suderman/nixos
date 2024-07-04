@@ -340,7 +340,6 @@ in {
     "super+shift, print, exec, ${screenshot} sf"
     "ctrl+shift, print, exec, ${screenshot} si"
     "alt, print, exec, ${screenshot} p"
-    # ", PRINT, exec, hyprshot -m region"
 
     # Scroll through existing workspaces with super + scroll
     "super, mouse_down, workspace, e+1"
