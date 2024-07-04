@@ -10,12 +10,12 @@
   # modules.linode.enable = true;
 
   # Network
-  modules.tailscale.enable = true;
+  services.tailscale.enable = true;
   # modules.ddns.enable = true;
 
   services.traefik = {
     enable = true;
-    routers."rss.suderman.net" = "https://rsshub.sol";
+    # routers."rss.suderman.net" = "https://rsshub.sol";
     routers."wiki.zz" = "https://wiki.sol";
     extraInternalHostNames = [ "wiki.zz" ];
   };
@@ -35,8 +35,8 @@
   programs.tmux.enable = true;
 
   # Web services
-  # modules.whoogle = { enable = true; name = "g"; };
-  modules.whoogle = { enable = true; name = "g.suderman.net"; };
+  modules.whoogle = { enable = true; name = "g"; };
+  # modules.whoogle = { enable = true; name = "g.suderman.net"; };
   # modules.gitea = { enable = true; name = "git"; };
   modules.tiddlywiki = { enable = true; name = "wiki"; };
   modules.rsshub.enable = true;

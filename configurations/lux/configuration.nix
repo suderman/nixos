@@ -18,7 +18,7 @@
   modules.neovim.enable = true;
 
   # Web services
-  modules.tailscale = {
+  services.tailscale = {
     enable = true;
     deleteRoute = "10.1.0.0/16";
   };

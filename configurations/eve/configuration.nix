@@ -23,7 +23,7 @@
   modules.neovim.enable = true;
 
   # Web services
-  modules.tailscale.enable = true;
+  services.tailscale.enable = true;
   modules.whoami.enable = true;
 
   # Custom DNS

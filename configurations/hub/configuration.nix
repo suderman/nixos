@@ -18,7 +18,7 @@
   modules.neovim.enable = true;
 
   # Web services
-  modules.tailscale.enable = true;
+  services.tailscale.enable = true;
   # modules.ddns.enable = true;
   modules.whoami.enable = true;
   modules.withings-sync.enable = true;
