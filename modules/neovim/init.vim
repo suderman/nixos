@@ -97,6 +97,9 @@ nnoremap <silent> <F5> :let _s=@/<Bar>:%s/\s\+$//e<Bar>:let @/=_s<Bar>:nohl<CR>:
 " Clear search with comma-space
 noremap <leader><space> :noh<CR>:match none<CR>:2match none<CR>:3match none<CR>
 
+" F2 will sort selected words into alphabetical single line
+vnoremap <F2> d:execute 'normal i' . join(sort(split(getreg('"'))), ' ')<CR>
+
 " augroup hypr_ftdetect
 "   au!
 "   au BufRead,BufNewFile *hypr/*.conf,*hypr/*/*.conf,*hyprland/*.conf,*hyprland/*/*.conf set ft=hypr
