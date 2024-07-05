@@ -1,20 +1,16 @@
-# modules.unifi.enable = true;
-{ config, lib, pkgs, this, ... }:
+# services.unifi.enable = true;
+{ config, lib, pkgs, this, ... }: let
 
-let
-
-  cfg = config.modules.unifi;
-  inherit (lib) mkIf mkOption options types strings;
+  cfg = config.services.unifi;
   inherit (builtins) toString;
+  inherit (lib) ls mkIf mkOption options strings types;
 
 in {
 
-  imports = [ 
-    ./unifi.nix 
-    ./gateway.nix 
-  ];
+  imports = ls ./.; 
+  disabledModules = [ "services/networking/unifi.nix" ];
 
-  options.modules.unifi = {
+  options.services.unifi = {
 
     enable = options.mkEnableOption "unifi"; 
 

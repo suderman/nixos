@@ -1,28 +1,24 @@
-# modules.home-assistant.enable = true;
+# services.home-assistant.enable = true;
 { config, lib, pkgs, this, ... }:
 
 let
 
-  cfg = config.modules.home-assistant;
-  inherit (lib) mkIf mkOption mkBefore options types strings;
+  cfg = config.services.home-assistant;
+  inherit (lib) extraGroups ls mkBefore mkIf mkOption options strings types;
   inherit (builtins) toString readFile;
-  inherit (this.lib) extraGroups;
 
   # https://github.com/home-assistant/core/pkgs/container/home-assistant/versions?filters%5Bversion_type%5D=tagged
-  version = "2024.5.4";
+  version = "2024.7.1";
 
   # https://github.com/zwave-js/zwave-js-ui/pkgs/container/zwave-js-ui/versions?filters%5Bversion_type%5D=tagged
-  zwaveVersion = "9.12.0";
+  zwaveVersion = "9.14.4";
 
 in {
 
-  imports = [ 
-    ./hass.nix 
-    ./zwave.nix 
-    ./isy.nix 
-  ];
+  imports = ls ./.; 
+  disabledModules = [ "services/home-automation/home-assistant.nix" ];
 
-  options.modules.home-assistant = {
+  options.services.home-assistant = {
 
     enable = options.mkEnableOption "home-assistant"; 
 

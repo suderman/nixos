@@ -1,8 +1,6 @@
-{ config, lib, this, ... }:
+{ config, lib, this, ... }: let
 
-let
-
-  cfg = config.modules.home-assistant;
+  cfg = config.services.home-assistant;
   inherit (lib) mkIf;
   inherit (config.age) secrets;
 

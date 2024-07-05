@@ -1,10 +1,8 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, ... }: let
 
-let
-
-  cfg = config.modules.home-assistant;
+  cfg = config.services.home-assistant;
   inherit (builtins) toString readFile;
-  inherit (lib) mkIf mkOption mkBefore options types strings;
+  inherit (lib) mkBefore mkIf mkOption options strings types;
   inherit (pkgs) writeText;
   inherit (config.services.traefik.lib) mkLabels;
 

@@ -1,15 +1,13 @@
-{ config, lib, ... }:
+{ config, lib, ... }: let
 
-let
-
-  cfg = config.modules.home-assistant;
+  cfg = config.services.home-assistant;
   inherit (builtins) toString;
-  inherit (lib) mkIf mkBefore;
+  inherit (lib) mkBefore mkIf;
   inherit (config.services.traefik.lib) mkLabels;
 
 in {
 
-  config = mkIf (cfg.enable && cfg.zwave != "") {
+  config = mkIf ( cfg.enable && cfg.zwave != "" ) {
 
     # Enable reverse proxy
     services.traefik.enable = true;

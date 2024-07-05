@@ -1,8 +1,6 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, ... }: let
 
-let
-
-  cfg = config.modules.unifi;
+  cfg = config.services.unifi;
   inherit (lib) mkIf;
 
 in {

@@ -34,13 +34,13 @@
   };
 
   # LAN controller
-  modules.unifi = with this.networks; {
+  services.unifi = with this.networks; {
     enable = true;
     gateway = home.logos;
   };
 
   # Home automation
-  modules.home-assistant = with this.networks; {
+  services.home-assistant = with this.networks; {
     enable = true; 
     name = "hass";
     ip = home.hub;

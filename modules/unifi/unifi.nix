@@ -1,11 +1,9 @@
-{ config, lib, pkgs, ... }:
-
-let
+{ config, lib, pkgs, ... }: let
 
   # https://hub.docker.com/r/jacobalberty/unifi/tags
   version = "7.5";
 
-  cfg = config.modules.unifi;
+  cfg = config.services.unifi;
   inherit (builtins) toString;
   inherit (lib) mkIf;
   inherit (config.services.traefik.lib) mkLabels;

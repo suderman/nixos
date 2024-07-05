@@ -51,8 +51,8 @@
   # services.tandoor-recipes.enable = false;
   # services.rsshub.enable = true;
   # services.jellyfin.enable = false;
-  # modules.home-assistant.enable = true;
-  # modules.unifi = with this.network.dns; {
+  # services.home-assistant.enable = true;
+  # services.unifi = with this.network.dns; {
   #   enable = true;
   #   gateway = home.logos;
   # };
