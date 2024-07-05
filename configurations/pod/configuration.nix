@@ -24,6 +24,9 @@
   # Apps
   programs.mosh.enable = true;
   programs.neovim.enable = true;
+  programs.dolphin.enable = true;
+  programs.steam.enable = true;
+  services.whoami.enable = true;
 
   # Web services
   services.tailscale = {
@@ -31,9 +34,9 @@
     deleteRoute = "10.1.0.0/16";
   };
 
-  services.whoami.enable = true;
-  programs.dolphin.enable = true;
-  programs.steam.enable = true;
+  # Desktop environment
+  services.xserver.desktopManager.gnome.enable = false;
+  programs.hyprland.enable = true;
 
   # https://wiki.nixos.org/wiki/AMD_GPU
   environment.variables = {

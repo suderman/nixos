@@ -1,12 +1,11 @@
-# wayland.windowManager.hyprland.enable = true; 
-{ config, lib, pkgs, this, inputs, ... }: 
-
-let 
+# osConfig.programs.hyprland.enable = true;
+{ config, osConfig, lib, pkgs, this, inputs, ... }: let 
 
   cfg = config.wayland.windowManager.hyprland;
-  inherit (lib) mkIf mkDefault mkForce mkMerge mkOption removeSuffix types;
+  oscfg = osConfig.programs.hyprland;
+
+  inherit (lib) ls mkDefault mkForce mkIf mkMerge mkOption mkShellScript removeSuffix types;
   inherit (lib.options) mkEnableOption;
-  inherit (this.lib) destabilize ls mkShellScript;
 
 in {
 
@@ -21,7 +20,7 @@ in {
     default = "hyprland-ready.target";
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf oscfg.enable {
 
     # Add target that is enabled by exec-once at the top of the configuration
     systemd.user.targets."${removeSuffix ".target" cfg.systemd.target}".Unit = {
@@ -57,10 +56,10 @@ in {
       hyprland = "Hyprland";
     };
 
-    # gtk.theme.package = pkgs.dracula-theme;
-    # gtk.theme.name = "dracula";
-
+    # Automatically enable home-manager module if nixos module is enabled
     wayland.windowManager.hyprland = {
+      enable = true;
+
       systemd = {
         enable = true;
         enableXdgAutostart = true;

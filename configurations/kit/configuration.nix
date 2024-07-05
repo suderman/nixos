@@ -34,8 +34,10 @@
   };
 
   services.garmin.enable = true;
+
+  # Desktop environment
+  services.xserver.desktopManager.gnome.enable = false;
   programs.hyprland.enable = true;
-  services.whoami.enable = true;
 
   # Apps
   programs.dolphin.enable = true;
@@ -44,6 +46,7 @@
   programs.mosh.enable = true;
   programs.kdeconnect.enable = true;
 
+  services.whoami.enable = true;
   modules.ollama.enable = true;
   services.ollama.acceleration = "cuda";
 
