@@ -1,36 +1,11 @@
-# services.silverbullet-docker.enable = true;
-{ config, lib, pkgs, this, ... }:
+# services.silverbullet.enable = true;
+{ config, lib, pkgs, this, ... }: let
 
-let
-
-  # https://github.com/silverbulletmd/silverbullet/releases
-  version = "0.7.7";
-
-  cfg = config.services.silverbullet-docker;
-
+  cfg = config.services.silverbullet;
   inherit (builtins) toString;
-  inherit (lib) mkIf mkOption options types strings mkBefore;
-  inherit (this.lib) extraGroups;
-  inherit (config.services.traefik.lib) mkLabels;
-
+  inherit (lib) mkIf extraGroups;
 
 in {
-
-  options.services.silverbullet-docker = {
-
-    enable = options.mkEnableOption "silverbullet"; 
-
-    name = mkOption {
-      type = types.str;
-      default = "silverbullet";
-    };
-
-    dataDir = mkOption {
-      type = types.path;
-      default = "/var/lib/silverbullet";
-    };
-
-  };
 
   config = mkIf cfg.enable {
 
@@ -39,22 +14,20 @@ in {
     ids.uids.silverbullet = 913;
     ids.gids.silverbullet = 913;
 
+    # Ensure consistent UID/GIDs
     users = {
       users = {
 
-        # Add user to the silverbullet group
+        # Silverbullet user
         silverbullet = {
-          isSystemUser = true;
-          group = "silverbullet";
-          description = "silverbullet daemon user";
-          home = cfg.dataDir;
+          home = cfg.spaceDir;
           uid = config.ids.uids.silverbullet;
         };
 
       # Add admins to the silverbullet group
       } // extraGroups this.admins [ "silverbullet" ];
 
-      # Create group
+      # Silverbullet group
       groups.silverbullet = {
         gid = config.ids.gids.silverbullet;
       };
@@ -62,36 +35,18 @@ in {
     };
 
     # Ensure data directory exists
-    file."${cfg.dataDir}" = {
+    file."${cfg.spaceDir}" = {
       type = "dir"; mode = 775; 
       user = config.users.users.silverbullet.uid; 
       group = config.users.groups.silverbullet.gid;
     };
 
+
     # Enable reverse proxy
-    services.traefik.enable = true;
-
-    virtualisation.oci-containers.containers.silverbullet = {
-      image = "zefhemel/silverbullet:${version}";
-      autoStart = true;
-
-      # Run as silverbullet user
-      user = with config.ids; "${toString uids.silverbullet}:${toString gids.silverbullet}";
-
-      # Traefik labels
-      extraOptions = mkLabels cfg.name;
-
-      volumes = [ "${cfg.dataDir}:/space" ];
-
-    };
-
-    # Extend systemd service
-    systemd.services.docker-silverbullet = {
-      after = [ "traefik.service" ];
-      requires = [ "traefik.service" ];
-      preStart = with config.virtualisation.oci-containers.containers; ''
-        docker pull ${silverbullet.image};
-      '';
+    services.silverbullet.listenPort = 3003;
+    services.traefik = {
+      enable = true;
+      proxy.silverbullet = "http://${cfg.listenAddress}:${toString cfg.listenPort}";
     };
 
   };

@@ -61,7 +61,7 @@
   # services.tiddlywiki.enable = true;
   # modules.nextcloud.enable = false;
   # modules.ocis = { enable = true; dataDir = "/tmp/ocis"; };
-  # modules.silverbullet.enable = true;
+  # services.silverbullet.enable = true;
   # services.bluebubbles.enable = true;
   # services.traefik = { 
   #   proxy.isy = "http://${this.networks.home.isy}:80";

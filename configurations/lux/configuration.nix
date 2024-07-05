@@ -27,7 +27,7 @@
   services.prometheus.enable = true;
   services.whoami.enable = true;
 
-  services.silverbullet-docker.enable = true;
+  services.silverbullet.enable = true;
   services.gitea.enable = true; 
 
   services.jellyfin.enable = true;

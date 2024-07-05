@@ -34,4 +34,7 @@
     public = false;
   };
 
+
+  services.silverbullet.enable = true;
+
 }
