@@ -2,7 +2,8 @@
 { config, lib, pkgs, ... }: let
 
   cfg = config.programs.silverbullet;
-  inherit (lib) mkIf mkOption options types mkWebApp chromeClass;
+  inherit (lib) mkIf mkOption options types;
+  inherit (config.programs.chromium.lib) mkClass mkWebApp;
 
 in {
 
@@ -23,7 +24,7 @@ in {
 
     # Keyboard shortcuts
     services.keyd.windows = {
-      "${chromeClass cfg.url}" = {
+      "${mkClass cfg.url}" = {
         "super.o" = "C-k"; # page picker
         "super.p" = "C-slash"; # command pallete
         "super.r" = "C-A-r"; # reload system

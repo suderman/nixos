@@ -49,6 +49,7 @@ in {
 
     programs = {
       kitty.enable = true;
+      chromium.enable = true;
     };
 
     # I'll never remember the H

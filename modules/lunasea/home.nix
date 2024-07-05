@@ -2,7 +2,8 @@
 { config, lib, pkgs, ... }: let
 
   cfg = config.programs.lunasea;
-  inherit (lib) mkIf mkOption options types mkWebApp chromeClass;
+  inherit (lib) mkIf mkOption options types;
+  inherit (config.programs.chromium.lib) mkClass mkWebApp;
 
 in {
 
@@ -23,7 +24,7 @@ in {
 
     # Keyboard shortcuts
     services.keyd.windows = {
-      "${chromeClass cfg.url}" = {};
+      "${mkClass cfg.url}" = {};
     };
 
   };
