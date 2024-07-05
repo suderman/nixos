@@ -1,6 +1,6 @@
 { config, options, lib, pkgs, ... }: {
   
-  modules.gnome = with pkgs; {
+  programs.gnome-shell = with pkgs; {
     dock = [
       kitty
       firefox
@@ -12,7 +12,7 @@
       "org.gimp.GIMP"
       # "com.cassidyjames.butler"
     ];
-    extensions = options.modules.gnome.extensions.default ++ [
+    gnome-extensions = options.programs.gnome-shell.gnome-extensions.default ++ [
       gnomeExtensions.dash-to-dock
       gnomeExtensions.gsconnect
     ];

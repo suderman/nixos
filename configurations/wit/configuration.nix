@@ -23,6 +23,8 @@
   services.tailscale.enable = true;
   services.whoami.enable = true;
 
+  # Desktop environment
+  services.xserver.desktopManager.gnome.enable = true;
   services.displayManager.autoLogin.enable = true;
   services.displayManager.autoLogin.user = "ness";
 

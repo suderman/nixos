@@ -19,8 +19,8 @@ in {
     zsh.enable = true;
   };
 
-  modules.gnome = with pkgs; {
-    extensions = options.modules.gnome.extensions.default ++ [
+  programs.gnome-shell = with pkgs; {
+    gnome-extensions = options.programs.gnome-shell.gnome-extensions.default ++ [
       gnomeExtensions.dash-to-dock
     ];
     dock = [

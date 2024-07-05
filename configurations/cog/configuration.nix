@@ -70,6 +70,9 @@
   };
 
   services.garmin.enable = true;
+
+  # Desktop environment
+  services.xserver.desktopManager.gnome.enable = false;
   programs.hyprland.enable = true;
 
   # Web services

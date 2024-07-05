@@ -1,16 +1,14 @@
-# modules.gnome.enable = true;
-{ config, lib, pkgs, osConfig, this, ... }:
+# osConfig.services.xserver.desktopManager.gnome.enable = true;
+{ config, osConfig, lib, pkgs, this, ... }: let 
 
-let 
-
-  cfg = config.modules.gnome;
+  cfg = config.programs.gnome-shell;
+  oscfg = osConfig.services.xserver.desktopManager.gnome;
   inherit (lib) mkIf mkOption types;
   inherit (lib.options) mkEnableOption;
 
 in {
 
-  options.modules.gnome = with types; {
-    enable = mkEnableOption "gnome"; 
+  options.programs.gnome-shell = with types; {
     meta = mkOption { type = anything; default = {}; };
 
     dock = mkOption { 
@@ -37,7 +35,7 @@ in {
     };
 
     # `gnome-extensions list` for a list
-    extensions = mkOption { 
+    gnome-extensions = mkOption { 
       type = listOf package; 
       default = with pkgs.gnomeExtensions; [
         auto-move-windows
@@ -60,7 +58,8 @@ in {
 
   };
 
-  config = mkIf cfg.enable { 
+  config = mkIf oscfg.enable { 
+    programs.gnome-shell.enable = true;
 
     # # Helpful for debugging
     # modules.gnome.meta = let
@@ -78,7 +77,7 @@ in {
     # Install all missing packages and extentions
     home.packages = let 
       inherit (lib) unique filter isString subtractLists;
-      allPkgs = unique( cfg.packages ++ cfg.dock ++ cfg.extensions );
+      allPkgs = unique( cfg.packages ++ cfg.dock ++ cfg.gnome-extensions );
       userPkgs = filter (pkg: ! isString pkg) allPkgs;
       systemPkgs = osConfig.environment.systemPackages;
     in subtractLists systemPkgs userPkgs;
@@ -86,7 +85,7 @@ in {
     # Install all missing flatpak packages
     services.flatpak.packages = let
       inherit (lib) unique filter isString subtractLists;
-      allPkgs = unique( cfg.packages ++ cfg.dock ++ cfg.extensions );
+      allPkgs = unique( cfg.packages ++ cfg.dock ++ cfg.gnome-extensions );
       userPkgs = filter (pkg: isString pkg) allPkgs;
       systemPkgs = osConfig.services.flatpak.all;
     in subtractLists systemPkgs userPkgs;
@@ -100,7 +99,7 @@ in {
 
       "org/gnome/shell" = {
         disable-user-extensions = false;
-        enabled-extensions = appIds cfg.extensions; 
+        enabled-extensions = appIds cfg.gnome-extensions; 
         favorite-apps = appIds cfg.dock;
       };
 

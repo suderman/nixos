@@ -1,18 +1,12 @@
-# modules.gnome.enable = true;
-{ config, lib, pkgs, this, ... }:
+# services.xserver.desktopManager.gnome.enable = true;
+{ config, lib, pkgs, this, ... }: let 
 
-let 
+  cfg = config.services.xserver.desktopManager.gnome;
+  inherit (lib) mkIf;
 
-  cfg = config.modules.gnome;
   home = config.users.users."${builtins.head this.admins}".home;
-  inherit (lib) mkIf mkOption types;
-  inherit (lib.options) mkEnableOption;
 
 in {
-
-  options.modules.gnome = {
-    enable = mkEnableOption "gnome"; 
-  };
 
   config = mkIf cfg.enable {
 
@@ -20,7 +14,6 @@ in {
       libinput.enable = true; # enable touchpad support
       xserver = {
         enable = true;
-        desktopManager.gnome.enable = true;
         displayManager.gdm.enable = true;
         displayManager.gdm.autoSuspend = true;
       };
