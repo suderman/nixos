@@ -11,8 +11,8 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Use freshest kernel
-  # boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.kernelPackages = pkgs.linuxPackages_6_8;
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+  # boot.kernelPackages = pkgs.linuxPackages_6_8;
 
   # Sound & Bluetooth
   sound.enable = true;
