@@ -58,7 +58,7 @@ external and assumed public by default.
 {
   services.traefik.dynamicConfigOptions.http = {
     routers."foo.com" = {
-      rule = "Host(`foo.com`,`PUBLIC`)";
+      rule = "Host(`foo.com`) || Host(`PUBLIC`)";
       entrypoints = "websecure";
       middlewares = [ "foo.com" ];
       service = "foo.com";
@@ -141,7 +141,7 @@ external and assumed public by default.
     extraOptions = [ 
       "--label=traefik.enable=true" 
       "--label=traefik.http.routers.example_com.entrypoints=websecure"
-      "--label=traefik.http.routers.example_com.rule=Host(`example.com`,`PUBLIC`)" 
+      "--label=traefik.http.routers.example_com.rule=Host(`example.com`) || Host(`PUBLIC`)"
       "--label=traefik.http.routers.example_com.tls.certresolver=resolver-dns"
       "--label=traefik.http.routers.example_com.tls.domains[0].main=example.com"
       "--label=traefik.http.routers.example_com.tls.domains[1].sans=*.example.com"
