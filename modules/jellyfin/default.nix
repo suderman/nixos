@@ -32,13 +32,13 @@ in {
 
     services.traefik = { 
       enable = true;
-      routers = let router = {
+      proxy = let route = {
         hostName = mkHostName cfg.name;
         url = "http://127.0.0.1:${toString cfg.port}";
         public = false;
       }; in {
-        jellyfin-websecure = router;
-        jellyfin-web = router // { tls = false; };
+        jellyfin-websecure = route;
+        jellyfin-web = route // { tls = false; };
       };
     };
 

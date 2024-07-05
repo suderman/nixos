@@ -6,7 +6,7 @@ let
 
   cfg = config.modules.wallabag;
 
-  inherit (lib) mkIf mkOption types toInt;
+  inherit (lib) mkForce mkIf mkOption toInt types;
   inherit (builtins) toString;
   inherit (this.lib) extraGroups;
   inherit (config.age) secrets;
@@ -79,10 +79,9 @@ in {
     };
 
     services.traefik = { 
-      routers.${cfg.name} = "https://127.0.0.1:${toString cfg.port}";
-      dynamicConfigOptions.http = {
-        middlewares.wallabag.headers.customRequestHeaders.Host = "${cfg.name}.${this.hostName}";
-        routers.${cfg.name}.middlewares = [ "wallabag" ];
+      proxy.${cfg.name} = "https://127.0.0.1:${toString cfg.port}";
+      dynamicConfigOptions.http.middlewares.wallabag.headers = {
+        customRequestHeaders.Host = mkForce "${cfg.name}.${this.hostName}";
       };
     };
 

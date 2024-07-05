@@ -37,7 +37,7 @@ in {
 
     services.traefik = { 
       enable = true;
-      routers.${cfg.name} = "http://127.0.0.1:${toString cfg.port}"; # 9090
+      proxy.${cfg.name} = "http://127.0.0.1:${toString cfg.port}"; # 9090
     };
 
   };

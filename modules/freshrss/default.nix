@@ -4,7 +4,7 @@
   cfg = config.services.freshrss;
   port = config.services.nginx.defaultHTTPListenPort;
 
-  inherit (lib) mkIf mkOption types;
+  inherit (lib) mkForce mkIf mkOption types;
   inherit (lib.strings) toInt;
   inherit (builtins) toString;
   inherit (config.age) secrets;
@@ -65,10 +65,9 @@ in {
     services.nginx.enable = true;
     services.traefik = { 
       enable = true;
-      routers.${cfg.name} = "http://127.0.0.1:${toString port}";
-      dynamicConfigOptions.http = {
-        middlewares.freshrss.headers.customRequestHeaders.Host = "${cfg.name}.${this.hostName}";
-        routers.${cfg.name}.middlewares = [ "freshrss" ];
+      proxy.${cfg.name} = "http://127.0.0.1:${toString port}";
+      dynamicConfigOptions.http.middlewares.${cfg.name}.headers = {
+        customRequestHeaders.Host = mkForce "${cfg.name}.${this.hostName}";
       };
     };
 

@@ -11,7 +11,7 @@ in {
 
     services.traefik = { 
       enable = true;
-      routers.${cfg.gatewayName} = "https://${cfg.gateway}:443";
+      proxy.${cfg.gatewayName} = "https://${cfg.gateway}:443";
     };
 
   };

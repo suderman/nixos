@@ -25,10 +25,7 @@ in {
 
     users.groups.media.members = [ arr.user ];
 
-    services.traefik = {
-      enable = true;
-      routers.${name} = "http://127.0.0.1:${toString port}";
-    };
+    services.traefik.proxy.${name} = "http://127.0.0.1:${toString port}";
 
     services.prometheus = {
       exporters."exportarr-${name}" = {

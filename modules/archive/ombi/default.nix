@@ -40,7 +40,7 @@ in {
     # Enable reverse proxy
     services.traefik = {
       enable = true;
-      routers = {
+      proxy = {
         "${cfg.name}" = "http://127.0.0.1:${toString cfg.port}";
       } // mkAlias cfg.name cfg.alias;
     };

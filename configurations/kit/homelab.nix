@@ -28,8 +28,8 @@
 
 
   # Stable Diffusion
-  services.traefik.routers.sd = "http://127.0.0.1:7860";
-  services.traefik.routers."sd.suderman.org" = {
+  services.traefik.proxy.sd = "http://127.0.0.1:7860";
+  services.traefik.proxy."sd.suderman.org" = {
     url = "http://127.0.0.1:7860";
     public = false;
   };

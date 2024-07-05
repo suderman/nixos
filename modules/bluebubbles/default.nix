@@ -36,7 +36,7 @@ in {
 
     services.traefik = {
       enable = true;
-      routers.${cfg.name} = "http://${cfg.ip}:${toString cfg.port}";
+      proxy.${cfg.name} = "http://${cfg.ip}:${toString cfg.port}";
     };
 
   }; 

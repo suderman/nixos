@@ -34,7 +34,7 @@ in {
     networking.firewall.allowedTCPPorts = [ cfg.caPort ];
 
     # Also serve the ca.crt via traefik
-    services.traefik.routers.ca = "http://127.0.0.1:${toString cfg.caPort}";
+    services.traefik.proxy.ca = "http://127.0.0.1:${toString cfg.caPort}";
 
   };
 

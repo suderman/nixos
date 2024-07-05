@@ -91,7 +91,7 @@
   mkMiddleware = name: url: let
     inherit (builtins) isAttrs isString;
     fromString = url: fromAttrs { inherit url; };
-    fromAttrs = { url, ... }: mkDefault { headers.customRequestHeaders.Host = (mkHostName url); };
+    fromAttrs = { url, ... }: { headers.customRequestHeaders.Host = mkHostName url; };
     in 
       if isString url then fromString url
       else if isAttrs url then fromAttrs url

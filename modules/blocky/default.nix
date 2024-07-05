@@ -49,7 +49,7 @@ in {
     # https://blocky.hub/api/blocking/status
     services.traefik = {
       enable = true;
-      routers.${cfg.name} = "http://127.0.0.1:${toString cfg.httpPort}";
+      proxy.${cfg.name} = "http://127.0.0.1:${toString cfg.httpPort}";
     };
 
     # Ensure directory exists for downloaded lists

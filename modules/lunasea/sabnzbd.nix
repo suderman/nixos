@@ -3,7 +3,7 @@
   cfg = config.services.lunasea;
   arr = config.services.${name};
   inherit (config.services.prometheus) exporters;
-  inherit (lib) mkIf mkBefore mkOption options types;
+  inherit (lib) mkBefore mkIf mkOption options types;
   inherit (builtins) toString;
 
   # arrttributes
@@ -23,8 +23,10 @@ in {
     users.groups.media.members = [ arr.user ];
 
     services.traefik = {
-      enable = true;
-      routers.${name} = "http://127.0.0.1:${toString port}";
+      proxy.${name} = "http://127.0.0.1:${toString port}";
+      dynamicConfigOptions.http.middlewares.${name}.headers = {
+        accessControlAllowHeaders = "*";
+      };
     };
 
     services.prometheus = {

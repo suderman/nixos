@@ -64,11 +64,11 @@
   # modules.silverbullet.enable = true;
   # services.bluebubbles.enable = true;
   # services.traefik = { 
-  #   routers.isy = "http://${this.networks.home.isy}:80";
+  #   proxy.isy = "http://${this.networks.home.isy}:80";
   #   dynamicConfigOptions.http = {
   #     middlewares.isy.headers.customRequestHeaders.authorization = "Basic {{ env `ISY_BASIC_AUTH` }}";
   #   };
-  #   routers."foo.bar" = "https://whoami.cog";
+  #   proxy."foo.bar" = "https://whoami.cog";
   # };
 
 

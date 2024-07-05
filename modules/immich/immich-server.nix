@@ -50,7 +50,7 @@ in {
     # Enable reverse proxy
     services.traefik = {
       enable = true;
-      routers = mkAlias cfg.name cfg.alias;
+      proxy = mkAlias cfg.name cfg.alias;
     };
 
     # Extend systemd service

@@ -6,8 +6,8 @@
   metricsPort = 81;
   acmeEmail = "dns@suderman.org";
 
-  inherit (lib) mkIf mkOption options types subtractLists mapAttrs mkAttrs ls;
-  inherit (cfg.lib) mkHostNames mkService mkRouter mkMiddleware mkLabels mkAlias mkHostName;
+  inherit (lib) ls mapAttrs mkAttrs mkIf mkOption options subtractLists types;
+  inherit (cfg.lib) mkAlias mkHostName mkHostNames mkLabels mkMiddleware mkRouter mkService;
   inherit (config.age) secrets;
 
 in {
@@ -18,7 +18,7 @@ in {
   options.services.traefik = {
 
     # Shortcut for adding reverse proxies
-    routers = mkOption { 
+    proxy = mkOption { 
       type = with types; anything; 
       default = {};
     };
@@ -165,9 +165,9 @@ in {
 
         http = { 
 
-          # Generate traefik middlewares from configuration routers
+          # Generate traefik middlewares from configuration proxy
           middlewares = ( 
-            mapAttrs mkMiddleware cfg.routers 
+            mapAttrs mkMiddleware cfg.proxy 
 
           # Include a couple extra middlewares often used
           ) // {
@@ -186,16 +186,16 @@ in {
             ];
           };
 
-          # Generate traefik services from configuration routers
+          # Generate traefik services from configuration proxy
           services = ( 
-            mapAttrs mkService cfg.routers
+            mapAttrs mkService cfg.proxy
 
           # Avoid a config error ensuring at least one service defined
           ) // { "noop" = {}; };
 
-          # Generate traefik routers from configuration routers
+          # Generate traefik routers from configuration proxy
           routers = (
-            mapAttrs mkRouter cfg.routers
+            mapAttrs mkRouter cfg.proxy
                 
           # Make available the traefik dashboard
           ) // {
@@ -207,7 +207,7 @@ in {
             }; 
           };
 
-        }; 
+        };
 
         # Add every module certificate into the default store
         tls.certificates = map (name: { 

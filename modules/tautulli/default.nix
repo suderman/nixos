@@ -7,20 +7,11 @@
 
 in {
 
-  options.modules.tautulli = {
-
-    enable = lib.options.mkEnableOption "tautulli"; 
-
+  options.services.tautulli = {
     name = mkOption {
       type = types.str;
       default = "tautulli";
     };
-
-    port = mkOption {
-      default = 8181;
-      type = types.port;
-    };
-
   };
 
   config = mkIf cfg.enable {
@@ -34,7 +25,7 @@ in {
 
     services.traefik = {
       enable = true;
-      routers.${cfg.name} = "http://127.0.0.1:${toString cfg.port}";
+      proxy.${cfg.name} = "http://127.0.0.1:${toString cfg.port}"; # 8181
     };
 
   };

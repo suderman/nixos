@@ -19,7 +19,7 @@ external and assumed public by default.
 
 ```nix
 {
-  services.traefik.routers.foo = "http://bar.hub:80";
+  services.traefik.proxy.foo = "http://bar.hub:80";
 }
 ```
 
@@ -49,7 +49,7 @@ external and assumed public by default.
 
 ```nix
 {
-  services.traefik.routers."foo.com" = "http://baz.eve:80";
+  services.traefik.proxy."foo.com" = "http://baz.eve:80";
 }
 ```
 ...becomes...  
@@ -85,7 +85,7 @@ external and assumed public by default.
 ```nix
 {
   services.traefik = { 
-    routers.isy = "http://${this.networks.home.isy}:80";
+    proxy.isy = "http://${this.networks.home.isy}:80";
     dynamicConfigOptions.http = {
       middlewares.isy.headers.customRequestHeaders.authorization = "Basic {{ env `ISY_BASIC_AUTH` }}";
     };

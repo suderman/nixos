@@ -99,7 +99,7 @@ in {
 
     services.traefik = { 
       enable = true;
-      routers.${cfg.name} = "http://127.0.0.1:${toString cfg.settings.server.http_port}";
+      proxy.${cfg.name} = "http://127.0.0.1:${toString cfg.settings.server.http_port}";
     };
 
   };

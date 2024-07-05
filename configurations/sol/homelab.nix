@@ -12,7 +12,7 @@
   };
 
   services.traefik = {
-    routers."wiki.zz" = "https://wiki.sol";
+    proxy."wiki.zz" = "https://wiki.sol";
     extraInternalHostNames = [ "wiki.zz" ];
   };
 

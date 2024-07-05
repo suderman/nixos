@@ -21,10 +21,9 @@ in {
 
     services.traefik = { 
       enable = true;
-      routers.${cfg.isyName} = "http://${cfg.isy}:80";
-      dynamicConfigOptions.http = {
-        middlewares.isy.headers.customRequestHeaders.authorization = "Basic {{ env `ISY_BASIC_AUTH` }}";
-        routers.${cfg.isyName}.middlewares = [ "isy" ];
+      proxy.${cfg.isyName} = "http://${cfg.isy}:80";
+      dynamicConfigOptions.http.middlewares.${cfg.isyName}.headers = {
+        customRequestHeaders.authorization = "Basic {{ env `ISY_BASIC_AUTH` }}";
       };
     };
 
