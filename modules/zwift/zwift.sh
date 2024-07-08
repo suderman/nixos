@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 set -x
 
 # https://hub.docker.com/r/netbrain/zwift
