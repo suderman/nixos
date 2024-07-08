@@ -5,16 +5,16 @@
   inherit (lib) getExe mkOption removePrefix removeSuffix replaceStrings toLower types;
 
   # Create window class name from URL used by Chromium Web Apps 
-  # without slugify: https://example.com --> chrome-example.com__-Default
-  #    with slugify: https://example.com --> chrome-example-com-default
+  # without keydify: https://example.com --> chrome-example.com__-Default
+  #    with keydify: https://example.com --> chrome-example-com-default
   mkClass = arg: let
-    toSlug = str: replaceStrings ["." "_" "/"] ["-" "" ""] (toLower str);
-    toClass = { url, slugify ? false }: let 
+    toKeydClass = config.services.keyd.lib.mkClass;
+    toClass = { url, keydify ? false }: let 
       removeProtocols = url: removePrefix "http://" (removePrefix "https://" url);
       removeSlashes = url: replaceStrings [ "/" ] [ "." ] (removeSuffix "/" url);
       class = "chrome-${removeSlashes( removeProtocols url )}__-Default";
-    in if slugify == true then (toSlug class) else class;
-  in if isString arg then toClass { url = arg; slugify = true; } else toClass arg;
+    in if keydify == true then (toKeydClass class) else class;
+  in if isString arg then toClass { url = arg; keydify = true; } else toClass arg;
 
 
   # Create web app as desktop entry
@@ -22,7 +22,7 @@
   mkWebApp = { 
     name, url, icon ? "internet-web-browser", 
     platform ? "wayland", # x11 or wayland (wayland glitchy when resizing in hyprland)
-    class ? (mkClass { inherit url; slugify = false; }) # chrome-example.com__-Default
+    class ? (mkClass { inherit url; keydify = false; }) # chrome-example.com__-Default
   }: {
     "${class}" = {
       inherit name icon;

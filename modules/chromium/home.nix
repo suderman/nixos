@@ -3,6 +3,10 @@
 
   cfg = config.programs.chromium;
   inherit (lib) ls mkIf;
+  inherit (config.services.keyd.lib) mkClass;
+
+  # Window class name
+  class = "chromium-browser";
 
 in {
 
@@ -32,20 +36,18 @@ in {
     };
 
     # keyboard shortcuts
-    services.keyd.windows = {
-      chromium-browser = {
-        "alt.f" = "C-f"; # find in page
-        "super.[" = "C-S-tab"; # prev tab
-        "super.]" = "macro(C-tab)"; # next tab
-        "super.w" = "C-w"; # close tab
-        "super.t" = "C-t"; # new tab
-      };
+    services.keyd.windows."${mkClass class}" = {
+      "alt.f" = "C-f"; # find in page
+      "super.[" = "C-S-tab"; # prev tab
+      "super.]" = "macro(C-tab)"; # next tab
+      "super.w" = "C-w"; # close tab
+      "super.t" = "C-t"; # new tab
     };
 
     # tag Chromium and Picture-in-Picture windows
     wayland.windowManager.hyprland.settings = {
       windowrulev2 = [
-        "tag +web2, class:[Cc]hromium-browser"
+        "tag +web2, class:(${class})"
         "tag +pip, title:^(Picture in picture)$"
       ];
     };
