@@ -27,7 +27,7 @@ in {
     inkscape junction libreoffice newsflash
     unstable.nodePackages_latest.immich
 
-    withings-sync zwift coffee
+    withings-sync coffee
     bin-foo bin-bar
 
     tauon # jellyfin/plex/local music player
@@ -35,6 +35,7 @@ in {
     pavucontrol ncpamixer pamixer pamix
   ];
 
+  programs.zwift.enable = true;
   programs.chromium.enable = true;
   programs.git.enable = true;
   programs.tmux.enable = true;
