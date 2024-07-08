@@ -26,13 +26,13 @@ in {
     _1password _1password-gui 
     junction 
 
-    zwift coffee
-    bin-foo bin-bar
+    bin-foo bin-bar coffee
 
     tauon # jellyfin/plex/local music player
 
   ];
 
+  programs.zwift.enable = true;
   programs.chromium.enable = true;
   programs.git.enable = true;
   programs.tmux.enable = true;

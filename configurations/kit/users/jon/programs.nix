@@ -27,8 +27,7 @@ in {
     unstable.nodePackages_latest.immich
     junction 
 
-    zwift coffee
-    bin-foo bin-bar
+    bin-foo bin-bar coffee
 
     tauon # jellyfin/plex/local music player
 
@@ -44,6 +43,8 @@ in {
   programs.wezterm.enable = false;
   programs.foot.enable = false;
   programs.yazi.enable = true;
+
+  programs.zwift.enable = true;
 
   programs.silverbullet = {
     enable = true;
