@@ -46,6 +46,14 @@ in {
 
   programs.zwift.enable = true;
 
+  programs.chromium = {
+    enable = true;
+    commandLineArgs = [
+      "--enable-features=UseOzonePlatform"
+      "--ozone-platform=x11"
+    ];
+  };
+
   programs.silverbullet = {
     enable = true;
     url = "https://silverbullet.lux";
