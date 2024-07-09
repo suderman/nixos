@@ -80,5 +80,4 @@
     docker-nvidia-smi # test nvidia in docker container
   ];
 
-
 }

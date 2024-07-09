@@ -21,7 +21,7 @@
     # Attempts to make Wayland work. Was needed at the time, probably not anymore. Need to clean this up.
     home.sessionVariables = {
 
-      NIXOS_OZONE_WL = "1";
+      # NIXOS_OZONE_WL = "1";
       MOZ_ENABLE_WAYLAND = "1";
       MOZ_USE_XINPUT2 = "1";
       GDK_BACKEND = "wayland";

@@ -4,8 +4,8 @@
 let 
 
   cfg = config.programs.hyprland;
-  inherit (lib) mkIf mkOption mkBefore types;
-  inherit (this.lib) destabilize;
+  inherit (lib) mkBefore mkDefault mkIf mkOption types;
+  nvidia = config.hardware.nvidia.modesetting.enable; # true if using nvidia
 
 in {
 
@@ -37,7 +37,8 @@ in {
     # Thumbnail support for images
     services.tumbler.enable = true;
 
-    environment.sessionVariables = {
+    # Encourage Wayland support for electron (if not using nvidia)
+    environment.sessionVariables = if nvidia then {} else {
       NIXOS_OZONE_WL = "1";
     };
 
