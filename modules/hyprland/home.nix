@@ -50,6 +50,11 @@ in {
       chromium.enable = true;
     };
 
+    services.kdeconnect = {
+      enable = true;
+      indicator = true;
+    };
+
     # I'll never remember the H
     home.shellAliases = {
       hyprland = "Hyprland";
