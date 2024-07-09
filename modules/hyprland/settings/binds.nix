@@ -248,6 +248,9 @@ in {
     # Back-and-forth with super \
     "super, backslash, focuscurrentorlast"
 
+    # Focus urgent windows
+    "super, u, focusurgentorlast"
+
   ]) ++ [
 
     # Manage groups
@@ -260,7 +263,7 @@ in {
     # Manage windows
     "super, i, togglesplit"
     "super+shift, p, pseudo"
-    "super, u, togglefloating"
+    "super, y, togglefloating"
     "super+shift, p, pin"
     "super, f, fullscreen, 1"
     "super+alt, f, fullscreen, 0"
@@ -321,8 +324,8 @@ in {
     "super+shift, 0, centerwindow, 1"
     "super+shift, O, resizeactive, exact 600 400"
 
-    "super+alt, U, centerwindow, 1"
-    "super+alt, I, exec, ${cycleFloatingPositions}"
+    "super+alt, y, centerwindow, 1"
+    "super+alt, i, exec, ${cycleFloatingPositions}"
     "super+alt+shift, I, exec, ${cycleFloatingPositions} reverse"
 
     # Super+m to minimize window, Super+m to bring it back (possibly on a different workspace)
@@ -366,8 +369,8 @@ in {
     "super+shift, l, resizeactive, 80 0"
 
     # Cycle floating windows
-    # "super, u, cyclenext, floating"
-    # "super+shift, u, cyclenext, prev floating"
+    # "super, y, cyclenext, floating"
+    # "super+shift, y, cyclenext, prev floating"
 
   ];
 

@@ -31,7 +31,6 @@ in {
     home.packages = with pkgs; [ 
       inputs.hyprswitch.packages."${pkgs.stdenv.system}".default
       brightnessctl
-      mako
       # pamixer
       # ncpamixer
       font-awesome

@@ -21,7 +21,6 @@ in {
   # Execute your favorite apps at launch
   exec-once = [
     "${init}"
-    "mako"
     "swww-daemon"
   ];
 
