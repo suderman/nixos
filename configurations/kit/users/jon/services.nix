@@ -3,6 +3,11 @@
   # Keyboard control
   services.keyd.enable = true;
 
+  services.kdeconnect = {
+    enable = true;
+    indicator = true;
+  };
+
   # File sync
   modules.ocis.enable = true;
 

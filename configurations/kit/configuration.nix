@@ -44,7 +44,6 @@
   programs.steam.enable = true;
   programs.neovim.enable = true;
   programs.mosh.enable = true;
-  programs.kdeconnect.enable = true;
 
   services.whoami.enable = true;
   modules.ollama.enable = true;

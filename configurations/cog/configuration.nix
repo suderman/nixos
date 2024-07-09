@@ -83,7 +83,6 @@
   programs.neovim.enable = true;
   programs.steam.enable = true;
   programs.mosh.enable = true;
-  programs.kdeconnect.enable = true;
   programs.dolphin.enable = true;
 
   services.flatpak = {
