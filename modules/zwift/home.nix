@@ -30,7 +30,7 @@ in {
     # Add to launcher
     xdg.desktopEntries."${class}" = {
       name = "Zwift"; 
-      icon = ./zwift.png; 
+      icon = ./zwift.svg; 
       exec = getExe zwift;
     };
 
