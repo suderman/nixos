@@ -33,9 +33,10 @@ fi
 docker run --rm \
   --privileged \
   --network=bridge \
-  --name=zwift-$USER \
+  --name=zwift \
   --hostname=$(hostname) \
   --env-file=$CREDENTIALS \
+  --security-opt label=disable \
   --device=$DEVICE \
   -e NVIDIA_DRIVER_CAPABILITIES=all \
   -e DISPLAY=:0 \
