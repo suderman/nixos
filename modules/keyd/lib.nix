@@ -8,11 +8,12 @@
   # 423   return re.sub('[^A-Za-z0-9]+', '-', s).strip('-').lower()
   mkClass = str: let
     invalid = [ "." "_" "/" "(" ")" "$" "<" ">" "[" "]" ":" ];
-    hyphens = map ( _: "-" ) invalid;
-    v1 = replaceStrings invalid hyphens str;
-    v2 = (removePrefix "-" (removePrefix "--" (removePrefix "---" (removePrefix "----" v1) ) )); 
-    v3 = (removeSuffix "-" (removeSuffix "--" (removeSuffix "---" (removeSuffix "----" v2) ) )); 
-  in toLower v3;
+    repeats = [ "-------" "------" "-----" "----" "---" "--" ];
+    hyphens = map ( _: "-" );
+    strValidated = replaceStrings invalid ( hyphens invalid ) str;
+    strShortened = replaceStrings repeats ( hyphens repeats ) strValidated; 
+    strTrimmed = removeSuffix "-" ( removePrefix "-" strShortened ); 
+  in toLower strTrimmed;
 
 in {
 
