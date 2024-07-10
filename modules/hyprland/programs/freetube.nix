@@ -30,7 +30,6 @@
     # keyboard shortcuts
     services.keyd.windows = {
       freetube = {
-        "alt.l" = "C-l"; # location bar
         "super.o" = "C-l"; # location bar
         "super.n" = "C-n"; # new window
       };

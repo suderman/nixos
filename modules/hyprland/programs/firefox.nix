@@ -18,7 +18,6 @@
     services.keyd.windows = {
       firefox = {
         "alt.f" = "C-f"; # find in page
-        "alt.l" = "C-l"; # location bar
         "super.o" = "C-l"; # location bar
         "super.t" = "C-t"; # new tab
         "super.w" = "C-w"; # close tab
