@@ -66,13 +66,9 @@ in {
     security.pam.services.ags = {};
 
     # Login screen
-    services.greetd = {
+    services.greetd = let command = getExe pkgs.hyprland; in {
       enable = true;
-      settings = let command = getExe pkgs.hyprland; in {
-        initial_session = if cfg.autologin == null then {} else { 
-          user = cfg.autologin;
-          inherit command; 
-        };
+      settings = {
         default_session = {
           user = "greeter";
           command = builtins.toString [ "${getExe pkgs.greetd.tuigreet}"
@@ -84,7 +80,12 @@ in {
             "--cmd ${command}"
           ];
         };
-      };
+      } // ( if cfg.autologin == null then {} else { 
+        initial_session = { 
+          user = cfg.autologin;
+          inherit command; 
+        };
+      } );
     };
 
 
