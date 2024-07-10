@@ -4,7 +4,7 @@
 let
 
   # https://github.com/immich-app/immich/releases
-  version = "1.107.2";
+  version = "1.108.0";
 
   cfg = config.services.immich;
 
@@ -160,7 +160,6 @@ in {
       before = [ # run this before the rest:
         "docker-immich-machine-learning.service"
         "docker-immich-server.service"
-        "docker-immich-microservices.service"
       ];
       wants = service.after ++ service.before; 
       serviceConfig = {
