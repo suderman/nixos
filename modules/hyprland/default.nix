@@ -4,7 +4,7 @@
 let 
 
   cfg = config.programs.hyprland;
-  inherit (lib) mkBefore mkDefault mkIf mkOption types;
+  inherit (lib) getExe mkBefore mkDefault mkIf mkOption types;
   nvidia = config.hardware.nvidia.modesetting.enable; # true if using nvidia
 
 in {
@@ -14,6 +14,12 @@ in {
     # Flake nixos module
     # https://github.com/hyprwm/Hyprland/blob/main/nix/module.nix
     [ inputs.hyprland.nixosModules.default ];
+
+  # Set this to a username to automatically login at boot
+  options.programs.hyprland.autologin = mkOption {
+    type = with lib.types; nullOr str;
+    default = null;
+  };
 
   config = mkIf cfg.enable {
     programs.light.enable = true;
@@ -59,17 +65,28 @@ in {
     # https://aylur.github.io/ags-docs/config/utils/#authentication
     security.pam.services.ags = {};
 
-    # # Login screen
-    # services = {
-    #   # displayManager.defaultSession = "hyprland";
-    #   xserver = {
-    #     enable = true;
-    #     # desktopManager.xterm.enable = false;
-    #     displayManager = {
-    #       lightdm.enable = true;
-    #     };
-    #   };
-    # };
+    # Login screen
+    services.greetd = {
+      enable = true;
+      settings = let command = getExe pkgs.hyprland; in {
+        initial_session = if cfg.autologin == null then {} else { 
+          user = cfg.autologin;
+          inherit command; 
+        };
+        default_session = {
+          user = "greeter";
+          command = builtins.toString [ "${getExe pkgs.greetd.tuigreet}"
+            "--greeting 'Welcome to NixOS!'" 
+            "--asterisks" # display asterisks when a secret is typed
+            "--remember" # remember last logged-in username
+            "--remember-user-session" # remember last selected session for each user
+            "--time" # display the current date and time
+            "--cmd ${command}"
+          ];
+        };
+      };
+    };
+
 
   };
 

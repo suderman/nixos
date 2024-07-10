@@ -1,13 +1,20 @@
 { lib, pkgs, this, ... }: let 
 
-  inherit (lib) mkDefault; 
-  inherit (this.lib) mkShellScript;
+  inherit (lib) concatStringsSep mkDefault mkShellScript;
 
   init = mkShellScript {
-    inputs = with pkgs; [ coreutils ]; text = ''
+    inputs = with pkgs; [ coreutils swww ]; text = concatStringsSep "\n" [ 
+
       # Temporary symlink
       "ln -sf $XDG_RUNTIME_DIR/hypr /tmp/hypr"
-    '';
+
+      # Ensure portals and other systemd user services are running
+      "bounce"
+
+      # Wallpaper
+      "swww-daemon"
+
+    ];
   };
 
 in {
@@ -18,11 +25,8 @@ in {
   # Let xwayland be tiny, not blurry
   xwayland.force_zero_scaling = true;
 
-  # Execute your favorite apps at launch
-  exec-once = [
-    "${init}"
-    "swww-daemon"
-  ];
+  # Execute at launch
+  exec-once = [ "${init}" ];
 
   input = {
     kb_layout = "us";
@@ -43,9 +47,7 @@ in {
   # "device:epic-mouse-v1" = { sensitivity = -0.5; };
 
   general = {
-    # layout = mkDefault "master";
     layout = mkDefault "dwindle";
-    # no_cursor_warps = mkDefault false;
     resize_on_border = mkDefault true;
   };
 

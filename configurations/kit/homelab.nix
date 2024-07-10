@@ -37,4 +37,12 @@
 
   services.silverbullet.enable = true;
 
+  services.udev.extraRules = let 
+    vendor = "0fcf"; product = "1009";
+    modprobe = "${pkgs.kmod}/sbin/modprobe";
+  in lib.mkAfter ''
+    SUBSYSTEM=="usb", ATTRS{idVendor}=="${vendor}", ATTRS{idProduct}=="${product}", RUN+="${modprobe} usbserial vendor=0x${vendor} product=0x${product}", MODE="0666", OWNER="root", GROUP="root"
+  '';
+
+
 }

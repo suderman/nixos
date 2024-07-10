@@ -4,7 +4,7 @@
   cfg = config.wayland.windowManager.hyprland;
   oscfg = osConfig.programs.hyprland;
 
-  inherit (lib) ls mkDefault mkForce mkIf mkMerge mkOption mkShellScript removeSuffix types;
+  inherit (lib) concatStringsSep ls mkDefault mkForce mkIf mkMerge mkOption mkShellScript removeSuffix types;
   inherit (lib.options) mkEnableOption;
 
 in {
@@ -28,7 +28,28 @@ in {
       Requires = [ "hyprland-session.target" ];
     };
 
-    home.packages = with pkgs; [ 
+    # Add these to my path
+    home.packages = let
+
+      # Ensure portals and other systemd user services are running
+      # https://wiki.hyprland.org/Useful-Utilities/xdg-desktop-portal-hyprland/
+      bounce = mkShellScript {
+        inputs = with pkgs; [ systemd ]; name = "bounce"; text = let 
+          restart = name: "sleep 1 && systemctl --user stop ${name} && systemctl --user start ${name}";
+        in concatStringsSep "\n" [ 
+
+          # Ensure portals and other systemd user services are running
+          # https://wiki.hyprland.org/Useful-Utilities/xdg-desktop-portal-hyprland/
+          ( restart "xdg-desktop-portal-hyprland" )
+          ( restart "xdg-desktop-portal-gtk" )
+          ( restart "xdg-desktop-portal" )
+          ( restart "hyprland-ready.target" )
+
+        ];
+      };
+
+    in with pkgs; [ 
+      bounce
       inputs.hyprswitch.packages."${pkgs.stdenv.system}".default
       brightnessctl
       # pamixer

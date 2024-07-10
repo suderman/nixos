@@ -37,7 +37,10 @@
 
   # Desktop environment
   services.xserver.desktopManager.gnome.enable = false;
-  programs.hyprland.enable = true;
+  programs.hyprland = {
+    enable = true;
+    autologin = "jon";
+  };
 
   # Apps
   programs.dolphin.enable = true;

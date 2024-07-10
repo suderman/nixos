@@ -36,7 +36,10 @@
 
   # Desktop environment
   services.xserver.desktopManager.gnome.enable = false;
-  programs.hyprland.enable = true;
+  programs.hyprland = {
+    enable = true;
+    autologin = "jon";
+  };
 
   # https://wiki.nixos.org/wiki/AMD_GPU
   environment.variables = {
