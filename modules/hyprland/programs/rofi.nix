@@ -67,6 +67,13 @@ in {
           "drun"
           "ssh"
         ];
+
+        # rofi -show drun -sorting-method fzf -sort -matching fuzzy
+        # sort = true;
+        # sorting-method = "fzf";
+        # matching = "fuzzy";
+        # matching = "glob";
+
         separator-style = "dash";
         color-enabled = true;
         display-hyprwindow = "";

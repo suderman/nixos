@@ -72,4 +72,10 @@ in {
     platform = "x11";
   };
 
+  programs.jellyfin = {
+    enable = true;
+    url = "https://jellyfin.lux";
+    platform = "x11";
+  };
+
 }

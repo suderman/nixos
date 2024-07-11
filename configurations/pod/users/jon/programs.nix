@@ -41,4 +41,14 @@ in {
   programs.foot.enable = false;
   programs.yazi.enable = true;
 
+  programs.silverbullet = {
+    enable = true;
+    url = "https://silverbullet.lux";
+  };
+
+  programs.jellyfin = {
+    enable = true;
+    url = "https://jellyfin.lux";
+  };
+
 }

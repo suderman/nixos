@@ -65,4 +65,9 @@ in {
     url = "https://lunasea.lux";
   };
 
+  programs.jellyfin = {
+    enable = true;
+    url = "https://jellyfin.lux";
+  };
+
 }
