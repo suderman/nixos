@@ -36,7 +36,6 @@ in {
       swww # wallpaper
       brightnessctl
       font-awesome
-      wlogout # logout menu
       wl-clipboard # copying and pasting
       hyprpicker  # color picker
       hyprcursor

@@ -62,6 +62,15 @@ window#waybar {
   border-radius : 5px;
 }
 
+
+#idle_inhibitor {
+  padding : 5px 6px;
+}
+
+#custom-bluetooth {
+  padding : 5px 6px;
+}
+
 #network {
   color : #B5BFE2;
   background-color: #151521;

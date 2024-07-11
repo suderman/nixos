@@ -33,7 +33,11 @@
     deleteRoute = "10.1.0.0/16";
   };
 
-  services.garmin.enable = true;
+  # Allow powerkey to be intercepted, but still poweroff for longpress
+  services.logind = {
+    powerKey = "ignore";
+    powerKeyLongPress = "poweroff";
+  };
 
   # Desktop environment
   services.xserver.desktopManager.gnome.enable = false;
@@ -51,6 +55,7 @@
   services.whoami.enable = true;
   modules.ollama.enable = true;
   services.ollama.acceleration = "cuda";
+  services.garmin.enable = true;
 
   services.flatpak = {
     enable = true;

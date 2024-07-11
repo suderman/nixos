@@ -4,7 +4,8 @@
   inherit (builtins) readFile;
   inherit (lib) getExe mkIf mkForce;
 
-  systemMonitor = "${pkgs.kitty}/bin/kitty htop";
+  systemMonitor = "${getExe pkgs.kitty} htop";
+  rofi = getExe config.programs.rofi.finalPackage;
 
 in {
 
@@ -52,7 +53,7 @@ in {
 
         # modules config
         "custom/launcher" = {
-          on-click = "${getExe pkgs.fuzzel}";
+          on-click = "${rofi} -show combi";
           format = " ";
         };
         "hyprland/workspaces" = {
@@ -85,6 +86,10 @@ in {
         };
         idle_inhibitor = {
           format = "{icon}";
+          format-icons = {
+            activated = "";
+            deactivated = "";
+          };
         };
         network = {
           interval = 1;
@@ -139,7 +144,7 @@ in {
           tooltip = true;
         };
         "custom/power" = {
-          on-click = "powermenu &";
+          on-click = "powerkey";
           format = " ";
         };
       };

@@ -53,7 +53,11 @@
     # START_CHARGE_THRESH_BAT0 = 90;
     # STOP_CHARGE_THRESH_BAT0 = 97;
   };
+
+  # Allow powerkey to be intercepted, but still poweroff for longpress
   services.logind = {
+    powerKey = "ignore";
+    powerKeyLongPress = "poweroff";
     lidSwitch = "suspend";
     lidSwitchExternalPower = "suspend";
     lidSwitchDocked = "ignore";
