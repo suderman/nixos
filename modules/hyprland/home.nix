@@ -3,9 +3,7 @@
 
   cfg = config.wayland.windowManager.hyprland;
   oscfg = osConfig.programs.hyprland;
-
-  inherit (lib) concatStringsSep ls mkDefault mkForce mkIf mkMerge mkOption mkShellScript removeSuffix types;
-  inherit (lib.options) mkEnableOption;
+  inherit (lib) concatStringsSep ls mkIf mkMerge mkOption mkShellScript removeSuffix types;
 
 in {
 
