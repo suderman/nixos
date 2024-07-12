@@ -63,8 +63,6 @@
     hyprland.inputs.nixpkgs.follows = "nixpkgs-unstable";
     hyprland-plugins.url = "github:hyprwm/hyprland-plugins";
     hyprland-plugins.inputs.hyprland.follows = "hyprland";
-    hyprswitch.url = "github:h3rmt/hyprswitch/release";
-    hyprswitch.inputs.nixpkgs.follows = "nixpkgs-unstable";
 
     # Aylur's Gtk Shell (AGS)
     # <https://github.com/Aylur/ags

@@ -1,33 +1,7 @@
-{ lib, pkgs, ... }: let 
+{ config, lib, pkgs, ... }: let 
 
-  inherit (lib) getExe mkDefault mkShellScript; 
-
-  toggleGroupOrLock = mkShellScript {
-    inputs = with pkgs; [ hyprland jq ]; text = ''
-      grouped_windows_count="$(hyprctl activewindow -j | jq '.grouped | length')"
-      if (( grouped_windows_count > 1 )); then
-        hyprctl dispatch lockactivegroup toggle
-      else
-        hyprctl dispatch togglegroup
-      fi
-    '';
-  };
-
-  toggleFloating = mkShellScript {
-    inputs = with pkgs; [ hyprland jq ]; text = ''
-      # Save active window address
-      addr="$(hyprctl activewindow -j | jq -r .address)"
-
-      # Toggle floating and get status
-      hyprctl --batch "dispatch togglefloating address:$addr ; dispatch focuswindow address:$addr"
-      is_floating="$(hyprctl clients -j | jq ".[] | select(.address==\"$addr\") .floating")"
-
-      # If window is now floating, resize and centre
-      if [[ "$is_floating" == "true" ]]; then
-        hyprctl --batch "dispatch resizeactive exact 50% 50% ; dispatch centerwindow 1"
-      fi
-    '';
-  };
+  cfg = config.wayland.windowManager.hyprland;
+  inherit (lib) getExe mkDefault mkIf mkShellScript; 
 
   cycleFloatingPositions = mkShellScript {
     inputs = with pkgs; [ coreutils hyprland jq ]; text = ''
@@ -103,45 +77,6 @@
     '';
   };
 
-  newWindowInGroup = mkShellScript {
-    inputs = with pkgs; [ coreutils hyprland jq ]; text = ''
-
-      win() { hyprctl clients -j | jq ".[] | select(.address == \"$1\")"; }
-      group_count() { echo "$(win $1)" | jq '.grouped | length'; }
-      is_group() { [[ "$(group_count $1)" == "0" ]] && return 1 || return 0; }
-
-      # Get the active window
-      window="$(hyprctl activewindow -j)"
-
-      # Find address, pid and command for active window
-      addr="$(echo $window | jq -r .address)"
-      pid="$(echo $window | jq -r .pid)"
-      cmd=$(ps -p $pid -o command | tail -1)
-
-      # Unlock existing group or create new unlocked group
-      if $(is_group $addr); then
-        hyprctl dispatch lockactivegroup unlock 
-      else
-        hyprctl dispatch togglegroup 
-      fi
-
-      # Wait until window is part of a group
-      while ! $(is_group $addr); do sleep 0.2; done
-
-      # Store the current group count
-      count="$(group_count "$addr")"
-
-      # Run the command
-      hyprctl dispatch exec $cmd
-
-      # Wait for the group count to increase
-      while [[ "$count" -ge "$(group_count $addr)" ]]; do sleep 0.2; done
-
-      # Lock the group
-      hyprctl dispatch lockactivegroup lock
-      
-    '';
-  };
 
 
   screenshot = mkShellScript {
@@ -216,191 +151,190 @@
 
 in {
 
-  bind = [
+  config = mkIf cfg.enable {
+    wayland.windowManager.hyprland.settings = {
 
-    # Exit hyprland
-    "super+shift, q, exit,"
+      bind = [
 
-    # Both q and w kill the active window, but some programs override super+w to kill the current tab
-    "super, q, killactive,"
-    "super, w, killactive,"
+        # Exit hyprland
+        "super+shift, q, exit,"
 
-    # Manage special workspace
-    "super, escape, togglespecialworkspace"
-    "super+alt, escape, movetoworkspacesilent, special"
+        # Both q and w kill the active window, but some programs override super+w to kill the current tab
+        "super, q, killactive,"
+        "super, w, killactive,"
 
-    # Terminal
-    "super, return, exec, kitty"
+        # Manage special workspace
+        "super, escape, togglespecialworkspace"
+        # "super+alt, escape, movetoworkspacesilent, special"
 
-    # File manager
-    "super, e, exec, nautilus"
+        # Terminal
+        "super, return, exec, kitty"
 
-    # Password manager
-    "super, period, exec, 1password"
+        # File manager
+        "super, e, exec, nautilus"
 
-    # Browser
-    "super, b, exec, firefox"
-    "super+shift, b, exec, firefox --private-window"
+        # Password manager
+        "super, period, exec, 1password"
 
-    # Alt browser
-    "super+alt, b, exec, chromium-browser"
-    "super+alt+shift, b, exec, chromium-browser --incognito"
+        # Browser
+        "super, b, exec, firefox"
+        "super+shift, b, exec, firefox --private-window"
 
-    # Navigate workspaces
-    "super, right, workspace, m+1" # cyclenext
-    "super, left, workspace, m-1" # cyclenext, prev
+        # Alt browser
+        "super+alt, b, exec, chromium-browser"
+        "super+alt+shift, b, exec, chromium-browser --incognito"
 
-  ] ++ ( 
+        # Navigate workspaces
+        "super, right, workspace, m+1" # cyclenext
+        "super, left, workspace, m-1" # cyclenext, prev
 
-    let supertab = mkShellScript { 
-      inputs = with pkgs; [ hyprland gawk ]; 
-      text = ../bin/supertab.sh; 
-    }; 
+      ] ++ ( 
 
-  in [
+        let supertab = mkShellScript { 
+          inputs = with pkgs; [ hyprland gawk ]; 
+          text = ../bin/supertab.sh; 
+        }; 
 
-    # Navigation windows with super tab
-    "super, tab, exec, ${supertab}"
-    "super+alt, tab, exec, ${supertab} next"
-    "super+shift, tab, exec, ${supertab} prev"
+      in [
 
-    # Back-and-forth with super \
-    "super, backslash, focuscurrentorlast"
+        # Navigation windows with super tab
+        "super, tab, exec, ${supertab}"
+        "super+alt, tab, exec, ${supertab} next"
+        "super+shift, tab, exec, ${supertab} prev"
 
-    # Focus urgent windows
-    "super, u, focusurgentorlast"
+        # Back-and-forth with super \
+        "super, backslash, focuscurrentorlast"
 
-  ]) ++ [
+        # Focus urgent windows
+        "super, u, focusurgentorlast"
 
-    # Manage groups
-    "super+shift, g, togglegroup,"
-    "super, g, exec, ${toggleGroupOrLock}"
-    "super, n, changegroupactive, f"
-    "super+shift, n, changegroupactive, b"
-    "super+shift, t, exec, ${newWindowInGroup}"
+      ]) ++ [
 
-    # Manage windows
-    "super+alt, i, exec, ${toggleFloating}"
-    "super, i, togglesplit"
-    "super, i, exec, ${cycleFloatingPositions}"
-    "super+shift, i, exec, ${cycleFloatingPositions} reverse"
-    "super+shift, p, pseudo"
-    "super+shift, p, pin"
-    "super, f, fullscreen, 1"
-    "super+alt, f, fullscreen, 0"
 
-    # App launcher
-    # "super, space, exec, ${getExe pkgs.fuzzel}"
+        # Manage windows
+        "super, i, togglesplit"
+        "super, i, exec, ${cycleFloatingPositions}"
+        "super+shift, i, exec, ${cycleFloatingPositions} reverse"
+        "super+shift, p, pseudo"
+        "super+shift, p, pin"
+        "super, f, fullscreen, 1"
+        "super+alt, f, fullscreen, 0"
 
-    # Move focus with super [hjkl]
-    "super, h, movefocus, l"
-    "super, j, movefocus, d"
-    "super, k, movefocus, u"
-    "super, l, movefocus, r"
+        # App launcher
+        # "super, space, exec, ${getExe pkgs.fuzzel}"
 
-    # Switch workspaces with super [0-9]
-    "super, 1, workspace, 1"
-    "super, 2, workspace, 2"
-    "super, 3, workspace, 3"
-    "super, 4, workspace, 4"
-    "super, 5, workspace, 5"
-    "super, 6, workspace, 6"
-    "super, 7, workspace, 7"
-    "super, 8, workspace, 8"
-    "super, 9, workspace, 9"
-    "super, 0, workspace, 10"
+        # Move focus with super [hjkl]
+        "super, h, movefocus, l"
+        "super, j, movefocus, d"
+        "super, k, movefocus, u"
+        "super, l, movefocus, r"
 
-    # Move active window to a workspace with super+alt [0-9]
-    "super+alt, 1, movetoworkspace, 1"
-    "super+alt, 2, movetoworkspace, 2"
-    "super+alt, 3, movetoworkspace, 3"
-    "super+alt, 4, movetoworkspace, 4"
-    "super+alt, 5, movetoworkspace, 5"
-    "super+alt, 6, movetoworkspace, 6"
-    "super+alt, 7, movetoworkspace, 7"
-    "super+alt, 8, movetoworkspace, 8"
-    "super+alt, 9, movetoworkspace, 9"
-    "super+alt, 0, movetoworkspace, 10"
+        # Switch workspaces with super [0-9]
+        "super, 1, workspace, 1"
+        "super, 2, workspace, 2"
+        "super, 3, workspace, 3"
+        "super, 4, workspace, 4"
+        "super, 5, workspace, 5"
+        "super, 6, workspace, 6"
+        "super, 7, workspace, 7"
+        "super, 8, workspace, 8"
+        "super, 9, workspace, 9"
+        "super, 0, workspace, 10"
 
-    # Resize active window to various presets
-    "super+shift, 1, resizeactive, exact 10% 10%"
-    "super+shift, 1, centerwindow, 1"
-    "super+shift, 2, resizeactive, exact 20% 20%"
-    "super+shift, 2, centerwindow, 1"
-    "super+shift, 3, resizeactive, exact 30% 30%"
-    "super+shift, 3, centerwindow, 1"
-    "super+shift, 4, resizeactive, exact 40% 40%"
-    "super+shift, 4, centerwindow, 1"
-    "super+shift, 5, resizeactive, exact 50% 50%"
-    "super+shift, 5, centerwindow, 1"
-    "super+shift, 6, resizeactive, exact 60% 60%"
-    "super+shift, 6, centerwindow, 1"
-    "super+shift, 7, resizeactive, exact 70% 70%"
-    "super+shift, 7, centerwindow, 1"
-    "super+shift, 8, resizeactive, exact 80% 80%"
-    "super+shift, 8, centerwindow, 1"
-    "super+shift, 9, resizeactive, exact 90% 90%"
-    "super+shift, 9, centerwindow, 1"
+        # Move active window to a workspace with super+alt [0-9]
+        "super+alt, 1, movetoworkspace, 1"
+        "super+alt, 2, movetoworkspace, 2"
+        "super+alt, 3, movetoworkspace, 3"
+        "super+alt, 4, movetoworkspace, 4"
+        "super+alt, 5, movetoworkspace, 5"
+        "super+alt, 6, movetoworkspace, 6"
+        "super+alt, 7, movetoworkspace, 7"
+        "super+alt, 8, movetoworkspace, 8"
+        "super+alt, 9, movetoworkspace, 9"
+        "super+alt, 0, movetoworkspace, 10"
 
-    "super+shift, 0, centerwindow, 1"
-    "super+shift, O, resizeactive, exact 600 400"
+        # Resize active window to various presets
+        "super+shift, 1, resizeactive, exact 10% 10%"
+        "super+shift, 1, centerwindow, 1"
+        "super+shift, 2, resizeactive, exact 20% 20%"
+        "super+shift, 2, centerwindow, 1"
+        "super+shift, 3, resizeactive, exact 30% 30%"
+        "super+shift, 3, centerwindow, 1"
+        "super+shift, 4, resizeactive, exact 40% 40%"
+        "super+shift, 4, centerwindow, 1"
+        "super+shift, 5, resizeactive, exact 50% 50%"
+        "super+shift, 5, centerwindow, 1"
+        "super+shift, 6, resizeactive, exact 60% 60%"
+        "super+shift, 6, centerwindow, 1"
+        "super+shift, 7, resizeactive, exact 70% 70%"
+        "super+shift, 7, centerwindow, 1"
+        "super+shift, 8, resizeactive, exact 80% 80%"
+        "super+shift, 8, centerwindow, 1"
+        "super+shift, 9, resizeactive, exact 90% 90%"
+        "super+shift, 9, centerwindow, 1"
 
-    # "super+alt, y, centerwindow, 1"
-    # "super+alt, i, exec, ${cycleFloatingPositions}"
-    # "super+alt+shift, I, exec, ${cycleFloatingPositions} reverse"
+        "super+shift, 0, centerwindow, 1"
+        "super+shift, O, resizeactive, exact 600 400"
 
-    # Super+m to minimize window, Super+m to bring it back (possibly on a different workspace)
-    "super, m, togglespecialworkspace, mover"
-    "super, m, movetoworkspace, +0"
-    "super, m, togglespecialworkspace, mover"
-    "super, m, movetoworkspace, special:mover"
-    "super, m, togglespecialworkspace, mover"
+        # "super+alt, y, centerwindow, 1"
+        # "super+alt, i, exec, ${cycleFloatingPositions}"
+        # "super+alt+shift, I, exec, ${cycleFloatingPositions} reverse"
 
-    # Screenshot a region
-    ", print, exec, ${screenshot} ri"
-    "super, print, exec, ${screenshot} rf"
-    "ctrl, print, exec, ${screenshot} rc"
-    "shift, print, exec, ${screenshot} sc"
-    "super+shift, print, exec, ${screenshot} sf"
-    "ctrl+shift, print, exec, ${screenshot} si"
-    "alt, print, exec, ${screenshot} p"
+        # Super+m to minimize window, Super+m to bring it back (possibly on a different workspace)
+        "super, m, togglespecialworkspace, mover"
+        "super, m, movetoworkspace, +0"
+        "super, m, togglespecialworkspace, mover"
+        "super, m, movetoworkspace, special:mover"
+        "super, m, togglespecialworkspace, mover"
 
-    # Scroll through existing workspaces with super + scroll
-    "super, mouse_down, workspace, e+1"
-    "super, mouse_up, workspace, e-1"
+        # Screenshot a region
+        ", print, exec, ${screenshot} ri"
+        "super, print, exec, ${screenshot} rf"
+        "ctrl, print, exec, ${screenshot} rc"
+        "shift, print, exec, ${screenshot} sc"
+        "super+shift, print, exec, ${screenshot} sf"
+        "ctrl+shift, print, exec, ${screenshot} si"
+        "alt, print, exec, ${screenshot} p"
 
-    # # Experimental
-    # "super, f6, exec, ${toggleMoveMode}"
-    # "shift, f6, exec, ${toggleMoveMode}"
-    # "alt, f6, exec, ${toggleMoveMode}"
-  ];
+        # Scroll through existing workspaces with super + scroll
+        "super, mouse_down, workspace, e+1"
+        "super, mouse_up, workspace, e-1"
 
-  binde = [
+        # # Experimental
+        # "super, f6, exec, ${toggleMoveMode}"
+        # "shift, f6, exec, ${toggleMoveMode}"
+        # "alt, f6, exec, ${toggleMoveMode}"
+      ];
 
-    # Move window 
-    "super+alt, h, exec, ${moveWindowOrGroupOrActive} l -40 0"
-    "super+alt, j, exec, ${moveWindowOrGroupOrActive} d 0 40"
-    "super+alt, k, exec, ${moveWindowOrGroupOrActive} u 0 -40"
-    "super+alt, l, exec, ${moveWindowOrGroupOrActive} r 40 0"
+      binde = [
 
-    # Resize window
-    "super+shift, h, resizeactive, -80 0"
-    "super+shift, j, resizeactive, 0 80"
-    "super+shift, k, resizeactive, 0 -80"
-    "super+shift, l, resizeactive, 80 0"
+        # Move window 
+        "super+alt, h, exec, ${moveWindowOrGroupOrActive} l -40 0"
+        "super+alt, j, exec, ${moveWindowOrGroupOrActive} d 0 40"
+        "super+alt, k, exec, ${moveWindowOrGroupOrActive} u 0 -40"
+        "super+alt, l, exec, ${moveWindowOrGroupOrActive} r 40 0"
 
-    # Cycle floating windows
-    # "super, y, cyclenext, floating"
-    # "super+shift, y, cyclenext, prev floating"
+        # Resize window
+        "super+shift, h, resizeactive, -80 0"
+        "super+shift, j, resizeactive, 0 80"
+        "super+shift, k, resizeactive, 0 -80"
+        "super+shift, l, resizeactive, 80 0"
 
-  ];
+        # Cycle floating windows
+        # "super, y, cyclenext, floating"
+        # "super+shift, y, cyclenext, prev floating"
 
-  bindm = [
+      ];
 
-    # Move/resize windows with super + LMB/RMB and dragging
-    "super, mouse:272, movewindow"
-    "super, mouse:273, resizewindow"
+      bindm = [
 
-  ];
+        # Move/resize windows with super + LMB/RMB and dragging
+        "super, mouse:272, movewindow"
+        "super, mouse:273, resizewindow"
+
+      ];
+
+    };
+  };
 
 }

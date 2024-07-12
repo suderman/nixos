@@ -1,60 +1,71 @@
-{ lib, ... }: let inherit (lib) mkDefault; in {
+{ config, lib, pkgs, ... }: let 
 
-  windowrulev2 = [
+  cfg = config.wayland.windowManager.hyprland;
+  inherit (lib) mkIf;
 
-    # forbid windows from maximizing/fullscreening themselves
-    "suppressevent maximize, class:.*"
-    "suppressevent fullscreen, class:.*"
+in {
 
-    # idle inhibit while fullscreen (games, videos, etc) 
-    "idleinhibit fullscreen, class:.*"
+  config = mkIf cfg.enable {
+    wayland.windowManager.hyprland.settings = {
 
-    # Picture-in-Picture for any windows tagged pip
-    "float, tag:pip"
-    "pin, tag:pip"
-    "keepaspectratio, tag:pip"
-    "noborder, tag:pip"
-    "size 480 270, tag:pip"
-    "minsize 240 135, tag:pip"
-    "maxsize 960 540, tag:pip"
-    "move 100%-490 100%-280, tag:pip"
+      windowrulev2 = [
 
-    # make pop-up file dialogs floating, centred, and pinned
-    "tag +dialog, title:(Open|Progress|Save File|Save As)"
-    "tag +dialog, class:(xdg-desktop-portal-gtk)"
-    "float, tag:dialog"
-    "center, tag:dialog"
-    "pin, tag:dialog"
+        # forbid windows from maximizing/fullscreening themselves
+        "suppressevent maximize, class:.*"
+        "suppressevent fullscreen, class:.*"
 
-    # assign windows to workspaces
-    # "workspace 1 silent, class:[Ff]irefox"
-    # "workspace 0 silent, class:[Ss]team"
-    # "workspace 1, class:[Ff]irefox"
+        # idle inhibit while fullscreen (games, videos, etc) 
+        "idleinhibit fullscreen, class:.*"
 
-    # Tag steam and games
-    "tag +steam, class:[Ss]team"
-    "tag +steam, class:^steam_app_(.*)$"
-    "tag +steam, class:^(.*).bin.x86$"
-    "tag +steam, class:^(TurokEx)$"
+        # Picture-in-Picture for any windows tagged pip
+        "float, tag:pip"
+        "pin, tag:pip"
+        "keepaspectratio, tag:pip"
+        "noborder, tag:pip"
+        "size 480 270, tag:pip"
+        "minsize 240 135, tag:pip"
+        "maxsize 960 540, tag:pip"
+        "move 100%-490 100%-280, tag:pip"
 
-    # Steam and games fullscreen on workspace 10
-    "workspace 10, tag:steam"
-    # "fullscreen, tag:steam"
-    "rounding 0, tag:steam"
-    "noborder, tag:steam"
+        # make pop-up file dialogs floating, centred, and pinned
+        "tag +dialog, title:(Open|Progress|Save File|Save As)"
+        "tag +dialog, class:(xdg-desktop-portal-gtk)"
+        "float, tag:dialog"
+        "center, tag:dialog"
+        "pin, tag:dialog"
 
-    # # Steam and games fullscreen on workspace 10
-    # "workspace 10, class:[Ss]team"
-    # "fullscreen, class:[Ss]team"
-    # "workspace 10, class:^steam_app_(.*)$"
-    # "fullscreen, class:^steam_app_(.*)$"
+        # assign windows to workspaces
+        # "workspace 1 silent, class:[Ff]irefox"
+        # "workspace 0 silent, class:[Ss]team"
+        # "workspace 1, class:[Ff]irefox"
 
-    # throw sharing indicators away
-    # "workspace special silent, title:^(Firefox — Sharing Indicator)$"
-    # "workspace special silent, title:^(.*is sharing (your screen|a window)\.)$"
+        # Tag steam and games
+        "tag +steam, class:[Ss]team"
+        "tag +steam, class:^steam_app_(.*)$"
+        "tag +steam, class:^(.*).bin.x86$"
+        "tag +steam, class:^(TurokEx)$"
 
-    "float, class:^(org.telegram.desktop|telegramdesktop)$, title:^(Media viewer)$"
+        # Steam and games fullscreen on workspace 10
+        "workspace 10, tag:steam"
+        # "fullscreen, tag:steam"
+        "rounding 0, tag:steam"
+        "noborder, tag:steam"
 
-  ];
+        # # Steam and games fullscreen on workspace 10
+        # "workspace 10, class:[Ss]team"
+        # "fullscreen, class:[Ss]team"
+        # "workspace 10, class:^steam_app_(.*)$"
+        # "fullscreen, class:^steam_app_(.*)$"
+
+        # throw sharing indicators away
+        # "workspace special silent, title:^(Firefox — Sharing Indicator)$"
+        # "workspace special silent, title:^(.*is sharing (your screen|a window)\.)$"
+
+        "float, class:^(org.telegram.desktop|telegramdesktop)$, title:^(Media viewer)$"
+
+      ];
+
+    };
+  };
 
 }

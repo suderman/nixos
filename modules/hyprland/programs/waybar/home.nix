@@ -4,7 +4,7 @@
   inherit (builtins) readFile;
   inherit (lib) getExe mkIf mkForce;
 
-  systemMonitor = "${getExe pkgs.kitty} htop";
+  kitty = getExe pkgs.kitty;
   rofi = getExe config.programs.rofi.finalPackage;
 
 in {
@@ -31,6 +31,7 @@ in {
       settings.bar = {
         layer = "top";
         position = "top";
+        # position = "bottom";
         height = 35;
         exclusive = true;
         persistent_workspaces = {
@@ -47,43 +48,53 @@ in {
         };
 
         # modules layout
-        modules-left = [ "custom/launcher" "hyprland/workspaces" "wlr/taskbar" ];
-        modules-center = [ "clock" "hyprland/window" ];
-        modules-right = [ "idle_inhibitor" "custom/bluetooth" "network" "temperature" "cpu" "tray" "battery" "custom/power" ];
+        modules-left = [ 
+          "custom/launcher" 
+          "hyprland/workspaces" 
+          # "wlr/taskbar"
+        ];
+        modules-center = [ "hyprland/window" ];
+        modules-right = [ 
+          "idle_inhibitor" 
+          "custom/bluetooth" 
+          "network" 
+          "temperature" 
+          "cpu" 
+          "tray" 
+          "battery" 
+          "clock" 
+          "custom/power" 
+        ];
 
         # modules config
         "custom/launcher" = {
           on-click = "${rofi} -show combi";
           format = " ";
         };
+
         "hyprland/workspaces" = {
           on-click = "activate";
           all-outputs = true;
-          # format = "{icon} {name}";
           format = "{name}";
           disable-scroll = true;
           active-only = false;
-          format-icons = {
-            default = "󰊠 ";
-            persistent = "󰊠 ";
-            focused = "󰮯 ";
-          };
           show-special = false;
         };
+
         clock = {
           format = " {:%I:%M %p}";
-          # format = "{:%d %A %H:%M}";
           format-alt = " {:%a %b %d, %G}";
           tooltip-format = "<big>{:%B %Y}</big>\n<tt><small>{calendar}</small></tt>";
-          # tooltip-format = "{:%Y-%m-%d | %H:%M}";
           interval = 60;
           align = 0;
           rotate = 0;
         };
+
         "custom/bluetooth" = {
-          on-click = "${pkgs.kitty}/bin/kitty bluetuith";
+          on-click = "${kitty} bluetuith";
           format = "bt ";
         };
+
         idle_inhibitor = {
           format = "{icon}";
           format-icons = {
@@ -91,6 +102,7 @@ in {
             deactivated = "";
           };
         };
+
         network = {
           interval = 1;
           on-click = "${getExe pkgs.networkmanager_dmenu}";
@@ -105,18 +117,19 @@ in {
             Down: {bandwidthDownBits}
           '';
         };
+
         cpu = {
-          # format = " {usage0}%/{usage1}%/{usage2}%/{usage3}%/{usage4}%/{usage5}%/{usage6}%/{usage7}%";
           format = " {load} / {usage}%";
-          on-click = "${pkgs.kitty}/bin/kitty htop";
+          on-click = "${kitty} htop";
         };
+
         temperature = {
-          # thermal-zone = 2;
-          thermal-zone = 1;
+          thermal-zone = 1; # 2
           critical-threshold = 80;
           format-critical = "{temperatureC}°C ";
           format = "{temperatureC}°C ";
         };
+
         "wlr/taskbar" = {
           format = "{icon}";
           icon-size = 14;
@@ -129,24 +142,27 @@ in {
             "Firefox Web Browser" = "Firefox";
           };
         };
+
         tray = {
           icon-size = 14;
           spacing = 6;
         };
+
         battery = {
           interval = 60;
           format = "{icon}";
-          # on-click = "eww open --toggle control";
           format-charging = " ";
           format-icons = [ "󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹" ];
           format-plugged = "󰚦 ";
           states = { warning = 30; critical = 15; };
           tooltip = true;
         };
+
         "custom/power" = {
           on-click = "powerkey";
           format = " ";
         };
+
       };
 
       style = readFile ./style.css;

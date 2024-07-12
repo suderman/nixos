@@ -1,98 +1,125 @@
-window#waybar {
-  background-color: #11111b;
-  /* background-color: @theme_base_color; */
+/*
+ * Interactive CSS editing
+ * 
+ * > systemctl stop waybar
+ * > env GTK_DEBUG=interactive waybar 
+ *
+*/
+
+#waybar {
+  background-color: rgba(21, 21, 33, 0.5);
   color: #f5e0dc;
   border-bottom: none;
+  font-family: JetBrainsMono;
 }
+
+.modules-left { background-color: transparent; }
+.modules-center { background-color: transparent; }
+.modules-right { background-color: transparent; }
+
+#custom-launcher {
+  background: rgba(21, 21, 33, 0.5);
+  color: #6481d0;
+  margin: 0px;
+  padding: 5px 9px 5px 12px;
+  font-size: 18px;
+  transition: all 0.3s;
+}
+
+#custom-launcher:hover {
+  background: rgba(21, 21, 33, 0.8);
+}
+
 #workspaces {
-  font-family: "Material Design Icons Desktop";
-  font-size: 20px;
-  background-color: #151521;
-  margin : 4px 0;
-  border-radius : 5px;
+  margin: 4px 10px;
+  border-radius: 5px;
 }
+
 #workspaces button {
   font-size: 18px;
   background-color: transparent;
-  color: #c669cc;
+  color: #b7bdf8;
   transition: all 0.1s ease;
+  margin: 0;
+  padding: 5px 7px;
+  border-radius: 0;
+  background: rgba(21, 21, 33, 0.3);
+  transition: all 0.3s;
 }
+
+#workspaces button:first-child { border-radius: 10px 0 0 10px; }
+#workspaces button:last-child { border-radius: 0 10px 10px 0; }
+
 #workspaces button.active {
-  font-size: 18px;
-  background-color: #e0875f;
-  color: #000000;
+  background-color: rgba(183, 189, 248, 0.6);
+  color: rgba(21, 21, 33, 1.0);
 }
 
-#workspaces button.focused {
-  font-size: 18px;
-  color: #e0875f;
+#workspaces button:hover {
+  box-shadow: inherit;
+  text-shadow: inherit;
+  border-color: transparent;
+  background: rgba(21, 21, 33, 0.6);
 }
 
-#workspaces button.persistent {
-  color: #d05759;
-  font-size: 12px;
-}
-#custom-launcher {
-  background-color: #151521;
-  color: #6481d0;
-  margin : 4px 4.5px;
-  padding : 5px 12px;
-  font-size: 18px;
-  border-radius : 5px;
+#workspaces button.active:hover {
+  background-color: rgba(183, 189, 248, 0.6);
 }
 
-#tray {
-  padding : 5px 11px 5px 13px;
-  margin : 4px 4.5px 4px 4.5px;
+#window {
+ font-size: 20px; 
 }
 
 #custom-power {
-  color : #d05759;
-  background-color: #151521;
-  margin : 4px 4.5px 4px 4.5px;
-  padding : 5px 11px 5px 13px;
-  border-radius : 5px;
+  color: #d05759;
+  margin: 0;
+  padding: 5px 10px 5px 20px;
 }
 
 #clock {
-  background-color: #151521;
-  color: #B5BFE2;
-  margin : 4px 9px;
-  padding : 5px 12px;
-  border-radius : 5px;
+  margin: 0;
+  padding: 5px 5px;
+}
+
+#tray {
+  margin: 0;
+  padding: 5px 20px;
 }
 
 
+#temperature {
+  margin: 0;
+  padding: 5px 10px;
+}
+
+#cpu {
+  margin: 0;
+  padding: 5px 10px;
+}
+
 #idle_inhibitor {
-  padding : 5px 6px;
+  margin: 0;
+  padding: 5px 10px;
 }
 
 #custom-bluetooth {
+  margin: 0;
   padding : 5px 6px;
 }
 
 #network {
-  color : #B5BFE2;
-  background-color: #151521;
-  margin : 4px 0 4px 4.5px;
-  padding : 5px 12px;
-  border-radius : 5px 0 0 5px;
+  margin: 0;
+  padding: 5px 10px;
 }
+
 #battery {
-  color : #5fbf70;
-  background-color: #151521;
-  margin : 4px 0px;
-  padding : 5px 12px;
-  border-radius : 5px 0 0 5px;
+  color: #5fbf70;
+  margin: 0;
+  padding: 5px 10px;
 }
-#custom-swallow {
-  background-color: #151521;
-  margin : 4px 4.5px;
-  padding : 5px 12px;
-  border-radius : 5px;
-}
+
 * {
   font-size: 16px;
   min-height: 0;
-  font-family: "Iosevka Nerd Font", "Material Design Icons Desktop";
+  font-family: "Iosevka Nerd Font", "Material Design Icons Desktop", sans-serif;
 }

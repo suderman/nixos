@@ -7,7 +7,7 @@
 
 in {
 
-  imports = ls { path = ./programs; dirsWith = [ "home.nix" ]; } ++
+  imports = ls ./settings ++ ls { path = ./programs; dirsWith = [ "home.nix" ]; } ++
 
     # Flake home-manager module
     # https://github.com/hyprwm/Hyprland/blob/main/nix/hm-module.nix
@@ -50,18 +50,11 @@ in {
         ];
       };
 
-      plugins = [ 
-        # inputs.hyprland-plugins.packages.${pkgs.system}.hyprbars
-        # inputs.hyprland-plugins.packages.${pkgs.system}.hyprexpo 
-        # inputs.hyprland-plugins.packages.${pkgs.system}.hyprwinwrap 
+      plugins = with pkgs.hyprlandPlugins; [ 
+        # hyprbars
+        hyprexpo
+        # hypr-dynamic-cursors
       ];
-
-      settings = let
-        args = { 
-          inherit lib this; 
-          pkgs = pkgs // { inherit (inputs.hyprland.packages.${pkgs.system}) hyprland; };
-        };
-      in mkMerge ( map ( f: import f args ) ( ls ./settings ) );
 
       extraConfig = ''
         source = ~/.config/hypr/extra.conf
