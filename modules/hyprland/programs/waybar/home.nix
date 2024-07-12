@@ -2,10 +2,23 @@
 
   cfg = config.wayland.windowManager.hyprland;
   inherit (builtins) readFile;
-  inherit (lib) getExe mkIf mkForce;
+  inherit (lib) getExe mkIf mkShellScript mkForce;
 
   kitty = getExe pkgs.kitty;
   rofi = getExe config.programs.rofi.finalPackage;
+
+  groupies = mkShellScript {
+    inputs = with pkgs; [ socat hyprland jq ];
+    text = ''
+      handle() {
+        case $1 in 
+          activewindowv2\>\>*)
+            hyprctl activewindow -j | jq -r '.grouped | length' ;;
+        esac
+      }
+      socat -U - UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock | while read -r line; do handle "$line"; done
+    '';
+  };
 
 in {
 
@@ -32,7 +45,7 @@ in {
         layer = "top";
         position = "top";
         # position = "bottom";
-        height = 35;
+        height = 39;
         exclusive = true;
         persistent_workspaces = {
           "1" = [ ];
@@ -51,6 +64,9 @@ in {
         modules-left = [ 
           "custom/launcher" 
           "hyprland/workspaces" 
+          "custom/expo" 
+          "custom/special" 
+          "custom/groupies" 
           # "wlr/taskbar"
         ];
         modules-center = [ "hyprland/window" ];
@@ -70,6 +86,23 @@ in {
         "custom/launcher" = {
           on-click = "${rofi} -show combi";
           format = " ";
+        };
+
+        "custom/expo" = {
+          format = "★";
+          on-click = "sleep 0.1 && exec hyprctl dispatch hyprexpo:expo toggle";
+        };
+
+        "custom/special" = {
+          format = "ᓬ";
+          on-click = "exec hyprctl dispatch togglespecialworkspace";
+        };
+
+        "custom/groupies" = {
+          exec = "${groupies}";
+          format = "ᘐ {}";
+          on-click = "exec hyprctl dispatch changegroupactive f";
+          on-click-right = "exec hyprctl dispatch changegroupactive f";
         };
 
         "hyprland/workspaces" = {

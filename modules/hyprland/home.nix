@@ -51,8 +51,6 @@ in {
       };
 
       plugins = with pkgs.hyprlandPlugins; [ 
-        # hyprbars
-        hyprexpo
         # hypr-dynamic-cursors
       ];
 

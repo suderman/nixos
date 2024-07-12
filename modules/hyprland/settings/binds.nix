@@ -159,13 +159,8 @@ in {
         # Exit hyprland
         "super+shift, q, exit,"
 
-        # Both q and w kill the active window, but some programs override super+w to kill the current tab
-        "super, q, killactive,"
+        # Kill the active window
         "super, w, killactive,"
-
-        # Manage special workspace
-        "super, escape, togglespecialworkspace"
-        # "super+alt, escape, movetoworkspacesilent, special"
 
         # Terminal
         "super, return, exec, kitty"

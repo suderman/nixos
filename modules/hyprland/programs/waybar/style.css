@@ -7,7 +7,7 @@
 */
 
 #waybar {
-  background-color: rgba(21, 21, 33, 0.5);
+  background-color: rgba(21, 21, 33, 0.7);
   color: #f5e0dc;
   border-bottom: none;
   font-family: JetBrainsMono;
@@ -65,6 +65,46 @@
 #workspaces button.active:hover {
   background-color: rgba(183, 189, 248, 0.6);
 }
+
+#custom-expo {
+  margin: 0;
+  padding: 5px 8px;
+  color: #6481d0;
+  font-size: 18px;
+  transition: all 0.3s;
+}
+
+#custom-expo:hover {
+  background: rgba(21, 21, 33, 0.5);
+}
+
+#custom-special {
+  margin: 0;
+  padding: 5px 8px;
+  color: #6481d0;
+  font-size: 16px;
+  transition: all 0.3s;
+}
+
+#custom-special:hover {
+  background: rgba(21, 21, 33, 0.5);
+}
+
+#custom-groupies {
+  margin: 0;
+  padding: 5px 8px;
+  color: #b7bdf8;
+  font-size: 18px;
+  transition: all 0.3s;
+  letter-spacing: -4px;
+  font-size: 17px;
+  font-family: monospace; 
+}
+
+#custom-groupies:hover {
+  background: rgba(21, 21, 33, 0.5);
+}
+
 
 #window {
  font-size: 20px; 

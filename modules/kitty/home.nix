@@ -89,7 +89,7 @@ in {
         "super.p" = "S-insert"; # paste
         "super.equal" = "C-S-equal";
         "super.minus" = "C-S-minus";
-        "super.slash" = "macro(C-S-h slash)"; # search scrollback
+        "super.o" = "macro(C-S-h slash)"; # search scrollback
       };
     };
 

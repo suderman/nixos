@@ -3,17 +3,6 @@
   cfg = config.wayland.windowManager.hyprland;
   inherit (lib) mkIf mkShellScript;
 
-  toggleSpecial = mkShellScript {
-    inputs = with pkgs; [ hyprland jq ]; text = ''
-      id="$(hyprctl activewindow -j | jq -r .workspace.id)"
-      if (( id < 0 )); then 
-        hyprctl dispatch movetoworkspace e+0
-      else 
-        hyprctl dispatch movetoworkspacesilent special
-      fi
-    '';
-  };
-
   toggleGroupOrKill = mkShellScript {
     inputs = with pkgs; [ hyprland jq ]; text = ''
       grouped_windows_count="$(hyprctl activewindow -j | jq '.grouped | length')"
@@ -32,6 +21,17 @@
         hyprctl dispatch lockactivegroup toggle
       else
         hyprctl dispatch togglegroup
+      fi
+    '';
+  };
+
+  toggleSpecial = mkShellScript {
+    inputs = with pkgs; [ hyprland jq ]; text = ''
+      id="$(hyprctl activewindow -j | jq -r .workspace.id)"
+      if (( id < 0 )); then 
+        hyprctl dispatch movetoworkspace e+0
+      else 
+        hyprctl dispatch movetoworkspacesilent special
       fi
     '';
   };
@@ -89,17 +89,20 @@ in {
 
         bind = [
 
-          # Toggle floating or tiled windows
-          "super+alt, i, exec, ${toggleFloating}"
+          # Kill the group or window
+          "super, q, exec, ${toggleGroupOrKill}"
 
           # Minimize windows (send to special workspace) and restore
           "super+alt, escape, exec, ${toggleSpecial}"
+          "super, escape, togglespecialworkspace" # toggle special workspace
 
-          # Manage groups
-          "super, g, exec, ${toggleGroupOrLock}"
-          "super+shift, g, togglegroup," # release windows from group
+          # Manage groups with [/] [;] [']
+          "super, slash, exec, ${toggleGroupOrLock}"
           "super, semicolon, changegroupactive, b" # prev window in group
           "super, apostrophe, changegroupactive, f" # next window in group
+
+          # Toggle floating or tiled windows
+          "super+alt, i, exec, ${toggleFloating}"
 
         ];
 
