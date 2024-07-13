@@ -98,8 +98,10 @@ in {
 
           # Manage groups with [/] [;] [']
           "super, slash, exec, ${toggleGroupOrLock}"
-          "super, semicolon, changegroupactive, b" # prev window in group
-          "super, apostrophe, changegroupactive, f" # next window in group
+          # "super, semicolon, changegroupactive, b" # prev window in group
+          # "super, apostrophe, changegroupactive, f" # next window in group
+          "super, comma, changegroupactive, b" # prev window in group
+          "super, period, changegroupactive, f" # next window in group
 
           # Toggle floating or tiled windows
           "super+alt, i, exec, ${toggleFloating}"

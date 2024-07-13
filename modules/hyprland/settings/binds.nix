@@ -169,7 +169,7 @@ in {
         "super, e, exec, nautilus"
 
         # Password manager
-        "super, period, exec, 1password"
+        "super+alt, period, exec, 1password"
 
         # Browser
         "super, b, exec, firefox"
