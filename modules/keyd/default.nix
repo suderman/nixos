@@ -65,6 +65,28 @@ in {
     # Also enable ydotool 
     programs.ydotool.enable = true;
 
+    # Monitor keyd events 
+    systemd.services.keyd-monitor = {
+      description = "Keyd monitor";
+      after = [ "keyd.service" ];
+      wantedBy = [ "multi-user.target" ];
+      path = with pkgs; [ coreutils keyd ];
+      script = ''
+        while read -r line; do
+          if [[ "$line" == *"leftmouse down"* ]] ; then
+            echo left > /run/mouse-button
+          elif [[ "$line" == *"middlemouse down"* ]] ; then
+            echo middle > /run/mouse-button
+          elif [[ "$line" == *"rightmouse down"* ]] ; then
+            echo right > /run/mouse-button
+          fi
+        done< <(exec keyd -m)
+      '';
+    };
+
+    # Ensure read permissions for mouse-button click
+    file."/run/mouse-button" = { type = "file"; mode = 644; user = "root"; group = "keyd"; };
+
   };
 
 }

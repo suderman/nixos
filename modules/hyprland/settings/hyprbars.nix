@@ -16,11 +16,24 @@
 
   toggleGroupOrLock = mkShellScript {
     inputs = with pkgs; [ hyprland jq ]; text = ''
-      grouped_windows_count="$(hyprctl activewindow -j | jq '.grouped | length')"
-      if (( grouped_windows_count > 1 )); then
-        hyprctl dispatch lockactivegroup toggle
+      btn="$(cat /run/mouse-button)"
+
+      # next window in group
+      if [[ "$btn" == "right" ]]; then
+        hyprctl dispatch changegroupactive f
+
+      # prev window in group
+      elif [[ "$btn" == "middle" ]]; then
+        hyprctl dispatch changegroupactive b
+
+      # toggle group lock
       else
-        hyprctl dispatch togglegroup
+        grouped_windows_count="$(hyprctl activewindow -j | jq '.grouped | length')"
+        if (( grouped_windows_count > 1 )); then
+          hyprctl dispatch lockactivegroup toggle
+        else
+          hyprctl dispatch togglegroup
+        fi
       fi
     '';
   };
@@ -66,17 +79,21 @@ in {
           bar_height = 30; 
           bar_padding = 10;
           bar_button_padding = 7; 
-          bar_color = "rgba(00000000)";
+          # bar_color = "rgba(00000000)";
+          # bar_color = "rgba(151521b3)";
+          bar_color = "rgba(151521d9)";
 
           bar_part_of_window = false;
           bar_precedence_over_border = false; 
-          bar_title_enabled = false;
+          # bar_title_enabled = false;
+          bar_title_enabled = true;
           # col.text = "rgb(000000)";
           # bar_text_size = 12; 
           # bar_text_font = "Jetbrains Mono Nerd Font Mono Bold";
 
           hyprbars-button = let 
-            button = icon: command: "rgba(00000050), 20, ${icon}, ${command}"; 
+            # button = icon: command: "rgba(00000050), 20, ${icon}, ${command}"; 
+            button = icon: command: "rgba(1515214d), 20, ${icon}, ${command}"; 
           in [
             ( button "" "hyprctl dispatch exec ${toggleGroupOrKill}" ) # kill
             ( button "ᘐ" "hyprctl dispatch exec ${toggleGroupOrLock}" ) # group

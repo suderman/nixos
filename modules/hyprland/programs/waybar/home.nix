@@ -69,7 +69,8 @@ in {
           "custom/groupies" 
           # "wlr/taskbar"
         ];
-        modules-center = [ "hyprland/window" ];
+        # modules-center = [ "hyprland/window" ];
+        modules-center = [ "clock" ];
         modules-right = [ 
           "idle_inhibitor" 
           "custom/bluetooth" 
@@ -78,7 +79,7 @@ in {
           "cpu" 
           "tray" 
           "battery" 
-          "clock" 
+          # "clock" 
           "custom/power" 
         ];
 
@@ -89,8 +90,10 @@ in {
         };
 
         "custom/expo" = {
-          format = "★";
-          on-click = "sleep 0.1 && exec hyprctl dispatch hyprexpo:expo toggle";
+          # format = "★";
+          # format = "⚃";
+          format = "▦";
+          on-click = "sleep 0.2 && exec hyprctl dispatch hyprexpo:expo toggle";
         };
 
         "custom/special" = {

@@ -13,8 +13,8 @@ in {
       ];
 
       general = {
-        gaps_in = "0, 10, 5, 10";
-        gaps_out = "0, 20, 20, 20";
+        gaps_in = "10, 10, 5, 10";
+        gaps_out = "10, 20, 20, 20";
         gaps_workspaces = 20;
         border_size = 3;
         "col.active_border" = mkDefault "rgba(89b4facc) rgba(cba6f7cc) 270deg";
@@ -45,9 +45,10 @@ in {
       decoration = {
         rounding = mkDefault 15;
         drop_shadow = mkDefault true;
-        shadow_range = mkDefault 4;
-        shadow_render_power = mkDefault 3;
-        "col.shadow" = mkDefault "rgba(1a1a1aee)";
+        shadow_range = 20;
+        shadow_offset = "0, 3";
+        shadow_render_power = 3;
+        "col.shadow" = "rgba(00000080)";
         dim_inactive = mkDefault false;
         dim_strength = mkDefault 0.1;
         dim_special = mkDefault 0.5;
@@ -59,7 +60,6 @@ in {
           ignore_opacity = true;
           special = mkDefault true;
           xray = mkDefault true;
-
         };
       };
 

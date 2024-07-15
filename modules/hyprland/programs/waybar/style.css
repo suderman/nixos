@@ -7,7 +7,7 @@
 */
 
 #waybar {
-  background-color: rgba(21, 21, 33, 0.7);
+  background-color: rgba(21, 21, 33, 0.85);
   color: #f5e0dc;
   border-bottom: none;
   font-family: JetBrainsMono;
@@ -69,7 +69,8 @@
 #custom-expo {
   margin: 0;
   padding: 5px 8px;
-  color: #6481d0;
+  /* color: #6481d0; */
+  color: #ffffff;
   font-size: 18px;
   transition: all 0.3s;
 }
@@ -81,7 +82,8 @@
 #custom-special {
   margin: 0;
   padding: 5px 8px;
-  color: #6481d0;
+  /* color: #6481d0; */
+  color: #ffffff;
   font-size: 16px;
   transition: all 0.3s;
 }
@@ -93,7 +95,8 @@
 #custom-groupies {
   margin: 0;
   padding: 5px 8px;
-  color: #b7bdf8;
+  /* color: #b7bdf8; */
+  color: #ffffff;
   font-size: 18px;
   transition: all 0.3s;
   letter-spacing: -4px;
