@@ -16,21 +16,41 @@
 
   toggleGroupOrLock = mkShellScript {
     inputs = with pkgs; [ hyprland jq ]; text = ''
-      btn="$(cat /run/mouse-button)"
+      grouped_windows_count="$(hyprctl activewindow -j | jq '.grouped | length')"
+      if (( grouped_windows_count > 1 )); then
+        hyprctl dispatch lockactivegroup toggle
+      else
+        hyprctl dispatch togglegroup
+      fi
+    '';
+  };
 
-      # next window in group
-      if [[ "$btn" == "left" ]]; then
-        hyprctl dispatch changegroupactive f
+  toggleGroupOrLockOrNavigate = mkShellScript {
+    inputs = with pkgs; [ hyprland jq ]; text = ''
+      btn="$(cat /run/keyd/button)"
+      grouped_windows_count="$(hyprctl activewindow -j | jq '.grouped | length')"
+
+      # toggle group lock
+      if [[ "$btn" == "right" ]]; then
+
+        if (( grouped_windows_count > 1 )); then
+          hyprctl dispatch lockactivegroup toggle
+        else
+          hyprctl dispatch togglegroup
+        fi
 
       # prev window in group
       elif [[ "$btn" == "middle" ]]; then
-        hyprctl dispatch changegroupactive b
-
-      # toggle group lock
-      else
-        grouped_windows_count="$(hyprctl activewindow -j | jq '.grouped | length')"
         if (( grouped_windows_count > 1 )); then
-          hyprctl dispatch lockactivegroup toggle
+          hyprctl dispatch changegroupactive b
+        else
+          hyprctl dispatch togglegroup
+        fi
+
+      # next window in group
+      else
+        if (( grouped_windows_count > 1 )); then
+          hyprctl dispatch changegroupactive f
         else
           hyprctl dispatch togglegroup
         fi
@@ -49,18 +69,33 @@
     '';
   };
 
-  toggleFloating = mkShellScript {
+  toggleFullscreenOrFloating = mkShellScript {
     inputs = with pkgs; [ hyprland jq ]; text = ''
-      # Save active window address
-      addr="$(hyprctl activewindow -j | jq -r .address)"
+      btn="$(cat /run/keyd/button)"
 
-      # Toggle floating and get status
-      hyprctl --batch "dispatch togglefloating address:$addr ; dispatch focuswindow address:$addr"
-      is_floating="$(hyprctl clients -j | jq ".[] | select(.address==\"$addr\") .floating")"
+      # toggle fullscreen
+      if [[ "$btn" == "left" ]]; then
+        hyprctl dispatch fullscreen 1   # act like only window in workspace
 
-      # If window is now floating, resize and centre
-      if [[ "$is_floating" == "true" ]]; then
-        hyprctl --batch "dispatch resizeactive exact 50% 50% ; dispatch centerwindow 1"
+      # toggle fullscreen (no waybar)
+      elif [[ "$btn" == "middle" ]]; then
+        hyprctl dispatch fullscreen 0   # actual fullscreen
+
+      # toggle floating
+      else
+
+        # Save active window address
+        addr="$(hyprctl activewindow -j | jq -r .address)"
+
+        # Toggle floating and get status
+        hyprctl --batch "dispatch togglefloating address:$addr ; dispatch focuswindow address:$addr"
+        is_floating="$(hyprctl clients -j | jq ".[] | select(.address==\"$addr\") .floating")"
+
+        # If window is now floating, resize and centre
+        if [[ "$is_floating" == "true" ]]; then
+          hyprctl --batch "dispatch resizeactive exact 50% 50% ; dispatch centerwindow 1"
+        fi
+
       fi
     '';
   };
@@ -96,10 +131,9 @@ in {
             button = icon: command: "rgba(1515214d), 20, ${icon}, ${command}"; 
           in [
             ( button "" "hyprctl dispatch exec ${toggleGroupOrKill}" ) # kill
-            ( button "ᘐ" "hyprctl dispatch exec ${toggleGroupOrLock}" ) # group
+            ( button "ᘐ" "hyprctl dispatch exec ${toggleGroupOrLockOrNavigate}" ) # group
             ( button "ᓬ" "hyprctl dispatch exec ${toggleSpecial}" )     # special
-            ( button "❖" "hyprctl dispatch exec ${toggleFloating}" )    # float
-            ( button "✚" "hyprctl dispatch fullscreen 1" )              # full
+            ( button "❖" "hyprctl dispatch exec ${toggleFullscreenOrFloating}" ) # window
           ];
 
         }; 
@@ -121,7 +155,7 @@ in {
           "super, period, changegroupactive, f" # next window in group
 
           # Toggle floating or tiled windows
-          "super+alt, i, exec, ${toggleFloating}"
+          "super+alt, i, exec, ${toggleFullscreenOrFloating}"
 
         ];
 
