@@ -7,11 +7,11 @@
     inputs = with pkgs; [ hyprland jq ]; text = ''
       btn="$(cat /run/keyd/button)"
 
-      # Kill window and group
+      # kill window within group
       if [[ "$btn" == "right" ]]; then
         hyprctl dispatch killactive
 
-      # Disperse group or kill window
+      # disperse group (if exists) else kill window
       else
         grouped_windows_count="$(hyprctl activewindow -j | jq '.grouped | length')"
         if (( grouped_windows_count > 1 )); then
