@@ -19,7 +19,7 @@
       btn="$(cat /run/mouse-button)"
 
       # next window in group
-      if [[ "$btn" == "right" ]]; then
+      if [[ "$btn" == "left" ]]; then
         hyprctl dispatch changegroupactive f
 
       # prev window in group
