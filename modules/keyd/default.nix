@@ -82,14 +82,16 @@ in {
             echo right > /run/mouse-button
 
           # left - kpminus numlock
-          elif [[ "$line" == *"numlock down"* ]] ; then
-            echo left > /run/mouse-button
+          # elif [[ "$line" == *"numlock down"* ]] ; then
+          #   echo left > /run/mouse-button
 
           # right - kpminus numlock kp6 numlock
+          # right - kp6
           elif [[ "$line" == *"kp6 down"* ]] ; then
             echo right > /run/mouse-button
 
           # middle - kpminus kpplus numlock
+          # middle - kpplus
           elif [[ "$line" == *"kpplus down"* ]] ; then
             echo middle > /run/mouse-button
           fi
