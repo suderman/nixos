@@ -73,19 +73,27 @@ in {
       path = with pkgs; [ coreutils keyd ];
       script = ''
         while read -r line; do
+
           if [[ "$line" == *"leftmouse down"* ]] ; then
             echo left > /run/mouse-button
           elif [[ "$line" == *"middlemouse down"* ]] ; then
             echo middle > /run/mouse-button
           elif [[ "$line" == *"rightmouse down"* ]] ; then
             echo right > /run/mouse-button
-          elif [[ "$line" == *"kpminus down"* ]] ; then
+
+          # left - kpminus numlock
+          elif [[ "$line" == *"numlock down"* ]] ; then
             echo left > /run/mouse-button
+
+          # right - kpminus numlock kp6 numlock
           elif [[ "$line" == *"kp6 down"* ]] ; then
             echo right > /run/mouse-button
+
+          # middle - kpminus kpplus numlock
           elif [[ "$line" == *"kpplus down"* ]] ; then
             echo middle > /run/mouse-button
           fi
+
         done< <(exec keyd -m)
       '';
     };
