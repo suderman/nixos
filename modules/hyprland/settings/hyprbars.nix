@@ -42,6 +42,7 @@
       # prev window in group
       elif [[ "$btn" == "middle" ]]; then
         if (( grouped_windows_count > 1 )); then
+          hyprctl dispatch lockactivegroup lock
           hyprctl dispatch changegroupactive b
         else
           hyprctl dispatch togglegroup
@@ -50,6 +51,7 @@
       # next window in group
       else
         if (( grouped_windows_count > 1 )); then
+          hyprctl dispatch lockactivegroup lock
           hyprctl dispatch changegroupactive f
         else
           hyprctl dispatch togglegroup
@@ -69,30 +71,65 @@
     '';
   };
 
-  toggleFullscreenOrFloating = mkShellScript {
+  toggleFullscreenOrSpecial = mkShellScript {
     inputs = with pkgs; [ hyprland jq ]; text = ''
       btn="$(cat /run/keyd/button)"
+      
+      # minimize to special
+      if [[ "$btn" == "right" ]]; then
 
-      # toggle fullscreen
-      if [[ "$btn" == "left" ]]; then
-        hyprctl dispatch fullscreen 1   # act like only window in workspace
+        id="$(hyprctl activewindow -j | jq -r .workspace.id)"
+        if (( id < 0 )); then 
+          hyprctl dispatch movetoworkspace e+0
+        else 
+          hyprctl dispatch movetoworkspacesilent special
+        fi
 
       # toggle fullscreen (no waybar)
       elif [[ "$btn" == "middle" ]]; then
-        hyprctl dispatch fullscreen 0   # actual fullscreen
+        hyprctl dispatch fullscreen 0
+        
+      # toggle fullscreen
+      else
+        hyprctl dispatch fullscreen 1
+      fi
+    '';
+  };
+
+  toggleFloatingOrSplit = mkShellScript {
+    inputs = with pkgs; [ hyprland jq ]; text = ''
+      btn="$(cat /run/keyd/button)"
+      
+      # Save active window address
+      addr="$(hyprctl activewindow -j | jq -r .address)"
+
+      # Get floating status
+      is_floating="$(hyprctl clients -j | jq ".[] | select(.address==\"$addr\") .floating")"
+
+      # toggle split/pin
+      if [[ "$btn" == "right" ]]; then
+
+        # if floating, pin window
+        if [[ "$is_floating" == "true" ]]; then
+          hyprctl dispatch pin
+
+        # if tiled, toggle the split
+        else
+          hyprctl --batch "dispatch togglesplit ; dispatch focuswindow address:$addr"
+        fi
+
+      # toggle pseudo (only applies to tiled)
+      elif [[ "$btn" == "middle" ]]; then
+        hyprctl dispatch pseudo
 
       # toggle floating
       else
 
-        # Save active window address
-        addr="$(hyprctl activewindow -j | jq -r .address)"
-
         # Toggle floating and get status
         hyprctl --batch "dispatch togglefloating address:$addr ; dispatch focuswindow address:$addr"
-        is_floating="$(hyprctl clients -j | jq ".[] | select(.address==\"$addr\") .floating")"
 
-        # If window is now floating, resize and centre
-        if [[ "$is_floating" == "true" ]]; then
+        # If window is now floating (wasn't before), resize and centre
+        if [[ "$is_floating" != "true" ]]; then
           hyprctl --batch "dispatch resizeactive exact 50% 50% ; dispatch centerwindow 1"
         fi
 
@@ -114,26 +151,19 @@ in {
           bar_height = 30; 
           bar_padding = 10;
           bar_button_padding = 7; 
-          # bar_color = "rgba(00000000)";
-          # bar_color = "rgba(151521b3)";
           bar_color = "rgba(151521d9)";
 
           bar_part_of_window = false;
           bar_precedence_over_border = false; 
-          # bar_title_enabled = false;
           bar_title_enabled = true;
-          # col.text = "rgb(000000)";
-          # bar_text_size = 12; 
-          # bar_text_font = "Jetbrains Mono Nerd Font Mono Bold";
 
           hyprbars-button = let 
-            # button = icon: command: "rgba(00000050), 20, ${icon}, ${command}"; 
             button = icon: command: "rgba(1515214d), 20, ${icon}, ${command}"; 
           in [
             ( button "" "hyprctl dispatch exec ${toggleGroupOrKill}" ) # kill
             ( button "ᘐ" "hyprctl dispatch exec ${toggleGroupOrLockOrNavigate}" ) # group
-            ( button "ᓬ" "hyprctl dispatch exec ${toggleSpecial}" )     # special
-            ( button "❖" "hyprctl dispatch exec ${toggleFullscreenOrFloating}" ) # window
+            ( button "ᓬ" "hyprctl dispatch exec ${toggleFullscreenOrSpecial}" )   # max/min
+            ( button "❖" "hyprctl dispatch exec ${toggleFloatingOrSplit}" ) # window
           ];
 
         }; 
@@ -147,16 +177,26 @@ in {
           "super+alt, escape, exec, ${toggleSpecial}"
           "super, escape, togglespecialworkspace" # toggle special workspace
 
-          # Manage groups with [/] [;] [']
-          "super, slash, exec, ${toggleGroupOrLock}"
-          # "super, semicolon, changegroupactive, b" # prev window in group
-          # "super, apostrophe, changegroupactive, f" # next window in group
-          "super, comma, changegroupactive, b" # prev window in group
-          "super, period, changegroupactive, f" # next window in group
-
           # Toggle floating or tiled windows
-          "super+alt, i, exec, ${toggleFullscreenOrFloating}"
+          "super+alt, i, exec, ${toggleFloatingOrSplit}"
 
+          # Prev window in group with super+comma [<]
+          "super, comma, changegroupactive, b" 
+          "super, comma, lockactivegroup, lock"
+
+          # Next window in group with super+period [>]
+          "super, period, changegroupactive, f" 
+          "super, period, lockactivegroup, lock"
+
+          # Fullscreen toggle
+          "alt, return, fullscreen, 0"
+
+        ];
+
+        # Toggle group lock with super+comma+period ([<>] same-time)
+        bindsn = [
+          "super_l, comma&period, exec, ${toggleGroupOrLock}"
+          "super_r, comma&period, exec, ${toggleGroupOrLock}"
         ];
 
       };

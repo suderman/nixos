@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }: let 
 
   cfg = config.wayland.windowManager.hyprland;
-  inherit (lib) getExe mkDefault mkIf mkShellScript; 
+  inherit (lib) getExe mkIf mkShellScript; 
 
   cycleFloatingPositions = mkShellScript {
     inputs = with pkgs; [ coreutils hyprland jq ]; text = ''
@@ -77,8 +77,6 @@
     '';
   };
 
-
-
   screenshot = mkShellScript {
     inputs = with pkgs; [ coreutils slurp grim swappy hyprpicker libnotify wl-clipboard ]; text = ''
       # Flags:
@@ -133,22 +131,6 @@
     '';
   };
 
-  # toggleMoveMode = mkShellScript {
-  #   inputs = with pkgs; [ coreutils hyprland ]; text = ''
-  #     if [[ -e /tmp/movemode ]]; then 
-  #       hyprctl keyword unbind , mouse:272
-  #       hyprctl keyword unbind , mouse:273
-  #       hyprctl keyword unbind , mouse:274
-  #       rm -f /tmp/movemode
-  #     else
-  #       hyprctl keyword bindm , mouse:272, movewindow
-  #       hyprctl keyword bindm , mouse:273, resizewindow
-  #       hyprctl keyword bind , mouse:274, exec, ${toggleGroupOrLock}
-  #       touch /tmp/movemode
-  #     fi
-  #   '';
-  # };
-
 in {
 
   config = mkIf cfg.enable {
@@ -169,7 +151,7 @@ in {
         "super, e, exec, nautilus"
 
         # Password manager
-        "super+alt, period, exec, 1password"
+        "super+control, period, exec, 1password"
 
         # Browser
         "super, b, exec, firefox"
@@ -180,8 +162,10 @@ in {
         "super+alt+shift, b, exec, chromium-browser --incognito"
 
         # Navigate workspaces
-        "super, right, workspace, m+1" # cyclenext
-        "super, left, workspace, m-1" # cyclenext, prev
+        "super, right, workspace, e+1" # cyclenext
+        "super, apostrophe, workspace, e+1"
+        "super, left, workspace, e-1" # cyclenext, prev
+        "super, semicolon, workspace, e-1"
 
       ] ++ ( 
 
@@ -212,6 +196,7 @@ in {
         "super+shift, i, exec, ${cycleFloatingPositions} reverse"
         "super+shift, p, pseudo"
         "super+shift, p, pin"
+
         "super, f, fullscreen, 1"
         "super+alt, f, fullscreen, 0"
 
@@ -295,10 +280,6 @@ in {
         "super, mouse_down, workspace, e+1"
         "super, mouse_up, workspace, e-1"
 
-        # # Experimental
-        # "super, f6, exec, ${toggleMoveMode}"
-        # "shift, f6, exec, ${toggleMoveMode}"
-        # "alt, f6, exec, ${toggleMoveMode}"
       ];
 
       binde = [
@@ -314,10 +295,6 @@ in {
         "super+shift, j, resizeactive, 0 80"
         "super+shift, k, resizeactive, 0 -80"
         "super+shift, l, resizeactive, 80 0"
-
-        # Cycle floating windows
-        # "super, y, cyclenext, floating"
-        # "super+shift, y, cyclenext, prev floating"
 
       ];
 

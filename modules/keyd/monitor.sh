@@ -8,7 +8,7 @@ while read -r line; do
   button() { 
     echo button $1
     echo $1 > /run/keyd/button
-    ( sleep 3 && echo "" > /run/keyd/button ) &
+    ( sleep 1 && echo "" > /run/keyd/button ) &
   }
 
   key() {

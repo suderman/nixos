@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }: let 
 
   cfg = config.wayland.windowManager.hyprland;
-  inherit (lib) concatStringsSep mkDefault mkIf mkShellScript;
+  inherit (lib) concatStringsSep mkIf mkShellScript;
 
   init = mkShellScript {
     inputs = with pkgs; [ coreutils swww ]; text = concatStringsSep "\n" [ 
@@ -34,8 +34,7 @@ in {
 
       input = {
         kb_layout = "us";
-        # follow_mouse = mkDefault 2;
-        follow_mouse = mkDefault 1;
+        follow_mouse = 1;
         natural_scroll = true;
         scroll_factor = 1.5;
         touchpad = {
@@ -48,11 +47,9 @@ in {
         sensitivity = 0; # -1.0 - 1.0, 0 means no modification.
       };
 
-      # "device:epic-mouse-v1" = { sensitivity = -0.5; };
-
       general = {
-        layout = mkDefault "dwindle";
-        resize_on_border = mkDefault true;
+        layout = "dwindle";
+        resize_on_border = true;
       };
 
       dwindle = {
@@ -63,20 +60,19 @@ in {
         split_width_multiplier = 1.35;
       };
 
-      gestures.workspace_swipe = mkDefault true;
+      gestures.workspace_swipe = true;
 
       misc = {
-        mouse_move_enables_dpms = mkDefault true;
-        key_press_enables_dpms = mkDefault true;
-        enable_swallow = mkDefault true;
-        swallow_regex = mkDefault "^(Alacritty|kitty|footclient)$";
-        focus_on_activate = mkDefault false;
-        # cursor_zoom_factor = mkDefault 1;
+        mouse_move_enables_dpms = true;
+        key_press_enables_dpms = true;
+        enable_swallow = true;
+        swallow_regex = "^(Alacritty|kitty|footclient)$";
+        focus_on_activate = false;
         new_window_takes_over_fullscreen = 2; # unfullscreen when opening new window
       };
 
       binds = {
-         workspace_back_and_forth = mkDefault true;
+         workspace_back_and_forth = true;
       };
 
     };

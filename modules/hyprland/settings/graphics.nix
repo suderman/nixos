@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }: let 
 
   cfg = config.wayland.windowManager.hyprland;
-  inherit (lib) mkDefault mkIf; 
+  inherit (lib) mkIf; 
 
 in {
 
@@ -17,18 +17,18 @@ in {
         gaps_out = "10, 20, 20, 20";
         gaps_workspaces = 20;
         border_size = 3;
-        "col.active_border" = mkDefault "rgba(89b4facc) rgba(cba6f7cc) 270deg";
-        "col.inactive_border" = mkDefault "rgba(11111b66) rgba(b4befe66) 270deg";
+        "col.active_border" = "rgba(89b4facc) rgba(cba6f7cc) 270deg";
+        "col.inactive_border" = "rgba(11111b66) rgba(b4befe66) 270deg";
         extend_border_grab_area = 100;
       };
 
       group = {
-        groupbar.enabled = mkDefault false;
-        "col.border_active" = mkDefault "rgba(FF5F1Fcc) rgba(FF5F1Fcc) 270deg";
-        "col.border_inactive" = mkDefault "rgba(FF5F1F80) rgba(FF5F1F80) 270deg";
+        groupbar.enabled = false;
+        "col.border_active" = "rgba(FF5F1Fcc) rgba(FF5F1Fcc) 270deg";
+        "col.border_inactive" = "rgba(FF5F1F80) rgba(FF5F1F80) 270deg";
 
-        "col.border_locked_active" = mkDefault "rgba(F1C40Fcc) rgba(16A085cc) 270deg";
-        "col.border_locked_inactive" = mkDefault "rgba(F1C40F80) rgba(16A08580) 270deg";
+        "col.border_locked_active" = "rgba(F1C40Fcc) rgba(16A085cc) 270deg";
+        "col.border_locked_inactive" = "rgba(F1C40F80) rgba(16A08580) 270deg";
       };
 
       dwindle = {
@@ -36,38 +36,38 @@ in {
       };
 
       misc = {
-        disable_hyprland_logo = mkDefault true;
-        disable_splash_rendering = mkDefault true;
-        animate_manual_resizes = mkDefault true;
-        animate_mouse_windowdragging = mkDefault false;
+        disable_hyprland_logo = true;
+        disable_splash_rendering = true;
+        animate_manual_resizes = true;
+        animate_mouse_windowdragging = false;
       };
 
       decoration = {
-        rounding = mkDefault 15;
-        drop_shadow = mkDefault true;
+        rounding = 15;
+        drop_shadow = true;
         shadow_range = 20;
         shadow_offset = "0, 3";
         shadow_render_power = 3;
         "col.shadow" = "rgba(00000080)";
-        dim_inactive = mkDefault false;
-        dim_strength = mkDefault 0.1;
-        dim_special = mkDefault 0.5;
+        dim_inactive = false;
+        dim_strength = 0.1;
+        dim_special = 0.5;
 
         blur = {
           enabled = true;
-          size = mkDefault 4;
-          passes = mkDefault 3;
+          size = 4;
+          passes = 3;
           ignore_opacity = true;
-          special = mkDefault true;
-          xray = mkDefault true;
+          special = true;
+          xray = true;
         };
       };
 
 
       animations = {
-        enabled = mkDefault true;
-        bezier = mkDefault [
+        enabled = true;
 
+        bezier = [
           "overshot, 0.05, 0.9, 0.1, 1.05"
           "smoothOut, 0.36, 0, 0.66, -0.56"
           "smoothIn, 0.25, 1, 0.5, 1"
@@ -84,11 +84,9 @@ in {
           "win10, 0, 0, 0, 1"
           "gnome, 0, 0.85, 0.3, 1"
           "funky, 0.46, 0.35, -0.2, 1.2"
-
         ];
 
-        animation = mkDefault [
-
+        animation = [
           "windows, 1, 3, overshot, slide"
           "windowsOut, 1, 3, smoothOut, slide"
           "windowsMove, 1, 3, default"
@@ -98,35 +96,9 @@ in {
           "fadeDim, 1, 3, smoothIn"
           "workspaces, 1, 3, default"
           "specialWorkspace, 1, 3, overshot, slidefadevert -50%"
-
-          # "layers, 1, 0.4, default, fade"
           "layers, 1, 0.1, default, fade"
-
-          # "layers, 1, 0.4, default, fade"
-          # "layers, 1, 0.4, default, fade"
-          # "layers, 1, 0.8, rofi, fade"
-          # "layers, 1, 1, fade, default"
-
-          # "windows, 1, 5, win, slide"
-          # "windowsIn, 1, 6, winIn, slide"
-          # "windowsOut, 1, 5, winOut, slide"
-          # "border, 1, 20, overshot"
-          # "borderangle, 1, 20, liner, once"
-          # "fade, 1, 10, default"
-          # "workspaces, 1, 5, win"
-          # "specialWorkspace, 1, 3, default, slidefadevert -50%"
-
-          # "windows, 1, 2, overshot, popin"
-          # # "windowsMove, 1, 1, md3_standard, slide"
-          # "windowsMove, 0"
-          # # "windows, 1, 2, md3_decel, popin"
-          # "border, 1, 10, default"
-          # "fade, 1, 0.0000001, default"
-          # # "workspaces, 1, 4, md3_decel, slidefade"
-          # "workspaces, 1, 4, hyprnostretch, slidefade"
-          # "specialWorkspace, 1, 3, default, slidefadevert -50%"
-
         ];
+
       };
 
       # animation slide/popin/fade
