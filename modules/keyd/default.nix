@@ -74,23 +74,54 @@ in {
       script = ''
         while read -r line; do
 
+          this=/run/touchpad-this 
+          last=/run/touchpad-last
+          touch $this $last
+
+          if [[ "$line" == *"kpminus down"* ]] ; then
+            [[ "kpminus" == "$(cat $this)" ]] || cp -f $this $last
+            echo kpminus > $this
+
+          elif [[ "$line" == *"kpplus down"* ]] ; then
+            [[ "kpplus" == "$(cat $this)" ]] || cp -f $this $last
+            echo kpplus > $this
+
+          elif [[ "$line" == *"kp6 down"* ]] ; then
+            [[ "kp6" == "$(cat $this)" ]] || cp -f $this $last
+            echo kp6 > $this
+
+          elif [[ "$line" == *"leftmouse down"* ]] ; then
+            [[ "leftmouse" == "$(cat $this)" ]] || cp -f $this $last
+            echo leftmouse > $this
+
+          elif [[ "$line" == *"middlemouse down"* ]] ; then
+            [[ "middlemouse" == "$(cat $this)" ]] || cp -f $this $last
+            echo middlemouse > $this
+
+          elif [[ "$line" == *"rightmouse down"* ]] ; then
+            [[ "rightmouse" == "$(cat $this)" ]] || cp -f $this $last
+            echo rightmouse > $this
+          fi
+
           if [[ "$line" == *"leftmouse down"* ]] ; then
             echo left > /run/mouse-button
+
           elif [[ "$line" == *"middlemouse down"* ]] ; then
             echo middle > /run/mouse-button
+
           elif [[ "$line" == *"rightmouse down"* ]] ; then
             echo right > /run/mouse-button
 
-          # left - kpminus numlock
+          # left - kpminus numlock / (none)
           # elif [[ "$line" == *"numlock down"* ]] ; then
           #   echo left > /run/mouse-button
 
-          # right - kpminus numlock kp6 numlock
-          # right - kp6
+          # right - kpminus (numlock?) kp6 / numlock
           elif [[ "$line" == *"kp6 down"* ]] ; then
             echo right > /run/mouse-button
 
-          # middle - kpminus kpplus numlock
+          # middle - kpminus kp6,numlock kpplus / numlock
+          # kpminus kpplus --- numlock
           # middle - kpplus
           elif [[ "$line" == *"kpplus down"* ]] ; then
             echo middle > /run/mouse-button
