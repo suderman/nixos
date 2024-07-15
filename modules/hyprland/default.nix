@@ -19,7 +19,6 @@ in {
     programs.light.enable = true;
 
     # Enable audio
-    sound.enable = true;
     services.pipewire = {
       enable = true;
       alsa.enable = true;

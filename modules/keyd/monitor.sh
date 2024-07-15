@@ -6,7 +6,6 @@ while read -r line; do
   touch $this $last
 
   button() { 
-    echo button $1
     echo $1 > /run/keyd/button
     ( sleep 1 && echo "" > /run/keyd/button ) &
   }

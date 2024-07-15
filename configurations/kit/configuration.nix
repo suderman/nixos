@@ -15,7 +15,6 @@
   # boot.kernelPackages = pkgs.linuxPackages_6_8;
 
   # Sound & Bluetooth
-  sound.enable = true;
   hardware.bluetooth.enable = true;
   services.pipewire.enable = true;
   security.rtkit.enable = true;
