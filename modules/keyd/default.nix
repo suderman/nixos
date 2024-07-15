@@ -79,7 +79,7 @@ in {
             echo middle > /run/mouse-button
           elif [[ "$line" == *"rightmouse down"* ]] ; then
             echo right > /run/mouse-button
-          elif [[ "$line" == *"numlock down"* ]] ; then
+          elif [[ "$line" == *"kpminus down"* ]] ; then
             echo left > /run/mouse-button
           elif [[ "$line" == *"kp6 down"* ]] ; then
             echo right > /run/mouse-button
