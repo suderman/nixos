@@ -43,7 +43,7 @@ in {
       };
 
       decoration = {
-        rounding = 15;
+        rounding = 10;
         drop_shadow = true;
         shadow_range = 20;
         shadow_offset = "0, 3";
