@@ -5,11 +5,20 @@
 
   toggleGroupOrKill = mkShellScript {
     inputs = with pkgs; [ hyprland jq ]; text = ''
-      grouped_windows_count="$(hyprctl activewindow -j | jq '.grouped | length')"
-      if (( grouped_windows_count > 1 )); then
-        hyprctl dispatch togglegroup
-      else
+      btn="$(cat /run/keyd/button)"
+
+      # Kill window and group
+      if [[ "$btn" == "right" ]]; then
         hyprctl dispatch killactive
+
+      # Disperse group or kill window
+      else
+        grouped_windows_count="$(hyprctl activewindow -j | jq '.grouped | length')"
+        if (( grouped_windows_count > 1 )); then
+          hyprctl dispatch togglegroup
+        else
+          hyprctl dispatch killactive
+        fi
       fi
     '';
   };
@@ -157,12 +166,13 @@ in {
           bar_precedence_over_border = false; 
           bar_title_enabled = true;
 
+          # https://gist.github.com/lopspower/03fb1cc0ac9f32ef38f4
           hyprbars-button = let 
-            button = icon: command: "rgba(1515214d), 20, ${icon}, ${command}"; 
+            button = icon: command: "rgba(15152100), 20, ${icon}, ${command}"; 
           in [
             ( button "" "hyprctl dispatch exec ${toggleGroupOrKill}" ) # kill
             ( button "ᘐ" "hyprctl dispatch exec ${toggleGroupOrLockOrNavigate}" ) # group
-            ( button "ᓬ" "hyprctl dispatch exec ${toggleFullscreenOrSpecial}" )   # max/min
+            ( button "ᓬ" "hyprctl dispatch exec ${toggleFullscreenOrSpecial}" ) # max/min
             ( button "❖" "hyprctl dispatch exec ${toggleFloatingOrSplit}" ) # window
           ];
 
