@@ -44,15 +44,17 @@
   padding: 5px 7px;
   border-radius: 0;
   background: rgba(21, 21, 33, 0.3);
-  transition: all 0.3s;
+  transition: padding 0.6s;
 }
 
 #workspaces button:first-child { border-radius: 10px 0 0 10px; }
 #workspaces button:last-child { border-radius: 0 10px 10px 0; }
+#workspaces button:first-child:last-child { border-radius: 10px; }
 
 #workspaces button.active {
   background-color: rgba(183, 189, 248, 0.6);
   color: rgba(21, 21, 33, 1.0);
+  padding: 5px 15px;
 }
 
 #workspaces button:hover {

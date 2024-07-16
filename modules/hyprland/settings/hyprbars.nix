@@ -188,7 +188,7 @@ in {
           "super, escape, togglespecialworkspace" # toggle special workspace
 
           # Toggle floating or tiled windows
-          "super+alt, i, exec, ${toggleFloatingOrSplit}"
+          "super, backspace, exec, ${toggleFloatingOrSplit}"
 
           # Prev window in group with super+comma [<]
           "super, comma, changegroupactive, b" 

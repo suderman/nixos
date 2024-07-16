@@ -25,6 +25,17 @@ in {
       hyprland = "Hyprland";
     };
 
+    home.packages = let 
+      inherit (builtins) attrNames readDir;
+      inherit (lib) filterAttrs mkShellScript removeSuffix;
+      inputs = with pkgs; [ hyprland jq ];
+      scripts = attrNames (filterAttrs (n: v: v == "regular") (readDir ./bin));
+    in map ( name: ( mkShellScript { 
+      inherit inputs; 
+      name = removeSuffix ".sh" name;
+      text = ./bin/${name}; 
+    } ) ) scripts;
+
     # Add target that is enabled by exec-once at the top of the configuration
     systemd.user.targets."${removeSuffix ".target" cfg.systemd.target}".Unit = {
       Description = "Hyprland compositor session after dbus-update-activation-environment";

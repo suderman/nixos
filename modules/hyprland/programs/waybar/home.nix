@@ -63,14 +63,17 @@ in {
         # modules layout
         modules-left = [ 
           "custom/launcher" 
-          "hyprland/workspaces" 
+          # "hyprland/workspaces" 
           "custom/expo" 
           "custom/special" 
           "custom/groupies" 
           # "wlr/taskbar"
         ];
         # modules-center = [ "hyprland/window" ];
-        modules-center = [ "clock" ];
+        modules-center = [ 
+          # "clock" 
+          "hyprland/workspaces" 
+        ];
         modules-right = [ 
           "idle_inhibitor" 
           "custom/bluetooth" 
@@ -79,7 +82,7 @@ in {
           "cpu" 
           "tray" 
           "battery" 
-          # "clock" 
+          "clock" 
           "custom/power" 
         ];
 

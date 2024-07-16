@@ -191,9 +191,9 @@ in {
 
 
         # Manage windows
-        "super, i, togglesplit"
-        "super, i, exec, ${cycleFloatingPositions}"
-        "super+shift, i, exec, ${cycleFloatingPositions} reverse"
+        "super, slash, togglesplit"
+        "super, slash, exec, ${cycleFloatingPositions}"
+        "super+shift, slash, exec, ${cycleFloatingPositions} reverse"
         "super+shift, p, pseudo"
         "super+shift, p, pin"
 
