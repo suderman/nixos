@@ -93,9 +93,9 @@ in {
       };
     };
 
-    home.packages = with pkgs; [ 
-      (unstable.nerdfonts.override { fonts = [ "NerdFontsSymbolsOnly" ]; })
-    ];
+    home.packages = with pkgs; [ nerdfonts ]; 
+    #   (unstable.nerdfonts.override { fonts = [ "NerdFontsSymbolsOnly" ]; })
+    # ];
 
     home.shellAliases = {
       icat="kitty +kitten icat";

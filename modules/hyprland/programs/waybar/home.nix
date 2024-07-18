@@ -89,24 +89,25 @@ in {
         # modules config
         "custom/launcher" = {
           on-click = "${rofi} -show combi";
-          format = " ";
+          format = "";
         };
 
         "custom/expo" = {
           # format = "★";
           # format = "⚃";
-          format = "▦";
+          format = "󱗼";
           on-click = "sleep 0.2 && exec hyprctl dispatch hyprexpo:expo toggle";
         };
 
+        #  󰐃
         "custom/special" = {
-          format = "ᓬ";
+          format = "󰔷";
           on-click = "exec hyprctl dispatch togglespecialworkspace";
         };
 
         "custom/groupies" = {
           exec = "${groupies}";
-          format = "ᘐ {}";
+          format = "󰽤 {}";
           on-click = "exec hyprctl dispatch changegroupactive f";
           on-click-right = "exec hyprctl dispatch changegroupactive f";
         };
@@ -131,14 +132,14 @@ in {
 
         "custom/bluetooth" = {
           on-click = "${kitty} bluetuith";
-          format = "bt ";
+          format = "󰂯";
         };
 
         idle_inhibitor = {
           format = "{icon}";
           format-icons = {
-            activated = "";
-            deactivated = "";
+            activated = "󰅶";
+            deactivated = "󰾪";
           };
         };
 
@@ -147,7 +148,7 @@ in {
           on-click = "${getExe pkgs.networkmanager_dmenu}";
           format-disconnected = "󰤮 ";
           format-wifi = "󰤨 ";
-          format-ethernet = " {essid}";
+          format-ethernet = "󰈀 {essid}";
           tooltip = true;
           tooltip-format = ''
             {ifname}

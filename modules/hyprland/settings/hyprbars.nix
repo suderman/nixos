@@ -1,6 +1,7 @@
 { config, lib, pkgs, ... }: let 
 
   cfg = config.wayland.windowManager.hyprland;
+  inherit (builtins) toString;
   inherit (lib) mkIf mkShellScript;
 
   toggleGroupOrKill = mkShellScript {
@@ -159,7 +160,7 @@ in {
 
           bar_height = 30; 
           bar_padding = 10;
-          bar_button_padding = 7; 
+          bar_button_padding = 5; 
           bar_color = "rgba(151521d9)";
 
           bar_part_of_window = false;
@@ -168,12 +169,18 @@ in {
 
           # https://gist.github.com/lopspower/03fb1cc0ac9f32ef38f4
           hyprbars-button = let 
-            button = icon: command: "rgba(15152100), 20, ${icon}, ${command}"; 
+            button = icon: size: command: "rgba(15152100), ${toString size}, ${icon}, ${command}"; 
           in [
-            ( button "" "hyprctl dispatch exec ${toggleGroupOrKill}" ) # kill
-            ( button "ᘐ" "hyprctl dispatch exec ${toggleGroupOrLockOrNavigate}" ) # group
-            ( button "ᓬ" "hyprctl dispatch exec ${toggleFullscreenOrSpecial}" ) # max/min
-            ( button "❖" "hyprctl dispatch exec ${toggleFloatingOrSplit}" ) # window
+        
+            ( button "" 21 "hyprctl dispatch exec ${toggleGroupOrKill}" ) # kill
+            ( button "󰽤" 18 "hyprctl dispatch exec ${toggleGroupOrLockOrNavigate}" ) # group
+            ( button "󰔷" 19 "hyprctl dispatch exec ${toggleFullscreenOrSpecial}" ) # max/min
+            ( button "" 18 "hyprctl dispatch exec ${toggleFloatingOrSplit}" ) # window
+
+            # ( button "" "hyprctl dispatch exec ${toggleGroupOrKill}" ) # kill
+            # ( button "ᘐ" "hyprctl dispatch exec ${toggleGroupOrLockOrNavigate}" ) # group
+            # ( button "ᓬ" "hyprctl dispatch exec ${toggleFullscreenOrSpecial}" ) # max/min
+            # ( button "❖" "hyprctl dispatch exec ${toggleFloatingOrSplit}" ) # window
           ];
 
         }; 
@@ -191,7 +198,7 @@ in {
           "super, backspace, exec, ${toggleFloatingOrSplit}"
 
           # Prev window in group with super+comma [<]
-          "super, comma, changegroupactive, b" 
+          "super, comma, changegroupactive, b"
           "super, comma, lockactivegroup, lock"
 
           # Next window in group with super+period [>]

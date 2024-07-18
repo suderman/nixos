@@ -6,11 +6,11 @@
  *
 */
 
+
 #waybar {
   background-color: rgba(21, 21, 33, 0.85);
   color: #f5e0dc;
   border-bottom: none;
-  font-family: JetBrainsMono;
 }
 
 .modules-left { background-color: transparent; }
@@ -18,10 +18,12 @@
 .modules-right { background-color: transparent; }
 
 #custom-launcher {
-  background: rgba(21, 21, 33, 0.5);
-  color: #6481d0;
+  /* background: rgba(21, 21, 33, 0.5); */
+  /* color: #6481d0; */
+  color: #ffffff;
   margin: 0px;
-  padding: 5px 9px 5px 12px;
+  padding: 5px 8px;
+  /* padding: 5px 9px 5px 12px; */
   font-size: 18px;
   transition: all 0.3s;
 }
@@ -166,5 +168,6 @@
 * {
   font-size: 16px;
   min-height: 0;
-  font-family: "Iosevka Nerd Font", "Material Design Icons Desktop", sans-serif;
+  /* font-family: "Iosevka Nerd Font", "Material Design Icons Desktop", sans-serif; */
+  font-family: sans-serif;
 }

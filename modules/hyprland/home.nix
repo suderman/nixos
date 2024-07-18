@@ -36,6 +36,8 @@ in {
       text = ./bin/${name}; 
     } ) ) scripts;
 
+    # home.packages = with pkgs; [ nerdfonts ]; 
+
     # Add target that is enabled by exec-once at the top of the configuration
     systemd.user.targets."${removeSuffix ".target" cfg.systemd.target}".Unit = {
       Description = "Hyprland compositor session after dbus-update-activation-environment";
