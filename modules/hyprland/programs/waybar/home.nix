@@ -7,19 +7,6 @@
   kitty = getExe pkgs.kitty;
   rofi = getExe config.programs.rofi.finalPackage;
 
-  groupies = mkShellScript {
-    inputs = with pkgs; [ socat hyprland jq ];
-    text = ''
-      handle() {
-        case $1 in 
-          activewindowv2\>\>*)
-            hyprctl activewindow -j | jq -r '.grouped | length | if . < 1 then "" else . end' ;;
-        esac
-      }
-      socat -U - UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock | while read -r line; do handle "$line"; done
-    '';
-  };
-
 in {
 
   config = mkIf cfg.enable {
@@ -106,10 +93,10 @@ in {
         };
 
         "custom/groupies" = {
-          exec = "${groupies}";
-          format = "󰽤 {}";
+          exec = "waybar-groupies";
+          format = "{}";
           on-click = "exec hyprctl dispatch changegroupactive f";
-          on-click-right = "exec hyprctl dispatch changegroupactive f";
+          on-click-right = "exec hyprctl dispatch changegroupactive b";
         };
 
         "hyprland/workspaces" = {

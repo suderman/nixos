@@ -9,6 +9,7 @@
     coreutils 
     gawk  
     gettext
+    gnused
     grim 
     hyprland 
     hyprpicker 
@@ -17,6 +18,7 @@
     libnotify 
     procps 
     slurp 
+    socat
     swappy 
     wl-clipboard 
   ];

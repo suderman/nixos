@@ -98,12 +98,12 @@
 
 #custom-groupies {
   margin: 0;
-  padding: 5px 8px;
+  padding: 5px 4px;
   /* color: #b7bdf8; */
   color: #ffffff;
-  font-size: 18px;
+  font-size: 16px;
   transition: all 0.3s;
-  letter-spacing: -4px;
+  letter-spacing: 2px;
   font-size: 17px;
   font-family: monospace; 
 }
