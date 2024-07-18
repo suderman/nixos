@@ -4,150 +4,6 @@
   inherit (builtins) toString;
   inherit (lib) mkIf mkShellScript;
 
-  toggleGroupOrKill = mkShellScript {
-    inputs = with pkgs; [ hyprland jq ]; text = ''
-      btn="$(cat /run/keyd/button)"
-
-      # kill window within group
-      if [[ "$btn" == "right" ]]; then
-        hyprctl dispatch killactive
-
-      # disperse group (if exists) else kill window
-      else
-        grouped_windows_count="$(hyprctl activewindow -j | jq '.grouped | length')"
-        if (( grouped_windows_count > 1 )); then
-          hyprctl dispatch togglegroup
-        else
-          hyprctl dispatch killactive
-        fi
-      fi
-    '';
-  };
-
-  toggleGroupOrLock = mkShellScript {
-    inputs = with pkgs; [ hyprland jq ]; text = ''
-      grouped_windows_count="$(hyprctl activewindow -j | jq '.grouped | length')"
-      if (( grouped_windows_count > 1 )); then
-        hyprctl dispatch lockactivegroup toggle
-      else
-        hyprctl dispatch togglegroup
-      fi
-    '';
-  };
-
-  toggleGroupOrLockOrNavigate = mkShellScript {
-    inputs = with pkgs; [ hyprland jq ]; text = ''
-      btn="$(cat /run/keyd/button)"
-      grouped_windows_count="$(hyprctl activewindow -j | jq '.grouped | length')"
-
-      # toggle group lock
-      if [[ "$btn" == "right" ]]; then
-
-        if (( grouped_windows_count > 1 )); then
-          hyprctl dispatch lockactivegroup toggle
-        else
-          hyprctl dispatch togglegroup
-        fi
-
-      # prev window in group
-      elif [[ "$btn" == "middle" ]]; then
-        if (( grouped_windows_count > 1 )); then
-          hyprctl dispatch lockactivegroup lock
-          hyprctl dispatch changegroupactive b
-        else
-          hyprctl dispatch togglegroup
-        fi
-
-      # next window in group
-      else
-        if (( grouped_windows_count > 1 )); then
-          hyprctl dispatch lockactivegroup lock
-          hyprctl dispatch changegroupactive f
-        else
-          hyprctl dispatch togglegroup
-        fi
-      fi
-    '';
-  };
-
-  toggleSpecial = mkShellScript {
-    inputs = with pkgs; [ hyprland jq ]; text = ''
-      id="$(hyprctl activewindow -j | jq -r .workspace.id)"
-      if (( id < 0 )); then 
-        hyprctl dispatch movetoworkspace e+0
-      else 
-        hyprctl dispatch movetoworkspacesilent special
-      fi
-    '';
-  };
-
-  toggleFullscreenOrSpecial = mkShellScript {
-    inputs = with pkgs; [ hyprland jq ]; text = ''
-      btn="$(cat /run/keyd/button)"
-      
-      # minimize to special
-      if [[ "$btn" == "right" ]]; then
-
-        id="$(hyprctl activewindow -j | jq -r .workspace.id)"
-        if (( id < 0 )); then 
-          hyprctl dispatch movetoworkspace e+0
-        else 
-          hyprctl dispatch movetoworkspacesilent special
-        fi
-
-      # toggle fullscreen (no waybar)
-      elif [[ "$btn" == "middle" ]]; then
-        hyprctl dispatch fullscreen 0
-        
-      # toggle fullscreen
-      else
-        hyprctl dispatch fullscreen 1
-      fi
-    '';
-  };
-
-  toggleFloatingOrSplit = mkShellScript {
-    inputs = with pkgs; [ hyprland jq ]; text = ''
-      btn="$(cat /run/keyd/button)"
-      
-      # Save active window address
-      addr="$(hyprctl activewindow -j | jq -r .address)"
-
-      # Get floating status
-      is_floating="$(hyprctl clients -j | jq ".[] | select(.address==\"$addr\") .floating")"
-
-      # toggle split/pin
-      if [[ "$btn" == "right" ]]; then
-
-        # if floating, pin window
-        if [[ "$is_floating" == "true" ]]; then
-          hyprctl dispatch pin
-
-        # if tiled, toggle the split
-        else
-          hyprctl --batch "dispatch togglesplit ; dispatch focuswindow address:$addr"
-        fi
-
-      # toggle pseudo (only applies to tiled)
-      elif [[ "$btn" == "middle" ]]; then
-        hyprctl dispatch pseudo
-
-      # toggle floating
-      else
-
-        # Toggle floating and get status
-        hyprctl --batch "dispatch togglefloating address:$addr ; dispatch focuswindow address:$addr"
-
-        # If window is now floating (wasn't before), resize and centre
-        if [[ "$is_floating" != "true" ]]; then
-          hyprctl --batch "dispatch resizeactive exact 50% 50% ; dispatch centerwindow 1"
-        fi
-
-      fi
-    '';
-  };
-
-
 in {
 
   config = mkIf cfg.enable {
@@ -171,16 +27,10 @@ in {
           hyprbars-button = let 
             button = icon: size: command: "rgba(15152100), ${toString size}, ${icon}, ${command}"; 
           in [
-        
-            ( button "" 21 "hyprctl dispatch exec ${toggleGroupOrKill}" ) # kill
-            ( button "󰽤" 18 "hyprctl dispatch exec ${toggleGroupOrLockOrNavigate}" ) # group
-            ( button "󰔷" 19 "hyprctl dispatch exec ${toggleFullscreenOrSpecial}" ) # max/min
-            ( button "" 18 "hyprctl dispatch exec ${toggleFloatingOrSplit}" ) # window
-
-            # ( button "" "hyprctl dispatch exec ${toggleGroupOrKill}" ) # kill
-            # ( button "ᘐ" "hyprctl dispatch exec ${toggleGroupOrLockOrNavigate}" ) # group
-            # ( button "ᓬ" "hyprctl dispatch exec ${toggleFullscreenOrSpecial}" ) # max/min
-            # ( button "❖" "hyprctl dispatch exec ${toggleFloatingOrSplit}" ) # window
+            ( button "" 21 "hyprctl dispatch exec hypr-togglegrouporkill" ) # kill
+            ( button "󰽤" 18 "hyprctl dispatch exec hypr-togglegrouporlockornavigate" ) # group
+            ( button "󰔷" 19 "hyprctl dispatch exec hypr-togglefullscreenorspecial" ) # max/min
+            ( button "" 18 "hyprctl dispatch exec hypr-togglefloatingorsplit" ) # window
           ];
 
         }; 
@@ -188,14 +38,15 @@ in {
         bind = [
 
           # Kill the group or window
-          "super, q, exec, ${toggleGroupOrKill}"
+          "super, q, exec, hypr-togglegrouporkill"
 
           # Minimize windows (send to special workspace) and restore
-          "super+alt, escape, exec, ${toggleSpecial}"
+          "super+alt, escape, exec, hypr-togglefullscreenorspecial right"
+
           "super, escape, togglespecialworkspace" # toggle special workspace
 
           # Toggle floating or tiled windows
-          "super, backspace, exec, ${toggleFloatingOrSplit}"
+          "super, backspace, exec, hypr-togglefloatingorsplit"
 
           # Prev window in group with super+comma [<]
           "super, comma, changegroupactive, b"
@@ -212,8 +63,8 @@ in {
 
         # Toggle group lock with super+comma+period ([<>] same-time)
         bindsn = [
-          "super_l, comma&period, exec, ${toggleGroupOrLock}"
-          "super_r, comma&period, exec, ${toggleGroupOrLock}"
+          "super_l, comma&period, exec, hypr-togglegrouporlockornavigate right"
+          "super_r, comma&period, exec, hypr-togglegrouporlockornavigate right"
         ];
 
       };

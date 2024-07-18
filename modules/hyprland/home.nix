@@ -25,18 +25,18 @@ in {
       hyprland = "Hyprland";
     };
 
-    home.packages = let 
-      inherit (builtins) attrNames readDir;
-      inherit (lib) filterAttrs mkShellScript removeSuffix;
-      inputs = with pkgs; [ hyprland jq ];
-      scripts = attrNames (filterAttrs (n: v: v == "regular") (readDir ./bin));
-    in map ( name: ( mkShellScript { 
-      inherit inputs; 
-      name = removeSuffix ".sh" name;
-      text = ./bin/${name}; 
-    } ) ) scripts;
+    # home.packages = let 
+    #   inherit (builtins) attrNames readDir;
+    #   inherit (lib) filterAttrs hasSuffix mkShellScript removeSuffix;
+    #   inputs = with pkgs; [ hyprland jq ];
+    #   scripts = attrNames (filterAttrs (n: v: v == "regular" && hasSuffix ".sh" n) (readDir ./bin));
+    # in map ( name: ( mkShellScript { 
+    #   inherit inputs; 
+    #   name = removeSuffix ".sh" name;
+    #   text = ./bin/${name}; 
+    # } ) ) scripts;
 
-    # home.packages = with pkgs; [ nerdfonts ]; 
+    home.packages = with pkgs; [ nerdfonts ]; 
 
     # Add target that is enabled by exec-once at the top of the configuration
     systemd.user.targets."${removeSuffix ".target" cfg.systemd.target}".Unit = {
