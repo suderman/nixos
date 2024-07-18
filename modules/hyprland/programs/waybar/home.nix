@@ -89,7 +89,7 @@ in {
         # modules config
         "custom/launcher" = {
           on-click = "${rofi} -show combi";
-          format = "";
+          format = "";
         };
 
         "custom/expo" = {
@@ -159,15 +159,18 @@ in {
         };
 
         cpu = {
-          format = " {load} / {usage}%";
+          # format = " {load} / {usage}%";
+          format = " {usage}%";
           on-click = "${kitty} htop";
         };
 
         temperature = {
           thermal-zone = 1; # 2
           critical-threshold = 80;
-          format-critical = "{temperatureC}°C ";
-          format = "{temperatureC}°C ";
+          # format-critical = "{temperatureC}°C ";
+          # format = "{temperatureC}°C ";
+          format-critical = "{temperatureC}°C";
+          format = "{temperatureC}°C";
         };
 
         "wlr/taskbar" = {
@@ -184,7 +187,7 @@ in {
         };
 
         tray = {
-          icon-size = 14;
+          icon-size = 16;
           spacing = 6;
         };
 

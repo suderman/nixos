@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Cache found names/icons
 CACHE="$XDG_RUNTIME_DIR/hyprwindow"
 mkdir -p $CACHE

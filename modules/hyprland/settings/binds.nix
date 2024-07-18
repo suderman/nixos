@@ -1,135 +1,7 @@
 { config, lib, pkgs, ... }: let 
 
   cfg = config.wayland.windowManager.hyprland;
-  inherit (lib) getExe mkIf mkShellScript; 
-
-  cycleFloatingPositions = mkShellScript {
-    inputs = with pkgs; [ coreutils hyprland jq ]; text = ''
-      is_floating="$(hyprctl activewindow -j | jq -r .floating)"
-      if [[ "$is_floating" == "true" ]]; then
-
-        # Get the cache directory and active window name
-        cache_dir="$XDG_RUNTIME_DIR/hypr/cyclefloating"
-        window_address="$(hyprctl activewindow -j | jq -r .address)"
-
-        mkdir -p $cache_dir
-        touch $cache_dir/$window_address
-
-        # top_left    top_center    top_right
-        # middle_left               middle_right
-        # bottom_left bottom_center bottom_right
-        pos="$(cat $cache_dir/$window_address)" 
-        next_pos="top_left"
-
-        # forward or reverse
-        dir="''${1:-forward}"
-
-        if [[ "$pos" == "top_left" ]]; then 
-          hyprctl --batch "dispatch movewindow u ; dispatch movewindow l"
-          [[ "$dir" == "forward" ]] && next_pos="top_center" || next_pos="middle_left"
-
-        elif [[ "$pos" == "top_center" ]]; then 
-          hyprctl --batch "dispatch centerwindow 1; dispatch movewindow u"
-          [[ "$dir" == "forward" ]] && next_pos="top_right" || next_pos="top_left"
-
-        elif [[ "$pos" == "top_right" ]]; then 
-          hyprctl --batch "dispatch movewindow u ; dispatch movewindow r"
-          [[ "$dir" == "forward" ]] && next_pos="middle_right" || next_pos="top_center"
-
-        elif [[ "$pos" == "middle_right" ]]; then 
-          hyprctl --batch "dispatch centerwindow 1 ; dispatch movewindow r"
-          [[ "$dir" == "forward" ]] && next_pos="bottom_right" || next_pos="top_right"
-
-        elif [[ "$pos" == "bottom_right" ]]; then 
-          hyprctl --batch "dispatch movewindow d ; dispatch movewindow r"
-          [[ "$dir" == "forward" ]] && next_pos="bottom_center" || next_pos="middle_right"
-
-        elif [[ "$pos" == "bottom_center" ]]; then 
-          hyprctl --batch "dispatch centerwindow 1 ; dispatch movewindow d"
-          [[ "$dir" == "forward" ]] && next_pos="bottom_left" || next_pos="bottom_right"
-
-        elif [[ "$pos" == "bottom_left" ]]; then 
-          hyprctl --batch "dispatch movewindow d ; dispatch movewindow l"
-          [[ "$dir" == "forward" ]] && next_pos="middle_left" || next_pos="bottom_center"
-
-        elif [[ "$pos" == "middle_left" ]]; then 
-          hyprctl --batch "dispatch centerwindow 1 ; dispatch movewindow l"
-          [[ "$dir" == "forward" ]] && next_pos="top_left" || next_pos="bottom_left"
-        fi
-
-        # Save the next position to file
-        echo "$next_pos" > $cache_dir/$window_address
-
-      fi
-    '';
-  };
-
-  moveWindowOrGroupOrActive = mkShellScript {
-    inputs = with pkgs; [ hyprland jq ]; text = ''
-      is_floating="$(hyprctl activewindow -j | jq -r .floating)"
-      dir="$1" # [l]eft [d]own [u]p [r]ight 
-      x="$2" y="$3" # distance to move window
-      if [[ "$is_floating" == "true" ]]; then
-        hyprctl dispatch moveactive $x $y
-      else
-        hyprctl dispatch movewindoworgroup $dir 
-      fi
-    '';
-  };
-
-  screenshot = mkShellScript {
-    inputs = with pkgs; [ coreutils slurp grim swappy hyprpicker libnotify wl-clipboard ]; text = ''
-      # Flags:
-      #
-      # r: region
-      # s: screen
-      # c: clipboard
-      # f: file
-      # i: interactive
-      # p: pixel
-
-      # Region to clipboard
-      if [[ $1 == rc ]]; then
-          grim -g "$(slurp -b '#000000b0' -c '#00000000')" - | wl-copy
-          notify-send 'Copied to Clipboard' Screenshot
-
-      # Region to file
-      elif [[ $1 == rf ]]; then
-          mkdir -p ~/Pictures/Screenshots
-          filename=~/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png
-          grim -g "$(slurp -b '#000000b0' -c '#00000000')" $filename
-          notify-send 'Screenshot Taken' $filename
-
-      # Region to interactive
-      elif [[ $1 == ri ]]; then
-          grim -g "$(slurp -b '#000000b0' -c '#00000000')" - | tee >(wl-copy) | swappy -f -
-          # grim -g "$(slurp -b '#000000b0' -c '#00000000')" - | swappy -f -
-
-      # Screen to clipboard
-      elif [[ $1 == sc ]]; then
-          filename=~/Pictures/Screenshots/%Y-%m-%d_%H-%M-%S.png
-          grim - | wl-copy
-          notify-send 'Copied to Clipboard' Screenshot
-
-      # Screen to file
-      elif [[ $1 == sf ]]; then
-          mkdir -p ~/Pictures/Screenshots
-          filename=~/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png
-          grim $filename
-          notify-send 'Screenshot Taken' $filename
-
-      # Screen to interactive
-      elif [[ $1 == si ]]; then
-          grim - | swappy -f -
-
-      # Colour to clipboard
-      elif [[ $1 == p ]]; then
-          color=$(hyprpicker -a)
-          wl-copy $color
-          notify-send 'Copied to Clipboard' $color
-      fi
-    '';
-  };
+  inherit (lib) mkIf; 
 
 in {
 
@@ -167,19 +39,11 @@ in {
         "super, left, workspace, e-1" # cyclenext, prev
         "super, semicolon, workspace, e-1"
 
-      ] ++ ( 
-
-        let supertab = mkShellScript { 
-          inputs = with pkgs; [ hyprland gawk ]; 
-          text = ../bin/supertab.sh; 
-        }; 
-
-      in [
 
         # Navigation windows with super tab
-        "super, tab, exec, ${supertab}"
-        "super+alt, tab, exec, ${supertab} next"
-        "super+shift, tab, exec, ${supertab} prev"
+        "super, tab, exec, hypr-supertab"
+        "super+alt, tab, exec, hypr-supertab next"
+        "super+shift, tab, exec, hypr-supertab prev"
 
         # Back-and-forth with super \
         "super, backslash, focuscurrentorlast"
@@ -187,21 +51,16 @@ in {
         # Focus urgent windows
         "super, u, focusurgentorlast"
 
-      ]) ++ [
-
 
         # Manage windows
         "super, slash, togglesplit"
-        "super, slash, exec, ${cycleFloatingPositions}"
-        "super+shift, slash, exec, ${cycleFloatingPositions} reverse"
+        "super, slash, exec, hypr-cyclefloatingpos"
+        "super+shift, slash, exec, hypr-cyclefloatingpos reverse"
         "super+shift, p, pseudo"
         "super+shift, p, pin"
 
         "super, f, fullscreen, 1"
         "super+alt, f, fullscreen, 0"
-
-        # App launcher
-        # "super, space, exec, ${getExe pkgs.fuzzel}"
 
         # Move focus with super [hjkl]
         "super, h, movefocus, l"
@@ -256,10 +115,6 @@ in {
         "super+shift, 0, centerwindow, 1"
         "super+shift, O, resizeactive, exact 600 400"
 
-        # "super+alt, y, centerwindow, 1"
-        # "super+alt, i, exec, ${cycleFloatingPositions}"
-        # "super+alt+shift, I, exec, ${cycleFloatingPositions} reverse"
-
         # Super+m to minimize window, Super+m to bring it back (possibly on a different workspace)
         "super, m, togglespecialworkspace, mover"
         "super, m, movetoworkspace, +0"
@@ -268,13 +123,13 @@ in {
         "super, m, togglespecialworkspace, mover"
 
         # Screenshot a region
-        ", print, exec, ${screenshot} ri"
-        "super, print, exec, ${screenshot} rf"
-        "ctrl, print, exec, ${screenshot} rc"
-        "shift, print, exec, ${screenshot} sc"
-        "super+shift, print, exec, ${screenshot} sf"
-        "ctrl+shift, print, exec, ${screenshot} si"
-        "alt, print, exec, ${screenshot} p"
+        ", print, exec, hypr-screenshot ri"
+        "super, print, exec, hypr-screenshot rf"
+        "ctrl, print, exec, hypr-screenshot rc"
+        "shift, print, exec, hypr-screenshot sc"
+        "super+shift, print, exec, hypr-screenshot sf"
+        "ctrl+shift, print, exec, hypr-screenshot si"
+        "alt, print, exec, hypr-screenshot p"
 
         # Scroll through existing workspaces with super + scroll
         "super, mouse_down, workspace, e+1"
@@ -285,10 +140,10 @@ in {
       binde = [
 
         # Move window 
-        "super+alt, h, exec, ${moveWindowOrGroupOrActive} l -40 0"
-        "super+alt, j, exec, ${moveWindowOrGroupOrActive} d 0 40"
-        "super+alt, k, exec, ${moveWindowOrGroupOrActive} u 0 -40"
-        "super+alt, l, exec, ${moveWindowOrGroupOrActive} r 40 0"
+        "super+alt, h, exec, hypr-movewindoworgrouporactive l -40 0"
+        "super+alt, j, exec, hypr-movewindoworgrouporactive d 0 40"
+        "super+alt, k, exec, hypr-movewindoworgrouporactive u 0 -40"
+        "super+alt, l, exec, hypr-movewindoworgrouporactive r 40 0"
 
         # Resize window
         "super+shift, h, resizeactive, -80 0"

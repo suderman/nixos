@@ -2,30 +2,15 @@
 
   cfg = config.programs.rofi;
   ini = pkgs.formats.ini {};
-  inherit (lib) getExe mkIf mkShellScript;
-
-  hyprwindow = mkShellScript { 
-    inputs = with pkgs; [ hyprland jq gawk gettext ]; 
-    text = ../bin/hyprwindow.sh; 
-  }; 
-
-  # Toggle
-  rofi-toggle = mkShellScript { 
-    inputs = with pkgs; [ cfg.finalPackage procps keyd ]; 
-    text = ../bin/rofi-toggle.sh; 
-  }; 
+  inherit (lib) getExe mkIf;
 
 in {
 
   config = mkIf config.wayland.windowManager.hyprland.enable {
 
     wayland.windowManager.hyprland.settings = {
-      bindr = [ "super, Super_L, exec, ${rofi-toggle} -show combi" ];
-      bind = [
-        "super, space, exec, ${rofi-toggle} -show combi"
-        # ''alt, tab, exec, ${rofi-toggle}  -show combi -kb-accept-entry "!Alt-Tab,!Alt+Alt_L" -kb-row-down "Alt+Tab" -selected-row 1''
-        # ''super, tab, exec, ${rofi-toggle}  -show combi -kb-accept-entry "!Super-Tab,!Super+Super_L" -kb-row-down "Super+Tab" -selected-row 1''
-      ];
+      bindr = [ "super, Super_L, exec, rofi-toggle -show combi" ];
+      bind = [ "super, space, exec, rofi-toggle -show combi" ];
     };
 
     services.keyd.layers = {
@@ -63,7 +48,7 @@ in {
           # "run"
         ];
         combi-modes = [
-          "hyprwindow:${hyprwindow}"
+          "hyprwindow:rofi-hyprwindow"
           "drun"
           "ssh"
         ];

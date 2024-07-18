@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Stack of hyprland client windows
 STACK="$XDG_RUNTIME_DIR/supertab"
 touch $STACK

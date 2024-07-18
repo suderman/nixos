@@ -22,7 +22,7 @@
   /* color: #6481d0; */
   color: #ffffff;
   margin: 0px;
-  padding: 5px 8px;
+  padding: 5px 8px 5px 10px;
   /* padding: 5px 9px 5px 12px; */
   font-size: 18px;
   transition: all 0.3s;
@@ -130,7 +130,7 @@
 
 #tray {
   margin: 0;
-  padding: 5px 20px;
+  padding: 5px 20px 5px 15px;
 }
 
 
