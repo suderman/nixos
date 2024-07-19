@@ -26,7 +26,7 @@ in {
         }; 
 
         bind = [
-          "super, escape, hyprexpo:expo, toggle"
+          "super, 0, hyprexpo:expo, toggle"
         ];
 
       };

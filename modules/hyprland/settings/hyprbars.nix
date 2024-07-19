@@ -55,10 +55,10 @@ in {
           "alt, return, fullscreen, 0"
 
           # Minimize windows (send to special workspace) and restore
-          "alt, escape, exec, hypr-togglefullscreenorspecial right"
+          "super+alt, escape, exec, hypr-togglefullscreenorspecial right"
 
           # toggle special workspace
-          "alt, tab, togglespecialworkspace" 
+          "super, escape, togglespecialworkspace" 
 
         ];
 

@@ -43,6 +43,7 @@ in {
           "combi"
           "calc"
           "emoji"
+          "sinks:rofi-sinks"
           # "emoji:${getExe pkgs.rofimoji}"
           # "filebrowser"
           # "run"

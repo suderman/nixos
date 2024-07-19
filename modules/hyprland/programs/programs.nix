@@ -42,6 +42,7 @@ in {
       wf-recorder # screen recording
       grim # taking screenshots
       slurp # selecting a region to screenshot
+      pulseaudio
     ];
 
   };
