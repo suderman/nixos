@@ -45,6 +45,9 @@
     autologin = "jon";
   };
 
+  services.flatpak.enable = true;
+  services.garmin.enable = true;
+
   # Apps
   programs.dolphin.enable = true;
   programs.steam.enable = true;
@@ -54,20 +57,5 @@
   services.whoami.enable = true;
   modules.ollama.enable = true;
   services.ollama.acceleration = "cuda";
-  services.garmin.enable = true;
-
-  services.flatpak = {
-    enable = true;
-    apps = [
-      "app.bluebubbles.BlueBubbles"
-      "io.github.dvlv.boxbuddyrs"
-      "io.gitlab.zehkira.Monophony"
-      "org.emptyflow.ArdorQuery"
-      "com.github.treagod.spectator"
-    ];
-    beta = [
-      "org.gimp.GIMP" # https://www.gimp.org/downloads/devel
-    ];
-  };
 
 }

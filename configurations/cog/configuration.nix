@@ -72,6 +72,7 @@
     keyboard = config.services.keyd.internalKeyboards.framework;
   };
 
+  services.flatpak.enable = true;
   services.garmin.enable = true;
 
   # Desktop environment
@@ -87,20 +88,5 @@
   programs.steam.enable = true;
   programs.mosh.enable = true;
   programs.dolphin.enable = true;
-
-  services.flatpak = {
-    enable = true;
-    apps = [
-      "app.bluebubbles.BlueBubbles"
-      "io.github.dvlv.boxbuddyrs"
-      "io.gitlab.zehkira.Monophony"
-      "org.emptyflow.ArdorQuery"
-      "com.github.treagod.spectator"
-    ];
-    beta = [
-      "org.gimp.GIMP" # https://www.gimp.org/downloads/devel
-    ];
-  };
-
 
 }

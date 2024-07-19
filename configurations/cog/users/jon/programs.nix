@@ -35,14 +35,16 @@ in {
     pavucontrol ncpamixer pamixer pamix
   ];
 
-  programs.zwift.enable = true;
+  programs.bluebubbles.enable = true;
   programs.chromium.enable = true;
+  programs.foot.enable = false;
+  programs.gimp.enable = true;
   programs.git.enable = true;
   programs.tmux.enable = true;
-  programs.zsh.enable = true;
   programs.wezterm.enable = false;
-  programs.foot.enable = false;
   programs.yazi.enable = true;
+  programs.zsh.enable = true;
+  programs.zwift.enable = true;
 
   programs.obs-studio = with pkgs.unstable; {
     enable = true;
@@ -68,6 +70,16 @@ in {
   programs.jellyfin = {
     enable = true;
     url = "https://jellyfin.lux";
+  };
+
+  services.flatpak = {
+    enable = true;
+    apps = [
+      "io.github.dvlv.boxbuddyrs"
+      "io.gitlab.zehkira.Monophony"
+      "org.emptyflow.ArdorQuery"
+      "com.github.treagod.spectator"
+    ];
   };
 
 }

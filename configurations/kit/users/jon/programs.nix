@@ -35,15 +35,14 @@ in {
 
   ];
 
+  programs.bluebubbles.enable = true;
+  programs.foot.enable = false;
+  programs.gimp.enable = true;
   programs.git.enable = true;
   programs.tmux.enable = true;
-  programs.zsh.enable = true;
-  # programs.neovim.enable = true;
-
   programs.wezterm.enable = false;
-  programs.foot.enable = false;
   programs.yazi.enable = true;
-
+  programs.zsh.enable = true;
   programs.zwift.enable = true;
 
   programs.chromium = {
@@ -77,5 +76,16 @@ in {
     url = "https://jellyfin.lux";
     platform = "x11";
   };
+
+  services.flatpak = {
+    enable = true;
+    apps = [
+      "io.github.dvlv.boxbuddyrs"
+      "io.gitlab.zehkira.Monophony"
+      "org.emptyflow.ArdorQuery"
+      "com.github.treagod.spectator"
+    ];
+  };
+
 
 }

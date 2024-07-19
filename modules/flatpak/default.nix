@@ -1,5 +1,5 @@
 # services.flatpak.enable = true;
-{ config, lib, inputs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 
 let
 
@@ -23,10 +23,15 @@ in {
     services.flatpak = import ./config.nix { 
       inherit lib;  
       inherit (cfg) apps beta all;
-    };
+    } // {
+      uninstallUnmanaged = false; # allow imperative system flatpaks
+    }; 
 
     # portal required for flatpak
     xdg.portal.enable = true;
+
+    # browse (and try) flatpaks via Gnome Software
+    environment.systemPackages = [ pkgs.gnome.gnome-software ];
 
   };
 

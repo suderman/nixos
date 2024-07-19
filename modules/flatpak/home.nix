@@ -22,6 +22,8 @@ in {
     services.flatpak = import ./config.nix { 
       inherit lib;  
       inherit (cfg) apps beta all; 
+    } // {
+      uninstallUnmanaged = true; # manage user flatpaks declaratively
     }; 
   };
 
