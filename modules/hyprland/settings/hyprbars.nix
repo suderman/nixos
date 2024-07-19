@@ -40,13 +40,8 @@ in {
           # Kill the group or window
           "super, q, exec, hypr-togglegrouporkill"
 
-          # Minimize windows (send to special workspace) and restore
-          "super+alt, escape, exec, hypr-togglefullscreenorspecial right"
-
-          "super, escape, togglespecialworkspace" # toggle special workspace
-
           # Toggle floating or tiled windows
-          "super, backspace, exec, hypr-togglefloatingorsplit"
+          "alt, space, exec, hypr-togglefloatingorsplit"
 
           # Prev window in group with super+comma [<]
           "super, comma, changegroupactive, b"
@@ -59,12 +54,20 @@ in {
           # Fullscreen toggle
           "alt, return, fullscreen, 0"
 
+          # Minimize windows (send to special workspace) and restore
+          "alt, escape, exec, hypr-togglefullscreenorspecial right"
+
+          # toggle special workspace
+          "alt, tab, togglespecialworkspace" 
+
         ];
 
-        # Toggle group lock with super+comma+period ([<>] same-time)
         bindsn = [
+          
+          # Toggle group lock with super+comma+period ([<>] same-time)
           "super_l, comma&period, exec, hypr-togglegrouporlockornavigate right"
           "super_r, comma&period, exec, hypr-togglegrouporlockornavigate right"
+
         ];
 
       };

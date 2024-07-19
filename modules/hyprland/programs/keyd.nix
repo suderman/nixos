@@ -24,7 +24,7 @@ in {
           "alt.a" = "volumedown";
           "alt.s" = "volumeup";
           "alt.d" = "mute";
-          "alt.space" = "playpause";
+          # "alt.space" = "playpause";
 
         };
       };

@@ -46,7 +46,7 @@ in {
         "tag +steam, class:^(TurokEx)$"
 
         # Steam and games fullscreen on workspace 10
-        "workspace 10, tag:steam"
+        "workspace 9, tag:steam"
         # "fullscreen, tag:steam"
         "rounding 0, tag:steam"
         "noborder, tag:steam"

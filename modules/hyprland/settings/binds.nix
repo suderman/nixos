@@ -59,8 +59,8 @@ in {
         "super+shift, p, pseudo"
         "super+shift, p, pin"
 
-        "super, f, fullscreen, 1"
-        "super+alt, f, fullscreen, 0"
+        "super+shift, f, fullscreen, 1"
+        "super+alt, f, fullscreen, 2"
 
         # Move focus with super [hjkl]
         "super, h, movefocus, l"
@@ -78,7 +78,7 @@ in {
         "super, 7, workspace, 7"
         "super, 8, workspace, 8"
         "super, 9, workspace, 9"
-        "super, 0, workspace, 10"
+        # "super, 0, workspace, 10"
 
         # Move active window to a workspace with super+alt [0-9]
         "super+alt, 1, movetoworkspace, 1"
@@ -90,7 +90,7 @@ in {
         "super+alt, 7, movetoworkspace, 7"
         "super+alt, 8, movetoworkspace, 8"
         "super+alt, 9, movetoworkspace, 9"
-        "super+alt, 0, movetoworkspace, 10"
+        # "super+alt, 0, movetoworkspace, 10"
 
         # Resize active window to various presets
         "super+shift, 1, resizeactive, exact 10% 10%"
