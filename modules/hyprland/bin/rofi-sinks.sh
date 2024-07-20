@@ -4,19 +4,16 @@ echo -en "\0prompt\x1f\n"
 # List all sinks if no arguments provided
 if [ -z "${1-}" ]; then
 
-  # Directory of blessed sinks and names
-  dir="$XDG_RUNTIME_DIR/sinks"
-
   # Loop through all active sinks
   for line in $(pactl list short sinks | awk '{print $1 "|" $2}'); do
 
     # Extract id and check in directory
     sink="$(echo $line | awk -F'|' '{print $2}')"
-    if [[ -e $dir/$sink ]]; then 
+    if [[ -e /etc/sinks/$sink ]]; then 
 
       # Extract number and name 
       id="$(echo $line | awk -F'|' '{print $1}')"
-      name="$(cat $dir/$sink)"
+      name="$(cat /etc/sinks/$sink)"
 
       # Echo this line for rofi
       echo -en "$name\0icon\x1fspeaker\x1finfo\x1f${id}\n"

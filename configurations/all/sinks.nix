@@ -1,13 +1,11 @@
-{ config, lib, pkgs, ... }: let 
+{ config, lib, ... }: let 
 
-  cfg = config.wayland.windowManager.hyprland;
-  inherit (builtins) attrValues concatStringsSep mapAttrs;
-  inherit (lib) mkIf;
+  inherit (lib) mapAttrs' nameValuePair;
 
-  dir = "$XDG_RUNTIME_DIR/sinks";
-  sinks = attrValues( mapAttrs( id: name: ( 
-    ''$DRY_RUN_CMD echo "${name}" > "${dir}/${id}"''
-  ) ) {
+in {
+
+  # /etc/sinks/*
+  environment.etc = mapAttrs'( id: text: nameValuePair "sinks/${id}" { inherit text; } ) {
 
     # all
     "bluez_output.AC_3E_B1_9F_43_35.1" = "Pixel Buds Pro";
@@ -25,16 +23,6 @@
     "alsa_output.pci-0000_00_1b.0.analog-stereo" = "Main Headphones/Speakers";
     "alsa_output.pci-0000_05_00.1.hdmi-stereo-extra3" = "HDMI Audio"; # amd gpu
 
-  } );
-
-in {
-
-  config = mkIf cfg.enable {
-    home.activation.writeSinks = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      $DRY_RUN_CMD rm -rf ${dir}
-      $DRY_RUN_CMD mkdir -p ${dir}
-      ${concatStringsSep "\n" sinks}
-    '';
   };
 
 }
