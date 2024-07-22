@@ -20,6 +20,24 @@
     '';
   };
 
+
+  systemd.user.services.audioProfiles = {
+    description = "Set default audio profiles";
+    after = [ "graphical-session.target" ];
+    requires = [ "graphical-session.target" ];
+    wantedBy = [ "default.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = "yes";
+    };
+    path = with pkgs; [ pulseaudio ];
+    script = ''
+      pactl set-card-profile alsa_card.pci-0000_01_00.1 output:hdmi-stereo
+      pactl set-card-profile alsa_card.usb-Generic_USB_Audio-00 HiFi
+    '';
+  };
+
+
   file."/etc/foo" = { type = "dir"; };
   file."/etc/foo/bar" = { text = "Hello world!"; mode = 665; user = 913; };
   file."/etc/foo/symlink" = { type = "link"; source = /etc/foo/bar; };

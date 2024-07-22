@@ -128,7 +128,7 @@ in {
         element-text = {
           text-color =l "inherit";
           vertical-align =l "0.5";
-          tab-stops = map l [ "200px" ];
+          tab-stops = map l [ "250px" ];
         };
 
         entry = {
