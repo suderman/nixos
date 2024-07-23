@@ -34,7 +34,7 @@ in {
       bind = with pkgs; [
 
         # Bluetooth connection
-        ", XF86AudioMedia, exec, bluetoothctl connect $(bluetoothctl devices | ${getExe fuzzel} -d | cut -d' ' -f2)"
+        "shift, XF86AudioMedia, exec, export addr=$(bluetoothctl devices | rofi-toggle -dmenu | cut -d' ' -f2); bluetoothctl unblock $addr; bluetoothctl connect $addr"
 
       ];
     };

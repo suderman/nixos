@@ -49,9 +49,9 @@ in {
         ", XF86AudioMute, exec, volumectl -a toggle-mute"
         ", XF86AudioMicMute, exec, volumectl -am toggle-mute"
 
-        # Sink selection
-        "shift, XF86AudioMedia, exec, sinks -i" # choose
-        "alt, XF86AudioMedia, exec, sinks" # toggle last
+        # # Sink selection
+        # "shift, XF86AudioMedia, exec, sinks -i" # choose
+        # "alt, XF86AudioMedia, exec, sinks" # toggle last
 
       ];
     };

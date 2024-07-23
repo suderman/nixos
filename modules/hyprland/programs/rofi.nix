@@ -10,7 +10,11 @@ in {
 
     wayland.windowManager.hyprland.settings = {
       bindr = [ "super, Super_L, exec, rofi-toggle -show combi" ];
-      bind = [ "super, space, exec, rofi-toggle -show combi" ];
+      bind = [ 
+        "super, space, exec, rofi-toggle -show combi" 
+        ", XF86AudioMedia, exec, rofi-toggle -show sinks -cycle -theme-str 'window {width: 50%;}'"
+      ];
+
     };
 
     services.keyd.layers = {

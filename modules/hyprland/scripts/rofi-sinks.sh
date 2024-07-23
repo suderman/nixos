@@ -13,12 +13,14 @@ named_sink() {
 
   # Lookup sink name in case it already exists
   name="$(pactl -f json list sinks | jq -r '
-    .[] | select(.name == "'$sink'")
-    .ports[].description +"\t"+ .properties."device.description"
+    .[] | select(.name == "'$sink'") |
+    (.properties."device.description") as $device |
+    (.ports | map(select(.availability != "not available") | .description) | join(" / ")) as $ports |
+    "\($ports)\\t\($device)"
   ')"
 
   # Did we find a name?
-  if [[ -z "$name" ]]; then 
+  if [[ -z "$name" ]]; then
 
     # Try to get name from bluetoothctl (if paired)
     if [[ "$sink" =~ ^bluez.* ]]; then
@@ -36,7 +38,7 @@ named_sink() {
     fi
   fi
 
-  echo $name
+  echo -en $name
 }
 
 
@@ -50,9 +52,10 @@ connect_sink() {
     # Get name from bluetoothctl (if paired)
     addr="$(echo $sink | tr _ : | awk -F. '{ print $2 }')"
 
-    # If device is paired, attempt to connect 
+    # If device is paired, attempt to connect (two times in case of timeout)
     if [[ ! -z "$(bluetoothctl devices | grep $addr)" ]]; then
-      bluetoothctl connect $addr >/dev/null 2>&1
+      bluetoothctl unblock $addr >/dev/null 2>&1
+      bluetoothctl connect $addr >/dev/null 2>&1 || bluetoothctl connect $addr >/dev/null 2>&1
     fi
 
   fi
@@ -64,10 +67,11 @@ if [ -z "${1-}" ]; then
 
   # detected sinks saved to file
   pactl -f json list sinks | jq -r '.[] |
-    select(.ports[].availability == "available" or .ports[].availability == "availability unknown") |
-    ( .ports[].description +"\t"+ .properties."device.description" ) as $title |
-    ( if .name == "'$(pactl get-default-sink)'" then "audio-on" else "audio-ready" end ) as $icon |
-    "\($title)\\0icon\\x1f\($icon)\\x1finfo\\x1f\(.name)"
+    (.properties."device.description") as $device |
+    (.ports | map(select(.availability != "not available") | .description) | join(" / ")) as $ports |
+    (if .name == "'$(pactl get-default-sink)'" then "audio-on" else "audio-ready" end) as $icon |
+    (.name) as $sink |
+    "\($ports)\\t\($device)\\0icon\\x1f\($icon)\\x1finfo\\x1f\($sink)"
     ' > $dir/detected
 
   # extra sinks added to copy of file
@@ -75,7 +79,7 @@ if [ -z "${1-}" ]; then
   while read sink; do
 
     # ensure this extra sink wasn't already detected
-    if [[ -z "$(grep $sink $dir/detected)" ]]; then 
+    if [[ -z "$(grep $sink $dir/detected)" ]]; then
 
       # Add the sink to the list, formatted nice for rofi
       icon="audio-off"
@@ -119,11 +123,11 @@ else
     done
 
     # verify new default sink
-    coproc hyprctl notify 1 3000 0 " $(named_sink $sink)" 2>&1
+    coproc hyprctl notify 1 3000 0 "  $(named_sink $sink)" 2>&1
 
   # failed to connect to sink
   else
-    coproc hyprctl notify 3 3000 0 " $(named_sink $sink)" 2>&1
+    coproc hyprctl notify 3 3000 0 "  $(named_sink $sink)" 2>&1
   fi
 
 fi
