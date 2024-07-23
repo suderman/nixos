@@ -8,9 +8,9 @@
     extraSinks = concatStringsSep "\n" cfg.extraSinks;
     hiddenSinks = concatStringsSep "\n" cfg.hiddenSinks;
   in ''
-    $DRY_RUN_CMD mkdir -p $XDG_RUNTIME_DIR/sinks
-    $DRY_RUN_CMD echo -n "${extraSinks}" > $XDG_RUNTIME_DIR/sinks/extra
-    $DRY_RUN_CMD echo -n "${hiddenSinks}" > $XDG_RUNTIME_DIR/sinks/hidden
+    ''${DRY_RUN_CMD-} mkdir -p $XDG_RUNTIME_DIR/sinks
+    ''${DRY_RUN_CMD-} echo "${extraSinks}" > $XDG_RUNTIME_DIR/sinks/extra
+    ''${DRY_RUN_CMD-} echo "${hiddenSinks}" > $XDG_RUNTIME_DIR/sinks/hidden
   '';
 
 in {

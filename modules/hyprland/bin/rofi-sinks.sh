@@ -7,33 +7,55 @@ mkdir -p $dir
 touch $dir/extra $dir/hidden
 
 
-# Crete a rofi-formatted option for a provided sink that appears nice
-extra_sink() {
+# Create a rofi-formatted option for a provided sink that appears nice
+named_sink() {
+  sink="${1-unknown}"
 
   # Lookup sink name in case it already exists
   name="$(pactl -f json list sinks | jq -r '
-    .[] | select(.name == "'$1'")
+    .[] | select(.name == "'$sink'")
     .ports[].description +"\t"+ .properties."device.description"
   ')"
 
-  # If not, and it's a bluetooth device, check if it's been paired to find the name that way
-  if [[ -z "$name" ]] && [[ "$1" =~ ^bluez.* ]]; then
+  # Did we find a name?
+  if [[ -z "$name" ]]; then 
 
-    # Get name from bluetoothctl (if paired)
-    addr="$(echo $1 | tr _ : | awk -F. '{ print $2 }')"
-    name="$(bluetoothctl devices | grep $addr | awk '{ $1=""; $2=""; print $0 }' | xargs)"
-    [[ -z "$name" ]] && name="$addr"
+    # Try to get name from bluetoothctl (if paired)
+    if [[ "$sink" =~ ^bluez.* ]]; then
+      addr="$(echo $sink | tr _ : | awk -F. '{ print $2 }')"
+      name="$(bluetoothctl devices | grep $addr | awk '{ $1=""; $2=""; print $0 }' | xargs)"
+      [[ -z "$name" ]] && name="$addr"
 
-  else
-    name="$(echo "$1" \
-      sed -r 's/^(.+)_output.//' |\
-      sed 's/.*/\L&/; s/[a-z]*/\u&/g' |\
-      tr _ ' ')"
+    # All else fails, try to pretty-up this unknown sink name
+    else
+      name="$(echo "$sink" |\
+        sed -r 's/^(.+)_output.//' |\
+        sed 's/.*/\L&/; s/[a-z]*/\u&/g' |\
+        tr _ ' ')"
+
+    fi
   fi
 
-  # Output option for rofi
-  echo -n "${name}\\0icon\\x1fvolume-level-muted\\x1finfo\\x1f${1}"
+  echo $name
+}
 
+
+# Attempt to connect a sink to bluetooth where applicable
+connect_sink() {
+  sink="${1-unknown}"
+
+  # Only try to connect if sink is bluetooth
+  if [[ "$sink" =~ ^bluez.* ]]; then
+
+    # Get name from bluetoothctl (if paired)
+    addr="$(echo $sink | tr _ : | awk -F. '{ print $2 }')"
+
+    # If device is paired, attempt to connect 
+    if [[ ! -z "$(bluetoothctl devices | grep $addr)" ]]; then
+      bluetoothctl connect $addr >/dev/null 2>&1
+    fi
+
+  fi
 }
 
 
@@ -44,7 +66,7 @@ if [ -z "${1-}" ]; then
   pactl -f json list sinks | jq -r '.[] |
     select(.ports[].availability == "available" or .ports[].availability == "availability unknown") |
     ( .ports[].description +"\t"+ .properties."device.description" ) as $title |
-    ( if .state == "RUNNING" then "volume-level-high" else "volume-level-none" end ) as $icon |
+    ( if .name == "'$(pactl get-default-sink)'" then "audio-on" else "audio-ready" end ) as $icon |
     "\($title)\\0icon\\x1f\($icon)\\x1finfo\\x1f\(.name)"
     ' > $dir/detected
 
@@ -54,29 +76,51 @@ if [ -z "${1-}" ]; then
     # ensure this extra sink wasn't already detected
     if [[ -z "$(grep $sink $dir/detected)" ]]; then 
       # Add the sink to the list, formatted nice for rofi
-      extra_sink "$sink" >> $dir/appended
+      # extra_sink "$sink" >> $dir/appended
+      icon="audio-off"
+      echo -n "$(named_sink $sink)\\0icon\\x1f${icon}\\x1finfo\\x1f${sink}" >> $dir/appended
     fi
   done < $dir/extra
 
   # output sinks, filtering any sinks to be hidden
-  filter="$(cat $dir/hidden | tr '\n' '|')"
-  [[ -z "$filter" ]] && filter="show-all-sinks"
-  echo -en "$(grep -vE "$filter" $dir/appended)"
+  filter=$(sed -z s/.$// $dir/hidden | tr '\n' '|' )
+
+  # if there are no hidden sinks to filter, just output appended
+  if [[ -z "$filter" ]]; then
+    echo -en "$(cat $dir/appended)"
+  # if there are, filter with grep
+  else
+    echo -en "$(grep -vE "${filter}" $dir/appended)"
+  fi
 
 
 # If there is an argument, change to the selected sink
 else
 
   # get sink id from info
-  id="$(echo ${ROFI_INFO-0})"
+  sink="$(echo ${ROFI_INFO-unknown})"
+
+  # connect sink if required (bluetooth)
+  connect_sink "$sink"
 
   # update default sink
-  pactl set-default-sink "$id"
+  pactl set-default-sink "$sink" 2>/dev/null && connected=yes || connected=no
 
-  # move everything to this sink
-  declare i
-  pactl list short sink-inputs | awk '{print $1}' | while read -r i; do
-    pactl move-sink-input "$i" "$id"
-  done
+  # check if successful
+  if [[ "$connected" == "yes" ]]; then
+
+    # move everything to this sink
+    declare i
+    pactl list short sink-inputs | awk '{print $1}' | while read -r i; do
+      pactl move-sink-input "$i" "$sink"
+    done
+
+    # verify new default sink
+    coproc hyprctl notify 1 3000 0 " $(named_sink $sink)" 2>&1
+
+  # failed to connect to sink
+  else
+    coproc hyprctl notify 3 3000 0 " $(named_sink $sink)" 2>&1
+  fi
 
 fi
