@@ -73,21 +73,24 @@ if [ -z "${1-}" ]; then
   # extra sinks added to copy of file
   cat $dir/detected > $dir/appended
   while read sink; do
+
     # ensure this extra sink wasn't already detected
     if [[ -z "$(grep $sink $dir/detected)" ]]; then 
+
       # Add the sink to the list, formatted nice for rofi
-      # extra_sink "$sink" >> $dir/appended
       icon="audio-off"
       echo -n "$(named_sink $sink)\\0icon\\x1f${icon}\\x1finfo\\x1f${sink}" >> $dir/appended
+
     fi
   done < $dir/extra
 
   # output sinks, filtering any sinks to be hidden
-  filter=$(sed -z s/.$// $dir/hidden | tr '\n' '|' )
+  filter="$(sed -z s/.$// $dir/hidden | tr '\n' '|' )"
 
   # if there are no hidden sinks to filter, just output appended
   if [[ -z "$filter" ]]; then
     echo -en "$(cat $dir/appended)"
+
   # if there are, filter with grep
   else
     echo -en "$(grep -vE "${filter}" $dir/appended)"

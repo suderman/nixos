@@ -5,10 +5,12 @@
   inherit (lib) filterAttrs hasSuffix mkIf mkShellScript removeSuffix;
 
   inputs = with pkgs; [ 
+    bluez
     config.programs.rofi.finalPackage
     coreutils 
     gawk  
     gettext
+    gnugrep
     gnused
     grim 
     hyprland 
@@ -17,6 +19,7 @@
     keyd
     libnotify 
     procps 
+    pulseaudio
     slurp 
     socat
     swappy 
@@ -25,7 +28,7 @@
 
   scripts = attrNames( filterAttrs
     ( n: v: v == "regular" && hasSuffix ".sh" n) 
-    ( readDir ../bin )
+    ( readDir ../scripts )
   );
 
 in {
@@ -36,7 +39,7 @@ in {
       mkShellScript { 
         inherit inputs; 
         name = removeSuffix ".sh" name;
-        text = ../bin/${name}; 
+        text = ../scripts/${name}; 
       } 
     )) scripts;
 
