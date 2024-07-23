@@ -12,6 +12,7 @@ in {
       bindr = [ "super, Super_L, exec, rofi-toggle -show combi" ];
       bind = [ 
         "super, space, exec, rofi-toggle -show combi" 
+        "super, g, exec, rofi-toggle -show blezz -auto-select -matching normal -theme-str 'window {width: 50%;}'" 
         ", XF86AudioMedia, exec, rofi-toggle -show sinks -cycle -theme-str 'window {width: 50%;}'"
       ];
 
@@ -36,7 +37,7 @@ in {
     programs.rofi = {
       enable = true;
       package = pkgs.rofi-wayland;
-      plugins = with pkgs; [ rofi-calc rofi-emoji rofimoji ];
+      plugins = with pkgs; [ rofi-calc rofi-emoji rofimoji rofi-blezz ];
       cycle = false;
       terminal = getExe pkgs.kitty;
       font = "JetBrainsMono 14";
@@ -47,6 +48,7 @@ in {
           "combi"
           "calc"
           "emoji"
+          "blezz"
           "sinks:rofi-sinks"
           # "emoji:${getExe pkgs.rofimoji}"
           # "filebrowser"

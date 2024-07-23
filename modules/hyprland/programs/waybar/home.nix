@@ -3,9 +3,7 @@
   cfg = config.wayland.windowManager.hyprland;
   inherit (builtins) readFile;
   inherit (lib) getExe mkIf mkShellScript mkForce;
-
-  kitty = getExe pkgs.kitty;
-  rofi = getExe config.programs.rofi.finalPackage;
+  term = getExe pkgs.kitty;
 
 in {
 
@@ -76,7 +74,7 @@ in {
 
         # modules config
         "custom/launcher" = {
-          on-click = "${rofi} -show combi";
+          on-click = "rofi-toggle -show combi";
           format = "";
         };
 
@@ -123,8 +121,6 @@ in {
           format-bluetooth = "{volume}% {icon}";
           format-muted = "";
           format-icons = {
-            "alsa_output.pci-0000_00_1f.3.analog-stereo" = "";
-            "alsa_output.pci-0000_00_1f.3.analog-stereo-muted" = "";
             headphone = "";
             hands-free = "";
             headset = "";
@@ -136,12 +132,13 @@ in {
           };
           scroll-step = 1;
           on-click = "rofi-toggle -show sinks -cycle -theme-str 'window {width: 50%;}'";
-          on-click-right = "pavucontrol";
-          ignored-sinks = ["Easy Effects Sink"];
+          on-click-right = "${term} ncpamixer";
+          on-click-middle = "pavucontrol";
+          ignored-sinks = [];
         };
 
         "custom/bluetooth" = {
-          on-click = "${kitty} bluetuith";
+          on-click = "${term} bluetuith";
           format = "󰂯";
         };
 
@@ -171,7 +168,7 @@ in {
         cpu = {
           # format = " {load} / {usage}%";
           format = " {usage}%";
-          on-click = "${kitty} htop";
+          on-click = "${term} htop";
         };
 
         temperature = {
