@@ -25,10 +25,9 @@ in {
       bindr = [ "super, Super_L, exec, ${combi}" ];
       bind = [ 
         "super, space, exec, ${combi}" 
-        "super+shift, a, exec, ${sinks}"
-        ", XF86AudioMedia, exec, ${sinks}"
         "super+alt, space, exec, ${blezz}" 
         "super, slash, exec, ${blezz}" 
+        ", XF86AudioMedia, exec, ${sinks}"
       ];
     };
 
