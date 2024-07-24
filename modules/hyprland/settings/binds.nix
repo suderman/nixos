@@ -53,9 +53,9 @@ in {
 
 
         # Manage windows
-        "super, slash, togglesplit"
-        "super, slash, exec, hypr-cyclefloatingpos"
-        "super+shift, slash, exec, hypr-cyclefloatingpos reverse"
+        "super, i, togglesplit"
+        "super, i, exec, hypr-cyclefloatingpos"
+        "super+shift, i, exec, hypr-cyclefloatingpos reverse"
         "super+shift, p, pseudo"
         "super+shift, p, pin"
 

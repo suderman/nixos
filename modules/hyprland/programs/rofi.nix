@@ -8,14 +8,18 @@ in {
 
   config = mkIf config.wayland.windowManager.hyprland.enable {
 
-    wayland.windowManager.hyprland.settings = {
-      bindr = [ "super, Super_L, exec, rofi-toggle -show combi" ];
+    wayland.windowManager.hyprland.settings = let
+      combi = "rofi-toggle -show combi";
+      blezz = "rofi-toggle -show blezz -auto-select -matching normal -theme-str 'window {width: 50%;}'";
+      sinks = "rofi-toggle -show sinks -cycle -theme-str 'window {width: 50%;}'";
+    in {
+      bindr = [ "super, Super_L, exec, ${combi}" ];
       bind = [ 
-        "super, space, exec, rofi-toggle -show combi" 
-        "super, g, exec, rofi-toggle -show blezz -auto-select -matching normal -theme-str 'window {width: 50%;}'" 
-        ", XF86AudioMedia, exec, rofi-toggle -show sinks -cycle -theme-str 'window {width: 50%;}'"
+        "super, space, exec, ${combi}" 
+        "super+alt, space, exec, ${blezz}" 
+        "super, slash, exec, ${blezz}" 
+        ", XF86AudioMedia, exec, ${sinks}"
       ];
-
     };
 
     services.keyd.layers = {

@@ -67,6 +67,7 @@ if [ -z "${1-}" ]; then
 
   # detected sinks saved to file
   pactl -f json list sinks | jq -r '.[] |
+    select(.ports[].availability != "not available") |
     (.properties."device.description") as $device |
     (.ports | map(select(.availability != "not available") | .description) | join(" / ")) as $ports |
     (if .name == "'$(pactl get-default-sink)'" then "audio-on" else "audio-ready" end) as $icon |

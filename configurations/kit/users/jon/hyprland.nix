@@ -5,8 +5,8 @@
 
     settings = {
 
-      # single monitor
-      monitor = [ ", 2560x1440@60.00Hz, 0x0, 1" ];
+      # 4k display
+      monitor = [ "DP-1, 3840x2160@160.00Hz, 0x0, 1.5" ];
 
       # nvidia fixes
       env = [
