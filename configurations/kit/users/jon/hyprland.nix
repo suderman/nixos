@@ -1,10 +1,9 @@
 { config, lib, pkgs, this, ... }: {
 
-
   wayland.windowManager.hyprland.settings = {
 
     # 4k display
-    monitor = [ "DP-1, 3840x2160@160.00Hz, 0x0, 1.5" ];
+    monitor = [ "DP-1, 3840x2160@160.00Hz, 0x0, 1.33" ];
 
     # nvidia fixes
     env = [

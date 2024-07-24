@@ -30,6 +30,7 @@ in {
         scrollback_lines = 10000;
         enable_audio_bell = false;
         update_check_interval = 0;
+        confirm_os_window_close = 0;
 
         # disable ligatures when cursor is on them
         disable_ligatures = "cursor"; 
@@ -38,8 +39,8 @@ in {
         background_opacity = "0.95";
         hide_window_decorations = "titlebar-only";
         remember_window_size = "no";
-        window_padding_width = "0";
-        window_logo_alpha = "0";
+        window_padding_width = 0;
+        window_logo_alpha = 0;
 
         # Tab bar
         tab_bar_edge = "top";
