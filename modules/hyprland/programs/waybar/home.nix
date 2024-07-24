@@ -168,7 +168,7 @@ in {
         cpu = {
           # format = " {load} / {usage}%";
           format = " {usage}%";
-          on-click = "${term} htop";
+          on-click = "${term} btop";
         };
 
         temperature = {

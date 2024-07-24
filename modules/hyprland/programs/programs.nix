@@ -43,6 +43,7 @@ in {
       grim # taking screenshots
       slurp # selecting a region to screenshot
       pulseaudio
+      xorg.xeyes # confirm xwayland
     ];
 
   };
