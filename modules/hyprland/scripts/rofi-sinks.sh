@@ -73,7 +73,7 @@ if [ -z "${1-}" ]; then
     (if .name == "'$(pactl get-default-sink)'" then "audio-on" else "audio-ready" end) as $icon |
     (.name) as $sink |
     "\($ports)\\t\($device)\\0icon\\x1f\($icon)\\x1finfo\\x1f\($sink)"
-    ' > $dir/detected
+    ' | uniq > $dir/detected
 
   # extra sinks added to copy of file
   cat $dir/detected > $dir/appended
