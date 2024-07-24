@@ -2,9 +2,18 @@
 
   cfg = config.programs.rofi;
   ini = pkgs.formats.ini {};
-  inherit (lib) getExe mkIf;
+  inherit (lib) concatStringsSep getExe mkIf mkOption types;
 
 in {
+
+  options.programs.rofi = {
+    extraSinks = mkOption { 
+      type = with types; listOf str; default = [];
+    };
+    hiddenSinks = mkOption { 
+      type = with types; listOf str; default = [];
+    };
+  };
 
   config = mkIf config.wayland.windowManager.hyprland.enable {
 
@@ -16,9 +25,10 @@ in {
       bindr = [ "super, Super_L, exec, ${combi}" ];
       bind = [ 
         "super, space, exec, ${combi}" 
+        "super+shift, a, exec, ${sinks}"
+        ", XF86AudioMedia, exec, ${sinks}"
         "super+alt, space, exec, ${blezz}" 
         "super, slash, exec, ${blezz}" 
-        ", XF86AudioMedia, exec, ${sinks}"
       ];
     };
 
@@ -36,6 +46,11 @@ in {
         "super.q" = "escape";
         "super.x" = "escape";
       };
+    };
+
+    xdg.configFile = {
+      "rofi/extra.sinks".text = concatStringsSep "\n" cfg.extraSinks;
+      "rofi/hidden.sinks".text = concatStringsSep "\n" cfg.hiddenSinks;
     };
 
     programs.rofi = {

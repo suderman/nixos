@@ -4,7 +4,8 @@ echo -en "\0prompt\x1f\n"
 # Prep dirs/files
 dir=$XDG_RUNTIME_DIR/sinks
 mkdir -p $dir
-touch $dir/extra $dir/hidden
+echo "$(cat $XDG_CONFIG_HOME/rofi/extra.sinks)" > $dir/extra
+cat $XDG_CONFIG_HOME/rofi/hidden.sinks > $dir/hidden
 
 
 # Create a rofi-formatted option for a provided sink that appears nice
