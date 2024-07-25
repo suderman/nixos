@@ -22,6 +22,7 @@ in {
         "pin, tag:pip"
         "keepaspectratio, tag:pip"
         "noborder, tag:pip"
+        "plugin:hyprbars:nobar, tag:pip"
         "size 480 270, tag:pip"
         "minsize 240 135, tag:pip"
         "maxsize 960 540, tag:pip"
@@ -30,9 +31,12 @@ in {
         # make pop-up file dialogs floating, centred, and pinned
         "tag +dialog, title:(Open|Progress|Save File|Save As)"
         "tag +dialog, class:(xdg-desktop-portal-gtk)"
+        "tag +dialog, class:(re.sonny.Junction)"
         "float, tag:dialog"
         "center, tag:dialog"
         "pin, tag:dialog"
+        "noborder, tag:dialog"
+        "plugin:hyprbars:nobar, tag:dialog"
 
         # assign windows to workspaces
         # "workspace 1 silent, class:[Ff]irefox"
