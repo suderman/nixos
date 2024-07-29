@@ -51,14 +51,14 @@ in {
     services.traefik = {
       enable = true;
       proxy.${cfg.hostName} = {
-        url = "http://${cfg.address}:${toString cfg.port}"; # origin address
+        url = "http://${cfg.address}:${toString cfg.port}"; # origin address (with http://)
         public = cfg.public;
       };
     };
 
     # Configure service
     services.ocis = {
-      address = "${cfg.name}.${this.hostName}"; port = 9200; # origin address (without https://)
+      address = "${cfg.name}.${this.hostName}"; port = 9200; # origin address (without http://)
       url = "https://${cfg.hostName}"; # public address (with https://)
       configDir = "${cfg.stateDir}/config";
       environment = {
