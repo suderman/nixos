@@ -35,6 +35,9 @@ in {
 
         }; 
 
+        # Hide bars when floating windows are unfocussed
+        windowrulev2 = [ "plugin:hyprbars:nobar, focus:0, floating:1" ];
+
         bind = [
 
           # Kill the group or window
