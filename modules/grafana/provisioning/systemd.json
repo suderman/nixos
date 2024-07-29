@@ -515,8 +515,8 @@
       {
         "current": {
           "selected": false,
-          "text": "100.122.170.88:9100",
-          "value": "100.122.170.88:9100"
+          "text": "100.122.170.88:9500",
+          "value": "100.122.170.88:9500"
         },
         "datasource": {
           "type": "prometheus",

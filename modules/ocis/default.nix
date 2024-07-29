@@ -1,25 +1,18 @@
-# modules.ocis.enable = true;
+# services.ocis.enable = true;
 { config, lib, pkgs, this, ... }:
   
 let 
 
-  # https://github.com/owncloud/ocis/releases
-  version = "5.0.4";
+  cfg = config.services.ocis;
 
-  cfg = config.modules.ocis;
-  signingKey = "idp-private-key.pem";
-  encryptionSecret = "idp-encryption.key";
-
-  inherit (lib) mkIf mkOption mkBefore types;
-  inherit (this.lib) extraGroups toOwnership;
+  inherit (lib) extraGroups getExe mkBefore mkForce mkIf mkOption toOwnership types;
   inherit (config.age) secrets;
-  inherit (config.services.traefik.lib) mkHostName mkLabels;
+  inherit (config.services.traefik.lib) mkHostName;
   inherit (config.ids) uids gids;
 
 in {
 
-  options.modules.ocis = {
-    enable = lib.options.mkEnableOption "ocis"; 
+  options.services.ocis = {
     name = mkOption {
       type = types.str;
       default = "ocis";
@@ -31,10 +24,6 @@ in {
     public = mkOption {
       type = with lib.types; nullOr bool;
       default = null;
-    };
-    dataDir = mkOption {
-      type = types.path;
-      default = "/var/lib/ocis";
     };
   };
 
@@ -48,89 +37,62 @@ in {
     users = {
       users = {
 
-        # Create user
-        ocis = {
-          isSystemUser = true;
-          group = "ocis";
-          description = "ocis daemon user";
-          home = cfg.dataDir;
-          uid = uids.ocis;
-        };
+        # Set uid
+        "${cfg.user}".uid = uids.ocis;
 
       # Add admins to the ocis group
-      } // extraGroups this.admins [ "ocis" ];
+      } // extraGroups this.admins [ cfg.group ];
 
-      # Create group
-      groups.ocis = {
-        gid = gids.ocis;
-      };
+      # Set gid
+      groups."${cfg.group}".gid = gids.ocis;
+
     };
 
-    # Enable reverse proxy
-    services.traefik.enable = true;
-
-    # Docker container
-    virtualisation.oci-containers.containers.ocis = {
-      image = "owncloud/ocis:${version}";
-      autoStart = true;
-
-      entrypoint = "/bin/sh";
-      cmd = [ "-c" "ocis init || true; ocis server" ];
-
-      # Run as ocis user
-      user = toOwnership uids.ocis gids.ocis;
-
-      # Traefik labels
-      extraOptions = mkLabels {
-        name = cfg.name;
-        hostName = cfg.hostName;
+    services.traefik = {
+      enable = true;
+      proxy.${cfg.hostName} = {
+        url = "http://${cfg.address}:${toString cfg.port}"; # origin address
         public = cfg.public;
       };
-
-      environment = {
-        OCIS_URL = "https://${cfg.hostName}";
-        OCIS_LOG_LEVEL = "debug";
-        PROXY_TLS = "false"; 
-        OCIS_INSECURE = "true";
-        PROXY_ENABLE_BASIC_AUTH = "true";
-        IDP_SIGNING_PRIVATE_KEY_FILES = "/etc/ocis/${signingKey}";
-        IDP_ENCRYPTION_SECRET_FILE = "/etc/ocis/${encryptionSecret}";
-        IDM_CREATE_DEMO_USERS = "false";
-      };
-
-      # IDM_ADMIN_PASSWORD=xxxxxxxxxxxxxxx;
-      # NOTIFICATIONS_SMTP_HOST=smtp.example.com;
-      # NOTIFICATIONS_SMTP_PORT=587
-      # NOTIFICATIONS_SMTP_SENDER=user@example.com
-      # NOTIFICATIONS_SMTP_PASSWORD=xxxxxxxxxxxx
-      environmentFiles = [ secrets.ocis-env.path ];
-      
-      volumes = [
-        "${cfg.dataDir}:/var/lib/ocis"
-        "${cfg.dataDir}/config:/etc/ocis"
-        "/etc/localtime:/etc/localtime:ro"
-      ];
-
     };
 
-    # Extend systemd service
-    systemd.services.docker-ocis = {
+    # Configure service
+    services.ocis = {
+      address = "${cfg.name}.${this.hostName}"; port = 9200; # origin address (without https://)
+      url = "https://${cfg.hostName}"; # public address (with https://)
+      configDir = "${cfg.stateDir}/config";
+      environment = {
+        PROXY_TLS = "false"; # make origin use http://
+        OCIS_INSECURE = "true"; # allow self-signed certs
+        PROXY_ENABLE_BASIC_AUTH = "true"; # needed for WebDav clients without OpenID Connect
+        IDP_SIGNING_PRIVATE_KEY_FILES = "${cfg.configDir}/idp-private-key.pem";
+        IDP_ENCRYPTION_SECRET_FILE = "${cfg.configDir}/idp-encryption.key";
+      };
+    };
 
+    # Initialize configuration
+    systemd.services.ocis-init = {
+      enable = true;
+      description = "Setup ocis config & keys";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "traefik.service" ]; 
+      before = [ "ocis.service" ];
+      wants = with config.systemd.services.ocis; after ++ before; 
+      serviceConfig.Type = "oneshot";
       # Persist sessions - regenerating these files will force all clients to reauthenticate
       # https://github.com/owncloud/ocis/issues/3540#issuecomment-1144517534
-      preStart = let openssl = "${pkgs.openssl}/bin/openssl"; etc = "${cfg.dataDir}/config"; in mkBefore ''
-        mkdir -p ${etc}
-        [ -e ${etc}/${encryptionSecret} ] || ${openssl} rand -out ${etc}/${encryptionSecret} 32 
-        [ -e ${etc}/${signingKey} ] || ${openssl} genpkey -algorithm RSA -out ${etc}/${signingKey} -pkeyopt rsa_keygen_bits:4096
-        chown -R ${toOwnership uids.ocis gids.ocis} ${cfg.dataDir}
+      script = let 
+        ocis = getExe cfg.package; 
+        openssl = "${pkgs.openssl}/bin/openssl"; 
+        signingKey = cfg.environment.IDP_SIGNING_PRIVATE_KEY_FILES;
+        encryptionSecret = cfg.environment.IDP_ENCRYPTION_SECRET_FILE;
+      in ''
+        mkdir -p ${cfg.configDir}
+        [ -e ${encryptionSecret} ] || ${openssl} rand -out ${encryptionSecret} 32 
+        [ -e ${signingKey} ] || ${openssl} genpkey -algorithm RSA -out ${signingKey} -pkeyopt rsa_keygen_bits:4096
+        [ -e ${cfg.configDir}/ocis.yaml ] || ${ocis} init --config-path ${cfg.configDir} --insecure true
+        chown -R ${toOwnership uids.ocis gids.ocis} ${cfg.stateDir}
       '';
-
-      # traefik should be running before this service starts
-      after = [ "traefik.service" ];
-
-      # If the proxy goes down, take down this service too
-      requires = [ "traefik.service" ];
-
     };
 
   }; 

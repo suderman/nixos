@@ -23,6 +23,7 @@ in {
 
       exporters.node = {
         enable = true;
+        port = 9500; # default 9100 overlaps with OCIS
         enabledCollectors = [ "systemd" ];
       };
 

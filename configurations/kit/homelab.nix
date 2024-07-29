@@ -52,6 +52,11 @@
     public = false;
   };
 
+  # services.ocis = {
+  #   enable = true;
+  #   hostName = "ocis.kit";
+  #   public = false;
+  # };
 
   services.silverbullet.enable = true;
 

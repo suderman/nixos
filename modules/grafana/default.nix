@@ -60,7 +60,8 @@ in {
           user = "blocky";
           jsonData = { user = "blocky"; database = "blocky"; sslmode = "disable"; };
         }];
-        dashboards.settings.providers = [{
+        dashboards.settings.providers = [ 
+        {
           name = "Nodes";
           options.path = ./provisioning/nodes.json;
         } {
