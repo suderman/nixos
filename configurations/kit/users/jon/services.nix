@@ -9,7 +9,7 @@
   };
 
   # File sync
-  modules.ocis.enable = true;
+  services.ocis.enable = true;
 
   # Custom user service
   systemd.user.services.foobar-hm = {

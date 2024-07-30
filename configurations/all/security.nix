@@ -35,7 +35,7 @@ in {
   };
 
   # Set environment variables for every service
-  systemd.globalEnvironment = {
+  environment.sessionVariables = {
 
     # Convince python to trust CA certificate
     REQUESTS_CA_BUNDLE = this.ca;
@@ -43,6 +43,9 @@ in {
 
     # Convince node to trust CA certificate
     NODE_EXTRA_CA_CERTS = this.ca;
+
+    # Convince everyone else to trust CA certificate
+    SSL_CERT_FILE = "/etc/ssl/certs/ca-bundle.crt";
 
   };
 

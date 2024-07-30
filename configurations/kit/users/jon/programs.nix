@@ -33,6 +33,8 @@ in {
 
     pavucontrol ncpamixer pamixer pamix
 
+    celeste
+
   ];
 
   programs.bluebubbles.enable = true;

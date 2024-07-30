@@ -60,7 +60,7 @@
   # services.whoogle = { enable = true; name = "g"; };
   # services.tiddlywiki.enable = true;
   # modules.nextcloud.enable = false;
-  # modules.ocis = { enable = true; dataDir = "/tmp/ocis"; };
+  # services.ocis = { enable = true; dataDir = "/tmp/ocis"; };
   # services.silverbullet.enable = true;
   # services.bluebubbles.enable = true;
   # services.traefik = { 

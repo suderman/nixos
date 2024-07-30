@@ -58,7 +58,8 @@ in {
 
     # Configure service
     services.ocis = {
-      address = "${cfg.name}.${this.hostName}"; port = 9200; # origin address (without http://)
+      # address = "${cfg.name}.${this.hostName}"; port = 9200; # origin address (without http://)
+      address = cfg.hostName; port = 9200; # origin address (without http://)
       url = "https://${cfg.hostName}"; # public address (with https://)
       configDir = "${cfg.stateDir}/config";
       environment = {

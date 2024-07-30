@@ -1,16 +1,16 @@
-# modules.ocis.enable = true;
+# services.ocis.enable = true;
 { config, lib, pkgs, this, ... }: 
 
 let 
 
-  cfg = config.modules.ocis;
+  cfg = config.services.ocis;
   inherit (config.home) homeDirectory;
   inherit (lib) mkIf mkForce;
   inherit (this.lib) mkShellScript;
 
 in {
 
-  options.modules.ocis = {
+  options.services.ocis = {
     enable = lib.options.mkEnableOption "ocis"; 
   };
 
@@ -22,17 +22,17 @@ in {
       package = unstable.owncloud-client;
     };
 
-    systemd.user.services.owncloud-client.Service = {
-      Restart = "always";
-      ExecStart = mkForce( mkShellScript { 
-        inputs = with pkgs; [ coreutils unstable.owncloud-client ];
-        text = ''
-          sleep 10 
-          owncloud;
-        '';
-      });
-
-    };
+    # systemd.user.services.owncloud-client.Service = {
+    #   Restart = "always";
+    #   ExecStart = mkForce( mkShellScript { 
+    #     inputs = with pkgs; [ coreutils unstable.owncloud-client ];
+    #     text = ''
+    #       sleep 10 
+    #       owncloud;
+    #     '';
+    #   });
+    #
+    # };
 
     # The ownCloud client automatically creates a directory in home called "~/ownCloud - My Name"
     # This is the default folder sync connection even though I've configurated a custom one called "~/data"
