@@ -36,8 +36,8 @@
 
   services.ocis = {
     enable = true;
-    # hostName = "ocis.suderman.org";
-    # public = false;
+    hostName = "ocis.suderman.org";
+    public = false;
   };
   
   services.immich = {

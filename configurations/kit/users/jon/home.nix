@@ -8,10 +8,10 @@
     createDirectories = false;
     download = "${homeDirectory}/Downloads";
     desktop = "${homeDirectory}/Personal";
-    documents = "${homeDirectory}/Personal/documents";
-    music = "${homeDirectory}/Personal/music";
-    pictures = "${homeDirectory}/Personal/images";
-    videos = "${homeDirectory}/Personal/videos";
+    documents = "${homeDirectory}/Personal/Documents";
+    music = "${homeDirectory}/Personal/Music";
+    pictures = "${homeDirectory}/Personal/Images";
+    videos = "${homeDirectory}/Personal/Videos";
     # publicShare = "${homeDirectory}/public";
   };
 
