@@ -4,6 +4,7 @@ let
 
   cfg = config.services.immich;
   inherit (lib) mkIf;
+  inherit (config.services.traefik.lib) mkLabels;
 
 in {
 
@@ -22,8 +23,15 @@ in {
         "immich-machine-learning:/cache"
       ];
 
+      # Traefik labels
+      extraOptions = mkLabels "${cfg.name}-ml"
+
       # Networking for docker containers
-      extraOptions = [
+      ++ [
+        "--gpus 'count=1'"
+
+      # Networking for docker containers
+      # extraOptions = [
         "--network=immich"
       ];
 

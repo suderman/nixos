@@ -68,4 +68,8 @@
   '';
 
 
+  services.immich = {
+    enable = true;
+  };
+
 }
