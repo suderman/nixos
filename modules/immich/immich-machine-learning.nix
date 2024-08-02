@@ -4,7 +4,8 @@ let
 
   cfg = config.services.immich;
   inherit (lib) mkIf;
-  inherit (config.services.traefik.lib) mkLabels;
+  nvidia = if config.hardware.nvidia.modesetting.enable then "-cuda" else ""; # set if using nvidia
+  port = 3333; # machine learning port
 
 in {
 
@@ -12,7 +13,7 @@ in {
 
     # Machine learning
     virtualisation.oci-containers.containers.immich-machine-learning = {
-      image = "ghcr.io/immich-app/immich-machine-learning:v${cfg.version}";
+      image = "ghcr.io/immich-app/immich-machine-learning:v${cfg.version}${nvidia}";
       autoStart = false;
 
       # Environment variables
@@ -23,17 +24,13 @@ in {
         "immich-machine-learning:/cache"
       ];
 
-      # Traefik labels
-      extraOptions = mkLabels "${cfg.name}-ml"
+      # Make ML available on network 
+      ports = [ "${toString port}:3003" ];
 
       # Networking for docker containers
-      ++ [
-        "--gpus 'count=1'"
-
-      # Networking for docker containers
-      # extraOptions = [
+      extraOptions = [ 
         "--network=immich"
-      ];
+      ] ++ ( if nvidia == "" then [] else [ "--gpus=all" ] ); # use nvidia gpu if present
 
     };
 
@@ -46,6 +43,11 @@ in {
         KillSignal = "SIGKILL";
         SuccessExitStatus = "0 SIGKILL";
       };
+    };
+
+    # Open firewall
+    networking.firewall = {
+      allowedTCPPorts = [ port ];
     };
 
   };
