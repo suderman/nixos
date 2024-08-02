@@ -33,6 +33,9 @@ in {
     tauon # jellyfin/plex/local music player
 
     pavucontrol ncpamixer pamixer pamix
+
+    gnome-disk-utility
+
   ];
 
   programs.bluebubbles.enable = true;

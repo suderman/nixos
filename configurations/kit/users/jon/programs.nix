@@ -33,7 +33,7 @@ in {
 
     pavucontrol ncpamixer pamixer pamix
 
-    celeste
+    gnome-disk-utility
 
   ];
 
