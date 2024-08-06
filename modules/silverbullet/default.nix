@@ -79,7 +79,7 @@ in {
           export RCLONE_CONFIG_OCIS_USER=$WEBDAV_USER
           export RCLONE_CONFIG_OCIS_PASS=$(rclone obscure $WEBDAV_PASS)
           export FLAGS="$RESYNC --create-empty-src-dirs --compare size --slow-hash-sync-only --resilient --fix-case"
-          rclone --no-check-certificate bisync $FLAGS ${cfg.spaceDir} ocis:${cfg.ocisDir} > /tmp/rclone-cmd.txt
+          rclone --no-check-certificate bisync $FLAGS ${cfg.spaceDir} ocis:${cfg.ocisDir}
           chown -R ${toOwnership config.users.users.silverbullet.uid config.users.groups.silverbullet.gid} ${cfg.spaceDir}
         '';
       in { 
@@ -98,6 +98,16 @@ in {
 
       };
 
+      # Run this script every time a file modification is detected in the directory
+      paths."silverbullet-sync" = {
+        wantedBy = [ "multi-user.target" ];
+        partOf = [ "silverbullet-sync.service" ];
+        pathConfig = { 
+          PathChanged = cfg.spaceDir; 
+          Unit = "silverbullet-sync.service";
+        };
+      };
+
       # Run this script every 5 minutes
       timers."silverbullet-sync" = {
         wantedBy = [ "timers.target" ];
@@ -108,7 +118,7 @@ in {
         };
       };
 
-    });
+    } );
 
   };
 }
