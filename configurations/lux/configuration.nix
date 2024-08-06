@@ -26,9 +26,13 @@
   services.traefik.enable = true;
   services.prometheus.enable = true;
   services.whoami.enable = true;
-
-  services.silverbullet.enable = true;
   services.gitea.enable = true; 
+
+  services.silverbullet = {
+    enable = true;
+    ocisHostName = "ocis.suderman.org";
+    ocisDir = "Notes";
+  };
 
   services.jellyfin.enable = true;
   services.plex.enable = true;
