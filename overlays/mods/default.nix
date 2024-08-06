@@ -13,7 +13,7 @@ in {
   rofi-blezz = prev.rofi-blezz.override rofi-wayland;
   # rofi-bluetooth = prev.rofi-bluetooth.override rofi-wayland;
   rofi-calc = prev.rofi-calc.override rofi-wayland;
-  rofi-emoji = prev.rofi-emoji.override rofi-wayland;
+  # rofi-emoji = prev.rofi-emoji.override rofi-wayland;
   rofi-file-browser = prev.rofi-file-browser.override rofi-wayland;
   rofi-menugen = prev.rofi-menugen.override rofi-wayland;
   rofi-obsidian = prev.rofi-obsidian.override rofi-wayland;

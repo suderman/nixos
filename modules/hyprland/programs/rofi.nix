@@ -55,7 +55,8 @@ in {
     programs.rofi = {
       enable = true;
       package = pkgs.rofi-wayland;
-      plugins = with pkgs; [ rofi-calc rofi-emoji rofimoji rofi-blezz ];
+      # plugins = with pkgs; [ rofi-calc rofi-emoji rofimoji rofi-blezz ];
+      plugins = with pkgs; [ rofi-calc rofi-emoji-wayland rofimoji rofi-blezz ];
       cycle = false;
       terminal = getExe pkgs.kitty;
       font = "JetBrainsMono 14";
