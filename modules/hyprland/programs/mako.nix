@@ -10,7 +10,7 @@ in {
     services.mako = {
       enable = true;
       font = "JetBrainsMono 11";
-      anchor = "top-center";
+      anchor = "bottom-left";
       width = 600;
       height = 300;
       borderRadius = 7;
