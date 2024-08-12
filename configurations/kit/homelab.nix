@@ -68,8 +68,8 @@
   '';
 
 
-  services.immich = {
-    enable = true;
-  };
+  # services.immich = {
+  #   enable = true;
+  # };
 
 }
