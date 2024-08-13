@@ -29,8 +29,8 @@ in {
         "super.p" = "C-slash"; # command pallete
         "super.r" = "C-A-r"; # reload system
         "super.t" = "C-S-f"; # search space
-        "super.[" = "C-["; # back 
-        "super.]" = "C-]"; # forward 
+        "super.[" = "A-left"; # back 
+        "super.]" = "A-right"; # forward 
       };
     };
 
