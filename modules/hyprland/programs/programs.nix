@@ -44,6 +44,8 @@ in {
       slurp # selecting a region to screenshot
       pulseaudio
       xorg.xeyes # confirm xwayland
+      nemo-with-extensions
+      mpv
     ];
 
   };

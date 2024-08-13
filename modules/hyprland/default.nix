@@ -46,11 +46,11 @@ in {
       vulkan-tools
     ];
 
-    # # Encourage Wayland support for electron (if not using nvidia)
-    # environment.sessionVariables = if nvidia then {} else {
-    #   NIXOS_OZONE_WL = "1";
-    # };
-    environment.sessionVariables.NIXOS_OZONE_WL = "1"; # just do this for all
+    # Encourage Wayland support for electron (if not using nvidia)
+    environment.sessionVariables = if nvidia then {} else {
+      NIXOS_OZONE_WL = "1";
+    };
+    # environment.sessionVariables.NIXOS_OZONE_WL = "1"; # just do this for all
 
     # https://wiki.hyprland.org/Useful-Utilities/xdg-desktop-portal-hyprland/
     # > XDPH doesn’t implement a file picker. For that, I recommend installing xdg-desktop-portal-gtk alongside XDPH.
