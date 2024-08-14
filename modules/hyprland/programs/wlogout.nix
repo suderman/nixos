@@ -6,6 +6,7 @@
 
   hyprctl = "${pkgs.hyprland}/bin/hyprctl";
   hyprlock = "${pkgs.hyprlock}/bin/hyprlock";
+  swaylock = "${config.programs.swaylock.package}/bin/swaylock";
   systemctl = "${pkgs.systemd}/bin/systemctl";
 
   # Wrapper script for formatting and prevent multiple instances
@@ -38,7 +39,8 @@ in {
       layout = with pkgs; [
         {
           label = "lock";
-          action = "${hyprlock} --immediate";
+          # action = "${hyprlock} --immediate";
+          action = "${swaylock}";
           text = "lock";
           keybind = "l";
         }
