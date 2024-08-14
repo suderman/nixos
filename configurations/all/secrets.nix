@@ -1,11 +1,7 @@
-{ config, lib, pkgs, this, inputs, ... }:
-
-let 
+{ config, lib, pkgs, this, inputs, ... }: let 
 
   cfg = config.secrets;
-  age = config.age;
-  inherit (lib) mkIf mkOption types;
-  inherit (this.lib) mkAttrs;
+  inherit (lib) mkAttrs mkIf mkOption types;
 
 in {
 

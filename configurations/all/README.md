@@ -33,9 +33,7 @@ Common defaults I like to use for each system:
 ## Secrets
 
 Use [agenix](https://github.com/ryantm/agenix) to encrypt/decrypt files for use
-in NixOS configurations.  Use
-[homeage](https://github.com/jordanisaacs/homeage/) to do the same in
-home-manager configurations.
+in NixOS and home-manager configurations.  
 
 See `nixos secrets` CLI usage [here](https://github.com/suderman/nixos/tree/main/secrets).
 

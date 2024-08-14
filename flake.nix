@@ -30,7 +30,7 @@
     # <https://github.com/nix-community/impermanence>
     impermanence.url = "github:nix-community/impermanence";
 
-    # NixOS Secrets
+    # NixOS & Home Manager secrets
     # <https://github.com/ryantm/agenix>
     agenix.url = "github:ryantm/agenix";
     agenix.inputs.nixpkgs.follows = "nixpkgs";
@@ -39,14 +39,6 @@
     agenix-unstable.url = "github:ryantm/agenix";
     agenix-unstable.inputs.nixpkgs.follows = "nixpkgs-unstable";
     agenix-unstable.inputs.home-manager.follows = "home-manager-unstable";
-
-    # Home Manager Secrets
-    # <https://github.com/jordanisaacs/homeage>
-    homeage.url = "github:jordanisaacs/homeage";
-    homeage.inputs.nixpkgs.follows = "nixpkgs";
-    # Unstable
-    homeage-unstable.url = "github:jordanisaacs/homeage";
-    homeage-unstable.inputs.nixpkgs.follows = "nixpkgs-unstable";
 
     # Nix User Repository
     # <https://nur.nix-community.org>

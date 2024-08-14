@@ -202,46 +202,6 @@
         "type": "github"
       }
     },
-    "homeage": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1669234151,
-        "narHash": "sha256-TwT87E3m2TZLgwYJESlype14HxUOrRGojPM5C2akrMg=",
-        "owner": "jordanisaacs",
-        "repo": "homeage",
-        "rev": "02bfe4ca06962d222e522fff0240c93946b20278",
-        "type": "github"
-      },
-      "original": {
-        "owner": "jordanisaacs",
-        "repo": "homeage",
-        "type": "github"
-      }
-    },
-    "homeage-unstable": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs-unstable"
-        ]
-      },
-      "locked": {
-        "lastModified": 1669234151,
-        "narHash": "sha256-TwT87E3m2TZLgwYJESlype14HxUOrRGojPM5C2akrMg=",
-        "owner": "jordanisaacs",
-        "repo": "homeage",
-        "rev": "02bfe4ca06962d222e522fff0240c93946b20278",
-        "type": "github"
-      },
-      "original": {
-        "owner": "jordanisaacs",
-        "repo": "homeage",
-        "type": "github"
-      }
-    },
     "hyprcursor": {
       "inputs": {
         "hyprlang": [
@@ -285,11 +245,11 @@
         "xdph": "xdph"
       },
       "locked": {
-        "lastModified": 1723488592,
-        "narHash": "sha256-nPYQrQD8rldLIhrz6px0YHGB4WwIaWLdmBtWsMgLLNI=",
+        "lastModified": 1723579231,
+        "narHash": "sha256-PL9C3aOetj+TS+vXvNhh7q5bm3g70oakg+iSu5eQBUQ=",
         "ref": "refs/heads/main",
-        "rev": "77cf651825c2afac69e3a827ff910a62c73e1218",
-        "revCount": 5083,
+        "rev": "3b4aabe04c7756fb0a70d78b6f0e701228f46345",
+        "revCount": 5087,
         "submodules": true,
         "type": "git",
         "url": "https://github.com/hyprwm/Hyprland"
@@ -540,11 +500,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1723400035,
-        "narHash": "sha256-WoKZDlBEdMhP+hjquBAh0BhUJbcH2+U8g2mHOr1mv8I=",
+        "lastModified": 1723556749,
+        "narHash": "sha256-+CHVZnTnIYRLYsARInHYoWkujzcRkLY/gXm3s5bE52o=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "a731b45590a5169542990c36ffcde6cebd9a3356",
+        "rev": "4a92571f9207810b559c9eac203d1f4d79830073",
         "type": "github"
       },
       "original": {
@@ -556,11 +516,11 @@
     },
     "nur": {
       "locked": {
-        "lastModified": 1723545976,
-        "narHash": "sha256-eFaTyL29sqvX5kkh8pXcZOTlip4IHzC1CJGKPpkR9dE=",
+        "lastModified": 1723654016,
+        "narHash": "sha256-w+YnUCKO+PmG7Y59X5GWDiC4xhYtK0RWSH0wHzBJLFs=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "ef2114993069b79eddfbe2fb3b1981fffd357bc9",
+        "rev": "0feedaeb18733b83f137961463af71d90c452440",
         "type": "github"
       },
       "original": {
@@ -577,8 +537,6 @@
         "hardware": "hardware",
         "home-manager": "home-manager",
         "home-manager-unstable": "home-manager-unstable",
-        "homeage": "homeage",
-        "homeage-unstable": "homeage-unstable",
         "hyprland": "hyprland",
         "hyprland-plugins": "hyprland-plugins",
         "impermanence": "impermanence",

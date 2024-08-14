@@ -21,6 +21,9 @@
     # List of directory names
     dirNames = path: attrNames (filterAttrs (n: v: v == "directory") (readDir path));
 
+    # Given an attr set and a value, fetch the attr name with that value
+    attrNameByValue = val: attr: toString ( attrNames (filterAttrs (n: v: v == val) attr) );
+
     # List of directory names containing default.nix
     moduleDirNames = path: filter(dir: pathExists ("${path}/${dir}/default.nix")) (dirNames path);
 

@@ -4,7 +4,7 @@ let
 
   inherit (lib) mkIf mkOption types;
   inherit (builtins) hasAttr filter;
-  inherit (this.lib) mkAttrs;
+  inherit (this.lib) mkAttrs attrNameByValue;
   inherit (config) age;
   inherit (config.age) secrets keys;
 
@@ -16,39 +16,52 @@ let
 
 in {
 
-  # Reserve user ids, fallback on null
-  ids.uids = {
-    jon = 1000;
-    ness = 1001;
-    me = 1002;
+  # User 1000's name
+  options.user = mkOption { 
+    type = types.str; 
+    default = attrNameByValue 1000 config.ids.uids;
   };
 
-  # Add all users found in configurations/*/users/*
-  users.users = mkAttrs this.users (user: { 
-    uid = with config.ids; if hasAttr user uids then uids."${user}" else null;
-    isNormalUser = true;
-    shell = pkgs.zsh;
-    home = "/home/${user}";
-    description = user;
-    hashedPasswordFile = mkIf (age.enable) secrets.password-hash.path;
-    password = mkIf (!age.enable) "${user}";
-    extraGroups = ifAdmin user ([ "wheel" ] ++ ifTheyExist [ "networkmanager" "docker" "media" "photos" ]);
-    openssh.authorizedKeys.keys = keys.users.all;
-  }); 
+  # Configuration for all normal users 
+  config = {
 
-  # GIDs 900-909 are custom shared groups in my flake                                                                                                                                   
-  # UID/GIDs 910-999 are custom system users/groups in my flake                                                                                                                         
+    # Reserve user ids, fallback on null
+    ids.uids = {
+      jon = 1000;
+      ness = 1001;
+      me = 1002;
+    };
 
-  # Create secrets group
-  ids.gids.secrets = 900;
-  users.groups.secrets.gid = config.ids.gids.secrets;
-                                                                                                                                                                                        
-  # Create media group                                                                                                                                                                  
-  ids.gids.media = 901;                                                                                                                                                                 
-  users.groups.media.gid = config.ids.gids.media;                                                                                                                                       
-                                                                                                                                                                                        
-  # Create photos group                                                                                                                                                                 
-  ids.gids.photos = 902;                                                                                                                                                                
-  users.groups.photos.gid = config.ids.gids.photos;
+    # hm = x: config.home-manager.users."${config.user}";
+
+    # Add all users found in configurations/*/users/*
+    users.users = mkAttrs this.users (user: { 
+      uid = with config.ids; if hasAttr user uids then uids."${user}" else null;
+      isNormalUser = true;
+      shell = pkgs.zsh;
+      home = "/home/${user}";
+      description = user;
+      hashedPasswordFile = mkIf (age.enable) secrets.password-hash.path;
+      password = mkIf (!age.enable) "${user}";
+      extraGroups = ifAdmin user ([ "wheel" ] ++ ifTheyExist [ "networkmanager" "docker" "media" "photos" ]);
+      openssh.authorizedKeys.keys = keys.users.all;
+    }); 
+
+    # GIDs 900-909 are custom shared groups in my flake                                                                                                                                   
+    # UID/GIDs 910-999 are custom system users/groups in my flake                                                                                                                         
+
+    # Create secrets group
+    ids.gids.secrets = 900;
+    users.groups.secrets.gid = config.ids.gids.secrets;
+                                                                                                                                                                                          
+    # Create media group                                                                                                                                                                  
+    ids.gids.media = 901;                                                                                                                                                                 
+    users.groups.media.gid = config.ids.gids.media;                                                                                                                                       
+                                                                                                                                                                                          
+    # Create photos group                                                                                                                                                                 
+    ids.gids.photos = 902;                                                                                                                                                                
+    users.groups.photos.gid = config.ids.gids.photos;
+
+  };
 
 }
