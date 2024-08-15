@@ -56,10 +56,11 @@ in {
 
           # Fullscreen toggle
           "alt, z, exec, hypr-togglefullscreenorspecial left" # fullscreen 1 (zoom window)
-          "alt, return, exec, hypr-togglefullscreenorspecial middle" # fullscreen 0 (no waybar)
+          "shift+alt, z, exec, hypr-togglefullscreenorspecial middle" # fullscreen 0 (no waybar)
+          "alt, return, exec, hypr-togglefullscreenorspecial middle" 
 
           # Minimize windows (send to special workspace) and restore
-          "shift+alt, z, exec, hypr-togglefullscreenorspecial right" # movetoworkspacesilent special
+          "alt, escape, exec, hypr-togglefullscreenorspecial right" # movetoworkspacesilent special
           "super+alt, escape, exec, hypr-togglefullscreenorspecial right"
 
           # toggle special workspace
