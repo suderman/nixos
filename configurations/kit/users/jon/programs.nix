@@ -18,7 +18,7 @@ in {
     yt-dlp 
 
     tdesktop slack
-    isy lapce micro quickemu xorg.xeyes
+    isy micro xorg.xeyes
     jetbrains-mono
     gst_all_1.gst-libav
     libsForQt5.kdenlive
@@ -29,7 +29,9 @@ in {
 
     bin-foo bin-bar coffee
 
-    tauon # jellyfin/plex/local music player
+    # Re-enable these after this is fixed:
+    # https://github.com/NixOS/nixpkgs/issues/332957
+    # quickemu lapce tauon 
 
     pavucontrol ncpamixer pamixer pamix
 
