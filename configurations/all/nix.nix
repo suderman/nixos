@@ -22,7 +22,8 @@ in {
     # Supress annoying warning
     warn-dirty = false;
 
-    # builders = 
+    # https://discourse.nixos.org/t/how-to-prevent-flake-from-downloading-registry-at-every-flake-command/32003/3
+    flake-registry = "${inputs.flake-registry}/flake-registry.json";
 
     # Speed up remote builds
     builders-use-substitutes = true;

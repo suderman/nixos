@@ -22,6 +22,11 @@
     nix-index-database-unstable.url = "github:Mic92/nix-index-database";
     nix-index-database-unstable.inputs.nixpkgs.follows = "nixpkgs-unstable";
 
+    # Nix Flake Registry
+    # <https://github.com/nixos/flake-registry>
+    flake-registry.url = "github:NixOS/flake-registry";
+    flake-registry.flake = false;
+
     # NixOS profiles for different hardware
     # <https://github.com/NixOS/nixos-hardware>
     hardware.url = "github:NixOS/nixos-hardware";
