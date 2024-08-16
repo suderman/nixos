@@ -9,19 +9,22 @@ in {
 
     programs.swaylock = {
       enable = true;
-      package = pkgs.swaylock-effects;
+      # package = pkgs.swaylock-effects;
+      package = pkgs.swaylock;
       settings = {
-        grace = 2;
-        screenshots = true;
-        effect-blur = "7x5";
-        effect-vignette = "0.25:0.75";
+        # grace = 2;
+        # screenshots = true;
+        # effect-blur = "7x5";
+        # effect-vignette = "0.25:0.75";
+        color = "000000";
         font = "monospace";
         line-color = "000000";
         ring-color = "ffffff70";
-        indicator = true;
+        # indicator = true;
         indicator-radius = 150;
         indicator-thickness = 30;
         show-failed-attempts = true;
+        ignore-empty-password = true; 
       };
     };
 
