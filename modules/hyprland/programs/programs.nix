@@ -27,6 +27,7 @@ in {
     # Check modules directory for extra configuration
     programs = {
       kitty.enable = true;
+      firefox.enable = true;
       chromium.enable = true;
     };
 
