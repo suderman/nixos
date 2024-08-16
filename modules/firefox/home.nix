@@ -16,7 +16,19 @@ in {
       profiles.default = {
 
         settings = {
-          "ui.key.menuAccessKeyFocuses" = false;
+          "ui.key.menuAccessKeyFocuses" = false; # don't toggle menu with alt key
+          "browser.tabs.tabClipWidth" = 999; # hide close button on inactive tabs
+          "middlemouse.paste" = false; # I don't use this
+          "widget.non-native-theme.scrollbar.style" = 1; # Apple-style scroll bars
+          "apz.overscroll.enabled" = true; # elastic scroll bounce
+          "browser.uidensity" = 1; # more compact ui
+          "browser.compactmode.show" = true;
+          "full-screen-api.transition-duration.enter" = "0 0";
+          "full-screen-api.transition-duration.leave" = "0 0";
+          "full-screen-api.warning.delay" = 0;
+          "full-screen-api.warning.timeout" = 0;
+          "mousewheel.default.delta_multiplier_y" = 150; # scroll faster
+          "browser.tabs.loadDivertedInBackground" = true; # middle click tab in background
         };
 
         search = {
