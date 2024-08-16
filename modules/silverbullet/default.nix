@@ -12,7 +12,7 @@ in {
     ocisHostName = mkOption {
       type = types.str;
       default = "";
-      example = "https://ocis.example.com/remote.php/webdav/Notes";
+      example = "ocis.example.com";
     };
     ocisDir = mkOption {
       type = types.str;
