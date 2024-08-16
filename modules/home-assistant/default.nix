@@ -1,17 +1,15 @@
 # services.home-assistant.enable = true;
-{ config, lib, pkgs, this, ... }:
-
-let
+{ config, lib, pkgs, this, ... }: let
 
   cfg = config.services.home-assistant;
   inherit (lib) extraGroups ls mkBefore mkIf mkOption options strings types;
   inherit (builtins) toString readFile;
 
   # https://github.com/home-assistant/core/pkgs/container/home-assistant/versions?filters%5Bversion_type%5D=tagged
-  version = "2024.7.1";
+  version = "2024.8.2";
 
   # https://github.com/zwave-js/zwave-js-ui/pkgs/container/zwave-js-ui/versions?filters%5Bversion_type%5D=tagged
-  zwaveVersion = "9.14.4";
+  zwaveVersion = "9.17.0";
 
 in {
 
