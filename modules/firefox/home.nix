@@ -21,14 +21,15 @@ in {
           "middlemouse.paste" = false; # I don't use this
           "widget.non-native-theme.scrollbar.style" = 1; # Apple-style scroll bars
           "apz.overscroll.enabled" = true; # elastic scroll bounce
-          "browser.uidensity" = 1; # more compact ui
-          "browser.compactmode.show" = true;
-          "full-screen-api.transition-duration.enter" = "0 0";
-          "full-screen-api.transition-duration.leave" = "0 0";
-          "full-screen-api.warning.delay" = 0;
-          "full-screen-api.warning.timeout" = 0;
-          "mousewheel.default.delta_multiplier_y" = 150; # scroll faster
-          "browser.tabs.loadDivertedInBackground" = true; # middle click tab in background
+          # "browser.uidensity" = 1; # more compact ui
+          # "browser.compactmode.show" = true;
+          "full-screen-api.ignore-widgets" = true; # fix full screen freezes
+          # "full-screen-api.transition-duration.enter" = "0 0";
+          # "full-screen-api.transition-duration.leave" = "0 0";
+          # "full-screen-api.warning.delay" = 0;
+          # "full-screen-api.warning.timeout" = 0;
+          # "mousewheel.default.delta_multiplier_y" = 150; # scroll faster
+          # "browser.tabs.loadDivertedInBackground" = true; # middle click tab in background
         };
 
         search = {
