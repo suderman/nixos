@@ -33,7 +33,7 @@
 
     # Persist state
     # <https://github.com/nix-community/impermanence>
-    impermanence.url = "github:nix-community/impermanence";
+    impermanence.url = "github:nix-community/impermanence/23c1f06316";
 
     # NixOS & Home Manager secrets
     # <https://github.com/ryantm/agenix>
