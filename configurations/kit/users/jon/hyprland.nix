@@ -13,6 +13,10 @@
       "__GLX_VENDOR_LIBRARY_NAME,nvidia"
     ];
 
+    # 0.42's explicit sync wasn't needed on my system and when it's enabled
+    # Firefox and other apps freeze and crash
+    render.explicit_sync = false;
+
     # env = SDL_VIDEODRIVER,wayland
     # env = WLR_NO_HARDWARE_CURSORS,1
     # env = __NV_PRIME_RENDER_OFFLOAD,1
