@@ -1,6 +1,6 @@
 { config, lib, pkgs, this, ... }: let
 
-  inherit (this.lib) mkAttrs;
+  inherit (lib) mkAttrs;
 
 in {
 
