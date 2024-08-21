@@ -4,7 +4,6 @@
   cfg = config.services.traefik;
   certs = "${cfg.dataDir}/certs"; # dir for self-signed certificates
   metricsPort = 81;
-  acmeEmail = "dns@suderman.org";
 
   inherit (lib) ls mapAttrs mkAttrs mkIf mkOption options subtractLists types;
   inherit (cfg.lib) mkAlias mkHostName mkHostNames mkLabels mkMiddleware mkRouter mkService;
@@ -150,7 +149,7 @@ in {
         certificatesResolvers.resolver-dns.acme = {
           dnsChallenge.provider = "cloudflare";
           storage = "/var/lib/traefik/cert.json";
-          email = acmeEmail;
+          email = "dns@${this.domainName}";
         };
 
         global = {

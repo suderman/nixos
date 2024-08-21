@@ -41,17 +41,13 @@
   services.ocis = {
     enable = true;
     hostName = "ocis.suderman.org";
-    public = false;
   };
   
   services.immich = {
     enable = true;
     photosDir = "/data/photos/immich";
     externalDir = "/data/photos/collections";
-    alias = { 
-      hostName = "immich.suderman.org"; 
-      public = false; 
-    };
+    alias = "immich.suderman.org"; 
   };
 
 }

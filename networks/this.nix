@@ -28,6 +28,9 @@ in this // rec {
   # openssl req -new -x509 -nodes -extensions v3_ca -days 25568 -subj "/CN=Suderman CA" -key ca.key -out ca.crt  
   ca = ./ca.crt;
 
+  # Assume any subdomains are part of this internal network
+  domainName = "suderman.org";
+
   inherit networks domains;
   mapping = (flatten networks) // domains;
   hostNames = filter (name: hasPrefix this.hostName name) (attrNames mapping);

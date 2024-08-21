@@ -106,7 +106,7 @@
 
       # If the hostName is or ends with this system's hostName, assume internal DNS and private CA
       # If the hostName is anything else, assume external and needs public DNS with a certresolver
-      external' = if elem hostName ([ this.hostName ] ++ cfg.extraInternalHostNames) || hasSuffix ".${this.hostName}" hostName then false else true;  
+      external' = if elem hostName ([ this.hostName ] ++ cfg.extraInternalHostNames) || hasSuffix ".${this.hostName}" hostName || hasSuffix ".${this.domainName}" hostName then false else true;  
       # If public is boolean (explicitly set), just use that value. Otherwise, match with external.
       public' = if ! isNull public then public else external';
 
@@ -168,7 +168,7 @@
 
       # If the hostName is or ends with this system's hostName, assume internal DNS and private CA
       # If the hostName is anything else, assume external and needs public DNS with a certresolver
-      external' = if elem hostName ([ this.hostName ] ++ cfg.extraInternalHostNames) || hasSuffix ".${this.hostName}" hostName then false else true;  
+      external' = if elem hostName ([ this.hostName ] ++ cfg.extraInternalHostNames) || hasSuffix ".${this.hostName}" hostName || hasSuffix ".${this.domainName}" hostName then false else true;  
       # If public is boolean (explicitly set), just use that value. Otherwise, match with external.
       public' = if ! isNull public then public else external';
 
@@ -220,10 +220,14 @@
   # Helper function to quickly add alias routers
   mkAlias = name: args: ( let
     inherit (builtins) head isAttrs isList isString tail;
+    inherit (lib) hasSuffix;
     origin = mkHostName name;
 
+    # Determine if default value for public is true or false
+    defaultPublic = hostName: if hasSuffix ".${this.domainName}" hostName then false else true;
+
     # If only passing a single argument, accept a string
-    fromString = hostName: fromAttrs { inherit hostName; public = true; };
+    fromString = hostName: fromAttrs { inherit hostName; public = defaultPublic hostName; };
 
     # First element is hostName, second is public
     fromList = args: let
@@ -232,7 +236,7 @@
     in fromAttrs { inherit hostName public; };
 
     # Require hostName, public defaults to true
-    fromAttrs = { hostName, public ? true, ... }: let
+    fromAttrs = { hostName, public ? defaultPublic hostName, ... }: let
       url = "https://${origin}";
     in { "${hostName}" =  { inherit url public; }; };
 
