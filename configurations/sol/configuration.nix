@@ -29,4 +29,11 @@
   services.rsshub.enable = true;
   services.freshrss.enable = true;
 
+  # Auto restart containers if unheathy
+  virtualisation.oci-containers.containers.autoheal = {
+    image = "willfarrell/autoheal";
+    volumes = [ "/var/run/docker.sock:/var/run/docker.sock" ];
+    environment.AUTOHEAL_CONTAINER_LABEL = "all";
+  };
+
 }
