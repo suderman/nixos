@@ -11,6 +11,8 @@ Hyprland custom build sitting on my home office desk:
 - [64GB G.Skill DDR5 Ripjaws S5 6400MHz CL32 memory](https://www.amazon.ca/dp/B0C1TL9CT9)
 - [2TB WD_Black SN850X NVME storage (x2)](https://www.amazon.ca/dp/B0B7CMZ3QH)
 - [Acer XB273K V3bmiiprx 27" UHD 4K display](https://www.amazon.ca/gp/product/B0CQPHJ32Y/)
+- [Happy Hacking Keyboard Professional 2, black](https://hhkeyboard.us/hhkb/pro-classic/sku/cg01000-296401)
+- [Logitech G600 mouse](https://www.logitechg.com/en-ca/products/gaming-mice/g600-mmo-gaming-mouse.910-002864.html)
 
 ## Setup
 
