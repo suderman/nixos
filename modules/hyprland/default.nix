@@ -15,6 +15,9 @@ in {
 
   config = mkIf cfg.enable {
 
+    # Development version of hyprland
+    # programs.hyprland.package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
+
     # Enable screen brightness control
     programs.light.enable = true;
 
