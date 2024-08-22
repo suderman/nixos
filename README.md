@@ -1,6 +1,6 @@
 # NixOS system configurations & dotfiles
 
-![nixos](https://socialify.git.ci/suderman/nixos/image?description=1&language=1&name=1&owner=1&pattern=Circuit%20Board&theme=Auto)
+![nixos](https://socialify.git.ci/suderman/nixos/image?description=1&font=Inter&logo=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2F3%2F35%2FNix_Snowflake_Logo.svg&name=1&owner=1&pattern=Circuit%20Board&theme=Auto)
 
 *Welcome to the NixOS configuration for all my personal infrastucture!*  
 
@@ -74,7 +74,7 @@ The above is a wrapper for `nix repl` using [repl.nix](https://github.com/suderm
 
 - [NixOS Packages](https://search.nixos.org/packages)
 - [NixOS Options](https://search.nixos.org/options)
-- [Home Manager Options](https://mipmip.github.io/home-manager-option-search)
+- [Home Manager Options](https://home-manager-options.extranix.com/)
 
 When trying to figure out how to do something, examples are almost always best.
 Make use of GitHub's search with the code language filter to find examples from
