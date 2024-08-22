@@ -87,7 +87,7 @@ in {
     # tag Firefox and Picture-in-Picture windows
     wayland.windowManager.hyprland.settings = {
       windowrulev2 = [
-        "tag +web2, class:(${class})"
+        "tag +web, class:(${class})"
         "tag +pip, title:^(Picture-in-Picture)$"
       ];
     };
