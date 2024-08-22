@@ -30,7 +30,26 @@ in {
           "full-screen-api.warning.timeout" = 0;
           "mousewheel.default.delta_multiplier_y" = 150; # scroll faster
           "browser.tabs.loadDivertedInBackground" = false; # middle click tab in foreground
+          "extensions.autoDisableScopes" = 0; # auto-enable extensions
         };
+
+        extensions = with pkgs.nur.repos.rycee.firefox-addons; [
+          add-custom-search-engine
+          alby
+          auto-tab-discard
+          don-t-fuck-with-paste
+          faststream
+          gsconnect
+          i-dont-care-about-cookies
+          onepassword-password-manager
+          return-youtube-dislikes
+          rsshub-radar
+          scroll_anywhere
+          sponsorblock
+          stylus
+          ublock-origin
+          vimium
+        ];
 
         search = {
           default = "Whoogle";
