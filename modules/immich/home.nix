@@ -27,6 +27,12 @@ in {
       "${mkClass cfg.url}" = {};
     };
 
+    # cli upload tools
+    home.packages = with pkgs; [ 
+      immich-cli
+      immich-go
+    ];
+
   };
 
 }
