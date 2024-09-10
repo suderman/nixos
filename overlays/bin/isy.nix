@@ -1,32 +1,11 @@
-{ lib, writeTextFile, runtimeShell, adoptopenjdk-icedtea-web }: 
+{ lib, this, adoptopenjdk-icedtea-web }: this.lib.mkShellScript {
 
-let 
   name = "isy";
-  description = "ISY994i Admin Console";
-  runtimeInputs = [ adoptopenjdk-icedtea-web ];
-  text = ''
-    javaws http://10.1.0.8/admin.jnlp
+  inputs = [ adoptopenjdk-icedtea-web ];
+
+  text = '' 
+    # echo $ISY_BASIC_AUTH | base64 -d | cut -d':' -f2 | wl-copy
+    javaws http://${this.networks.home.isy}/admin.jnlp
   '';
-in 
-
-writeTextFile {
-  inherit name;
-  executable = true;
-  destination = "/bin/${name}";
-
-  text = ''
-    #!${runtimeShell}
-  '' + lib.optionalString (runtimeInputs != [ ]) ''
-    export PATH="${lib.makeBinPath runtimeInputs}:$PATH"
-  '' + ''
-    ${text}
-  '';
-
-  meta = with lib; {
-    mainProgram = name;
-    description = description;
-    license = licenses.mit;
-    platforms = platforms.all;
-  };
 
 }

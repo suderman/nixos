@@ -42,6 +42,7 @@ in {
           gsconnect
           i-dont-care-about-cookies
           onepassword-password-manager
+          read-aloud
           return-youtube-dislikes
           rsshub-radar
           scroll_anywhere

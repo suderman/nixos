@@ -1,5 +1,5 @@
 # services.flatpak.enable = true;
-{ config, lib, pkgs, inputs, ... }:
+{ config, lib, pkgs, inputs, this, ... }:
 
 let
 
@@ -31,7 +31,9 @@ in {
     xdg.portal.enable = true;
 
     # browse (and try) flatpaks via Gnome Software
-    environment.systemPackages = [ pkgs.gnome.gnome-software ];
+    environment.systemPackages = with pkgs; [( 
+      if this.stable then gnome.gnome-software else gnome-software # moved to top-level in unstable
+    )];
 
   };
 

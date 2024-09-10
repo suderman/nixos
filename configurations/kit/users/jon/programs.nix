@@ -8,46 +8,40 @@ in {
   # Packages
   home.packages = with pkgs; [ 
 
-    bat cowsay eza fish killall lf 
+    # cowsay owofetch sl
+    bat eza fish killall lf 
     linode-cli lsd mosh nano ncdu neofetch
-    nnn owofetch rclone ripgrep sl sysz
+    nnn rclone ripgrep sysz
     tealdeer wget yo lazygit lazydocker parted
     imagemagick
 
     # yt-dlp -f mp4-240p -x --audio-format mp3 https://rumble.com/...
     yt-dlp 
 
-    tdesktop slack
-    isy micro xorg.xeyes
-    jetbrains-mono
+    # tdesktop slack
+    isy micro 
+    # jetbrains-mono
     gst_all_1.gst-libav
-    libsForQt5.kdenlive
+    # libsForQt5.kdenlive
 
-    inkscape junction libreoffice newsflash
-    unstable.nodePackages_latest.immich
-    junction 
-
+    # junction 
     bin-foo bin-bar coffee
 
     # Re-enable these after this is fixed:
     # https://github.com/NixOS/nixpkgs/issues/332957
     # quickemu lapce tauon 
 
-    pavucontrol ncpamixer pamixer pamix
-
-    gnome-disk-utility
-
   ];
 
-  programs.bluebubbles.enable = true;
+  # programs.bluebubbles.enable = true;
   programs.foot.enable = false;
-  programs.gimp.enable = true;
+  # programs.gimp.enable = true;
   programs.git.enable = true;
   programs.tmux.enable = true;
   programs.wezterm.enable = false;
-  programs.yazi.enable = true;
+  # programs.yazi.enable = true;
   programs.zsh.enable = true;
-  programs.zwift.enable = true;
+  # programs.zwift.enable = true;
 
   programs.chromium = {
     enable = true;
@@ -79,6 +73,12 @@ in {
   programs.jellyfin = {
     enable = true;
     url = "https://jellyfin.lux";
+    platform = "x11";
+  };
+
+  programs.home-assistant = {
+    enable = true;
+    url = "https://hass.hub";
     platform = "x11";
   };
 
