@@ -32,6 +32,8 @@
   services.tailscale.enable = true;
   networking.networkmanager.enable = true;
   networking.extraHosts = ''
+    159.203.49.164 touchstoneexploration.com www.touchstoneexploration.com
+    18.191.53.91 www.parkwhiz.com
     127.0.0.1 example.com
     127.0.0.1 local
   '';
