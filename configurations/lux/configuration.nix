@@ -50,4 +50,19 @@
     alias = "immich.suderman.org"; 
   };
 
+  services.samba = {
+    enable = true;
+    openFirewall = true;
+    shares.media = {
+      path = "/media";
+      browseable = "yes";
+      "read only" = "no";
+      "guest ok" = "no";
+      comment = "Media";
+    };
+  };
+
+  # Allows Windows clients to discover server
+  services.samba-wsdd.enable = true;
+
 }
