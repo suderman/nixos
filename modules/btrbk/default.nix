@@ -1,5 +1,5 @@
 # services.btrbk.enable = true;
-{ config, lib, ... }: 
+{ config, lib, pkgs, this, ... }: 
 
 let 
 
@@ -24,6 +24,8 @@ in {
       key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINTAr4tawFxq0q+cazxkwfIqFPF3CdkY1kCGZNVn9LWj";
       roles = [ "info" "source" "target" "delete" "snapshot" "send" "receive" ];
     }];
+
+    services.btrbk.extraPackages = if this.stable then [ pkgs.lz4 pkgs.mbuffer ] else [];
 
     services.btrbk.instances = let
 
