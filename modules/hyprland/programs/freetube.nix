@@ -32,6 +32,10 @@
       freetube = {
         "super.o" = "C-l"; # location bar
         "super.n" = "C-n"; # new window
+        "super.r" = "C-r"; # reload
+        "super.[" = "A-left"; # prev tab
+        "super.]" = "A-right"; # next tab
+        "super.w" = "C-w"; # close tab
       };
     };
 
