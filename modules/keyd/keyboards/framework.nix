@@ -1,4 +1,4 @@
-# Framework Laptop
+# Framework Laptop (internal keyboard)
 {
   ids = [ "0001:0001" ];
   settings = {
@@ -22,7 +22,6 @@
       rightalt = "layer(super)";
       rightcontrol = "layer(alt)";
       rightshift = "layer(shift)";
-
 
       # Both volume keys together trigger media key
       "volumedown+volumeup" = "media";

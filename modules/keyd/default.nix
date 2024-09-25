@@ -27,6 +27,8 @@ in {
         g600  = import ./keyboards/g600.nix;
         hhkb  = import ./keyboards/hhkb.nix;
         k811  = import ./keyboards/k811.nix;
+        rii   = import ./keyboards/rii.nix;
+        w3    = import ./keyboards/w3.nix;
       };
     };
     keyboard = mkOption {

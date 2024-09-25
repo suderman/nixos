@@ -1,4 +1,4 @@
-# Thinkpad T480s Laptop
+# Thinkpad T480s Laptop (interal keyboard)
 {
   ids = [ "0001:0001" ];
   settings = {

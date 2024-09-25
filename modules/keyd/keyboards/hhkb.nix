@@ -1,4 +1,5 @@
 # HHKB Pro 2
+# https://www.amazon.ca/gp/product/B07K9V58DP/
 # 1 = OFF    # Macintosh mode (enable media keys)
 # 2 = ON     #
 # 3 = ON     # Delete = BS

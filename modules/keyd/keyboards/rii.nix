@@ -1,3 +1,5 @@
+# Rii Bluetooth Keyboard with Touchpad
+# https://www.amazon.ca/gp/product/B081CTNB5W/
 {
   ids = [ "1997:2466" ];
   settings = {
@@ -6,18 +8,13 @@
       # Use tab as custom modifier
       tab = "overloadt2(nav, tab, 200)";
 
-      # Leave the default modifiers as-is
-      leftshift = "layer(shift)";
-      leftalt = "layer(alt)";
-      leftmeta = "layer(super)";
-      rightmeta = "layer(super)";
-      rightalt = "layer(alt)";
-      rightshift = "layer(shift)";
+      # Assign super to leftalt key
+      leftalt = "layer(super)";
 
-      # Alias compose to alt
+      # Assign alt to compose key
       compose = "layer(alt)";
 
-      # Alias homepage to super
+      # Assign super to homepage key
       homepage = "layer(super)";
 
     };

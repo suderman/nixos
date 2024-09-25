@@ -1,4 +1,5 @@
 # Logitech Gaming Mouse G600 Keyboard
+# https://www.amazon.ca/gp/product/B0086UK7IQ/
 {
   ids = [ "046d:c24a" ];
   settings = {

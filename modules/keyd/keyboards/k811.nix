@@ -1,4 +1,5 @@
-# Logitech K811
+# Logitech K811 Bluetooth Keyboard
+# https://www.amazon.ca/product/dp/B0099SMFP2/
 {
   ids = [ "046d:b317" ];
   settings = {

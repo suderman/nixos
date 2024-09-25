@@ -1,4 +1,5 @@
-# Apple Keyboard
+# Apple Wired Keyboard with Numpad
+# https://www.amazon.ca/gp/product/B07K7V1FWC/
 {
   ids = [ "05ac:0220" "05ac:024f" ];
   settings = {
