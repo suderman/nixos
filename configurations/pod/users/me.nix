@@ -3,7 +3,6 @@
   home.packages = with pkgs; [ 
     neofetch
     yo
-    firefox-wayland
   ];
 
   programs = {

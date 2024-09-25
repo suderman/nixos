@@ -11,8 +11,8 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Use freshest kernel
-  boot.kernelPackages = pkgs.linuxPackages_latest;
-  # boot.kernelPackages = pkgs.linuxPackages_6_8;
+  # boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxPackages_6_10; # 6.11 broken
 
   # Sound & Bluetooth
   hardware.bluetooth.enable = true;
@@ -53,6 +53,9 @@
   programs.steam.enable = true;
   programs.neovim.enable = true;
   programs.mosh.enable = true;
+
+  # AirDrop alternative
+  programs.localsend.enable = true; 
 
   services.whoami.enable = true;
   modules.ollama.enable = true;

@@ -1,5 +1,5 @@
 # programs.kitty.enable = true;
-{ config, lib, pkgs, ... }: let
+{ config, lib, pkgs, this, ... }: let
 
   cfg = config.programs.kitty;
   inherit (lib) mkIf mkAfter;
@@ -9,10 +9,11 @@ in {
   config = mkIf cfg.enable {
 
     # https://home-manager-options.extranix.com/?query=kitty&release=master
-    programs.kitty = {
-
-      # kitty +kitten themes
-      theme = "Catppuccin-Mocha";
+    programs.kitty = ( if this.stable then {
+      theme = "Catppuccin-Mocha"; # kitty +kitten themes
+    } else {
+      themeFile = "Catppuccin-Mocha"; # kitty +kitten themes
+    }) // {
 
       font = {
         name = "JetBrains Mono Regular";

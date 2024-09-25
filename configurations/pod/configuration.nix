@@ -28,6 +28,9 @@
   programs.steam.enable = true;
   services.whoami.enable = true;
 
+  # AirDrop alternative
+  programs.localsend.enable = true; 
+
   # Web services
   services.tailscale = {
     enable = true;
