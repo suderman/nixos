@@ -56,6 +56,10 @@
 
   # AirDrop alternative
   programs.localsend.enable = true; 
+  networking.firewall = let port = 53317; in {
+    allowedTCPPorts = [ port ];
+    allowedUDPPorts = [ port ];
+  };
 
   services.whoami.enable = true;
   modules.ollama.enable = true;
