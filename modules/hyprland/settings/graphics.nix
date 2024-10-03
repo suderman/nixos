@@ -19,10 +19,11 @@ in {
         border_size = 3;
         "col.active_border" = "rgba(89b4facc) rgba(cba6f7cc) 270deg";
         "col.inactive_border" = "rgba(11111b66) rgba(b4befe66) 270deg";
-        extend_border_grab_area = 100;
+        extend_border_grab_area = 20; # gaps between windows can be used for resizing
       };
 
       group = {
+        merge_groups_on_drag = true;
         groupbar.enabled = false;
         "col.border_active" = "rgba(FF5F1Fcc) rgba(FF5F1Fcc) 270deg";
         "col.border_inactive" = "rgba(FF5F1F80) rgba(FF5F1F80) 270deg";

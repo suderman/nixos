@@ -29,7 +29,8 @@ in {
         "move 100%-490 100%-280, tag:pip"
 
         # make pop-up file dialogs floating, centred, and pinned
-        "tag +dialog, title:(Open|Progress|Save File|Save As)"
+        "tag +dialog, title:(Progress|Save File|Save As)"
+        # "tag +dialog, title:(Open|Progress|Save File|Save As)"
         "tag +dialog, class:(xdg-desktop-portal-gtk)"
         "tag +dialog, class:(re.sonny.Junction)"
         "float, tag:dialog"
