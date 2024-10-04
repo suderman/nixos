@@ -18,7 +18,8 @@
     ];
 
     # Add terminfo files
-    enableAllTerminfo = true;
+    # TODO: https://github.com/NixOS/nixpkgs/issues/345752
+    # enableAllTerminfo = true;
 
   };
 
