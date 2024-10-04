@@ -31,6 +31,8 @@ in {
     # https://github.com/NixOS/nixpkgs/issues/332957
     # quickemu lapce tauon 
 
+    shotcut
+
   ];
 
   # programs.bluebubbles.enable = true;
