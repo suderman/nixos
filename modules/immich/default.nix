@@ -4,7 +4,7 @@
 let
 
   # https://github.com/immich-app/immich/releases
-  version = "1.116.1";
+  version = "1.117.0";
 
   cfg = config.services.immich;
 
@@ -17,6 +17,7 @@ in {
   # Service order reference:
   # https://github.com/immich-app/immich/blob/main/docker/docker-compose.yml
   imports = ls ./.;
+  disabledModules = [ "services/web-apps/immich.nix" ];
 
   options.services.immich = {
 
