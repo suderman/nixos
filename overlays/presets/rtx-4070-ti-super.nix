@@ -52,7 +52,7 @@ in {
   hardware.nvidia-container-toolkit.enable = true;
 
   virtualisation = {
-    docker.enableNvidia = true; # This is supposedly depecrated, replaced by the hardware line above?
+    docker.enableNvidia = true; # This is supposedly deprecated, replaced by the hardware line above?
     docker.package = pkgs.docker_25; # CDI is feature-gated and only available from Docker 25 and onwards
     docker.daemon.settings.features.cdi = true;
   };
