@@ -30,7 +30,7 @@ in {
       # Networking for docker containers
       extraOptions = [ 
         "--network=immich"
-      ] ++ ( if nvidia == "" then [] else [ "--gpus=all" ] ); # use nvidia gpu if present
+      ] ++ ( if nvidia == "" then [] else [ "--device=nvidia.com/gpu=all" ] ); # use nvidia gpu if present
 
     };
 

@@ -52,14 +52,9 @@ in {
   hardware.nvidia-container-toolkit.enable = true;
 
   virtualisation = {
-    docker.enableNvidia = true; # This is supposedly deprecated, replaced by the hardware line above?
     docker.package = pkgs.docker_25; # CDI is feature-gated and only available from Docker 25 and onwards
     docker.daemon.settings.features.cdi = true;
   };
-
-  # libnvidia-container does not support cgroups v2 (prior to 1.8.0)
-  # https://github.com/NVIDIA/nvidia-docker/issues/1447
-  # systemd.enableUnifiedCgroupHierarchy = false;
 
   environment.systemPackages = with pkgs; [ 
     nvitop
