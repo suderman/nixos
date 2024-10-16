@@ -64,6 +64,12 @@
     SUBSYSTEM=="usb", ATTRS{idVendor}=="${vendor}", ATTRS{idProduct}=="${product}", RUN+="${modprobe} usbserial vendor=0x${vendor} product=0x${product}", MODE="0666", OWNER="root", GROUP="root"
   '';
 
+  services.sunshine = {
+    enable = true;
+    autoStart = true;
+    capSysAdmin = true; # only needed for Wayland -- omit this when using with Xorg
+    openFirewall = true;
+  };
 
   # services.immich = {
   #   enable = true;
