@@ -3,6 +3,7 @@
 - `10.2.0.1` RT-AC66U - Asuswrt-Merlin 380.70
 - `10.2.0.2` 2009 Mac Pro - NixOS 24.05 ([eve](https://github.com/suderman/nixos/tree/main/configurations/eve))
 - `10.2.0.3` 2011 Mac Mini - macOS 10.13.6
+- `10.2.0.4` 2020 MacBook Air - macOS 15.0.1
 
 ## Router Configuration
 

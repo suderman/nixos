@@ -39,7 +39,8 @@
   services.bluebubbles = with this.networks; {
     enable = true;
     name = "bb";
-    ip = work.pom;
+    # ip = work.pom;
+    ip = work.bub;
   };
 
   # Backup media server
