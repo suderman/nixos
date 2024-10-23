@@ -32,6 +32,7 @@ in {
     # quickemu lapce tauon 
 
     shotcut
+    davinci-resolve
 
   ];
 
@@ -93,6 +94,5 @@ in {
       "com.github.treagod.spectator"
     ];
   };
-
 
 }
