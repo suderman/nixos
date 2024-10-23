@@ -8,6 +8,9 @@
   btrbk-key = ./btrbk-key.age;
   ca-key = ./ca-key.age;
   cloudflare-env = ./cloudflare-env.age;
+  emails-jon = ./emails-jon.age;
+  fastmail-env = ./fastmail-env.age;
+  gmail-env = ./gmail-env.age;
   isy-env = ./isy-env.age;
   ocis-env = ./ocis-env.age;
   password = ./password.age;

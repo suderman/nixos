@@ -80,4 +80,10 @@ with (import ./keys); {
 
 
 
+  "files/emails-jon.age".publicKeys = all;
+
+  "files/gmail-env.age".publicKeys = all;
+
+  "files/fastmail-env.age".publicKeys = all;
+
 }

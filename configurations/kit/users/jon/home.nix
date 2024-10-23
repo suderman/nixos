@@ -26,5 +26,7 @@
     loupe
   ];
 
+  # Enable email/calendars/contacts
+  accounts.enable = true;
 
 }
