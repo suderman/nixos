@@ -1,29 +1,36 @@
 { config, lib, pkgs, this, ... }: let 
 
   cfg = config.accounts;
-  inherit (lib) mkIf;
+  inherit (lib) mkIf mkShellScript;
+
+  fastmail = {
+    userName = "suderman@fastmail.com";
+    passwordCommand = [ "cat" "${config.age.secrets.fastmail.path}" ];
+  };
+
+  gmail = {
+    userName = "jon@nonfiction.ca";
+    passwordCommand = [ "cat" "${config.age.secrets.gmail.path}" ];
+  };
 
 in {
 
   config = mkIf cfg.enable {
 
     # Passwords for accounts
-    age.secrets.fastmail-env.file = config.secrets.files.fastmail-env;
-    age.secrets.gmail-env.file = config.secrets.files.gmail-env;
-
+    age.secrets.fastmail.file = config.secrets.files.password-jon-fastmail;
+    age.secrets.gmail.file = config.secrets.files.password-jon-gmail;
 
     accounts.contact = {
       basePath = "Contacts";
-      accounts."suderman" = {
+      accounts."Fastmail" = {
         local = {
           type = "filesystem";
           fileExt = ".vcf";
         };
-        remote = {
+        remote = fastmail // {
           url = "https://carddav.fastmail.com/";
           type = "carddav";
-          userName = "suderman@fastmail.com";
-          passwordCommand = "source ${config.age.secrets.fastmail-env.path} && echo $PASSWORD";
         };
         khard.enable = true;
         vdirsyncer.enable = true;
@@ -32,18 +39,16 @@ in {
 
     accounts.calendar = {
       basePath = "Calendars";
-      accounts."suderman" = {
+      accounts."Fastmail" = {
         primary = true;
         # name = "suderman";
         local = {
           fileExt = ".ics";
           type = "filesystem";
         };
-        remote = {
+        remote = fastmail // {
           url = "https://caldav.fastmail.com/";
           type = "caldav";
-          userName = "suderman@fastmail.com";
-          passwordCommand = "source ${config.age.secrets.fastmail-env.path} && echo $PASSWORD";
         };
         khal.enable = true;
         vdirsyncer = {
@@ -62,51 +67,23 @@ in {
     accounts.email.maildirBasePath = "Mail";
 
     # Personal email
-    accounts.email.accounts."suderman" = rec {
+    accounts.email.accounts."Fastmail" = fastmail // rec {
       flavor = "fastmail.com";
       primary = true;
       realName = "Jon Suderman";
       address = "jon@suderman.net";
-      userName = "suderman@fastmail.com";
-      passwordCommand = "source ${config.age.secrets.fastmail-env.path} && echo $PASSWORD";
       folders = {
         inbox = "Inbox";
         drafts = "Drafts";
         sent = "Sent";
         trash = "Trash";
       };
-      mbsync = {
-        enable = true;
-        create = "maildir";
-        expunge = "both";
-      };
-      neomutt = {
-        enable = true;
-        extraMailboxes = [ "Archive" "Drafts" "Sent" "Trash" ];
-      };
-      notmuch.enable = true;
-      msmtp.enable = true;
       signature = {
         showSignature = "append";
         text = ''
-            ${realName}
-            https://suderman.net
+          ${realName}
+          https://suderman.net
         '';
-      };
-    };
-
-    # Work email
-    accounts.email.accounts."nonfiction" = rec {
-      flavor = "gmail.com";
-      realName = "Jon Suderman";
-      address = "jon@nonfiction.ca";
-      userName = address;
-      passwordCommand = "source ${config.age.secrets.gmail-env.path} && echo $PASSWORD";
-      folders = {
-        inbox = "Inbox";
-        drafts = "Drafts";
-        sent = "Sent";
-        trash = "Trash";
       };
       mbsync = {
         enable = true;
@@ -119,6 +96,19 @@ in {
       };
       notmuch.enable = true;
       msmtp.enable = true;
+    };
+
+    # Work email
+    accounts.email.accounts."Gmail" = gmail // rec {
+      flavor = "gmail.com";
+      realName = "Jon Suderman";
+      address = "jon@nonfiction.ca";
+      folders = {
+        inbox = "Inbox";
+        drafts = "Drafts";
+        sent = "Sent";
+        trash = "Trash";
+      };
       signature = {
         showSignature = "append";
         text = ''
@@ -126,6 +116,17 @@ in {
           https://nonfiction.ca
         '';
       };
+      mbsync = {
+        enable = true;
+        create = "maildir";
+        expunge = "both";
+      };
+      neomutt = {
+        enable = true;
+        extraMailboxes = [ "Archive" "Drafts" "Sent" "Trash" ];
+      };
+      notmuch.enable = true;
+      msmtp.enable = true;
     };
 
     # Email reader

@@ -77,13 +77,13 @@ with (import ./keys); {
   # NOTIFICATIONS_SMTP_PASSWORD=xxxxxxxxxxxx
   "files/ocis-env.age".publicKeys = all;
 
-
-
-
+  # List of historical email addresses ever used
   "files/emails-jon.age".publicKeys = all;
 
-  "files/gmail-env.age".publicKeys = all;
+  # https://app.fastmail.com/settings/security/apps
+  "files/password-jon-fastmail.age".publicKeys = all;
 
-  "files/fastmail-env.age".publicKeys = all;
+  # https://myaccount.google.com/apppasswords
+  "files/password-jon-gmail.age".publicKeys = all;
 
 }

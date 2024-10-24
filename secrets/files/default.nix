@@ -9,12 +9,12 @@
   ca-key = ./ca-key.age;
   cloudflare-env = ./cloudflare-env.age;
   emails-jon = ./emails-jon.age;
-  fastmail-env = ./fastmail-env.age;
-  gmail-env = ./gmail-env.age;
   isy-env = ./isy-env.age;
   ocis-env = ./ocis-env.age;
   password = ./password.age;
   password-hash = ./password-hash.age;
+  password-jon-fastmail = ./password-jon-fastmail.age;
+  password-jon-gmail = ./password-jon-gmail.age;
   smtp-env = ./smtp-env.age;
   traefik-env = ./traefik-env.age;
   withings-env = ./withings-env.age;
