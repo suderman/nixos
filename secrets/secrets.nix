@@ -86,4 +86,6 @@ with (import ./keys); {
   # https://myaccount.google.com/apppasswords
   "files/password-jon-gmail.age".publicKeys = all;
 
+  "files/password-jon-icloud.age".publicKeys = all;
+
 }

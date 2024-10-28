@@ -15,6 +15,7 @@
   password-hash = ./password-hash.age;
   password-jon-fastmail = ./password-jon-fastmail.age;
   password-jon-gmail = ./password-jon-gmail.age;
+  password-jon-icloud = ./password-jon-icloud.age;
   smtp-env = ./smtp-env.age;
   traefik-env = ./traefik-env.age;
   withings-env = ./withings-env.age;

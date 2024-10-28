@@ -3,130 +3,138 @@
   cfg = config.accounts;
   inherit (lib) mkIf mkShellScript;
 
-  fastmail = {
-    userName = "suderman@fastmail.com";
-    passwordCommand = [ "cat" "${config.age.secrets.fastmail.path}" ];
-  };
-
-  gmail = {
-    userName = "jon@nonfiction.ca";
-    passwordCommand = [ "cat" "${config.age.secrets.gmail.path}" ];
-  };
-
 in {
 
   config = mkIf cfg.enable {
 
     # Passwords for accounts
-    age.secrets.fastmail.file = config.secrets.files.password-jon-fastmail;
-    age.secrets.gmail.file = config.secrets.files.password-jon-gmail;
-
-    accounts.contact = {
-      basePath = "Contacts";
-      accounts."Fastmail" = {
-        local = {
-          type = "filesystem";
-          fileExt = ".vcf";
-        };
-        remote = fastmail // {
-          url = "https://carddav.fastmail.com/";
-          type = "carddav";
-        };
-        khard.enable = true;
-        vdirsyncer.enable = true;
-      };
+    age.secrets = let inherit (config.home) username; in {
+      fastmail.file = config.secrets.files."password-${username}-fastmail";
+      icloud.file = config.secrets.files."password-${username}-icloud";
+      gmail.file = config.secrets.files."password-${username}-gmail";
     };
 
-    accounts.calendar = {
-      basePath = "Calendars";
-      accounts."Fastmail" = {
-        primary = true;
-        # name = "suderman";
-        local = {
-          fileExt = ".ics";
-          type = "filesystem";
-        };
-        remote = fastmail // {
-          url = "https://caldav.fastmail.com/";
-          type = "caldav";
-        };
-        khal.enable = true;
-        vdirsyncer = {
-          enable = true;
-          collections = [ "calendar" ];
-          itemTypes = [ "VEVENT" ];
-          timeRange = {
-            start = "datetime.now() - timedelta(days=7)";
-            end = "datetime.now() + timedelta(days=30)";
+    # Configure email/calendar/contacts accounts
+    # https://home-manager-options.extranix.com/?query=accounts.&release=master
+    accounts = let 
+
+      # Get account password: pass fastmail|icloud|gmail
+      pass = mkShellScript { text = ''
+        case "$@" in
+          fastmail) cat ${config.age.secrets.fastmail.path};;
+          icloud) cat ${config.age.secrets.icloud.path};;
+          gmail) cat ${config.age.secrets.gmail.path};;
+        esac
+      ''; };
+
+    in {
+
+      # Calendars are stored at ~/Calendars
+      calendar = {
+        basePath = "Calendars";
+        accounts."Fastmail" = {
+          primary = true;
+          primaryCollection = "Family";
+          local = {
+            fileExt = ".ics";
+            type = "filesystem";
+          };
+          remote = {
+            userName = "suderman@fastmail.com";
+            passwordCommand = [ "bash" "${pass}" "fastmail" ];
+            url = "https://caldav.fastmail.com/";
+            type = "caldav";
+          };
+          khal = {
+            enable = true;
+            type = "discover"; # calendar, birthdays, discover
+            priority = 1000;
+            color = "#ff0000";
+          };
+          qcal.enable = true; # trying out
+          vdirsyncer = {
+            enable = true;
+            collections = [ "from a" "from b" ];
+            metadata = [ "color" "displayname" ];
+            # itemTypes = [ "VEVENT" ];
+            # timeRange = {
+            #   start = "datetime.now() - timedelta(days=7)";
+            #   end = "datetime.now() + timedelta(days=30)";
+            # };
           };
         };
       };
-    };
 
-    # Email is stored at ~/Mail
-    accounts.email.maildirBasePath = "Mail";
+      # Email is stored at ~/Mail
+      email.maildirBasePath = "Mail";
 
-    # Personal email
-    accounts.email.accounts."Fastmail" = fastmail // rec {
-      flavor = "fastmail.com";
-      primary = true;
-      realName = "Jon Suderman";
-      address = "jon@suderman.net";
-      folders = {
-        inbox = "Inbox";
-        drafts = "Drafts";
-        sent = "Sent";
-        trash = "Trash";
+      # Personal email
+      email.accounts."Fastmail" = rec {
+        userName = "suderman@fastmail.com";
+        passwordCommand = [ "bash" "${pass}" "fastmail" ];
+        flavor = "fastmail.com";
+        primary = true;
+        realName = "Jon Suderman";
+        address = "jon@suderman.net";
+        folders = {
+          inbox = "Inbox";
+          drafts = "Drafts";
+          sent = "Sent";
+          trash = "Trash";
+        };
+        signature = {
+          showSignature = "append";
+          text = ''
+            ${realName}
+            https://suderman.net
+          '';
+        };
+        mbsync = {
+          enable = true;
+          create = "maildir";
+          expunge = "both";
+        };
+        neomutt = {
+          enable = true;
+          extraMailboxes = [ "Archive" "Drafts" "Sent" "Trash" ];
+        };
+        notmuch.enable = true;
+        msmtp.enable = true;
       };
-      signature = {
-        showSignature = "append";
-        text = ''
-          ${realName}
-          https://suderman.net
-        '';
-      };
-      mbsync = {
-        enable = true;
-        create = "maildir";
-        expunge = "both";
-      };
-      neomutt = {
-        enable = true;
-        extraMailboxes = [ "Archive" "Drafts" "Sent" "Trash" ];
-      };
-      notmuch.enable = true;
-      msmtp.enable = true;
-    };
 
-    # Work email
-    accounts.email.accounts."Gmail" = gmail // rec {
-      flavor = "gmail.com";
-      realName = "Jon Suderman";
-      address = "jon@nonfiction.ca";
-      folders = {
-        inbox = "Inbox";
-        drafts = "Drafts";
-        sent = "Sent";
-        trash = "Trash";
+      # Work email
+      email.accounts."Gmail" = rec {
+        userName = "jon@nonfiction.ca";
+        passwordCommand = [ "bash" "${pass}" "gmail" ];
+        flavor = "gmail.com";
+        realName = "Jon Suderman";
+        address = "jon@nonfiction.ca";
+        folders = {
+          inbox = "Inbox";
+          drafts = "Drafts";
+          sent = "Sent";
+          trash = "Trash";
+        };
+        signature = {
+          showSignature = "append";
+          text = ''
+            ${realName}
+            https://nonfiction.ca
+          '';
+        };
+        mbsync = {
+          enable = true;
+          create = "maildir";
+          expunge = "both";
+        };
+        neomutt = {
+          enable = true;
+          extraMailboxes = [ "Archive" "Drafts" "Sent" "Trash" ];
+        };
+        notmuch.enable = true;
+        msmtp.enable = true;
       };
-      signature = {
-        showSignature = "append";
-        text = ''
-          ${realName}
-          https://nonfiction.ca
-        '';
-      };
-      mbsync = {
-        enable = true;
-        create = "maildir";
-        expunge = "both";
-      };
-      neomutt = {
-        enable = true;
-        extraMailboxes = [ "Archive" "Drafts" "Sent" "Trash" ];
-      };
-      notmuch.enable = true;
-      msmtp.enable = true;
+
     };
 
     # Email reader
@@ -146,6 +154,15 @@ in {
 
     # DAV sync
     programs.vdirsyncer.enable = true;
+
+    programs.qcal.enable = true;
+    programs.khal = {
+      enable = true;
+      settings = {
+        # default.default_calendar = "Family";
+        default.default_event_duration = "30m";
+      };
+    };
 
     # Address book
     programs.khard = {
