@@ -1,8 +1,5 @@
-{ pkgs, this, ... }: let 
-
-  inherit (this.lib) apps ls mkShellScript;
-  coffee = mkShellScript { name = "coffee"; text = ./bin/coffee.sh; };
-
+{ pkgs, lib, ... }: let 
+  inherit (lib) ls;
 in {
 
   # Packages
@@ -18,33 +15,18 @@ in {
     # yt-dlp -f mp4-240p -x --audio-format mp3 https://rumble.com/...
     yt-dlp 
 
-    # tdesktop slack
     isy micro 
-    # jetbrains-mono
     gst_all_1.gst-libav
-    # libsForQt5.kdenlive
 
-    # junction 
-    bin-foo bin-bar coffee
-
-    # Re-enable these after this is fixed:
-    # https://github.com/NixOS/nixpkgs/issues/332957
-    # quickemu lapce tauon 
-
-    shotcut
-    davinci-resolve
+    junction 
+    bin-foo bin-bar
 
   ];
 
-  # programs.bluebubbles.enable = true;
   programs.foot.enable = false;
-  # programs.gimp.enable = true;
   programs.git.enable = true;
   programs.tmux.enable = true;
-  programs.wezterm.enable = false;
-  # programs.yazi.enable = true;
   programs.zsh.enable = true;
-  # programs.zwift.enable = true;
 
   programs.chromium = {
     enable = true;
