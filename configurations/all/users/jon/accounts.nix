@@ -1,7 +1,7 @@
-{ config, lib, pkgs, this, ... }: let 
+{ config, lib, pkgs, ... }: let 
 
   cfg = config.accounts;
-  inherit (lib) mkIf mkShellScript;
+  inherit (lib) mkForce mkIf mkShellScript;
 
 in {
 
@@ -27,23 +27,37 @@ in {
         esac
       ''; };
 
+    # I've configured Fastmail to syncronize shared calendars from iCloud & Gmail. 
+    # This way, I only need to configure the below calendars to talk to Fastmail
+    # to sync with my computers.
     in {
 
       # Calendars are stored at ~/Calendars
       calendar = {
-        basePath = "Calendars";
-        accounts."Fastmail" = {
+        basePath = ".";
+        accounts."Calendars" = {
           primary = true;
-          primaryCollection = "Family";
-          local = {
-            fileExt = ".ics";
-            type = "filesystem";
-          };
+          primaryCollection = "Personal";
           remote = {
             userName = "suderman@fastmail.com";
             passwordCommand = [ "bash" "${pass}" "fastmail" ];
             url = "https://caldav.fastmail.com/";
             type = "caldav";
+          };
+          local = {
+            fileExt = ".ics";
+            type = "filesystem";
+          };
+          vdirsyncer = {
+            enable = true;
+            collections = [ # Config, Remote, Local
+              [ "Personal" "80287d4d-d09b-4865-b3e0-80e315491c6f" "Personal" ] # Jon@Fastmail
+              [ "Wife" "5d5661e7-8492-4982-b587-52c7cc67a951" "Wife" ] # Janessa@iCloud
+              [ "Family" "d421551e-94f8-4969-9ca2-f78781706030" "Family" ] # Family@iCloud
+              [ "Work" "ed95445c-6ec6-4de0-9615-df506ef0af37" "Work" ] # nonfiction@Gmail
+            ];
+            conflictResolution = "remote wins";
+            metadata = [ "color" "displayname" "description" "order" ];
           };
           khal = {
             enable = true;
@@ -52,16 +66,32 @@ in {
             color = "#ff0000";
           };
           qcal.enable = true; # trying out
+        };
+      };
+
+      # Contacts are stored at ~/Contacts
+      contact = {
+        basePath = ".";
+        accounts."Contacts" = {
+          remote = {
+            userName = "suderman@fastmail.com";
+            passwordCommand = [ "bash" "${pass}" "fastmail" ];
+            url = "https://carddav.fastmail.com/";
+            type = "carddav";
+          };
+          local = {
+            type = "filesystem";
+            fileExt = ".vcf";
+          };
           vdirsyncer = {
             enable = true;
-            collections = [ "from a" "from b" ];
-            metadata = [ "color" "displayname" ];
-            # itemTypes = [ "VEVENT" ];
-            # timeRange = {
-            #   start = "datetime.now() - timedelta(days=7)";
-            #   end = "datetime.now() + timedelta(days=30)";
-            # };
+            collections = [
+              [ "Personal" "Default" "Personal" ] # default address book
+              [ "Shared" "masteruser_autoyk908y8@fastmail.com.Shared" "Shared" ]
+            ];
+            conflictResolution = "remote wins";
           };
+          khard.enable = true;
         };
       };
 
@@ -69,7 +99,7 @@ in {
       email.maildirBasePath = "Mail";
 
       # Personal email
-      email.accounts."Fastmail" = rec {
+      email.accounts."Personal" = rec {
         userName = "suderman@fastmail.com";
         passwordCommand = [ "bash" "${pass}" "fastmail" ];
         flavor = "fastmail.com";
@@ -103,7 +133,7 @@ in {
       };
 
       # Work email
-      email.accounts."Gmail" = rec {
+      email.accounts."Work" = rec {
         userName = "jon@nonfiction.ca";
         passwordCommand = [ "bash" "${pass}" "gmail" ];
         flavor = "gmail.com";
@@ -142,6 +172,7 @@ in {
 
     # IMAP sync
     programs.mbsync.enable = true;
+    services.mbsync.enable = true;
 
     # SMTP client
     programs.msmtp.enable = true; # neomutt will send via msmtp by default if enable
@@ -154,23 +185,38 @@ in {
 
     # DAV sync
     programs.vdirsyncer.enable = true;
+    services.vdirsyncer.enable = true;
 
     programs.qcal.enable = true;
     programs.khal = {
       enable = true;
       settings = {
-        # default.default_calendar = "Family";
+        default.default_calendar = "Personal";
         default.default_event_duration = "30m";
       };
     };
 
     # Address book
-    programs.khard = {
-      enable = true;
-      settings = {
-        general.default_action = "list";
-      };
-    };
+    programs.khard.enable = true;
+    xdg.configFile."khard/khard.conf".text = mkForce ''
+      [addressbooks]
+      [[personal]]
+      path = ${config.home.homeDirectory}/Contacts/Personal/
+      [[shared]]
+      path = ${config.home.homeDirectory}/Contacts/Shared/
+
+      [general]
+      default_action=list
+      editor=nvim, -i, NONE
+
+      [contact table]
+      display=formatted_name
+      preferred_email_address_type=pref, work, home
+      preferred_phone_number_type=pref, cell, home
+
+      [vcard]
+      private_objects=Jabber, Skype, Twitter
+    '';
 
   };
 
