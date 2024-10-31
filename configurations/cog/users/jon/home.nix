@@ -29,7 +29,10 @@ in {
   home.packages = with pkgs; [ 
     loupe
     cantarell-fonts
+    pkgs.stable.calcure
   ];
-
+  
+  # Enable email/calendars/contacts
+  accounts.enable = true;
 
 }

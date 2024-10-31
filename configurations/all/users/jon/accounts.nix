@@ -62,8 +62,8 @@ in {
           khal = {
             enable = true;
             type = "discover"; # calendar, birthdays, discover
-            priority = 1000;
-            color = "#ff0000";
+            # priority = 1000;
+            # color = "#ff0000";
           };
           qcal.enable = true; # trying out
         };
@@ -191,8 +191,37 @@ in {
     programs.khal = {
       enable = true;
       settings = {
-        default.default_calendar = "Personal";
-        default.default_event_duration = "30m";
+        default = {
+          default_calendar = "Personal";
+          # default_event_alarm = "15m";
+          default_event_duration = "30m";
+          highlight_event_days = true;
+          show_all_days = true; # show days without events too
+          timedelta = "7d"; # show 1 week into the future
+        };
+        keybindings = {
+          external_edit = "e";
+          export = "w";
+          save = "meta w";
+        };
+        highlight_days = {
+          method = "fg";
+          multiple = "#0000FF";
+          multiple_on_overflow = true;
+        };
+        view = {
+          dynamic_days = false;
+          event_view_always_visible = true;
+          frame = "color";
+        };
+        # palette = {
+        #   header = "'white', 'dark green', default, '#DDDDDD', '#2E7D32'";
+        #   "line header" = "'white', 'dark green', default, '#DDDDDD', '#2E7D32'";
+        #   footer = "'white', 'black', bold, '#DDDDDD', '#43A047'";
+        #   edit = "'white', 'black', default, '#DDDDDD', '#333333'";
+        #   "edit focus" = "'white', 'light green', 'bold'";
+        #   button = "'black', 'red'";
+        # };
       };
     };
 

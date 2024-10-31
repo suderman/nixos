@@ -38,6 +38,9 @@ in {
 
     gnome-disk-utility
 
+    asunder
+    lame
+
   ];
 
   programs.bluebubbles.enable = true;
