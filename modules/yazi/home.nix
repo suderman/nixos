@@ -9,7 +9,14 @@ in {
   config = mkIf cfg.enable {
 
     programs.yazi = {
-      package = pkgs.unstable.yazi;
+
+      # TODO: Try removing this override on next flake update
+      # https://github.com/NixOS/nixpkgs/issues/353119#issuecomment-2453521926
+      package = pkgs.yazi.override {
+        _7zz = (pkgs._7zz.override { useUasm = true; });
+      };
+      # package = pkgs.unstable.yazi;
+
       enableBashIntegration = true;
       enableZshIntegration = true;
       enableNushellIntegration = true;

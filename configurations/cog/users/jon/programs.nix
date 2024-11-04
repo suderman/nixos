@@ -23,7 +23,7 @@ in {
     gst_all_1.gst-libav
     libsForQt5.kdenlive
 
-    _1password _1password-gui darktable digikam
+    _1password-cli _1password-gui darktable digikam
     inkscape junction libreoffice newsflash
     unstable.nodePackages_latest.immich
 

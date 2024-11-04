@@ -10,9 +10,9 @@
   boot.loader.systemd-boot.consoleMode = "max";
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Use freshest kernel
-  # boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.kernelPackages = pkgs.linuxPackages_6_10; # 6.11 broken
+  # Linux kernel (often have to manage this for nvidia compatibility)
+  # boot.kernelPackages = pkgs.linuxPackages_latest; # 6.11 broken with nvidia 560.35.03
+  boot.kernelPackages = pkgs.linuxPackages_6_6; # LTS kernel, previously used 6.10 but is now EOL
 
   # Sound & Bluetooth
   hardware.bluetooth.enable = true;

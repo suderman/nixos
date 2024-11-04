@@ -49,7 +49,7 @@ in {
       wl-clipboard # copying and pasting
       hyprpicker  # color picker
       hyprcursor
-      wf-recorder # screen recording
+      # wf-recorder # screen recording - broken?
       grim # taking screenshots
       slurp # selecting a region to screenshot
       xorg.xeyes # confirm xwayland

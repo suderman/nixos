@@ -23,7 +23,7 @@ in {
     gst_all_1.gst-libav
     libsForQt5.kdenlive
 
-    _1password _1password-gui 
+    _1password-cli _1password-gui 
     junction 
 
     bin-foo bin-bar coffee

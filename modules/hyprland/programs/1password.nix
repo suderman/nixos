@@ -2,7 +2,7 @@
   config = lib.mkIf config.wayland.windowManager.hyprland.enable {
 
     home.packages = with pkgs; [ 
-      _1password 
+      _1password-cli
       _1password-gui 
     ];
 
