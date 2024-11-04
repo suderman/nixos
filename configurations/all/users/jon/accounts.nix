@@ -202,7 +202,8 @@ in {
         keybindings = {
           external_edit = "e";
           export = "w";
-          save = "meta w";
+          save = "meta w,<0>";
+          view = "enter, ";
         };
         highlight_days = {
           method = "fg";

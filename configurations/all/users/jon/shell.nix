@@ -24,6 +24,8 @@
     });
   };
 
+  programs.zoxide.enable = true;
+
   programs.less.enable = true;
   programs.lesspipe.enable = true;
 

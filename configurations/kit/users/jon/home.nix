@@ -24,6 +24,7 @@
   
   home.packages = with pkgs; [ 
     loupe
+    pkgs.stable.calcure
   ];
 
   # Enable email/calendars/contacts

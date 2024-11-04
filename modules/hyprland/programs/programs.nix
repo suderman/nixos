@@ -24,6 +24,11 @@ in {
   # Programs and packages required by my Hyprland
   config = mkIf config.wayland.windowManager.hyprland.enable {
 
+    xdg.mime.enable = true;
+    xdg.mimeApps = {
+      enable = true;
+    };
+
     # Check modules directory for extra configuration
     programs = {
       kitty.enable = true; # term
