@@ -9,7 +9,7 @@ in {
   config = mkIf cfg.enable {
     wayland.windowManager.hyprland = {
 
-      plugins = [ pkgs.hyprlandPlugins.hyprbars ];
+      plugins = mkIf cfg.enablePlugins [ pkgs.hyprlandPlugins.hyprbars ];
 
       settings = {
         "plugin:hyprbars" = {
@@ -36,7 +36,10 @@ in {
         }; 
 
         # Hide bars when floating windows are unfocussed
-        windowrulev2 = [ "plugin:hyprbars:nobar, focus:0, floating:1" ];
+        windowrulev2 = [ 
+          "plugin:hyprbars:nobar, floating:0" # disable hyprbars for tiling windows
+          "plugin:hyprbars:nobar, floating:1, focus:0 " # disable hyprbars for unfocussed floating windows 
+        ];
 
         bind = [
 

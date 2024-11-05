@@ -8,8 +8,8 @@ in {
   config = mkIf cfg.enable {
     wayland.windowManager.hyprland = {
 
-      plugins = [ pkgs.hyprlandPlugins.hyprexpo ];
-        
+      plugins = mkIf cfg.enablePlugins [ pkgs.hyprlandPlugins.hyprexpo ];
+         
       settings = {
         "plugin:hyprexpo" = {
 
@@ -25,8 +25,8 @@ in {
 
         }; 
 
-        bind = [
-          "super, 0, hyprexpo:expo, toggle"
+        bind = mkIf cfg.enablePlugins [ 
+          "super, 0, hyprexpo:expo, toggle" 
         ];
 
       };

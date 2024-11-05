@@ -13,10 +13,14 @@ in {
     # https://github.com/hyprwm/Hyprland/blob/main/nix/hm-module.nix
     [ inputs.hyprland.homeManagerModules.default ];
 
-  options.wayland.windowManager.hyprland.systemd.target = mkOption {
-    type = types.str;
-    default = "hyprland-ready.target";
+  options.wayland.windowManager.hyprland = {
+    enablePlugins = lib.options.mkEnableOption "enablePlugins";
+    systemd.target = mkOption {
+      type = types.str;
+      default = "hyprland-ready.target";
+    };
   };
+
 
   config = mkIf oscfg.enable {
 
@@ -52,7 +56,7 @@ in {
         ];
       };
 
-      plugins = with pkgs.hyprlandPlugins; [ 
+      plugins = with pkgs.hyprlandPlugins; mkIf cfg.enablePlugins [ 
         # hypr-dynamic-cursors
       ];
 
