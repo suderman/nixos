@@ -25,15 +25,6 @@ in {
   # Configuration for all normal users 
   config = {
 
-    # Reserve user ids, fallback on null
-    ids.uids = {
-      jon = 1000;
-      ness = 1001;
-      me = 1002;
-    };
-
-    # hm = x: config.home-manager.users."${config.user}";
-
     # Add all users found in configurations/*/users/*
     users.users = mkAttrs this.users (user: { 
       uid = with config.ids; if hasAttr user uids then uids."${user}" else null;
