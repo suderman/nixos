@@ -10,6 +10,7 @@
   cloudflare-env = ./cloudflare-env.age;
   emails-jon = ./emails-jon.age;
   isy-env = ./isy-env.age;
+  mopidy = ./mopidy.age;
   ocis-env = ./ocis-env.age;
   password = ./password.age;
   password-hash = ./password-hash.age;

@@ -22,7 +22,7 @@
   services.pipewire.enable = true;
   security.rtkit.enable = true;
   hardware.bluetooth.enable = true;
-  services.mpd.enable = true;
+  services.mpd.enableUser = true;
 
   # framework_tool
   environment.systemPackages = with pkgs; [

@@ -21,7 +21,7 @@ in {
       enableZshIntegration = true;
       enableNushellIntegration = true;
       enableFishIntegration = true;
-      shellWrapperName = "y";
+      # shellWrapperName = "y";
 
       settings.manager = {
         sort_dir_first = true;

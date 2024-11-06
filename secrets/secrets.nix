@@ -88,4 +88,6 @@ with (import ./keys); {
 
   "files/password-jon-icloud.age".publicKeys = all;
 
+  "files/mopidy.age".publicKeys = all;
+
 }
