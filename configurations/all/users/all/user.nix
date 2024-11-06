@@ -1,12 +1,22 @@
 { config, osConfig, lib, pkgs, this, ... }: {
 
+  # Lookup uid from configurations/all/uids.nix and assign to config.home.uid
   options.home.uid = let 
     inherit (lib) hasAttr mkOption types;
     inherit (config.home) username;
     inherit (osConfig.ids) uids;
   in mkOption {
-    type = with lib.types; nullOr int;
+    type = with types; nullOr int;
     default = if hasAttr username uids then uids."${username}" else null;
+  };
+
+  # Calculate offet added to ports (uid - 1000) and assign to config.home.offset
+  options.home.offset = let 
+    inherit (lib) mkOption types;
+    uid = if config.home.uid == null then 1000 else config.home.uid;
+  in mkOption {
+    type = with types; nullOr int;
+    default = if uid >= 1000 then uid - 1000 else 0;
   };
 
   # ---------------------------------------------------------------------------

@@ -17,4 +17,6 @@
     yazi.enable = true;
   };
 
+  services.mpd.enable = true;
+
 }

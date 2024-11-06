@@ -1,11 +1,17 @@
-{ config, osConfig, lib, pkgs, ... }: let
+{ config, lib, pkgs, ... }: let
 
-  cfg = osConfig.services.mpd;
+  cfg = config.services.mpd;
+  inherit (config.home) offset;
   inherit (lib) mkIf;
 
 in {
 
-  config = mkIf cfg.enableUser {
+  config = mkIf cfg.enable {
+
+    # NCurses Music Player Client (Plus Plus) is a lot
+    home.shellAliases = {
+      mp = "ncmpcpp"; # mp for Music Player
+    };
 
     programs.ncmpcpp = {
       enable = true;
@@ -30,11 +36,14 @@ in {
         # lyrics_fetchers = "musixmatch";
 
         # visualizer
-        visualizer_data_source = "/tmp/mpd.fifo";
+        visualizer_data_source = "/tmp/mpd${toString offset}.fifo";
         visualizer_output_name = "mpd_visualizer";
-        visualizer_type = "ellipse";
-        visualizer_look = "●●";
-        visualizer_color = "blue, green";
+        visualizer_fps = 60;
+        visualizer_in_stereo = "yes";
+        visualizer_type = "spectrum"; # off wave ellipse spectrum
+        visualizer_look = "●▮";
+        visualizer_color = "47, 83, 119, 155, 191, 227, 221, 215, 209, 203, 197, 161";
+        visualizer_spectrum_smooth_look = "yes";
 
         # appearance
         playlist_display_mode = "classic";

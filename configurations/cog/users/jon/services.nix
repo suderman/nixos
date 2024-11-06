@@ -11,6 +11,9 @@
   # File sync
   services.ocis.enable = true;
 
+  # Music daemon
+  services.mpd.enable = true;
+
   # Custom user service
   systemd.user.services.foobar-hm = {
     Unit = {

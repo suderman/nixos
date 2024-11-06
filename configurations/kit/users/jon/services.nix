@@ -11,4 +11,7 @@
   # File sync
   services.ocis.enable = true;
 
+  # Music daemon
+  services.mpd.enable = true;
+
 }

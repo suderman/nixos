@@ -18,7 +18,6 @@
   hardware.bluetooth.enable = true;
   services.pipewire.enable = true;
   security.rtkit.enable = true;
-  services.mpd.enableUser = true;
 
   # Memory management
   services.earlyoom.enable = true;
