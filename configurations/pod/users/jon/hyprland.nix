@@ -5,7 +5,7 @@
   };
 
   # Set to false if plugins barf notification errors
-  wayland.windowManager.hyprland.enablePlugins = true;
+  wayland.windowManager.hyprland.enablePlugins = false;
 
   programs.rofi = {
     extraSinks = [ "bluez_output.AC_3E_B1_9F_43_35.1" ]; # pixel buds pro
