@@ -33,7 +33,7 @@ in {
     wayland.windowManager.hyprland.settings = {
       bind = with pkgs; [
 
-        # Bluetooth connection
+        # shift+media to manage bluetooth connections
         "shift, XF86AudioMedia, exec, export addr=$(bluetoothctl devices | rofi-toggle -dmenu | cut -d' ' -f2); bluetoothctl unblock $addr; bluetoothctl connect $addr"
 
       ];
