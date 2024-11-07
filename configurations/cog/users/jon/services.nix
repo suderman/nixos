@@ -12,7 +12,12 @@
   services.ocis.enable = true;
 
   # Music daemon
-  services.mpd.enable = true;
+  services.mpd = {
+    enable = true;
+    # musicDirectory = config.xdg.userDirs.music;
+    musicDirectory = "/media/music";
+    proxy = "lux";
+  };
 
   # Custom user service
   systemd.user.services.foobar-hm = {

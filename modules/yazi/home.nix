@@ -1,5 +1,5 @@
 # programs.yazi.enable = true;
-{ config, lib, pkgs, ... }: let 
+{ config, lib, pkgs, this, ... }: let 
 
   cfg = config.programs.yazi;
   inherit (lib) mkIf;
@@ -12,16 +12,14 @@ in {
 
       # TODO: Try removing this override on next flake update
       # https://github.com/NixOS/nixpkgs/issues/353119#issuecomment-2453521926
-      package = pkgs.yazi.override {
-        _7zz = (pkgs._7zz.override { useUasm = true; });
+      package = if this.stable then pkgs.yazi else pkgs.yazi.override {
+        _7zz = ( pkgs._7zz.override { useUasm = true; } );
       };
-      # package = pkgs.unstable.yazi;
 
       enableBashIntegration = true;
       enableZshIntegration = true;
       enableNushellIntegration = true;
       enableFishIntegration = true;
-      # shellWrapperName = "y";
 
       settings.manager = {
         sort_dir_first = true;
@@ -41,7 +39,9 @@ in {
         { run = "remove --force"; on = [ "d" ]; }
       ];
 
-    };
+    } // (if this.stable then {} else {
+      shellWrapperName = "y"; # doesn't yet exist in stable
+    });
 
   };
 

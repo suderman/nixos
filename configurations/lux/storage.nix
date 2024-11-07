@@ -99,6 +99,11 @@ in {
     options = bind ++ automount;
   };
 
+  services.nfs.server = {
+    enable = true;
+    exports = "/media *(rw,fsid=1,insecure,no_subtree_check)";
+  };
+
   # # Services that depend on this mount may need the following
   # systemd.services.my-app = {
   #   requires = [ "mnt-raid.mount" ];

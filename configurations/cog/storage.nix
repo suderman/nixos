@@ -1,4 +1,4 @@
-{ config, ... }: let 
+{ config, pkgs, ... }: let 
 
   automount = [ 
     "noauto"                       # do not mount on boot
@@ -6,6 +6,13 @@
     "x-systemd.automount"          # create automount unit to mount when accessed
     "x-systemd.device-timeout=1ms" # assume device is already plugged in and do not wait
     "x-systemd.idle-timout=5m"     # unmount after 5 min of inactivity
+  ];
+  nfs = [ 
+    "noauto"                       # do not mount on boot
+    "nofail"                       # continue boot even if disk is missing
+    "x-systemd.automount"          # create automount unit to mount when accessed
+    "x-systemd.idle-timout=5m"     # unmount after 5 min of inactivity
+    "_netdev"                      # mark as network device
   ];
   btrfs = [ 
     "compress=zstd"                # enable zstd compression
@@ -20,6 +27,14 @@ in {
   # Btrfs mount options
   fileSystems."/".options = btrfs;
   fileSystems."/nix".options = btrfs;
+
+  # Media network share
+  # -------------------------------------------------------------------------
+  fileSystems."/media" = {
+    device = "lux:/media"; 
+    fsType = "nfs";
+    options = nfs;
+  };
 
   # # USB drive backup (work)
   # # -------------------------------------------------------------------------

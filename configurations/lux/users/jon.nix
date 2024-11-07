@@ -17,6 +17,9 @@
     yazi.enable = true;
   };
 
-  services.mpd.enable = true;
-
+  # Music daemon
+  services.mpd = {
+    enable = true;
+    musicDirectory = "/media/music";
+  };
 }
