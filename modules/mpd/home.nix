@@ -25,9 +25,11 @@ in {
       network.port = mdpPort + offset; # 6600 (or 6601, 6602, etc)
       dbFile = if cfg.proxy == "" then "${cfg.dataDir}/tag_cache" else null;
       extraConfig = ''
+        restore_paused "yes"
+        auto_update "yes"
         audio_output {
-          type            "pulse"
-          name            "PulseAudio"
+          type            "pipewire"
+          name            "PipeWire"
         }
         audio_output {
           type            "fifo"
@@ -38,11 +40,13 @@ in {
         audio_output {
           type            "httpd"
           name            "HTTP stream"
-          encoder         "vorbis" # vorbis, mp3, flac
           bind_to_address "0.0.0.0"
           port            "${toString( httpPort + offset )}" 
-          quality         "4.0"      
+          encoder         "opus" # vorbis, mp3, flac
+          bitrate         "128000" 
           format          "44100:16:2"
+          always_on       "yes"
+          tags            "yes"
         }
       '' + ( if cfg.proxy == "" then "" else ''
         database {
@@ -53,8 +57,12 @@ in {
       '' );
     };
 
+    services.mpd-mpris.enable = true;
+    services.mpris-proxy.enable = true;
+
     home.packages = with pkgs; [ 
       mpc-cli
+      mpd-notification
     ];
 
   };

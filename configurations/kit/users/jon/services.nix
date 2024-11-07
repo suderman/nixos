@@ -12,6 +12,10 @@
   services.ocis.enable = true;
 
   # Music daemon
-  services.mpd.enable = true;
+  services.mpd = {
+    enable = true;
+    musicDirectory = "/media/music";
+    proxy = "lux";
+  };
 
 }

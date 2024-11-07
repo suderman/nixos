@@ -36,6 +36,7 @@ in {
       password = mkIf (!age.enable) "${user}";
       extraGroups = ifAdmin user ([ "wheel" ] ++ ifTheyExist [ "networkmanager" "docker" "media" "photos" ]);
       openssh.authorizedKeys.keys = keys.users.all;
+      linger = true; # start/stop systemd user units at boot/shutdown instead of user login/logout
     }); 
 
     # GIDs 900-909 are custom shared groups in my flake                                                                                                                                   
