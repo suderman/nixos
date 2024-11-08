@@ -124,7 +124,7 @@ in {
         { key = "+"; command = [ "show_clock" ]; }
         { key = "s"; command = [ "stop" ]; }
         { key = "p"; command = [ "pause" ]; }
-        { key = "space"; command = [ "pause" ]; }
+        # { key = "space"; command = [ "pause" ]; }
         { key = ">"; command = [ "next" ]; }
         { key = "<"; command = [ "previous" ]; }
         { key = "backspace"; command = [ "jump_to_parent_directory" ]; }

@@ -25,12 +25,15 @@
       # Fn keypad as media keys
       # [+] next song
       # [-] previous song
-      # [*] play pause
+      # [*] play-pause
       # [/] media program 
       kpplus = "nextsong";
       kpminus = "previoussong";
       kpasterisk = "playpause";
       kpslash = "media";
+
+      # Pause/Break key as media play-pause
+      pause = "playpause";
 
       # Both volume keys together trigger media key
       "volumedown+volumeup" = "media";
