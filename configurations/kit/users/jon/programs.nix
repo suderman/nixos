@@ -21,6 +21,8 @@ in {
     junction 
     bin-foo bin-bar
 
+    shizuku # connect android to pc and run
+
   ];
 
   programs.foot.enable = false;

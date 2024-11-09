@@ -37,7 +37,8 @@ in {
         disable_ligatures = "cursor"; 
 
         # Window layout
-        background_opacity = "0.95";
+        # background_opacity = "0.95";
+        background_opacity = "0.85";
         hide_window_decorations = "titlebar-only";
         remember_window_size = "no";
         window_padding_width = 0;

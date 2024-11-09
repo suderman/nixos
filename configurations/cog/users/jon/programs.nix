@@ -41,6 +41,8 @@ in {
     asunder
     lame
 
+    shizuku # connect android to pc and run
+
   ];
 
   programs.bluebubbles.enable = true;
