@@ -5,6 +5,7 @@
   inherit (lib) mkIf ls mkDefault mkOption types;
   mdpPort = 6600; # default port for mpd
   httpPort = 8600; # default port for http streaming
+  snapPort = 1704; # default port for snapcast server stream
 
 in {
 
@@ -53,6 +54,19 @@ in {
           always_on       "yes"
           tags            "yes"
         }
+        # audio_output {
+        #   type            "snapcast"
+        #   name            "Snapcast"
+        #   port            "${toString( snapPort + offset )}" 
+        #   format          "44100:16:2"
+        # }
+        # audio_output {
+        #   type            "fifo"
+        #   name            "Snapserver"
+        #   format          "44100:16:2"
+        #   path            "/run/snapserver/pipe"
+        #   mixer_type      "software"
+        # }
       '' + ( if cfg.proxy == "" then "" else ''
         database {
           plugin "proxy"

@@ -44,9 +44,12 @@ in {
         statusbar_color = "white";
 
         # progress bar
-        progressbar_color = "cyan";
-        progressbar_elapsed_color = "white";
-        progressbar_look =  "=>-";
+        progressbar_look = "━━━";
+        progressbar_color = "black";
+        progressbar_elapsed_color = "blue";
+        # progressbar_color = "cyan";
+        # progressbar_elapsed_color = "white";
+        # progressbar_look =  "=>-";
 
         # current item
         current_item_prefix = "$(blue)$r";
