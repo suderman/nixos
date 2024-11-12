@@ -112,9 +112,15 @@ in {
         { key = "l"; command = [ "next_column" ]; } # right
         { key = "l"; command = [ "enter_directory" ]; } # right
         { key = "l"; command = [ "run_action" ]; } # right
+        { key = "right"; command = [ "next_column" ]; } # right
+        { key = "right"; command = [ "enter_directory" ]; } # right
+        { key = "right"; command = [ "run_action" ]; } # right
         { key = "h"; command = [ "reset_search_engine" ]; } # left
         { key = "h"; command = [ "previous_column" ]; } # left
         { key = "h"; command = [ "jump_to_parent_directory" ]; } # left
+        { key = "left"; command = [ "reset_search_engine" ]; } # left
+        { key = "left"; command = [ "previous_column" ]; } # left
+        { key = "left"; command = [ "jump_to_parent_directory" ]; } # left
         { key = "j"; command = [ "scroll_down" ]; } # down
         { key = "k"; command = [ "scroll_up" ]; } # up
         { key = "J"; command = [ "select_item" "scroll_down" ]; }
