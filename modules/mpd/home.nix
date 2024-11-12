@@ -29,6 +29,7 @@ in {
         restore_paused "yes"
         auto_update "yes"
         max_output_buffer_size "262144"
+        replaygain "auto" # adjust volume by track if shuffle, else album
         input {
           plugin "youtube-dl"
           executable "${pkgs.yt-dlp}/bin/yt-dlp"
@@ -82,6 +83,7 @@ in {
     home.packages = with pkgs; [ 
       mpc-cli
       mpd-notification
+      rsgain # rsgain easy /media/music
     ];
 
   };
