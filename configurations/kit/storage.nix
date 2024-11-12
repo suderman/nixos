@@ -11,8 +11,12 @@
     "noauto"                       # do not mount on boot
     "nofail"                       # continue boot even if disk is missing
     "x-systemd.automount"          # create automount unit to mount when accessed
-    "x-systemd.idle-timout=5m"     # unmount after 5 min of inactivity
+    "x-systemd.idle-timout=1m"     # unmount after 1 min of inactivity
     "_netdev"                      # mark as network device
+    "fsc"                          # local cache
+    "rsize=65536" "wsize=65536"    # max read/write size 64 KB
+    "soft"                         # allow client to give up operations
+    "x-systemd.mount-timeout=10"   # give up attempting to mount after 10 seconds
   ];
   btrfs = [ 
     "compress=zstd"                # enable zstd compression
@@ -35,6 +39,9 @@ in {
     fsType = "nfs";
     options = nfs;
   };
+
+  # allow fsc option
+  services.cachefilesd.enable = true;
 
   # Additional SSD disk
   # -------------------------------------------------------------------------
