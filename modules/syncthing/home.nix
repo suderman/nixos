@@ -30,7 +30,7 @@ in {
       Service = {
         Type = "simple";
         ExecStart = with pkgs; writeShellScript "syncthing-config" ''
-          PATH=${lib.makeBinPath [ syncthing ]}
+          PATH=${lib.makeBinPath [ syncthing coreutils ]}
           sleep 10 # allow syncthing time to initialize
           syncthing cli config options raw-listen-addresses 0 delete
           syncthing cli config options raw-listen-addresses 0 delete

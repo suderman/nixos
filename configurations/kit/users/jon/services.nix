@@ -10,6 +10,7 @@
 
   # File sync
   services.ocis.enable = true;
+  services.syncthing.enable = true;
 
   # Music daemon
   services.mpd = {
