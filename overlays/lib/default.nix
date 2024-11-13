@@ -8,7 +8,7 @@
   # Merge with existing this
   this = recursiveUpdate pkgs.this { lib = let
 
-    inherit (builtins) attrNames filter hasAttr hasSuffix isString pathExists readDir stringLength;
+    inherit (builtins) attrNames attrValues filter hasAttr hasSuffix isString pathExists readDir stringLength;
     inherit (lib) filterAttrs flatten removePrefix removeSuffix replaceStrings toLower unique;
     inherit (pkgs) this callPackage stdenv;
 
@@ -38,6 +38,9 @@
 
     # Trim newlines from beginning and end of string
     trim = text: removePrefix "\n" ( removeSuffix "\n" text );
+
+    # List of home-manager users that match provided filter function
+    filterUsers = fn: cfg: filter fn (if cfg ? home-manager then attrValues cfg.home-manager.users else []);
 
     # Return pair of modules to import which disables the stable module and replaces it with unstable
     destabilize = input: path: let 
