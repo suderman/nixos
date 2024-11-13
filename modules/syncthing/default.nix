@@ -1,6 +1,6 @@
 { config, lib, this, ... }: let
 
-  inherit (lib) attrValues filter filterUsers map mkAttrs removePrefix;
+  inherit (lib) filterUsers listToAttrs map;
   syncPort = 22000; # tcp/udp
   webguiPort = 8384; # tcp
   discoveryPort = 21027; # udp
@@ -28,11 +28,9 @@ in {
   };
 
   # Enable reverse proxy { "syncthing-jon" = "http://cog:8384"; }
-  services.traefik.proxy = mkAttrs 
-    ( map( user: "syncthing-${user.home.username}" ) users ) 
-    ( subdomain: let 
-        user = removePrefix "syncthing-" subdomain;
-        inherit (config.home-manager.users."${user}".home) offset;
-      in "http://${this.hostName}:${toString( webguiPort + offset )}" );
+  services.traefik.proxy = listToAttrs( map( user: with user.home; {
+    name = "syncthing-${username}";
+    value = "http://${hostName}:${toString( webguiPort + offset )}";
+  } ) users );
 
 }

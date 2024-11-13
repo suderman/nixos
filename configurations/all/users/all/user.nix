@@ -19,6 +19,12 @@
     default = if uid >= 1000 then uid - 1000 else 0;
   };
 
+  # Convenience shortcut to user's hostName
+  options.home.hostName = lib.mkOption {
+    type = lib.types.str;
+    default = this.hostName;
+  };
+
   # ---------------------------------------------------------------------------
   # User Configuration
   # ---------------------------------------------------------------------------

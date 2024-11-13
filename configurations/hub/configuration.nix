@@ -28,10 +28,12 @@
   services.grafana.enable = true;
 
   # Serve CA cert on http://10.1.0.4:1234
-  services.traefik = {
-    enable = true;
-    caPort = 1234;
-  };
+  services.traefik.enable = true;
+  services.traefik.caPort = 1234;
+
+  # Reverse proxy for termux syncthing webgui running on my phone
+  services.traefik.proxy."syncthing-jon.phone" = "http://phone.tail:8384";
+  services.traefik.extraInternalHostNames = [ "syncthing-jon.phone" ];
 
   # LAN controller
   services.unifi = with this.networks; {
