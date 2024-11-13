@@ -1,4 +1,4 @@
-{ config, lib, pkgs, this, ... }: let
+{ config, lib, pkgs, ... }: let
 
   cfg = config.services.syncthing;
   inherit (config.home) offset;
@@ -14,7 +14,7 @@ in {
     services.syncthing = {
       tray.enable = false;
       extraOptions = [ 
-        "--gui-address=http://${this.hostName}:${toString( webguiPort + offset )}"
+        "--gui-address=http://0.0.0.0:${toString( webguiPort + offset )}"
         "--no-default-folder"
       ];
     };
