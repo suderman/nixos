@@ -28,6 +28,7 @@ in {
         { plugin = neoscroll-nvim; config = builtins.readFile ./neoscroll.vim; }
         { plugin = vim-tmux-navigator; config = builtins.readFile ./vim-tmux-navigator.vim; }
         { plugin = fzf-lua; config = builtins.readFile ./fzf-lua.vim; }
+        { plugin = orgmode; config = builtins.readFile ./orgmode.vim; }
         nerdtree-git-plugin
         nvim-web-devicons
         vim-surround
@@ -47,7 +48,7 @@ in {
           src = pkgs.fetchFromGitHub {
             owner = "theRealCarneiro";
             repo = "hyprland-vim-syntax";
-            rev = "254df6b476db5784bc6bfe3f612129b73dfc43b5";
+            rev = "71760fe0cad972070657b0528f48456f7e0027b2";
             sha256 = "sx1NWPrZeA2J7D3k69GweeubqFSloytktAKd4eGiV6c=";
           };
         })

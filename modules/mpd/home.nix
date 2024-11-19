@@ -84,6 +84,7 @@ in {
       mpc-cli
       mpd-notification
       rsgain # rsgain easy /media/music
+      mpa # add streams to mpd using yt-dlp
     ];
 
   };
