@@ -49,7 +49,7 @@ in {
             owner = "theRealCarneiro";
             repo = "hyprland-vim-syntax";
             rev = "71760fe0cad972070657b0528f48456f7e0027b2";
-            sha256 = "sx1NWPrZeA2J7D3k69GweeubqFSloytktAKd4eGiV6c=";
+            sha256 = "hleDvq6lbP3KBzu6trV86hZqu8EnAJUatF2USnBQlyI=";
           };
         })
 
