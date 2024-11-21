@@ -59,8 +59,8 @@ in {
         "super+shift, p, pseudo"
         "super+shift, p, pin"
 
-        "super+shift, f, fullscreen, 1"
-        "super+alt, f, fullscreen, 2"
+        # "super+shift, f, fullscreen, 1"
+        # "super+alt, f, fullscreen, 2"
 
         # Move focus with super [hjkl]
         "super, h, movefocus, l"

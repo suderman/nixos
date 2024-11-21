@@ -43,13 +43,13 @@ in {
   # User service runs keyd-application-mapper
   config.systemd.user.services = (if cfg.systemdTarget == "" then {} else {
 
-    keyd-windows.Unit = {
+    keyd.Unit = {
       Description = "Keyd Application Mapper";
       After = [ cfg.systemdTarget ];
       Requires = [ cfg.systemdTarget ];
     };
-    keyd-windows.Install.WantedBy = [ cfg.systemdTarget ];
-    keyd-windows.Service = {
+    keyd.Install.WantedBy = [ cfg.systemdTarget ];
+    keyd.Service = {
       Type = "simple";
       Restart = "always";
       ExecStart = mkShellScript {

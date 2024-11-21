@@ -29,6 +29,14 @@ in {
           "super, 0, hyprexpo:expo, toggle" 
         ];
 
+        bindsn = [
+          
+          # Toggle expo with super+semicolon+apostrophe ([;'] same-time)
+          "super_l, semicolon&apostrophe, hyprexpo:expo, toggle"
+          "super_r, semicolon&apostrophe, hyprexpo:expo, toggle"
+
+        ];
+
       };
 
     };

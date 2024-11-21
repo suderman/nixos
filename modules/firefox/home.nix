@@ -76,7 +76,6 @@ in {
     services.keyd.windows."${mkClass class}" = {
       "alt.f" = "C-f"; # find in page
       "super.o" = "C-l"; # location bar
-      "super.f" = "C-f"; # new tab
       "super.t" = "C-t"; # new tab
       "super.w" = "C-w"; # close tab
       "super.[" = "C-pageup"; # prev tab

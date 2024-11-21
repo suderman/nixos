@@ -47,7 +47,9 @@ in {
           "super, q, exec, hypr-togglegrouporkill"
 
           # Toggle floating or tiled windows
-          "alt, space, exec, hypr-togglefloatingorsplit"
+          "super, slash, exec, hypr-togglefloatingorsplit left" # toggle floating/tiled
+          "super+shift, f, exec, hypr-togglefloatingorsplit left"
+          "super+alt, slash, exec, hypr-togglefloatingorsplit right" # toggle pin/split
 
           # Prev window in group with super+comma [<]
           "super, comma, changegroupactive, b"
@@ -58,13 +60,11 @@ in {
           "super, period, lockactivegroup, lock"
 
           # Fullscreen toggle
-          "alt, z, exec, hypr-togglefullscreenorspecial left" # fullscreen 1 (zoom window)
-          "shift+alt, z, exec, hypr-togglefullscreenorspecial middle" # fullscreen 0 (no waybar)
-          "alt, return, exec, hypr-togglefullscreenorspecial middle" 
+          "super, f, exec, hypr-togglefullscreenorspecial left" # fullscreen 1 (focus)
+          "super+alt, f, exec, hypr-togglefullscreenorspecial middle" # fullscreen 0 (full)
 
           # Minimize windows (send to special workspace) and restore
-          "alt, escape, exec, hypr-togglefullscreenorspecial right" # movetoworkspacesilent special
-          "super+alt, escape, exec, hypr-togglefullscreenorspecial right"
+          "super+alt, escape, exec, hypr-togglefullscreenorspecial right" # movetoworkspacesilent special
 
           # toggle special workspace
           "super, escape, togglespecialworkspace" 
