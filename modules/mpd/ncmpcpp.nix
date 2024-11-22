@@ -10,7 +10,7 @@ in {
 
     # NCurses Music Player Client (Plus Plus) is a lot
     home.shellAliases = {
-      mpp = "ncmpcpp"; # mp for Music Player
+      pp = "ncmpcpp";
     };
 
     programs.ncmpcpp = {

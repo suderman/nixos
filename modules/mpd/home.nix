@@ -2,10 +2,17 @@
 
   cfg = config.services.mpd;
   inherit (config.home) offset;
-  inherit (lib) mkIf ls mkDefault mkOption types;
+  inherit (lib) mkIf ls mkDefault mkOption mkShellScript types;
   mdpPort = 6600; # default port for mpd
   httpPort = 8600; # default port for http streaming
   snapPort = 1704; # default port for snapcast server stream
+
+  # add streams to mpd using yt-dlp
+  mpc-url = mkShellScript {
+    name = "mpc-url"; 
+    inputs = with pkgs; [ coreutils gawk iconv jq mpc-cli netcat-gnu wget yt-dlp ];
+    text = builtins.readFile ./mpc-url.sh;
+  }; 
 
 in {
 
@@ -82,10 +89,28 @@ in {
 
     home.packages = with pkgs; [ 
       mpc-cli
+      mpc-url # custom
       mpd-notification
       rsgain # rsgain easy /media/music
-      mpa # add streams to mpd using yt-dlp
     ];
+
+    # Watch for mpd playlist changes and update http songs
+    systemd.user.services.mpc-url = {
+      Unit = {
+        Description = "mpc-url loop";
+        After = [ "mpd.service" ];
+        Requires = [ "mpd.service" ];
+      };
+      Install.WantedBy = [ "default.target" ];
+      Service = {
+        Type = "simple";
+        Restart = "always";
+        ExecStart = mkShellScript {
+          inputs = [ mpc-url ];
+          text = "mpc-url loop";
+        };
+      };
+    };
 
   };
 
