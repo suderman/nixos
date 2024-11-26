@@ -1,7 +1,18 @@
 #!/usr/bin/env bash
 
-# First paramater is URL to add or loop for idleloop
-param="${1:-none}"
+if [[ $# -lt 1 ]] || [[ "$1" == "add" ]]; then
+  echo "Usage: mpc-url URL/COMMAND [mpd_host] [mpd_port]"
+  echo " - URL: http/https add song via yt-dlp"
+  echo " - COMMAND: flush/update/loop"
+  exit 1
+fi
+
+# If first paramater is URL, use it as src and set cmd to "add"
+cmd="${1:-none}"
+if [[ $cmd == http* ]]; then
+  src="$cmd"
+  cmd="add"
+fi
 
 # Optional mpd host and port paramaters
 mpd_host="${2:-localhost}"
@@ -14,44 +25,70 @@ mkdir -p $dir
 # Create mpc alias
 alias mpc="mpc --host $mpd_host --port $mpd_port"
 
-# Use yt-dlp to fetch url from src and append src at end as #fragment
-get_url(){
+# Use yt-dlp to fetch title, artist and url from src
+# Save result and return cached value if available
+fetch() {
   src="$1"
-  url="$(yt-dlp -g --audio-format best "$src" | tail -n1)"
-  echo "${url}#${src}"
+  flush="${2-false}" # flush cache for this src, always fetch fresh
+  file="$(echo "$src" | awk '{gsub(/[^a-zA-Z0-9._-]/, "_"); print}')"
+  if [[ ! -e $dir/$file || "$flush" == "true" ]]; then
+    # fetch metadata on first two lines
+    yt-dlp -j $src | jq -r '.title, .uploader' > $dir/$file
+    # fetch url on last line and append src to end as #fragment
+    echo "$(yt-dlp -g --audio-format=best $src | tail -n1)#${src}" >> $dir/$file
+  fi
+  cat $dir/$file
+}
+
+# First line of cache
+fetch_title() {
+  src="$1"
+  flush="${2-false}"
+  clean_tag "$(fetch "$src" "$flush" | head -n1)"
+}
+
+# Second line of cache
+fetch_artist() {
+  src="$1"
+  flush="${2-false}"
+  clean_tag "$(fetch "$src" "$flush" | head -n2 | tail -n1)"
+}
+
+# Last line of cache
+fetch_url() {
+  src="$1"
+  flush="${2-false}"
+  fetch "$src" "$flush" | tail -n1
 }
 
 # Fetch reversed songs in playlist with #http fragment, added to each line as src
-get_songs(){
-  mpc playlist -f "%position% %id% %file%" | awk '/#http/' | while read -r pos id url; do
-    src="${url#*#}"
+list_songs() {
+  mpc playlist -f "%position% %id% %file%" | awk '/https?:\/\//' | while read -r pos id url; do
+    src="${url#*#}" # Look for src at end of url as #fragment
+    [[ -z "$src" ]] && src="${url}" # fallback on url if src is empty
     echo "${pos} ${id} ${url} ${src}" 
   done | tac
 }
 
-# Get current http status code from url
-get_status_code() {
+# Get current http status code and content-type from url, return true if expired (or otherwise invalid) for streaming
+is_invalid() {
   url="$1"
-  wget -q --method=HEAD --server-response $url 2>&1 | awk '/HTTP\// {print $2}'
-}
-
-# Use yt-dlp to fetch title and channel separated by a newline
-get_tags(){
-  src="$1"
-
-  # Save yt-dlp tags in cache on disk
-  cache="$dir/$(echo "$src" | awk '{gsub(/[^a-zA-Z0-9._-]/, "_"); print}')"
-
-  # Populate file if it doesn't exist output the contents
-  if [[ ! -e "$cache" ]]; then
-    yt-dlp -j $src | jq -r '.title, .uploader' > $cache
+  wget -q --method=HEAD --server-response $url 2>&1 \
+    | awk '{gsub(/^[[:space:]]+/,"")} tolower($0) ~ /^(content-type:|http\/)/ {print $2}' \
+    > $dir/headers
+  status_code="$(cat $dir/headers | head -n1)"
+  content_type="$(cat $dir/headers | tail -n1)"
+  [[ -z "$content_type" ]] && content_type="text" # default to text if blank
+  if [[ "$status_code" == "200" && ! "$content_type" =~ ^text ]]; then
+    return 1 # false, it did not expire
+  else
+    return 0 # true, is is expired
   fi
-  cat $cache
 }
 
 # Transliteration of characters to their closest ASCII equivalents and tidy text
-clean_tag(){
-  echo "$1" | iconv -f utf8 -t ascii//TRANSLIT | awk '{
+clean_tag() {
+  echo "$1" | iconv -f UTF-8 -t ascii//TRANSLIT 2>/dev/null | awk '{
     gsub(/[^a-zA-Z0-9 ()&\/]/, " ");  # Replace special chars with space
     gsub(/ +/, " ");                  # Collapse multiple spaces
     sub(/^ +/, "");                   # Trim leading spaces
@@ -61,7 +98,7 @@ clean_tag(){
 }
 
 # Set an http song tag using netcat 
-set_tag(){
+set_tag() {
   id="$1"
   name="$2"
   value="$3"
@@ -72,76 +109,99 @@ set_tag(){
   ) | nc $mpd_host $mpd_port
 }
 
+# If url provided, add the song to the playlist
+if [[ "$cmd" == "add" ]]; then
+  echo "add: $src"
+  mpc add "$(fetch_url $src)"
+
+# Clear cache, lockfile and reset playlist hash
+elif [[ "$cmd" == "flush" ]]; then
+  rm -f $dir/*
+  echo "flush" > $dir/playlist
+
+elif [[ "$cmd" == "update" ]]; then
+
+  # Loop each http song playlist
+  list_songs | while read -r pos id url src; do
+    echo "src: $src"
+    echo "url: $url"
+    
+    # Check if the url has expired
+    if is_invalid "$url"; then
+      echo "invalid: removed from playlist"
+
+      # Remove expired song from playlist by position
+      mpc del $pos
+
+      # Fetch new url from src with forced flush
+      url="$(fetch_url $src true)"
+      echo "retry: $url"
+
+      # Try again with new url
+      if is_invalid "$url"; then
+        echo "invalid: url failed"
+
+      else
+        echo "valid: url replaced in playlist"
+
+        # Add new url to end of playlist
+        mpc add "$url"
+
+        # Move the newly added song from the bottom back to original position
+        mpc move $(mpc playlist -f "%position%" | tail -n1) $pos
+      fi
+
+    fi
+  done
+
+  # Loop each http song playlist (again)
+  list_songs | while read -r pos id url src; do
+    echo "tag: $src"
+    set_tag $id Title "$(fetch_title $src)" > /dev/null
+    set_tag $id Artist "$(fetch_artist $src)" > /dev/null
+    set_tag $id Album "$src" > /dev/null
+  done
+  echo "done"
+
 # First paramater is "loop", run the idleloop
-if [[ $param == "loop" ]]; then
+elif [[ "$cmd" == "loop" ]]; then
+
+  # Ensure existance of hashfile representing current playlist
+  echo "flush" > $dir/playlist # ensure this gets run the first time
 
   # Set a lockfile so it only runs one at a time
-  lockfile="$dir/mpc-url.lock"
-  rm -f $lockfile
+  rm -f $dir/playlist.lock
 
   # Watch for playlist changes
   echo "waiting for playlist changes"
   mpc idleloop playlist | while read change; do
 
     # Proceed if the lockfile isn't found
-    if [[ ! -e "$lockfile" ]]; then
+    if [[ ! -e "$dir/playlist.lock" ]]; then
 
       # Create a lockfile 
-      touch $lockfile
+      touch $dir/playlist.lock
       (
-        # Run script and remove lockfile when done
-        $0 && sleep 1
-        rm -f $lockfile
+
+        # Get hash of playlist and check for any changes
+        hash="$(mpc playlist -f "%file%" | sort | sha256sum)"
+        if [[ "$hash" != "$(cat $dir/playlist)" ]]; then
+
+          # Update hash and run script
+          echo "$hash" > $dir/playlist
+          $0 update && sleep 1
+
+        fi
+
+        # Remove lockfile when done
+        rm -f $dir/playlist.lock
 
       ) & # run in background
 
     fi
 
   done
+
+else
+  echo "Unknown command"
 fi
-
-# If url provided, add the song to the playlist
-if [[ $param == http* ]]; then
-  echo "add: $param"
-  mpc add "$(get_url $param)"
-fi
-
-# Loop each http song playlist
-get_songs | while read -r pos id url src; do
-
-  echo "try: $src"
-  
-  # Check if the url has expired
-  if [[ "$(get_status_code $url)" != "200" ]]; then
-
-    echo "exp: $src"
-
-    # Remove expired song from playlist by position
-    mpc del $pos
-
-    # Fetch new url from src and add to end of playlist
-    mpc add "$(get_url $src)"
-
-    # Move the newly added song from the bottom back to original position
-    mpc move $(mpc playlist -f "%position%" | tail -n1) $pos
-
-  fi
-
-done
-
-# Loop each http song playlist (again)
-get_songs | while read -r pos id url src; do
-
-  echo "tag: $src"
-
-  tags="$(get_tags $src)"
-  title="$(clean_tag "$(echo $tags | head -n1)")"
-  artist="$(clean_tag "$(echo $tags | tail -n1)")"
-
-  set_tag $id Title "$title" > /dev/null
-  set_tag $id Artist "$artist" > /dev/null
-  set_tag $id Album "$src" > /dev/null
-
-done
-
-echo "done"

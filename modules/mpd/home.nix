@@ -95,21 +95,57 @@ in {
     ];
 
     # Watch for mpd playlist changes and update http songs
-    systemd.user.services.mpc-url = {
-      Unit = {
-        Description = "mpc-url loop";
-        After = [ "mpd.service" ];
-        Requires = [ "mpd.service" ];
-      };
-      Install.WantedBy = [ "default.target" ];
-      Service = {
-        Type = "simple";
-        Restart = "always";
-        ExecStart = mkShellScript {
-          inputs = [ mpc-url ];
-          text = "mpc-url loop";
+    systemd.user = {
+
+      services.mpc-url = {
+        Unit = {
+          Description = "mpc-url";
+          After = [ "mpd.service" ];
+          Requires = [ "mpd.service" ];
+        };
+        Install.WantedBy = [ "default.target" ];
+        Service = {
+          Type = "simple";
+          Restart = "always";
+          ExecStart = mkShellScript {
+            inputs = [ mpc-url ];
+            text = ''
+              mpc-url flush 
+              mpc-url update 
+              mpc-url loop 
+            '';
+          };
         };
       };
+      
+      services.mpc-url-refresh = {
+        Unit = {
+          Description = "mpc-url refresh";
+          After = [ "mpd.service" ];
+          Requires = [ "mpd.service" ];
+        };
+        Install.WantedBy = [ "default.target" ];
+        Service = {
+          Type = "oneshot";
+          ExecStart = mkShellScript {
+            inputs = [ mpc-url ];
+            text = ''
+              mpc-url flush 
+              mpc-url update 
+            '';
+          };
+        };
+      };
+
+      timers.mpc-url-refresh = {
+        Unit.Description = "mpc-url refresh";
+        Install.WantedBy = [ "timers.target" ];
+        Timer = {
+          OnCalendar = "*-*-* 0/2:00:00";  # Every 2 hours
+          Persistent = true;
+        };
+      };
+
     };
 
   };
