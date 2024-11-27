@@ -74,7 +74,6 @@ in {
 
     # keyboard shortcuts
     services.keyd.windows."${mkClass class}" = {
-      "alt.f" = "C-f"; # find in page
       "super.o" = "C-l"; # location bar
       "super.t" = "C-t"; # new tab
       "super.w" = "C-w"; # close tab
