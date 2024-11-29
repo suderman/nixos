@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-
 if [[ $# -lt 1 ]] || [[ "$1" == "add" ]]; then
   echo "Usage: mpc-url URL/COMMAND [mpd_host] [mpd_port]"
   echo " - URL: http/https add song via yt-dlp"
-  echo " - COMMAND: flush/update/loop"
+  echo " - COMMAND: flush/update/watch"
   exit 1
 fi
 
@@ -18,7 +17,7 @@ fi
 mpd_host="${2:-localhost}"
 mpd_port="${3:-6600}"
 
-# Directory used for lockfile and tag cache
+# Directory used for tag cache and playlist hash
 dir="$HOME/.cache/mpc-url"
 mkdir -p $dir
 
@@ -97,24 +96,12 @@ clean_tag() {
   }'
 }
 
-# Set an http song tag using netcat 
-set_tag() {
-  id="$1"
-  name="$2"
-  value="$3"
-  (
-    echo "cleartagid $id $name"
-    echo "addtagid $id $name \"$value\""
-    echo "close" 
-  ) | nc $mpd_host $mpd_port
-}
-
 # If url provided, add the song to the playlist
 if [[ "$cmd" == "add" ]]; then
   echo "add: $src"
   mpc add "$(fetch_url $src)"
 
-# Clear cache, lockfile and reset playlist hash
+# Clear cache and reset playlist hash
 elif [[ "$cmd" == "flush" ]]; then
   rm -f $dir/*
   echo "flush" > $dir/playlist
@@ -130,9 +117,6 @@ elif [[ "$cmd" == "update" ]]; then
     if is_invalid "$url"; then
       echo "invalid: removed from playlist"
 
-      # Remove expired song from playlist by position
-      mpc del $pos
-
       # Fetch new url from src with forced flush
       url="$(fetch_url $src true)"
       echo "retry: $url"
@@ -140,6 +124,7 @@ elif [[ "$cmd" == "update" ]]; then
       # Try again with new url
       if is_invalid "$url"; then
         echo "invalid: url failed"
+        set_tag $id Title "invalid url" > /dev/null
 
       else
         echo "valid: url replaced in playlist"
@@ -147,59 +132,51 @@ elif [[ "$cmd" == "update" ]]; then
         # Add new url to end of playlist
         mpc add "$url"
 
+        # Remove expired song from playlist by position
+        mpc del $pos
+
         # Move the newly added song from the bottom back to original position
         mpc move $(mpc playlist -f "%position%" | tail -n1) $pos
       fi
 
     fi
-  done
 
-  # Loop each http song playlist (again)
-  list_songs | while read -r pos id url src; do
+    # Set metadata for each track
     echo "tag: $src"
-    set_tag $id Title "$(fetch_title $src)" > /dev/null
-    set_tag $id Artist "$(fetch_artist $src)" > /dev/null
-    set_tag $id Album "$src" > /dev/null
+    (
+      echo "cleartagid $id"
+      echo "addtagid $id Title \"$(fetch_title $src)\""
+      echo "addtagid $id Artist \"$(fetch_artist $src)\""
+      echo "addtagid $id Album \"$src\""
+      echo "close" 
+    ) | nc $mpd_host $mpd_port > /dev/null
+
   done
   echo "done"
 
-# First paramater is "loop", run the idleloop
-elif [[ "$cmd" == "loop" ]]; then
+# First parameter is "watch", watch for playlist changes
+elif [[ "$cmd" == "watch" ]]; then
 
   # Ensure existance of hashfile representing current playlist
   echo "flush" > $dir/playlist # ensure this gets run the first time
 
-  # Set a lockfile so it only runs one at a time
-  rm -f $dir/playlist.lock
-
   # Watch for playlist changes
-  echo "waiting for playlist changes"
-  mpc idleloop playlist | while read change; do
+  echo "watching for playlist changes"
+  while true; do
+    mpc idle playlist | while read; do
 
-    # Proceed if the lockfile isn't found
-    if [[ ! -e "$dir/playlist.lock" ]]; then
+      # Get hash of playlist and check for any changes
+      hash="$(mpc playlist -f "%file%" | sort | sha256sum)"
+      if [[ "$hash" != "$(cat $dir/playlist)" ]]; then
 
-      # Create a lockfile 
-      touch $dir/playlist.lock
-      (
+        # Update hash and run this script with "update" command
+        echo "$hash" > $dir/playlist
+        $0 update
 
-        # Get hash of playlist and check for any changes
-        hash="$(mpc playlist -f "%file%" | sort | sha256sum)"
-        if [[ "$hash" != "$(cat $dir/playlist)" ]]; then
+      fi
 
-          # Update hash and run script
-          echo "$hash" > $dir/playlist
-          $0 update && sleep 1
-
-        fi
-
-        # Remove lockfile when done
-        rm -f $dir/playlist.lock
-
-      ) & # run in background
-
-    fi
-
+    done
+    sleep 1
   done
 
 else

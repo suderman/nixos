@@ -112,7 +112,7 @@ in {
             text = ''
               mpc-url flush 
               mpc-url update 
-              mpc-url loop 
+              mpc-url watch 
             '';
           };
         };
