@@ -140,6 +140,10 @@ elif [[ "$cmd" == "update" ]]; then
       fi
 
     fi
+  done
+
+  # Loop each http song playlist again
+  list_songs | while read -r pos id url src; do
 
     # Set metadata for each track
     echo "tag: $src"
