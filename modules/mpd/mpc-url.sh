@@ -2,7 +2,7 @@
 if [[ $# -lt 1 ]] || [[ "$1" == "add" ]]; then
   echo "Usage: mpc-url URL/COMMAND [mpd_host] [mpd_port]"
   echo " - URL: http/https add song via yt-dlp"
-  echo " - COMMAND: flush/update/watch"
+  echo " - COMMAND: update/watch"
   exit 1
 fi
 
@@ -62,11 +62,11 @@ fetch_url() {
 
 # Fetch reversed songs in playlist with #http fragment, added to each line as src
 list_songs() {
-  mpc playlist -f "%position% %id% %file%" | awk '/https?:\/\//' | while read -r pos id url; do
-    src="${url#*#}" # Look for src at end of url as #fragment
-    [[ -z "$src" ]] && src="${url}" # fallback on url if src is empty
-    echo "${pos} ${id} ${url} ${src}" 
-  done | tac
+  while read -r pos id url; do
+    src="${url#*#}" # Look for src at end of URL as #fragment
+    [[ -z "$src" ]] && src="${url}" # Fallback on URL if src is empty
+    echo "${pos} ${id} ${url} ${src}"
+  done < <(mpc playlist -f "%position% %id% %file%" | awk '/https?:\/\//') | tac
 }
 
 # Get current http status code and content-type from url, return true if expired (or otherwise invalid) for streaming
@@ -96,20 +96,19 @@ clean_tag() {
   }'
 }
 
-# If url provided, add the song to the playlist
-if [[ "$cmd" == "add" ]]; then
-  echo "add: $src"
-  mpc add "$(fetch_url $src)"
+# Update the playlist, replacing any expired URLs and tagging tracks
+update() {
 
-# Clear cache and reset playlist hash
-elif [[ "$cmd" == "flush" ]]; then
-  rm -f $dir/*
-  echo "flush" > $dir/playlist
-
-elif [[ "$cmd" == "update" ]]; then
+  # Only allow one instance of this function to run at a time
+  if [[ -e "$dir/lock" ]]; then
+    echo "locked"
+    return
+  else
+    touch $dir/lock
+  fi
 
   # Loop each http song playlist
-  list_songs | while read -r pos id url src; do
+  while read -r pos id url src; do
     echo "src: $src"
     echo "url: $url"
     
@@ -140,10 +139,10 @@ elif [[ "$cmd" == "update" ]]; then
       fi
 
     fi
-  done
+  done < <(list_songs)
 
   # Loop each http song playlist again
-  list_songs | while read -r pos id url src; do
+  while read -r pos id url src; do
 
     # Set metadata for each track
     echo "tag: $src"
@@ -155,8 +154,24 @@ elif [[ "$cmd" == "update" ]]; then
       echo "close" 
     ) | nc $mpd_host $mpd_port > /dev/null
 
-  done
+  done < <(list_songs)
+
+  # Remove lockfile when done
+  rm -f $dir/lock
   echo "done"
+
+}
+
+# If url provided, add the song to the playlist
+if [[ "$cmd" == "add" ]]; then
+  echo "add: $src"
+  mpc add "$(fetch_url $src)"
+
+# Manually run update, with flushed cache and reset playlist hash
+elif [[ "$cmd" == "update" ]]; then
+  rm -f $dir/http*
+  echo "flush" > $dir/playlist
+  update
 
 # First parameter is "watch", watch for playlist changes
 elif [[ "$cmd" == "watch" ]]; then
@@ -167,7 +182,7 @@ elif [[ "$cmd" == "watch" ]]; then
   # Watch for playlist changes
   echo "watching for playlist changes"
   while true; do
-    mpc idle playlist | while read; do
+    while read; do
 
       # Get hash of playlist and check for any changes
       hash="$(mpc playlist -f "%file%" | sort | sha256sum)"
@@ -175,11 +190,11 @@ elif [[ "$cmd" == "watch" ]]; then
 
         # Update hash and run this script with "update" command
         echo "$hash" > $dir/playlist
-        $0 update
+        update
 
       fi
 
-    done
+    done < <(mpc idle playlist)
     sleep 1
   done
 

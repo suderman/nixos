@@ -110,9 +110,14 @@ in {
           ExecStart = mkShellScript {
             inputs = [ mpc-url ];
             text = ''
-              mpc-url flush 
-              mpc-url update 
-              mpc-url watch 
+              # Ensure no lockfile
+              dir="$HOME/.cache/mpc-url"
+              mkdir -p $dir
+              rm -f $dir/lock
+
+              # Update playlist and watch for changes
+              mpc-url update
+              mpc-url watch
             '';
           };
         };
@@ -130,7 +135,6 @@ in {
           ExecStart = mkShellScript {
             inputs = [ mpc-url ];
             text = ''
-              mpc-url flush 
               mpc-url update 
             '';
           };
