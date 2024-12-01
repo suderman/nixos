@@ -29,7 +29,7 @@ alias mpc="mpc --host $mpd_host --port $mpd_port"
 fetch() {
   src="$1"
   flush="${2-false}" # flush cache for this src, always fetch fresh
-  file="$(echo "$src" | awk '{gsub(/[^a-zA-Z0-9._-]/, "_"); print}')"
+  file="f$(echo "$src" | sha256sum | awk '{print $1}')"
   if [[ ! -e $dir/$file || "$flush" == "true" ]]; then
     # fetch metadata on first two lines
     yt-dlp -j $src | jq -r '.title, .uploader' > $dir/$file
@@ -47,7 +47,7 @@ fetch_title() {
 }
 
 # Second line of cache
-fetch_artist() {
+fetch_uploader() {
   src="$1"
   flush="${2-false}"
   clean_tag "$(fetch "$src" "$flush" | head -n2 | tail -n1)"
@@ -72,9 +72,7 @@ list_songs() {
 # Get current http status code and content-type from url, return true if expired (or otherwise invalid) for streaming
 is_invalid() {
   url="$1"
-  wget -q --method=HEAD --server-response $url 2>&1 \
-    | awk '{gsub(/^[[:space:]]+/,"")} tolower($0) ~ /^(content-type:|http\/)/ {print $2}' \
-    > $dir/headers
+  curl -sILw "__ %{http_code}\n__ %{content_type}\n" "$url" | awk 'tolower($0) ~ /^__/ {print $2}' > $dir/headers
   status_code="$(cat $dir/headers | head -n1)"
   content_type="$(cat $dir/headers | tail -n1)"
   [[ -z "$content_type" ]] && content_type="text" # default to text if blank
@@ -87,7 +85,7 @@ is_invalid() {
 
 # Transliteration of characters to their closest ASCII equivalents and tidy text
 clean_tag() {
-  echo "$1" | iconv -f UTF-8 -t ascii//TRANSLIT 2>/dev/null | awk '{
+  echo "$1" | awk '{
     gsub(/[^a-zA-Z0-9 ()&\/]/, " ");  # Replace special chars with space
     gsub(/ +/, " ");                  # Collapse multiple spaces
     sub(/^ +/, "");                   # Trim leading spaces
@@ -96,63 +94,99 @@ clean_tag() {
   }'
 }
 
+# Set metadata for song
+set_tag() {
+  id="$1"
+  src="${2-invalid}"
+  title="invalid"
+  uploader="invalid"
+  if [[ "$src" != "invalid" ]]; then
+    title="$(fetch_title $src)"
+    uploader="$(fetch_uploader $src)"
+  fi
+  (
+    echo "cleartagid $id"
+    echo "addtagid $id Title \"$title\""
+    echo "addtagid $id Album \"$uploader\""
+    echo "addtagid $id Artist \"$src\""
+    echo "close" 
+  ) | nc $mpd_host $mpd_port > /dev/null
+}
+
 # Update the playlist, replacing any expired URLs and tagging tracks
 update() {
+  flush="${1-false}"
 
   # Only allow one instance of this function to run at a time
   if [[ -e "$dir/lock" ]]; then
     echo "locked"
     return
-  else
-    touch $dir/lock
   fi
+
+  # Ensure online before proceeding
+  if ! nc -zw1 youtube.com 443; then
+    echo "offline"
+    return
+  fi
+
+  # Empty cache if flush set
+  if [[ "$flush" == "flush" ]]; then
+    rm -f $dir/f*
+    echo "flush" > $dir/playlist
+  fi
+
+  # Create lockfile
+  touch $dir/lock
 
   # Loop each http song playlist
   while read -r pos id url src; do
-    echo "src: $src"
     echo "url: $url"
     
     # Check if the url has expired
     if is_invalid "$url"; then
-      echo "invalid: removed from playlist"
 
       # Fetch new url from src with forced flush
+      prev_url="$url"
       url="$(fetch_url $src true)"
-      echo "retry: $url"
 
-      # Try again with new url
-      if is_invalid "$url"; then
-        echo "invalid: url failed"
-        set_tag $id Title "invalid url" > /dev/null
+      if [[ "$url" == "$prev_url" ]]; then
+        echo "-> url fail"
+        set_tag $id invalid
 
       else
-        echo "valid: url replaced in playlist"
+        echo "-> url fail, retry: $url"
 
-        # Add new url to end of playlist
-        mpc add "$url"
+        # Try again with new url
+        if is_invalid "$url"; then
+          echo "-> url retry fail"
+          set_tag $id invalid
 
-        # Remove expired song from playlist by position
-        mpc del $pos
+        else
+          echo "-> url retry pass"
 
-        # Move the newly added song from the bottom back to original position
-        mpc move $(mpc playlist -f "%position%" | tail -n1) $pos
+          # Add new url to end of playlist
+          mpc add "$url"
+
+          # Remove expired song from playlist by position
+          mpc del $pos
+
+          # Move the newly added song from the bottom back to original position
+          mpc move $(mpc playlist -f "%position%" | tail -n1) $pos
+        fi
       fi
 
+    else
+      echo "-> url pass"
     fi
+
   done < <(list_songs)
 
   # Loop each http song playlist again
   while read -r pos id url src; do
 
     # Set metadata for each track
-    echo "tag: $src"
-    (
-      echo "cleartagid $id"
-      echo "addtagid $id Title \"$(fetch_title $src)\""
-      echo "addtagid $id Artist \"$(fetch_artist $src)\""
-      echo "addtagid $id Album \"$src\""
-      echo "close" 
-    ) | nc $mpd_host $mpd_port > /dev/null
+    echo "tag: $id -> $src"
+    set_tag $id $src
 
   done < <(list_songs)
 
@@ -169,15 +203,16 @@ if [[ "$cmd" == "add" ]]; then
 
 # Manually run update, with flushed cache and reset playlist hash
 elif [[ "$cmd" == "update" ]]; then
-  rm -f $dir/http*
-  echo "flush" > $dir/playlist
-  update
+  update flush
 
 # First parameter is "watch", watch for playlist changes
 elif [[ "$cmd" == "watch" ]]; then
 
-  # Ensure existance of hashfile representing current playlist
-  echo "flush" > $dir/playlist # ensure this gets run the first time
+  # Ensure no lockfile
+  rm -f $dir/lock
+
+  # Run update flushed
+  update flush
 
   # Watch for playlist changes
   echo "watching for playlist changes"

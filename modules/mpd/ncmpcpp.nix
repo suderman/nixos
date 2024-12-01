@@ -95,7 +95,8 @@ in {
         # song list
         song_status_format = " $6%a $7⟫⟫ $3%t $7⟫⟫ $4%b ";
         song_list_format = "{$7%a - $9}{$5%t$9}|{$5%f$9}$R{$6%b $9}{$3%l$9}";
-        song_columns_list_format = "(10)[blue]{l} (30)[green]{t} (30)[magenta]{a} (30)[yellow]{b}";
+        # song_columns_list_format = "(10)[blue]{l} (30)[green]{t} (30)[magenta]{a} (30)[yellow]{b}";
+        song_columns_list_format = "(10)[blue]{l} (30)[green]{t} (30)[yellow]{b} (30)[magenta]{a} ";
         song_library_format = "{{%a - %t} (%b)}|{%f}";
         now_playing_prefix = "$r";
         now_playing_suffix = "🎵$/r";

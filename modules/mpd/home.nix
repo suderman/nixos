@@ -10,7 +10,7 @@
   # add streams to mpd using yt-dlp
   mpc-url = mkShellScript {
     name = "mpc-url"; 
-    inputs = with pkgs; [ coreutils gawk iconv jq mpc-cli netcat-gnu wget yt-dlp ];
+    inputs = with pkgs; [ coreutils curl gawk jq mpc-cli netcat-gnu yt-dlp ];
     text = builtins.readFile ./mpc-url.sh;
   }; 
 
@@ -110,13 +110,6 @@ in {
           ExecStart = mkShellScript {
             inputs = [ mpc-url ];
             text = ''
-              # Ensure no lockfile
-              dir="$HOME/.cache/mpc-url"
-              mkdir -p $dir
-              rm -f $dir/lock
-
-              # Update playlist and watch for changes
-              mpc-url update
               mpc-url watch
             '';
           };
