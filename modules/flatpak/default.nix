@@ -34,9 +34,7 @@ in {
     };
 
     # browse (and try) flatpaks via Gnome Software
-    environment.systemPackages = with pkgs; [( 
-      if this.stable then gnome.gnome-software else gnome-software # moved to top-level in unstable
-    )];
+    environment.systemPackages = with pkgs; [ gnome-software ];
 
   };
 

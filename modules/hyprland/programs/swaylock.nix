@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }: let 
 
   cfg = config.wayland.windowManager.hyprland;
-  inherit (lib) mkIf mkForce;
+  inherit (lib) mkIf mkDefault mkForce;
 
 in {
 
@@ -16,10 +16,10 @@ in {
         # screenshots = true;
         # effect-blur = "7x5";
         # effect-vignette = "0.25:0.75";
-        color = "000000";
-        font = "monospace";
-        line-color = "000000";
-        ring-color = "ffffff70";
+        color = mkDefault "000000";
+        font = mkDefault "monospace";
+        line-color = mkDefault "000000";
+        ring-color = mkDefault "ffffff70";
         # indicator = true;
         indicator-radius = 150;
         indicator-thickness = 30;

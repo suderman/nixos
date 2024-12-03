@@ -17,7 +17,7 @@ in {
     # yt-dlp -f mp4-240p -x --audio-format mp3 https://rumble.com/...
     yt-dlp 
 
-    beeper tdesktop slack
+    tdesktop slack
     isy micro xorg.xeyes
     jetbrains-mono
     gst_all_1.gst-libav

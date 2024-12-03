@@ -29,7 +29,7 @@ in {
       hyprland = "Hyprland";
     };
 
-    home.packages = with pkgs; [ nerdfonts ]; 
+    home.packages = with pkgs; [ nerd-fonts.symbols-only ]; 
 
     # Add target that is enabled by exec-once at the top of the configuration
     systemd.user.targets."${removeSuffix ".target" cfg.systemd.target}".Unit = {

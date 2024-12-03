@@ -20,7 +20,7 @@ in {
     # fonts
     home.packages = with pkgs; [ 
       jetbrains-mono
-      (unstable.nerdfonts.override { fonts = [ "NerdFontsSymbolsOnly" ]; })
+      nerd-fonts.symbols-only
     ];
 
     home.shellAliases = {

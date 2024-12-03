@@ -39,7 +39,6 @@ in {
     };
 
     # Enable sound.
-    sound.enable = true;
     services.pipewire.enable = true;
   
     # Gnome has a hard-coded screenshots directory

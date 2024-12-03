@@ -25,7 +25,7 @@ in {
       roles = [ "info" "source" "target" "delete" "snapshot" "send" "receive" ];
     }];
 
-    services.btrbk.extraPackages = if this.stable then [ pkgs.lz4 pkgs.mbuffer ] else [];
+    # services.btrbk.extraPackages = if this.stable then [ pkgs.lz4 pkgs.mbuffer ] else [];
 
     services.btrbk.instances = let
 

@@ -29,7 +29,7 @@ in {
           "super, 0, hyprexpo:expo, toggle" 
         ];
 
-        bindsn = [
+        bindsn = mkIf cfg.enablePlugins [
           
           # Toggle expo with super+semicolon+apostrophe ([;'] same-time)
           "super_l, semicolon&apostrophe, hyprexpo:expo, toggle"

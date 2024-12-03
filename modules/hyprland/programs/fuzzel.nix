@@ -1,5 +1,5 @@
 { config, lib, pkgs, ... }: let
-  inherit (lib) getExe mkIf;
+  inherit (lib) getExe mkIf mkDefault;
   ini = pkgs.formats.ini {};
 in {
 
@@ -21,7 +21,7 @@ in {
 
         # All colors must be specified as a RGBA quadruple, in hex format, without a leading '0x'
         # https://man.archlinux.org/man/fuzzel.1.en#COLORS
-        colors = {
+        colors = mkDefault {
           background = "3f3f3fdf";       # zenburn-bg
           text = "dcdcccff";             # zenburn-fg
           match = "dca3a3ff";            # zenburn-red+1

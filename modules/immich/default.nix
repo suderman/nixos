@@ -125,7 +125,8 @@ in {
       authentication = mkBefore "host immich immich 172.16.0.0/12 md5";
 
       # Postgres extension pgvecto.rs required since Immich 1.91.0
-      extraPlugins = [
+      # extraPlugins = [
+      extensions = [
         (pkgs.postgresqlPackages.pgvecto-rs.override rec {
           postgresql = config.services.postgresql.package;
         })

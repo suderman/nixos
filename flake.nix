@@ -4,12 +4,12 @@
 
     # Nix Packages 
     # <https://search.nixos.org/packages>
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     # Home Manager
     # <https://mipmip.github.io/home-manager-option-search>
-    home-manager.url = "github:nix-community/home-manager/release-24.05";
+    home-manager.url = "github:nix-community/home-manager/release-24.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     # Unstable
     home-manager-unstable.url = "github:nix-community/home-manager";
@@ -55,11 +55,14 @@
 
     # Hyprland (only unstable)
     # <https://github.com/hyprwm/Hyprland/releases>
-    # hyprland.url = "github:hyprwm/Hyprland/v0.41.0";
-    hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1";
+    hyprland.url = "github:hyprwm/Hyprland/v0.45.2";
     hyprland.inputs.nixpkgs.follows = "nixpkgs-unstable";
     hyprland-plugins.url = "github:hyprwm/hyprland-plugins";
     hyprland-plugins.inputs.hyprland.follows = "hyprland";
+
+    # Stylix system-wide colorscheming & typography
+    # <https://github.com/danth/stylix>
+    stylix.url = "github:danth/stylix";
 
     # Aylur's Gtk Shell (AGS)
     # <https://github.com/Aylur/ags
@@ -97,8 +100,13 @@
       config.allowUnfree = true;
       config.nvidia.acceptLicense = true;
 
-      # Add to-be-updated packages blocking builds (none right now)
-      config.permittedInsecurePackages = [];
+      # Add to-be-updated packages blocking builds
+      config.permittedInsecurePackages = [
+        "aspnetcore-runtime-wrapped-6.0.36"
+        "aspnetcore-runtime-6.0.36"
+        "dotnet-sdk-wrapped-6.0.428"
+        "dotnet-sdk-6.0.428"
+      ];
 
       # Modify pkgs with this, scripts, packages, nur and unstable
       overlays = [ 

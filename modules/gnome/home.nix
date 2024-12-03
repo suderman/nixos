@@ -16,7 +16,7 @@ in {
       default = with pkgs; [
         kitty
         firefox
-        gnome.nautilus
+        nautilus
         telegram-desktop
         gnome-text-editor
       ]; 
@@ -28,9 +28,9 @@ in {
         dconf 
         chrome-gnome-shell
         epiphany
-        gnome.gnome-software 
-        gnome.gnome-tweaks
-        gnome.dconf-editor
+        gnome-software 
+        gnome-tweaks
+        dconf-editor
       ];
     };
 

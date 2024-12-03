@@ -53,7 +53,7 @@
   services.samba = {
     enable = true;
     openFirewall = true;
-    shares.media = {
+    settings.media = {
       path = "/media";
       browseable = "yes";
       "read only" = "no";

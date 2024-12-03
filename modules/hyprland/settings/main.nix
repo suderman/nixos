@@ -50,6 +50,12 @@ in {
       general = {
         layout = "dwindle";
         resize_on_border = true;
+        snap = {
+          enabled = true;
+          window_gap = 10;
+          monitor_gap = 10;
+          border_overlap = true;
+        };
       };
 
       dwindle = {

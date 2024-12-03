@@ -32,10 +32,6 @@ in {
         "col.border_locked_inactive" = "rgba(F1C40F80) rgba(16A08580) 270deg";
       };
 
-      dwindle = {
-        no_gaps_when_only = 0;
-      };
-
       misc = {
         disable_hyprland_logo = true;
         disable_splash_rendering = true;
@@ -45,11 +41,15 @@ in {
 
       decoration = {
         rounding = 10;
-        drop_shadow = true;
-        shadow_range = 20;
-        shadow_offset = "0, 3";
-        shadow_render_power = 3;
-        "col.shadow" = "rgba(00000080)";
+
+        shadow = {
+          enabled = true;
+          range = 20;
+          render_power = 3;
+          offset = "0, 3";
+          color = "rgba(00000080)";
+        };
+
         dim_inactive = false;
         dim_strength = 0.1;
         dim_special = 0.5;

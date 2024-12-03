@@ -25,11 +25,11 @@ in {
     ];
     dock = [
       firefox
-      gnome.nautilus
+      nautilus
       telegram-desktop
-      gnome.gnome-calendar
+      gnome-calendar
       gnome-text-editor
-      gnome.gnome-calculator
+      gnome-calculator
     ];
     wallpapers = let dir = config.home.homeDirectory; in [ 
       "${dir}/.light.jpg" "${dir}/.dark.jpg" 

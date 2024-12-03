@@ -9,7 +9,7 @@ in {
   config = mkIf cfg.enable {
 
     programs.cava = {
-      enable = true;
+      enable = false;
       settings = {
 
         input = {

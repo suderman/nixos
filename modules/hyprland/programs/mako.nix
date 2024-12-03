@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }: let
 
   cfg = config.services.mako;
-  inherit (lib) getExe' mkIf;
+  inherit (lib) getExe' mkIf mkDefault;
 
 in {
 
@@ -9,7 +9,7 @@ in {
 
     services.mako = {
       enable = true;
-      font = "JetBrainsMono 11";
+      font = mkDefault "JetBrainsMono 11";
       anchor = "bottom-left";
       width = 600;
       height = 300;
@@ -18,10 +18,10 @@ in {
       padding = "15";
       defaultTimeout = 6000;
 
-      backgroundColor = "#303446";
-      textColor = "#c6d0f5";
-      borderColor = "#8caaee";
-      progressColor = "over #414559";
+      backgroundColor = mkDefault "#303446";
+      textColor = mkDefault "#c6d0f5";
+      borderColor = mkDefault "#8caaee";
+      progressColor = mkDefault "over #414559";
 
       extraConfig = ''
         [urgency=normal]

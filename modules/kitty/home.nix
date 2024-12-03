@@ -2,23 +2,21 @@
 { config, lib, pkgs, this, ... }: let
 
   cfg = config.programs.kitty;
-  inherit (lib) mkIf mkAfter;
+  inherit (lib) mkIf mkDefault mkAfter;
 
 in {
 
   config = mkIf cfg.enable {
 
     # https://home-manager-options.extranix.com/?query=kitty&release=master
-    programs.kitty = ( if this.stable then {
-      theme = "Catppuccin-Mocha"; # kitty +kitten themes
-    } else {
+    programs.kitty = {
+
       themeFile = "Catppuccin-Mocha"; # kitty +kitten themes
-    }) // {
 
       font = {
-        name = "JetBrains Mono Regular";
-        size = 11.0;
-        package = pkgs.jetbrains-mono;
+        name = mkDefault "JetBrains Mono Regular";
+        size = mkDefault 11.0;
+        package = mkDefault pkgs.jetbrains-mono;
       };
 
       settings = {
@@ -38,7 +36,7 @@ in {
 
         # Window layout
         # background_opacity = "0.95";
-        background_opacity = "0.85";
+        background_opacity = mkDefault "0.85";
         hide_window_decorations = "titlebar-only";
         remember_window_size = "no";
         window_padding_width = 0;
@@ -96,9 +94,7 @@ in {
       };
     };
 
-    home.packages = with pkgs; [ nerdfonts ]; 
-    #   (unstable.nerdfonts.override { fonts = [ "NerdFontsSymbolsOnly" ]; })
-    # ];
+    home.packages = [ pkgs.nerd-fonts.symbols-only ]; 
 
     home.shellAliases = {
       icat="kitty +kitten icat";

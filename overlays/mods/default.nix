@@ -38,11 +38,9 @@ in {
   # Add appId to existing packages meta
   firefox = appId "firefox.desktop" prev.firefox;
   gnome-text-editor = appId "org.gnome.TextEditor.desktop" prev.gnome-text-editor;
-  gnome = with prev.gnome; prev.gnome // {
-    gnome-calculator = appId "org.gnome.Calculator.desktop" gnome-calendar;
-    gnome-calendar = appId "org.gnome.Calendar.desktop" gnome-calendar;
-    nautilus = appId "org.gnome.Nautilus.desktop" nautilus;
-  };
+  gnome-calculator = appId "org.gnome.Calculator.desktop" prev.gnome-calendar;
+  gnome-calendar = appId "org.gnome.Calendar.desktop" prev.gnome-calendar;
+  nautilus = appId "org.gnome.Nautilus.desktop" prev.nautilus;
   gnomeExtensions = with prev.gnomeExtensions; prev.gnomeExtensions // {
     auto-move-windows = appId "auto-move-windows@gnome-shell-extensions.gcampax.github.com" auto-move-windows;
     bluetooth-quick-connect = appId "bluetooth-quick-connect@bjarosze.gmail.com" bluetooth-quick-connect;
