@@ -15,8 +15,8 @@
   # Music daemon
   services.mpd = {
     enable = true;
-    musicDirectory = "/media/music";
-    proxy = "lux";
+    # musicDirectory = "/media/music";
+    # proxy = "lux";
   };
 
 }

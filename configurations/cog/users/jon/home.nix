@@ -8,12 +8,12 @@ in {
   xdg.userDirs = with config.home; {
     enable = true;
     createDirectories = false;
+    desktop = "${homeDirectory}/Action";
     download = "${homeDirectory}/Downloads";
-    desktop = "${homeDirectory}/Personal";
-    documents = "${homeDirectory}/Personal/Documents";
-    music = "${homeDirectory}/Personal/Music";
-    pictures = "${homeDirectory}/Personal/Images";
-    videos = "${homeDirectory}/Personal/Videos";
+    documents = "${homeDirectory}/Documents";
+    music = "${homeDirectory}/Music";
+    pictures = "${homeDirectory}/Pictures";
+    videos = "${homeDirectory}/Videos";
     # publicShare = "${homeDirectory}/public";
   };
 
