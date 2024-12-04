@@ -98,8 +98,10 @@ in {
         # song_columns_list_format = "(10)[blue]{l} (30)[green]{t} (30)[magenta]{a} (30)[yellow]{b}";
         song_columns_list_format = "(10)[blue]{l} (30)[green]{t} (30)[yellow]{b} (30)[magenta]{a} ";
         song_library_format = "{{%a - %t} (%b)}|{%f}";
-        now_playing_prefix = "$r";
-        now_playing_suffix = "🎵$/r";
+        # now_playing_prefix = "$r";
+        # now_playing_suffix = "🎵$/r";
+        now_playing_prefix = "";
+        now_playing_suffix = "🎵";
         jump_to_now_playing_song_at_start = "yes";
 
         # misc

@@ -3,16 +3,9 @@
   cfg = config.services.mpd;
   inherit (config.home) offset;
   inherit (lib) mkIf ls mkDefault mkOption mkShellScript types;
-  mdpPort = 6600; # default port for mpd
+  mpdPort = 6600; # default port for mpd
   httpPort = 8600; # default port for http streaming
   snapPort = 1704; # default port for snapcast server stream
-
-  # add streams to mpd using yt-dlp
-  mpc-url = mkShellScript {
-    name = "mpc-url"; 
-    inputs = with pkgs; [ coreutils curl gawk jq mpc-cli netcat-gnu yt-dlp ];
-    text = builtins.readFile ./mpc-url.sh;
-  }; 
 
 in {
 
@@ -30,7 +23,7 @@ in {
     services.mpd = {
       musicDirectory = mkDefault config.xdg.userDirs.music;
       network.listenAddress = "any";
-      network.port = mdpPort + offset; # 6600 (or 6601, 6602, etc)
+      network.port = mpdPort + offset; # 6600 (or 6601, 6602, etc)
       dbFile = if cfg.proxy == "" then "${cfg.dataDir}/tag_cache" else null;
       extraConfig = ''
         restore_paused "yes"
@@ -89,61 +82,9 @@ in {
 
     home.packages = with pkgs; [ 
       mpc-cli
-      mpc-url # custom
       mpd-notification
       rsgain # rsgain easy /media/music
     ];
-
-    # Watch for mpd playlist changes and update http songs
-    systemd.user = {
-
-      services.mpc-url = {
-        Unit = {
-          Description = "mpc-url";
-          After = [ "mpd.service" ];
-          Requires = [ "mpd.service" ];
-        };
-        Install.WantedBy = [ "default.target" ];
-        Service = {
-          Type = "simple";
-          Restart = "always";
-          ExecStart = mkShellScript {
-            inputs = [ mpc-url ];
-            text = ''
-              mpc-url watch
-            '';
-          };
-        };
-      };
-      
-      services.mpc-url-refresh = {
-        Unit = {
-          Description = "mpc-url refresh";
-          After = [ "mpd.service" ];
-          Requires = [ "mpd.service" ];
-        };
-        Install.WantedBy = [ "default.target" ];
-        Service = {
-          Type = "oneshot";
-          ExecStart = mkShellScript {
-            inputs = [ mpc-url ];
-            text = ''
-              mpc-url update 
-            '';
-          };
-        };
-      };
-
-      timers.mpc-url-refresh = {
-        Unit.Description = "mpc-url refresh";
-        Install.WantedBy = [ "timers.target" ];
-        Timer = {
-          OnCalendar = "*-*-* 0/2:00:00";  # Every 2 hours
-          Persistent = true;
-        };
-      };
-
-    };
 
   };
 

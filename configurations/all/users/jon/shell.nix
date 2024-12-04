@@ -13,6 +13,10 @@
     tl = "tldr";
   };
 
+  home.packages = with pkgs; [ 
+    fetchgithub 
+  ];
+
   programs.btop = {
     enable = true;
     package = pkgs.btop.overrideAttrs (prev: rec {
