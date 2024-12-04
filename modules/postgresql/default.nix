@@ -16,8 +16,9 @@ in {
     services.postgresql = {
       
       # 14 was default package as of 22.11
-      # 15 is default package as of 23.11
-      # 15 remains default package as of 24.05
+      # 15 was default package as of 23.11
+      # 15 was default package as of 24.05
+      # 16 is default package as of 24.11
       package = pkgs.postgresql_14; 
 
       # Database & role for each admin

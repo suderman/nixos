@@ -13,6 +13,10 @@ in {
   boot.extraModulePackages = with config.boot.kernelPackages; 
     if beta then [ nvidia_x11_beta ] else [ nvidia_x11 ];
 
+  # 560.35.03 "latest" broken on LTS kernel 6.12, use previous LTS kernel 6.6
+  # https://github.com/NixOS/nixpkgs/commit/8653ea453d81a7320c63f930911bcd9f7e063c65
+  boot.kernelPackages = lib.mkForce pkgs.linuxPackages_6_6; 
+
   # Fix extra screen
   boot.kernelParams = [ "nvidia-drm.fbdev=1" ];
 

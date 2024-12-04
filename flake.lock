@@ -343,16 +343,16 @@
     "gnome-shell": {
       "flake": false,
       "locked": {
-        "lastModified": 1713702291,
-        "narHash": "sha256-zYP1ehjtcV8fo+c+JFfkAqktZ384Y+y779fzmR9lQAU=",
+        "lastModified": 1732369855,
+        "narHash": "sha256-JhUWbcYPjHO3Xs3x9/Z9RuqXbcp5yhPluGjwsdE2GMg=",
         "owner": "GNOME",
         "repo": "gnome-shell",
-        "rev": "0d0aadf013f78a7f7f1dc984d0d812971864b934",
+        "rev": "dadd58f630eeea41d645ee225a63f719390829dc",
         "type": "github"
       },
       "original": {
         "owner": "GNOME",
-        "ref": "46.1",
+        "ref": "47.2",
         "repo": "gnome-shell",
         "type": "github"
       }
@@ -779,11 +779,11 @@
     },
     "nur": {
       "locked": {
-        "lastModified": 1733245290,
-        "narHash": "sha256-q0vf2tINCUKk7XPDSKMdzp96c+x3pWUxwl0Y10c+UxQ=",
+        "lastModified": 1733287945,
+        "narHash": "sha256-ae+Y8pciOJhkmSGvHpKidB+wOn6afP2s0BVwdSIAiaQ=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "1a776f27abb96c4563f290bc7cffdc8cd7755fdd",
+        "rev": "e2a910a0aa18fe90cfcc72d8d337cf30822fae4f",
         "type": "github"
       },
       "original": {
@@ -854,11 +854,11 @@
         "tinted-tmux": "tinted-tmux"
       },
       "locked": {
-        "lastModified": 1733240444,
-        "narHash": "sha256-+bIlRMek7dtgL1XiLAIolzHziBhkiCW6/ubvqCPinfc=",
+        "lastModified": 1733262405,
+        "narHash": "sha256-/AT315It87ll6mlZLYcmfoe6Uogx9MjPBCCZZZTq8xY=",
         "owner": "danth",
         "repo": "stylix",
-        "rev": "111c75d73439fe4bea2cdfbeb60aeeb6ea770220",
+        "rev": "ffba1f1bab63ea49541f812c72a4fcf305461d67",
         "type": "github"
       },
       "original": {

@@ -27,7 +27,7 @@ Boot node into Rescue Mode with `installer` mounted at `/dev/sdb`. Then launch a
 
 ```zsh
 # https://nixos.org/download.html
-iso=https://channels.nixos.org/nixos-24.05/latest-nixos-minimal-x86_64-linux.iso
+iso=https://channels.nixos.org/nixos-24.11/latest-nixos-minimal-x86_64-linux.iso
 
 # Download the ISO, write it to the installer disk, and verify the checksum:
 curl -L $iso | tee >(dd of=/dev/sdb) | sha256sum

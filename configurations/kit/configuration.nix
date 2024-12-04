@@ -11,8 +11,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Linux kernel (often have to manage this for nvidia compatibility)
-  # boot.kernelPackages = pkgs.linuxPackages_latest; # 6.11 broken with nvidia 560.35.03
-  boot.kernelPackages = pkgs.linuxPackages_6_6; # LTS kernel, previously used 6.10 but is now EOL
+  boot.kernelPackages = pkgs.linuxPackages_latest; # pkgs.linuxPackages_6_12;
 
   # Sound & Bluetooth
   hardware.bluetooth.enable = true;

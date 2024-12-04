@@ -66,10 +66,10 @@ in {
     # https://aylur.github.io/ags-docs/config/utils/#authentication
     security.pam.services.ags = {};
 
-    # https://home-manager-options.extranix.com/?query=hyprlock&release=release-24.05
+    # https://home-manager-options.extranix.com/?query=hyprlock&release=release-24.11
     security.pam.services.hyprlock = {};
 
-    # https://home-manager-options.extranix.com/?query=swaylock&release=release-24.05
+    # https://home-manager-options.extranix.com/?query=swaylock&release=release-24.11
     security.pam.services.swaylock = {};
 
   };

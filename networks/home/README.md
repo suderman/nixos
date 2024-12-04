@@ -3,8 +3,8 @@
 - `10.1.0.1` Unifi Router - USG 3P
 - `10.1.0.2` Unifi Switch - US 8 150W
 - `10.1.0.3` Unifi Access Point - nanoHD
-- `10.1.0.4` 2013 Intel NUC - NixOS 24.05 ([hub](https://github.com/suderman/nixos/tree/main/configurations/hub))
-- `10.1.0.5` 2021 Intel NUC - NixOS 24.05 ([lux](https://github.com/suderman/nixos/tree/main/configurations/lux))
+- `10.1.0.4` 2013 Intel NUC - NixOS 24.11 ([hub](https://github.com/suderman/nixos/tree/main/configurations/hub))
+- `10.1.0.5` 2021 Intel NUC - NixOS 24.11 ([lux](https://github.com/suderman/nixos/tree/main/configurations/lux))
 - `10.1.0.6` 2024 FormD T1 Desktop - NixOS Unstable ([kit](https://github.com/suderman/nixos/tree/main/configurations/kit))
 - `10.1.0.7` 2009 Mac Pro - NixOS Unstable ([pod](https://github.com/suderman/nixos/tree/main/configurations/pod))
 - `10.1.0.8` Universal Devices - ISY-944i
