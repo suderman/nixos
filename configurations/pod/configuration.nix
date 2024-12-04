@@ -6,7 +6,8 @@
   ];
 
   # Use freshest kernel
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  # boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxPackages_6_6; # build failure on 6.12
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
