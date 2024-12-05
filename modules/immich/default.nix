@@ -53,6 +53,11 @@ in {
       default = ""; # External library directory for the Immich instance
     };
 
+    cuda = mkOption {
+      type = types.bool;
+      default = false; # Enable with nvidia gpu
+    };
+
     environment = mkOption { 
       description = "Shared environment across Immich services";
       type = types.anything; 
@@ -125,16 +130,10 @@ in {
       authentication = mkBefore "host immich immich 172.16.0.0/12 md5";
 
       # Postgres extension pgvecto.rs required since Immich 1.91.0
-      # extraPlugins = [
       extensions = [
         (pkgs.postgresqlPackages.pgvecto-rs.override rec {
           postgresql = config.services.postgresql.package;
         })
-        # # Used this before pgvecto-rs was packaged in nixpkgs
-        # (pkgs.pgvecto-rs.override rec {
-        #   postgresql = config.services.postgresql.package;
-        #   stdenv = postgresql.stdenv;
-        # })
       ];
       settings.shared_preload_libraries = "vectors.so";
 
@@ -145,13 +144,6 @@ in {
     systemd.services.postgresql.postStart = mkAfter ''
       $PSQL -tAc 'ALTER USER immich WITH SUPERUSER;'
     '';
-
-    # # Create extensions in database
-    # systemd.services.postgresql.postStart = mkAfter ''
-    #   $PSQL -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS cube;'
-    #   $PSQL -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS earthdistance;'
-    #   $PSQL -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS vectors;'
-    # '';
 
     # Init service
     systemd.services.immich = let service = config.systemd.services.immich; in {

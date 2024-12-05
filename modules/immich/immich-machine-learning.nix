@@ -4,7 +4,6 @@ let
 
   cfg = config.services.immich;
   inherit (lib) mkIf;
-  nvidia = if config.hardware.nvidia.modesetting.enable then "-cuda" else ""; # set if using nvidia
   port = 3333; # machine learning port
 
 in {
@@ -12,8 +11,10 @@ in {
   config = mkIf cfg.enable {
 
     # Machine learning
-    virtualisation.oci-containers.containers.immich-machine-learning = {
-      image = "ghcr.io/immich-app/immich-machine-learning:v${cfg.version}${nvidia}";
+    virtualisation.oci-containers.containers.immich-machine-learning = let
+      version = if cfg.cuda then "${cfg.version}-cuda" else cfg.version; 
+    in {
+      image = "ghcr.io/immich-app/immich-machine-learning:v${version}";
       autoStart = false;
 
       # Environment variables
@@ -30,7 +31,7 @@ in {
       # Networking for docker containers
       extraOptions = [ 
         "--network=immich"
-      ] ++ ( if nvidia == "" then [] else [ "--device=nvidia.com/gpu=all" ] ); # use nvidia gpu if present
+      ] ++ ( if cfg.cuda then [ "--device=nvidia.com/gpu=all" ] else [] ); # use nvidia gpu if present
 
     };
 
