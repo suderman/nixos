@@ -3,7 +3,7 @@
 
   cfg = config.stylix;
   oscfg = osConfig.stylix;
-  inherit (lib) ls mkIf mkDefault;
+  inherit (lib) ls mkIf mkDefault mkForce;
 
 in {
 
@@ -11,9 +11,10 @@ in {
 
     # Enable with nixos module
     enable = mkDefault true;
-    autoEnable = mkDefault true;
+    autoEnable = mkDefault oscfg.enable;
 
     targets = {
+      hyprpaper.enable = mkForce false; # don't set my wallpaper
       # alacritty.enable = false;
       # avizo.enable = false;
       # bat.enable = false;

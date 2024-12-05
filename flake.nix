@@ -15,6 +15,16 @@
     home-manager-unstable.url = "github:nix-community/home-manager";
     home-manager-unstable.inputs.nixpkgs.follows = "nixpkgs-unstable";
 
+    # System-wide colorscheming & typography
+    # <https://github.com/danth/stylix>
+    stylix.url = "github:danth/stylix/release-24.11";
+    stylix.inputs.nixpkgs.follows = "nixpkgs";
+    stylix.inputs.home-manager.follows = "home-manager";
+    # Unstable
+    stylix-unstable.url = "github:danth/stylix";
+    stylix-unstable.inputs.nixpkgs.follows = "nixpkgs-unstable";
+    stylix-unstable.inputs.home-manager.follows = "home-manager-unstable";
+
     # Nix Index Database
     nix-index-database.url = "github:Mic92/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
@@ -59,10 +69,6 @@
     hyprland.inputs.nixpkgs.follows = "nixpkgs-unstable";
     hyprland-plugins.url = "github:hyprwm/hyprland-plugins";
     hyprland-plugins.inputs.hyprland.follows = "hyprland";
-
-    # Stylix system-wide colorscheming & typography
-    # <https://github.com/danth/stylix>
-    stylix.url = "github:danth/stylix";
 
     # Aylur's Gtk Shell (AGS)
     # <https://github.com/Aylur/ags

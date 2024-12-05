@@ -12,7 +12,7 @@ in {
 
   config.stylix = {
 
-    autoEnable = mkDefault true;
+    autoEnable = mkDefault cfg.enable;
     polarity = mkDefault "either"; # dark light either
 
     image = mkDefault( pixel "base0A" );

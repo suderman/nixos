@@ -35,7 +35,9 @@ in {
   # Enable email/calendars/contacts
   accounts.enable = true;
 
-  stylix.targets.hyprland.enable = false;
-  stylix.targets.rofi.enable = false;
+  stylix.targets = {
+    # hyprland.enable = false;
+    # rofi.enable = false;
+  };
 
 }
