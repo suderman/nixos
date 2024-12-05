@@ -75,4 +75,13 @@
     source = "${pkgs.rocmPackages.clr}";
   };
 
+  stylix = {
+    enable = true;
+    cursor = {
+      name = "Banana";
+      package = pkgs.banana-cursor;
+      size = 50;
+    };
+  };
+
 }
