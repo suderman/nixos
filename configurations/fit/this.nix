@@ -1,5 +1,5 @@
 {
-  hostName = "pod"; 
+  hostName = "fit"; 
   domain = "home";
   stable = false;
 }
