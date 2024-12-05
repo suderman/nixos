@@ -168,6 +168,7 @@
             useGlobalPkgs = true;
             useUserPackages = true;
             extraSpecialArgs = mkSpecialArgs pkgs;
+            backupFileExtension = "bak"; # move existing config files out of the way
 
             # Include Home Manager configuration, modules, secrets and caches
             users = mkAttrs this.users ( 

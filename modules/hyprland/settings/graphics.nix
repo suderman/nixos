@@ -1,35 +1,35 @@
 { config, lib, pkgs, ... }: let 
 
   cfg = config.wayland.windowManager.hyprland;
-  inherit (lib) mkIf; 
+  inherit (lib) mkIf mkDefault mkForce; 
 
 in {
 
   config = mkIf cfg.enable {
     wayland.windowManager.hyprland.settings = {
 
-      env = [
-        "XCURSO_SIZE,84"
-      ];
+      # env = [
+      #   "XCURSO_SIZE,84"
+      # ];
 
       general = {
         gaps_in = "10, 10, 5, 10";
         gaps_out = "10, 20, 20, 20";
         gaps_workspaces = 20;
         border_size = 3;
-        "col.active_border" = "rgba(89b4facc) rgba(cba6f7cc) 270deg";
-        "col.inactive_border" = "rgba(11111b66) rgba(b4befe66) 270deg";
+        "col.active_border" = mkDefault "rgba(89b4facc) rgba(cba6f7cc) 270deg";
+        "col.inactive_border" = mkDefault "rgba(11111b66) rgba(b4befe66) 270deg";
         extend_border_grab_area = 20; # gaps between windows can be used for resizing
       };
 
       group = {
         merge_groups_on_drag = true;
         groupbar.enabled = false;
-        "col.border_active" = "rgba(FF5F1Fcc) rgba(FF5F1Fcc) 270deg";
-        "col.border_inactive" = "rgba(FF5F1F80) rgba(FF5F1F80) 270deg";
+        "col.border_active" = mkForce "rgba(FF5F1Fcc) rgba(FF5F1Fcc) 270deg";
+        "col.border_inactive" = mkForce "rgba(FF5F1F80) rgba(FF5F1F80) 270deg";
 
-        "col.border_locked_active" = "rgba(F1C40Fcc) rgba(16A085cc) 270deg";
-        "col.border_locked_inactive" = "rgba(F1C40F80) rgba(16A08580) 270deg";
+        "col.border_locked_active" = mkForce "rgba(F1C40Fcc) rgba(16A085cc) 270deg";
+        "col.border_locked_inactive" = mkForce "rgba(F1C40F80) rgba(16A08580) 270deg";
       };
 
       misc = {
@@ -47,7 +47,7 @@ in {
           range = 20;
           render_power = 3;
           offset = "0, 3";
-          color = "rgba(00000080)";
+          color = mkDefault "rgba(00000080)";
         };
 
         dim_inactive = false;

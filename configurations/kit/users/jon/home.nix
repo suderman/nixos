@@ -15,12 +15,12 @@
     # publicShare = "${homeDirectory}/public";
   };
 
-  home.pointerCursor = {
-    gtk.enable = true;
-    package = pkgs.adwaita-icon-theme;
-    name = "Adwaita";
-    size = 16;
-  };
+  # home.pointerCursor = {
+  #   gtk.enable = true;
+  #   package = pkgs.adwaita-icon-theme;
+  #   name = "Adwaita";
+  #   size = 16;
+  # };
   
   home.packages = with pkgs; [ 
     loupe
@@ -29,5 +29,10 @@
 
   # Enable email/calendars/contacts
   accounts.enable = true;
+
+  stylix.targets = {
+    # hyprland.enable = false;
+    # rofi.enable = false;
+  };
 
 }

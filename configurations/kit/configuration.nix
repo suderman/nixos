@@ -70,4 +70,15 @@
     127.0.0.1 local
   '';
 
+  stylix = {
+    enable = true;
+    polarity = "dark";
+    base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-macchiato.yaml";
+    cursor = {
+      name = "Banana";
+      package = pkgs.banana-cursor;
+      size = 36;
+    };
+  };
+
 }

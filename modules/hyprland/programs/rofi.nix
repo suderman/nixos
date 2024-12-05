@@ -2,7 +2,7 @@
 
   cfg = config.programs.rofi;
   ini = pkgs.formats.ini {};
-  inherit (lib) concatStringsSep getExe mkIf mkOption types;
+  inherit (lib) concatStringsSep getExe mkIf mkDefault mkOption types;
 
 in {
 
@@ -63,7 +63,7 @@ in {
       plugins = with pkgs; [ rofi-calc rofi-emoji-wayland rofimoji rofi-blezz ];
       cycle = false;
       terminal = getExe pkgs.kitty;
-      font = "JetBrainsMono 14";
+      font = mkDefault "JetBrainsMono 14";
       extraConfig = {
         icon-theme = "Papirus";
         show-icons = true;
@@ -113,7 +113,7 @@ in {
 
       };
 
-      theme = let l = config.lib.formats.rasi.mkLiteral; in {
+      theme = let l = (v: mkDefault (config.lib.formats.rasi.mkLiteral v)); in {
         "*" = {
           bg0 =l "#252034E6";
           bg1 =l "#3C3B5480";

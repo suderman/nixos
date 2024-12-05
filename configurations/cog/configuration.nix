@@ -98,4 +98,13 @@
     allowedUDPPorts = [ port ];
   };
 
+  stylix = {
+    enable = true;
+    cursor = {
+      name = "Banana";
+      package = pkgs.banana-cursor;
+      size = 36;
+    };
+  };
+
 }
