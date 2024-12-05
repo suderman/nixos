@@ -13,6 +13,7 @@
     tealdeer
     wget
     lsd
+    sv # wrapper for systemctl/journalctl
   ];
 
   # Enable home-manager, git & zsh

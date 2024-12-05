@@ -48,8 +48,8 @@ in {
         systemctl() { [ $EUID -eq 0 ] && command systemctl "$@" || command systemctl --user "$@"; }
         journalctl() { [ $EUID -eq 0 ] && command journalctl "$@" || command journalctl --user "$@"; }
 
-        ## zsh-fzf-tab
-        #. ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
+        # Fix tab completion
+        setopt EXTENDED_GLOB
 
         # message of the day
         [[ -e /var/lib/rust-motd/motd ]] && cat /var/lib/rust-motd/motd
