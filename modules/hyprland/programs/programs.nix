@@ -31,12 +31,13 @@ in {
 
     # Check modules directory for extra configuration
     programs = {
-      kitty.enable = true; # term
-      firefox.enable = true; # web browser
-      chromium.enable = true; # alt browser
-      yazi.enable = true; # file manager tui
-      gimp.enable = true; # image editor
       bluebubbles.enable = true; # ios chat
+      chromium.enable = true; # alt browser
+      firefox.enable = true; # web browser
+      gimp.enable = true; # image editor
+      kitty.enable = true; # term
+      mpv.enable = true; # media player
+      yazi.enable = true; # file manager tui
       zwift.enable = true; # fitness
     };
 
@@ -53,7 +54,6 @@ in {
       grim # taking screenshots
       slurp # selecting a region to screenshot
       xorg.xeyes # confirm xwayland
-      mpv
 
       font-awesome # icon font
       jetbrains-mono # mono font
