@@ -49,7 +49,6 @@ in {
           sponsorblock
           stylus
           ublock-origin
-          vimium
         ];
 
         search = {
@@ -90,6 +89,9 @@ in {
         "tag +pip, title:^(Picture-in-Picture)$"
       ];
     };
+
+    # Apply pretty colors
+    stylix.targets.firefox.profileNames = [ "default" ];
 
   };
 
