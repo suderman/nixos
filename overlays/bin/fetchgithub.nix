@@ -14,7 +14,7 @@
       exit 1
     fi
 
-    json=$(nix flake prefetch --json "github:$1")
+    json=$(nix flake prefetch --refresh --json "github:$1")
 
     out="";
     out="''${out}owner = \"$(echo "$json" | jq -r '.original.owner')\";\n"
