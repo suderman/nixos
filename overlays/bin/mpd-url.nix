@@ -7,8 +7,8 @@
   text = let repo = fetchFromGitHub {
     owner = "suderman";
     repo = "mpd-url";
-    rev = "a17cd90974077db066c024fd9839d942a75098ff";
-    sha256 = "sha256-WRRzIcVzYaI59tDlBXJ1yI2qD32+PKCEcf7NxwMDIU0=";
+    rev = "3b9186d91046e6ad25ebddd21a40157f4ae49dce";
+    sha256 = "sha256-cUz7iUBQCj9MtpwVKPcIW4nxg1lVByRfQ8RK3McvP2c=";
   }; in builtins.readFile "${repo}/mpd-url";
 
 }
