@@ -23,7 +23,7 @@ in {
         };
         Install.WantedBy = [ "default.target" ];
         Service = {
-          ype = "simple";
+          Type = "simple";
           Restart = "always";
           ExecStart = mkShellScript {
             inputs = [ pkgs.mpd-url ];
