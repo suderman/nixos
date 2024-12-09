@@ -10,7 +10,7 @@ in {
     programs.mpv = {
       enable = true;
       config = {
-        background = mkDefault "#292D3E";
+        background = mkDefault "color";
         hwdec = "auto";
         hwdec-codecs = "all";
       };
