@@ -42,31 +42,31 @@ in {
   programs.silverbullet = {
     enable = true;
     url = "https://silverbullet.lux";
-    platform = "x11";
+    # platform = "x11";
   };
 
   programs.immich = {
     enable = true;
     url = "https://immich.lux";
-    platform = "x11";
+    # platform = "x11";
   };
 
   programs.lunasea = {
     enable = true;
     url = "https://lunasea.lux";
-    platform = "x11";
+    # platform = "x11";
   };
 
   programs.jellyfin = {
     enable = true;
     url = "https://jellyfin.lux";
-    platform = "x11";
+    # platform = "x11";
   };
 
   programs.home-assistant = {
     enable = true;
     url = "https://hass.hub";
-    platform = "x11";
+    # platform = "x11";
   };
 
   services.flatpak = {
