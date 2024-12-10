@@ -1,8 +1,8 @@
-{ config, lib, pkgs, presets, ... }: {
+{ config, lib, pkgs, hardware, ... }: {
 
   # Import all *.nix files in this directory
   imports = lib.ls ./. ++ [
-    presets.framework-11th-gen-intel
+    hardware.framework-11th-gen-intel
   ];
 
   # Use the systemd-boot EFI boot loader.

@@ -1,7 +1,7 @@
-{ config, lib, pkgs, presets, ... }: {
+{ config, lib, pkgs, hardware, ... }: {
 
   # Import all *.nix files in this directory
-  imports = lib.ls ./. ++ [ presets.linode ];
+  imports = lib.ls ./. ++ [ hardware.linode ];
 
   # Use freshest kernel
   boot.kernelPackages = pkgs.linuxPackages_latest;

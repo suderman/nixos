@@ -15,7 +15,7 @@
 
     # 0.42's explicit sync wasn't needed on my system and when it's enabled
     # Firefox and other apps freeze and crash
-    render.explicit_sync = false;
+    render.explicit_sync = true;
 
   };
 

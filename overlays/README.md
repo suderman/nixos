@@ -4,7 +4,7 @@ Extend `pkgs` with my customizations and additions. Organized into
 [pkgs](https://github.com/suderman/nixos/tree/main/overlays/pkgs),
 [bin](https://github.com/suderman/nixos/tree/main/overlays/bin),
 [lib](https://github.com/suderman/nixos/tree/main/overlays/lib), and
-[presets](https://github.com/suderman/nixos/tree/main/overlays/presets). 
+[hardware](https://github.com/suderman/nixos/tree/main/overlays/hardware). 
 
 ## mods
 
@@ -41,10 +41,10 @@ directory. The `overlays/lib/default.nix` file is also imported and contains
 additional lib functions in that one file. At configuration, `pkgs.this.lib` 
 is merged with `pkgs.lib` as `lib` in `specialArgs` and `extraSpecialArgs`. 
 
-## presets
+## hardware
 
-Hardware and preset configurations. Every `overlays/presets/*.nix` and
-`overlays/presets/*/default.nix` gets automatically imported into `pkgs.*`
+Additional hardware configurations. Every `overlays/hardware/*.nix` and
+`overlays/hardware/*/default.nix` gets automatically imported into `pkgs.*`
 inheriting an attribute name from the file or directory. The 
 [nixos-hardware](https://github.com/suderman/nixos/blob/main/flake.nix#L27) 
 input is also merged into this attribute set, and included in `specialArgs` 

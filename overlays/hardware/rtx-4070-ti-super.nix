@@ -1,5 +1,5 @@
 # Nvidia GeForce RTX 4070 Ti Super
-{ config, pkgs, lib, presets, ... }: let
+{ config, pkgs, lib, hardware, ... }: let
 
   # https://raw.githubusercontent.com/aaronp24/nvidia-versions/master/nvidia-versions.txt
   beta = false;
@@ -7,7 +7,7 @@
 in {
 
   # https://github.com/NixOS/nixos-hardware/tree/master/common/gpu/nvidia
-  imports = [ presets.common-gpu-nvidia-nonprime ];
+  imports = [ hardware.common-gpu-nvidia-nonprime ];
 
   boot.initrd.kernelModules = [ "nvidia" ];
   boot.extraModulePackages = with config.boot.kernelPackages; 
@@ -54,11 +54,7 @@ in {
 
   # Enable dynamic CDI configuration for NVidia devices by running nvidia-container-toolkit on boot
   hardware.nvidia-container-toolkit.enable = true;
-
-  virtualisation = {
-    docker.package = pkgs.docker_25; # CDI is feature-gated and only available from Docker 25 and onwards
-    docker.daemon.settings.features.cdi = true;
-  };
+  virtualisation.docker.daemon.settings.features.cdi = true;
 
   environment.systemPackages = with pkgs; [ 
     nvitop

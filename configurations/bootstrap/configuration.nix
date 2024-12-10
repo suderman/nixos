@@ -1,9 +1,9 @@
-{ config, pkgs, presets, ... }: {
+{ config, pkgs, hardware, ... }: {
 
   imports = [ 
     ./hardware-configuration.nix
     # Linode boot
-    # presets.linode
+    # hardware.linode
   ];
 
   # UEFI boot 

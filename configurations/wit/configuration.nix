@@ -1,8 +1,8 @@
-{ config, lib, pkgs, presets, ... }: {
+{ config, lib, pkgs, hardware, ... }: {
 
   # Import all *.nix files in this directory
   imports = lib.ls ./. ++ [
-    presets.lenovo-thinkpad-t480s
+    hardware.lenovo-thinkpad-t480s
   ];
 
   # Use the systemd-boot EFI boot loader.

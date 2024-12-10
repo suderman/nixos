@@ -1,8 +1,8 @@
-{ config, pkgs, lib, presets, ... }: {
+{ config, pkgs, lib, hardware, ... }: {
 
   # Import all *.nix files in this directory
   imports = lib.ls ./. ++ [
-    presets.rtx-4070-ti-super
+    hardware.rtx-4070-ti-super
   ];
 
   # Use the systemd-boot EFI boot loader.

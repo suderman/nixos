@@ -121,8 +121,8 @@
         (final: prev: { inherit this; })
         (final: prev: { this = import ./overlays/lib { inherit final prev; }; })
 
-        # Preset configurations merged with nixos-hardware
-        (final: prev: { presets = import ./overlays/presets { inherit final prev; }; })
+        # Hardware configurations merged with nixos-hardware
+        (final: prev: { hardware = import ./overlays/hardware { inherit final prev; }; })
 
         # Unstable/stable nixpkgs channel
         (final: prev: { unstable = import inputs.nixpkgs-unstable { inherit system config; }; })
@@ -151,7 +151,7 @@
     mkSpecialArgs = pkgs: {
       inherit outputs;
       inherit (pkgs.this) inputs;
-      inherit (pkgs) this presets;
+      inherit (pkgs) this hardware;
       lib = pkgs.this.inputs.nixpkgs.lib.extend (_: _: pkgs.this.inputs.home-manager.lib // pkgs.this.lib );
     };
 
