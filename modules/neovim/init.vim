@@ -10,6 +10,13 @@ set number                             " show line numbers
 set wildmode=list:longest,list:full
 set redrawtime=10000
 
+                                                                                                                                            
+" leader is space                                                                                                                           
+let g:mapleader = " "
+let g:maplocalleader = " "
+nnoremap <Space> <Nop>
+
+
 " Wrapped lines goes down/up to next row, rather than next line in file.
 noremap j gj
 noremap k gk
@@ -94,8 +101,8 @@ set gdefault
 " F5 will remove trailing whitespace and tabs
 nnoremap <silent> <F5> :let _s=@/<Bar>:%s/\s\+$//e<Bar>:let @/=_s<Bar>:nohl<CR>:retab<CR>
 
-" Clear search with comma-space
-noremap <leader><space> :noh<CR>:match none<CR>:2match none<CR>:3match none<CR>
+" Clear search with space-c
+noremap <leader>c :noh<CR>:match none<CR>:2match none<CR>:3match none<CR>
 
 " F2 will sort selected words into alphabetical single line
 vnoremap <F2> d:execute 'normal i' . join(sort(split(getreg('"'))), ' ')<CR>

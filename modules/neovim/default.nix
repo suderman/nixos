@@ -15,24 +15,25 @@ in {
       configure = {
         packages.myPlugins = with pkgs.vimPlugins; {
           start = [ 
+            align
+            bufexplorer
+            delimitMate
+            gruvbox-nvim
+            lightline-vim
+            neoscroll-nvim
+            nerdtree
+            nerdtree-git-plugin
+            nvim-fzf
+            syntastic
+            tcomment_vim
+            todo-txt-vim
+            vim-endwise
+            vim-lastplace 
+            vim-nix 
+            vim-repeat
             vim-sensible
             vim-surround
             vim-unimpaired
-            vim-endwise
-            vim-repeat
-            vim-lastplace 
-            vim-nix 
-            neoscroll-nvim
-            lightline-vim
-            bufexplorer
-            gruvbox-nvim
-            nerdtree
-            nerdtree-git-plugin
-            delimitMate
-            tcomment_vim
-            align
-            syntastic
-            nvim-fzf
           ]; 
           opt = [];
         };

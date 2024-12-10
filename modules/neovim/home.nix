@@ -29,19 +29,21 @@ in {
         { plugin = vim-tmux-navigator; config = builtins.readFile ./vim-tmux-navigator.vim; }
         { plugin = fzf-lua; config = builtins.readFile ./fzf-lua.vim; }
         { plugin = orgmode; config = builtins.readFile ./orgmode.vim; }
+
+        align
+        delimitMate
         nerdtree-git-plugin
         nvim-web-devicons
-        vim-surround
+        ron-vim
+        tcomment_vim
+        todo-txt-vim
         vim-endwise
-        vim-repeat
         vim-lastplace 
         vim-nix 
         vim-parinfer
+        vim-repeat
+        vim-surround
         yuck-vim
-        ron-vim
-        delimitMate
-        tcomment_vim
-        align
 
         (pkgs.vimUtils.buildVimPlugin {
           name = "hyprland-vim-syntax";
