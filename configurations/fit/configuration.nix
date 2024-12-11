@@ -31,10 +31,6 @@
 
   # AirDrop alternative
   programs.localsend.enable = true; 
-  networking.firewall = let port = 53317; in {
-    allowedTCPPorts = [ port ];
-    allowedUDPPorts = [ port ];
-  };
 
   # Web services
   services.tailscale = {
@@ -73,15 +69,6 @@
   file."/opt/rocm/hip" = { 
     type = "link"; 
     source = "${pkgs.rocmPackages.clr}";
-  };
-
-  stylix = {
-    enable = true;
-    cursor = {
-      name = "Banana";
-      package = pkgs.banana-cursor;
-      size = 50;
-    };
   };
 
 }

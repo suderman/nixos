@@ -55,10 +55,6 @@
 
   # AirDrop alternative
   programs.localsend.enable = true; 
-  networking.firewall = let port = 53317; in {
-    allowedTCPPorts = [ port ];
-    allowedUDPPorts = [ port ];
-  };
 
   services.whoami.enable = true;
   modules.ollama.enable = true;
@@ -69,18 +65,5 @@
     127.0.0.1 example.com
     127.0.0.1 local
   '';
-
-  stylix = {
-    enable = true;
-    polarity = "dark";
-    # base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-macchiato.yaml";
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-city-dark.yaml";
-    opacity.terminal = 0.85;
-    cursor = {
-      name = "Banana";
-      package = pkgs.banana-cursor;
-      size = 36;
-    };
-  };
 
 }
