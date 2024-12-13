@@ -40,7 +40,8 @@
     enable = true;
     name = "bb";
     # ip = work.pom;
-    ip = work.bub;
+    # ip = work.bub;
+    ip = home.bub;
   };
 
   # Backup media server
