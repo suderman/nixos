@@ -79,4 +79,6 @@ in {
     ];
   };
 
+  programs.sparrow.enable = true;
+
 }
