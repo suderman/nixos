@@ -26,11 +26,19 @@
   ]; 
   bind = [ "bind" ]; 
 
+  mkBees = spec: {
+    inherit spec;
+    # verbosity = "crit";
+    verbosity = "info";
+    extraOptions = [ "--thread-count" "4" "--loadavg-target" "5.0" ];
+  };
+
 in {
 
   # Btrfs mount options
   fileSystems."/".options = btrfs;
   fileSystems."/nix".options = btrfs;
+  # services.beesd.filesystems.nix = mkBees "/nix";
 
   # Media network share
   # -------------------------------------------------------------------------
@@ -73,6 +81,7 @@ in {
     device = "/dev/disk/by-uuid/be48bf4a-6fc1-492c-bdf9-4e361c912e8c";
     options = btrfs ++ automount;
   };
+  # services.beesd.filesystems.ssd = mkBees "/mnt/ssd";
 
   fileSystems."/data" = {
     device = "/mnt/ssd/data"; 

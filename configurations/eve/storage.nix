@@ -15,11 +15,18 @@
   ]; 
   bind = [ "bind" ]; 
 
+  mkBees = spec: {
+    inherit spec;
+    verbosity = "info";
+    extraOptions = [ "--thread-count" "4" "--loadavg-target" "5.0" ];
+  };
+
 in {
 
   # Btrfs mount options
   fileSystems."/".options = btrfs;
   fileSystems."/nix".options = btrfs;
+  # services.beesd.filesystems.nix = mkBees "/nix";
 
   # Additional HDD disk pool
   # -------------------------------------------------------------------------
@@ -49,6 +56,7 @@ in {
     device = "/dev/disk/by-uuid/68ab0d1f-4070-4cec-a2c3-267d1cafc6ea";
     options = btrfs ++ automount;  
   };
+  # services.beesd.filesystems.pool = mkBees "/mnt/pool";
 
   fileSystems."/data" = {
     device = "/mnt/pool/data"; 

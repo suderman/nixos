@@ -26,11 +26,18 @@
   ]; 
   bind = [ "bind" ]; 
 
+  mkBees = spec: {
+    inherit spec;
+    verbosity = "crit";
+    extraOptions = [ "--thread-count" "4" "--loadavg-target" "5.0" ];
+  };
+
 in {
 
   # Btrfs mount options
   fileSystems."/".options = btrfs;
   fileSystems."/nix".options = btrfs;
+  # services.beesd.filesystems.nix = mkBees "/nix";
 
   # Media network share
   # -------------------------------------------------------------------------
