@@ -13,7 +13,14 @@ in {
 
   options.programs.sparrow = {
     enable = lib.options.mkEnableOption "sparrow"; 
-    scale = mkOption { type = types.float; default = 1.5; };
+    scale = mkOption { 
+      type = types.float; 
+      default = 1.5; 
+    };
+    configDir = mkOption {
+      type = types.path;
+      default = "${config.xdg.configHome}/sparrow";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -25,7 +32,7 @@ in {
       sparrow-desktop-wrapper = mkShellScript {
         name = "sparrow-desktop-wrapper";
         text = ''
-          JAVA_TOOL_OPTIONS="-Dglass.gtk.uiScale=${toString cfg.scale}" ${getExe pkgs.sparrow} 
+          JAVA_TOOL_OPTIONS="-Dglass.gtk.uiScale=${toString cfg.scale}" ${getExe pkgs.sparrow} -d ${cfg.configDir}  
         '';
       };
 
