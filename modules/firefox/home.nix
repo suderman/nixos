@@ -2,13 +2,16 @@
 { config, lib, pkgs, ... }: let
 
   cfg = config.programs.firefox;
-  inherit (lib) mkIf;
+  inherit (lib) ls mkIf;
   inherit (config.services.keyd.lib) mkClass;
 
   # Window class name
   class = "firefox";
 
 in {
+
+  # Extra addons not found in nur
+  imports = ls ./.;
 
   config = mkIf cfg.enable {
 
@@ -49,6 +52,7 @@ in {
           sponsorblock
           stylus
           ublock-origin
+          cfg.extraAddons.easy-container-shortcuts
         ];
 
         search = {
@@ -74,7 +78,8 @@ in {
     # keyboard shortcuts
     services.keyd.windows."${mkClass class}" = {
       "super.o" = "C-l"; # location bar
-      "super.t" = "C-t"; # new tab
+      # "super.t" = "C-t"; # new tab
+      "super.t" = "C-A-t"; # new tab (in same container)
       "super.w" = "C-w"; # close tab
       "super.[" = "C-pageup"; # prev tab
       "super.]" = "C-pagedown"; # next tab
