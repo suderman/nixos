@@ -9,7 +9,7 @@ in {
   config = mkIf cfg.enable {
     wayland.windowManager.hyprland = {
 
-      plugins = mkIf cfg.enablePlugins [ pkgs.hyprlandPlugins.hyprbars ];
+      plugins = mkIf cfg.enablePlugins [ cfg.pkgs.hyprlandPlugins.hyprbars ];
 
       settings = {
         "plugin:hyprbars" = {
