@@ -37,15 +37,15 @@ in {
   # Set environment variables for every service
   environment.sessionVariables = {
 
-    # Convince python to trust CA certificate
-    REQUESTS_CA_BUNDLE = this.ca;
-    PIP_CERT = this.ca;
+    # # Convince python to trust CA certificate
+    # REQUESTS_CA_BUNDLE = this.ca;
+    # PIP_CERT = this.ca;
 
     # Convince node to trust CA certificate
     NODE_EXTRA_CA_CERTS = this.ca;
 
-    # Convince everyone else to trust CA certificate
-    SSL_CERT_FILE = "/etc/ssl/certs/ca-bundle.crt";
+    # # Convince everyone else to trust CA certificate
+    # SSL_CERT_FILE = "/etc/ssl/certs/ca-bundle.crt";
 
   };
 
