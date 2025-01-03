@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }: let 
+{ config, pkgs, lib, ... }: let 
   inherit (lib) ls;
 in {
 
@@ -80,5 +80,6 @@ in {
   };
 
   programs.sparrow.enable = true;
+
 
 }

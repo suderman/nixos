@@ -12,6 +12,9 @@
   services.ocis.enable = true;
   services.syncthing.enable = true;
 
+  # Sync health data
+  services.withings-sync.enable = true;
+
   # Music daemon
   services.mpd = {
     enable = true;

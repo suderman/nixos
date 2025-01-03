@@ -1,3 +1,4 @@
+# RETIRED - now using a home-manager module instead
 # services.withings-sync.enable = true;
 
 # Manually sync today:

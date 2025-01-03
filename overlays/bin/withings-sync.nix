@@ -1,9 +1,10 @@
+# RETIRED - now using python package provided in nixpkgs
 # https://github.com/jaroslawhartman/withings-sync
 { lib, this, docker }: let
 
   # https://github.com/jaroslawhartman/withings-sync/pkgs/container/withings-sync
   image = "ghcr.io/jaroslawhartman/withings-sync";
-  tag = "v4.2.1";
+  tag = "v4.2.7";
 
 in this.lib.mkShellScript {
 
@@ -11,9 +12,9 @@ in this.lib.mkShellScript {
   inputs = [ docker ];
 
   text = let command = 
-    ''--name withings --rm '' +
+    ''--name withings --rm --dns 8.8.8.8 '' +
     ''-e GARMIN_USERNAME -e GARMIN_PASSWORD '' +
-    ''-v "/home/${builtins.head this.admins}:/root" '' +
+    ''-v $HOME:/root '' +
     ''${image}:${tag}'';
 
   in ''
