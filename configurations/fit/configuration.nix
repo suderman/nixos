@@ -45,10 +45,10 @@
     autologin = "jon";
   };
 
-  # https://wiki.nixos.org/wiki/AMD_GPU
-  environment.variables = {
-    ROC_ENABLE_PRE_VEGA = "1";
-  };
+  # # https://wiki.nixos.org/wiki/AMD_GPU
+  # environment.variables = {
+  #   ROC_ENABLE_PRE_VEGA = "1";
+  # };
 
   hardware.graphics = {
     enable = true;
@@ -65,9 +65,9 @@
     ];
   };
 
-  file."/opt/rocm/hip" = { 
-    type = "link"; 
-    source = "${pkgs.rocmPackages.clr}";
-  };
+  # file."/opt/rocm/hip" = { 
+  #   type = "link"; 
+  #   source = "${pkgs.rocmPackages.clr}";
+  # };
 
 }
