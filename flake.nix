@@ -63,17 +63,17 @@
     # <https://github.com/gmodena/nix-flatpak>
     nix-flatpak.url = "github:gmodena/nix-flatpak"; 
 
-    # Hyprland
-    # <https://github.com/hyprwm/Hyprland/tags>
-    hyprland.url = "github:hyprwm/Hyprland/v0.46.2"; 
-    hyprland.inputs.nixpkgs.follows = "nixpkgs-unstable";
-    # <https://github.com/hyprwm/hyprland-plugins/tags>
-    hyprland-plugins.url = "github:hyprwm/hyprland-plugins/v0.46.0"; 
-    hyprland-plugins.inputs.hyprland.follows = "hyprland";
-
-    # Aylur's Gtk Shell (AGS)
-    # <https://github.com/Aylur/ags
-    ags.url = "github:Aylur/ags";
+    # # Hyprland
+    # # <https://github.com/hyprwm/Hyprland/tags>
+    # hyprland.url = "github:hyprwm/Hyprland/v0.46.2"; 
+    # hyprland.inputs.nixpkgs.follows = "nixpkgs-unstable";
+    # # <https://github.com/hyprwm/hyprland-plugins/tags>
+    # hyprland-plugins.url = "github:hyprwm/hyprland-plugins/v0.46.0"; 
+    # hyprland-plugins.inputs.hyprland.follows = "hyprland";
+    #
+    # # Aylur's Gtk Shell (AGS)
+    # # <https://github.com/Aylur/ags
+    # ags.url = "github:Aylur/ags";
 
   };
 

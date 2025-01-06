@@ -16,10 +16,10 @@ in {
 
   options.wayland.windowManager.hyprland = {
     enablePlugins = lib.options.mkEnableOption "enablePlugins";
-    pkgs.hyprlandPlugins = mkOption {
-      type = types.anything; # hyprland's own plugins from flake input
-      default = inputs.hyprland-plugins.packages."${pkgs.stdenv.system}";
-    };
+    # pkgs.hyprlandPlugins = mkOption {
+    #   type = types.anything; # hyprland's own plugins from flake input
+    #   default = inputs.hyprland-plugins.packages."${pkgs.stdenv.system}";
+    # };
     systemd.target = mkOption {
       type = types.str;
       default = "hyprland-ready.target";
