@@ -1,4 +1,4 @@
-{ config, lib, pkgs, inputs, hardware, ... }: {
+{ config, lib, pkgs, hardware, ... }: {
 
   # Import all *.nix files in this directory
   imports = lib.ls ./. ++ [
@@ -42,7 +42,6 @@
   services.xserver.desktopManager.gnome.enable = false;
   programs.hyprland = {
     enable = true;
-    package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
     autologin = "jon";
   };
 
