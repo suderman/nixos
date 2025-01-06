@@ -16,6 +16,7 @@ in {
   # 560.35.03 "latest" broken on LTS kernel 6.12, use previous LTS kernel 6.6
   # https://github.com/NixOS/nixpkgs/commit/8653ea453d81a7320c63f930911bcd9f7e063c65
   boot.kernelPackages = lib.mkForce pkgs.linuxPackages_6_6; 
+  # boot.kernelPackages = lib.mkForce pkgs.linuxPackages_6_12; 
 
   # Fix extra screen
   boot.kernelParams = [ "nvidia-drm.fbdev=1" ];
@@ -43,7 +44,8 @@ in {
 
     # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/os-specific/linux/nvidia-x11/default.nix
     package = with config.boot.kernelPackages; 
-      if beta then nvidiaPackages.beta else nvidiaPackages.latest;
+      # if beta then nvidiaPackages.beta else nvidiaPackages.latest;
+      if beta then nvidiaPackages.beta else nvidiaPackages.production; # https://github.com/NixOS/nixpkgs/pull/365711
 
   };
 

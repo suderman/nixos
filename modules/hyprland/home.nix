@@ -11,7 +11,8 @@ in {
 
     # Flake home-manager module
     # https://github.com/hyprwm/Hyprland/blob/main/nix/hm-module.nix
-    [ inputs.hyprland.homeManagerModules.default ];
+    # [ inputs.hyprland.homeManagerModules.default ];
+    [];
 
   options.wayland.windowManager.hyprland = {
     enablePlugins = lib.options.mkEnableOption "enablePlugins";

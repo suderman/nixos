@@ -69,7 +69,7 @@ in {
       nemo-with-extensions # file manager gui
       junction # browser chooser
 
-      quickemu # virtual machines
+      # quickemu # virtual machines
       qalculate-gtk # calculator
       newsflash # rss reader
       tauon # mp3 player (and jellyfin client)

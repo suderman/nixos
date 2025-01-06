@@ -30,8 +30,10 @@ in {
     # portal required for flatpak
     xdg.portal = {
       enable = true;
+      config.common.default = "*"; # "gtk"
       extraPortals = [ pkgs.xdg-desktop-portal-gtk ]; # or xdg-desktop-portal-kde
     };
+
 
     # browse (and try) flatpaks via Gnome Software
     environment.systemPackages = with pkgs; [ gnome-software ];

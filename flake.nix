@@ -65,10 +65,10 @@
 
     # Hyprland
     # <https://github.com/hyprwm/Hyprland/tags>
-    hyprland.url = "github:hyprwm/Hyprland/v0.45.2"; 
+    hyprland.url = "github:hyprwm/Hyprland/v0.46.2"; 
     hyprland.inputs.nixpkgs.follows = "nixpkgs-unstable";
     # <https://github.com/hyprwm/hyprland-plugins/tags>
-    hyprland-plugins.url = "github:hyprwm/hyprland-plugins/v0.45.0"; 
+    hyprland-plugins.url = "github:hyprwm/hyprland-plugins/v0.46.0"; 
     hyprland-plugins.inputs.hyprland.follows = "hyprland";
 
     # Aylur's Gtk Shell (AGS)

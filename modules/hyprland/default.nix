@@ -7,11 +7,12 @@
 
 in {
 
-  imports = ls ./. ++ 
+  imports = ls ./. ++
 
     # Flake nixos module
     # https://github.com/hyprwm/Hyprland/blob/main/nix/module.nix
-    [ inputs.hyprland.nixosModules.default ];
+    # [ inputs.hyprland.nixosModules.default ];
+    [];
 
   config = mkIf cfg.enable {
 
