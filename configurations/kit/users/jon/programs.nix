@@ -39,11 +39,11 @@ in {
     # ];
   };
 
-  programs.silverbullet = {
-    enable = true;
-    url = "https://silverbullet.lux";
-    # platform = "x11";
-  };
+  # programs.silverbullet = {
+  #   enable = true;
+  #   url = "https://silverbullet.lux";
+  #   # platform = "x11";
+  # };
 
   programs.immich = {
     enable = true;

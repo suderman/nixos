@@ -55,7 +55,7 @@
   #   public = false;
   # };
 
-  services.silverbullet.enable = true;
+  # services.silverbullet.enable = true;
 
   services.udev.extraRules = let 
     vendor = "0fcf"; product = "1009";

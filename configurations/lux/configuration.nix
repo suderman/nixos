@@ -28,20 +28,20 @@
   services.whoami.enable = true;
   services.gitea.enable = true; 
 
-  services.silverbullet = {
-    enable = true;
-    ocisHostName = "ocis.suderman.org";
-    ocisDir = "Notes";
-  };
+  # services.silverbullet = {
+  #   enable = true;
+  #   ocisHostName = "ocis.suderman.org";
+  #   ocisDir = "Notes";
+  # };
 
   services.jellyfin.enable = true;
   services.plex.enable = true;
   services.lunasea.enable = true;
 
-  services.ocis = {
-    enable = true;
-    hostName = "ocis.suderman.org";
-  };
+  # services.ocis = {
+  #   enable = true;
+  #   hostName = "ocis.suderman.org";
+  # };
   
   services.immich = {
     enable = true;

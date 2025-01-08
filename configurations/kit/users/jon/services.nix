@@ -9,7 +9,7 @@
   };
 
   # File sync
-  services.ocis.enable = true;
+  # services.ocis.enable = true;
   services.syncthing.enable = true;
 
   # Sync health data

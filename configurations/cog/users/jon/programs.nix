@@ -62,10 +62,10 @@ in {
     # plugins = [ obs-studio-plugins.wlrobs ];
   };
 
-  programs.silverbullet = {
-    enable = true;
-    url = "https://silverbullet.lux";
-  };
+  # programs.silverbullet = {
+  #   enable = true;
+  #   url = "https://silverbullet.lux";
+  # };
 
   programs.immich = {
     enable = true;
