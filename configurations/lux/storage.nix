@@ -129,9 +129,10 @@ in {
       "/mnt/ssd".target."/backups/${hostName}" = {};
 
       # Remote backup to "eve" server using ssh
-      "/nix".target."ssh://eve/backups/${hostName}" = {};
-      "/mnt/ssd".target."ssh://eve/backups/${hostName}" = {};
-      "/mnt/raid".target."ssh://eve/backups/${hostName}" = {};
+      # re-enable after eve is healthy again
+      # "/nix".target."ssh://eve/backups/${hostName}" = {};
+      # "/mnt/ssd".target."ssh://eve/backups/${hostName}" = {};
+      # "/mnt/raid".target."ssh://eve/backups/${hostName}" = {};
 
     };
   };

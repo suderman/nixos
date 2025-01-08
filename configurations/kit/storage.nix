@@ -95,7 +95,8 @@ in {
       "/mnt/ssd".subvolume."data" = {};
     };
     backups = with config.networking; {
-      "/nix".target."ssh://eve/backups/${hostName}" = {};
+      # re-enable after eve is healthy again
+      # "/nix".target."ssh://eve/backups/${hostName}" = {};
     };
   };
   

@@ -102,7 +102,8 @@ in {
 
     # Nightly backups over SSH
     backups = {
-      "/nix".target."ssh://eve/backups/${hostName}" = {};
+      # re-enable after eve is healthy again
+      # "/nix".target."ssh://eve/backups/${hostName}" = {};
     };
 
   };
