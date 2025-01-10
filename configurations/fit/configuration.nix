@@ -6,8 +6,7 @@
   ];
 
   # Use freshest kernel
-  # boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.kernelPackages = pkgs.linuxPackages_6_6; # build failure on 6.12
+  boot.kernelPackages = pkgs.linuxPackages_6_12; # lts
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -23,11 +22,11 @@
   services.keyd.enable = true;
 
   # Apps
-  programs.mosh.enable = true;
+  services.whoami.enable = true;
   programs.neovim.enable = true;
+  programs.mosh.enable = true;
   programs.dolphin.enable = true;
   programs.steam.enable = true;
-  services.whoami.enable = true;
 
   # AirDrop alternative
   programs.localsend.enable = true; 
@@ -45,29 +44,11 @@
     autologin = "jon";
   };
 
-  # # https://wiki.nixos.org/wiki/AMD_GPU
-  # environment.variables = {
-  #   ROC_ENABLE_PRE_VEGA = "1";
-  # };
-
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
-    extraPackages = with pkgs; [
-      libvdpau-va-gl
-      vaapiVdpau
-      # amdvlk
-    ];
-    extraPackages32 = with pkgs; [
-      libvdpau-va-gl
-      vaapiVdpau
-      # driversi686Linux.amdvlk
-    ];
+    extraPackages = with pkgs; [ libvdpau-va-gl vaapiVdpau ];
+    extraPackages32 = with pkgs; [ libvdpau-va-gl vaapiVdpau ];
   };
-
-  # file."/opt/rocm/hip" = { 
-  #   type = "link"; 
-  #   source = "${pkgs.rocmPackages.clr}";
-  # };
 
 }

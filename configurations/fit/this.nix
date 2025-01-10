@@ -1,5 +1,5 @@
 {
   hostName = "fit"; 
   domain = "home";
-  stable = false;
+  stable = true;
 }

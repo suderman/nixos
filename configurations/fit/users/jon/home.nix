@@ -8,13 +8,15 @@ in {
   xdg.userDirs = with config.home; {
     enable = true;
     createDirectories = false;
-    download = "${homeDirectory}/tmp";
-    desktop = "${homeDirectory}/data";
-    documents = "${homeDirectory}/data/documents";
-    music = "${homeDirectory}/data/music";
-    pictures = "${homeDirectory}/data/images";
-    videos = "${homeDirectory}/data/videos";
+    desktop = "${homeDirectory}/Action";
+    download = "${homeDirectory}/Downloads";
+    documents = "${homeDirectory}/Documents";
+    music = "${homeDirectory}/Music";
+    pictures = "${homeDirectory}/Pictures";
+    videos = "${homeDirectory}/Videos";
     # publicShare = "${homeDirectory}/public";
   };
+
+  services.keyd.enable = true;
 
 }
