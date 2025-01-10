@@ -63,6 +63,14 @@
     # <https://github.com/gmodena/nix-flatpak>
     nix-flatpak.url = "github:gmodena/nix-flatpak"; 
 
+    # Bitcoin tooling
+    # <https://github.com/fort-nix/nix-bitcoin>
+    nix-bitcoin.url = "github:fort-nix/nix-bitcoin/nixos-24.11";
+    nix-bitcoin.inputs.nixpkgs.follows = "nixpkgs";
+    # Unstable
+    nix-bitcoin-unstable.url = "github:fort-nix/nix-bitcoin/release";
+    nix-bitcoin-unstable.inputs.nixpkgs.follows = "nixpkgs-unstable";
+
     # # Hyprland
     # # <https://github.com/hyprwm/Hyprland/tags>
     # hyprland.url = "github:hyprwm/Hyprland/v0.46.2"; 
