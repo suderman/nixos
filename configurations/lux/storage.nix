@@ -83,6 +83,14 @@ in {
   # > btrfs subvolume create /mnt/raid/backups
   # > btrfs subvolume create /mnt/raid/media
   #
+  # Also create more subvolumes to prevent unwanted backups:
+  # > mkdir -p /mnt/raid/media/{music,movies,series}
+  # > btrfs subvolume create /mnt/raid/media/downloads
+  # > btrfs subvolume create /mnt/raid/media/music/downloads
+  # > btrfs subvolume create /mnt/raid/media/movies/dowloads
+  # > btrfs subvolume create /mnt/raid/media/series/downloads
+  # > btrfs subvolume create /mnt/raid/media/movies/releases
+  # > btrfs subvolume create /mnt/raid/media/series/releases
   fileSystems."/mnt/raid" = {
     fsType = "btrfs"; 
     device = "/dev/disk/by-uuid/75ae6de3-04d1-4c62-9d15-357038fc4d81";

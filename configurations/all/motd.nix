@@ -17,7 +17,8 @@ in {
       uptime.prefix = "Up";
       memory.swap_pos = "beside";
       filesystems = {
-        root = "/";
+        nix = "/nix";
+        boot = "/boot";
       };
       last_login = mkAttrs this.users (user: 2);
       # docker = {};
