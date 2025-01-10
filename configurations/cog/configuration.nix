@@ -94,4 +94,7 @@
   # AirDrop alternative
   programs.localsend.enable = true; 
 
+  # Agent to monitor system
+  services.beszel.key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGo/UVSuyrSmtE3RA0rxXpwApHEGMGOTd2c0EtGeCGAr";
+
 }

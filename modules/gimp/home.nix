@@ -6,7 +6,7 @@
   inherit (config.services.keyd.lib) mkClass;
 
   # Window class name
-  class = "gimp-2.99";
+  class = "gimp-3.0";
 
 in {
 

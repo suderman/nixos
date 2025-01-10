@@ -51,4 +51,7 @@
     extraPackages32 = with pkgs; [ libvdpau-va-gl vaapiVdpau ];
   };
 
+  # Agent to monitor system
+  services.beszel.key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGo/UVSuyrSmtE3RA0rxXpwApHEGMGOTd2c0EtGeCGAr";
+
 }

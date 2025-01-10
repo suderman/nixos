@@ -67,4 +67,5 @@
     127.0.0.1 local
   '';
 
+  services.beszel.key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGo/UVSuyrSmtE3RA0rxXpwApHEGMGOTd2c0EtGeCGAr";
 }
