@@ -2,7 +2,7 @@
 { config, pkgs, lib, hardware, ... }: let
 
   # https://raw.githubusercontent.com/aaronp24/nvidia-versions/master/nvidia-versions.txt
-  beta = false;
+  beta = true; # I want to use current LTS, so setting this to true
 
 in {
 
@@ -13,10 +13,12 @@ in {
   boot.extraModulePackages = with config.boot.kernelPackages; 
     if beta then [ nvidia_x11_beta ] else [ nvidia_x11 ];
 
-  # 560.35.03 "latest" broken on LTS kernel 6.12, use previous LTS kernel 6.6
-  # https://github.com/NixOS/nixpkgs/commit/8653ea453d81a7320c63f930911bcd9f7e063c65
-  boot.kernelPackages = lib.mkForce pkgs.linuxPackages_6_6; 
-  # boot.kernelPackages = lib.mkForce pkgs.linuxPackages_6_12; 
+  # Current LTS kernel 6.12 seems to work better with nvidia's beta driver
+  # If not using beta, stay on previous LTS kernel 6.6 for now
+  boot.kernelPackages = lib.mkForce ( if beta 
+    then pkgs.linuxPackages_6_12 
+    else pkgs.linuxPackages_6_6
+  ); 
 
   # Fix extra screen
   boot.kernelParams = [ "nvidia-drm.fbdev=1" ];
