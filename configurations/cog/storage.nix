@@ -39,13 +39,13 @@ in {
   fileSystems."/nix".options = btrfs;
   # services.beesd.filesystems.nix = mkBees "/nix";
 
-  # Media network share
-  # -------------------------------------------------------------------------
-  fileSystems."/media" = {
-    device = "lux:/media"; 
-    fsType = "nfs";
-    options = nfs;
-  };
+  # # Media network share
+  # # -------------------------------------------------------------------------
+  # fileSystems."/media" = {
+  #   device = "lux:/media"; 
+  #   fsType = "nfs";
+  #   options = nfs;
+  # };
 
   # allow fsc option
   services.cachefilesd.enable = true;
