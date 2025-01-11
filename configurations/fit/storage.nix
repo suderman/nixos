@@ -21,6 +21,46 @@ in {
   fileSystems."/".options = btrfs;
   fileSystems."/nix".options = btrfs;
 
+  # Additional HDD disk pool
+  # -------------------------------------------------------------------------
+  # Become root, insert disk and lookup the device name:
+  # > sudo -s
+  # > lsblk -f
+  #
+  # Assuming the disks are "sdc-sdd", create the parition tables and new partitions:
+  # parted -s /dev/sdc mklabel gpt
+  # parted -s /dev/sdc mkpart one btrfs 1MiB 100%
+  # parted -s /dev/sdd mklabel gpt
+  # parted -s /dev/sdd mkpart two btrfs 1MiB 100%
+  #
+  # Format as btrfs and create the pool
+  # mkfs.btrfs -fL pool -d single /dev/sdc1 /dev/sdd1
+  #
+  # Take note of the UUID and mount the pool
+  # mkdir -p /mnt/pool
+  # mount -t btrfs -o defaults /dev/disk/by-uuid/06ee79b6-e3bc-4e50-a586-784d732f470b /mnt/pool
+  #
+  # Create two subvolumes:
+  # > btrfs subvolume create /mnt/pool/data
+  # > btrfs subvolume create /mnt/pool/backups
+
+  fileSystems."/mnt/pool" = {
+    fsType = "btrfs"; 
+    device = "/dev/disk/by-uuid/06ee79b6-e3bc-4e50-a586-784d732f470b";
+    options = btrfs ++ automount;  
+  };
+  # services.beesd.filesystems.pool = mkBees "/mnt/pool";
+
+  fileSystems."/data" = {
+    device = "/mnt/pool/data"; 
+    options = bind ++ automount;
+  };
+
+  fileSystems."/backups" = {
+    device = "/mnt/pool/backups"; 
+    options = bind ++ automount;
+  };
+
   # # Snapshots & backups
   # services.btrbk = {
   #   enable = true;

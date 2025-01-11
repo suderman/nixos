@@ -52,6 +52,23 @@
   };
 
   # Agent to monitor system
-  services.beszel.key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGo/UVSuyrSmtE3RA0rxXpwApHEGMGOTd2c0EtGeCGAr";
+  services.beszel = {
+    key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGo/UVSuyrSmtE3RA0rxXpwApHEGMGOTd2c0EtGeCGAr";
+    gpu = "amd";
+  };
+
+  # https://wiki.nixos.org/wiki/AMD_GPU
+  environment.variables = {
+    ROC_ENABLE_PRE_VEGA = "1";
+  };
+
+  environment.systemPackages = with pkgs; [ 
+    rocmPackages.rocm-smi # rocm-smi
+  ];
+  
+  file."/opt/rocm/hip" = { 
+    type = "link"; 
+    source = "${pkgs.rocmPackages.clr}";
+  };
 
 }
