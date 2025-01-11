@@ -112,11 +112,6 @@ in {
     exports = "/media *(rw,fsid=1,insecure,no_subtree_check)";
   };
 
-  # # Services that depend on this mount may need the following
-  # systemd.services.my-app = {
-  #   requires = [ "mnt-raid.mount" ];
-  # };
-
   # Snapshots & backups
   services.btrbk = {
     enable = true;
@@ -131,10 +126,6 @@ in {
     backups = with config.networking; {
       "/mnt/ssd".subvolume."data" = {};
       "/mnt/raid".subvolume."media" = {};
-
-      # RAID is mounted to /backups, so target can be directory instead of ssh
-      "/nix".target."/backups/${hostName}" = {};
-      "/mnt/ssd".target."/backups/${hostName}" = {};
 
       # Remote backup to "fit" server using ssh
       "/nix".target."ssh://fit/backups/${hostName}" = {};
