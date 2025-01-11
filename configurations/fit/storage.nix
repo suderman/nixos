@@ -61,12 +61,13 @@ in {
     options = bind ++ automount;
   };
 
-  # # Snapshots & backups
-  # services.btrbk = {
-  #   enable = true;
-  #   backups = with config.networking; {
-  #     "/nix".target."ssh://eve.${domain}/backups/${hostName}" = {};
-  #   };
-  # };
+  # Snapshots & backup with btrbk
+  # This also allows other computers to send their backups here
+  services.btrbk.enable = true;
+
+  # Additional filesystems in motd
+  programs.rust-motd.settings.filesystems = {
+    pool = "/mnt/pool";
+  };
 
 }
