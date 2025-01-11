@@ -10,10 +10,6 @@
   boot.loader.systemd-boot.consoleMode = "max";
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Linux kernel (often have to manage this for nvidia compatibility)
-  # boot.kernelPackages = pkgs.linuxPackages_latest; # pkgs.linuxPackages_6_12;
-  boot.kernelPackages = pkgs.linuxPackages_6_6; # pkgs.linuxPackages_6_12;
-
   # Sound & Bluetooth
   hardware.bluetooth.enable = true;
   services.pipewire.enable = true;
@@ -67,5 +63,7 @@
     127.0.0.1 local
   '';
 
+  # Agent to monitor system
   services.beszel.key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGo/UVSuyrSmtE3RA0rxXpwApHEGMGOTd2c0EtGeCGAr";
+
 }

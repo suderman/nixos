@@ -22,6 +22,10 @@ in {
       type = types.port;
       default = 45876; 
     };
+    extraPackages = mkOption {
+      type = with types; listOf package;
+      default = [];
+    };
   };
 
   config = mkIf cfg.enableAgent {
@@ -39,6 +43,7 @@ in {
         PORT = toString cfg.agentPort;
         KEY = cfg.key;
       };
+      path = cfg.extraPackages;
       serviceConfig = {
         User = "beszel";
         Group = "beszel";

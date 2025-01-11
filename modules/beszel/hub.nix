@@ -12,22 +12,12 @@ in {
 
   config = mkIf cfg.enable {
 
-    # environment.systemPackages = [ cfg.package ];
-
     file."${cfg.dataDir}/hub" = {
       type = "dir"; 
       mode = 775; 
       user = "beszel";
       group = "beszel";
     };
-
-    # users.users.beszel = {
-    #   isSystemUser = true;
-    #   description = "Beszel monitoring system";
-    #   group = "beszel";
-    #   extraGroups = [ "docker" ];
-    # };
-    # users.groups.beszel = {};
 
     systemd.services.beszel-hub = {
       wantedBy = [ "multi-user.target" ];

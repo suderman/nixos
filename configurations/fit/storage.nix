@@ -27,14 +27,14 @@ in {
   # > sudo -s
   # > lsblk -f
   #
-  # Assuming the disks are "sdc-sdd", create the parition tables and new partitions:
-  # parted -s /dev/sdc mklabel gpt
-  # parted -s /dev/sdc mkpart one btrfs 1MiB 100%
-  # parted -s /dev/sdd mklabel gpt
-  # parted -s /dev/sdd mkpart two btrfs 1MiB 100%
+  # Assuming the disks are "sda-sdb", create the parition tables and new partitions:
+  # parted -s /dev/sda mklabel gpt
+  # parted -s /dev/sda mkpart one btrfs 1MiB 100%
+  # parted -s /dev/sdb mklabel gpt
+  # parted -s /dev/sdb mkpart two btrfs 1MiB 100%
   #
   # Format as btrfs and create the pool
-  # mkfs.btrfs -fL pool -d single /dev/sdc1 /dev/sdd1
+  # mkfs.btrfs -fL pool -d single /dev/sda1 /dev/sdb1
   #
   # Take note of the UUID and mount the pool
   # mkdir -p /mnt/pool

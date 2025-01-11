@@ -15,10 +15,9 @@ in {
 
   # Current LTS kernel 6.12 seems to work better with nvidia's beta driver
   # If not using beta, stay on previous LTS kernel 6.6 for now
-  boot.kernelPackages = lib.mkForce ( if beta 
+  boot.kernelPackages = if beta 
     then pkgs.linuxPackages_6_12 
-    else pkgs.linuxPackages_6_6
-  ); 
+    else pkgs.linuxPackages_6_6;
 
   # Fix extra screen
   boot.kernelParams = [ "nvidia-drm.fbdev=1" ];
@@ -64,5 +63,8 @@ in {
     nvitop
     docker-nvidia-smi # test nvidia in docker container
   ];
+
+  # nvidia-smi included in monitoring
+  services.beszel.extraPackages = [ config.hardware.nvidia.package.bin ];
 
 }
