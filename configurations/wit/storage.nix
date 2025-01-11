@@ -21,13 +21,13 @@ in {
   fileSystems."/".options = btrfs;
   fileSystems."/nix".options = btrfs;
 
-  # # Snapshots & backups
-  # services.btrbk = {
-  #   enable = true;
-  #   backups = with config.networking; {
-  #     "/nix".target."ssh://eve.${domain}/backups/${hostName}" = {};
-  #   };
-  # };
+  # Snapshots & backups
+  services.btrbk = {
+    enable = true;
+    backups = with config.networking; {
+      "/nix".target."ssh://fit/backups/${hostName}" = {};
+    };
+  };
 
 
 }

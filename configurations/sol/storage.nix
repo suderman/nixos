@@ -25,8 +25,8 @@ in {
   services.btrbk = {
     enable = true;
     backups = with config.networking; {
-      # re-enable after eve is healthy again
-      # "/nix".target."ssh://eve/backups/${hostName}" = {};
+      "/nix".target."ssh://fit/backups/${hostName}" = {}; 
+      # "/nix".target."ssh://eve/backups/${hostName}" = {}; # re-enable after eve is healthy again
     };
   };
 

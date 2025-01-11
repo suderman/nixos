@@ -97,6 +97,7 @@ in {
     backups = with config.networking; {
       # re-enable after eve is healthy again
       # "/nix".target."ssh://eve/backups/${hostName}" = {};
+      "/nix".target."ssh://fit/backups/${hostName}" = {};
     };
   };
   

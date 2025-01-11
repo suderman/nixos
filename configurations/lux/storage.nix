@@ -136,8 +136,12 @@ in {
       "/nix".target."/backups/${hostName}" = {};
       "/mnt/ssd".target."/backups/${hostName}" = {};
 
-      # Remote backup to "eve" server using ssh
-      # re-enable after eve is healthy again
+      # Remote backup to "fit" server using ssh
+      "/nix".target."ssh://fit/backups/${hostName}" = {};
+      "/mnt/ssd".target."ssh://fit/backups/${hostName}" = {};
+      "/mnt/raid".target."ssh://fit/backups/${hostName}" = {};
+
+      # Remote backup to "eve" server using ssh / re-enable after eve is healthy again
       # "/nix".target."ssh://eve/backups/${hostName}" = {};
       # "/mnt/ssd".target."ssh://eve/backups/${hostName}" = {};
       # "/mnt/raid".target."ssh://eve/backups/${hostName}" = {};
