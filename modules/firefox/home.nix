@@ -96,7 +96,7 @@ in {
     };
 
     # Apply pretty colors
-    stylix.targets.firefox.profileNames = [ "default" ];
+    # stylix.targets.firefox.profileNames = [ "default" ];
 
   };
 
