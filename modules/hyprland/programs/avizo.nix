@@ -7,8 +7,6 @@ in {
 
   config = mkIf cfg.enable {
 
-    home.packages = with pkgs; [ sinks ];
-
     systemd.user.services.avizo = {
       Install.WantedBy = mkForce [ cfg.systemd.target ];
       Unit.PartOf = mkForce [ cfg.systemd.target ];
@@ -48,10 +46,6 @@ in {
         # Mute toggle
         ", XF86AudioMute, exec, volumectl -a toggle-mute"
         ", XF86AudioMicMute, exec, volumectl -am toggle-mute"
-
-        # # Sink selection
-        # "shift, XF86AudioMedia, exec, sinks -i" # choose
-        # "alt, XF86AudioMedia, exec, sinks" # toggle last
 
       ];
     };

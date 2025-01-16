@@ -56,7 +56,7 @@ in {
       else { host = "0.0.0.0"; port = cfg.port; }
     ) // {
       enable = true;
-      package = pkgs.ollama;
+      # package = pkgs.ollama;
     };
 
     virtualisation.oci-containers.containers.open-webui = {

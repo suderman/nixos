@@ -9,7 +9,7 @@ in {
     bat eza fish killall lf 
     linode-cli lsd mosh nano ncdu neofetch
     nnn rclone ripgrep sysz
-    tealdeer wget yo lazygit lazydocker parted
+    tealdeer wget lazygit lazydocker parted
     imagemagick
 
     # yt-dlp -f mp4-240p -x --audio-format mp3 https://rumble.com/...

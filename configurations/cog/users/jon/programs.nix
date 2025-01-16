@@ -11,7 +11,7 @@ in {
     bat cowsay eza fish killall lf 
     linode-cli lsd mosh nano ncdu neofetch
     nnn owofetch rclone ripgrep sl sysz
-    tealdeer wget yo lazygit lazydocker parted
+    tealdeer wget lazygit lazydocker parted
     imagemagick
 
     # yt-dlp -f mp4-240p -x --audio-format mp3 https://rumble.com/...
@@ -27,7 +27,7 @@ in {
     inkscape junction libreoffice newsflash
     unstable.nodePackages_latest.immich
 
-    withings-sync coffee
+    coffee
     bin-foo bin-bar
 
     # Re-enable these after this is fixed:
