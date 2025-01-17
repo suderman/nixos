@@ -54,8 +54,12 @@
   programs.localsend.enable = true; 
 
   services.whoami.enable = true;
-  # modules.ollama.enable = true;
-  # services.ollama.acceleration = "cuda";
+
+  services.ollama = {
+    enable = true;
+    acceleration = "cuda";
+    package = pkgs.ollama-cuda;
+  };
 
   networking.extraHosts = ''
     18.191.53.91 www.parkwhiz.com
