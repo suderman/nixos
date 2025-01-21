@@ -71,18 +71,6 @@
     nix-bitcoin-unstable.url = "github:fort-nix/nix-bitcoin/release";
     nix-bitcoin-unstable.inputs.nixpkgs.follows = "nixpkgs-unstable";
 
-    # # Hyprland
-    # # <https://github.com/hyprwm/Hyprland/tags>
-    # hyprland.url = "github:hyprwm/Hyprland/v0.46.2"; 
-    # hyprland.inputs.nixpkgs.follows = "nixpkgs-unstable";
-    # # <https://github.com/hyprwm/hyprland-plugins/tags>
-    # hyprland-plugins.url = "github:hyprwm/hyprland-plugins/v0.46.0"; 
-    # hyprland-plugins.inputs.hyprland.follows = "hyprland";
-    #
-    # # Aylur's Gtk Shell (AGS)
-    # # <https://github.com/Aylur/ags
-    # ags.url = "github:Aylur/ags";
-
   };
 
   outputs = { self, ... }: let 
