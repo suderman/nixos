@@ -33,7 +33,7 @@ in {
       };
     };
 
-    services.traefik.proxy."beszel" = "http://127.0.0.1:${toString port}";
+    services.traefik.proxy."beszel" = port;
 
   };
 

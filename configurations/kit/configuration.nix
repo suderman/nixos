@@ -55,11 +55,17 @@
 
   services.whoami.enable = true;
 
+  # Enable ollama server
   services.ollama = {
     enable = true;
-    acceleration = "cuda";
-    package = pkgs.ollama-cuda;
+    host = "0.0.0.0"; openFirewall = true; # allow network access
+    acceleration = "cuda"; package = pkgs.ollama-cuda; # gpu power
+    models = "/data/models/ollama"; # model storage on separate disk
   };
+
+  # https://chat.kit/
+  services.open-webui.enable = true;
+  services.traefik.proxy."chat" = config.services.open-webui.port;
 
   networking.extraHosts = ''
     18.191.53.91 www.parkwhiz.com

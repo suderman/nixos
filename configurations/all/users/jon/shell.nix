@@ -11,6 +11,7 @@
     maplines = "xargs -n1 -0";
     grep = "rg";
     tl = "tldr";
+    isd = "nix run github:isd-project/isd"; # manage systemd units
   };
 
   home.packages = with pkgs; [ 

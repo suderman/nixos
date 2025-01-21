@@ -77,31 +77,36 @@
 
   # Generate traefik service
   mkService = name: url: let
-    inherit (builtins) isAttrs isString;
+    inherit (builtins) isAttrs isInt isString;
     fromString = url: fromAttrs { inherit url; };
+    fromInt = port: fromAttrs { url = "http://127.0.0.1:${toString port}"; };
     fromAttrs = { url, ... }: { 
       loadBalancer.servers = [{ inherit url; }];
     };
     in 
       if isString url then fromString url
+      else if isInt url then fromInt url
       else if isAttrs url then fromAttrs url
       else {};
 
   # Generate traefik middleware
   mkMiddleware = name: url: let
-    inherit (builtins) isAttrs isString;
+    inherit (builtins) isAttrs isInt isString;
     fromString = url: fromAttrs { inherit url; };
+    fromInt = port: fromAttrs { url = "http://127.0.0.1:${toString port}"; };
     fromAttrs = { url, ... }: { headers.customRequestHeaders.Host = mkHostName url; };
     in 
       if isString url then fromString url
+      else if isInt url then fromInt url
       else if isAttrs url then fromAttrs url
       else {};
 
   # Generate traefik router
   mkRouter = name: url: let
-    inherit (builtins) elem isAttrs isNull isString hasAttr;
+    inherit (builtins) elem isAttrs isInt isNull isString hasAttr;
     inherit (lib) hasSuffix;
     fromString = url: fromAttrs { inherit url; };
+    fromInt = port: fromAttrs { url = "http://127.0.0.1:${toString port}"; };
     fromAttrs = { hostName ? mkHostName name, tls ? null, public ? null, middlewares ? [], ... }: let
 
       # If the hostName is or ends with this system's hostName, assume internal DNS and private CA
@@ -142,6 +147,7 @@
       };   
     in 
       if isString url then fromString url
+      else if isInt url then fromInt url
       else if isAttrs url then fromAttrs url
       else {};
 
