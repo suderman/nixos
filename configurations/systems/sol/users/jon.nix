@@ -7,8 +7,6 @@
   home.packages = with pkgs; [ 
     owofetch
     neofetch
-    unstable.nnn 
-    unstable.sl
     yo
   ];
 
