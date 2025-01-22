@@ -35,7 +35,7 @@
       fromPath = path: fromAttrs { inherit path; };
 
       # Return list of directory/file names if asPath is false, otherwise list of absolute paths
-      fromAttrs = { path, dirsWith ? [ "default.nix" ], filesExcept ? [ "flake.nix" "default.nix" "configuration.nix" "home.nix" "this.nix" ], asPath ? true }: unique
+      fromAttrs = { path, dirsWith ? [ "default.nix" ], filesExcept ? [ "flake.nix" "default.nix" "configuration.nix" "nixos.nix" "home.nix" "this.nix" ], asPath ? true }: unique
         (if ! pathExists path then [] else # If path doesn't exist, return an empty list
           (if hasSuffix ".nix" path then [ path ] else # If path is a nix file, return that path in a list
             (if dirsWith == false then [] else (dirNames path dirsWith asPath)) ++ # No subdirs if dirsWith is false, 
@@ -166,7 +166,7 @@
         # Home Manager modules are organized under each user's name
         mkUsers hostName (
           userPath: let userName = userNameFromPath userPath; in 
-            ls { path = ./options; dirsWith = [ "home.nix" ]; } ++ # home-manager options
+            ls { path = ./modules; dirsWith = [ "home.nix" ]; } ++ # home-manager modules
             ls ./users/all/home.nix ++ # shared home-manager configuration for all users
             ls ./users/${userName}.nix ++ # shared home-manager configuration for one user
             ls ./users/${userName}/home.nix ++
@@ -177,7 +177,7 @@
         # NixOS modules are organization under "root"
         ) // {
           root = 
-            ls { path = ./options; dirsWith = [ "default.nix" ]; } ++ # nixos options
+            ls { path = ./modules; dirsWith = [ "nixos.nix" ]; } ++ # nixos modules
             ls ./systems/all/configuration.nix ++ # shared nixos configuration for all systems
             ls ./systems/${hostName}/configuration.nix ++ # specific nixos configuration for one system
             [ ./secrets ] ++ nix-cache ++ nix-index.nixos # secrets, keys, cache and index

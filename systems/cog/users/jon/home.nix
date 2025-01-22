@@ -35,6 +35,9 @@ in {
   # Enable email/calendars/contacts
   accounts.enable = true;
 
+  # Enable desktop programs
+  gui.enable = true;
+
   stylix.targets = {
     # hyprland.enable = false;
     # rofi.enable = false;

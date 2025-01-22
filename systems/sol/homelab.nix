@@ -5,11 +5,11 @@
   # services.gitea = { enable = true; name = "git"; };
   # modules.nextcloud.enable = false;
 
-  services.tandoor-recipes = {
-    enable = false;
-    package = pkgs.unstable.tandoor-recipes;
-    public = "tandoor.suderman.net";
-  };
+  # services.tandoor-recipes = {
+  #   enable = false;
+  #   package = pkgs.unstable.tandoor-recipes;
+  #   public = "tandoor.suderman.net";
+  # };
 
   services.traefik = {
     proxy."wiki.zz" = "https://wiki.sol";

@@ -19,4 +19,7 @@ in {
 
   services.keyd.enable = true;
 
+  # Enable desktop programs
+  gui.enable = true;
+
 }
