@@ -1,6 +1,6 @@
 # Attribute set of NixOS configurations found in each directory
 { inputs, caches ? [], ... }: let
-  inherit (lib) ls mkAttrs mkUsers mkList lsUsers configurationNameFromPath userNameFromPath;
+  inherit (lib) ls mkAttrs mkUsers mkList lsUsers configurationNameFromPath profileNameFromPath userNameFromPath;
 
   # Personal lib
   lib = {
@@ -184,6 +184,16 @@
           ;
         };
 
+    profileNameFromPath = path: let
+      inherit (builtins) toString;
+      inherit (inputs.nixpkgs.lib) removeSuffix;
+    in baseNameOf( removeSuffix "/nixos.nix" (removeSuffix "/home.nix" (toString path) ) );
+
+    mkProfiles = nixosOrHome: builtins.listToAttrs ( map 
+      ( path: { name = profileNameFromPath path; value = (path); } )
+      ( ls { path = ./configurations/profiles; asPath = true; dirsWith = [ "${nixosOrHome}.nix" ]; } )
+    );
+
   };
 
 in {
@@ -198,6 +208,7 @@ in {
   users = []; # without users, only root exists
   admins = []; # allow sudo/ssh powers users with keys
   modules = {}; # includes for nixos and home-manager
+  profiles = {}; # includes for nixos and home-manager
 
   system = "x86_64-linux";
   stable = true;

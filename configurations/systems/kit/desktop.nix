@@ -1,4 +1,8 @@
-{ config, pkgs, lib, ... }: {
+{ config, pkgs, lib, profiles, ... }: {
+
+  imports = [
+    profiles.games
+  ];
 
   # Desktop environment
   services.xserver.desktopManager.gnome.enable = false;

@@ -1,4 +1,4 @@
-{ config, lib, pkgs, this, ... }: { 
+{ config, lib, pkgs, this, profiles, ... }: { 
 
   # Experiments
   systemd.user.services.foobar = {

@@ -77,7 +77,7 @@
     
     inherit (self) outputs inputs; 
     inherit (builtins) hasAttr mapAttrs length;
-    inherit (this'.lib) lsAdmins lsUsers mkAttrs mkConfigurations mkModules;
+    inherit (this'.lib) lsAdmins lsUsers mkAttrs mkConfigurations mkModules mkProfiles;
 
     # Replace stable inputs with unstable (if available)
     unstableInputs = mapAttrs (k: v: if hasAttr "${k}-unstable" inputs then inputs."${k}-unstable" else v) inputs;
@@ -145,11 +145,12 @@
     };
 
     # NixOS/Home-Manager special args with merged lib from nixpkgs, home-manager, and this
-    mkSpecialArgs = pkgs: {
+    mkSpecialArgs = pkgs: context: {
       inherit outputs;
       inherit (pkgs.this) inputs;
       inherit (pkgs) this hardware;
       lib = pkgs.this.inputs.nixpkgs.lib.extend (_: _: pkgs.this.inputs.home-manager.lib // pkgs.this.lib );
+      profiles = pkgs.this.profiles."${context}";
     };
 
     # Make a NixOS system configuration 
@@ -158,7 +159,7 @@
       # Make nixpkgs for this system (with overlays)
       pkgs = mkPkgs this;
       system = pkgs.this.system;
-      specialArgs = mkSpecialArgs pkgs;
+      specialArgs = mkSpecialArgs pkgs "root";
 
       # Include NixOS configurations, modules, secrets and caches
       modules = this.modules.root ++ (if (length this.users < 1) then [] else [
@@ -170,7 +171,7 @@
             # Inherit NixOS packages
             useGlobalPkgs = true;
             useUserPackages = true;
-            extraSpecialArgs = mkSpecialArgs pkgs;
+            extraSpecialArgs = mkSpecialArgs pkgs "user";
             backupFileExtension = "bak"; # move existing config files out of the way
 
             # Include Home Manager configuration, modules, secrets and caches
@@ -199,6 +200,7 @@
         users = lsUsers this;
         admins = lsAdmins this;
         modules = mkModules this;
+        profiles = { root = mkProfiles "nixos"; user = mkProfiles "home"; };
         inputs = if this.stable then inputs else unstableInputs;
       })
 
