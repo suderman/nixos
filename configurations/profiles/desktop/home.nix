@@ -8,8 +8,8 @@
     jetbrains-mono
     gst_all_1.gst-libav
 
-    _1password-cli _1password-gui darktable digikam
-    inkscape junction libreoffice newsflash
+    _1password-cli _1password-gui 
+    junction libreoffice newsflash
 
     lapce # text editor 
     tauon # music player

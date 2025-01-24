@@ -89,7 +89,6 @@
   programs.neovim.enable = true;
   programs.steam.enable = true;
   programs.mosh.enable = true;
-  programs.dolphin.enable = true;
 
   # AirDrop alternative
   programs.localsend.enable = true; 

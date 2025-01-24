@@ -1,7 +1,7 @@
 { config, pkgs, lib, profiles, ... }: {
 
-  imports = [
-    profiles.games
+  imports = with profiles; [
+    gaming # steam and emulation
   ];
 
   # Desktop environment
