@@ -3,7 +3,7 @@
 { config, lib, pkgs, this, ... }: let
 
   # https://github.com/immich-app/immich/releases
-  version = "1.124.2";
+  version = "1.125.2";
 
   cfg = config.services.immich;
 
@@ -63,7 +63,7 @@ in {
       default = {
         PUID = toString config.ids.uids.immich;
         PGID = toString config.ids.gids.immich;
-        DB_URL = "socket://immich:@/run/postgresql?db=immich";
+        DB_URL = "socket://immich@/run/postgresql?db=immich";
         REDIS_SOCKET = "/run/redis-immich/redis.sock";
         REVERSE_GEOCODING_DUMP_DIRECTORY = "/usr/src/app/geocoding";
       };
