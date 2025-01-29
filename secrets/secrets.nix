@@ -90,4 +90,6 @@ with (import ./keys); {
 
   "files/mopidy.age".publicKeys = all;
 
+  "files/btc-env.age".publicKeys = all;
+
 }
