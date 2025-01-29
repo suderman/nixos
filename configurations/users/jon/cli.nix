@@ -36,6 +36,8 @@ in {
 
     shizuku # connect android to pc and run
 
+    goose-ai
+
   ];
 
   programs.yazi.enable = true;
