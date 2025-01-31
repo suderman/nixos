@@ -38,6 +38,9 @@ in {
 
     goose-ai
 
+    distrobox
+    distrobox-tui
+
   ];
 
   programs.yazi.enable = true;
