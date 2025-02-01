@@ -1,15 +1,22 @@
-{ config, pkgs, lib, ... }: {
+{ config, lib, pkgs, ... }: let
+  inherit (lib) mkDefault;
+in {
 
+  # App Store
+  services.flatpak.enable = true;
+
+  # AirDrop alternative
+  programs.localsend.enable = true; 
+
+  # My color scheme
   stylix = {
     enable = true;
-    polarity = "dark";
-    # base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-macchiato.yaml";
     base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-city-dark.yaml";
     opacity.terminal = 0.85;
     cursor = {
       name = "Banana";
       package = pkgs.banana-cursor;
-      size = 46;
+      size = mkDefault 36;
     };
   };
 

@@ -1,7 +1,10 @@
-{ config, lib, pkgs, this, ... }: {
+{ config, lib, pkgs, this, profiles, ... }: {
 
   # Import all *.nix files in this directory
-  imports = lib.ls ./.;
+  imports = lib.ls ./. ++ [
+    profiles.services
+    profiles.terminal
+  ];
 
   # Use freshest kernel
   boot.kernelPackages = pkgs.linuxPackages_latest;
@@ -9,42 +12,15 @@
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-
-  networking.networkmanager.enable = true;
-
-  # Memory management
   services.earlyoom.enable = true;
-
-  # Keyboard control
-  services.keyd.enable = true;
-
-  # Apps
-  programs.mosh.enable = true;
-  programs.neovim.enable = true;
-
-  # Web services
-  services.tailscale.enable = true;
-  services.whoami.enable = true;
 
   # Custom DNS
   services.blocky.enable = true;
-
-  # Agent to monitor system
-  services.beszel.key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGo/UVSuyrSmtE3RA0rxXpwApHEGMGOTd2c0EtGeCGAr";
 
   # Serve CA cert on http://10.2.0.2:1234
   services.traefik = {
     enable = true;
     caPort = 1234;
-  };
-
-  # Reverse proxy bluebubbles server on nearby Mac Mini
-  services.bluebubbles = with this.networks; {
-    enable = true;
-    name = "bb";
-    # ip = work.pom;
-    # ip = work.bub;
-    ip = home.bub;
   };
 
   # Backup media server

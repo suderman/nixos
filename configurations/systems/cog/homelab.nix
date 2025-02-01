@@ -1,5 +1,8 @@
 { config, lib, pkgs, ... }: { 
 
+  # Fix this
+  services.garmin.enable = true;
+
   # Experiments
   systemd.user.services.foobar = {
     description = "Foobar NixOS";

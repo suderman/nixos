@@ -1,27 +1,17 @@
-{ config, lib, pkgs, hardware, ... }: {
+{ config, lib, pkgs, hardware, profiles, ... }: {
 
   # Import all *.nix files in this directory
-  imports = lib.ls ./. ++ [ hardware.linode ];
+  imports = lib.ls ./. ++ [
+    hardware.linode
+    profiles.services
+    profiles.terminal
+  ];
 
   # Use freshest kernel
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
-  # Network
-  networking.extraHosts = "";
-  services.tailscale.enable = true;
-  services.traefik.enable = true;
-  services.whoami.enable = true;
-
   # Custom DNS
   services.blocky.enable = true;
-
-  # Memory management
-  services.earlyoom.enable = true;
-
-  # Apps
-  programs.neovim.enable = true;
-  programs.mosh.enable = true;
-  programs.tmux.enable = true;
 
   # Web services
   services.whoogle = { enable = true; name = "g"; };
@@ -35,8 +25,5 @@
     volumes = [ "/var/run/docker.sock:/var/run/docker.sock" ];
     environment.AUTOHEAL_CONTAINER_LABEL = "all";
   };
-
-  # Agent to monitor system
-  services.beszel.key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGo/UVSuyrSmtE3RA0rxXpwApHEGMGOTd2c0EtGeCGAr";
 
 }

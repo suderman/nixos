@@ -1,18 +1,9 @@
-{ config, lib, pkgs, ... }: {
+{ config, lib, pkgs, profiles, ... }: {
 
-  # imports = [ ../_/home ];
-
-  home.packages = with pkgs; [ 
-    neofetch
-    yo
-    firefox-wayland
-    dolphin
+  # Import all *.nix files in this directory
+  imports = lib.ls ./. ++ [
+    profiles.desktop # gui apps on all my desktops
+    profiles.image-editing # graphics apps 
   ];
-
-  programs = {
-    git.enable = true;
-    tmux.enable = true;
-    zsh.enable = true;
-  };
 
 }

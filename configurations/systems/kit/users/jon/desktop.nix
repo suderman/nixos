@@ -1,13 +1,34 @@
-{ config, lib, pkgs, profiles, ... }: {
+{ config, lib, pkgs, ... }: {
 
-  imports = with profiles; [
-    desktop # gui apps on all my desktops
-    video-editing # davinci resolve and others
-  ];
+  # Hyprland
+  wayland.windowManager.hyprland.settings = {
 
-  home.packages = with pkgs; [
-    loupe
-    pkgs.stable.calcure
-  ];
+    # 4k display
+    monitor = [ "DP-1, 3840x2160@160.00Hz, 0x0, 1.33" ];
+
+    # nvidia fixes
+    env = [
+      "LIBVA_DRIVER_NAME,nvidia"
+      "XDG_SESSION_TYPE,wayland"
+      "GBM_BACKEND,nvidia-drm"
+      "__GLX_VENDOR_LIBRARY_NAME,nvidia"
+    ];
+
+    # 0.42's explicit sync wasn't needed on my system and when it's enabled
+    # Firefox and other apps freeze and crash
+    render.explicit_sync = true;
+
+  };
+
+  # Set to false if plugins barf notification errors
+  # wayland.windowManager.hyprland.enablePlugins = true;
+  wayland.windowManager.hyprland.enablePlugins = false;
+
+  programs.rofi = {
+    extraSinks = [ "bluez_output.AC_3E_B1_9F_43_35.1" ]; # pixel buds pro
+    hiddenSinks = [ "alsa_output.pci-0000_01_00.1.hdmi-stereo" ]; # monitor speakers
+    # hiddenSinks = [ "alsa_output.usb-Generic_USB_Audio-00.HiFi__SPDIF__sink" ]; # optical now connected to desk speakers
+  };
+
 
 }

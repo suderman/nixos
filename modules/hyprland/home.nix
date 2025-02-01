@@ -72,6 +72,9 @@ in {
 
     };
 
+    # Enable user service for keyd to watch window focus changes  
+    services.keyd.enable = true;
+
     # Extra config
     home.activation.hyprland = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       $DRY_RUN_CMD mkdir -p $HOME/.config/hypr

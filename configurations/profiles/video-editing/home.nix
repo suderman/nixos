@@ -30,7 +30,7 @@ in {
     # Convert video from format to another
     ffmpeg
 
-    # Alternative vidoe editing software
+    # Alternative video editing software
     shotcut
 
   ];

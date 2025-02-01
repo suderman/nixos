@@ -1,6 +1,5 @@
 { config, lib, pkgs, ... }: {
 
-  # cli packages
   home.packages = with pkgs; [ 
 
     tdesktop slack
@@ -19,6 +18,10 @@
     gnome-disk-utility
 
     asunder # cd ripper
+
+    loupe # png/jpg viewer
+
+    cantarell-fonts
 
   ];
 

@@ -1,23 +1,17 @@
-{ config, options, lib, pkgs, this, ... }: let 
-  inherit (lib) mkOptionDefault;
-in {
+{ config, lib, pkgs, profiles, ... }: {
+
+  # Import all *.nix files in this directory
+  imports = lib.ls ./. ++ [
+    profiles.desktop # gui apps on all my desktops
+    profiles.image-editing # graphics apps 
+  ];
 
   home.packages = with pkgs; [ 
-    neofetch
-    yo
-    firefox-wayland
-    dolphin
     plex-media-player
     plexamp
     telegram-desktop
     libreoffice
   ];
-
-  programs = {
-    git.enable = true;
-    tmux.enable = true;
-    zsh.enable = true;
-  };
 
   programs.gnome-shell = with pkgs; {
     gnome-extensions = options.programs.gnome-shell.gnome-extensions.default ++ [

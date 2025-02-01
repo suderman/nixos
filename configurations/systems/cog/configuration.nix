@@ -1,8 +1,12 @@
-{ config, lib, pkgs, hardware, ... }: {
+{ config, lib, pkgs, hardware, profiles, ... }: {
 
   # Import all *.nix files in this directory
   imports = lib.ls ./. ++ [
     hardware.framework-11th-gen-intel
+    profiles.services # system services I use everywhere
+    profiles.terminal # tui apps on all my workstations
+    profiles.desktop # gui apps on all my workstations
+    profiles.gaming # steam and emulation
   ];
 
   # Use the systemd-boot EFI boot loader.
@@ -23,37 +27,22 @@
   security.rtkit.enable = true;
   hardware.bluetooth.enable = true;
 
-  # framework_tool
-  environment.systemPackages = with pkgs; [
-    framework-tool
-  ];
+  # Laptop-specific
+  services.fwupd.enable = true; # sudo fwupdmgr update
+  services.thermald.enable = true; # Lower fan noise 
 
-  # Network
-  services.tailscale.enable = true;
-  networking.networkmanager.enable = true;
+  # Power management
+  services.power-profiles-daemon.enable = false;
+  services.tlp.enable = true;
+  services.tlp.settings.SATA_LINKPWR_ON_BAT = "max_performance";
+
+  # Override DNS
   networking.extraHosts = ''
     159.203.49.164 touchstoneexploration.com www.touchstoneexploration.com
     18.191.53.91 www.parkwhiz.com
     127.0.0.1 example.com
     127.0.0.1 local
   '';
-
-  # sudo fwupdmgr update
-  services.fwupd.enable = true;
-
-  # Lower fan noise 
-  services.thermald.enable = true;
-
-  # Power management
-  services.power-profiles-daemon.enable = false;
-  services.tlp.enable = true;
-  services.tlp.settings = {
-    SATA_LINKPWR_ON_BAT = "max_performance";
-    # CPU_BOOST_ON_BAT = 0;
-    # CPU_SCALING_GOVERNOR_ON_BATTERY = "powersave";
-    # START_CHARGE_THRESH_BAT0 = 90;
-    # STOP_CHARGE_THRESH_BAT0 = 97;
-  };
 
   # Allow powerkey to be intercepted, but still poweroff for longpress
   services.logind = {
@@ -64,36 +53,11 @@
     lidSwitchDocked = "ignore";
   };
 
-  # Memory management
-  services.earlyoom.enable = true;
-
   # Keyboard control
   services.keyd = {
     enable = true;
     quirks = true;
     keyboard = config.services.keyd.internalKeyboards.framework;
   };
-
-  services.flatpak.enable = true;
-  services.garmin.enable = true;
-
-  # Desktop environment
-  services.xserver.desktopManager.gnome.enable = false;
-  programs.hyprland.enable = true;
-
-  # Web services
-  services.traefik.enable = true;
-  services.whoami.enable = true;
-
-  # Apps & Games
-  programs.neovim.enable = true;
-  programs.steam.enable = true;
-  programs.mosh.enable = true;
-
-  # AirDrop alternative
-  programs.localsend.enable = true; 
-
-  # Agent to monitor system
-  services.beszel.key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGo/UVSuyrSmtE3RA0rxXpwApHEGMGOTd2c0EtGeCGAr";
 
 }

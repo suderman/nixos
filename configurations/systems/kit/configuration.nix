@@ -1,8 +1,12 @@
-{ config, pkgs, lib, hardware, ... }: {
+{ config, pkgs, lib, hardware, profiles, ... }: {
 
   # Import all *.nix files in this directory
   imports = lib.ls ./. ++ [
     hardware.rtx-4070-ti-super
+    profiles.services # system services I use everywhere
+    profiles.terminal # tui apps on all my workstations
+    profiles.desktop # gui apps on all my workstations
+    profiles.gaming # steam and emulation
   ];
 
   # Use the systemd-boot EFI boot loader.
@@ -15,19 +19,10 @@
   services.pipewire.enable = true;
   security.rtkit.enable = true;
 
-  # Memory management
-  services.earlyoom.enable = true;
+  # Remove undesired route
+  services.tailscale.deleteRoute = "10.1.0.0/16";
 
-  # Keyboard control
-  services.keyd.enable = true;
-
-  # Network
-  networking.networkmanager.enable = true;
-  services.whoami.enable = true;
-  services.tailscale = {
-    enable = true;
-    deleteRoute = "10.1.0.0/16";
-  };
+  # Override DNS
   networking.extraHosts = ''
     18.191.53.91 www.parkwhiz.com
     127.0.0.1 example.com
@@ -40,12 +35,7 @@
     powerKeyLongPress = "poweroff";
   };
 
-  # Apps
-  programs.neovim.enable = true;
-  programs.mosh.enable = true;
+  # Services
   services.garmin.enable = true;
-
-  # Agent to monitor system
-  services.beszel.key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGo/UVSuyrSmtE3RA0rxXpwApHEGMGOTd2c0EtGeCGAr";
 
 }

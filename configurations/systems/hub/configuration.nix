@@ -1,38 +1,26 @@
-{ config, lib, pkgs, this, ... }: {
+{ config, lib, pkgs, this, profiles, ... }: {
 
   # Import all *.nix files in this directory
-  imports = lib.ls ./.;
+  imports = lib.ls ./. ++ [
+    profiles.services
+    profiles.terminal
+  ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-
-  # Memory management
-  services.earlyoom.enable = true;
-
-  # Keyboard control
-  services.keyd.enable = true;
-
-  # Apps
-  programs.mosh.enable = true;
-  programs.neovim.enable = true;
-
-  # Web services
-  services.tailscale.enable = true;
-  services.whoami.enable = true;
 
   # Custom DNS
   services.blocky.enable = true;
   services.prometheus.enable = true;
   services.grafana.enable = true;
 
+  # Hub for monitoring other machines
+  services.beszel.enable = true;
+
   # Serve CA cert on http://10.1.0.4:1234
   services.traefik.enable = true;
   services.traefik.caPort = 1234;
-
-  # Reverse proxy for termux syncthing webgui running on my phone
-  services.traefik.proxy."syncthing-jon.phone" = "http://phone.tail:8384";
-  services.traefik.extraInternalHostNames = [ "syncthing-jon.phone" ];
 
   # LAN controller
   services.unifi = with this.networks; {
@@ -50,8 +38,8 @@
     isy = home.isy;
   };
 
-  services.beszel.enable = true;
-  services.beszel.key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGo/UVSuyrSmtE3RA0rxXpwApHEGMGOTd2c0EtGeCGAr";
-
+  # Reverse proxy for termux syncthing webgui running on my phone
+  services.traefik.proxy."syncthing-jon.phone" = "http://phone.tail:8384";
+  services.traefik.extraInternalHostNames = [ "syncthing-jon.phone" ];
 
 }

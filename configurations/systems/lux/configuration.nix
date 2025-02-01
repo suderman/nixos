@@ -1,47 +1,23 @@
-{ config, lib, pkgs, this, ... }: {
+{ config, lib, pkgs, this, profiles, ... }: {
 
   # Import all *.nix files in this directory
-  imports = lib.ls ./.;
+  imports = lib.ls ./. ++ [
+    profiles.services
+    profiles.terminal
+  ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Memory management
-  services.earlyoom.enable = true;
+  # Remove undesired route
+  services.tailscale.deleteRoute = "10.1.0.0/16";
 
-  # Keyboard control
-  services.keyd.enable = true;
-
-  # Apps
-  programs.mosh.enable = true;
-  programs.neovim.enable = true;
-
-  # Web services
-  services.tailscale = {
-    enable = true;
-    deleteRoute = "10.1.0.0/16";
-  };
-
-  services.traefik.enable = true;
   services.prometheus.enable = true;
-  services.whoami.enable = true;
   services.gitea.enable = true; 
-
-  # services.silverbullet = {
-  #   enable = true;
-  #   ocisHostName = "ocis.suderman.org";
-  #   ocisDir = "Notes";
-  # };
-
   services.jellyfin.enable = true;
   services.plex.enable = true;
   services.lunasea.enable = true;
-
-  # services.ocis = {
-  #   enable = true;
-  #   hostName = "ocis.suderman.org";
-  # };
   
   services.immich = {
     enable = true;
@@ -64,8 +40,5 @@
 
   # Allows Windows clients to discover server
   services.samba-wsdd.enable = true;
-
-  # Agent to monitor system
-  services.beszel.key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGo/UVSuyrSmtE3RA0rxXpwApHEGMGOTd2c0EtGeCGAr";
 
 }

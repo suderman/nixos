@@ -1,9 +1,12 @@
-{ config, lib, pkgs, this, ... }: {
+{ config, lib, pkgs, profiles, ... }: { 
+
+  # Import all *.nix files in this directory
+  imports = lib.ls ./. ++ [
+    profiles.desktop # gui apps on all my desktops
+  ];
 
   wayland.windowManager.hyprland.settings = {
-    monitor = [ # embedded display (laptop)
-      "eDP-1, 2256x1504@59.9990001, 500x1440, 1.333333"
-    ];
+    exec-once = [ "freetube" "zwift" ];
   };
 
   # Set to false if plugins barf notification errors

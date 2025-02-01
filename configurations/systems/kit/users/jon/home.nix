@@ -1,38 +1,22 @@
-{ config, lib, pkgs, ... }: {
+{ config, lib, pkgs, profiles, ... }: {
 
   # Import all *.nix files in this directory
-  imports = lib.ls ./.;
-
-  xdg.userDirs = with config.home; {
-    enable = true;
-    createDirectories = false;
-    desktop = "${homeDirectory}/Action";
-    download = "${homeDirectory}/Downloads";
-    documents = "${homeDirectory}/Documents";
-    music = "${homeDirectory}/Music";
-    pictures = "${homeDirectory}/Pictures";
-    videos = "${homeDirectory}/Videos";
-    # publicShare = "${homeDirectory}/public";
-  };
-
-  # home.pointerCursor = {
-  #   gtk.enable = true;
-  #   package = pkgs.adwaita-icon-theme;
-  #   name = "Adwaita";
-  #   size = 16;
-  # };
-  
-  home.packages = with pkgs; [ 
-    loupe
-    pkgs.stable.calcure
+  imports = lib.ls ./. ++ [
+    profiles.desktop # gui apps on all my desktops
+    profiles.image-editing # graphics apps 
+    profiles.video-editing # davinci resolve and others
   ];
 
   # Enable email/calendars/contacts
   accounts.enable = true;
 
-  stylix.targets = {
-    # hyprland.enable = false;
-    # rofi.enable = false;
+  # Enhance btop with GPU support
+  programs.btop = {
+    package = pkgs.btop.overrideAttrs (prev: rec {
+      cmakeFlags = (prev.cmakeFlags or []) ++ [
+        "GPU_SUPPORT=true"
+      ];
+    });
   };
 
 }
