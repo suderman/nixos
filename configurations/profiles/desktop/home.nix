@@ -1,43 +1,34 @@
 { config, lib, pkgs, ... }: {
 
   home.packages = with pkgs; [ 
-
-    tdesktop slack
-    xorg.xeyes
-    jetbrains-mono
-    gst_all_1.gst-libav
-
-    _1password-cli _1password-gui 
-    junction libreoffice newsflash
-
-    lapce # text editor 
-    tauon # music player
-
-    pavucontrol 
-
-    gnome-disk-utility
-
+    _1password-cli _1password-gui # password manager
     asunder # cd ripper
-
+    gnome-disk-utility # format and partition gui
+    junction # browser chooser 
+    lapce # text editor 
+    libreoffice  # office suite (writing, spreadsheets, etc)
     loupe # png/jpg viewer
-
-    cantarell-fonts
-
+    newsflash # rss reader
+    pavucontrol # audio control panel
+    slack # Slack chatroom
+    tauon # music player
+    tdesktop # Telegram messenger
+    xorg.xeyes # test for x11
   ];
 
   programs.bluebubbles.enable = true;
   programs.chromium.enable = true;
   programs.foot.enable = false;
-  programs.gimp.enable = true;
   programs.wezterm.enable = false;
-
   programs.sparrow.enable = true;
   programs.zwift.enable = true;
 
   programs.obs-studio = with pkgs.unstable; {
     enable = true;
     package = obs-studio;
-    # plugins = [ obs-studio-plugins.wlrobs ];
+    plugins = with obs-studio-plugins; [
+      obs-pipewire-audio-capture
+    ];
   };
 
   programs.immich = {

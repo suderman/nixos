@@ -3,12 +3,20 @@
   # Missing on 24.11
   if prev.this.stable then {
 
-    symbols-only = prev.nerdfonts.override {
-      fonts = [ "NerdFontsSymbolsOnly" ];
+    fira-code = prev.nerdfonts.override {
+      fonts = [ "FireCode" ];
+    };
+
+    monofur = prev.nerdfonts.override {
+      fonts = [ "Monofur" ];
     };
 
     jetbrains-mono = prev.nerdfonts.override {
       fonts = [ "JetBrainsMono" ];
+    };
+
+    symbols-only = prev.nerdfonts.override {
+      fonts = [ "NerdFontsSymbolsOnly" ];
     };
 
   } 

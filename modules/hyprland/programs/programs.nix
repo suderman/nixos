@@ -34,7 +34,6 @@ in {
       bluebubbles.enable = true; # ios chat
       chromium.enable = true; # alt browser
       firefox.enable = true; # web browser
-      gimp.enable = true; # image editor
       kitty.enable = true; # term
       mpv.enable = true; # media player
       yazi.enable = true; # file manager tui

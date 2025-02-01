@@ -76,7 +76,8 @@
   outputs = { self, ... }: let 
     
     inherit (self) outputs inputs; 
-    inherit (builtins) hasAttr mapAttrs length;
+    inherit (builtins) hasAttr elem mapAttrs length;
+    inherit (inputs.nixpkgs.lib) getName; 
     inherit (this'.lib) lsAdmins lsUsers mkAttrs mkConfigurations mkModules mkProfiles;
 
     # Replace stable inputs with unstable (if available)
@@ -101,6 +102,8 @@
 
       # Accept agreements for unfree software
       config.allowUnfree = true;
+      config.allowUnfreePredicate = pkg: elem (getName pkg) [ "joypixels" ];
+      config.joypixels.acceptLicense = true;
       config.nvidia.acceptLicense = true;
 
       # Add to-be-updated packages blocking builds

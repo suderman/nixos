@@ -2,6 +2,11 @@
   inherit (lib) mkDefault;
 in {
 
+  imports = [ 
+    ./codecs.nix # media codecs
+    ./fonts.nix # system-wide fonts
+  ]; 
+
   # App Store
   services.flatpak.enable = true;
 
