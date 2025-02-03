@@ -4,7 +4,7 @@
   if prev.this.stable then {
 
     fira-code = prev.nerdfonts.override {
-      fonts = [ "FireCode" ];
+      fonts = [ "FiraCode" ];
     };
 
     monofur = prev.nerdfonts.override {

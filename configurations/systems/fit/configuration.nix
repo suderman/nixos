@@ -18,6 +18,11 @@
   # Remove undesired route
   services.tailscale.deleteRoute = "10.1.0.0/16";
 
+  programs.hyprland = {
+    enable = true;
+    autologin = "jon";
+  };
+
   # Bigger banana
   stylix.cursor.size = 46;
 

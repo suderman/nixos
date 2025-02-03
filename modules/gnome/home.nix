@@ -104,10 +104,10 @@ in {
         favorite-apps = appIds cfg.dock;
       };
 
-      "org/gnome/desktop/background" = {
-        picture-uri = "file://" + toString( head cfg.wallpapers );
-        picture-uri-dark = "file://" + toString( tail cfg.wallpapers );
-      };
+      # "org/gnome/desktop/background" = {
+      #   picture-uri = "file://" + toString( head cfg.wallpapers );
+      #   picture-uri-dark = "file://" + toString( tail cfg.wallpapers );
+      # };
 
 
       # Enable fractional scaling

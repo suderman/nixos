@@ -1,7 +1,6 @@
 { config, lib, pkgs, profiles, ... }: { 
 
-  # Import all *.nix files in this directory
-  imports = lib.ls ./. ++ [
+  imports = [
     profiles.desktop # gui apps on all my desktops
   ];
 
