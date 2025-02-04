@@ -16,7 +16,7 @@
       # Return list of directory names (with default.nix) inside path
       dirNames = path: dirsWith: dirsExcept: asPath: let
         dirs = attrNames (filterAttrs (n: v: v == "directory") (readDir path)); 
-        isAllowed = (name: !elem name dirsExcept); # default filters out dirs named "home"
+        isAllowed = (name: !elem name dirsExcept); # default filters out dirs named "user"
         isVisible = (name: (!hasPrefix "." name));
         dirsWithFiles = (dirs: concatMap (dir: concatMap (file: ["${dir}/${file}"] ) dirsWith) dirs);
         isValid = dirFile: pathExists "${path}/${dirFile}";
@@ -36,7 +36,7 @@
       fromPath = path: fromAttrs { inherit path; };
 
       # Return list of directory/file names if asPath is false, otherwise list of absolute paths
-      fromAttrs = { path, dirsWith ? [ "default.nix" ], dirsExcept ? [ "home" ], filesExcept ? [ "flake.nix" "default.nix" "configuration.nix" "this.nix" ], asPath ? true }: unique
+      fromAttrs = { path, dirsWith ? [ "default.nix" ], dirsExcept ? [ "user" ], filesExcept ? [ "flake.nix" "default.nix" "configuration.nix" "this.nix" ], asPath ? true }: unique
         (if ! pathExists path then [] else # If path doesn't exist, return an empty list
           (if hasSuffix ".nix" path then [ path ] else # If path is a nix file, return that path in a list
             (if dirsWith == false then [] else (dirNames path dirsWith dirsExcept asPath)) ++ # No subdirs if dirsWith is false, 
@@ -103,7 +103,7 @@
       ( ls { path = ./configurations/systems; asPath = true; dirsWith = [ "this.nix" ]; dirsExcept = []; } )
     );
 
-    # Like mkAttrs but only includes paths to user nix files or user directories with home.nix
+    # Like mkAttrs but only includes paths to user nix files or user directories
     mkUsers = hostName: fn: builtins.listToAttrs ( map
       ( path: { name = nameFromPath path; value = (fn path); } )
       ( ls { path = ./configurations/systems/${hostName}/users; asPath = true; dirsExcept = []; } )
@@ -111,9 +111,7 @@
 
     # List of users for a particular nixos configuration
     lsUsers = this: mkList( ls { 
-      path = ./configurations/systems/${this.hostName}/users; 
-      dirsExcept = []; 
-      asPath = false;
+      path = ./configurations/systems/${this.hostName}/users; asPath = false; dirsExcept = []; 
     });
 
     # List of users with a public key in the secrets directory
@@ -127,15 +125,15 @@
     nameFromPath = path: let
       inherit (builtins) toString;
       inherit (inputs.nixpkgs.lib) removeSuffix;
-    in baseNameOf (removeSuffix ".nix" (removeSuffix "/this.nix" (removeSuffix "/configuration.nix" (removeSuffix "/default.nix" (removeSuffix "/home/default.nix" (toString path) )))));
+    in baseNameOf (removeSuffix ".nix" (removeSuffix "/this.nix" (removeSuffix "/configuration.nix" (removeSuffix "/default.nix" (removeSuffix "/user/default.nix" (toString path) )))));
 
     # Importable configuration profiles
     mkProfiles = this: let
       profilesFromPath = dirName: builtins.listToAttrs ( map 
         ( path: { name = nameFromPath path; value = (path); } )
-        ( ls { path = ./configurations/profiles; asPath = true; dirsExcept = [ "home" ]; dirsWith = [ "${dirName}/default.nix" ]; } )
+        ( ls { path = ./configurations/profiles; asPath = true; dirsWith = [ "${dirName}/default.nix" ]; } )
       );
-    in { root = profilesFromPath "/"; user = profilesFromPath "/home"; };
+    in { root = profilesFromPath "/"; user = profilesFromPath "/user"; };
 
     # NixOS modules imported in each configuration
     mkModules = this: let 
@@ -170,7 +168,7 @@
         # Home Manager modules are organized under each user's name
         mkUsers hostName (
           userPath: let userName = nameFromPath userPath; in 
-            ls { path = ./modules; dirsWith = [ "home/default.nix" ]; } ++ # home-manager modules
+            ls { path = ./modules; dirsWith = [ "user/default.nix" ]; } ++ # home-manager modules
             ls ./configurations/users/all/default.nix ++ # shared home-manager configuration for all users
             ls ./configurations/users/${userName}.nix ++ # shared home-manager configuration for one user
             ls ./configurations/users/${userName}/default.nix ++
