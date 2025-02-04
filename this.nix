@@ -1,26 +1,27 @@
 # Attribute set of NixOS configurations found in each directory
 { inputs, caches ? [], ... }: let
-  inherit (lib) ls mkAttrs mkUsers mkList lsUsers configurationNameFromPath profileNameFromPath userNameFromPath;
+  inherit (lib) ls mkAttrs mkUsers mkList lsUsers nameFromPath;
 
   # Personal lib
   lib = {
 
     # List directories and files that can be imported by nix
     # ls ./modules;
-    # ls { path = ./modules; dirsWith = [ "default.nix" "home.nix" ]; filesExcept = [ "default.nix" ]; asPath = true; };
+    # ls { path = ./modules; dirsWith = [ "default.nix" "configuration.nix" ]; filesExcept = [ "default.nix" ]; asPath = true; };
     ls = x: ( let
 
       inherit (builtins) attrNames concatMap elem filter isAttrs isPath pathExists readDir;
       inherit (inputs.nixpkgs.lib) filterAttrs hasPrefix hasSuffix removeSuffix unique;
 
       # Return list of directory names (with default.nix) inside path
-      dirNames = path: dirsWith: asPath: let
-        dirs = attrNames (filterAttrs (n: v: v == "directory") (readDir path));
+      dirNames = path: dirsWith: dirsExcept: asPath: let
+        dirs = attrNames (filterAttrs (n: v: v == "directory") (readDir path)); 
+        isAllowed = (name: !elem name dirsExcept); # default filters out dirs named "home"
         isVisible = (name: (!hasPrefix "." name));
         dirsWithFiles = (dirs: concatMap (dir: concatMap (file: ["${dir}/${file}"] ) dirsWith) dirs);
         isValid = dirFile: pathExists "${path}/${dirFile}";
         format = paths: map (dirFile: (if (asPath == true) then path + "/${dirFile}" else dirOf dirFile)) paths;
-      in format (filter isValid (dirsWithFiles (filter isVisible dirs)));
+      in format (filter isValid (dirsWithFiles (filter isVisible (filter isAllowed dirs))));
 
       # Return list of filenames (ending in .nix) inside path 
       fileNames = path: filesExcept: asPath: let 
@@ -35,10 +36,10 @@
       fromPath = path: fromAttrs { inherit path; };
 
       # Return list of directory/file names if asPath is false, otherwise list of absolute paths
-      fromAttrs = { path, dirsWith ? [ "default.nix" ], filesExcept ? [ "flake.nix" "default.nix" "configuration.nix" "nixos.nix" "home.nix" "this.nix" ], asPath ? true }: unique
+      fromAttrs = { path, dirsWith ? [ "default.nix" ], dirsExcept ? [ "home" ], filesExcept ? [ "flake.nix" "default.nix" "configuration.nix" "this.nix" ], asPath ? true }: unique
         (if ! pathExists path then [] else # If path doesn't exist, return an empty list
           (if hasSuffix ".nix" path then [ path ] else # If path is a nix file, return that path in a list
-            (if dirsWith == false then [] else (dirNames path dirsWith asPath)) ++ # No subdirs if dirsWith is false, 
+            (if dirsWith == false then [] else (dirNames path dirsWith dirsExcept asPath)) ++ # No subdirs if dirsWith is false, 
             (if filesExcept == false then [] else (fileNames path filesExcept asPath)) # No files if filesExcept is false
           )
         );
@@ -77,7 +78,7 @@
       # Create attribute set from files and subdirectories of path
       fromPath = path: listToAttrs ( map 
         ( name: { name = (removeSuffix ".nix" name); value = (fn name); }) 
-        ( ls { inherit path; asPath = false; } )
+        ( ls { inherit path; asPath = false; dirsExcept = []; } )
       );
 
       # Create attribute set list of values
@@ -96,34 +97,23 @@
       else {}
     );
 
-    # Convert a user path to a user name
-    userNameFromPath = path: let
-      inherit (builtins) toString;
-      inherit (inputs.nixpkgs.lib) removeSuffix;
-    in baseNameOf( removeSuffix ".nix" (removeSuffix "/home.nix" (toString path) ) );
-
-    # Convert a configuration path to a configuration name
-    configurationNameFromPath = path: let
-      inherit (builtins) toString;
-      inherit (inputs.nixpkgs.lib) removeSuffix;
-    in baseNameOf( removeSuffix "/this.nix" (removeSuffix "/configuration.nix" (removeSuffix "/default.nix" (toString path) ) ) );
-
     # Like mkAttrs but only includes paths to configuration directories with this.nix
     mkConfigurations = fn: builtins.listToAttrs ( map 
-      ( path: { name = configurationNameFromPath path; value = (fn path); } )
-      ( ls { path = ./configurations/systems; asPath = true; dirsWith = [ "this.nix" ]; } )
+      ( path: { name = nameFromPath path; value = (fn path); } )
+      ( ls { path = ./configurations/systems; asPath = true; dirsWith = [ "this.nix" ]; dirsExcept = []; } )
     );
 
     # Like mkAttrs but only includes paths to user nix files or user directories with home.nix
     mkUsers = hostName: fn: builtins.listToAttrs ( map
-      ( path: { name = userNameFromPath path; value = (fn path); } )
-      ( ls { path = ./configurations/systems/${hostName}/users; asPath = true; dirsWith = [ "home.nix" ]; } )
+      ( path: { name = nameFromPath path; value = (fn path); } )
+      ( ls { path = ./configurations/systems/${hostName}/users; asPath = true; dirsExcept = []; } )
     );  
 
     # List of users for a particular nixos configuration
     lsUsers = this: mkList( ls { 
       path = ./configurations/systems/${this.hostName}/users; 
-      asPath = false; dirsWith = [ "home.nix" ]; 
+      dirsExcept = []; 
+      asPath = false;
     });
 
     # List of users with a public key in the secrets directory
@@ -131,6 +121,18 @@
       inherit (this.inputs.nixpkgs.lib) attrNames intersectLists remove; 
     in intersectLists ( lsUsers this ) (
       remove "all" ( attrNames (import ./secrets/keys).users )
+    );
+
+    # Determine name from file path
+    nameFromPath = path: let
+      inherit (builtins) toString;
+      inherit (inputs.nixpkgs.lib) removeSuffix;
+    in baseNameOf (removeSuffix ".nix" (removeSuffix "/this.nix" (removeSuffix "/configuration.nix" (removeSuffix "/default.nix" (removeSuffix "/home/default.nix" (toString path) )))));
+
+    # Importable configuration profiles
+    mkProfiles = dirName: builtins.listToAttrs ( map 
+      ( path: { name = nameFromPath path; value = (path); } )
+      ( ls { path = ./configurations/profiles; asPath = true; dirsExcept = [ "home" ]; dirsWith = [ "${dirName}/default.nix" ]; } )
     );
 
     # NixOS modules imported in each configuration
@@ -165,34 +167,24 @@
       in
         # Home Manager modules are organized under each user's name
         mkUsers hostName (
-          userPath: let userName = userNameFromPath userPath; in 
-            ls { path = ./modules; dirsWith = [ "home.nix" ]; } ++ # home-manager modules
-            ls ./configurations/users/all/home.nix ++ # shared home-manager configuration for all users
+          userPath: let userName = nameFromPath userPath; in 
+            ls { path = ./modules; dirsWith = [ "home/default.nix" ]; } ++ # home-manager modules
+            ls ./configurations/users/all/default.nix ++ # shared home-manager configuration for all users
             ls ./configurations/users/${userName}.nix ++ # shared home-manager configuration for one user
-            ls ./configurations/users/${userName}/home.nix ++
+            ls ./configurations/users/${userName}/default.nix ++
             ls ./configurations/systems/${hostName}/users/${userName}.nix ++ # specific home-manager configuration for one user
-            ls ./configurations/systems/${hostName}/users/${userName}/home.nix ++
+            ls ./configurations/systems/${hostName}/users/${userName}/default.nix ++
             [ ./secrets ] ++ nix-cache ++ nix-index.home # secrets, keys, cache and index
 
         # NixOS modules are organization under "root"
         ) // {
           root = 
-            ls { path = ./modules; dirsWith = [ "nixos.nix" ]; } ++ # nixos modules
+            ls { path = ./modules; dirsWith = [ "default.nix" ]; } ++ # nixos modules
             ls ./configurations/systems/all/configuration.nix ++ # shared nixos configuration for all systems
             ls ./configurations/systems/${hostName}/configuration.nix ++ # specific nixos configuration for one system
             [ ./secrets ] ++ nix-cache ++ nix-index.nixos # secrets, keys, cache and index
           ;
         };
-
-    profileNameFromPath = path: let
-      inherit (builtins) toString;
-      inherit (inputs.nixpkgs.lib) removeSuffix;
-    in baseNameOf( removeSuffix "/nixos.nix" (removeSuffix "/home.nix" (toString path) ) );
-
-    mkProfiles = nixosOrHome: builtins.listToAttrs ( map 
-      ( path: { name = profileNameFromPath path; value = (path); } )
-      ( ls { path = ./configurations/profiles; asPath = true; dirsWith = [ "${nixosOrHome}.nix" ]; } )
-    );
 
   };
 

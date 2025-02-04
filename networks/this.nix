@@ -2,7 +2,8 @@
 this: let
 
   inherit (builtins) attrNames attrValues filter;
-  inherit (this.lib) configurationNameFromPath mkAttrs mkConfigurations;
+  # inherit (this.lib) configurationNameFromPath mkAttrs mkConfigurations;
+  inherit (this.lib) nameFromPath mkAttrs mkConfigurations;
   inherit (this.inputs.nixpkgs.lib) foldl filterAttrs hasPrefix mapAttrsToList mapAttrs' nameValuePair naturalSort unique; 
 
   # Centralized list of IP addresses
@@ -17,7 +18,8 @@ this: let
   # Determine IP address for each host from configuration domain
   domains = filterAttrs (n: v: v != "") ( mkConfigurations ( path: let
     config = import path;
-    hostName = configurationNameFromPath path;
+    # hostName = configurationNameFromPath path;
+    hostName = nameFromPath path;
     domain = if config ? domain then config.domain else "";
     ip = if networks ? ${domain} then ( if networks.${domain} ? ${hostName} then networks.${domain}.${hostName} else "" ) else "";
   in ip ) );

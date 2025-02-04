@@ -13,14 +13,14 @@ in {
   imports = [ inputs.nix-flatpak.homeManagerModules.nix-flatpak ];
 
   # options shared with nixos module
-  options.services.flatpak = import ./options.nix { 
+  options.services.flatpak = import ../options.nix { 
     inherit lib;  
     inherit (cfg) apps beta;
   };
 
   # config (mostly) shared with nixos module
   config = mkIf cfg.enable {
-    services.flatpak = import ./config.nix { 
+    services.flatpak = import ../config.nix { 
       inherit lib;  
       inherit (cfg) apps beta all; 
     } // {

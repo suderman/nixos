@@ -195,7 +195,7 @@
         users = lsUsers this;
         admins = lsAdmins this;
         modules = mkModules this;
-        profiles = { root = mkProfiles "nixos"; user = mkProfiles "home"; };
+        profiles = { root = mkProfiles "/"; user = mkProfiles "/home"; };
         inputs = if this.stable then inputs else unstableInputs;
       })
 
