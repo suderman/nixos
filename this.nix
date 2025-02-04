@@ -130,10 +130,12 @@
     in baseNameOf (removeSuffix ".nix" (removeSuffix "/this.nix" (removeSuffix "/configuration.nix" (removeSuffix "/default.nix" (removeSuffix "/home/default.nix" (toString path) )))));
 
     # Importable configuration profiles
-    mkProfiles = dirName: builtins.listToAttrs ( map 
-      ( path: { name = nameFromPath path; value = (path); } )
-      ( ls { path = ./configurations/profiles; asPath = true; dirsExcept = [ "home" ]; dirsWith = [ "${dirName}/default.nix" ]; } )
-    );
+    mkProfiles = this: let
+      profilesFromPath = dirName: builtins.listToAttrs ( map 
+        ( path: { name = nameFromPath path; value = (path); } )
+        ( ls { path = ./configurations/profiles; asPath = true; dirsExcept = [ "home" ]; dirsWith = [ "${dirName}/default.nix" ]; } )
+      );
+    in { root = profilesFromPath "/"; user = profilesFromPath "/home"; };
 
     # NixOS modules imported in each configuration
     mkModules = this: let 
