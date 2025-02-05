@@ -8,7 +8,7 @@ Each of these directories are automatically imported and available in my
 flake's `outputs.nixosConfigurations.*`. NixOS configuration files can be found
 in `configurations/systems/*/configuration.nix` and system-specific Home
 Manager configurations can be found in `configurations/systems/*/users/*.nix`
-or `configurations/systems/*/users/*/home.nix`
+or `configurations/systems/*/users/*/default.nix`
 
 - `bootstrap` [Bootstrap configuration](https://github.com/suderman/nixos/tree/main/configurations/systems/bootstrap)
 - `cog` [Framework laptop](https://github.com/suderman/nixos/tree/main/configurations/systems/cog)

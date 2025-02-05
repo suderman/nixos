@@ -2,10 +2,10 @@
 
 Each of these directories are automatically imported in each configuration.
 
-Every subdirectory with `nixos.nix` represents a module for NixOS and
-`home.nix` represents a module for Home Manager. Some of these are custom
-modules while others are opinionated overrides of existing nixpkgs modules.
-Each module must be opted-in using the enable option.
+Every directory with `default.nix` represents a module for NixOS and each
+`home` subdirectory with `default/nix` represents a module for Home Manager.
+Some of these are custom modules while others are opinionated overrides of
+existing nixpkgs modules. Each module must be opted-in using the enable option.
 
 ## Example
 
@@ -15,5 +15,5 @@ Each module must be opted-in using the enable option.
 }
 ```
 
-This can be done in `configuration.nix` for NixOS modules and `home.nix` for
-Home Manager modules.
+This can be done in `configuration.nix` for NixOS modules and `users/*`
+subdirectory for Home Manager modules.

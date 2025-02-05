@@ -8,7 +8,6 @@
 
 in {
 
-  # imports = ls ./settings ++ ls { path = ./programs; dirsWith = [ "home.nix" ]; } ++
   imports = ls ./settings ++ ls ./programs ++
 
     # Flake home-manager module
