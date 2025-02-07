@@ -28,7 +28,7 @@
   services.traefik.proxy."chat" = config.services.open-webui.port;
 
   environment.systemPackages = with pkgs; [ 
-    goose-ai
+    goose-cli
   ];
 
 }

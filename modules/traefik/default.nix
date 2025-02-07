@@ -273,6 +273,7 @@ in {
     virtualisation = {
       docker.enable = true;
       docker.storageDriver = "overlay2";
+      docker.liveRestore = false; # enabling this is incompatiable with docker swarm
       oci-containers.backend = "docker";
     };
 

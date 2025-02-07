@@ -4,7 +4,6 @@
     _1password-cli
     calcure # calendar viewer
     distrobox distrobox-tui
-    goose-ai # ai agent command
     killall # kill by process name
     lazydocker # docker tui
     linode-cli # control linode virtual servers
