@@ -189,7 +189,7 @@ in {
 
     programs.qcal.enable = true;
     programs.khal = {
-      enable = true;
+      # enable = true; # FIXME re-enable when working again
       settings = {
         default = {
           default_calendar = "Personal";

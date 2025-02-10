@@ -23,9 +23,11 @@
     models = "/data/models/ollama"; # model storage on separate disk
   };
 
-  # https://chat.kit/
-  services.open-webui.enable = true;
-  services.traefik.proxy."chat" = config.services.open-webui.port;
+  # FIXME re-enable when working again
+  # https://github.com/NixOS/nixpkgs/issues/380636
+  # # https://chat.kit/
+  # services.open-webui.enable = true;
+  # services.traefik.proxy."chat" = config.services.open-webui.port;
 
   environment.systemPackages = with pkgs; [ 
     goose-cli

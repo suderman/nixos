@@ -30,7 +30,7 @@ in {
 
     # cli upload tools
     home.packages = with pkgs; [ 
-      immich-cli
+      # immich-cli # broken, renable and check again later
       immich-go
     ];
 
