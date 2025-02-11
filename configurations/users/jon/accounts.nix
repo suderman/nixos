@@ -189,7 +189,8 @@ in {
 
     programs.qcal.enable = true;
     programs.khal = {
-      # enable = true; # FIXME re-enable when working again
+      enable = true; 
+      package = pkgs.stable.khal; # https://github.com/NixOS/nixpkgs/pull/380358
       settings = {
         default = {
           default_calendar = "Personal";
