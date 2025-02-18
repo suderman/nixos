@@ -26,6 +26,7 @@
   # https://chat.kit/
   services.open-webui.enable = true;
   services.open-webui.package = pkgs.stable.open-webui; # https://github.com/NixOS/nixpkgs/issues/380636
+  services.open-webui.port = 11111; # default is 8080
   services.traefik.proxy."chat" = config.services.open-webui.port;
 
   environment.systemPackages = with pkgs; [ 

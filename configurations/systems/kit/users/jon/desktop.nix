@@ -30,5 +30,9 @@
     # hiddenSinks = [ "alsa_output.usb-Generic_USB_Audio-00.HiFi__SPDIF__sink" ]; # optical now connected to desk speakers
   };
 
+  programs.vscode = {
+    enable = true;
+    package = pkgs.vscode.fhs;
+  };
 
 }

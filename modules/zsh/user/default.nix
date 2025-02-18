@@ -48,8 +48,8 @@ in {
         systemctl() { [ $EUID -eq 0 ] && command systemctl "$@" || command systemctl --user "$@"; }
         journalctl() { [ $EUID -eq 0 ] && command journalctl "$@" || command journalctl --user "$@"; }
 
-        # Fix tab completion
-        setopt EXTENDED_GLOB
+        # Fix tab completion (disabled because this makes # useless)
+        # setopt EXTENDED_GLOB
 
         # message of the day
         [[ -e /var/lib/rust-motd/motd ]] && cat /var/lib/rust-motd/motd
