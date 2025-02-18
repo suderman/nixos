@@ -37,7 +37,7 @@ in {
           "extensions.autoDisableScopes" = 0; # auto-enable extensions
         };
 
-        extensions = with pkgs.nur.repos.rycee.firefox-addons; [
+        extensions.packages = with pkgs.nur.repos.rycee.firefox-addons; [
           add-custom-search-engine
           alby
           auto-tab-discard
