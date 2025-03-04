@@ -29,6 +29,9 @@
     127.0.0.1 local
   '';
 
+  networking.bridges.bridge0.interfaces = [ "enp58s0u1u2u3" ];
+  networking.interfaces.bridge0.useDHCP = true;
+
   # Allow powerkey to be intercepted, but still poweroff for longpress
   services.logind = {
     powerKey = "ignore";
