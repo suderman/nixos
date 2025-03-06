@@ -6,7 +6,6 @@
     perSystem.self.seed-to-ssh
   ];
 
-
 in pkgs.writeScriptBin "seed-to-age" ''
   #!/usr/bin/env bash
   export PATH=${path}:$PATH
@@ -15,7 +14,7 @@ in pkgs.writeScriptBin "seed-to-age" ''
   seed="$(cat)"
   [[ -z "$seed" ]] && exit 0
 
-  # Use seed-to-age (this flake to generate ssh key from seed
+  # Use seed-to-age (this flake) to generate ssh key from seed
   ssh="$(echo "$seed" | seed-to-ssh)"
   [[ -z "$ssh" ]] && exit 0
 
