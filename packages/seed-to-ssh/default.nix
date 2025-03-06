@@ -9,5 +9,5 @@
 # Create wrapper script
 in pkgs.writeScriptBin "seed-to-ssh" ''
   #!/usr/bin/env bash
-  exec ${pythonWithPackages}/bin/python3 ${./seed-to-ssh.py} "''${@}"
+  exec ${pythonWithPackages}/bin/python3 ${./seed-to-ssh.py}
 ''

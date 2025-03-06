@@ -2,6 +2,7 @@
 
   path = pkgs.lib.makeBinPath [ 
     pkgs.coreutils
+    pkgs.gnugrep
     pkgs.openssh
     pkgs.rage
   ];

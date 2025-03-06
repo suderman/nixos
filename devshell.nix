@@ -34,9 +34,10 @@ in perSystem.devshell.mkShell {
     pkgs.smenu
     pkgs.rage
     perSystem.agenix-rekey.default
-    # perSystem.self.deterministic-keygen
     perSystem.self.seed-to-ssh
     perSystem.self.seed-to-age
+    perSystem.self.qr-to-ssh
+    perSystem.self.qr-to-age
     perSystem.self.private-to-public
   ];
 
