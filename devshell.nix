@@ -10,7 +10,7 @@ in perSystem.devshell.mkShell {
 
   # Startup script of devshell, plus extra
   devshell.startup.age.text = ''
-    [[ -e $HOME/.ssh/id_age ]] && cp -f $HOME/.ssh/id_age /tmp/id_age
+    [[ -e id_age ]] && cp -f id_age /tmp/id_age
     touch /tmp/id_age
     chmod 600 /tmp/id_age
   ''; 

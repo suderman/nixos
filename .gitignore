@@ -2,3 +2,5 @@
 /hardware-configuration.nix
 /result
 *.qcow2
+id_age
+id_age_alt

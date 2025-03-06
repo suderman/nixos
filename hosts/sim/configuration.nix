@@ -1,55 +1,17 @@
-{ flake, inputs, perSystem, pkgs, modulesPath, config, ... }: let
-
+{ config, flake, modulesPath, pkgs, ... }: let
   inherit (builtins) mapAttrs;
-
 in {
 
-  # services.openssh.hostKeys = [{
-  #   path = ../../state/sim_ssh_host_ed25519_key;
-  #   type = "ed25519";
-  # } {
-  #   path = ../../state/sim_ssh_host_rsa_key;
-  #   type = "rsa";
-  #   bits = 4096;
-  # }];
-  age.rekey = {
-    hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA1f7U6J47oadgOmHl9f7KEma7ChzTWRiQW4RU8lSKTl";
-    masterIdentities = [ /tmp/id_age ];
-    storageMode = "local";
-    localStorageDir = flake.secrets + "/${config.networking.hostName}";
-  };
-  age.secrets = {
-    fresh = { rekeyFile = ./fresh.txt.age; };
-  };
-  environment.etc = {
-    # "ssh/ssh_host_ed25519_key" = {
-    #   source = ../../state/sim_ssh_host_ed25519_key;
-    #   mode = "0600";
-    #   user = "root";
-    #   group = "root";
-    # };
-    # "ssh/ssh_host_rsa_key" = {
-    #   source = ../../state/sim_ssh_host_rsa_key;
-    #   mode = "0600";
-    #   user = "root";
-    #   group = "root";
-    # };
-  };
-
-  services.openssh.hostKeys = [{
-    type = "ed25519";
-    path = "/etc/ssh/ssh_host_ed25519_key";
-  } {
-    type = "rsa"; bits = 4096;
-    path = "/etc/ssh/ssh_host_rsa_key";
-  }];
-
   imports = [
-    inputs.agenix.nixosModules.default
-    inputs.agenix-rekey.nixosModules.default
+    flake.nixosModules.agenix
     (modulesPath + "/profiles/qemu-guest.nix")
     (modulesPath + "/virtualisation/qemu-vm.nix")
   ];
+
+  age = {
+    rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA1f7U6J47oadgOmHl9f7KEma7ChzTWRiQW4RU8lSKTl";
+    secrets.fresh.rekeyFile = ./fresh.txt.age; 
+  };
 
   boot.kernelParams = [ "console=ttyS0" "console=tty1" "boot.shell_on_fail" ];
   boot.kernelPackages = pkgs.linuxPackages_latest;
@@ -60,8 +22,16 @@ in {
 
   environment.systemPackages = [
     pkgs.vim
-    perSystem.agenix-rekey.default
   ];
+
+  environment.etc = {
+    "fresh.txt" = {
+      source = config.age.secrets.fresh.path;
+      mode = "0750";
+      user = "jon";
+      group = "users";
+    };
+  };
 
   # users.users.root = {
   #   initialPassword = "root";
