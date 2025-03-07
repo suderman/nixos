@@ -7,24 +7,24 @@
     pkgs.rage
   ];
 
-in pkgs.writeScriptBin "private-to-public" ''
+in pkgs.writeScriptBin "to-public" ''
   #!/usr/bin/env bash
   export PATH=${path}:$PATH
 
-  # Exit if private key missing (standard input)
-  key="$(cat)"
-  [[ -z "$key" ]] && exit 0
+  # Exit if standard input is missing
+  input="$(cat)"
+  [[ -z "$input" ]] && exit 0
 
   # If age identity detected, extract recipient from secret and output
-  if [[ ! -z "$(echo "$key" | grep "AGE-SECRET-KEY")" ]]; then
-    echo "$key" | rage-keygen -y
+  if [[ ! -z "$(echo "$input" | grep "AGE-SECRET-KEY")" ]]; then
+    echo "$input" | rage-keygen -y
 
   # If ssh ed25519 detected, extract public key from secret and output
-  elif [[ ! -z "$(echo "$key" | grep "OPENSSH PRIVATE KEY")" ]]; then
-    ssh-keygen -y -f <(echo "$key") | cut -d ' ' -f 1,2
+  elif [[ ! -z "$(echo "$input" | grep "OPENSSH PRIVATE KEY")" ]]; then
+    ssh-keygen -y -f <(echo "$input") | cut -d ' ' -f 1,2
 
   # Fallback on echoing the input to output
   else
-    echo "$key"
+    echo "$input"
   fi
 ''
