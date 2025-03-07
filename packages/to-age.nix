@@ -1,7 +1,7 @@
+# Input (converted into 32-bytes -> ED25519 key) used to generate age identity
 { perSystem, pkgs, ... }: let
 
   path = pkgs.lib.makeBinPath [ 
-    pkgs.coreutils
     pkgs.ssh-to-age
     perSystem.self.to-public
     perSystem.self.to-ssh

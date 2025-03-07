@@ -1,4 +1,4 @@
-# Python script for deterministic key generation
+# Input (converted into 32-bytes) used to generate ED25519 key
 { pkgs, ... }: let
 
   # Python with required packages
@@ -7,7 +7,7 @@
   ]);
 
 # Create wrapper script
-in pkgs.writeScriptBin "seed-to-ssh" ''
+in pkgs.writeScriptBin "to-ssh" ''
   #!/usr/bin/env bash
   exec ${pythonWithPackages}/bin/python3 ${./to-ssh.py}
 ''

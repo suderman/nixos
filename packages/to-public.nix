@@ -1,7 +1,7 @@
+# Convenience script to extract public keys from ssh or age identities
 { pkgs, ... }: let
 
   path = pkgs.lib.makeBinPath [ 
-    pkgs.coreutils
     pkgs.gnugrep
     pkgs.openssh
     pkgs.rage
