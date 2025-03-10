@@ -1,7 +1,7 @@
 { flake, perSystem, pkgs, ... }: let 
 
   # inherit (flake) config;
-  # inherit (flake.lib) mkShell;
+  inherit (flake.lib) helpers;
 
 in perSystem.devshell.mkShell {
 
@@ -10,9 +10,9 @@ in perSystem.devshell.mkShell {
 
   # Startup script of devshell, plus extra
   devshell.startup.age.text = ''
-    [[ -e id_age ]] && cp -f id_age /tmp/id_age
-    touch /tmp/id_age
-    chmod 600 /tmp/id_age
+    # [[ -e id_age ]] && cp -f id_age /tmp/id_age
+    # touch /tmp/id_age
+    # chmod 600 /tmp/id_age
   ''; 
 
   env = [];
@@ -25,17 +25,43 @@ in perSystem.devshell.mkShell {
   } {
     name = "qr-to-age";
     help = "Generate age identity from QR code";
-    command = let key = "id_age"; in ''
-      [[ -e "$(pwd)/${key}" ]] && echo "$(pwd)/${key} already exists" && exit
-      qr | to-age > ${key}
-      cp -f ${key} /tmp/${key}
-      chmod 600 /tmp/${key}
+    command = ''
+      source ${helpers}
+      has id_age.age && error "$(pwd)/id_age.age already exists"
+      id="$(qr | to-age)"
+      empty "$id" && error "Failed to read QR code"
+      echo "$id" | rage -ep > id_age.age
+      info "QR code imported as encrypted age identity: $(pwd)/id_age.age"
+      echo "$id" > /tmp/id_age
+      chmod 600 /tmp/id_age
+      info "Age identity unlocked"
+    '';
+  } {
+    name = "unlock";
+    help = "Unlock age identity";
+    command = ''
+      source ${helpers}
+      hasnt id_age.age && error "$(pwd)/id_age.age missing"
+      id="$(cat id_age.age | rage -d)"
+      empty "$id" && error "Failed to unlock age identity"
+      echo "$id" > /tmp/id_age
+      chmod 600 /tmp/id_age
+      info "Age identity unlocked"
+    '';
+  } {
+    name = "lock";
+    help = "Lock age identity";
+    command = ''
+      source ${helpers}
+      rm -f /tmp/id_age
+      info "Age identity locked"
     '';
   } {
     name = "qr-to-ssh";
     help = "Generate ssh key pair from QR code";
     command = let key = "~/.ssh/id_ed25519"; in ''
-      [[ -e ${key} ]] && echo "${key} already exists" && exit
+      source ${helpers}
+      has ${key} && error "${key} already exists"
       qr | to-ssh > ${key}
       cat ${key} | to-public > ${key}.pub
     '';
@@ -43,8 +69,12 @@ in perSystem.devshell.mkShell {
     name = "gen-seed";
     help = "Generate seed from id_age";
     command = ''
-      # if [[ ! -e id_age ]] then; echo "missing id_age" && exit; fi
-      echo "$(cat id_age | to-hex seed)" | rage -e -i id_age > seed.age
+      source ${helpers}
+      hasnt /tmp/id_age && error "Age identity locked"
+      seed="$(cat /tmp/id_age | to-hex seed)"
+      empty "$seed" && error "Failed to generate seed"
+      echo "$seed" | rage -ei /tmp/id_age > seed.age
+      info "Encrypted seed generated: $(pwd)/seed.age"
     '';
   }];
 

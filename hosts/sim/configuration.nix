@@ -4,6 +4,7 @@ in {
 
   imports = [
     flake.nixosModules.agenix
+    flake.nixosModules.homelab
     (modulesPath + "/profiles/qemu-guest.nix")
     (modulesPath + "/virtualisation/qemu-vm.nix")
   ];
@@ -12,6 +13,25 @@ in {
     rekey.hostPubkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA1f7U6J47oadgOmHl9f7KEma7ChzTWRiQW4RU8lSKTl";
     secrets.fresh.rekeyFile = ./fresh.txt.age; 
   };
+
+  test = {
+    foo = "bar";
+
+  };
+
+  # age.secrets.env-secrets = {
+  #   rekeyFile = ./secrets/env-secrets.age;
+  #   generator = {
+  #     # Specify an attrset of dependencies as it's easier to select each one
+  #     dependencies = {
+  #       inherit (config.age.secrets) smtp-password oidc-secret;
+  #     };
+  #     script = { pkgs, lib, decrypt, deps, ... }: ''
+  #       printf 'SMTP_PASSWORD="%s"\n' $(${decrypt} ${lib.escapeShellArg deps.smtp-password.file})
+  #       printf 'OIDC_SECRET="%s"\n' $(${decrypt} ${lib.escapeShellArg deps.oidc-secret.file})
+  #     '';
+  #   };
+  # };
 
   boot.kernelParams = [ "console=ttyS0" "console=tty1" "boot.shell_on_fail" ];
   boot.kernelPackages = pkgs.linuxPackages_latest;
@@ -57,6 +77,7 @@ in {
     device = "/dev/disk/by-label/nixos";
     fsType = "ext4";
   };
+
 
   virtualisation = {
     diskSize = 4096;   # Disk size in MB

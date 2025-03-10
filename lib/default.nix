@@ -1,6 +1,12 @@
-{ flake, inputs, ... }: {
+{ flake, inputs, ... }: let
 
-  # Add custom lib functions here
-  foo = bar: "baz";
+  # Module args with lib included
+  inherit (inputs.nixpkgs) lib;
+  args = { inherit flake inputs lib; };
+
+in rec {
+
+  # Bash script helpers
+  helpers = ./helpers.sh;
 
 }
