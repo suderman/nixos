@@ -39,6 +39,13 @@ in perSystem.devshell.mkShell {
       qr | to-ssh > ${key}
       cat ${key} | to-public > ${key}.pub
     '';
+  } {
+    name = "gen-seed";
+    help = "Generate seed from id_age";
+    command = ''
+      # if [[ ! -e id_age ]] then; echo "missing id_age" && exit; fi
+      echo "$(cat id_age | to-hex seed)" | rage -e -i id_age > seed.age
+    '';
   }];
 
   # Base list of packages for devshell, plus extra
