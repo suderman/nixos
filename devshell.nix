@@ -9,72 +9,97 @@ in perSystem.devshell.mkShell {
   devshell.name = "suderman/nixos";
 
   # Startup script of devshell, plus extra
-  devshell.startup.age.text = ''
-    # [[ -e id_age ]] && cp -f id_age /tmp/id_age
-    # touch /tmp/id_age
-    # chmod 600 /tmp/id_age
+  devshell.startup.nixos.text = ''
   ''; 
 
   env = [];
 
   # Base list of commands for devshell, plus extra
   commands = [{
+    category = "virtual machine";
     name = "sim";
     help = "nixos-rebuild --flake .#sim build-vm && ./result/bin/run-sim-vm";
     command = "nixos-rebuild --flake .#sim build-vm && ./result/bin/run-sim-vm";
   } {
-    name = "qr-to-age";
+    category = "age identity";
+    name = "import-id";
     help = "Generate age identity from QR code";
     command = ''
-      source ${helpers}
-      has id_age.age && error "$(pwd)/id_age.age already exists"
-      id="$(qr | to-age)"
-      empty "$id" && error "Failed to read QR code"
-      echo "$id" | rage -ep > id_age.age
-      info "QR code imported as encrypted age identity: $(pwd)/id_age.age"
-      echo "$id" > /tmp/id_age
-      chmod 600 /tmp/id_age
-      info "Age identity unlocked"
+      source ${helpers} && cd $(flake)
+      if has id.age; then
+        [[ ! -s id.age ]] && rm -f id.age || error "$(pwd)/id.age already exists"
+      fi
+      seed="$(qr)"
+      empty "$seed" && error "Failed to read QR code"
+      echo "$seed" | to-age | rage -ep > id.age
+      info "QR code imported as encrypted age identity: $(pwd)/id.age"
+      echo "$seed" | rage -er "$(echo "$seed" | to-age | to-public)" > seed.age
+      git add seed.age
+      info "QR code imported as encrypted seed: $(pwd)/seed.age"
+      echo "$seed" | to-age | unlock-id
     '';
   } {
-    name = "unlock";
+    category = "age identity";
+    name = "unlock-id";
     help = "Unlock age identity";
     command = ''
-      source ${helpers}
-      hasnt id_age.age && error "$(pwd)/id_age.age missing"
-      id="$(cat id_age.age | rage -d)"
-      empty "$id" && error "Failed to unlock age identity"
+      source ${helpers} && cd $(flake)
+      id="$(input)"
+      if empty "$id"; then
+        hasnt id.age && error "$(pwd)/id.age missing"
+        id="$(cat id.age | rage -d)"
+        empty "$id" && error "Failed to unlock age identity"
+      fi
+      has /tmp/id_age && mv /tmp/id_age /tmp/id_age_prev
+      touch /tmp/id_age_prev
       echo "$id" > /tmp/id_age
-      chmod 600 /tmp/id_age
+      chmod 600 /tmp/id_age /tmp/id_age_prev
       info "Age identity unlocked"
     '';
   } {
-    name = "lock";
+    category = "age identity";
+    name = "lock-id";
     help = "Lock age identity";
     command = ''
-      source ${helpers}
-      rm -f /tmp/id_age
+      source ${helpers} && cd $(flake)
+      rm -f /tmp/id_age /tmp/id_age_prev
       info "Age identity locked"
     '';
+  # } {
+  #   category = "misc";
+  #   name = "qr-to-ssh";
+  #   help = "Generate ssh key pair from QR code";
+  #   command = let key = "~/.ssh/id_ed25519"; in ''
+  #     source ${helpers} && cd $(flake)
+  #     has ${key} && error "${key} already exists"
+  #     qr | to-ssh > ${key}
+  #     cat ${key} | to-public > ${key}.pub
+  #   '';
   } {
-    name = "qr-to-ssh";
-    help = "Generate ssh key pair from QR code";
-    command = let key = "~/.ssh/id_ed25519"; in ''
-      source ${helpers}
-      has ${key} && error "${key} already exists"
-      qr | to-ssh > ${key}
-      cat ${key} | to-public > ${key}.pub
+    category = "ssh host keys";
+    name = "ssh-keysgen";
+    help = "Generate ssh host keys from seed";
+    command = ''
+      source ${helpers} && cd $(flake)
+      hasnt seed.age && error "$(pwd)/seed.age missing"
+      hasnt /tmp/id_age && error "Age identity locked"
+      for host in $(ls hosts); do
+        echo "$(cat seed.age | rage -di /tmp/id_age | to-hex "$host" | to-ssh | to-public) @$host" > hosts/$host/ssh.pub
+        git add hosts/$host/ssh.pub
+        info "Public ssh host key generated: $(pwd)/hosts/$host/ssh.pub"
+      done
     '';
   } {
-    name = "gen-seed";
-    help = "Generate seed from id_age";
+    category = "ssh host keys";
+    name = "ssh-keysend";
+    help = "Send ssh host key generated from seed";
     command = ''
-      source ${helpers}
+      source ${helpers} && cd $(flake)
+      ip="''${1-}"
+      empty "$ip" && error "Missing destination IP address"
+      hasnt seed.age && error "$(pwd)/seed.age missing"
       hasnt /tmp/id_age && error "Age identity locked"
-      seed="$(cat /tmp/id_age | to-hex seed)"
-      empty "$seed" && error "Failed to generate seed"
-      echo "$seed" | rage -ei /tmp/id_age > seed.age
-      info "Encrypted seed generated: $(pwd)/seed.age"
+      cat seed.age | rage -di /tmp/id_age | to-hex "$(ls hosts | smenu)" | to-ssh | nc -N $ip 12345
     '';
   }];
 

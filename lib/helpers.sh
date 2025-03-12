@@ -72,6 +72,11 @@ function empty {
   return 1
 }
 
+# Echo any standard input (if exists)
+function input {
+  [ -t 0 ] || cat
+} 
+
 # Echo information
 function info { 
   echo "$(green_bold "#") $(green "$*")" 
@@ -174,6 +179,23 @@ function ask_ip {
       [[ "$ip" == "[new]" ]] && ip="$(ask - "$last_ip")"
     fi
   done
+}
+
+# Return path to flake dir
+function flake {
+  local dir="$PWD"
+  while [[ "$dir" != "/" ]]; do
+    if [[ -f "$dir/flake.nix" ]]; then
+      echo "$dir"
+      return 0
+    fi
+    dir=$(dirname "$dir")
+  done
+  if [[ -f "/flake.nix" ]]; then
+    echo "/"
+    return 0
+  fi
+  return 1
 }
 
 # smenu formatting
