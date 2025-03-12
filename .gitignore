@@ -1,5 +1,7 @@
 /scratch
 /hardware-configuration.nix
 /result
+.data
+.direnv
 *.qcow2
 id*age*
