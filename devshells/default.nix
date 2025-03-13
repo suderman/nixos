@@ -1,7 +1,7 @@
 { flake, perSystem, pkgs, ... }: let 
 
   inherit (builtins) toString readFile;
-  inherit (flake.lib) foo;
+  inherit (flake.lib) ls;
 
 in perSystem.devshell.mkShell {
 
@@ -61,6 +61,7 @@ in perSystem.devshell.mkShell {
     pkgs.rage
     perSystem.agenix-rekey.default
     perSystem.self.qr
+    perSystem.self.to
     perSystem.self.to-age
     perSystem.self.to-hex
     perSystem.self.to-public
