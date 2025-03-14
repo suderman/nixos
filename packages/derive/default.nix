@@ -27,7 +27,9 @@ in perSystem.self.mkScript {
         ${readFile ./age.sh}
         ;;
       hex | h)
-        echo "$input" | python3 ${./hex.py} "$args"
+        [[ -z "$args" ]] \
+          && echo "$input" | python3 ${./hex.py} \
+          || echo "$input" | python3 ${./hex.py} "$args"
         ;;
       public | p)
         ${readFile ./public.sh}

@@ -1,4 +1,4 @@
-# perSystem.self.mkShellScript {}
+# perSystem.self.mkScript {}
 { pkgs, ... }: let
 
   inherit (builtins) isAttrs isPath isString readFile;
