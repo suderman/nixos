@@ -64,7 +64,8 @@ in {
     };
 
     networking.hostName = "sim";
-    networking.hostPubkey = ./ssh.pub;
+    networking.hostPubkey = ./ssh_host_ed25519_key.pub;
+    networking.hostPrvkey = ./ssh_host_ed25519_key.age;
     networking.firewall.allowPing = true;
 
     age.secrets.fresh.rekeyFile = ./fresh.txt.age; 

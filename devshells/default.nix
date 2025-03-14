@@ -61,11 +61,12 @@ in perSystem.devshell.mkShell {
     pkgs.rage
     perSystem.agenix-rekey.default
     perSystem.self.qr
-    perSystem.self.to
-    perSystem.self.to-age
-    perSystem.self.to-hex
-    perSystem.self.to-public
-    perSystem.self.to-ssh
+    perSystem.self.derive
+    # perSystem.self.to
+    # perSystem.self.to-age
+    # perSystem.self.to-hex
+    # perSystem.self.to-public
+    # perSystem.self.to-ssh
     perSystem.self.hello
   ];
 

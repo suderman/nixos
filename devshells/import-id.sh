@@ -7,11 +7,11 @@ fi
 seed="$(qr)"
 empty "$seed" && error "Failed to read QR code"
 
-echo "$seed" | to-age | rage -ep > id.age
+echo "$seed" | derive age | rage -ep > id.age
 info "QR code imported as encrypted age identity: $(pwd)/id.age"
 
-echo "$seed" | rage -er "$(echo "$seed" | to-age | to-public)" > seed.age
+echo "$seed" | rage -er "$(echo "$seed" | derive age | derive public)" > seed.age
 git add seed.age
 info "QR code imported as encrypted seed: $(pwd)/seed.age"
 
-echo "$seed" | to-age | unlock-id
+echo "$seed" | derive age | unlock-id

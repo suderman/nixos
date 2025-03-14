@@ -31,8 +31,9 @@ in {
     inputs.agenix-rekey.nixosModules.default
   ];
 
-  options = {
-    networking.hostPubkey = mkOption { type = types.path; };
+  options.networking = {
+    hostPubkey = mkOption { type = types.path; };
+    hostPrvkey = mkOption { type = types.path; };
   };
 
   config = {

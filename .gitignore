@@ -4,4 +4,5 @@
 .data
 .direnv
 *.qcow2
-id*age*
+id.age
+id_age*
