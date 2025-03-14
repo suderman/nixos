@@ -42,8 +42,8 @@ in {
       inherit hostPubkey;
       masterIdentities = [ /tmp/id_age /tmp/id_age_prev ];
       storageMode = "local";
-      localStorageDir = flake + /hosts/${hostName}/secrets;
-      generatedSecretsDir = flake + /hosts/${hostName}/secrets;
+      localStorageDir = flake + /secrets/${hostName};
+      generatedSecretsDir = flake + /secrets/${hostName};
     };
 
     age.secrets = {
