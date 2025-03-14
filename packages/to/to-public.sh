@@ -1,5 +1,5 @@
 # Exit if standard input is missing
-input="$(cat)"
+empty "${input-}" && "$(input)"
 [[ -z "$input" ]] && exit 0
 
 # If age identity detected, extract recipient from secret and output

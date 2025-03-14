@@ -1,5 +1,5 @@
 # Exit if standard input is missing
-input="$(cat)"
+empty "${input-}" && "$(input)"
 [[ -z "$input" ]] && exit 0
 
 # Use to-ssh (this flake) to generate ssh key from input
