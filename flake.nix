@@ -23,12 +23,20 @@
 
   };
 
-  outputs = inputs: inputs.blueprint { inherit inputs; } // {
+  outputs = inputs: let flake = rec {
+
+    flake = inputs.self;
+
+    # map extra folders
+    users = flake.lib.mkAttrs ./users ( user: import ./users/${user} );
     networks = {};
     secrets = ./secrets;
+
     agenix-rekey = inputs.agenix-rekey.configure {
-      userFlake = inputs.self;
-      inherit (inputs.self) nixosConfigurations;
+      userFlake = flake;
+      inherit (flake) nixosConfigurations;
     };
-  };
+
+  # blueprint automatically maps: devshells, hosts, lib, modules, packages
+  }; in inputs.blueprint { inherit inputs; } // flake;
 }
