@@ -1,17 +1,35 @@
 source $LIB; cd $PRJ_ROOT
 
-if has id.age; then
-  [[ ! -s id.age ]] && rm -f id.age || error "$(pwd)/id.age already exists"
+if has secrets/id.age; then
+  [[ ! -s secrets/id.age ]] && rm -f secrets/id.age \
+    || error "$(pwd)/secrets/id.age already exists"
 fi
 
-seed="$(qr)"
-empty "$seed" && error "Failed to read QR code"
+# Attempt to read QR code master key (hex32)
+key="$(qr)"
+defined "$key" && info "QR code scanned!" \
+  || error "Failed to read QR code"
 
-echo "$seed" | derive age | rage -ep > id.age
-info "QR code imported as encrypted age identity: $(pwd)/id.age"
+# Write a password-protected copy of the age identity
+echo "$key" \
+  | derive age \
+  | rage -ep > secrets/id.age
+info "Private age identity written: $(pwd)/secrets/id.age"
 
-echo "$seed" | rage -er "$(echo "$seed" | derive age | derive public)" > seed.age
-git add seed.age
-info "QR code imported as encrypted seed: $(pwd)/seed.age"
+# Write the age identity's public key
+echo "$key" \
+  | derive age \
+  | derive public \
+  > secrets/id.pub
+info "Public age identity written: $(pwd)/secrets/id.pub"
+git add secrets/id.pub
 
-echo "$seed" | derive age | unlock-id
+# Write the encrypted master key (protected by age identity)
+echo "$key" \
+  | rage -eR secrets/id.pub \
+  > secrets/key.age
+info "Private master key written: $(pwd)/secrets/key.age"
+git add secrets/key.age
+
+# Unlock the id right away
+echo "$key" | derive age | unlock-id

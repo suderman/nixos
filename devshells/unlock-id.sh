@@ -2,8 +2,8 @@ source $LIB; cd $PRJ_ROOT
 
 id="$(input)"
 if empty "$id"; then
-  hasnt id.age && error "$(pwd)/id.age missing"
-  id="$(cat id.age | rage -d)"
+  hasnt secrets/id.age && error "$(pwd)/secrets/id.age missing"
+  id="$(cat secrets/id.age | rage -d)"
   empty "$id" && error "Failed to unlock age identity"
 fi
 

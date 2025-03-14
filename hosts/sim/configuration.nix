@@ -24,8 +24,8 @@ in {
     ];
 
     environment.etc = {
-      "fresh.txt" = {
-        source = config.age.secrets.fresh.path;
+      "foo.txt" = {
+        source = config.age.secrets.foo.path;
         mode = "0750";
         user = "jon";
         group = "users";
@@ -68,7 +68,7 @@ in {
     networking.hostPrvkey = ./ssh_host_ed25519_key.age;
     networking.firewall.allowPing = true;
 
-    age.secrets.fresh.rekeyFile = ./fresh.txt.age; 
+    age.secrets.foo.rekeyFile = ./foo.txt.age; 
     # test.foo = config.age.secrets.foo.path;
 
     services.tailscale.enable = true;

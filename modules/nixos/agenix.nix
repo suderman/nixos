@@ -3,10 +3,10 @@
 
   ssh-keyget = pkgs.writeScriptBin "ssh-keyget" ''
     #!/usr/bin/env bash
-    export PATH=${makeBinPath [pkgs.netcat perSystem.self.to-public]}:$PATH
+    export PATH=${makeBinPath [pkgs.netcat perSystem.self.derive]}:$PATH
     echo "ssh-keysend $(lan-ip)"
     nc -l -N 12345 > /etc/ssh/key
-    if [[ "ssh-ed25519" == "$(cat /etc/ssh/key | to-public | cut -d' ' -f1)" ]]; then
+    if [[ "ssh-ed25519" == "$(cat /etc/ssh/key | derive public | cut -d' ' -f1)" ]]; then
       mv /etc/ssh/key /etc/ssh/ssh_host_ed25519_key
       chmod 600 /etc/ssh/ssh_host_ed25519_key
       systemctl restart sshd
@@ -47,7 +47,7 @@ in {
     };
 
     age.secrets = {
-      seed.rekeyFile = flake + /seed.age; 
+      key.rekeyFile = flake + /secrets/key.age; 
     };
 
     environment.etc = {
@@ -86,11 +86,11 @@ in {
       after = [ "network.target" ]; 
       wantedBy = [ "multi-user.target" ]; 
       serviceConfig.Type = "oneshot";
-      path = [ ssh-keyget perSystem.self.to-public ];
+      path = [ ssh-keyget perSystem.self.derive ];
       script = ''
         while true; do
           if [[ -f /etc/ssh/ssh_host_ed25519_key ]] && [[ -f /etc/ssh/ssh_host_ed25519_key.pub ]]; then
-            if [[ "$(cat /etc/ssh/ssh_host_ed25519_key | to-public)" == "$(cat /etc/ssh/ssh_host_ed25519_key.pub)" ]]; then
+            if [[ "$(cat /etc/ssh/ssh_host_ed25519_key | derive public)" == "$(cat /etc/ssh/ssh_host_ed25519_key.pub)" ]]; then
               echo "VALID ssh host key"
               break
             else
