@@ -62,6 +62,7 @@ in perSystem.devshell.mkShell {
     perSystem.agenix-rekey.default
     perSystem.self.qr
     perSystem.self.derive
+    perSystem.self.ssh-key
     perSystem.self.ipaddr
     perSystem.self.hello
   ];

@@ -10,7 +10,7 @@ hasnt users && error "$(pwd)/users directory missing"
 path="bip85-hex32-index1"
 
 # Per each host...
-for host in $(ls -d hosts); do
+for host in $(ls hosts); do
 
   # Write the public ssh host key
   cat secrets/key.age \
@@ -36,7 +36,7 @@ for host in $(ls -d hosts); do
 done
 
 # Per each user...
-for user in $(ls -d users); do
+for user in $(ls users); do
 
   # Write the public ssh user key
   cat secrets/key.age \

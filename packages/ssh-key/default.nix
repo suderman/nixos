@@ -7,7 +7,7 @@
 in perSystem.self.mkScript {
 
   name = "ssh-key";
-  path = [ derive git netcat rage smenu ];
+  path = [ derive git ipaddr netcat rage smenu ];
 
   # Derivation path for key
   env = { inherit (flake) derivationPath; };
