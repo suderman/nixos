@@ -37,6 +37,9 @@
       inherit (flake) nixosConfigurations;
     };
 
+    # Derive Seeds (BIP-85) > 32-bytes hex > Index Number 1
+    derivationPath = "bip85-hex32-index1";
+
   # blueprint automatically maps: devshells, hosts, lib, modules, packages
   }; in inputs.blueprint { inherit inputs; } // flake;
 }
