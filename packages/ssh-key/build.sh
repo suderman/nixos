@@ -6,11 +6,8 @@ hasnt /tmp/id_age && error "Age identity locked"
 hasnt hosts && error "$(pwd)/hosts directory missing"
 hasnt users && error "$(pwd)/users directory missing"
 
-# Derivation path for key
-path="bip85-hex32-index1"
-
 # Per each host...
-for host in $(ls hosts); do
+for host in $(eza -D hosts); do
 
   # Write the public ssh host key
   cat secrets/key.age \
@@ -36,7 +33,7 @@ for host in $(ls hosts); do
 done
 
 # Per each user...
-for user in $(ls users); do
+for user in $(eza -D users); do
 
   # Write the public ssh user key
   cat secrets/key.age \
@@ -55,7 +52,7 @@ for user in $(ls users); do
     | derive ssh \
     | rage -er $(cat /tmp/id_age | derive public) \
       -R users/$user/id_ed25519.pub \
-      $(printf " -R hosts/%s/ssh_host_ed25519_key.pub" $(ls hosts)) \
+      $(printf " -R hosts/%s/ssh_host_ed25519_key.pub" $(eza -D hosts)) \
     > users/$user/id_ed25519.age
   git add users/$user/id_ed25519.age
   info "Private user key written: $(pwd)/users/$user/id_ed25519.age"

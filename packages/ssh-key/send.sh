@@ -8,6 +8,6 @@ empty "$ip" && error "Missing destination IP address"
 # Send ssh key for selected host to provided IP address
 cat secrets/key.age \
   | rage -di /tmp/id_age \
-  | derive hex "$(ls -d hosts | smenu)" \
+  | derive hex "$(eza -D hosts | smenu)" \
   | derive ssh \
   | nc -N $ip 12345

@@ -19,30 +19,30 @@ in perSystem.devshell.mkShell {
 
   # Base list of commands for devshell, plus extra
   commands = [{
-    category = "age identity";
+    category = "key management";
     name = "import-id";
     help = "Generate age identity from QR code";
     command = readFile ./import-id.sh;
   } {
-    category = "age identity";
+    category = "key management";
     name = "unlock-id";
     help = "Unlock age identity";
     command = readFile ./unlock-id.sh;
   } {
-    category = "age identity";
+    category = "key management";
     name = "lock-id";
     help = "Lock age identity";
     command = readFile ./lock-id.sh;
   } {
-    category = "ssh host keys";
-    name = "ssh-keysgen";
-    help = "Generate ssh host keys from seed";
-    command = readFile ./ssh-keysgen.sh;
+    category = "key management";
+    name = "ssh-key-build";
+    help = "Generate ssh host keys from master key";
+    command = "cd $PRJ_ROOT; ssh-key build";
   } {
-    category = "ssh host keys";
-    name = "ssh-keysend";
-    help = "Send ssh host key generated from seed";
-    command = readFile ./ssh-keysend.sh;
+    category = "key management";
+    name = "ssh-key-send";
+    help = "Send ssh host key generated from master key";
+    command = ''cd $PRJ_ROOT; ssh-key send ''${1-}'';
   } {
     category = "virtual machine";
     name = "sim";

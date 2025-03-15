@@ -1,13 +1,13 @@
 { flake, pkgs, perSystem, ... }: let
 
   inherit (builtins) readFile;
-  inherit (pkgs) git netcat rage smenu;
+  inherit (pkgs) eza git netcat rage smenu;
   inherit (perSystem.self) derive ipaddr;
 
 in perSystem.self.mkScript {
 
   name = "ssh-key";
-  path = [ derive git ipaddr netcat rage smenu ];
+  path = [ derive eza git ipaddr netcat rage smenu ];
 
   # Derivation path for key
   env = { inherit (flake) derivationPath; };

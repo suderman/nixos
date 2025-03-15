@@ -1,6 +1,6 @@
 { flake, pkgs, perSystem, ... }: perSystem.self.mkScript {
 
-  path = [ pkgs.curl pkgs.gawk pkgs.iproute2 ];
+  path = with pkgs; [ curl gawk iproute2 ];
   name = "ipaddr";
   text = ''
     case "''${1-}" in
