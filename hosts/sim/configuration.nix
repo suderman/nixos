@@ -23,6 +23,7 @@ in {
       pkgs.vim
     ];
 
+    age.secrets.foo.rekeyFile = ./foo.txt.age; 
     environment.etc = {
       "foo.txt" = {
         source = config.age.secrets.foo.path;
@@ -68,7 +69,6 @@ in {
     networking.hostPrvkey = ./ssh_host_ed25519_key.age;
     networking.firewall.allowPing = true;
 
-    age.secrets.foo.rekeyFile = ./foo.txt.age; 
     # test.foo = config.age.secrets.foo.path;
 
     services.tailscale.enable = true;

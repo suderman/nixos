@@ -7,9 +7,9 @@ if empty "$id"; then
   empty "$id" && error "Failed to unlock age identity"
 fi
 
-has /tmp/id_age && mv /tmp/id_age /tmp/id_age_prev
-touch /tmp/id_age_prev
+has /tmp/id_age && mv /tmp/id_age /tmp/id_age_
+touch /tmp/id_age_
 echo "$id" > /tmp/id_age
-chmod 600 /tmp/id_age /tmp/id_age_prev
+chmod 600 /tmp/id_age /tmp/id_age_
 
 info "Age identity unlocked"

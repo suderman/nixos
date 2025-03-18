@@ -1,13 +1,13 @@
 { flake, pkgs, perSystem, ... }: let
 
   inherit (builtins) readFile;
-  inherit (pkgs) eza git inetutils netcat rage;
+  inherit (pkgs) eza git inetutils iptables netcat rage;
   inherit (perSystem.self) derive ipaddr;
 
 in perSystem.self.mkScript {
 
   name = "ssh-key";
-  path = [ derive eza git ipaddr inetutils netcat rage ];
+  path = [ derive eza git inetutils ipaddr iptables netcat rage ];
 
   # Derivation path for key
   env = { inherit (flake) derivationPath; };
@@ -35,12 +35,16 @@ in perSystem.self.mkScript {
       send | s)
         ${readFile ./send.sh}
         ;;
+      verify | v)
+        ${readFile ./verify.sh}
+        ;;
       help | *)
         echo "Usage: ssh-key COMMAND"
         echo
         echo "  build"
-        echo "  receive [REBOOT]"
+        echo "  receive"
         echo "  send [HOST] [IP]"
+        echo "  verify"
         echo "  help"
         ;;
     esac
