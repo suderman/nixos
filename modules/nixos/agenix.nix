@@ -1,29 +1,5 @@
 { config, flake, inputs, perSystem, pkgs, lib, ... }: let
   inherit (lib) makeBinPath mkOption types;
-
-  ssh-keyget = pkgs.writeScriptBin "ssh-keyget" ''
-    #!/usr/bin/env bash
-    export PATH=${makeBinPath [pkgs.netcat perSystem.self.derive]}:$PATH
-    echo "ssh-keysend $(lan-ip)"
-    nc -l -N 12345 > /etc/ssh/key
-    if [[ "ssh-ed25519" == "$(cat /etc/ssh/key | derive public | cut -d' ' -f1)" ]]; then
-      mv /etc/ssh/key /etc/ssh/ssh_host_ed25519_key
-      chmod 600 /etc/ssh/ssh_host_ed25519_key
-      systemctl restart sshd
-      echo "Success: valid ed25519 key"
-    else
-      echo "Error: invalid ed25519 key"
-    fi
-  '';
-
-  lan-ip = pkgs.writeScriptBin "lan-ip" ''
-    #!/usr/bin/env bash
-    export PATH=${makeBinPath [pkgs.iproute2]}:$PATH
-    lan="$(ip -4 a | awk '/state UP/{flag=1} flag && /inet /{split($2, ip, "/"); print ip[1]; exit}')"
-    vpn="$(ip -4 a | awk '/tailscale0/{flag=1} flag && /inet /{split($2, ip, "/"); print ip[1]; exit}')"
-    echo "$([ -z "$vpn" ] || [[ $lan == 10.0.2.* ]] && echo "$vpn" || echo "$lan")"
-  '';
-
 in {
 
   imports = [
@@ -70,37 +46,23 @@ in {
 
     environment.systemPackages = [
       perSystem.agenix-rekey.default
+      perSystem.self.ipaddr
       pkgs.curl
       pkgs.openssh
       pkgs.netcat
       pkgs.iproute2 # ip
-      ssh-keyget
-      lan-ip
     ];
 
     networking.firewall.allowedTCPPorts = [ 12345 ];
 
-    systemd.services.ssh-keyget = {
+    systemd.services.ssh-key-receieve = {
       enable = true;
       description = "Receive SSH host key";
       after = [ "network.target" ]; 
       wantedBy = [ "multi-user.target" ]; 
       serviceConfig.Type = "oneshot";
-      path = [ ssh-keyget perSystem.self.derive ];
-      script = ''
-        while true; do
-          if [[ -f /etc/ssh/ssh_host_ed25519_key ]] && [[ -f /etc/ssh/ssh_host_ed25519_key.pub ]]; then
-            if [[ "$(cat /etc/ssh/ssh_host_ed25519_key | derive public)" == "$(cat /etc/ssh/ssh_host_ed25519_key.pub)" ]]; then
-              echo "VALID ssh host key"
-              break
-            else
-              echo "INVALID ssh host key"
-              ssh-keyget
-            fi
-          fi
-          sleep 1
-        done
-      '';
+      path = [ perSystem.self.ssh-key ];
+      script = "cd /etc/ssh && ssh-key receive reboot";
     };
 
   };

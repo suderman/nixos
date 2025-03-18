@@ -1,10 +1,17 @@
 # Ensure public key exists
 hasnt ssh_host_ed25519_key.pub && error "Missing ssh host public key"
 
+# Get hostname for displaying send command
+host="$(cat ssh_host_ed25519_key.pub | cut -d' ' -f3 | cut -d'@' -f1)"
+empty "$host" && host=$(hostname)
+
 function fetch_ssh_key {  
 
+  # Mark that we're waiting to fetch an ssh key
+  touch /tmp/fetch_ssh_key
+
   # Demonstrate command to enter on client
-  info "ssh-key send $(ipaddr local)"
+  info "ssh-key send $host $(ipaddr lan)"
 
   # Wait for private key to be received over netcat
   nc -l -N 12345 > .ssh_host_ed25519_key
@@ -32,12 +39,15 @@ while true; do
   else
 
     # Existing public key and public key derived from private
-    existing_pub="$(cat ssh_host_ed25519_key.pub)"
+    existing_pub="$(cat ssh_host_ed25519_key.pub | cut -d' ' -f1,2)"
     expected_pub="$(cat ssh_host_ed25519_key | derive public)"
 
     # Validate the existing public key against the expected public key
     if [[ "$existing_pub" == "$expected_pub" ]]; then
       info "VALID ssh host key"
+      if [[ "$reboot" == "reboot" ]]; then # reboot upon match
+        has /tmp/fetch_ssh_key && reboot now 
+      fi
       break
 
     # If they don't match, refetch the key

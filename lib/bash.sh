@@ -145,18 +145,18 @@ function confirm {
 # color="$(ask "red green blue" "green")"
 function ask { 
   # Check for 1st arg or stdin
-  local words="${1}"; [[ -p /dev/stdin ]] && words="$(cat -)"
+  local words="${1-}"; [[ -p /dev/stdin ]] && words="$(cat -)"
   # Check for 2nd arg as search word
-  local search="${2}"; [[ -n "$search" ]] && search="-s ${search}" 
+  local search="${2-}"; [[ -n "$search" ]] && search="-s ${search}" 
   # Check for 3rd arg as timer seconds
-  local timer="${3}"; [[ -n "$timer" ]] && timer="-X ${timer}" 
+  local timer="${3-}"; [[ -n "$timer" ]] && timer="-X ${timer}" 
   # If any words, get choice from smenu
   if [[ -n "$words" && "$words" != "-" ]]; then
     smenu -c -a i:3,b c:3,br $search $timer <<< "$words"
   # Otherwise, prompt for input
   else
     local reply=""; while [[ -z "$reply" ]]; do
-      read -p "$(blue_bold :) " -i "${2}" -e reply
+      read -p "$(blue_bold :) " -i "${2-}" -e reply
     done; echo "$reply"
   fi
 }
@@ -165,7 +165,7 @@ function ask {
 # ip="$(ask_ip 192.168.0.2)"
 function ask_ip {
   local ip="" last_ip="" ips="" search=""
-  [[ -n "$1" ]] && ip="$1" || ip="$(ask - "192.168.")"
+  [[ -n "${1-}" ]] && ip="${1-}" || ip="$(ask - "192.168.")"
   while :; do
     last_ip="$ip"
     if $(ping -c1 -w1 $ip >/dev/null 2>&1); then
