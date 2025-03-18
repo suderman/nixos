@@ -42,7 +42,7 @@ in perSystem.devshell.mkShell {
     category = "key management";
     name = "ssh-key-send";
     help = "Send ssh host key generated from master key";
-    command = ''cd $PRJ_ROOT; ssh-key send ''${1-}'';
+    command = ''cd $PRJ_ROOT; ssh-key send ''${1-} ''${2-}'';
   } {
     category = "virtual machine";
     name = "sim";
