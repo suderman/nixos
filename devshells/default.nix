@@ -15,6 +15,9 @@ in perSystem.devshell.mkShell {
   env = [{
     name = "LIB";
     value = toString flake.lib.bash;
+  } {
+    name ="DERIVATION_INDEX";
+    value = toString flake.derivationIndex;
   }];
 
   # Base list of commands for devshell, plus extra

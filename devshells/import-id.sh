@@ -1,5 +1,7 @@
 source $LIB; cd $PRJ_ROOT
 
+pause "Derive Seeds (BIP-85) > 32-bytes hex > Index Number $DERIVATION_INDEX"
+
 if has secrets/id.age; then
   [[ ! -s secrets/id.age ]] && rm -f secrets/id.age \
     || error "$(pwd)/secrets/id.age already exists"

@@ -11,11 +11,11 @@
 
   text = ''
     # Disable webcam autofocus
-    autofocus="$(v4l2-ctl --get-ctrl=focus_automatic_continuous 2>/dev/null | cut -d' ' -f2)"
+    autofocus="$(v4l2-ctl --get-ctrl=focus_automatic_continuous 2>/dev/null | cut -d' ' -f2 || echo "")"
     [[ -z "$autofocus" ]] || v4l2-ctl --set-ctrl=focus_automatic_continuous=0
 
     # Set webcam focus level to 200 (0 = furthest back, 250 = closest possible)
-    focus="$(v4l2-ctl --get-ctrl=focus_absolute 2>/dev/null | cut -d' ' -f2)"
+    focus="$(v4l2-ctl --get-ctrl=focus_absolute 2>/dev/null | cut -d' ' -f2 || echo "")"
     [[ -z "$focus" ]] || v4l2-ctl --set-ctrl=focus_absolute=200
 
     # Scan QR code from webcam

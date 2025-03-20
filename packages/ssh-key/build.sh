@@ -14,7 +14,7 @@ for host in $(eza -D hosts); do
     | rage -di /tmp/id_age \
     | derive hex "$host" \
     | derive ssh \
-    | derive public "$host@${derivationPath-}" \
+    | derive public "$host@${derivation_path-}" \
     > hosts/$host/ssh_host_ed25519_key.pub
   git add hosts/$host/ssh_host_ed25519_key.pub 2>/dev/null || true
   info "Public host key written: $(pwd)/hosts/$host/ssh_host_ed25519_key.pub"
@@ -40,7 +40,7 @@ for user in $(eza -D users); do
     | rage -di /tmp/id_age \
     | derive hex "$user" \
     | derive ssh \
-    | derive public "$user@${derivationPath-}" \
+    | derive public "$user@${derivation_path-}" \
     > users/$user/id_ed25519.pub
   git add users/$user/id_ed25519.pub 2>/dev/null || true
   info "Public user key written: $(pwd)/users/$user/id_ed25519.pub"

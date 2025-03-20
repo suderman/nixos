@@ -10,7 +10,7 @@ in perSystem.self.mkScript {
   path = [ derive eza git inetutils ipaddr iptables netcat rage ];
 
   # Derivation path for key
-  env = { inherit (flake) derivationPath; };
+  env.derivation_path = "bip85-hex32-index${toString flake.derivationIndex}";
 
   text = ''
     source ${flake.lib.bash}
