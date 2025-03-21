@@ -13,6 +13,9 @@
     agenix-rekey.url = "github:oddlama/agenix-rekey";
     agenix-rekey.inputs.nixpkgs.follows = "nixpkgs";
 
+    # https://github.com/nix-community/impermanence
+    impermanence.url = "github:nix-community/impermanence"; 
+
     # https://github.com/numtide/blueprint/
     blueprint.url = "github:numtide/blueprint";
     blueprint.inputs.nixpkgs.follows = "nixpkgs";

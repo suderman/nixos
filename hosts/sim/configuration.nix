@@ -1,23 +1,17 @@
-{ config, flake, modulesPath, pkgs, lib, ... }: let
+{ config, flake, pkgs, lib, ... }: let
   inherit (builtins) mapAttrs;
   inherit (lib) mkOption types;
 in {
 
   imports = [
-    flake.nixosModules.agenix
+    flake.nixosModules.common
+    flake.nixosModules.vm
     flake.nixosModules.homelab
-    (modulesPath + "/profiles/qemu-guest.nix")
-    (modulesPath + "/virtualisation/qemu-vm.nix")
   ];
 
   config = {
 
-    boot.kernelParams = [ "console=ttyS0" "console=tty1" "boot.shell_on_fail" ];
-    boot.kernelPackages = pkgs.linuxPackages_latest;
-    boot.initrd.checkJournalingFS = false;
-
     nixpkgs.hostPlatform = "x86_64-linux";
-    nixpkgs.config.system-features = [ "kvm" ];
 
     environment.systemPackages = [
       pkgs.vim
@@ -52,17 +46,6 @@ in {
     };
 
     users.groups.users = {};
-
-    fileSystems."/" = {
-      device = "/dev/disk/by-label/nixos";
-      fsType = "ext4";
-    };
-
-
-    virtualisation = {
-      diskSize = 4096;   # Disk size in MB
-      memorySize = 2048; # RAM in MB
-    };
 
     networking.hostName = "sim";
     networking.hostPubkey = ./ssh_host_ed25519_key.pub;

@@ -1,19 +1,22 @@
-{ config, flake, inputs, perSystem, pkgs, lib, ... }: let
-  inherit (lib) makeBinPath mkOption types;
-in {
+{ config, flake, inputs, perSystem, pkgs, lib, ... }: {
 
   imports = [
     inputs.agenix.nixosModules.default
     inputs.agenix-rekey.nixosModules.default
   ];
 
-  options.networking = {
-    hostPubkey = mkOption { type = types.path; };
-    hostPrvkey = mkOption { type = types.path; };
+  # Extra networking options to track ssh keys per host
+  options = let inherit (lib) mkOption types; in {
+    networking = {
+      hostPubkey = mkOption { type = types.path; };
+      hostPrvkey = mkOption { type = types.path; };
+    };
   };
 
+  # Configure agenix to work with derived identity and ssh keys
   config = {
 
+    # agenix-rekey setup for this host, secrets in repo
     age.rekey = with config.networking; {
       inherit hostPubkey;
       masterIdentities = [ /tmp/id_age /tmp/id_age_ ];
@@ -22,6 +25,7 @@ in {
       generatedSecretsDir = flake + /secrets/${hostName};
     };
 
+    # 32-byte hex imported from QR code
     age.secrets = {
       key.rekeyFile = flake + /secrets/key.age; 
     };
@@ -41,12 +45,6 @@ in {
       HostKey /etc/ssh/ssh_host_ed25519_key
     '';
 
-    # Exclude auto-generated ssh ed25519 from this list
-    services.openssh.hostKeys = [{
-      type = "rsa"; bits = 4096;
-      path = "/etc/ssh/ssh_host_rsa_key";
-    }];
-
     # Because of the above, manually specify derived key as age identity
     age.identityPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
 
@@ -58,14 +56,14 @@ in {
       pkgs.curl
       pkgs.openssh
       pkgs.netcat
-      pkgs.iproute2 # ip
+      pkgs.iproute2
     ];
 
     # Helps bootstrap a new system with expected SSH private key
     # When needed, listens on port 12345 for a key to be sent via netcat
     # Also updates the /etc/issue with the command required
     systemd.services.sshed = {
-      description = "Verify and/or receive SSH host key via netcat";
+      description = "Verify and/or receive SSH host key via sshed receive";
       wantedBy = [ "multi-user.target" ]; 
       after = [ "network.target" ]; 
       before = [ "sshd.service" ]; 
