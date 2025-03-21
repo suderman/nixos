@@ -15,7 +15,7 @@ cp -f $dir/ssh_host_ed25519_key.pub $tmp/ssh_host_ed25519_key.pub
 
 # Demonstrate command to enter on client
 host="$(cat ssh_host_ed25519_key.pub | cut -d' ' -f3 | cut -d'@' -f1)"
-info "ssh-key send ${host:-$(hostname)} $(ipaddr lan)"
+info "sshed send ${host:-$(hostname)} $(ipaddr lan)"
 
 # Loop until private key validated
 while true; do
@@ -23,7 +23,7 @@ while true; do
   # Wait for private key to be received over netcat
   nc -l -N 12345 > $tmp/ssh_host_ed25519_key
 
-  if ssh-key verify; then
+  if $0 verify; then
     mv $tmp/ssh_host_ed25519_key $dir/ssh_host_ed25519_key
     chmod 600 $dir/ssh_host_ed25519_key
     cd $dir && rm -rf $tmp

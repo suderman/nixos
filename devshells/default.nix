@@ -38,14 +38,14 @@ in perSystem.devshell.mkShell {
     command = readFile ./lock-id.sh;
   } {
     category = "key management";
-    name = "ssh-key-build";
+    name = "sshed-build";
     help = "Generate ssh host keys from master key";
-    command = "cd $PRJ_ROOT; ssh-key build";
+    command = "cd $PRJ_ROOT; sshed build";
   } {
     category = "key management";
-    name = "ssh-key-send";
+    name = "sshed-send";
     help = "Send ssh host key generated from master key";
-    command = ''cd $PRJ_ROOT; ssh-key send ''${1-} ''${2-}'';
+    command = ''cd $PRJ_ROOT; sshed send ''${1-} ''${2-}'';
   } {
     category = "virtual machine";
     name = "sim";
@@ -65,7 +65,7 @@ in perSystem.devshell.mkShell {
     perSystem.agenix-rekey.default
     perSystem.self.qr
     perSystem.self.derive
-    perSystem.self.ssh-key
+    perSystem.self.sshed
     perSystem.self.ipaddr
     perSystem.self.hello
   ];

@@ -6,7 +6,7 @@
 
 in perSystem.self.mkScript {
 
-  name = "ssh-key";
+  name = "sshed";
   path = [ derive eza git inetutils ipaddr iptables netcat rage ];
 
   # Derivation path for key
@@ -39,7 +39,7 @@ in perSystem.self.mkScript {
         ${readFile ./verify.sh}
         ;;
       help | *)
-        echo "Usage: ssh-key COMMAND"
+        echo "Usage: sshed COMMAND"
         echo
         echo "  build"
         echo "  receive"

@@ -54,7 +54,7 @@ in {
       perSystem.agenix-rekey.default
       perSystem.self.ipaddr
       perSystem.self.derive
-      perSystem.self.ssh-key
+      perSystem.self.sshed
       pkgs.curl
       pkgs.openssh
       pkgs.netcat
@@ -64,7 +64,7 @@ in {
     # Helps bootstrap a new system with expected SSH private key
     # When needed, listens on port 12345 for a key to be sent via netcat
     # Also updates the /etc/issue with the command required
-    systemd.services.ssh-key-loader = {
+    systemd.services.sshed = {
       description = "Verify and/or receive SSH host key via netcat";
       wantedBy = [ "multi-user.target" ]; 
       after = [ "network.target" ]; 
@@ -72,7 +72,7 @@ in {
       requiredBy = [ "sshd.service" ]; 
       serviceConfig.Type = "oneshot";
       path = [ 
-        perSystem.self.ssh-key 
+        perSystem.self.sshed 
         perSystem.self.ipaddr 
         pkgs.hostname 
         pkgs.systemd 
@@ -80,7 +80,7 @@ in {
       script = ''
         # Verify private ssh key matches public key
         cd /etc/ssh 
-        if ssh-key verify; then
+        if sshed verify; then
           echo "SSH host keys VALID"
         else
 
@@ -88,14 +88,14 @@ in {
           while [[ -z "$(ipaddr lan)" ]]; do sleep 1; done
           while [[ -z "$(hostname)" ]]; do sleep 1; done
 
-          # Append issue with ssh-key send command including IP address
+          # Append issue with sshed send command including IP address
           rm /etc/issue && cp /etc/static/issue /etc/issue
           echo "SSH host keys INVALID" | tee -a /etc/issue
           echo "Send missing private SSH key from another computer with the following command:" >> /etc/issue
-          echo -e "\n> ssh-key send $(hostname) $(ipaddr lan)\n" >> /etc/issue
+          echo -e "\n> sshed send $(hostname) $(ipaddr lan)\n" >> /etc/issue
 
           # Wait for private ssh key to be received and then reboot
-          ssh-key receive
+          sshed receive
           systemctl reboot
 
         fi
