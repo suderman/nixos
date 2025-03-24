@@ -17,11 +17,6 @@ in {
     
     networking.domain = "tail";
 
-    # host.domain = "tail";
-
-    # host = import ./host.nix;
-    # nixpkgs.hostPlatform = "x86_64-linux";
-
     environment.systemPackages = [
       pkgs.vim
     ];
@@ -36,25 +31,6 @@ in {
       };
     };
 
-    # users.users.root = {
-    #   initialPassword = "root";
-    # };
-
-    # Disallow modifying users outside of this config
-    users.mutableUsers = false;
-
-    users.users.jon = {
-      createHome = true;
-      isNormalUser = true;
-      shell = pkgs.bash;
-      uid = 1000;
-      initialPassword = "jon";
-      group = "users";
-      extraGroups = [ "wheel" "input" ];
-      linger = true;
-    };
-
-    users.groups.users = {};
 
     # networking.hostName = "sim";
     # networking.hostPubkey = ./ssh_host_ed25519_key.pub;

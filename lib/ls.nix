@@ -29,7 +29,7 @@
   fromPath = path: fromAttrs { inherit path; };
 
   # Return list of directory/file names if asPath is false, otherwise list of absolute paths
-  fromAttrs = { path, dirsWith ? [ "default.nix" ], dirsExcept ? [ "user" ], filesExcept ? [ "flake.nix" "default.nix" "configuration.nix" "this.nix" ], asPath ? true }: unique
+  fromAttrs = { path, dirsWith ? [ "default.nix" ], dirsExcept ? [ "user" ], filesExcept ? [ "flake.nix" "default.nix" "configuration.nix" "home-configuration.nix" ], asPath ? true }: unique
     (if ! pathExists path then [] else # If path doesn't exist, return an empty list
       (if hasSuffix ".nix" path then [ path ] else # If path is a nix file, return that path in a list
         (if dirsWith == false then [] else (dirNames path dirsWith dirsExcept asPath)) ++ # No subdirs if dirsWith is false, 
