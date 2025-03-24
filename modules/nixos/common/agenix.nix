@@ -5,14 +5,6 @@
     inputs.agenix-rekey.nixosModules.default
   ];
 
-  # Extra networking options to track ssh keys per host
-  options = let inherit (lib) mkOption types; in {
-    networking = {
-      hostPubkey = mkOption { type = types.path; };
-      hostPrvkey = mkOption { type = types.path; };
-    };
-  };
-
   # Configure agenix to work with derived identity and ssh keys
   config = {
 

@@ -8,10 +8,19 @@ in {
     flake.nixosModules.vm
     flake.nixosModules.homelab
   ];
+  # ] ++ flake.lib.ls ./.;
 
   config = {
 
-    nixpkgs.hostPlatform = "x86_64-linux";
+    path = ./.;
+    stable = false;
+    
+    networking.domain = "tail";
+
+    # host.domain = "tail";
+
+    # host = import ./host.nix;
+    # nixpkgs.hostPlatform = "x86_64-linux";
 
     environment.systemPackages = [
       pkgs.vim
@@ -47,9 +56,9 @@ in {
 
     users.groups.users = {};
 
-    networking.hostName = "sim";
-    networking.hostPubkey = ./ssh_host_ed25519_key.pub;
-    networking.hostPrvkey = ./ssh_host_ed25519_key.age;
+    # networking.hostName = "sim";
+    # networking.hostPubkey = ./ssh_host_ed25519_key.pub;
+    # networking.hostPrvkey = ./ssh_host_ed25519_key.age;
     networking.firewall.allowPing = true;
 
     # test.foo = config.age.secrets.foo.path;
@@ -57,7 +66,9 @@ in {
     services.tailscale.enable = true;
     services.openssh.enable = true;
 
-    system.stateVersion = "24.11";
+    # system.stateVersion = "24.11";
+
+    # test.hostName = builtins.baseNameOf ./.;
 
   };
 }

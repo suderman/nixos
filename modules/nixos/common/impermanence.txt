@@ -51,6 +51,7 @@ in {
           # "/etc/nixos"
           "/etc/NetworkManager/system-connections"
           # "/var/lib"  
+          "/var/lib/nixos"  
           "/var/log"  
           # "/home"  
         ] ++ cfg.dirs;
