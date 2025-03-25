@@ -10,7 +10,7 @@
 
     # agenix-rekey setup for this host, secrets in repo
     age.rekey = with config.networking; {
-      inherit hostPubkey;
+      hostPubkey = config.services.openssh.publicKey;
       masterIdentities = [ /tmp/id_age /tmp/id_age_ ];
       storageMode = "local";
       localStorageDir = flake + /secrets/${hostName};
@@ -25,7 +25,7 @@
     # Manually add public ssh ed25519 key
     environment.etc = {
       "ssh/ssh_host_ed25519_key.pub" = {
-        source = config.networking.hostPubkey;
+        source = config.services.openssh.publicKey;
         mode = "0644";
         user = "root";
         group = "root";

@@ -25,6 +25,9 @@ in rec {
   # Use systemd tmpfiles rules to create files, directories, symlinks and permissions changes
   mkRules = import ./mkRules.nix args; 
 
+  # Create user attrs from path 
+  mkUsers = import ./mkUsers.nix args; 
+
   # List of directory names
   dirNames = path: attrNames (filterAttrs (n: v: v == "directory") (readDir path));
 

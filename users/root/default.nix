@@ -1,5 +1,5 @@
 {
   uid = 0;
-  name = "root";
-  description = "root";
+  isSystemUser = true;
+  openssh.authorizedKeys.keyFiles = [ ../jon/id_ed25519.pub ];
 }

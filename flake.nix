@@ -31,7 +31,8 @@
     flake = inputs.self;
 
     # map extra folders
-    users = flake.lib.mkAttrs ./users ( user: import ./users/${user} );
+    # users = flake.lib.mkAttrs ./users ( user: import ./users/${user} );
+    users = flake.lib.mkUsers ./users;
     networks = {};
     secrets = ./secrets;
 

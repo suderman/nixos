@@ -26,7 +26,8 @@ in {
     };
 
     # Extra networking option to track private ssh key
-    networking.hostKey = mkOption { 
+    # networking.hostKey = mkOption { 
+    services.openssh.privateKey = mkOption { 
       description = "Path to (age-encrypted) NixOS SSH host private key";
       type = with types; nullOr path;
       default = null;
@@ -34,7 +35,8 @@ in {
     };
 
     # Extra networking option to track public ssh key
-    networking.hostPubkey = mkOption { 
+    # networking.hostPubkey = mkOption { 
+    services.openssh.publicKey = mkOption { 
       description = "Path to NixOS SSH host public key";
       type = with types; nullOr path;
       default = null;
@@ -54,13 +56,27 @@ in {
       # Derive hostName from configuration path
       hostName = baseNameOf cfg.path;
 
+      # # Set ssh host key if present
+      # hostKey = let 
+      #   path = cfg.path + /ssh_host_ed25519_key.age;
+      # in if pathExists path then path else null;
+      #
+      # # Set ssh host public key if present
+      # hostPubkey = let 
+      #   path = cfg.path + /ssh_host_ed25519_key.pub;
+      # in if pathExists path then path else null;
+
+    };
+
+    services.openssh = {
+
       # Set ssh host key if present
-      hostKey = let 
+      privateKey = let 
         path = cfg.path + /ssh_host_ed25519_key.age;
       in if pathExists path then path else null;
 
       # Set ssh host public key if present
-      hostPubkey = let 
+      publicKey = let 
         path = cfg.path + /ssh_host_ed25519_key.pub;
       in if pathExists path then path else null;
 

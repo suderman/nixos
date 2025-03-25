@@ -1,6 +1,5 @@
 {
   uid = 1000;
-  name = "jon";
   description = "Jon Suderman";
-  sudo = true;
+  extraGroups = [ "wheel" ]; # sudo 
 }
