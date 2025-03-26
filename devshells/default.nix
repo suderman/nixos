@@ -47,6 +47,11 @@ in perSystem.devshell.mkShell {
     help = "Send ssh host key generated from master key";
     command = ''cd $PRJ_ROOT; sshed send ''${1-} ''${2-}'';
   } {
+    category = "init";
+    name = "init";
+    help = "Generate hosts, users and related files";
+    command = readFile ./init.sh;
+  } {
     category = "virtual machine";
     name = "sim";
     help = "nixos-rebuild --flake .#sim build-vm && ./result/bin/run-sim-vm";
@@ -55,6 +60,7 @@ in perSystem.devshell.mkShell {
 
   # Base list of packages for devshell, plus extra
   packages = [
+    pkgs.eza
     pkgs.gh
     pkgs.git
     pkgs.gnumake
