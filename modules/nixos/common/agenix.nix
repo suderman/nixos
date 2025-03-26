@@ -13,8 +13,8 @@
       hostPubkey = config.services.openssh.publicKey;
       masterIdentities = [ /tmp/id_age /tmp/id_age_ ];
       storageMode = "local";
-      localStorageDir = flake + /secrets/${hostName};
-      generatedSecretsDir = flake + /secrets/${hostName};
+      localStorageDir = flake + /secrets/rekeyed/${hostName};
+      generatedSecretsDir = flake + /secrets/generated/${hostName};
     };
 
     # 32-byte hex imported from QR code

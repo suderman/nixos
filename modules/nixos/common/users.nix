@@ -68,7 +68,7 @@ in {
     ) // (
       mkAttrs userPasswordsHash (
         passwordName: let user = flake.users."${getName passwordName}" or {}; in { 
-          rekeyFile = flake + "${user.path}/password-hash.age"; 
+          # rekeyFile = flake + "${user.path}/password-hash.age"; 
           generator.dependencies.password = config.age.secrets."${removeSuffix "-hash" passwordName}";
           generator.script = { pkgs, lib, decrypt, deps, ... }: ''
             ${pkgs.mkpasswd}/bin/mkpasswd -m sha-512 $(${decrypt} ${lib.escapeShellArg deps.password.file})
