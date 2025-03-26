@@ -82,6 +82,11 @@ function info {
   echo "$(green_bold "#") $(green "$*")" 
 }
 
+# Echo hint
+function hint { 
+  echo "$(blue_bold "#") $(blue "$*")" 
+}
+
 # Echo warning
 function warn { 
   echo "$(red_bold "#") $(red "$*")" 

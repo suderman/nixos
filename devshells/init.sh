@@ -7,10 +7,11 @@ hasnt /tmp/id_age && error "Age identity locked"
   # Convert based on format
   case "${1-}" in
     host | h)
-      echo "init host"
       [[ -z "${2-}" ]] && error "Missing hostname"
       host="hosts/${2-}"
-      if hasnt $host; then  
+      if has $host; then
+        hint "Host configuration exists: $(pwd)/$host"
+      else
         mkdir -p $host/users
         for user in $(eza -D users); do
           [[ "$user" == "root" ]] || echo "{ ... }: {}" > $host/users/$user.nix
@@ -21,15 +22,33 @@ hasnt /tmp/id_age && error "Age identity locked"
         echo "  config = { path = ./.; };" >> $cfg
         echo "}" >> $cfg
         git add $host 2>/dev/null || true
-        info "Host configuration written: $(pwd)/$cfg"
+        info "Host configuration staged: $(pwd)/$host"
       fi
       ;&
     user | u)
-      echo "init user"
+      [[ -z "${2-}" ]] && error "Missing username"
+      user="users/${2-}"
+      if has $user; then
+        hint "User configuration exists: $(pwd)/$user"
+      else
+        mkdir -p $user
+        echo "x" \
+          | rage -er $(cat /tmp/id_age | derive public) \
+          > $user/password.age
+        cfg="$user/default.nix"
+        echo "{" > $cfg
+        echo "  uid = null;" >> $cfg
+        echo "  description = \"User\";" >> $cfg
+        echo "}" >> $cfg
+        git add $user 2>/dev/null || true
+        info "User configuration staged: $(pwd)/$user"
+      fi
       ;&
     all | a)
-      echo "init missing"
       sshed build
+      agenix generate
+      git add secrets/generated 2>/dev/null || true
+      agenix rekey -a
       ;;
     help | *)
       echo "Usage: init TARGET"
