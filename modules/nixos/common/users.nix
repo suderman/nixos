@@ -1,27 +1,31 @@
 { flake, config, pkgs, lib, ... }: let
 
   # inherit (lib) mkDefault mkIf mkOption types;
-  inherit (lib) forEach pipe removePrefix removeSuffix mkOption types;
+  inherit (lib) forEach genAttrs pipe removePrefix removeSuffix mkOption types;
   inherit (flake.lib) ls mkAttrs;
-  inherit (builtins) attrNames baseNameOf filter hasAttr mapAttrs;
+  inherit (builtins) attrNames baseNameOf filter hasAttr mapAttrs toString;
 
-  # List of nixosConfiguration usernames that also appear in flake.users
-  userNames = map (userPath: pipe userPath [
-    (path: toString path)
-    (path: removeSuffix "/home-configuration.nix" path)
-    (path: removeSuffix ".nix" path)
-    (path: baseNameOf path)
-  ]) (ls { path = config.path + /users; dirsWith = [ "home-configuration.nix" ]; });
+  # Include all user password.age files as an agenix secret as user-password
+  userPasswords = genAttrs 
+    (map (userName: "${userName}-password") (attrNames flake.users))
+    (secretName: let userName = removeSuffix "-password" secretName; in {
+      rekeyFile = flake + "${flake.users."${userName}".path}/password.age"; 
+    });
 
-  # List of user password names to be used in agenix secrets
-  userPasswords = map (name: "user-${name}-password") (attrNames flake.users);
-  userPasswordsHash = map (name: "user-${name}-password-hash") (attrNames flake.users);
-
-  # Extract user name from agenix secrets password name
-  getName = passwordName: removePrefix "user-" ( removeSuffix "-password" ( removeSuffix "-password-hash" passwordName ));
-
-  # Return path to agenix hashed password file
-  getPasswordFile = userName: config.age.secrets."user-${userName}-password-hash".path or null;
+  # Generate hashed versions of the above secret as user-password-hash
+  userHashedPasswords = genAttrs 
+    (map (userName: "${userName}-password-hash") (attrNames flake.users))
+    (secretName: let userName = removeSuffix "-password-hash" secretName; in {
+      generator.dependencies = {
+        hex = config.age.secrets.hex; # hex as custom salt for mkpasswd
+        password = config.age.secrets."${userName}-password";
+      };
+      generator.script = { pkgs, lib, decrypt, deps, ... }: toString [
+        "${pkgs.mkpasswd}/bin/mkpasswd -m sha-512 -S" 
+        "$(${decrypt} ${lib.escapeShellArg deps.hex.file} | cut -c 1-16)" 
+        "$(${decrypt} ${lib.escapeShellArg deps.password.file})"
+      ];
+    });
 
   # Filter list of groups to only those which exist
   ifTheyExist = groups: filter (group: hasAttr group config.users.groups) groups;
@@ -54,48 +58,40 @@ in {
 
   config = {
 
+    # Add user passwords to agenix
+    age.secrets = userPasswords // userHashedPasswords;
+
     # Disallow modifying users outside of this config
     users.mutableUsers = false;
 
     users.defaultUserShell = pkgs.zsh;
 
-    age.secrets = (
-      mkAttrs userPasswords (
-        passwordName: let user = flake.users."${getName passwordName}" or {}; in { 
-          rekeyFile = flake + "${user.path}/password.age"; 
-        }
-      )
-    ) // (
-      mkAttrs userPasswordsHash (
-        passwordName: let user = flake.users."${getName passwordName}" or {}; in { 
-          # rekeyFile = flake + "${user.path}/password-hash.age"; 
-          generator.dependencies.password = config.age.secrets."${removeSuffix "-hash" passwordName}";
-          generator.script = { pkgs, lib, decrypt, deps, ... }: ''
-            ${pkgs.mkpasswd}/bin/mkpasswd -m sha-512 $(${decrypt} ${lib.escapeShellArg deps.password.file})
-          '';
-        }
-      )
-    );
-
     # Update users with details found in flake.users
     users.users = let
 
+      # List of nixosConfiguration usernames that also appear in flake.users
+      userNames = map (userPath: pipe userPath [
+        (path: toString path)
+        (path: removeSuffix "/home-configuration.nix" path)
+        (path: removeSuffix ".nix" path)
+        (path: baseNameOf path)
+      ]) (ls { path = config.path + /users; dirsWith = [ "home-configuration.nix" ]; });
+
+      # Each user account found in flake.users
       userAccounts = mkAttrs userNames (name: let 
         user = flake.users."${name}" or {};
         groups = user.extraGroups or [];
       in user // {
+        hashedPasswordFile = config.age.secrets."${name}-password-hash".path;
         extraGroups = groups ++ ifTheyExist [ 
           "networkmanager" "docker" "media" "photos" 
         ];
-        hashedPasswordFile = getPasswordFile name;
       });
 
-      rootAccount = {
-        root = flake.users.root or {} // { 
-          hashedPasswordFile = getPasswordFile "root";
-        }; 
-
-      };
+      # Special case for flake.users.root
+      rootAccount = { root = flake.users.root or {} // { 
+        hashedPasswordFile = config.age.secrets."root-password-hash".path;
+      }; };
 
     in userAccounts // rootAccount;
 

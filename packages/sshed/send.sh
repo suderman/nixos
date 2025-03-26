@@ -1,5 +1,5 @@
 # Ensure key exists and identity unlocked
-hasnt secrets/key.age && error "$(pwd)/secrets/key.age missing"
+hasnt secrets/hex.age && error "$(pwd)/secrets/hex.age missing"
 hasnt /tmp/id_age && error "Age identity locked"
 
 # Ensure host is provided
@@ -17,7 +17,7 @@ fi
 empty "$ip" && error "Missing destination IP address"
 
 # Send ssh key for selected host to provided IP address
-cat secrets/key.age \
+cat secrets/hex.age \
   | rage -di /tmp/id_age \
   | derive hex "$host" \
   | derive ssh \

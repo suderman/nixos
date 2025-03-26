@@ -1,5 +1,5 @@
 # Ensure key exists and identity unlocked
-hasnt secrets/key.age && error "$(pwd)/secrets/key.age missing"
+hasnt secrets/hex.age && error "$(pwd)/secrets/hex.age missing"
 hasnt /tmp/id_age && error "Age identity locked"
 
 # Ensure directories exist
@@ -10,7 +10,7 @@ hasnt ./users && error "$(pwd)/users directory missing"
 for host in $(eza -D hosts); do
 
   # Write the public ssh host key
-  cat secrets/key.age \
+  cat secrets/hex.age \
     | rage -di /tmp/id_age \
     | derive hex "$host" \
     | derive ssh \
@@ -20,7 +20,7 @@ for host in $(eza -D hosts); do
   info "Public host key written: $(pwd)/hosts/$host/ssh_host_ed25519_key.pub"
 
   # Write the (encrypted) private ssh host key
-  cat secrets/key.age \
+  cat secrets/hex.age \
     | rage -di /tmp/id_age \
     | derive hex "$host" \
     | derive ssh \
@@ -36,7 +36,7 @@ done
 for user in $(eza -D users); do
 
   # Write the public ssh user key
-  cat secrets/key.age \
+  cat secrets/hex.age \
     | rage -di /tmp/id_age \
     | derive hex "$user" \
     | derive ssh \
@@ -46,7 +46,7 @@ for user in $(eza -D users); do
   info "Public user key written: $(pwd)/users/$user/id_ed25519.pub"
 
   # Write the (encrypted) private ssh user key
-  cat secrets/key.age \
+  cat secrets/hex.age \
     | rage -di /tmp/id_age \
     | derive hex "$user" \
     | derive ssh \

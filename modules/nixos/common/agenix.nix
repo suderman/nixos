@@ -19,7 +19,7 @@
 
     # 32-byte hex imported from QR code
     age.secrets = {
-      key.rekeyFile = flake + /secrets/key.age; 
+      hex.rekeyFile = flake + /secrets/hex.age; 
     };
 
     # Manually add public ssh ed25519 key
