@@ -4,7 +4,7 @@
 
 This is a work-in-progress.
 
-## Recover age indentity
+## Recover age identity
 
 Type `import-id` to scan this QR code (index 1):
 
