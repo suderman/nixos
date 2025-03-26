@@ -78,8 +78,9 @@ in {
     );
 
     # Update users with details found in flake.users
-    users.users = (
-      mkAttrs userNames (name: let 
+    users.users = let
+
+      userAccounts = mkAttrs userNames (name: let 
         user = flake.users."${name}" or {};
         groups = user.extraGroups or [];
       in user // {
@@ -87,12 +88,16 @@ in {
           "networkmanager" "docker" "media" "photos" 
         ];
         hashedPasswordFile = getPasswordFile name;
-      })
-    ) // { 
-      root = flake.users.root or {} // { 
-        hashedPasswordFile = getPasswordFile "root";
-      }; 
-    };
+      });
+
+      rootAccount = {
+        root = flake.users.root or {} // { 
+          hashedPasswordFile = getPasswordFile "root";
+        }; 
+
+      };
+
+    in userAccounts // rootAccount;
 
     # GIDs 900-909 are custom shared groups in my flake                                                                                                                                   
     # UID/GIDs 910-999 are custom system users/groups in my flake                                                                                                                         
