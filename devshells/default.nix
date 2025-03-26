@@ -37,16 +37,6 @@ in perSystem.devshell.mkShell {
     help = "Lock age identity";
     command = readFile ./lock-id.sh;
   } {
-    category = "key management";
-    name = "sshed-build";
-    help = "Generate ssh host keys from master key";
-    command = "cd $PRJ_ROOT; sshed build";
-  } {
-    category = "key management";
-    name = "sshed-send";
-    help = "Send ssh host key generated from master key";
-    command = ''cd $PRJ_ROOT; sshed send ''${1-} ''${2-}'';
-  } {
     category = "init";
     name = "init";
     help = "Generate hosts, users and related files";

@@ -4,7 +4,7 @@ pause "Derive Seeds (BIP-85) > 32-bytes hex > Index Number $DERIVATION_INDEX"
 
 if has secrets/id.age; then
   [[ ! -s secrets/id.age ]] && rm -f secrets/id.age \
-    || error "$(pwd)/secrets/id.age already exists"
+    || error "./secrets/id.age already exists"
 fi
 
 # Attempt to read QR code master key (hex32)
@@ -16,21 +16,21 @@ defined "$hex" && info "QR code scanned!" \
 echo "$hex" \
   | derive age \
   | rage -ep > secrets/id.age
-info "Private age identity written: $(pwd)/secrets/id.age"
+info "Private age identity written: ./secrets/id.age"
 
 # Write the age identity's public key
 echo "$hex" \
   | derive age \
   | derive public \
   > secrets/id.pub
-info "Public age identity written: $(pwd)/secrets/id.pub"
+info "Public age identity written: ./secrets/id.pub"
 git add secrets/id.pub
 
 # Write the encrypted master key (protected by age identity)
 echo "$hex" \
   | rage -eR secrets/id.pub \
   > secrets/hex.age
-info "Private master key written: $(pwd)/secrets/hex.age"
+info "Private master key written: ./secrets/hex.age"
 git add secrets/hex.age
 
 # Unlock the id right away

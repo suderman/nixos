@@ -15,7 +15,7 @@ in perSystem.self.mkScript {
   text = ''
     source ${flake.lib.bash}
 
-    # First arg is command: build|receive|send
+    # First arg is command: generate|receive|send
     command=''${1-}
 
     # Second arg is HOST or REBOOT
@@ -26,8 +26,8 @@ in perSystem.self.mkScript {
     ip=''${3-}
 
     case "$command" in
-      build | b)
-        ${readFile ./build.sh}
+      generate | g)
+        ${readFile ./generate.sh}
         ;;
       receive | r)
         ${readFile ./receive.sh}
@@ -41,7 +41,7 @@ in perSystem.self.mkScript {
       help | *)
         echo "Usage: sshed COMMAND"
         echo
-        echo "  build"
+        echo "  generate"
         echo "  receive"
         echo "  send [HOST] [IP]"
         echo "  verify"

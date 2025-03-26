@@ -1,5 +1,5 @@
 # Ensure key exists and identity unlocked
-hasnt secrets/hex.age && error "$(pwd)/secrets/hex.age missing"
+hasnt secrets/hex.age && error "./secrets/hex.age missing"
 hasnt /tmp/id_age && error "Age identity locked"
 
 # Ensure host is provided
