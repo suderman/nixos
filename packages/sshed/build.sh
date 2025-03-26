@@ -10,25 +10,33 @@ hasnt ./users && error "$(pwd)/users directory missing"
 for host in $(eza -D hosts); do
 
   # Write the public ssh host key
-  cat secrets/hex.age \
-    | rage -di /tmp/id_age \
-    | derive hex "$host" \
-    | derive ssh \
-    | derive public "$host@${derivation_path-}" \
-    > hosts/$host/ssh_host_ed25519_key.pub
-  git add hosts/$host/ssh_host_ed25519_key.pub 2>/dev/null || true
-  info "Public host key written: $(pwd)/hosts/$host/ssh_host_ed25519_key.pub"
+  if has hosts/$host/ssh_host_ed25519_key.pub; then
+    info "Public host key exists: $(pwd)/hosts/$host/ssh_host_ed25519_key.pub"
+  else
+    cat secrets/hex.age \
+      | rage -di /tmp/id_age \
+      | derive hex "$host" \
+      | derive ssh \
+      | derive public "$host@${derivation_path-}" \
+      > hosts/$host/ssh_host_ed25519_key.pub
+    git add hosts/$host/ssh_host_ed25519_key.pub 2>/dev/null || true
+    info "Public host key written: $(pwd)/hosts/$host/ssh_host_ed25519_key.pub"
+  fi
 
   # Write the (encrypted) private ssh host key
-  cat secrets/hex.age \
-    | rage -di /tmp/id_age \
-    | derive hex "$host" \
-    | derive ssh \
-    | rage -er $(cat /tmp/id_age | derive public) \
-      -R hosts/$host/ssh_host_ed25519_key.pub \
-    > hosts/$host/ssh_host_ed25519_key.age
-  git add hosts/$host/ssh_host_ed25519_key.age 2>/dev/null || true
-  info "Private host key written: $(pwd)/hosts/$host/ssh_host_ed25519_key.age"
+  if has hosts/$host/ssh_host_ed25519_key.age; then
+    info "Private host key exists: $(pwd)/hosts/$host/ssh_host_ed25519_key.age"
+  else
+    cat secrets/hex.age \
+      | rage -di /tmp/id_age \
+      | derive hex "$host" \
+      | derive ssh \
+      | rage -er $(cat /tmp/id_age | derive public) \
+        -R hosts/$host/ssh_host_ed25519_key.pub \
+      > hosts/$host/ssh_host_ed25519_key.age
+    git add hosts/$host/ssh_host_ed25519_key.age 2>/dev/null || true
+    info "Private host key written: $(pwd)/hosts/$host/ssh_host_ed25519_key.age"
+  fi
 
 done
 
@@ -36,14 +44,18 @@ done
 for user in $(eza -D users); do
 
   # Write the public ssh user key
-  cat secrets/hex.age \
-    | rage -di /tmp/id_age \
-    | derive hex "$user" \
-    | derive ssh \
-    | derive public "$user@${derivation_path-}" \
-    > users/$user/id_ed25519.pub
-  git add users/$user/id_ed25519.pub 2>/dev/null || true
-  info "Public user key written: $(pwd)/users/$user/id_ed25519.pub"
+  if has users/$user/id_ed25519.pub; then
+    info "Public user key exists: $(pwd)/users/$user/id_ed25519.pub"
+  else
+    cat secrets/hex.age \
+      | rage -di /tmp/id_age \
+      | derive hex "$user" \
+      | derive ssh \
+      | derive public "$user@${derivation_path-}" \
+      > users/$user/id_ed25519.pub
+    git add users/$user/id_ed25519.pub 2>/dev/null || true
+    info "Public user key written: $(pwd)/users/$user/id_ed25519.pub"
+  fi
 
   # # Write the (encrypted) private ssh user key
   # cat secrets/hex.age \
@@ -58,14 +70,18 @@ for user in $(eza -D users); do
   # info "Private user key written: $(pwd)/users/$user/id_ed25519.age"
 
   # Write the (encrypted) private ssh user key
-  cat secrets/hex.age \
-    | rage -di /tmp/id_age \
-    | derive hex "$user" \
-    | derive ssh \
-    | rage -er $(cat /tmp/id_age | derive public) \
-      -R users/$user/id_ed25519.pub \
-    > users/$user/id_ed25519.age
-  git add users/$user/id_ed25519.age 2>/dev/null || true
-  info "Private user key written: $(pwd)/users/$user/id_ed25519.age"
+  if has users/$user/id_ed25519.age; then
+    info "Private user key exists: $(pwd)/users/$user/id_ed25519.age"
+  else
+    cat secrets/hex.age \
+      | rage -di /tmp/id_age \
+      | derive hex "$user" \
+      | derive ssh \
+      | rage -er $(cat /tmp/id_age | derive public) \
+        -R users/$user/id_ed25519.pub \
+      > users/$user/id_ed25519.age
+    git add users/$user/id_ed25519.age 2>/dev/null || true
+    info "Private user key written: $(pwd)/users/$user/id_ed25519.age"
+  fi
 
 done
