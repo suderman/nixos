@@ -1,34 +1,8 @@
 { flake, config, pkgs, lib, ... }: let
 
-  # inherit (lib) mkDefault mkIf mkOption types;
-  inherit (lib) forEach genAttrs pipe removePrefix removeSuffix mkOption types;
+  inherit (lib) genAttrs mkOption pipe removeSuffix types;
   inherit (flake.lib) ls mkAttrs;
-  inherit (builtins) attrNames baseNameOf filter hasAttr mapAttrs toString;
-
-  # Include all user password.age files as an agenix secret as user-password
-  userPasswords = genAttrs 
-    (map (userName: "${userName}-password") (attrNames flake.users))
-    (secretName: let userName = removeSuffix "-password" secretName; in {
-      rekeyFile = flake + "${flake.users."${userName}".path}/password.age"; 
-    });
-
-  # Generate hashed versions of the above secret as user-password-hash
-  userHashedPasswords = genAttrs 
-    (map (userName: "${userName}-password-hash") (attrNames flake.users))
-    (secretName: let userName = removeSuffix "-password-hash" secretName; in {
-      generator.dependencies = {
-        hex = config.age.secrets.hex; # hex as custom salt for mkpasswd
-        password = config.age.secrets."${userName}-password";
-      };
-      generator.script = { pkgs, lib, decrypt, deps, ... }: toString [
-        "${pkgs.mkpasswd}/bin/mkpasswd -m sha-512 -S" 
-        "$(${decrypt} ${lib.escapeShellArg deps.hex.file} | cut -c 1-16)" 
-        "$(${decrypt} ${lib.escapeShellArg deps.password.file})"
-      ];
-    });
-
-  # Filter list of groups to only those which exist
-  ifTheyExist = groups: filter (group: hasAttr group config.users.groups) groups;
+  inherit (builtins) attrNames baseNameOf filter hasAttr toString;
 
 in {
 
@@ -58,14 +32,6 @@ in {
 
   config = {
 
-    # Add user passwords to agenix
-    age.secrets = userPasswords // userHashedPasswords;
-
-    # Disallow modifying users outside of this config
-    users.mutableUsers = false;
-
-    users.defaultUserShell = pkgs.zsh;
-
     # Update users with details found in flake.users
     users.users = let
 
@@ -76,6 +42,9 @@ in {
         (path: removeSuffix ".nix" path)
         (path: baseNameOf path)
       ]) (ls { path = config.path + /users; dirsWith = [ "home-configuration.nix" ]; });
+
+      # Filter list of groups to only those which exist
+      ifTheyExist = groups: filter (group: hasAttr group config.users.groups) groups;
 
       # Each user account found in flake.users
       userAccounts = mkAttrs userNames (name: let 
@@ -94,6 +63,12 @@ in {
       }; };
 
     in userAccounts // rootAccount;
+
+    # Disallow modifying users outside of this config
+    users.mutableUsers = false;
+
+    # Everybody can use zsh
+    users.defaultUserShell = pkgs.zsh;
 
     # GIDs 900-909 are custom shared groups in my flake                                                                                                                                   
     # UID/GIDs 910-999 are custom system users/groups in my flake                                                                                                                         
@@ -117,6 +92,33 @@ in {
     system.activationScripts.root.text = ''
       printf "[safe]\ndirectory = /etc/nixos" > /root/.gitconfig
     '';
+
+    # Add user passwords to agenix
+    age.secrets = let 
+
+      # Include all user password.age files as an agenix secret as user-password
+      userPasswords = genAttrs 
+        (map (userName: "${userName}-password") (attrNames flake.users))
+        (secretName: let userName = removeSuffix "-password" secretName; in {
+          rekeyFile = flake + "${flake.users."${userName}".path}/password.age"; 
+        });
+
+      # Generate hashed versions of the above secret as user-password-hash
+      userHashedPasswords = genAttrs 
+        (map (userName: "${userName}-password-hash") (attrNames flake.users))
+        (secretName: let userName = removeSuffix "-password-hash" secretName; in {
+          generator.dependencies = {
+            hex = config.age.secrets.hex; # hex as custom salt for mkpasswd
+            password = config.age.secrets."${userName}-password";
+          };
+          generator.script = { pkgs, lib, decrypt, deps, ... }: toString [
+            "${pkgs.mkpasswd}/bin/mkpasswd -m sha-512 -S" 
+            "$(${decrypt} ${lib.escapeShellArg deps.hex.file} | cut -c 1-16)" 
+            "$(${decrypt} ${lib.escapeShellArg deps.password.file})"
+          ];
+        });
+
+    in userPasswords // userHashedPasswords;
 
   };
 
