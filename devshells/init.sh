@@ -20,7 +20,8 @@ hasnt /tmp/id_age && error "Age identity locked"
         echo "  imports = [ flake.nixosModules.common ];" >> $cfg
         echo "  config = { path = ./.; };" >> $cfg
         echo "}" >> $cfg
-        git add $host
+        git add $host 2>/dev/null || true
+        info "Host configuration written: $(pwd)/$cfg"
       fi
       ;&
     user | u)

@@ -45,6 +45,18 @@ for user in $(eza -D users); do
   git add users/$user/id_ed25519.pub 2>/dev/null || true
   info "Public user key written: $(pwd)/users/$user/id_ed25519.pub"
 
+  # # Write the (encrypted) private ssh user key
+  # cat secrets/hex.age \
+  #   | rage -di /tmp/id_age \
+  #   | derive hex "$user" \
+  #   | derive ssh \
+  #   | rage -er $(cat /tmp/id_age | derive public) \
+  #     -R users/$user/id_ed25519.pub \
+  #     $(printf " -R hosts/%s/ssh_host_ed25519_key.pub" $(eza -D hosts)) \
+  #   > users/$user/id_ed25519.age
+  # git add users/$user/id_ed25519.age 2>/dev/null || true
+  # info "Private user key written: $(pwd)/users/$user/id_ed25519.age"
+
   # Write the (encrypted) private ssh user key
   cat secrets/hex.age \
     | rage -di /tmp/id_age \
@@ -52,7 +64,6 @@ for user in $(eza -D users); do
     | derive ssh \
     | rage -er $(cat /tmp/id_age | derive public) \
       -R users/$user/id_ed25519.pub \
-      $(printf " -R hosts/%s/ssh_host_ed25519_key.pub" $(eza -D hosts)) \
     > users/$user/id_ed25519.age
   git add users/$user/id_ed25519.age 2>/dev/null || true
   info "Private user key written: $(pwd)/users/$user/id_ed25519.age"
