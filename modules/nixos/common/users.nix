@@ -1,8 +1,17 @@
-{ flake, config, pkgs, lib, ... }: let
+{ flake, config, pkgs, lib, perSystem, ... }: let
 
-  inherit (lib) genAttrs mkOption pipe removeSuffix types;
+  inherit (lib) concatMapStrings genAttrs mkAfter mkOption pipe removeSuffix types;
   inherit (flake.lib) ls mkAttrs;
   inherit (builtins) attrNames baseNameOf filter hasAttr toString;
+  inherit (perSystem.self) mkScript;
+
+  # List of nixosConfiguration usernames that also appear in flake.users
+  userNames = map (userPath: pipe userPath [
+    (path: toString path)
+    (path: removeSuffix "/home-configuration.nix" path)
+    (path: removeSuffix ".nix" path)
+    (path: baseNameOf path)
+  ]) (ls { path = config.path + /users; dirsWith = [ "home-configuration.nix" ]; });
 
 in {
 
@@ -34,14 +43,6 @@ in {
 
     # Update users with details found in flake.users
     users.users = let
-
-      # List of nixosConfiguration usernames that also appear in flake.users
-      userNames = map (userPath: pipe userPath [
-        (path: toString path)
-        (path: removeSuffix "/home-configuration.nix" path)
-        (path: removeSuffix ".nix" path)
-        (path: baseNameOf path)
-      ]) (ls { path = config.path + /users; dirsWith = [ "home-configuration.nix" ]; });
 
       # Filter list of groups to only those which exist
       ifTheyExist = groups: filter (group: hasAttr group config.users.groups) groups;
@@ -93,8 +94,32 @@ in {
       printf "[safe]\ndirectory = /etc/nixos" > /root/.gitconfig
     '';
 
+    system.activationScripts.users.text = let
+      sshDir = name: let
+        user = config.users.users.${name};
+        privateKey = config.age.secrets."${name}-key";
+      in ''
+        mkdir -p ${user.home}/.ssh
+        cat ${privateKey.path} > ${user.home}/.ssh/id_ed25519
+        cat ${user.openssh.publicKey} > ${user.home}/.ssh/id_ed25519.pub
+        chmod 700 ${user.home}/.ssh
+        chmod 600 ${user.home}/.ssh/id_ed25519
+        chmod 644 ${user.home}/.ssh/id_ed25519.pub
+        chown -R ${user.name}:${user.group} ${user.home}/.ssh
+      '';
+      # Write ssh dir for each of these users
+      script = concatMapStrings sshDir ( ["root"] ++ userNames );
+    in mkAfter "${mkScript script}";
+
     # Add user passwords to agenix
     age.secrets = let 
+
+      # Include all user password.age files as an agenix secret as user-password
+      userKeys = genAttrs 
+        (map (userName: "${userName}-key") (attrNames flake.users))
+        (secretName: let userName = removeSuffix "-key" secretName; in {
+          rekeyFile = flake + "${flake.users."${userName}".path}/id_ed25519.age"; 
+        });
 
       # Include all user password.age files as an agenix secret as user-password
       userPasswords = genAttrs 
@@ -118,7 +143,7 @@ in {
           ];
         });
 
-    in userPasswords // userHashedPasswords;
+    in userKeys // userPasswords // userHashedPasswords;
 
   };
 

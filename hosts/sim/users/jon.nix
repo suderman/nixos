@@ -1,4 +1,8 @@
-{ config, lib, ... }: {
+{ flake, config, lib, ... }: {
+
+  imports = [
+    flake.homeModules.common
+  ];
 
   home.stateVersion = "24.11";
   systemd.user.startServices = "sd-switch";
