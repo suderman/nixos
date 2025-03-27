@@ -1,4 +1,4 @@
-{ config, lib, ... }: let
+{ flake, config, lib, ... }: let
 
   cfg = config;
   inherit (lib) mkDefault mkIf mkOption types;
@@ -14,7 +14,7 @@ in {
       description = "Path to NixOS host configuration directory";
       type = types.path;
       default = /null;
-      example = /etc/nixos/hosts/foo;
+      example = ./hosts/foo;
     };
 
     # Servers are stable, desktops can be unstable
@@ -25,22 +25,20 @@ in {
       example = false;
     };
 
-    # Extra networking option to track private ssh key
-    # networking.hostKey = mkOption { 
+    # Extra networking option for private ssh key
     services.openssh.privateKey = mkOption { 
-      description = "Path to (age-encrypted) NixOS SSH host private key";
+      description = "Path to NixOS SSH host private key";
       type = with types; nullOr path;
       default = null;
-      example = /etc/nixos/hosts/foo/ssh_host_ed25519_key.age;
+      example = /run/agenix/foo-key;
     };
 
-    # Extra networking option to track public ssh key
-    # networking.hostPubkey = mkOption { 
+    # Extra networking option for public ssh key
     services.openssh.publicKey = mkOption { 
       description = "Path to NixOS SSH host public key";
       type = with types; nullOr path;
       default = null;
-      example = /etc/nixos/hosts/foo/ssh_host_ed25519_key.pub;
+      example = ./hosts/foo/ssh_host_ed25519_key.pub;
     };
 
   };
@@ -50,36 +48,18 @@ in {
     # Default to x86 linux
     nixpkgs.hostPlatform = mkDefault "x86_64-linux";
 
-    # Extra networking options
-    networking = {
+    # Derive hostName from configuration path
+    networking.hostName = baseNameOf cfg.path;
 
-      # Derive hostName from configuration path
-      hostName = baseNameOf cfg.path;
-
-      # # Set ssh host key if present
-      # hostKey = let 
-      #   path = cfg.path + /ssh_host_ed25519_key.age;
-      # in if pathExists path then path else null;
-      #
-      # # Set ssh host public key if present
-      # hostPubkey = let 
-      #   path = cfg.path + /ssh_host_ed25519_key.pub;
-      # in if pathExists path then path else null;
-
+    # Set ssh host key and public key
+    services.openssh = {
+      privateKey = config.age.secrets.key.path or null; # custom option
+      publicKey = cfg.path + /ssh_host_ed25519_key.pub; # custom option
     };
 
-    services.openssh = {
-
-      # Set ssh host key if present
-      privateKey = let 
-        path = cfg.path + /ssh_host_ed25519_key.age;
-      in if pathExists path then path else null;
-
-      # Set ssh host public key if present
-      publicKey = let 
-        path = cfg.path + /ssh_host_ed25519_key.pub;
-      in if pathExists path then path else null;
-
+    # Add host key to agenix 
+    age.secrets.key = with cfg.networking; {
+      rekeyFile = flake + /hosts/${hostName}/ssh_host_ed25519_key.age; 
     };
 
     # Precious memories 
