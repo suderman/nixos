@@ -45,9 +45,6 @@ in {
 
   config = mkIf (pathExists cfg.path) {
 
-    # Default to x86 linux
-    nixpkgs.hostPlatform = mkDefault "x86_64-linux";
-
     # Derive hostName from configuration path
     networking.hostName = baseNameOf cfg.path;
 
@@ -61,9 +58,6 @@ in {
     age.secrets.key = with cfg.networking; {
       rekeyFile = flake + /hosts/${hostName}/ssh_host_ed25519_key.age; 
     };
-
-    # Precious memories 
-    system.stateVersion = "24.11";
 
   };
 
