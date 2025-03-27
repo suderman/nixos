@@ -1,19 +1,11 @@
-{ flake, ... }: users: let
-  inherit (builtins) baseNameOf pathExists;
-  inherit (flake.lib) mkAttrs;
-in 
+{ flake, ... }: users:  
 
-  mkAttrs users ( dir: let
+  flake.lib.mkAttrs users ( dir: let
     user = import "${users}/${dir}";
-    path = "/${baseNameOf users}/${dir}";
-    privateKey = "${users}/${dir}/id_ed25519.age";
-    publicKey = "${users}/${dir}/id_ed25519.pub";
-
   in user // (
 
     # Special case for root user
     if dir == "root" then rec {
-      inherit path;
       name = "root";
       uid = 0;
       description = "System administrator";
@@ -23,13 +15,12 @@ in
       openssh = {
         authorizedKeys = user.openssh.authorizedKeys or {};
         authorizedPrincipals = user.openssh.authorizedPrincipals or [];
-        privateKey = if pathExists privateKey then privateKey else null; # custom option
-        publicKey = if pathExists publicKey then publicKey else null; # custom option
+        publicKey = "${users}/${dir}/id_ed25519.pub"; # custom option
+        privateKey = null; # custom option
       };
 
     # Normal users with custom defaults
     } else rec {
-      inherit path;
       name = user.name or dir;
       uid = user.uid or null;
       description = user.description or name;
@@ -40,8 +31,8 @@ in
       openssh = {
         authorizedKeys = user.openssh.authorizedKeys or {};
         authorizedPrincipals = user.openssh.authorizedPrincipals or [];
-        privateKey = if pathExists privateKey then privateKey else null; # custom option
-        publicKey = if pathExists publicKey then publicKey else null; # custom option
+        publicKey = "${users}/${dir}/id_ed25519.pub"; # custom option
+        privateKey = null; # custom option
       };
 
     })

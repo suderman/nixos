@@ -5,15 +5,18 @@
   inherit (builtins) attrNames baseNameOf filter hasAttr toString;
   inherit (perSystem.self) mkScript;
 
-  # List of nixosConfiguration usernames that also appear in flake.users
-  userNames = map (userPath: pipe userPath [
-    (path: toString path)
-    (path: removeSuffix "/home-configuration.nix" path)
-    (path: removeSuffix ".nix" path)
-    (path: baseNameOf path)
-  ]) (ls { path = config.path + /users; dirsWith = [ "home-configuration.nix" ]; });
-
 in {
+
+  # List of nixosConfiguration usernames that also appear in flake.users
+  options.users.names = mkOption {
+    type = with types; listOf str;
+    default = map (userPath: pipe userPath [
+      (path: toString path)
+      (path: removeSuffix "/home-configuration.nix" path)
+      (path: removeSuffix ".nix" path)
+      (path: baseNameOf path)
+    ]) (ls { path = config.path + /users; dirsWith = [ "home-configuration.nix" ]; });
+  };
 
   # Extra options for each user
   options.users.users = mkOption {
@@ -21,20 +24,14 @@ in {
       options.openssh.privateKey = mkOption {
         type = nullOr path;
         default = null;
-        description = "Path to age-encrypted user SSH private key";
-        example = /etc/nixos/users/jon/id_ed25519.age;
+        description = "Path to user SSH private key file";
+        example = /run/agenix/jon-key;
       };
       options.openssh.publicKey = mkOption {
         type = nullOr path;
         default = null;
         description = "Path to user SSH public key";
-        example = /etc/nixos/users/jon/id_ed25519.pub;
-      };
-      options.path = mkOption { 
-        description = "Path to user configuration directory";
-        type = nullOr types.str;
-        default = null;
-        example = "/users/jon";
+        example = ./users/jon/id_ed25519.pub;
       };
     });
   };
@@ -47,20 +44,28 @@ in {
       # Filter list of groups to only those which exist
       ifTheyExist = groups: filter (group: hasAttr group config.users.groups) groups;
 
-      # Each user account found in flake.users
-      userAccounts = mkAttrs userNames (name: let 
+      # Get a user by name from the flake
+      flakeUser = name: rec {
+        inherit name;
         user = flake.users."${name}" or {};
-        groups = user.extraGroups or [];
-      in user // {
+        openssh = user.openssh or {};
+        privateKey = config.age.secrets."${name}-key".path;
         hashedPasswordFile = config.age.secrets."${name}-password-hash".path;
-        extraGroups = groups ++ ifTheyExist [ 
+        extraGroups = user.extraGroups ++ ifTheyExist [ 
           "networkmanager" "docker" "media" "photos" 
         ];
+      };
+
+      # Each user account found in flake.users
+      userAccounts = mkAttrs config.users.names (name: let u = flakeUser name; in u.user // {
+        inherit (u) hashedPasswordFile extraGroups;
+        openssh = u.openssh // { inherit (u) privateKey; };
       });
 
       # Special case for flake.users.root
-      rootAccount = { root = flake.users.root or {} // { 
-        hashedPasswordFile = config.age.secrets."root-password-hash".path;
+      rootAccount = let u = flakeUser "root"; in { "${u.name}" = u.user // { 
+        inherit (u) hashedPasswordFile;
+        openssh = u.openssh // { inherit (u) privateKey; };
       }; };
 
     in userAccounts // rootAccount;
@@ -70,23 +75,6 @@ in {
 
     # Everybody can use zsh
     users.defaultUserShell = pkgs.zsh;
-
-    # GIDs 900-909 are custom shared groups in my flake                                                                                                                                   
-    # UID/GIDs 910-999 are custom system users/groups in my flake                                                                                                                         
-
-    # Create secrets group
-    ids.gids.secrets = 900;
-    users.groups.secrets.gid = config.ids.gids.secrets;
-                                                                                                                                                                                          
-    # Create media group                                                                                                                                                                  
-    ids.gids.media = 901;                                                                                                                                                                 
-    users.groups.media.gid = config.ids.gids.media;                                                                                                                                       
-                                                                                                                                                                                          
-    # Create photos group                                                                                                                                                                 
-    ids.gids.photos = 902;                                                                                                                                                                
-    users.groups.photos.gid = config.ids.gids.photos;
-
-    # Default shell
     programs.zsh.enable = true;
 
     # Allow root to work with git on the /etc/nixos directory
@@ -94,21 +82,19 @@ in {
       printf "[safe]\ndirectory = /etc/nixos" > /root/.gitconfig
     '';
 
+    # Write user SSH keys to each ~/.ssh directory
     system.activationScripts.users.text = let
-      sshDir = name: let
-        user = config.users.users.${name};
-        privateKey = config.age.secrets."${name}-key";
-      in ''
+      sshDir = name: let user = config.users.users.${name}; in ''
         mkdir -p ${user.home}/.ssh
-        cat ${privateKey.path} > ${user.home}/.ssh/id_ed25519
+        cat ${user.openssh.privateKey} > ${user.home}/.ssh/id_ed25519
         cat ${user.openssh.publicKey} > ${user.home}/.ssh/id_ed25519.pub
         chmod 700 ${user.home}/.ssh
         chmod 600 ${user.home}/.ssh/id_ed25519
         chmod 644 ${user.home}/.ssh/id_ed25519.pub
         chown -R ${user.name}:${user.group} ${user.home}/.ssh
       '';
-      # Write ssh dir for each of these users
-      script = concatMapStrings sshDir ( ["root"] ++ userNames );
+      # Write ssh dir for each of these users, including root
+      script = concatMapStrings sshDir ( config.users.names ++ [ "root" ] );
     in mkAfter "${mkScript script}";
 
     # Add user passwords to agenix
@@ -118,14 +104,14 @@ in {
       userKeys = genAttrs 
         (map (userName: "${userName}-key") (attrNames flake.users))
         (secretName: let userName = removeSuffix "-key" secretName; in {
-          rekeyFile = flake + "${flake.users."${userName}".path}/id_ed25519.age"; 
+          rekeyFile = flake + /users/${userName}/id_ed25519.age; 
         });
 
       # Include all user password.age files as an agenix secret as user-password
       userPasswords = genAttrs 
         (map (userName: "${userName}-password") (attrNames flake.users))
         (secretName: let userName = removeSuffix "-password" secretName; in {
-          rekeyFile = flake + "${flake.users."${userName}".path}/password.age"; 
+          rekeyFile = flake + /users/${userName}/password.age; 
         });
 
       # Generate hashed versions of the above secret as user-password-hash
