@@ -7,6 +7,16 @@ hasnt /tmp/id_age && error "Age identity locked"
 # host|user|all|help
 case "${1-}" in
 
+  # Usage output
+  help)
+    echo "Usage: init TARGET"
+    echo
+    echo "  all"
+    echo "  host HOSTNAME"
+    echo "  user USERNAME"
+    echo "  help"
+    ;;
+
   # Generate a host
   host | h)
 
@@ -24,7 +34,12 @@ case "${1-}" in
 
       # Add users for home-manager configuration
       for user in $(eza -D users); do
-        [[ "$user" == "root" ]] || echo "{ ... }: {}" > $host/users/$user.nix
+        cfg="$host/users/$user.nix"
+        if [[ "$user" != "root" ]]; then
+          echo "{ flake, ... }: {" > $cfg
+          echo "  imports = [ flake.homeModules.common ];" >> $cfg
+          echo "}" >> $cfg
+        fi
       done
 
       # Create a basic configuration.nix in this directory
@@ -76,9 +91,10 @@ case "${1-}" in
     ;&
 
   # Generate missing files
-  all | a)
+  all | *)
 
-    # Generate missing ssh keys for hosts and users
+    # Generate missing SSH keys for hosts and users
+    echo "Generating SSH keys..."
     sshed generate
 
     # Generate missing/changed secrets
@@ -88,16 +104,6 @@ case "${1-}" in
     # Ensure secrets are rekeyed for all hosts
     agenix rekey -a
 
-    ;;
-
-  # Usage output
-  help | *)
-    echo "Usage: init TARGET"
-    echo
-    echo "  all"
-    echo "  host HOSTNAME"
-    echo "  user USERNAME"
-    echo "  help"
     ;;
 
 esac
