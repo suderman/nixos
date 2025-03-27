@@ -24,6 +24,11 @@
     devshell.url = "github:numtide/devshell";
     devshell.inputs.nixpkgs.follows = "nixpkgs";
 
+    # Nix Flake Registry
+    # <https://github.com/nixos/flake-registry>
+    flake-registry.url = "github:NixOS/flake-registry";
+    flake-registry.flake = false;
+
   };
 
   outputs = inputs: let flake = rec {
@@ -31,7 +36,6 @@
     flake = inputs.self;
 
     # map extra folders
-    # users = flake.lib.mkAttrs ./users ( user: import ./users/${user} );
     users = flake.lib.mkUsers ./users;
     networks = {};
     secrets = ./secrets;
