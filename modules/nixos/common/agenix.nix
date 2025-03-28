@@ -1,4 +1,4 @@
-{ config, flake, inputs, perSystem, pkgs, lib, ... }: {
+{ flake, inputs, perSystem, config, lib, pkgs, hostName, ... }: {
 
   imports = [
     inputs.agenix.nixosModules.default
@@ -6,26 +6,23 @@
   ];
 
   # Configure agenix to work with derived identity and ssh keys
-  config = {
+  config = let 
+    hostPubkey = builtins.readFile config.services.openssh.publicKey;
+  in {
 
     # agenix-rekey setup for this host, secrets in repo
-    age.rekey = with config.networking; {
-      hostPubkey = config.services.openssh.publicKey;
+    age.rekey = {
+      inherit hostPubkey;
       masterIdentities = [ /tmp/id_age /tmp/id_age_ ];
       storageMode = "local";
       localStorageDir = flake + /secrets/rekeyed/${hostName};
       generatedSecretsDir = flake + /secrets/generated/${hostName};
     };
 
-    # 32-byte hex imported from QR code
-    age.secrets = {
-      hex.rekeyFile = flake + /secrets/hex.age; 
-    };
-
     # Manually add public ssh ed25519 key
     environment.etc = {
       "ssh/ssh_host_ed25519_key.pub" = {
-        source = config.services.openssh.publicKey;
+        text = hostPubkey;
         mode = "0644";
         user = "root";
         group = "root";
@@ -40,15 +37,20 @@
     # Because of the above, manually specify derived key as age identity
     age.identityPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
 
+    # 32-byte hex imported from QR code
+    age.secrets = {
+      hex.rekeyFile = flake + /secrets/hex.age; 
+    };
+
     environment.systemPackages = [
       perSystem.agenix-rekey.default
-      perSystem.self.ipaddr
       perSystem.self.derive
+      perSystem.self.ipaddr
       perSystem.self.sshed
       pkgs.curl
-      pkgs.openssh
-      pkgs.netcat
       pkgs.iproute2
+      pkgs.netcat
+      pkgs.openssh
     ];
 
     # Helps bootstrap a new system with expected SSH private key

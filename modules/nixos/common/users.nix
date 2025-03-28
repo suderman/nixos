@@ -11,11 +11,14 @@ in {
   options.users.names = mkOption {
     type = with types; listOf str;
     default = map (userPath: pipe userPath [
-      (path: toString path)
       (path: removeSuffix "/home-configuration.nix" path)
       (path: removeSuffix ".nix" path)
       (path: baseNameOf path)
-    ]) (ls { path = config.path + /users; dirsWith = [ "home-configuration.nix" ]; });
+    ]) (ls { 
+      path = flake + /hosts/${config.networking.hostName}/users; 
+      dirsWith = [ "home-configuration.nix" ]; 
+      asPath = false;
+    });
   };
 
   # Extra options for each user
@@ -58,13 +61,16 @@ in {
 
       # Each user account found in flake.users
       userAccounts = mkAttrs config.users.names (name: let u = flakeUser name; in u.user // {
-        inherit (u) hashedPasswordFile extraGroups;
+        extraGroups = u.extraGroups;
         openssh = u.openssh // { inherit (u) privateKey; };
+        hashedPasswordFile = if config.users.users."${u.name}".password == null 
+          then u.hashedPasswordFile else null;
       });
 
       # Special case for flake.users.root
       rootAccount = let u = flakeUser "root"; in { "${u.name}" = u.user // { 
-        inherit (u) hashedPasswordFile;
+        hashedPasswordFile = if config.users.users."${u.name}".password == null 
+          then u.hashedPasswordFile else null;
         openssh = u.openssh // { inherit (u) privateKey; };
       }; };
 

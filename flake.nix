@@ -31,23 +31,29 @@
 
   };
 
-  outputs = inputs: let flake = rec {
+  outputs = inputs: let 
 
-    flake = inputs.self;
+    # blueprint automatically maps: devshells, hosts, lib, modules, packages
+    # blueprint = inputs.blueprint { inherit inputs; };  
+    blueprint = builtins.removeAttrs
+      ( inputs.blueprint { inherit inputs; } ) 
+      [ "__functor" ];
 
-    # map extra folders
-    users = flake.lib.mkUsers ./users;
-    networks = {};
-    secrets = ./secrets;
+    flake = {
 
-    agenix-rekey = inputs.agenix-rekey.configure {
-      userFlake = flake;
-      inherit (flake) nixosConfigurations;
-    };
+      # map extra folders
+      users = inputs.self.lib.mkUsers ./users;
+      networks = {};
 
-    # Derive Seeds (BIP-85) > 32-bytes hex > Index Number:
-    derivationIndex = 1;
+      agenix-rekey = inputs.agenix-rekey.configure {
+        userFlake = inputs.self;
+        inherit (inputs.self) nixosConfigurations;
+      };
 
-  # blueprint automatically maps: devshells, hosts, lib, modules, packages
-  }; in inputs.blueprint { inherit inputs; } // flake;
+      # Derive Seeds (BIP-85) > 32-bytes hex > Index Number:
+      derivationIndex = 1;
+
+    }; 
+
+  in blueprint // flake;
 }

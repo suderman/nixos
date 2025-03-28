@@ -37,13 +37,18 @@ in perSystem.devshell.mkShell {
     help = "Lock age identity";
     command = readFile ./lock-id.sh;
   } {
-    category = "init";
+    category = "development";
     name = "init";
     help = "Generate hosts, users and related files";
     command = readFile ./init.sh;
   } {
-    category = "virtual machine";
-    name = "sim";
+    category = "development";
+    name = "b";
+    help = "browse flake";
+    command = "nix-inspect --path .";
+  } {
+    category = "development";
+    name = "vm";
     help = "nixos-rebuild --flake .#sim build-vm && ./result/bin/run-sim-vm";
     command = "nixos-rebuild --flake .#sim build-vm && ./result/bin/run-sim-vm";
   }];
@@ -56,6 +61,7 @@ in perSystem.devshell.mkShell {
     pkgs.gnumake
     pkgs.lazydocker
     pkgs.lazygit
+    pkgs.nix-inspect
     pkgs.smenu
     pkgs.rage
     perSystem.agenix-rekey.default
