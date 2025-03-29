@@ -31,10 +31,10 @@ in {
         example = /run/agenix/jon-key;
       };
       options.openssh.publicKey = mkOption {
-        type = nullOr path;
+        type = nullOr str;
         default = null;
-        description = "Path to user SSH public key";
-        example = ./users/jon/id_ed25519.pub;
+        description = "User SSH public key";
+        example = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPviN4LtuWOvvSMomJeXbWn7AIZGDQoagNmkg4Y2UePa jon@bip85-hex32-index1";
       };
     });
   };
@@ -93,7 +93,7 @@ in {
       sshDir = name: let user = config.users.users.${name}; in ''
         mkdir -p ${user.home}/.ssh
         cat ${user.openssh.privateKey} > ${user.home}/.ssh/id_ed25519
-        cat ${user.openssh.publicKey} > ${user.home}/.ssh/id_ed25519.pub
+        echo "${user.openssh.publicKey}" > ${user.home}/.ssh/id_ed25519.pub
         chmod 700 ${user.home}/.ssh
         chmod 600 ${user.home}/.ssh/id_ed25519
         chmod 644 ${user.home}/.ssh/id_ed25519.pub

@@ -6,13 +6,11 @@
   ];
 
   # Configure agenix to work with derived identity and ssh keys
-  config = let 
-    hostPubkey = builtins.readFile config.services.openssh.publicKey;
-  in {
+  config = {
 
     # agenix-rekey setup for this host, secrets in repo
     age.rekey = {
-      inherit hostPubkey;
+      hostPubkey = config.services.openssh.publicKey;
       masterIdentities = [ /tmp/id_age /tmp/id_age_ ];
       storageMode = "local";
       localStorageDir = flake + /secrets/rekeyed/${hostName};
@@ -22,7 +20,7 @@
     # Manually add public ssh ed25519 key
     environment.etc = {
       "ssh/ssh_host_ed25519_key.pub" = {
-        text = hostPubkey;
+        text = config.services.openssh.publicKey + "\n";
         mode = "0644";
         user = "root";
         group = "root";

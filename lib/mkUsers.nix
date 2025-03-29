@@ -1,4 +1,9 @@
-{ flake, ... }: users:  
+{ flake, ... }: let
+
+  inherit (builtins) readFile;
+  inherit (flake.lib) trim;
+
+in users:  
 
   flake.lib.mkAttrs users ( dir: let
     user = import "${users}/${dir}";
@@ -15,7 +20,7 @@
       openssh = {
         authorizedKeys = user.openssh.authorizedKeys or {};
         authorizedPrincipals = user.openssh.authorizedPrincipals or [];
-        publicKey = "${users}/${dir}/id_ed25519.pub"; # custom option
+        publicKey = trim (readFile "${users}/${dir}/id_ed25519.pub"); # custom option
         privateKey = null; # custom option
       };
 
@@ -31,7 +36,7 @@
       openssh = {
         authorizedKeys = user.openssh.authorizedKeys or {};
         authorizedPrincipals = user.openssh.authorizedPrincipals or [];
-        publicKey = "${users}/${dir}/id_ed25519.pub"; # custom option
+        publicKey = trim (readFile "${users}/${dir}/id_ed25519.pub"); # custom option
         privateKey = null; # custom option
       };
 

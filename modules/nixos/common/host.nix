@@ -1,5 +1,7 @@
 { flake, config, lib, hostName, ... }: let
+  inherit (builtins) readFile;
   inherit (lib) mkDefault mkOption types;
+  inherit (flake.lib) trim;
 in {
 
   # Extra options for each host
@@ -23,10 +25,10 @@ in {
 
     # Extra networking option for public ssh key
     services.openssh.publicKey = mkOption { 
-      description = "Path to NixOS SSH host public key";
-      type = with types; nullOr path;
+      description = "NixOS SSH host public key";
+      type = with types; nullOr str;
       default = null;
-      example = ./hosts/foo/ssh_host_ed25519_key.pub;
+      example = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBKEb5HqzSaYjXrFkQ4MV5/80mcQCedPmE/sLiH2h6rI nixos@bip85-hex32-index1";
     };
 
   };
@@ -45,7 +47,7 @@ in {
     # Set ssh host key and public key
     services.openssh = {
       privateKey = config.age.secrets.key.path or null; # custom option
-      publicKey = flake + /hosts/${hostName}/ssh_host_ed25519_key.pub; # custom option
+      publicKey = trim( readFile( flake + /hosts/${hostName}/ssh_host_ed25519_key.pub )); # custom option
     };
 
     # Add host key to agenix 
