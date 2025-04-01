@@ -31,8 +31,7 @@
         # Derive machine id
         [[ -f ${hex} ]] && 
         cat ${hex} | 
-        derive hex ${hostName} | 
-        cut -c1-32 > /etc/machine-id
+        derive hex ${hostName} 32 > /etc/machine-id
         chown 444 /etc/machine-id
       ''; };
     in lib.mkAfter "${script}";

@@ -1,5 +1,4 @@
 # Exit if standard input is missing
-empty "${input-}" && "$(input)"
 [[ -z "$input" ]] && exit 0
 
 # Use derive ssh (this package) to generate ssh key from input
