@@ -50,11 +50,11 @@
       # Copy public ssh host key from this repo to /persist directory
       text = ''
         mkdir -p /persist/etc/ssh
-        echo ${hostPubkey} > /persist/etc/ssh/ssh_host_ed25519_key.pub
+        echo "${hostPubkey}" > /persist/etc/ssh/ssh_host_ed25519_key.pub
         chown 644 /persist/etc/ssh/ssh_host_ed25519_key.pub
       '' + 
 
-      # Derive machine id from decrypted hex
+      # Derive machine id from decrypted hex (if agenix decrypting)
       ''
         [[ -f ${hex} ]] && cat ${hex} | 
         derive hex ${hostName} 32 > /etc/machine-id
