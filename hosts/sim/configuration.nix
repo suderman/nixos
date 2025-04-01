@@ -18,7 +18,7 @@ in {
     networking.firewall.allowPing = true;
 
     # Override encrypted/hashed password with this
-    # users.users.jon.password = "x";
+    users.users.jon.password = "x";
 
     environment.systemPackages = [
       pkgs.vim

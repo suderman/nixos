@@ -4,7 +4,7 @@
   inherit (inputs.nixpkgs) lib;
   args = { inherit flake inputs lib; };
 
-  inherit (builtins) attrNames attrValues filter head match pathExists readDir stringLength;
+  inherit (builtins) attrNames attrValues filter head match pathExists readDir readFile stringLength;
   inherit (lib) filterAttrs removePrefix removeSuffix;
 
 # Personal helper library 
@@ -46,13 +46,21 @@ in rec {
   # Format owner and group as "owner:group"
   toOwnership = owner: group: "${toString owner}:${toString group}";
 
-  # Trim newlines from beginning and end of string
+  # Trim whitespace from beginning and end of string
   trim = str: let m = match "[[:space:]]*(.*[^[:space:]])[[:space:]]*" str; in
     if m == null then
       if str == "" || match "[[:space:]]*" str != null
       then "" else str
     else
       head m;
+
+  # readFile with whitespace trimmed
+  trimFile = path: trim( readFile( path ) );
+
+  # lib.derivationPath "salt"
+  derivationPath = salt: let 
+    prefix = if salt == "" then "" else "${salt}@"; 
+  in prefix + "bip85-hex32-index${toString flake.derivationIndex}";
 
   # List of home-manager users that match provided filter function
   filterUsers = fn: cfg: filter fn (if cfg ? home-manager then attrValues cfg.home-manager.users else []);

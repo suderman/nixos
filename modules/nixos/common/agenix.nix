@@ -10,30 +10,45 @@
 
     # agenix-rekey setup for this host, secrets in repo
     age.rekey = {
-      hostPubkey = config.services.openssh.publicKey;
+      hostPubkey = flake.lib.trimFile( flake + /hosts/${hostName}/ssh_host_ed25519_key.pub );
       masterIdentities = [ /tmp/id_age /tmp/id_age_ ];
       storageMode = "local";
       localStorageDir = flake + /secrets/rekeyed/${hostName};
       generatedSecretsDir = flake + /secrets/generated/${hostName};
     };
 
-    # Manually add public ssh ed25519 key
-    environment.etc = {
-      "ssh/ssh_host_ed25519_key.pub" = {
-        text = config.services.openssh.publicKey + "\n";
-        mode = "0644";
-        user = "root";
-        group = "root";
-      };
-    };
+    # Derive secrets from hex
+    system.activationScripts.etc.text = let
+      inherit (perSystem.self) mkScript derive;
+      inherit (config.age.rekey) hostPubkey;
+      hex = config.age.secrets.hex.path;
+      script = mkScript { path = [ derive ]; text = ''
+        # Write public ssh host key
+        mkdir -p /persist/etc/ssh
+        echo ${hostPubkey} > /persist/etc/ssh/ssh_host_ed25519_key.pub
+        chown 644 /persist/etc/ssh/ssh_host_ed25519_key.pub
 
-    # Manually add private ssh ed25519 key
-    services.openssh.extraConfig = ''
-      HostKey /etc/ssh/ssh_host_ed25519_key
-    '';
+        # Derive machine id
+        [[ -f ${hex} ]] && 
+        cat ${hex} | 
+        derive hex ${hostName} | 
+        cut -c1-32 > /etc/machine-id
+        chown 444 /etc/machine-id
+      ''; };
+    in lib.mkAfter "${script}";
 
-    # Because of the above, manually specify derived key as age identity
-    age.identityPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+    # Private ssh host key must be side-loaded/persisted to decrypt secrets
+    age.identityPaths = [ "/persist/etc/ssh/ssh_host_ed25519_key" ];
+
+    # Tell sshd that ssh host keys are found in /persist
+    services.openssh.hostKeys = [{
+      path = "/persist/etc/ssh/ssh_host_ed25519_key"; # derived and side-loaded
+      type = "ed25519";
+    } {
+      path = "/persist/etc/ssh/ssh_host_rsa_key"; # automatically generated
+      type = "rsa";
+      bits = 4096;
+    }];
 
     # 32-byte hex imported from QR code
     age.secrets = {
@@ -69,7 +84,7 @@
       ];
       script = ''
         # Verify private ssh key matches public key
-        cd /etc/ssh 
+        cd /persist/etc/ssh 
         if sshed verify; then
           echo "SSH host keys VALID"
         else
