@@ -17,7 +17,7 @@ for host in $(eza -D hosts); do
     | derive public "$host@${derivation_path-}" \
     > hosts/$host/ssh_host_ed25519_key.pub
   git add hosts/$host/ssh_host_ed25519_key.pub 2>/dev/null || true
-  info "Public host key staged: ./hosts/$host/ssh_host_ed25519_key.pub"
+  show "./hosts/$host/ssh_host_ed25519_key.pub"
 
 done
 
@@ -31,6 +31,6 @@ for user in $(eza -D users); do
     | derive public "$user@${derivation_path-}" \
     > users/$user/id_ed25519.pub
   git add users/$user/id_ed25519.pub 2>/dev/null || true
-  info "Public user key staged: ./users/$user/id_ed25519.pub"
+  show "./users/$user/id_ed25519.pub"
 
 done
