@@ -8,36 +8,61 @@
   # Configure agenix to work with derived identity and ssh keys
   config = {
 
-    # agenix-rekey setup for this host, secrets in repo
-    age.rekey = {
-      hostPubkey = flake.lib.trimFile( flake + /hosts/${hostName}/ssh_host_ed25519_key.pub );
-      masterIdentities = [ /tmp/id_age /tmp/id_age_ ];
-      storageMode = "local";
-      localStorageDir = flake + /secrets/rekeyed/${hostName};
-      generatedSecretsDir = flake + /secrets/generated/${hostName};
+    # https://github.com/ryantm/agenix
+    age = {
+
+      # 32-byte hex imported from QR code
+      # > import-id
+      secrets.hex.rekeyFile = flake + /secrets/hex.age; 
+
+      # Private ssh host key must be side-loaded/persisted to decrypt secrets
+      # > sshed send hostName IP
+      identityPaths = [ "/persist/etc/ssh/ssh_host_ed25519_key" ];
+
+      # https://github.com/oddlama/agenix-rekey
+      rekey = {
+
+        # Public ssh host key derived from 32-byte hex
+        # > sshed generate
+        hostPubkey = builtins.readFile (
+          flake + /hosts/${hostName}/ssh_host_ed25519_key.pub
+        );
+
+        # Master identity decrypted to /tmp/id_age for rekeying
+        # > unlock-id
+        masterIdentities = [ /tmp/id_age /tmp/id_age_ ];
+
+        # Store rekeyed & generated secrets in repo
+        storageMode = "local";
+        localStorageDir = flake + /secrets/rekeyed/${hostName};
+        generatedSecretsDir = flake + /secrets/generated/${hostName};
+      };
+
     };
 
-    # Derive secrets from hex
+    # Add /persist/etc/ssh/ssh_host_ed25519_key.pub and /etc/machine-id
     system.activationScripts.etc.text = let
-      inherit (perSystem.self) mkScript derive;
+
       inherit (config.age.rekey) hostPubkey;
       hex = config.age.secrets.hex.path;
-      script = mkScript { path = [ derive ]; text = ''
-        # Write public ssh host key
+      path = [ perSystem.self.derive ];
+
+      # Copy public ssh host key from this repo to /persist directory
+      text = ''
         mkdir -p /persist/etc/ssh
         echo ${hostPubkey} > /persist/etc/ssh/ssh_host_ed25519_key.pub
         chown 644 /persist/etc/ssh/ssh_host_ed25519_key.pub
+      '' + 
 
-        # Derive machine id
-        [[ -f ${hex} ]] && 
-        cat ${hex} | 
+      # Derive machine id from decrypted hex
+      ''
+        [[ -f ${hex} ]] && cat ${hex} | 
         derive hex ${hostName} 32 > /etc/machine-id
         chown 444 /etc/machine-id
-      ''; };
-    in lib.mkAfter "${script}";
+      ''; 
 
-    # Private ssh host key must be side-loaded/persisted to decrypt secrets
-    age.identityPaths = [ "/persist/etc/ssh/ssh_host_ed25519_key" ];
+    in lib.mkAfter "${perSystem.self.mkScript { inherit path text; }}";
+
 
     # Tell sshd that ssh host keys are found in /persist
     services.openssh.hostKeys = [{
@@ -48,22 +73,6 @@
       type = "rsa";
       bits = 4096;
     }];
-
-    # 32-byte hex imported from QR code
-    age.secrets = {
-      hex.rekeyFile = flake + /secrets/hex.age; 
-    };
-
-    environment.systemPackages = [
-      perSystem.agenix-rekey.default
-      perSystem.self.derive
-      perSystem.self.ipaddr
-      perSystem.self.sshed
-      pkgs.curl
-      pkgs.iproute2
-      pkgs.netcat
-      pkgs.openssh
-    ];
 
     # Helps bootstrap a new system with expected SSH private key
     # When needed, listens on port 12345 for a key to be sent via netcat
@@ -105,6 +114,18 @@
         fi
       '';
     };
+
+    # These packages should be available to the whole system
+    environment.systemPackages = [
+      perSystem.agenix-rekey.default
+      perSystem.self.derive
+      perSystem.self.ipaddr
+      perSystem.self.sshed
+      pkgs.curl
+      pkgs.iproute2
+      pkgs.netcat
+      pkgs.openssh
+    ];
 
   };
 

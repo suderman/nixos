@@ -46,7 +46,6 @@ in perSystem.self.mkScript {
         echo "  help"
         ;;
     esac
-    echo
   '';
 
 }
