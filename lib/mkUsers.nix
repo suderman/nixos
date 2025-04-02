@@ -20,8 +20,6 @@ in users:
       openssh = {
         authorizedKeys = user.openssh.authorizedKeys or {};
         authorizedPrincipals = user.openssh.authorizedPrincipals or [];
-        publicKey = trim (readFile "${users}/${dir}/id_ed25519.pub"); # custom option
-        privateKey = null; # custom option
       };
 
     # Normal users with custom defaults
@@ -36,8 +34,6 @@ in users:
       openssh = {
         authorizedKeys = user.openssh.authorizedKeys or {};
         authorizedPrincipals = user.openssh.authorizedPrincipals or [];
-        publicKey = trim (readFile "${users}/${dir}/id_ed25519.pub"); # custom option
-        privateKey = null; # custom option
       };
 
     })

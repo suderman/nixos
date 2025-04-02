@@ -21,24 +21,6 @@ in {
     });
   };
 
-  # Extra options for each user
-  options.users.users = mkOption {
-    type = with types; attrsOf (submodule {
-      options.openssh.privateKey = mkOption {
-        type = nullOr path;
-        default = null;
-        description = "Path to user SSH private key file";
-        example = /run/agenix/jon-key;
-      };
-      options.openssh.publicKey = mkOption {
-        type = nullOr str;
-        default = null;
-        description = "User SSH public key";
-        example = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPviN4LtuWOvvSMomJeXbWn7AIZGDQoagNmkg4Y2UePa jon@bip85-hex32-index1";
-      };
-    });
-  };
-
   config = {
 
     # Update users with details found in flake.users
@@ -52,8 +34,6 @@ in {
         inherit name;
         user = flake.users."${name}" or {};
         openssh = user.openssh or {};
-        privateKey = config.age.secrets."${name}-key".path;
-        hashedPasswordFile = "/run/user/${name}"; # generated in activation script
         extraGroups = user.extraGroups ++ ifTheyExist [ 
           "networkmanager" "docker" "media" "photos" 
         ];
@@ -61,17 +41,16 @@ in {
 
       # Each user account found in flake.users
       userAccounts = mkAttrs config.users.names (name: let u = flakeUser name; in u.user // {
-        extraGroups = u.extraGroups;
-        openssh = u.openssh // { inherit (u) privateKey; };
+        inherit (u) extraGroups openssh;
         hashedPasswordFile = if config.users.users."${u.name}".password == null 
-          then u.hashedPasswordFile else null;
+          then "/run/user/${u.name}" else null; # generated in activation script
       });
 
       # Special case for flake.users.root
       rootAccount = let u = flakeUser "root"; in { "${u.name}" = u.user // { 
+        inherit (u) openssh;
         hashedPasswordFile = if config.users.users."${u.name}".password == null 
-          then u.hashedPasswordFile else null;
-        openssh = u.openssh // { inherit (u) privateKey; };
+          then "/run/user/${u.name}" else null; # generated in activation script
       }; };
 
     in userAccounts // rootAccount;
@@ -87,6 +66,13 @@ in {
     # system.activationScripts.root.text = ''
     #   printf "[safe]\ndirectory = /etc/nixos" > /root/.gitconfig
     # '';
+
+    # Include all user password.age files as an agenix secret as user-password
+    age.secrets = genAttrs 
+      (map (userName: "${userName}-password") (attrNames flake.users))
+      (secretName: let userName = removeSuffix "-password" secretName; in {
+        rekeyFile = flake + /users/${userName}/password.age; 
+      });
 
     # Hash user password & write SSH keys to each ~/.ssh directory
     system.activationScripts = let
@@ -183,41 +169,6 @@ in {
       in mkAfter "${mkScript { inherit text path ; }}";
 
     };
-
-
-    # Add user passwords to agenix
-    age.secrets = let 
-
-      # Include all user password.age files as an agenix secret as user-password
-      userKeys = genAttrs 
-        (map (userName: "${userName}-key") (attrNames flake.users))
-        (secretName: let userName = removeSuffix "-key" secretName; in {
-          rekeyFile = flake + /users/${userName}/id_ed25519.age; 
-        });
-
-      # Include all user password.age files as an agenix secret as user-password
-      userPasswords = genAttrs 
-        (map (userName: "${userName}-password") (attrNames flake.users))
-        (secretName: let userName = removeSuffix "-password" secretName; in {
-          rekeyFile = flake + /users/${userName}/password.age; 
-        });
-
-      # Generate hashed versions of the above secret as user-password-hash
-      userHashedPasswords = genAttrs 
-        (map (userName: "${userName}-password-hash") (attrNames flake.users))
-        (secretName: let userName = removeSuffix "-password-hash" secretName; in {
-          generator.dependencies = {
-            hex = config.age.secrets.hex; # hex as custom salt for mkpasswd
-            password = config.age.secrets."${userName}-password";
-          };
-          generator.script = { pkgs, lib, decrypt, deps, ... }: toString [
-            "${pkgs.mkpasswd}/bin/mkpasswd -m sha-512 -S" 
-            "$(${decrypt} ${lib.escapeShellArg deps.hex.file} | cut -c 1-16)" 
-            "$(${decrypt} ${lib.escapeShellArg deps.password.file})"
-          ];
-        });
-
-    in userKeys // userPasswords // userHashedPasswords;
 
   };
 
