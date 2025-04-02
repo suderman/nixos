@@ -51,14 +51,14 @@
       text = ''
         mkdir -p /persist/etc/ssh
         echo "${hostPubkey}" > /persist/etc/ssh/ssh_host_ed25519_key.pub
-        chown 644 /persist/etc/ssh/ssh_host_ed25519_key.pub
+        chmod 644 /persist/etc/ssh/ssh_host_ed25519_key.pub
       '' + 
 
       # Derive machine id from decrypted hex (if agenix decrypting)
       ''
         [[ -f ${hex} ]] && cat ${hex} | 
         derive hex ${hostName} 32 > /etc/machine-id
-        chown 444 /etc/machine-id
+        chmod 444 /etc/machine-id
       ''; 
 
     in lib.mkAfter "${perSystem.self.mkScript { inherit path text; }}";
