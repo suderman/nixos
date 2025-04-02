@@ -34,7 +34,16 @@ in perSystem.self.mkScript {
         ${readFile ./public.sh}
         ;;
       ssh | s)
-        echo "$input" | python3 ${./ssh.py}
+        passphrase=''${2-} # optional passphrase
+        if [[ -z "''${@:2}" ]]; then  
+          echo "$input" | python3 ${./ssh.py}
+        else
+          key=$(mktemp) # write key to tmp file so passphrase can be added
+          echo "$input" | python3 ${./ssh.py} > $key
+          ssh-keygen -p -f $key -P "" -N "$passphrase" > /dev/null 2>&1
+          cat $key
+          shred -u $key # delete tmp key after sending to stdout
+        fi
         ;;
       help | *)
         echo "Usage: echo 123 | derive FORMAT [ARGS]"
@@ -42,7 +51,7 @@ in perSystem.self.mkScript {
         echo "  age"
         echo "  hex [SALT] [LEN]"
         echo "  public [COMMENT]"
-        echo "  ssh"
+        echo "  ssh [PASSPHRASE]"
         echo "  help"
         ;;
     esac
