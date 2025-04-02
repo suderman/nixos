@@ -53,7 +53,7 @@ in {
         user = flake.users."${name}" or {};
         openssh = user.openssh or {};
         privateKey = config.age.secrets."${name}-key".path;
-        hashedPasswordFile = config.age.secrets."${name}-password-hash".path;
+        hashedPasswordFile = "/run/user/${name}"; # generated in activation script
         extraGroups = user.extraGroups ++ ifTheyExist [ 
           "networkmanager" "docker" "media" "photos" 
         ];
@@ -84,24 +84,106 @@ in {
     programs.zsh.enable = true;
 
     # Allow root to work with git on the /etc/nixos directory
-    system.activationScripts.root.text = ''
-      printf "[safe]\ndirectory = /etc/nixos" > /root/.gitconfig
-    '';
+    # system.activationScripts.root.text = ''
+    #   printf "[safe]\ndirectory = /etc/nixos" > /root/.gitconfig
+    # '';
 
-    # Write user SSH keys to each ~/.ssh directory
-    system.activationScripts.users.text = let
-      sshDir = name: let user = config.users.users.${name}; in ''
-        mkdir -p ${user.home}/.ssh
-        cat ${user.openssh.privateKey} > ${user.home}/.ssh/id_ed25519
-        echo "${user.openssh.publicKey}" > ${user.home}/.ssh/id_ed25519.pub
-        chmod 700 ${user.home}/.ssh
-        chmod 600 ${user.home}/.ssh/id_ed25519
-        chmod 644 ${user.home}/.ssh/id_ed25519.pub
-        chown -R ${user.name}:${user.group} ${user.home}/.ssh
-      '';
-      # Write ssh dir for each of these users, including root
-      script = concatMapStrings sshDir ( config.users.names ++ [ "root" ] );
-    in mkAfter "${mkScript script}";
+    # Hash user password & write SSH keys to each ~/.ssh directory
+    system.activationScripts = let
+
+      inherit (lib) mkAfter;
+      inherit (perSystem.self) mkScript;
+      hex = config.age.secrets.hex.path;
+
+      everyone = config.users.names ++ [ "root" ];
+      usermeta = name: {
+
+        # Get user from nixos configuration
+        user = config.users.users.${name};
+
+        # Public ssh user key derived from 32-byte hex
+        publicKey = flake + /users/${name}/id_ed25519.pub;
+
+        # Password encrypted with age identity
+        password = config.age.secrets."${name}-password".path;
+
+      };
+
+    in {
+
+      # Hash user password and save to /run/user
+      agenixInstall.text = let
+        perUser = userName: let 
+          inherit (usermeta userName) user password;
+
+        # Hash user password and store as file in /run/user
+        in ''
+          if [[ -f ${hex} ]]; then 
+            mkdir -p /run/user
+            mkpasswd -m sha-512 -S $(cat ${hex} | cut -c 1-16) $(cat ${password}) \
+            > /run/user/${userName}
+            chmod 600 /run/user/${userName}
+          fi
+        '';
+
+        text = concatMapStrings perUser everyone;
+        path = [ pkgs.mkpasswd ];
+
+      in mkAfter "${mkScript { inherit text path ; }}";
+
+      # Write SSH keys to each ~/.ssh directory
+      users.text = let
+        perUser = userName: let 
+          inherit (usermeta userName) user publicKey password;
+
+        # Ensure ~/.ssh exists 
+        in ''
+          mkdir -p ${user.home}/.ssh
+        '' +
+
+        # Generate private ssh user key derived from 32-byte hex
+        # Encrypted with passphrase matching user password
+        ''
+          [[ -f ${hex} ]] && cat ${hex} | 
+          derive hex ${userName} |
+          derive ssh "$(cat ${password})" \
+          > ${user.home}/.ssh/id_ed25519
+        '' +
+
+        # Copy public ssh user key from this repo to ~/.ssh
+        ''
+          cat ${publicKey} \
+          > ${user.home}/.ssh/id_ed25519.pub
+        '' +
+
+        # Ensure proper permissions and ownership in ~/.ssh
+        ''
+          [[ -f ${user.home}/.ssh/id_ed25519 ]] && 
+          chmod 600 ${user.home}/.ssh/id_ed25519
+
+          [[ -f ${user.home}/.ssh/id_ed25519.pub ]] && 
+          chmod 644 ${user.home}/.ssh/id_ed25519.pub
+
+          chmod 700 ${user.home}/.ssh
+          chown -R ${user.name}:${user.group} ${user.home}/.ssh
+        '' +
+
+        ''
+          if [[ -f ${hex} ]]; then 
+            mkdir -p /run/user
+            mkpasswd -m sha-512 -S $(cat ${hex} | cut -c 1-16) $(cat ${password}) \
+            > /run/user/${userName}
+            chmod 600 /run/user/${userName}
+          fi
+        '';
+
+        text = concatMapStrings perUser everyone;
+        path = [ perSystem.self.derive ];
+
+      in mkAfter "${mkScript { inherit text path ; }}";
+
+    };
+
 
     # Add user passwords to agenix
     age.secrets = let 

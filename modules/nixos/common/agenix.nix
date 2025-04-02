@@ -47,7 +47,7 @@
       hex = config.age.secrets.hex.path;
       path = [ perSystem.self.derive ];
 
-      # Copy public ssh host key from this repo to /persist directory
+      # Copy public ssh host key from this repo to /persist
       text = ''
         mkdir -p /persist/etc/ssh
         echo "${hostPubkey}" > /persist/etc/ssh/ssh_host_ed25519_key.pub
