@@ -1,9 +1,8 @@
 { flake, config, pkgs, lib, perSystem, ... }: let
 
-  inherit (lib) concatMapStrings genAttrs mkAfter mkOption pipe removeSuffix types;
+  inherit (lib) genAttrs mkOption pipe removeSuffix types;
   inherit (flake.lib) ls mkAttrs;
-  inherit (builtins) attrNames baseNameOf filter hasAttr toString;
-  inherit (perSystem.self) mkScript;
+  inherit (builtins) attrNames baseNameOf filter hasAttr;
 
 in {
 
@@ -77,11 +76,13 @@ in {
     # Hash user password & write SSH keys to each ~/.ssh directory
     system.activationScripts = let
 
-      inherit (lib) mkAfter;
+      inherit (lib) concatMapStrings mkAfter;
       inherit (perSystem.self) mkScript;
       hex = config.age.secrets.hex.path;
 
+      # All users in this configuration including root
       everyone = config.users.names ++ [ "root" ];
+
       usermeta = name: {
 
         # Get user from nixos configuration
