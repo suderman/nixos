@@ -44,8 +44,9 @@ in {
         # "/etc/nixos"
         "/etc/NetworkManager/system-connections"
         # "/var/lib"  
-        "/var/lib/nixos"  
+        "/var/lib/nixos"
         "/var/log"  
+        "/var/lib/systemd/coredump"
         # "/home"  
       ] ++ cfg.dirs;
 

@@ -121,7 +121,7 @@ in {
         # Ensure ~/.ssh exists 
         in ''
           mkdir -p ${user.home}/.ssh
-          cd "${user.home}/.ssh"
+          cd ${user.home}/.ssh
         '' +
 
         # Copy public ssh user key from this repo to ~/.ssh
