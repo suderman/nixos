@@ -1,7 +1,5 @@
 { flake, config, lib, hostName, ... }: let
-  inherit (builtins) readFile;
   inherit (lib) mkDefault mkOption types;
-  inherit (flake.lib) trim;
 in {
 
   # Extra options for each host

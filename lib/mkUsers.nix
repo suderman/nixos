@@ -1,9 +1,4 @@
-{ flake, ... }: let
-
-  inherit (builtins) readFile;
-  inherit (flake.lib) trim;
-
-in users:  
+{ flake, ... }: users:  
 
   flake.lib.mkAttrs users ( dir: let
     user = import "${users}/${dir}";

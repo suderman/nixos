@@ -1,18 +1,17 @@
 { flake, config, pkgs, lib, perSystem, ... }: let
 
-  inherit (lib) genAttrs mkOption pipe removeSuffix types;
+  inherit (lib) mkOption types;
   inherit (flake.lib) ls mkAttrs;
-  inherit (builtins) attrNames baseNameOf filter hasAttr;
 
 in {
 
   # List of nixosConfiguration usernames that also appear in flake.users
   options.users.names = mkOption {
     type = with types; listOf str;
-    default = map (userPath: pipe userPath [
-      (path: removeSuffix "/home-configuration.nix" path)
-      (path: removeSuffix ".nix" path)
-      (path: baseNameOf path)
+    default = map (userPath: lib.pipe userPath [
+      (path: lib.removeSuffix "/home-configuration.nix" path)
+      (path: lib.removeSuffix ".nix" path)
+      (path: builtins.baseNameOf path)
     ]) (ls { 
       path = flake + /hosts/${config.networking.hostName}/users; 
       dirsWith = [ "home-configuration.nix" ]; 
@@ -26,7 +25,8 @@ in {
     users.users = let
 
       # Filter list of groups to only those which exist
-      ifTheyExist = groups: filter (group: hasAttr group config.users.groups) groups;
+      ifTheyExist = groups: builtins.filter 
+        (group: builtins.hasAttr group config.users.groups) groups;
 
       # Get a user by name from the flake
       flakeUser = name: rec {
@@ -61,15 +61,10 @@ in {
     users.defaultUserShell = pkgs.zsh;
     programs.zsh.enable = true;
 
-    # Allow root to work with git on the /etc/nixos directory
-    # system.activationScripts.root.text = ''
-    #   printf "[safe]\ndirectory = /etc/nixos" > /root/.gitconfig
-    # '';
-
     # Include all user password.age files as an agenix secret as user-password
-    age.secrets = genAttrs 
-      (map (userName: "${userName}-password") (attrNames flake.users))
-      (secretName: let userName = removeSuffix "-password" secretName; in {
+    age.secrets = lib.genAttrs 
+      (map (userName: "${userName}-password") (builtins.attrNames flake.users))
+      (secretName: let userName = lib.removeSuffix "-password" secretName; in {
         rekeyFile = flake + /users/${userName}/password.age; 
       });
 
@@ -126,21 +121,35 @@ in {
         # Ensure ~/.ssh exists 
         in ''
           mkdir -p ${user.home}/.ssh
-        '' +
-
-        # Generate private ssh user key derived from 32-byte hex
-        # Encrypted with passphrase matching user password
-        ''
-          [[ -f ${hex} ]] && cat ${hex} | 
-          derive hex ${userName} |
-          derive ssh "$(cat ${password})" \
-          > ${user.home}/.ssh/id_ed25519
+          cd "${user.home}/.ssh"
         '' +
 
         # Copy public ssh user key from this repo to ~/.ssh
         ''
           cat ${publicKey} \
           > ${user.home}/.ssh/id_ed25519.pub
+        '' +
+
+        # Generate private ssh user key derived from 32-byte hex
+        # Delete if derived private key doesn't verify with repo's public key
+        ''
+          if [[ -f ${hex} ]]; then 
+            cat ${hex} | 
+            derive hex ${userName} |
+            derive ssh > ${user.home}/.ssh/id_ed25519
+            sshed verify || rm -f ${user.home}/.ssh/id_ed25519
+          fi
+        '' +
+
+        # If matching private key successfully derived, do it again
+        # Encrypted with passphrase matching user password
+        ''
+          if [[ -f ${hex} && -f ${user.home}/.ssh/id_ed25519 ]]; then 
+            cat ${hex} | 
+            derive hex ${userName} |
+            derive ssh "$(cat ${password})" \
+            > ${user.home}/.ssh/id_ed25519
+          fi
         '' +
 
         # Ensure proper permissions and ownership in ~/.ssh
@@ -153,19 +162,10 @@ in {
 
           chmod 700 ${user.home}/.ssh
           chown -R ${user.name}:${user.group} ${user.home}/.ssh
-        '' +
-
-        ''
-          if [[ -f ${hex} ]]; then 
-            mkdir -p /run/user
-            mkpasswd -m sha-512 -S $(cat ${hex} | cut -c 1-16) $(cat ${password}) \
-            > /run/user/${userName}
-            chmod 600 /run/user/${userName}
-          fi
         '';
 
         text = concatMapStrings perUser everyone;
-        path = [ perSystem.self.derive ];
+        path = [ perSystem.self.derive perSystem.self.sshed ];
 
       in mkAfter "${mkScript { inherit text path ; }}";
 
