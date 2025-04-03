@@ -1,7 +1,7 @@
-{ flake, ... }: users:  
+{ flake, ... }: 
 
-  flake.lib.mkAttrs users ( dir: let
-    user = import "${users}/${dir}";
+  flake.lib.mkAttrs ../users ( dir: let
+    user = import ../users/${dir};
   in user // (
 
     # Special case for root user

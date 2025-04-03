@@ -10,6 +10,14 @@
 # Personal helper library 
 in rec {
 
+  # Extra flake outputs
+  users = import ./users.nix args; 
+  networks = import ./networks.nix args; 
+  agenix-rekey = inputs.agenix-rekey.configure {
+    userFlake = flake;
+    inherit (flake) nixosConfigurations;
+  };
+
   # Bash script library
   bash = ./bash.sh;
 

@@ -34,19 +34,12 @@
   outputs = inputs: let flake = inputs.self; in {
 
     # Blueprint automatically maps: devshells, hosts, lib, modules, packages
-    inherit ( inputs.blueprint { inherit inputs; } )
-      checks devShells formatter lib templates 
-      nixosConfigurations homeModules nixosModules packages;
+    inherit (inputs.blueprint { inherit inputs; })
+      devShells packages formatter checks lib 
+      nixosConfigurations homeModules nixosModules;
 
-    # Map extra folders
-    users = flake.lib.mkUsers ./users;
-    networks = {};
-
-    # Manage secrets
-    agenix-rekey = inputs.agenix-rekey.configure {
-      userFlake = flake;
-      inherit (flake) nixosConfigurations;
-    };
+    # Map additional folders to custom outputs
+    inherit (flake.lib) agenix-rekey networks users;
 
     # Derive Seeds (BIP-85) > 32-bytes hex > Index Number:
     derivationIndex = 1;
