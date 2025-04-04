@@ -62,6 +62,7 @@ in perSystem.devshell.mkShell {
     pkgs.lazydocker
     pkgs.lazygit
     pkgs.nix-inspect
+    pkgs.openssl
     pkgs.smenu
     pkgs.rage
     perSystem.agenix-rekey.default
