@@ -25,10 +25,13 @@ in perSystem.self.mkScript {
         ${readFile ./age.sh}
         ;;
       cert | c)
-        if [[ ! -z "$(echo "$input" | grep "BEGIN PRIVATE KEY")" ]]; then
-          echo "$input" | python3 ${./cert.py} 
+        echo "$input" | $0 key > cakey
+        cat cakey | python3 ${./cert.py} > cacert
+        if [[ -z "''${@:2}" ]]; then  
+          cat cacert
         else
-          echo "$input" | $0 key | python3 ${./cert.py} 
+          echo "$input" | $0 key $name > key
+          cat key | python3 ${./cert.py} --name ''${2-} --cacert cacert --cakey cakey
         fi
         ;;
       hex | h)
@@ -44,7 +47,7 @@ in perSystem.self.mkScript {
         if [[ ! -z "$(echo "$input" | grep "BEGIN PRIVATE KEY")" ]]; then
           echo "$input"
         else
-          echo "$input" | $0 hex | python3 ${./key.py}
+          echo "$input" | $0 hex ''${2-} | python3 ${./key.py}
         fi
         ;;
       public | p)
@@ -67,9 +70,9 @@ in perSystem.self.mkScript {
         echo "Usage: echo 123 | derive FORMAT [ARGS]"
         echo
         echo "  age"
-        echo "  cert"
+        echo "  cert [COMMON_NAME]"
         echo "  hex [SALT] [LEN]"
-        echo "  key"
+        echo "  key [COMMON_NAME]"
         echo "  public [COMMENT]"
         echo "  ssh [PASSPHRASE]"
         echo "  help"
