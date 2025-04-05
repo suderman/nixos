@@ -2,11 +2,7 @@
 
   inherit (builtins) readFile;
   inherit (pkgs) gnugrep openssh openssl rage ssh-to-age;
-  python3 = ( pkgs.python3.withPackages (ps: [
-    ps.asn1crypto 
-    ps.cryptography 
-    ps.ecdsa 
-  ]) );
+  python3 = ( pkgs.python3.withPackages (ps: [ ps.cryptography ]) );
 
 in perSystem.self.mkScript {
 
@@ -21,9 +17,11 @@ in perSystem.self.mkScript {
 
     # Convert based on format: age|hex|public|ssh
     case "''${1-}" in
+
       age | a)
         ${readFile ./age.sh}
         ;;
+
       cert | c)
         cakey="$(echo "$input" | $0 key)" 
         cacert="$(echo "$cakey" | python3 ${./cert.py})" 
@@ -34,6 +32,7 @@ in perSystem.self.mkScript {
           echo "$key" | python3 ${./cert.py} --name ''${2-} --cacert <(echo "$cacert") --cakey <(echo "$cakey")
         fi
         ;;
+
       hex | h)
         salt=''${2-} # optional salt, optional character length (default 64)
         len=''${3:-64} && [[ "$len" =~ ^[0-9]+$ ]] && (( len >= 1 )) || len=""
@@ -43,6 +42,7 @@ in perSystem.self.mkScript {
           echo "$input" | python3 ${./hex.py} "$salt" | cut -c 1-$len
         fi
         ;;
+
       key | k)
         if [[ ! -z "$(echo "$input" | grep "BEGIN PRIVATE KEY")" ]]; then
           echo "$input"
@@ -50,10 +50,12 @@ in perSystem.self.mkScript {
           echo "$input" | $0 hex ''${2-} | python3 ${./key.py}
         fi
         ;;
+
       public | p)
         comment=''${2-} # optional ssh comment
         ${readFile ./public.sh}
         ;;
+
       ssh | s)
         passphrase=''${2-} # optional passphrase
         if [[ -z "''${@:2}" ]]; then  
@@ -66,13 +68,14 @@ in perSystem.self.mkScript {
           shred -u $key # delete tmp key after sending to stdout
         fi
         ;;
+
       help | *)
         echo "Usage: echo 123 | derive FORMAT [ARGS]"
         echo
         echo "  age"
-        echo "  cert [COMMON_NAME]"
+        echo "  cert [NAME]"
         echo "  hex [SALT] [LEN]"
-        echo "  key [COMMON_NAME]"
+        echo "  key [NAME]"
         echo "  public [COMMENT]"
         echo "  ssh [PASSPHRASE]"
         echo "  help"
