@@ -25,13 +25,13 @@ in perSystem.self.mkScript {
         ${readFile ./age.sh}
         ;;
       cert | c)
-        echo "$input" | $0 key > cakey
-        cat cakey | python3 ${./cert.py} > cacert
+        cakey="$(echo "$input" | $0 key)" 
+        cacert="$(echo "$cakey" | python3 ${./cert.py})" 
         if [[ -z "''${@:2}" ]]; then  
-          cat cacert
+          echo "$cacert"
         else
-          echo "$input" | $0 key $name > key
-          cat key | python3 ${./cert.py} --name ''${2-} --cacert cacert --cakey cakey
+          key=$(echo "$input" | $0 key $name)
+          echo "$key" | python3 ${./cert.py} --name ''${2-} --cacert <(echo "$cacert") --cakey <(echo "$cakey")
         fi
         ;;
       hex | h)

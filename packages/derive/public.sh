@@ -9,7 +9,7 @@ if [[ ! -z "$(echo "$input" | grep "AGE-SECRET-KEY")" ]]; then
 elif [[ ! -z "$(echo "$input" | grep "OPENSSH PRIVATE KEY")" ]]; then
   echo $(ssh-keygen -y -f <(echo "$input") | cut -d ' ' -f 1,2) ${comment-}
 
-# If ECDSA key detected, extract private key from secret and output
+# If ed25519 key detected, extract private key from secret and output
 elif [[ ! -z "$(echo "$input" | grep "BEGIN PRIVATE KEY")" ]]; then
   openssl ec -in <(echo "$input") -pubout  2>/dev/null
 
