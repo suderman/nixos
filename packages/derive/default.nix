@@ -28,8 +28,12 @@ in perSystem.self.mkScript {
         if [[ -z "''${@:2}" ]]; then  
           echo "$cacert"
         else
-          key=$(echo "$input" | $0 key $name)
-          echo "$key" | python3 ${./cert.py} --name ''${2-} --cacert <(echo "$cacert") --cakey <(echo "$cakey")
+          common_name=''${2-}
+          key=$(echo "$input" | $0 key $common_name)
+          echo "$key" | python3 ${./cert.py} \
+            --name $common_name \
+            --cacert <(echo "$cacert") \
+            --cakey <(echo "$cakey")
         fi
         ;;
 
