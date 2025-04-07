@@ -13,7 +13,7 @@
 
       # 32-byte hex imported from QR code
       # > import-id
-      secrets.hex.rekeyFile = flake + /secrets/hex.age; 
+      secrets.hex.rekeyFile = flake + /hex.age; 
 
       # Private ssh host key must be side-loaded/persisted to decrypt secrets
       # > sshed send hostName IP
@@ -34,8 +34,10 @@
 
         # Store rekeyed & generated secrets in repo
         storageMode = "local";
-        localStorageDir = flake + /secrets/rekeyed/${hostName};
-        generatedSecretsDir = flake + /secrets/generated/${hostName};
+        # localStorageDir = flake + /secrets/rekeyed/${hostName};
+        # generatedSecretsDir = flake + /secrets/generated/${hostName};
+        localStorageDir = flake + /hosts/${hostName}/secrets;
+        generatedSecretsDir = flake + /hosts/${hostName}/generated;
       };
 
     };

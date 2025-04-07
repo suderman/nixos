@@ -1,37 +1,38 @@
 source $LIB; cd $PRJ_ROOT
 
+# Confirm derivation path
 pause "Derive Seeds (BIP-85) > 32-bytes hex > Index Number $DERIVATION_INDEX"
 
-if has secrets/id.age; then
-  [[ ! -s secrets/id.age ]] && rm -f secrets/id.age \
-    || error "./secrets/id.age already exists"
+if [[ -f id.age ]]; then
+  [[ ! -s id.age ]] && 
+    rm -f id.age || 
+    error "./id.age already exists"
 fi
 
 # Attempt to read QR code master key (hex32)
 hex="$(qr)"
-defined "$hex" && info "QR code scanned!" \
-  || error "Failed to read QR code"
+[[ ! -z "$hex" ]] && 
+  info "QR code scanned!" || 
+  error "Failed to read QR code"
 
 # Write a password-protected copy of the age identity
-echo "$hex" \
-  | derive age \
-  | rage -ep > secrets/id.age
-info "Private age identity written: ./secrets/id.age"
+echo "$hex" | 
+  derive age | 
+  rage -ep > id.age
+info "Private age identity written: ./id.age"
 
 # Write the age identity's public key
-echo "$hex" \
-  | derive age \
-  | derive public \
-  > secrets/id.pub
-info "Public age identity written: ./secrets/id.pub"
-git add secrets/id.pub
+echo "$hex" | 
+  derive age | 
+  derive public > id.pub
+git add id.pub 2>/dev/null || true
+info "Public age identity written: ./id.pub"
 
-# Write the encrypted master key (protected by age identity)
-echo "$hex" \
-  | rage -eR secrets/id.pub \
-  > secrets/hex.age
-info "Private master key written: ./secrets/hex.age"
-git add secrets/hex.age
+# Write the 32-byte hex (protected by age identity)
+echo "$hex" | 
+  rage -eR id.pub > hex.age
+git add hex.age 2>/dev/null || true
+info "Private 32-byte hex written: ./hex.age"
 
 # Unlock the id right away
 echo "$hex" | derive age | unlock-id

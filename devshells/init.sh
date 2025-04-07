@@ -1,7 +1,7 @@
 source $LIB; cd $PRJ_ROOT
 
 # Ensure key exists and identity unlocked
-[[ ! -f secrets/hex.age ]] && error "./secrets/hex.age missing"
+[[ ! -f hex.age ]] && error "./hex.age missing"
 [[ ! -f /tmp/id_age ]] && error "Age identity locked"
 
 # host|user|all|help
@@ -99,15 +99,11 @@ case "${1-}" in
 
     # Generate CA certificate
     echo "Generating CA certificate..."
-    cat secrets/hex.age |
+    cat hex.age |
       rage -di /tmp/id_age |
       derive cert > zones/ca.crt
     git add zones/ca.crt 2>/dev/null || true
     show "./zones/ca.crt"
-
-    # Generate missing/changed secrets
-    agenix generate
-    git add secrets/generated 2>/dev/null || true
 
     # Ensure secrets are rekeyed for all hosts
     agenix rekey -a
