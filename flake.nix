@@ -39,7 +39,7 @@
       nixosConfigurations homeModules nixosModules;
 
     # Map additional folders to custom outputs
-    inherit (flake.lib) agenix-rekey networks users;
+    inherit (flake.lib) agenix-rekey networking users;
 
     # Derive Seeds (BIP-85) > 32-bytes hex > Index Number:
     derivationIndex = 1;

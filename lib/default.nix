@@ -12,7 +12,8 @@ in rec {
 
   # Extra flake outputs
   users = import ./users.nix args; 
-  networks = mkAttrs ../networks (network: import ../networks/${network});
+  # networking = mkAttrs ../zones (network: import ../zones/${network});
+  networking = import ./networking.nix args;
   agenix-rekey = inputs.agenix-rekey.configure {
     userFlake = flake;
     inherit (flake) nixosConfigurations;
