@@ -19,7 +19,7 @@
     (mapAttrs' (hostName: ip: nameValuePair ("${hostName}.${domain}") ip) hostNames)) tree
   );
 
-in rec {
+in {
 
   # Self-signed CA certificate, domain name used for public services
   inherit (import ../zones) ca domainName;

@@ -12,7 +12,6 @@ in rec {
 
   # Extra flake outputs
   users = import ./users.nix args; 
-  # networking = mkAttrs ../zones (network: import ../zones/${network});
   networking = import ./networking.nix args;
   agenix-rekey = inputs.agenix-rekey.configure {
     userFlake = flake;
@@ -36,9 +35,6 @@ in rec {
 
   # Create user attrs from path 
   mkUsers = import ./mkUsers.nix args; 
-
-  # Flatten the network tree into a "hostName.domain = address" set
-  mapping = import ./mapping.nix args; 
 
   # List of directory names
   dirNames = path: attrNames (filterAttrs (n: v: v == "directory") (readDir path));
