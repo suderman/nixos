@@ -9,6 +9,29 @@
   # Window class name
   class = "chromium-browser";
 
+  createSourceExtensionFor = browserVersion: { id, sha256, url, version}: {
+    inherit id;
+    crxPath = builtins.fetchurl {
+      name = "${id}.crx";
+      inherit url;
+      inherit sha256;
+    };
+    inherit version;
+  };
+
+  createChromiumExtensionFor = browserVersion: { id, sha256, version }: {
+    inherit id;
+    crxPath = builtins.fetchurl {
+      url = "https://clients2.google.com/service/update2/crx?response=redirect&acceptformat=crx2,crx3&prodversion=${browserVersion}&x=id%3D${id}%26installsource%3Dondemand%26uc";
+      name = "${id}.crx";
+      inherit sha256;
+    };
+    inherit version;
+  };
+
+  createSourceExtension = createSourceExtensionFor (lib.versions.major config.programs.chromium.package.version);
+  createChromiumExtension = createChromiumExtensionFor (lib.versions.major config.programs.chromium.package.version);
+
 in {
 
   imports = ls ./.;
@@ -29,26 +52,59 @@ in {
       ];
       package = pkgs.ungoogled-chromium;
       dictionaries = [ pkgs.hunspellDictsChromium.en_US ];
-      extensions = [{
-        id = "ocaahdebbfolfmndjeplogmgcagdmblk";
-        updateUrl = "https://raw.githubusercontent.com/NeverDecaf/chromium-web-store/master/updates.xml";
-      }] ++ [{ 
-        id = "dcpihecpambacapedldabdbpakmachpb"; # Bypass Paywalls
-        updateUrl = "https://raw.githubusercontent.com/iamadamdev/bypass-paywalls-chrome/master/src/updates/updates.xml"; 
-      }] ++ map (id: { inherit id; }) [
-        "cjpalhdlnbpafiamejdnhcphjbkeiagm" # uBlock Origin
-        "ddkjiahejlhfcafbddmgiahcphecmpfh" # uBlock Origin Lite
-        "jpbjcnkcffbooppibceonlgknpkniiff" # Global Speed
-        "eimadpbcbfnmbkopoojfekhnkhdbieeh" # Dark Reader
-        "dhdgffkkebhmkfjojejmpbldmpobfkfo" # TamperMonkey
-        "edibdbjcniadpccecjdfdjjppcpchdlm" # I still don't care about cookies
-        "icallnadddjmdinamnolclfjanhfoafe" # FastForward
-        "mnjggcdmjocbbbhaepdhchncahnbgone" # SponsorBlock
-        # "gfbliohnnapiefjpjlpjnehglfpaknnc" # Surfingkeys
-        # "cnojnbdhbhnkbcieeekonklommdnndci" # Search by Image
-        # "bggfcpfjbdkhfhfmkjpbhnkhnpjjeomc" # Material Icons for Github
-        # "padekgcemlokbadohgkifijomclgjgif" # Proxy SwitchyOmega
+
+        # nix-prefetch-url --name arst.crx 'https://clients2.google.com/service/...
+      extensions = [
+        (createSourceExtension {  # Web Store
+          url = "https://github.com/NeverDecaf/chromium-web-store/releases/download/v1.5.4.3/Chromium.Web.Store.crx";
+          id = "ocaahdebbfolfmndjeplogmgcagdmblk";
+          sha256 = "0ck5k4gs5cbwq1wd5i1aka5hwzlnyc4c513sv13vk9s0dlhbz4z5";
+          version = "1.5.4.3";
+        })
+        (createChromiumExtension { # ublock origin
+          id = "cjpalhdlnbpafiamejdnhcphjbkeiagm";
+          sha256 = "1lnk0k8zy0w33cxpv93q1am0d7ds2na64zshvbwdnbjq8x4sw5p6";
+          version = "1.61.2";
+        })
+        (createChromiumExtension { # dark reader
+          id = "eimadpbcbfnmbkopoojfekhnkhdbieeh";
+          sha256 = "0x9l2m260y0g7l7w988sghgh8qvfghydx8pbd1gd023zkqf1nrv2";
+          version = "4.9.96";
+        })
       ];
+
+      # extensions = [
+      #   { id = "cjpalhdlnbpafiamejdnhcphjbkeiagm"; }
+      #   {
+      #     id = "qwertyuiopasdfghjklzxcvbnmqwerty";
+      #     crxPath = pkgs.fetchurl {
+      #       url = "https://github.com/NeverDecaf/chromium-web-store/releases/download/v1.5.4.3/Chromium.Web.Store.crx";
+      #       sha256 = "sha256-5ZO/IG1Ap7lH2HqEwgjzln4Oi5oqxNJ4wHyxoh+ZZTI";
+      #     };
+      #     version = "1.0";
+      #   }
+      # ];
+
+      # extensions = [{
+      #   id = "ocaahdebbfolfmndjeplogmgcagdmblk";
+      #   updateUrl = "https://raw.githubusercontent.com/NeverDecaf/chromium-web-store/master/updates.xml";
+      # }] ++ [{ 
+      #   id = "dcpihecpambacapedldabdbpakmachpb"; # Bypass Paywalls
+      #   updateUrl = "https://raw.githubusercontent.com/iamadamdev/bypass-paywalls-chrome/master/src/updates/updates.xml"; 
+      # }] ++ map (id: { inherit id; }) [
+      #   "cjpalhdlnbpafiamejdnhcphjbkeiagm" # uBlock Origin
+      #   "ddkjiahejlhfcafbddmgiahcphecmpfh" # uBlock Origin Lite
+      #   "jpbjcnkcffbooppibceonlgknpkniiff" # Global Speed
+      #   "eimadpbcbfnmbkopoojfekhnkhdbieeh" # Dark Reader
+      #   "dhdgffkkebhmkfjojejmpbldmpobfkfo" # TamperMonkey
+      #   "edibdbjcniadpccecjdfdjjppcpchdlm" # I still don't care about cookies
+      #   "icallnadddjmdinamnolclfjanhfoafe" # FastForward
+      #   "mnjggcdmjocbbbhaepdhchncahnbgone" # SponsorBlock
+      #   # "gfbliohnnapiefjpjlpjnehglfpaknnc" # Surfingkeys
+      #   # "cnojnbdhbhnkbcieeekonklommdnndci" # Search by Image
+      #   # "bggfcpfjbdkhfhfmkjpbhnkhnpjjeomc" # Material Icons for Github
+      #   # "padekgcemlokbadohgkifijomclgjgif" # Proxy SwitchyOmega
+      # ];
     };
 
     # keyboard shortcuts
