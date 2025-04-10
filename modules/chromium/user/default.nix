@@ -1,139 +1,79 @@
-# -- modified module --
 # programs.chromium.enable = true;
 { config, lib, pkgs, ... }: let
 
   cfg = config.programs.chromium;
-  inherit (lib) concatStringSep hasPrefix ls mapAttrsToList mkIf versions;
+  inherit (lib) ls mkIf mkOption types;
   inherit (config.services.keyd.lib) mkClass;
-
-  crxUrl = id: if hasPrefix "http://" id || hasPrefix "https://" id then id else 
-    "https://clients2.google.com/service/update2/crx" +
-    "?response=redirect" +
-    "&acceptformat=crx2,crx3" +
-    "&prodversion=${versions.major cfg.package.version}" + 
-    "&x=id%3D${id}%26installsource%3Dondemand%26uc";
-
-  extensions = {
-    chromium-web-store = "https://github.com/NeverDecaf/chromium-web-store/releases/download/v1.5.4.3/Chromium.Web.Store.crx";
-    ublock-origin = "cjpalhdlnbpafiamejdnhcphjbkeiagm";
-    dark-reader = "eimadpbcbfnmbkopoojfekhnkhdbieeh";
-  };
-
-  script = concatStringSep "\n" (mapAttrsToList (
-    name: id: let url = crxUrl id; in ''
-      curl -L "${url}" > ${name}.zip
-      mkdir -p ${name}
-      unzip -u ${name}.zip -d ${name}
-
-      # curl -L "https://github.com/NeverDecaf/chromium-web-store/releases/download/v1.5.4.3/Chromium.Web.Store.crx" > 0.zip
-      # mkdir 0
-      # unzip -u 0.zip -d 0
-      # curl -L "https://clients2.google.com/service/update2/crx?response=redirect&acceptformat=crx2,crx3&prodversion=135.0.7049.52&x=id%3Dcjpalhdlnbpafiamejdnhcphjbkeiagm%26installsource%3Dondemand%26uc" > 1.zip
-      # mkdir 1
-      # unzip -u 1.zip -d 1
-    '' 
-  ));
-
 
   # Window class name
   class = "chromium-browser";
 
-  createSourceExtensionFor = browserVersion: { id, sha256, url, version}: {
-    inherit id;
-    crxPath = builtins.fetchurl {
-      name = "${id}.crx";
-      inherit url;
-      inherit sha256;
-    };
-    inherit version;
+  # Always load chromium web store
+  extensions = cfg.unpackedExtensions // {
+    chromium-web-store = "https://github.com/NeverDecaf/chromium-web-store/releases/download/v1.5.4.3/Chromium.Web.Store.crx";
+    # ublock-origin = "cjpalhdlnbpafiamejdnhcphjbkeiagm";
+    # dark-reader = "eimadpbcbfnmbkopoojfekhnkhdbieeh";
   };
-
-  createChromiumExtensionFor = browserVersion: { id, sha256, version }: {
-    inherit id;
-    crxPath = builtins.fetchurl {
-      url = "https://clients2.google.com/service/update2/crx?response=redirect&acceptformat=crx2,crx3&prodversion=${browserVersion}&x=id%3D${id}%26installsource%3Dondemand%26uc";
-      name = "${id}.crx";
-      inherit sha256;
-    };
-    inherit version;
-  };
-
-  createSourceExtension = createSourceExtensionFor (lib.versions.major config.programs.chromium.package.version);
-  createChromiumExtension = createChromiumExtensionFor (lib.versions.major config.programs.chromium.package.version);
 
 in {
 
   imports = ls ./.;
 
+  options.programs.chromium = {
+
+    # Extensions to automatically download and include with --load-extension
+    unpackedExtensions = mkOption {
+      type = types.anything; 
+      default = {};
+    };
+
+    # Where to download to and load extensions from
+    unpackedExtensionsDir = mkOption {
+      type = types.path; 
+      default = "${config.xdg.dataHome}/chromium/extensions";
+    };
+  };
+
   config = mkIf cfg.enable {
 
-    programs.chromium = {
-      # commandLineArgs = [ "--enable-features=WebUIDarkMode" ];
-      commandLineArgs = [ 
-        "--ozone-platform=wayland"
-        "--enable-features=UseOzonePlatform,WebUIDarkMode,WaylandWindowDecorations,WebRTCPipeWireCapturer,WaylandDrmSyncobj"
-        "--enable-accelerated-video-decode"
-        "--enable-gpu-rasterization"
-        "--disk-cache-dir=/run/user/${toString config.home.uid}/chromium-cache"
-        "--remove-referrers"
-        "--disable-top-sites"
-        "--no-default-browser-check"
+    programs.chromium = let 
+
+      # Store cache on volatile disk
+      runDir = "/run/user/${toString config.home.uid}/chromium-cache";
+
+      # Convert extension names to comma-separated directories
+      extensionsDirs = lib.concatStringsSep "," (
+        map (dir: "${cfg.unpackedExtensionsDir}/${dir}") (builtins.attrNames extensions)
+      );
+
+      # Enable these features in chromium
+      features = lib.concatStringsSep "," [
+        "UseOzonePlatform"
+        "WebUIDarkMode"
+        "WaylandWindowDecorations"
+        "WebRTCPipeWireCapturer"
+        "WaylandDrmSyncobj"
       ];
+
+    in {
+
+      # Using Chromium without Google
       package = pkgs.ungoogled-chromium;
       dictionaries = [ pkgs.hunspellDictsChromium.en_US ];
 
-        # nix-prefetch-url --name arst.crx 'https://clients2.google.com/service/...
-      extensions = [
-        (createSourceExtension {  # Web Store
-          url = "https://github.com/NeverDecaf/chromium-web-store/releases/download/v1.5.4.3/Chromium.Web.Store.crx";
-          id = "ocaahdebbfolfmndjeplogmgcagdmblk";
-          sha256 = "0ck5k4gs5cbwq1wd5i1aka5hwzlnyc4c513sv13vk9s0dlhbz4z5";
-          version = "1.5.4.3";
-        })
-        (createChromiumExtension { # ublock origin
-          id = "cjpalhdlnbpafiamejdnhcphjbkeiagm";
-          sha256 = "1lnk0k8zy0w33cxpv93q1am0d7ds2na64zshvbwdnbjq8x4sw5p6";
-          version = "1.61.2";
-        })
-        (createChromiumExtension { # dark reader
-          id = "eimadpbcbfnmbkopoojfekhnkhdbieeh";
-          sha256 = "0x9l2m260y0g7l7w988sghgh8qvfghydx8pbd1gd023zkqf1nrv2";
-          version = "4.9.96";
-        })
+      # Add these flags to the launcher
+      commandLineArgs = [ 
+        "--ozone-platform=wayland"
+        "--enable-features=${features}"
+        "--enable-accelerated-video-decode"
+        "--enable-gpu-rasterization"
+        "--remove-referrers"
+        "--disable-top-sites"
+        "--no-default-browser-check"
+        "--disk-cache-dir=${runDir}"
+        "--load-extension=${extensionsDirs}"
       ];
 
-      # extensions = [
-      #   { id = "cjpalhdlnbpafiamejdnhcphjbkeiagm"; }
-      #   {
-      #     id = "qwertyuiopasdfghjklzxcvbnmqwerty";
-      #     crxPath = pkgs.fetchurl {
-      #       url = "https://github.com/NeverDecaf/chromium-web-store/releases/download/v1.5.4.3/Chromium.Web.Store.crx";
-      #       sha256 = "sha256-5ZO/IG1Ap7lH2HqEwgjzln4Oi5oqxNJ4wHyxoh+ZZTI";
-      #     };
-      #     version = "1.0";
-      #   }
-      # ];
-
-      # extensions = [{
-      #   id = "ocaahdebbfolfmndjeplogmgcagdmblk";
-      #   updateUrl = "https://raw.githubusercontent.com/NeverDecaf/chromium-web-store/master/updates.xml";
-      # }] ++ [{ 
-      #   id = "dcpihecpambacapedldabdbpakmachpb"; # Bypass Paywalls
-      #   updateUrl = "https://raw.githubusercontent.com/iamadamdev/bypass-paywalls-chrome/master/src/updates/updates.xml"; 
-      # }] ++ map (id: { inherit id; }) [
-      #   "cjpalhdlnbpafiamejdnhcphjbkeiagm" # uBlock Origin
-      #   "ddkjiahejlhfcafbddmgiahcphecmpfh" # uBlock Origin Lite
-      #   "jpbjcnkcffbooppibceonlgknpkniiff" # Global Speed
-      #   "eimadpbcbfnmbkopoojfekhnkhdbieeh" # Dark Reader
-      #   "dhdgffkkebhmkfjojejmpbldmpobfkfo" # TamperMonkey
-      #   "edibdbjcniadpccecjdfdjjppcpchdlm" # I still don't care about cookies
-      #   "icallnadddjmdinamnolclfjanhfoafe" # FastForward
-      #   "mnjggcdmjocbbbhaepdhchncahnbgone" # SponsorBlock
-      #   # "gfbliohnnapiefjpjlpjnehglfpaknnc" # Surfingkeys
-      #   # "cnojnbdhbhnkbcieeekonklommdnndci" # Search by Image
-      #   # "bggfcpfjbdkhfhfmkjpbhnkhnpjjeomc" # Material Icons for Github
-      #   # "padekgcemlokbadohgkifijomclgjgif" # Proxy SwitchyOmega
-      # ];
     };
 
     # keyboard shortcuts
@@ -179,6 +119,69 @@ in {
     #   "electron-flags29.conf".text = flags;
     #   "electron-flags30.conf".text = flags;
     # };
+
+    # Download and keep chromium extensions up-to-date
+    systemd.user = let
+
+      inherit (lib) mkShellScript;
+      inherit (builtins) attrNames concatStringsSep;
+      inherit (lib) hasPrefix mapAttrsToList versions;
+
+      url = id: if hasPrefix "http://" id || hasPrefix "https://" id then id else 
+        "https://clients2.google.com/service/update2/crx" +
+        "?response=redirect" +
+        "&acceptformat=crx2,crx3" +
+        "&prodversion=${versions.major cfg.package.version}" + 
+        "&x=id%3D${id}%26installsource%3Dondemand%26uc";
+
+    in {
+      services.chromium-download-extensions = {
+        Unit.Description = "Download chromium exentions";
+        Unit.After = [ "network-online.target" ];
+        Unit.Wants = [ "network-online.target" ];
+        Service.Type = "oneshot";
+        Service.ExecStart = mkShellScript {
+          inputs = [ pkgs.curl pkgs.zip ];
+          text = ''
+
+            # Create and move to extensions directory
+            mkdir -p ${cfg.unpackedExtensionsDir}
+            cd ${cfg.unpackedExtensionsDir}
+
+            # Ensure the extension directories exists with stub manifest to avoid errors
+            for dir in ${toString (attrNames extensions)}; do
+              if [[ ! -d $dir ]]; then
+                mkdir $dir
+                echo "{ \"manifest_version\": 3, \"name\": \"$dir\", \"version\": \"0.0.1\" }" > $dir/manifest.json
+                touch -d '2000-01-01 00:00:00' $dir/manifest.json
+              fi
+            done
+
+          '' + concatStringsSep "\n" (mapAttrsToList ( name: id: ''
+            # Attempt to download the ${name} extension
+            curl -L "${url id}" > ${name}.zip || true
+
+            # If successful, unzip contents into extension's directory
+            if [[ -f ${name}.zip && -s ${name}.zip ]]; then
+              unzip -ou ${name}.zip -d ${name} 2>/dev/null || true
+            fi
+          '' ) extensions);
+        };
+        Install.WantedBy = [ "default.target" ];
+      };
+
+      timers.chromium-download-extensions = {
+        Unit.Description = "Download chromium exentions every 6 hours";
+        Timer = {
+          OnBootSec = "1min";
+          OnUnitActiveSec = "6h";
+          Persistent = true;
+        };
+        Install.WantedBy = [ "timers.target" ];
+      };
+
+    };
+
 
   };
 
