@@ -3,8 +3,37 @@
 { config, lib, pkgs, ... }: let
 
   cfg = config.programs.chromium;
-  inherit (lib) ls mkIf;
+  inherit (lib) concatStringSep hasPrefix ls mapAttrsToList mkIf versions;
   inherit (config.services.keyd.lib) mkClass;
+
+  crxUrl = id: if hasPrefix "http://" id || hasPrefix "https://" id then id else 
+    "https://clients2.google.com/service/update2/crx" +
+    "?response=redirect" +
+    "&acceptformat=crx2,crx3" +
+    "&prodversion=${versions.major cfg.package.version}" + 
+    "&x=id%3D${id}%26installsource%3Dondemand%26uc";
+
+  extensions = {
+    chromium-web-store = "https://github.com/NeverDecaf/chromium-web-store/releases/download/v1.5.4.3/Chromium.Web.Store.crx";
+    ublock-origin = "cjpalhdlnbpafiamejdnhcphjbkeiagm";
+    dark-reader = "eimadpbcbfnmbkopoojfekhnkhdbieeh";
+  };
+
+  script = concatStringSep "\n" (mapAttrsToList (
+    name: id: let url = crxUrl id; in ''
+      curl -L "${url}" > ${name}.zip
+      mkdir -p ${name}
+      unzip -u ${name}.zip -d ${name}
+
+      # curl -L "https://github.com/NeverDecaf/chromium-web-store/releases/download/v1.5.4.3/Chromium.Web.Store.crx" > 0.zip
+      # mkdir 0
+      # unzip -u 0.zip -d 0
+      # curl -L "https://clients2.google.com/service/update2/crx?response=redirect&acceptformat=crx2,crx3&prodversion=135.0.7049.52&x=id%3Dcjpalhdlnbpafiamejdnhcphjbkeiagm%26installsource%3Dondemand%26uc" > 1.zip
+      # mkdir 1
+      # unzip -u 1.zip -d 1
+    '' 
+  ));
+
 
   # Window class name
   class = "chromium-browser";
