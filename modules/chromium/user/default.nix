@@ -65,10 +65,12 @@ in {
         "TabstripDedupe"
         "TaskManagerDesktopRefresh"
         "UseOzonePlatform"
-        "WaylandDrmSyncobj"
+        "WaylandLinuxDrmSyncobjExplicitSync"
         "WaylandWindowDecorations"
         "WebRTCPipeWireCapturer"
         "WebUIDarkMode"
+        # "WaylandDrmSyncobj"
+        # "WaylandLinuxDMABufExplicitSyncV2"
       ];
 
     in {
