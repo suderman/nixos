@@ -35,6 +35,11 @@
     package = pkgs.vscode.fhs;
   };
 
+  xdg.desktopEntries = config.programs.chromium.lib.mkWebApp {
+    name = "Slack";
+    url = "https://app.slack.com/client/T024FEF48/C024FEF4E";
+  };
+
   programs.chromium = {
     enable = true;
     unpackedExtensions = {
