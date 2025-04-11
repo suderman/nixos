@@ -41,6 +41,8 @@ in {
       # Store cache on volatile disk
       runDir = "/run/user/${toString config.home.uid}/chromium-cache";
 
+      dataDir = "${config.xdg.dataHome}/chromium/profile";
+
       # Convert extension names to comma-separated directories
       extensionsDirs = lib.concatStringsSep "," (
         map (dir: "${cfg.unpackedExtensionsDir}/${dir}") (builtins.attrNames extensions)
@@ -48,11 +50,25 @@ in {
 
       # Enable these features in chromium
       features = lib.concatStringsSep "," [
+        "DevToolsPrivacyUI"
+        "EnableFingerprintingProtectionFilter:activation_level/enabled/enable_console_logging/true"
+        "EnableFingerprintingProtectionFilterInIncognito:activation_level/enabled/enable_console_logging/true"
+        "ImprovedSettingsUIOnDesktop"
+        "MultiTabOrganization"
+        "OneTimePermission"
+        "TabOrganization"
+        "TabOrganizationSettingsVisibility"
+        "TabReorganization"
+        "TabReorganizationDivider"
+        "TabSearchPositionSetting"
+        "TabstripDeclutter"
+        "TabstripDedupe"
+        "TaskManagerDesktopRefresh"
         "UseOzonePlatform"
-        "WebUIDarkMode"
+        "WaylandDrmSyncobj"
         "WaylandWindowDecorations"
         "WebRTCPipeWireCapturer"
-        "WaylandDrmSyncobj"
+        "WebUIDarkMode"
       ];
 
     in {
@@ -63,15 +79,23 @@ in {
 
       # Add these flags to the launcher
       commandLineArgs = [ 
-        "--ozone-platform=wayland"
-        "--enable-features=${features}"
-        "--enable-accelerated-video-decode"
-        "--enable-gpu-rasterization"
-        "--remove-referrers"
+        "--disable-features=EnableTabMuting"
+        "--disable-smooth-scrolling"
         "--disable-top-sites"
-        "--no-default-browser-check"
         "--disk-cache-dir=${runDir}"
+        "--user-data-dir=${dataDir}"
+        "--enable-accelerated-video-decode"
+        "--enable-features=${features}"
+        "--enable-gpu-rasterization"
+        "--enable-incognito-themes"
+        "--extension-mime-request-handling=always-prompt-for-install"
+        "--fingerprinting-canvas-image-data-noise"
+        "--fingerprinting-canvas-measuretext-noise"
+        "--fingerprinting-client-rects-noise"
         "--load-extension=${extensionsDirs}"
+        "--no-default-browser-check"
+        "--ozone-platform=wayland"
+        "--remove-referrers"
       ];
 
     };

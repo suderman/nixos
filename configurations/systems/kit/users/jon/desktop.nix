@@ -35,4 +35,20 @@
     package = pkgs.vscode.fhs;
   };
 
+  programs.chromium = {
+    enable = true;
+    unpackedExtensions = {
+      alby = "iokeahhehimjnekafflcihljlcjccdbe";
+      dark-reader = "eimadpbcbfnmbkopoojfekhnkhdbieeh";
+      dark-theme = "gjjbmfigjpgnehjioicaalopaikcnheo";
+      fake-data = "gchcfdihakkhjgfmokemfeembfokkajj";
+      global-speed = "jpbjcnkcffbooppibceonlgknpkniiff";
+      i-still-dont-care-about-cookies = "edibdbjcniadpccecjdfdjjppcpchdlm";
+      one-password = "aeblfdkhhhdcdjpifhhbdiojplfjncoa";
+      sponsorblock = "mnjggcdmjocbbbhaepdhchncahnbgone";
+      ublock-origin = "cjpalhdlnbpafiamejdnhcphjbkeiagm";
+      ublock-origin-lite = "ddkjiahejlhfcafbddmgiahcphecmpfh";
+    };
+  };
+
 }
