@@ -4,21 +4,17 @@
   cfg = config.programs.chromium;
   inherit (lib) ls mkIf mkOption types;
   inherit (config.services.keyd.lib) mkClass;
+  inherit (config.programs.chromium.lib) switches browserSwitches unpackedExtensions;
 
   # Window class name
   class = "chromium-browser";
 
-  # Always load chromium web store
-  extensions = cfg.unpackedExtensions // {
-    chromium-web-store = "https://github.com/NeverDecaf/chromium-web-store/releases/download/v1.5.4.3/Chromium.Web.Store.crx";
-    # ublock-origin = "cjpalhdlnbpafiamejdnhcphjbkeiagm";
-    # dark-reader = "eimadpbcbfnmbkopoojfekhnkhdbieeh";
-  };
-
 in {
 
+  # import chromium lib
   imports = ls ./.;
 
+  # extra options to manage unpacked extensions
   options.programs.chromium = {
 
     # Extensions to automatically download and include with --load-extension
@@ -36,44 +32,11 @@ in {
 
   config = mkIf cfg.enable {
 
-    programs.chromium = let 
-
-      # Store cache on volatile disk
-      runDir = "/run/user/${toString config.home.uid}/chromium-cache";
-
-      # Convert extension names to comma-separated directories
-      extensionsDirs = lib.concatStringsSep "," (
-        map (dir: "${cfg.unpackedExtensionsDir}/${dir}") (builtins.attrNames extensions)
-      );
-
-      # Enable these features in chromium
-      features = lib.concatStringsSep "," [
-        "UseOzonePlatform"
-        "WebUIDarkMode"
-        "WaylandWindowDecorations"
-        "WebRTCPipeWireCapturer"
-        "WaylandDrmSyncobj"
-      ];
-
-    in {
-
-      # Using Chromium without Google
+    # using Chromium without Google
+    programs.chromium = {
       package = pkgs.ungoogled-chromium;
       dictionaries = [ pkgs.hunspellDictsChromium.en_US ];
-
-      # Add these flags to the launcher
-      commandLineArgs = [ 
-        "--ozone-platform=wayland"
-        "--enable-features=${features}"
-        "--enable-accelerated-video-decode"
-        "--enable-gpu-rasterization"
-        "--remove-referrers"
-        "--disable-top-sites"
-        "--no-default-browser-check"
-        "--disk-cache-dir=${runDir}"
-        "--load-extension=${extensionsDirs}"
-      ];
-
+      commandLineArgs = switches ++ browserSwitches;  
     };
 
     # keyboard shortcuts
@@ -93,32 +56,12 @@ in {
       ];
     };
 
-    # xdg.configFile = let flags = ''
-    #     --ozone-platform=wayland
-    #     --enable-features=UseOzonePlatform,WebUIDarkMode,WaylandWindowDecorations,WebRTCPipeWireCapturer,WaylandDrmSyncobj
-    #     --enable-accelerated-video-decode
-    #     --enable-gpu-rasterization
-    #     --disk-cache-dir=/run/user/${toString config.home.uid}/chromium-cache
-    #   '';
-    # in {
-    #   "chromium-flags.conf".text = flags;
-    #   "electron-flags.conf".text = flags;
-    #   "electron-flags16.conf".text = flags;
-    #   "electron-flags17.conf".text = flags;
-    #   "electron-flags18.conf".text = flags;
-    #   "electron-flags19.conf".text = flags;
-    #   "electron-flags20.conf".text = flags;
-    #   "electron-flags21.conf".text = flags;
-    #   "electron-flags22.conf".text = flags;
-    #   "electron-flags23.conf".text = flags;
-    #   "electron-flags24.conf".text = flags;
-    #   "electron-flags25.conf".text = flags;
-    #   "electron-flags26.conf".text = flags;
-    #   "electron-flags27.conf".text = flags;
-    #   "electron-flags28.conf".text = flags;
-    #   "electron-flags29.conf".text = flags;
-    #   "electron-flags30.conf".text = flags;
-    # };
+    # Share switches with electron apps in ~/.config
+    xdg.configFile = let 
+      configs = [ "chromium-flags.conf" "electron-flags.conf" ] ++ 
+                (map (v: "electron-flags${toString v}.conf") (lib.range 14 40));
+      value = { text = lib.concatStringsSep "\n" switches; };
+    in builtins.listToAttrs (map (name: { inherit name value;  }) configs);
 
     # Download and keep chromium extensions up-to-date
     systemd.user = let
@@ -149,7 +92,7 @@ in {
             cd ${cfg.unpackedExtensionsDir}
 
             # Ensure the extension directories exists with stub manifest to avoid errors
-            for dir in ${toString (attrNames extensions)}; do
+            for dir in ${toString (attrNames unpackedExtensions)}; do
               if [[ ! -d $dir ]]; then
                 mkdir $dir
                 echo "{ \"manifest_version\": 3, \"name\": \"$dir\", \"version\": \"0.0.1\" }" > $dir/manifest.json
@@ -165,7 +108,7 @@ in {
             if [[ -f ${name}.zip && -s ${name}.zip ]]; then
               unzip -ou ${name}.zip -d ${name} 2>/dev/null || true
             fi
-          '' ) extensions);
+          '' ) unpackedExtensions);
         };
         Install.WantedBy = [ "default.target" ];
       };
@@ -181,7 +124,6 @@ in {
       };
 
     };
-
 
   };
 

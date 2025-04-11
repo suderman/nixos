@@ -1,10 +1,10 @@
-# -- modified module --
 # services.keyd.enable = true;
-{ config, lib, pkgs, this, ... }: let 
+{ config, lib, pkgs, perSystem, ... }: let 
 
   cfg = config.services.keyd;
   ini = pkgs.formats.ini {};
-  inherit (lib) concatStringsSep ls mapAttrsToList mkDefault mkIf mkOption mkShellScript types;
+  inherit (perSystem.self) mkScript;
+  inherit (lib) concatStringsSep ls mapAttrsToList mkDefault mkIf mkOption types;
 
 in {
 
@@ -53,8 +53,8 @@ in {
     keyd.Service = {
       Type = "simple";
       Restart = "always";
-      ExecStart = mkShellScript {
-        inputs = [ pkgs.keyd ];
+      ExecStart = mkScript {
+        path = [ pkgs.keyd ];
         text = "keyd-application-mapper";
       };
     };
@@ -69,8 +69,8 @@ in {
     keyd-layers.Service = {
       Type = "simple";
       Restart = "always";
-      ExecStart = mkShellScript {
-        inputs = with pkgs; [ socat keyd ];
+      ExecStart = mkScript {
+        path = with pkgs; [ socat keyd ];
         text = let
           openlayers = concatStringsSep "\n" ( 
             mapAttrsToList( layer: pairs: let 
