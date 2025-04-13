@@ -4,11 +4,6 @@
   inherit (lib) mkIf mkOption types;
   inherit (lib) hasPrefix mapAttrsToList versions;
 
-  # # all bookmarkedExtensions collected from all users
-  # bookmarkedExtensions = builtins.foldl' (acc: user: 
-  #   acc // (config.home-manager.users.${user}.programs.chromium.bookmarkedExtensions or {})
-  # ) {} (builtins.attrNames config.home-manager.users or {});
-
   extensions = builtins.foldl' (acc: user: 
     acc // (config.home-manager.users.${user}.programs.chromium.lib.extensions or {})
   ) {} (builtins.attrNames config.home-manager.users or {});
@@ -103,20 +98,29 @@ in {
           dir="${cfg.crxDir}/$1"
           mkdir -p $dir; cd $dir
 
-          # Second arg is crx url, download extension
-          curl -sL "$2" > extension.crx || true
-          crx3 unpack extension.crx || true
+          # Second arg is crx url, download extension and validate id
+          curl -sL "$2" > .extension.crx || true
+          if [[ "$(crx3 id .extension.crx 2>/dev/null)" =~ ^[a-p]{32}$ ]]; then
 
-          # Write extension's JSON file
-          printf '{"external_crx":"%s","external_version":"%s"}' \
-          "$dir/extension.crx" "$(cat extension/manifest.json | jq -r .version)" \
-          > $(crx3 id extension.crx).json || true
+            # If valid, rename tmp file and unpack
+            mv .extension.crx extension.crx
+            crx3 unpack extension.crx || true
+
+            # Write extension's JSON file
+            printf '{"external_crx":"%s","external_version":"%s"}' \
+            "$dir/extension.crx" "$(cat extension/manifest.json | jq -r .version)" \
+            > $(crx3 id extension.crx).json || true
+
+          # If invalid download, delete tmp file
+          else
+            rm .extension.crx
+          fi
 
         }
 
       '' + concatStringsSep "\n" (mapAttrsToList ( name: id: ''
         update "${name}" "${url id}"
-      '' ) extensions);
+      '' ) extensions) + "date > ${cfg.crxDir}/last";
 
     };
 

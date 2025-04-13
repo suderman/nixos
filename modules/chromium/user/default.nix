@@ -17,29 +17,28 @@ in {
   # extra options to manage unpacked extensions
   options.programs.chromium = {
 
-    # External Extensions
+    # Extensions to automatically download and include
     externalExtensions = mkOption {
       type = types.anything; 
       default = {};
     };
 
-    # # Extensions to added to managed bookmarks for easy install
-    # bookmarkedExtensions = mkOption {
-    #   type = types.anything; 
-    #   default = {};
-    # };
-
-    # Extensions to automatically download and include with --load-extension
+    # Extensions to automatically download and include unpacked
     unpackedExtensions = mkOption {
       type = types.anything; 
       default = {};
     };
 
-    # # Where to download to and load extensions from
-    # extensionsDir = mkOption {
-    #   type = types.path; 
-    #   default = "${config.xdg.dataHome}/chromium/extensions";
-    # };
+    # Registry of chromium extensions
+    registry = lib.mkOption {
+      type = types.anything; 
+      default = {};
+      example = {
+        chromium-web-store = "https://github.com/NeverDecaf/chromium-web-store/releases/download/v1.5.4.3/Chromium.Web.Store.crx";
+        ublock-origin = "cjpalhdlnbpafiamejdnhcphjbkeiagm";
+      };
+    };
+
   };
 
   config = mkIf cfg.enable {
@@ -113,81 +112,17 @@ in {
         Install.WantedBy = [ "default.target" ];
       };
 
-      timers.crx = {
+      paths.crx = {
         Unit.Description = "Symlink chromium extentions";
-        Timer = {
-          OnBootSec = "1min";
-          OnUnitActiveSec = "2h";
-          Persistent = true;
+        Path = {
+          PathExists = "${crxDir}/last";
+          PathChanged = "${crxDir}/last";
+          Unit = "crx.service";
         };
-        Install.WantedBy = [ "timers.target" ];
+        Install.WantedBy = [ "default.target" ];
       };
-    };
 
-    # # Download and keep chromium extensions up-to-date
-    # systemd.user = let
-    #
-    #   inherit (lib) mkShellScript;
-    #   inherit (builtins) attrNames concatStringsSep;
-    #   inherit (lib) hasPrefix mapAttrsToList versions;
-    #
-    #   url = id: if hasPrefix "http://" id || hasPrefix "https://" id then id else 
-    #     "https://clients2.google.com/service/update2/crx" +
-    #     "?response=redirect" +
-    #     "&acceptformat=crx2,crx3" +
-    #     "&prodversion=${versions.major cfg.package.version}" + 
-    #     "&x=id%3D${id}%26installsource%3Dondemand%26uc";
-    #
-    # in {
-    #   services.chromium-download-extensions = {
-    #     Unit.Description = "Download chromium exentions";
-    #     Unit.After = [ "network-online.target" ];
-    #     Unit.Wants = [ "network-online.target" ];
-    #     Service.Type = "oneshot";
-    #     Service.ExecStart = mkShellScript {
-    #       inputs = [ pkgs.curl pkgs.zip ];
-    #       text = ''
-    #
-    #         # Create and move to extensions directory
-    #         mkdir -p ${cfg.extensionsDir}
-    #         cd ${cfg.extensionsDir}
-    #
-    #         # Ensure the extension directories exists with stub manifest to avoid errors
-    #         for dir in ${toString (attrNames extensions)}; do
-    #           if [[ ! -d $dir ]]; then
-    #             mkdir $dir
-    #             echo "{ \"manifest_version\": 3, \"name\": \"$dir\", \"version\": \"0.0.1\" }" > $dir/manifest.json
-    #             touch -d '2000-01-01 00:00:00' $dir/manifest.json
-    #           fi
-    #         done
-    #
-    #       '' + concatStringsSep "\n" (mapAttrsToList ( name: id: ''
-    #         # Save the extension's id
-    #         echo "${id}" > ${name}.id
-    #
-    #         # Attempt to download the ${name} extension
-    #         curl -L "${url id}" > ${name}.crx || true
-    #
-    #         # If successful, unzip contents into extension's directory
-    #         if [[ -f ${name}.crx && -s ${name}.crx ]]; then
-    #           unzip -ou ${name}.crx -d ${name} 2>/dev/null || true
-    #         fi
-    #       '' ) extensions);
-    #     };
-    #     Install.WantedBy = [ "default.target" ];
-    #   };
-    #
-    #   timers.chromium-download-extensions = {
-    #     Unit.Description = "Download chromium exentions every 6 hours";
-    #     Timer = {
-    #       OnBootSec = "1min";
-    #       OnUnitActiveSec = "6h";
-    #       Persistent = true;
-    #     };
-    #     Install.WantedBy = [ "timers.target" ];
-    #   };
-    #
-    # };
+    };
 
   };
 

@@ -5,19 +5,15 @@
   inherit (builtins) attrNames isString;
   inherit (lib) concatStringsSep getExe mkOption removePrefix removeSuffix replaceStrings toLower types;
 
-  # # Store profile in ~/.local/share/chromium
-  # dataDir = "${config.xdg.dataHome}/chromium/profile";
-
   # Store cache on volatile disk
   runDir = "/run/user/${toString config.home.uid}/chromium-cache";
 
   # Always load chromium web store
   unpackedExtensions = cfg.unpackedExtensions // {
     inherit (cfg.registry) chromium-web-store;
-    # chromium-web-store = "https://github.com/NeverDecaf/chromium-web-store/releases/download/v1.5.4.3/Chromium.Web.Store.crx";
-    # inherit (registry) chromium-web-store;
   };
 
+  # All extensions in use
   extensions = unpackedExtensions // cfg.externalExtensions;
 
   # Convert extension names to comma-separated directories
