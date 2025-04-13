@@ -81,33 +81,39 @@ in {
       extDir = "${config.xdg.configHome}/chromium/External Extensions";
     in {
       services.crx = {
-        Unit.Description = "Symlink chromium extentions";
-        Unit.After = [ "network-online.target" ];
-        Unit.Wants = [ "network-online.target" ];
-        Service.Type = "oneshot";
-        Service.ExecStart = mkShellScript {
-          text = ''
-            # Ensure external extensions directory exists
-            dir="${extDir}"
-            mkdir -p "$dir"
+        Unit = {
+          Description = "Symlink chromium extentions";
+          StartLimitIntervalSec = 60;
+          StartLimitBurst = 5;
+        };
+        Service = {
+          Type = "oneshot";
+          ExecStart = mkShellScript {
+            text = ''
+              # Ensure external extensions directory exists
+              dir="${extDir}"
+              mkdir -p "$dir"
 
-            # Change dirctory and clear it out
-            cd "$dir"
-            rm -f *.json
+              # Change dirctory and clear it out
+              cd "$dir"
+              rm -f *.json
 
-            # Symlink each extension's json here
-            symlink() {
-              shopt -s nullglob
-              for json in ${crxDir}/$1/*.json; do
-                ln -sf $json .
-              done
-              shopt -u nullglob
-            }
+              # Symlink each extension's json here
+              symlink() {
+                shopt -s nullglob
+                for json in ${crxDir}/$1/*.json; do
+                  ln -sf $json .
+                done
+                shopt -u nullglob
+              }
 
-            # External extensions
-          '' + concatStringsSep "\n" ( 
-            map (name: "symlink ${name}") (attrNames extensions) 
-          );
+              # External extensions
+            '' + concatStringsSep "\n" ( 
+              map (name: "symlink ${name}") (attrNames extensions) 
+            );
+          };
+          Restart = "no";
+          RestartSec = 5;
         };
         Install.WantedBy = [ "default.target" ];
       };
@@ -115,7 +121,6 @@ in {
       paths.crx = {
         Unit.Description = "Symlink chromium extentions";
         Path = {
-          PathExists = "${crxDir}/last";
           PathChanged = "${crxDir}/last";
           Unit = "crx.service";
         };

@@ -4,10 +4,12 @@
   inherit (lib) mkIf mkOption types;
   inherit (lib) hasPrefix mapAttrsToList versions;
 
+  # All enabled extensions from all home-manager users
   extensions = builtins.foldl' (acc: user: 
     acc // (config.home-manager.users.${user}.programs.chromium.lib.extensions or {})
   ) {} (builtins.attrNames config.home-manager.users or {});
 
+  # If any extensions are enabled, set this to true
   enable = let 
     inherit (builtins) any attrNames;
     inherit (config.home-manager) users;
@@ -29,8 +31,6 @@ in {
   config = mkIf enable {
 
     programs.chromium = {
-
-      # Module only writes configuration to /etc, doesn't run anything
       enable = true;
 
       # defaultSearchProviderEnabled = true;
@@ -119,8 +119,13 @@ in {
         }
 
       '' + concatStringsSep "\n" (mapAttrsToList ( name: id: ''
-        update "${name}" "${url id}"
-      '' ) extensions) + "date > ${cfg.crxDir}/last";
+        update ${name} \
+        "${url id}"
+      '' ) extensions) + ''
+
+        # Trigger user services to symlink extensions
+        date > ${cfg.crxDir}/last
+      '';
 
     };
 
