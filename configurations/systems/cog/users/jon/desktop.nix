@@ -17,18 +17,25 @@
 
   programs.chromium = {
     enable = true;
-    unpackedExtensions = {
-      alby = "iokeahhehimjnekafflcihljlcjccdbe";
-      dark-reader = "eimadpbcbfnmbkopoojfekhnkhdbieeh";
-      fake-data = "gchcfdihakkhjgfmokemfeembfokkajj";
-      global-speed = "jpbjcnkcffbooppibceonlgknpkniiff";
-      i-still-dont-care-about-cookies = "edibdbjcniadpccecjdfdjjppcpchdlm";
-      one-password = "aeblfdkhhhdcdjpifhhbdiojplfjncoa";
-      sponsorblock = "mnjggcdmjocbbbhaepdhchncahnbgone";
-      tampermonkey = "dhdgffkkebhmkfjojejmpbldmpobfkfo";
-      ublock-origin = "cjpalhdlnbpafiamejdnhcphjbkeiagm";
-      ublock-origin-lite = "ddkjiahejlhfcafbddmgiahcphecmpfh";
+
+    externalExtensions = with config.programs.chromium; {
+      inherit (registry) 
+        alby
+        auto-tab-discard-suspend
+        built-with
+        fake-data
+        floccus-bookmarks-sync
+        global-speed
+        i-still-dont-care-about-cookies
+        one-password
+        return-youtube-dislike
+      ;
     };
+
+    unpackedExtensions = with config.programs.chromium; {
+      inherit (registry) ublock-origin sponsorblock;
+    };
+
   };
 
 }

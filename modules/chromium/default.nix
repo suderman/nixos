@@ -2,183 +2,134 @@
 
   cfg = config.programs.chromium;
   inherit (lib) mkIf mkOption types;
+  inherit (lib) hasPrefix mapAttrsToList versions;
 
-  hash = "/nix/state/chromium-config.hash";
+  # # all bookmarkedExtensions collected from all users
+  # bookmarkedExtensions = builtins.foldl' (acc: user: 
+  #   acc // (config.home-manager.users.${user}.programs.chromium.bookmarkedExtensions or {})
+  # ) {} (builtins.attrNames config.home-manager.users or {});
 
-  chromeWebstoreCrxUrl = id: "https://clients2.google.com/service/update2/crx"
-    + "?response=redirect"
-    + "&acceptformat=crx2,crx3"
-    + "&prodversion=${cfg.package.version}"
-    + "&x=id%3D${id}%26uc";
+  extensions = builtins.foldl' (acc: user: 
+    acc // (config.home-manager.users.${user}.programs.chromium.lib.extensions or {})
+  ) {} (builtins.attrNames config.home-manager.users or {});
 
-  # # ublock policies as an attr set, reusable from firefox, that's why it's a seperate module.
-  # ublockPolicies = import ./ublock-policies.nix {};
+  enable = let 
+    inherit (builtins) any attrNames;
+    inherit (config.home-manager) users;
+  in any (user: users.${user}.programs.chromium.enable or false) (attrNames users); 
 
 in {
 
-  options.programs.chromium.package = mkOption {
-    type = types.package;
-    default = pkgs.ungoogled-chromium;
+  options.programs.chromium = {
+    package = mkOption {
+      type = types.package;
+      default = pkgs.ungoogled-chromium;
+    };
+    crxDir = mkOption {
+      type = types.path;
+      default = "/nix/state/crx";
+    };
   };
 
-  # config = mkIf cfg.enable {
-  #   environment.systemPackages = [ cfg.package ];
-  #   programs.chromium = {
-  #
-  #     # Extensions
-  #     extensions = [
-  #       "cjpalhdlnbpafiamejdnhcphjbkeiagm" # ublock origin
-  #       "doojmbjmlfjjnbmnoijecmcbfeoakpjm" # noscript
-  #       "aeblfdkhhhdcdjpifhhbdiojplfjncoa" # 1password
-  #       "mnjggcdmjocbbbhaepdhchncahnbgone" # sponsorblock
-  #       # "dbepggeogbaibhgnhhndojpepiihcmeb" # vimium
-  #     ];
-  #
-  #     defaultSearchProviderEnabled = true;
-  #     defaultSearchProviderSearchURL = "https://www.google.com/search?q={searchTerms}&{google:RLZ}{google:originalQueryForSuggestion}{google:assistedQueryStats}{google:searchFieldtrialParameter}{google:searchClient}{google:sourceId}{google:instantExtendedEnabledParameter}ie={inputEncoding}";
-  #     defaultSearchProviderSuggestURL = "https://www.google.com/complete/search?output=chrome&q={searchTerms}";
-  #
-  #     # Policies
-  #     extraOpts = {
-  #       ExtensionSettings =
-  #         # allow added extensions
-  #         (builtins.listToAttrs ( map
-  #             (ext: {
-  #               name = ext;
-  #               value = { 
-  #                 installation_mode = "allowed"; 
-  #                 update_url = "https://clients2.google.com/service/update2/crx";
-  #               };
-  #             })
-  #             ( config.programs.chromium.extensions ++ [
-  #               "ocaahdebbfolfmndjeplogmgcagdmblk" # chromium web store
-  #               # "oladmjdebphlnjjcnomfhhbfdldiimaf" # libredirect
-  #             ])
-  #         )) // {
-  #           # "*" = {
-  #           #   installation_mode = "blocked"; # Block by default
-  #           #   blocked_install_message = "Add in nixos module!";
-  #           # };
-  #           "*" = {
-  #             installation_mode = "allowed"; # allow by default
-  #           };
-  #
-  #           "ocaahdebbfolfmndjeplogmgcagdmblk" = {
-  #             installation_mode = "allowed";
-  #             update_url = "https://github.com/NeverDecaf/chromium-web-store/releases/latest/download/Chromium.Web.Store.crx";
-  #           };
-  #
-  #           # Pin ublock
-  #           "cjpalhdlnbpafiamejdnhcphjbkeiagm" = {
-  #             # installation_mode = "allowed";
-  #             installation_mode = "allowed";
-  #             update_url = "https://clients2.google.com/service/update2/crx";
-  #             toolbar_pin = "force_pinned";
-  #           };
-  #
-  #           # Pin 1password
-  #           "aeblfdkhhhdcdjpifhhbdiojplfjncoa" = {
-  #             # installation_mode = "allowed";
-  #             installation_mode = "allowed";
-  #             update_url = "https://clients2.google.com/service/update2/crx";
-  #             toolbar_pin = "force_pinned";
-  #           };
-  #         };
-  #
-  #       # "3rdparty" = {
-  #       #   "extensions" = {
-  #       #     "cjpalhdlnbpafiamejdnhcphjbkeiagm" = {
-  #       #       adminSettings = builtins.toJSON ublockPolicies;
-  #       #     };
-  #       #   };
-  #       # };
-  #
-  #       # 5 = Open New Tab Page
-  #       # 1 = Restore the last session
-  #       # 4 = Open a list of URLs
-  #       # 6 = Open a list of URLs and restore the last session
-  #       "RestoreOnStartup" = 1;
-  #       # "RestoreOnStartupURLs" = [];
-  #
-  #       # 0 = Predict network actions on any network connection
-  #       # 2 = Do not predict network actions on any network connection
-  #       "NetworkPredictionOptions" = 0;
-  #
-  #       "HttpsOnlyMode" = "force_enabled";
-  #       "MemorySaverModeSavings" = 1;
-  #       "SearchSuggestEnabled" = true;
-  #       "PasswordManagerEnabled" = false;
-  #       "SpellcheckEnabled" = true;
-  #       "SpellcheckLanguage" = [ "en-US" ];
-  #     };
-  #
-  #     # The user has to confirm the installation of extensions on the first run
-  #     initialPrefs = {
-  #       "first_run_tabs" = (map chromeWebstoreCrxUrl config.programs.chromium.extensions) ++ [
-  #         "https://github.com/NeverDecaf/chromium-web-store/releases/latest/download/Chromium.Web.Store.crx"
-  #         # "https://github.com/libredirect/browser_extension/releases/download/v3.1.0/libredirect-3.1.0.crx"
-  #       ];
-  #     };
-  #   };
-  #
-  #   # nixpkgs.overlays = [
-  #   #   (self: super: {
-  #   #     ungoogled-chromium = (
-  #   #       super.ungoogled-chromium.override {
-  #   #         commandLineArgs = [
-  #   #           "--enable-incognito-themes"
-  #   #           "--extension-mime-request-handling=always-prompt-for-install"
-  #   #           "--fingerprinting-canvas-image-data-noise"
-  #   #           "--fingerprinting-canvas-measuretext-noise"
-  #   #           "--fingerprinting-client-rects-noise"
-  #   #           "--disable-smooth-scrolling"
-  #   #           "--enable-features=EnableFingerprintingProtectionFilter:activation_level/enabled/enable_console_logging/true,EnableFingerprintingProtectionFilterInIncognito:activation_level/enabled/enable_console_logging/true,TabstripDeclutter,DevToolsPrivacyUI,ImprovedSettingsUIOnDesktop,MultiTabOrganization,OneTimePermission,TabOrganization,TabOrganizationSettingsVisibility,TabReorganization,TabReorganizationDivider,TabSearchPositionSetting,TabstripDedupe,TaskManagerDesktopRefresh"
-  #   #           "--disable-features=EnableTabMuting"
-  #   #         ];
-  #   #       }
-  #   #     );
-  #   #   })
-  #   # ];
-  #
-  #   systemd.services.deleteChromiumFirstRun = {
-  #     wantedBy = [ "multi-user.target" ];
-  #     serviceConfig.Type = "oneshot";
-  #     script = ''
-  #       if ! systemctl is-system-running --quiet; then
-  #         echo "system is not fully running yet. skipping chromium update check."
-  #         exit 0
-  #       fi
-  #        echo "checking if chromium hash changed..."
-  #        # configuration hash storage location, might need to be updated to some persistent location on your computer
-  #        CHROMIUM_HASH_FILE="${hash}"
-  #        CURRENT_HASH="${
-  #          builtins.hashString "sha256" (
-  #            (builtins.toJSON cfg.extensions)
-  #            + (builtins.toJSON cfg.extraOpts.ExtensionSettings)
-  #            + (builtins.toJSON cfg.initialPrefs)
-  #          )
-  #        }"
-  #        echo $CURRENT_HASH
-  #
-  #        if [ -f "$CHROMIUM_HASH_FILE" ]; then
-  #          STORED_HASH=$(cat "$CHROMIUM_HASH_FILE")
-  #          if [ "$STORED_HASH" = "$CURRENT_HASH" ]; then
-  #            echo "chromium hash unchanged, skipping deletion of 'First Run' files."
-  #            exit 0
-  #          fi
-  #        fi
-  #
-  #        echo "chromium hash changed, deleting 'First Run' files..."
-  #        for i in /home/*; do
-  #          if [ -f "$i/.config/chromium/First Run" ]; then
-  #            echo "Deleting '$i/.config/chromium/First Run'"
-  #            rm -f "$i/.config/chromium/First Run"
-  #          fi
-  #        done
-  #
-  #        echo "$CURRENT_HASH" > "$CHROMIUM_HASH_FILE"
-  #     '';
-  #   };
-  # };
+  config = mkIf enable {
+
+    programs.chromium = {
+
+      # Module only writes configuration to /etc, doesn't run anything
+      enable = true;
+
+      # defaultSearchProviderEnabled = true;
+      # defaultSearchProviderSearchURL = "https://www.google.com/search?q={searchTerms}&{google:RLZ}{google:originalQueryForSuggestion}{google:assistedQueryStats}{google:searchFieldtrialParameter}{google:searchClient}{google:sourceId}{google:instantExtendedEnabledParameter}ie={inputEncoding}";
+      # defaultSearchProviderSuggestURL = "https://www.google.com/complete/search?output=chrome&q={searchTerms}";
+
+      # Policies
+      extraOpts = {
+
+        # 5 = Open New Tab Page
+        # 1 = Restore the last session
+        # 4 = Open a list of URLs
+        # 6 = Open a list of URLs and restore the last session
+        "RestoreOnStartup" = 1;
+        # "RestoreOnStartupURLs" = [];
+
+        # 0 = Predict network actions on any network connection
+        # 2 = Do not predict network actions on any network connection
+        "NetworkPredictionOptions" = 0;
+
+        "HttpsOnlyMode" = "allowed";
+        "MemorySaverModeSavings" = 1;
+        # "SearchSuggestEnabled" = true;
+        "PasswordManagerEnabled" = false;
+        "SpellcheckEnabled" = true;
+        "SpellcheckLanguage" = [ "en-CA" ];
+
+        "BookmarksBarEnabled" = true;
+        "ManagedBookmarks" = [{ toplevel_name = "Extensions"; }] ++ map 
+          (name: { inherit name; url = "file://${cfg.crxDir}/${name}/extension.crx"; }) 
+          (builtins.attrNames extensions);
+      };
+
+      # The user has to confirm the installation of extensions on the first run
+      # initialPrefs = {
+      #   "first_run_tabs" = map url (builtins.attrValues bookmarkedExtensions);
+      # };
+
+    };
+
+    systemd.services.crx = {
+      description = "crx";
+      after = [ "multi-user.target" ];
+      requires = [ "multi-user.target" ];
+      wantedBy = [ "sysinit.target" ];
+      serviceConfig.Type = "oneshot";
+      path = with pkgs; [ curl go-crx3 jq ];
+      script = let
+
+        inherit (builtins) concatStringsSep;
+        inherit (lib) hasPrefix mapAttrsToList versions;
+
+        url = id: if hasPrefix "http://" id || hasPrefix "https://" id then id else 
+          "https://clients2.google.com/service/update2/crx" +
+          "?response=redirect" +
+          "&acceptformat=crx2,crx3" +
+          "&prodversion=${versions.major cfg.package.version}" + 
+          "&x=id%3D${id}%26installsource%3Dondemand%26uc";
+
+      in ''
+        # Download extension by id from URL or Google Web Store
+        update() {
+
+          # First arg is crx name, create directory
+          dir="${cfg.crxDir}/$1"
+          mkdir -p $dir; cd $dir
+
+          # Second arg is crx url, download extension
+          curl -sL "$2" > extension.crx || true
+          crx3 unpack extension.crx || true
+
+          # Write extension's JSON file
+          printf '{"external_crx":"%s","external_version":"%s"}' \
+          "$dir/extension.crx" "$(cat extension/manifest.json | jq -r .version)" \
+          > $(crx3 id extension.crx).json || true
+
+        }
+
+      '' + concatStringsSep "\n" (mapAttrsToList ( name: id: ''
+        update "${name}" "${url id}"
+      '' ) extensions);
+
+    };
+
+    # Run this script every day
+    systemd.timers.crx = {
+      wantedBy = [ "timers.target" ];
+      partOf = [ "crx.service" ];
+      timerConfig = {
+        OnCalendar = "daily";
+        Unit = "crx.service";
+      };
+    };
+
+  };
 
 }

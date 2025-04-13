@@ -1,23 +1,28 @@
-{ config, lib, pkgs, ... }: let
+{ config, osConfig, lib, pkgs, ... }: let
 
   cfg = config.programs.chromium;
+  oscfg = osConfig.programs.chromium;
   inherit (builtins) attrNames isString;
   inherit (lib) concatStringsSep getExe mkOption removePrefix removeSuffix replaceStrings toLower types;
 
-  # Always load chromium web store
-  unpackedExtensions = cfg.unpackedExtensions // {
-    chromium-web-store = "https://github.com/NeverDecaf/chromium-web-store/releases/download/v1.5.4.3/Chromium.Web.Store.crx";
-  };
+  # # Store profile in ~/.local/share/chromium
+  # dataDir = "${config.xdg.dataHome}/chromium/profile";
 
   # Store cache on volatile disk
   runDir = "/run/user/${toString config.home.uid}/chromium-cache";
 
-  # Store profile in ~/.local/share/chromium
-  dataDir = "${config.xdg.dataHome}/chromium/profile";
+  # Always load chromium web store
+  unpackedExtensions = cfg.unpackedExtensions // {
+    inherit (cfg.registry) chromium-web-store;
+    # chromium-web-store = "https://github.com/NeverDecaf/chromium-web-store/releases/download/v1.5.4.3/Chromium.Web.Store.crx";
+    # inherit (registry) chromium-web-store;
+  };
+
+  extensions = unpackedExtensions // cfg.externalExtensions;
 
   # Convert extension names to comma-separated directories
-  extensionsDirs = concatStringsSep "," (
-    map (dir: "${cfg.unpackedExtensionsDir}/${dir}") (attrNames unpackedExtensions)
+  unpackedExtensionsDirs = concatStringsSep "," (
+    map (name: "${oscfg.crxDir}/${name}/extension") (attrNames unpackedExtensions)
   );
 
   # Enable these features in chromium
@@ -49,7 +54,7 @@
   switches = [ 
     "--disable-features=EnableTabMuting"
     "--disk-cache-dir=${runDir}"
-    "--user-data-dir=${dataDir}"
+    # "--user-data-dir=${dataDir}"
     "--enable-accelerated-video-decode"
     "--enable-features=${features}"
     "--enable-gpu-rasterization"
@@ -65,7 +70,7 @@
     "--fingerprinting-canvas-image-data-noise" # (browser-specific privacy feature)
     "--fingerprinting-canvas-measuretext-noise" # (browser-specific privacy feature)
     "--fingerprinting-client-rects-noise" # (browser-specific privacy feature)
-    "--load-extension=${extensionsDirs}" # (browser extension loading)
+    "--load-extension=${unpackedExtensionsDirs}" # (browser extension loading)
     "--remove-referrers" # (browser privacy feature)
   ];
 
@@ -107,7 +112,7 @@ in {
   options.programs.chromium.lib = mkOption {
     type = types.anything; 
     readOnly = true; 
-    default = { inherit mkClass mkWebApp switches browserSwitches unpackedExtensions; };
+    default = { inherit mkClass mkWebApp switches browserSwitches extensions; };
   };
 
 }
