@@ -11,6 +11,11 @@
     # Store cache on volatile disk
     runDir = "/run/user/${toString config.home.uid}/chromium-cache";
 
+    # Convert extension names to comma-separated directories
+    unpackedExtensionsDirs = concatStringsSep "," (
+      map (name: "${oscfg.crxDir}/${name}/extension") (attrNames cfg.unpackedExtensions)
+    );
+
     # Enable these features in chromium
     features = concatStringsSep "," [
       "DevToolsPrivacyUI"
@@ -39,42 +44,26 @@
   # Used in webapps and browser
   in [
     "--disable-features=EnableTabMuting"
+    "--disable-top-sites" # (relates to the browser's new tab page)
     "--disk-cache-dir=${runDir}"
     "--enable-accelerated-video-decode"
     "--enable-features=${features}"
     "--enable-gpu-rasterization"
-    "--no-default-browser-check"
-    "--ozone-platform=wayland"
-  ];
-
-  # Even more switches for the wrapper
-  browserSwitches = let 
-
-    # The default dir is expected by the home-manager module
-    dataDir = "${config.xdg.configHome}/chromium";
-
-    # Convert extension names to comma-separated directories
-    unpackedExtensionsDirs = concatStringsSep "," (
-      map (name: "${oscfg.crxDir}/${name}/extension") (attrNames cfg.unpackedExtensions)
-    );
-
-  # Just for the web browser
-  in [
-    "--user-data-dir=${dataDir}" # ~/.config/chromium
-    "--disable-top-sites" # (relates to the browser's new tab page)
     "--enable-incognito-themes" # (browser's incognito mode)
     "--extension-mime-request-handling=always-prompt-for-install" # (browser extension handling)
     "--fingerprinting-canvas-image-data-noise" # (browser-specific privacy feature)
     "--fingerprinting-canvas-measuretext-noise" # (browser-specific privacy feature)
     "--fingerprinting-client-rects-noise" # (browser-specific privacy feature)
     "--load-extension=${unpackedExtensionsDirs}" # (browser extension loading)
+    "--no-default-browser-check"
+    "--ozone-platform=wayland"
     "--remove-referrers" # (browser privacy feature)
   ];
 
   # Create window class name from URL used by Chromium Web Apps 
   # without keydify: https://example.com --> chrome-example.com__-Default
   #    with keydify: https://example.com --> chrome-example-com-default
-  mkClass = arg: let
+ mkClass = arg: let
     inherit (builtins) isString;
     inherit (lib) removePrefix removeSuffix replaceStrings;
     toKeydClass = config.services.keyd.lib.mkClass;
@@ -91,12 +80,12 @@
   mkWebApp = { 
     name, url, icon ? "internet-web-browser", 
     class ? (mkClass { inherit url; keydify = false; }) # chrome-example.com__-Default
-  }: let dataDir = "${config.xdg.dataHome}/webapps"; in {
+  }: let appDir = "${config.xdg.dataHome}/webapps"; in {
     "${class}" = {
       inherit name icon;
       exec = "${lib.getExe cfg.package} " + toString (switches ++ [ 
         ''--class="${class}"''
-        ''--user-data-dir="${dataDir}/${class}"''
+        ''--user-data-dir="${appDir}/${class}"''
         ''--app="${url}"''
         "%U"
       ]);
@@ -107,7 +96,7 @@ in {
 
   options.programs.chromium.lib = mkOption {
     type = types.anything; 
-    default = { inherit mkClass mkWebApp switches browserSwitches; };
+    default = { inherit mkClass mkWebApp switches; };
     readOnly = true; 
   };
 

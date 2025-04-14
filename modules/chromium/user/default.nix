@@ -4,7 +4,7 @@
   cfg = config.programs.chromium;
   inherit (lib) mkIf mkOption types;
   inherit (config.services.keyd.lib) mkClass;
-  inherit (config.programs.chromium.lib) switches browserSwitches;
+  inherit (config.programs.chromium.lib) switches;
 
   # Window class name
   class = "chromium-browser";
@@ -44,7 +44,9 @@ in {
     programs.chromium = {
       package = osConfig.programs.chromium.package;
       dictionaries = [ pkgs.hunspellDictsChromium.en_US ];
-      commandLineArgs = switches ++ browserSwitches;  
+      commandLineArgs = switches ++ [ # ~/.config/chromium
+        "--user-data-dir=${config.xdg.configHome}/chromium" 
+      ];  
     };
 
     # keyboard shortcuts
@@ -77,6 +79,7 @@ in {
       extNames = builtins.attrNames (cfg.externalExtensions // cfg.unpackedExtensions);
       crxDir = osConfig.programs.chromium.crxDir;
       extDir = "${config.xdg.configHome}/chromium/External Extensions";
+      appDir = "${config.xdg.dataHome}/webapps";
     in {
 
       # Symlink extensions from persistent storage
@@ -98,19 +101,30 @@ in {
               cd "$dir"
               rm -f *.json
 
+              # Enable nullglob
+              shopt -s nullglob
+
               # Symlink each extension's json here
               symlink() {
-                shopt -s nullglob
                 for json in ${crxDir}/$1/*.json; do
                   ln -sf $json .
                 done
-                shopt -u nullglob
               }
 
               # External extensions
             '' + builtins.concatStringsSep "\n" ( 
               map (name: "symlink ${name}") extNames 
-            );
+            ) + ''
+
+              # Symlink extensions dir to each webapp
+              for app in ${appDir}/*; do
+                rm -rf "$app/External Extensions"
+                ln -sf "$dir" "$app/External Extensions"
+              done
+
+              # Disable nullglob again
+              shopt -u nullglob
+            '';
           };
           Restart = "no";
           RestartSec = 5;
