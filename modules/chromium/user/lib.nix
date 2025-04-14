@@ -2,16 +2,8 @@
 
   cfg = config.programs.chromium;
   oscfg = osConfig.programs.chromium;
-  inherit (builtins) attrNames isString;
-  inherit (lib) concatStringsSep getExe mkOption removePrefix removeSuffix replaceStrings toLower types;
-
-  # Store cache on volatile disk
-  runDir = "/run/user/${toString config.home.uid}/chromium-cache";
-
-  # Convert extension names to comma-separated directories
-  unpackedExtensionsDirs = concatStringsSep "," (
-    map (name: "${oscfg.crxDir}/${name}/extension") (attrNames cfg.unpackedExtensions)
-  );
+  inherit (builtins) attrNames;
+  inherit (lib) concatStringsSep mkOption types;
 
   # Enable these features in chromium
   features = concatStringsSep "," [
@@ -39,7 +31,17 @@
   ];
 
   # Add these switches to the wrapper or config
-  switches = {
+  switches = let
+
+    # Store cache on volatile disk
+    runDir = "/run/user/${toString config.home.uid}/chromium-cache";
+
+    # Convert extension names to comma-separated directories
+    unpackedExtensionsDirs = concatStringsSep "," (
+      map (name: "${oscfg.crxDir}/${name}/extension") (attrNames cfg.unpackedExtensions)
+    );
+
+  in {
 
     # Common with both webapps and browser
     common = [ 
@@ -70,6 +72,8 @@
   # without keydify: https://example.com --> chrome-example.com__-Default
   #    with keydify: https://example.com --> chrome-example-com-default
   mkClass = arg: let
+    inherit (builtins) isString;
+    inherit (lib) removePrefix removeSuffix replaceStrings;
     toKeydClass = config.services.keyd.lib.mkClass;
     toClass = { url, keydify ? false }: let 
       removeProtocols = url: removePrefix "http://" (removePrefix "https://" url);
@@ -88,7 +92,7 @@
   }: {
     "${class}" = {
       inherit name icon;
-      exec = "${getExe cfg.package} " + toString (switches.common ++ [ 
+      exec = "${lib.getExe cfg.package} " + toString (switches.common ++ [ 
         ''--ozone-platform-hint="${platform}"''
         ''--class="${class}"''
         ''--user-data-dir="${config.xdg.dataHome}/chromium/webapps/${class}"''
