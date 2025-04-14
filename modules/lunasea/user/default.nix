@@ -11,7 +11,6 @@ in {
   options.programs.lunasea = {
     enable = options.mkEnableOption "lunasea"; 
     url = mkOption { type = types.str; default = "http://lunasea"; };
-    platform = mkOption { type = types.str; default = "wayland"; };
   };
 
   config = mkIf cfg.enable {
@@ -20,7 +19,7 @@ in {
     xdg.desktopEntries = mkWebApp {
       name = "LunaSea";
       icon = ./lunasea.png; 
-      inherit (cfg) url platform;
+      inherit (cfg) url;
     };
 
     # Keyboard shortcuts

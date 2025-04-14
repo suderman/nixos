@@ -10,7 +10,7 @@ in {
     tealdeer wget lazygit lazydocker parted
     imagemagick
     yt-dlp # yt-dlp -f mp4-240p -x --audio-format mp3 https://rumble.com/...
-    tdesktop slack
+    tdesktop # slack
     micro xorg.xeyes
     jetbrains-mono
     gst_all_1.gst-libav

@@ -11,7 +11,6 @@ in {
   options.programs.jellyfin = {
     enable = options.mkEnableOption "jellyfin"; 
     url = mkOption { type = types.str; default = "http://jellyfin"; };
-    platform = mkOption { type = types.str; default = "wayland"; };
   };
 
   config = mkIf cfg.enable {
@@ -20,7 +19,7 @@ in {
     xdg.desktopEntries = mkWebApp {
       name = "Jellyfin";
       icon = ./jellyfin.svg; 
-      inherit (cfg) url platform;
+      inherit (cfg) url;
     };
 
     # Keyboard shortcuts

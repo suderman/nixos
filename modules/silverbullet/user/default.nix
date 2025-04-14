@@ -10,7 +10,6 @@ in {
   options.programs.silverbullet = {
     enable = options.mkEnableOption "silverbullet"; 
     url = mkOption { type = types.str; default = "http://silverbullet"; };
-    platform = mkOption { type = types.str; default = "wayland"; };
   };
 
   config = mkIf cfg.enable {
@@ -19,7 +18,7 @@ in {
     xdg.desktopEntries = mkWebApp {
       name = "SilverBullet";
       icon = ./silverbullet.png; 
-      inherit (cfg) url platform;
+      inherit (cfg) url;
     };
 
     # Keyboard shortcuts

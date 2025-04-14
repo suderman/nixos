@@ -58,7 +58,7 @@ in {
       jetbrains-mono # mono font
 
       tdesktop # family chat
-      slack # work chat
+      # slack # work chat
 
       neovide # text editor
       lapce # text editor
