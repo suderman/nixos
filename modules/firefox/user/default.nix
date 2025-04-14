@@ -57,12 +57,12 @@ in {
         ];
 
         search = {
-          default = "Whoogle";
+          default = "Start Page";
           force = true;
           engines."Whoogle" = let whoogle = "g.sol"; in {
             urls = [{ template = "https://${whoogle}/search?q={searchTerms}"; }];
-            iconUpdateURL = "https://${whoogle}/static/img/favicon/apple-icon-144x144.png";
-            updateInterval = 24 * 60 * 60 * 1000; # every day
+            # iconUpdateURL = "https://${whoogle}/static/img/favicon/apple-icon-144x144.png";
+            # updateInterval = 24 * 60 * 60 * 1000; # every day
             definedAliases = [ "@wh" ];
             method = "POST";
           };
@@ -71,8 +71,12 @@ in {
             icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
             definedAliases = [ "@nix" ];
           };
+          engines."Start Page" = {
+            urls = [{ template = "https://www.startpage.com/sp/search?query={searchTerms}"; }];
+            icon = "https://www.startpage.com/favicon.ico";
+            definedAliases = [ "@start" ];
+          };
         };
-
       };
     };
 

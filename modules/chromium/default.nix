@@ -35,13 +35,28 @@ in {
     # nixos module enables managed policies written to /etc
     programs.chromium = {
       enable = true;
-
-      # defaultSearchProviderEnabled = true;
-      # defaultSearchProviderSearchURL = "https://www.google.com/search?q={searchTerms}&{google:RLZ}{google:originalQueryForSuggestion}{google:assistedQueryStats}{google:searchFieldtrialParameter}{google:searchClient}{google:sourceId}{google:instantExtendedEnabledParameter}ie={inputEncoding}";
-      # defaultSearchProviderSuggestURL = "https://www.google.com/complete/search?output=chrome&q={searchTerms}";
-
-      # Policies
       extraOpts = {
+        DefaultSearchProviderEnabled = true;
+        DefaultSearchProviderName = "Startpage";
+        DefaultSearchProviderKeyword = "@start";
+        DefaultSearchProviderSearchURL = "https://www.startpage.com/sp/search?query={searchTerms}";
+        DefaultSearchProviderSuggestURL = "https://www.startpage.com/suggestions?query={searchTerms}";
+        DefaultSearchProviderIconURL = "https://www.startpage.com/favicon.ico";
+        DefaultSearchProviderEncodings = [ "UTF-8" ];
+        SearchSuggestEnabled = true;
+        # SearchEngines = [{
+        #   Name = "Startpage";
+        #   Keyword = "@start";
+        #   URL = "https://www.startpage.com/sp/search?query={searchTerms}";
+        #   FaviconURL = "https://www.startpage.com/favicon.ico";
+        #   Encoding = "UTF-8";
+        # } {
+        #   Name = "Nix Code";
+        #   Keyword = "@nix";
+        #   URL = "https://github.com/search?type=code&q=lang%3Anix+{searchTerms}";
+        #   FaviconURL = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+        #   Encoding = "UTF-8";
+        # }];
         BuiltInDnsClientEnabled = false;
         ShowFullUrlsInAddressBar = true;
         DeveloperToolsAvailability = 1;
@@ -52,7 +67,6 @@ in {
         PasswordManagerEnabled = false;
         SpellcheckEnabled = true;
         SpellcheckLanguage = [ "en-CA" ];
-        # SearchSuggestEnabled = true;
         BookmarksBarEnabled = true;
         ManagedBookmarks = [{ toplevel_name = "Extensions"; }] ++ map 
           (name: { inherit name; url = "file://${cfg.crxDir}/${name}/extension.crx"; }) 

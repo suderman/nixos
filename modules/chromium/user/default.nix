@@ -11,10 +11,10 @@
 
 in {
 
-  # import chromium lib
+  # Import chromium lib
   imports = [ ./lib.nix ];
 
-  # extra options to manage unpacked extensions
+  # Extra options to manage external extensions
   options.programs.chromium = {
 
     # Registry of chromium extensions

@@ -48,6 +48,7 @@
         # alby
         auto-tab-discard-suspend
         # built-with
+        contextsearch
         dark-reader
         fake-data
         floccus-bookmarks-sync
