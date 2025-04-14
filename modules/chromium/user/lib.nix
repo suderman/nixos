@@ -8,9 +8,6 @@
   # Add these switches to the wrapper or config
   switches = let
 
-    # Store cache on volatile disk
-    runDir = "/run/user/${toString config.home.uid}/chromium-cache";
-
     # Convert extension names to comma-separated directories
     unpackedExtensionsDirs = concatStringsSep "," (
       map (name: "${oscfg.crxDir}/${name}/extension") (attrNames cfg.unpackedExtensions)
@@ -45,7 +42,6 @@
   in [
     "--disable-features=EnableTabMuting"
     "--disable-top-sites" # (relates to the browser's new tab page)
-    "--disk-cache-dir=${runDir}"
     "--enable-accelerated-video-decode"
     "--enable-features=${features}"
     "--enable-gpu-rasterization"
@@ -78,14 +74,18 @@
   # Create web app as desktop entry
   # config.xdg.desktopEntries = mkWebApp { name = "Example"; url = "https://example.com/"; };
   mkWebApp = { 
-    name, url, icon ? "internet-web-browser", 
+    name, url, icon ? "internet-web-browser", profile ? null,
     class ? (mkClass { inherit url; keydify = false; }) # chrome-example.com__-Default
-  }: let appDir = "${config.xdg.dataHome}/webapps"; in {
+  }: let 
+    dataDir = if isNull profile then cfg.dataDir else "${cfg.dataDir}/profiles/${profile}";
+    runDir = if isNull profile then "${cfg.runDir}/default" else "${cfg.runDir}/${profile}";
+  in {
     "${class}" = {
       inherit name icon;
       exec = "${lib.getExe cfg.package} " + toString (switches ++ [ 
+        ''--user-data-dir="${dataDir}"''
+        ''--disk-cache-dir="${runDir}"''
         ''--class="${class}"''
-        ''--user-data-dir="${appDir}/${class}"''
         ''--app="${url}"''
         "%U"
       ]);

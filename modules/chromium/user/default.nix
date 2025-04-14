@@ -17,6 +17,20 @@ in {
   # Extra options to manage external extensions
   options.programs.chromium = {
 
+    # home-manager module expects this default directory
+    dataDir = mkOption {
+      type = types.path;      # ~/.config/chromium
+      default = "${config.xdg.configHome}/chromium";
+      readOnly = true;
+    };
+
+    # Store cache in volatile directory
+    runDir = mkOption {
+      type = types.path;              # /run/user/1000/chromium
+      default = "/run/user/${toString config.home.uid}/chromium";
+      readOnly = true;
+    };
+
     # Registry of chromium extensions
     registry = mkOption {
       type = types.anything; 
@@ -44,8 +58,9 @@ in {
     programs.chromium = {
       package = osConfig.programs.chromium.package;
       dictionaries = [ pkgs.hunspellDictsChromium.en_US ];
-      commandLineArgs = switches ++ [ # ~/.config/chromium
-        "--user-data-dir=${config.xdg.configHome}/chromium" 
+      commandLineArgs = switches ++ [
+        "--user-data-dir=${cfg.dataDir}" 
+        "--disk-cache-dir=${cfg.runDir}/default"
       ];  
     };
 
@@ -78,8 +93,8 @@ in {
       inherit (lib) mkShellScript;
       extNames = builtins.attrNames (cfg.externalExtensions // cfg.unpackedExtensions);
       crxDir = osConfig.programs.chromium.crxDir;
-      extDir = "${config.xdg.configHome}/chromium/External Extensions";
-      appDir = "${config.xdg.dataHome}/webapps";
+      extDir = "${cfg.dataDir}/External Extensions";
+      appDir = "${cfg.dataDir}/profiles";
     in {
 
       # Symlink extensions from persistent storage
@@ -116,7 +131,7 @@ in {
               map (name: "symlink ${name}") extNames 
             ) + ''
 
-              # Symlink extensions dir to each webapp
+              # Symlink extensions dir to each webapp profile
               for app in ${appDir}/*; do
                 rm -rf "$app/External Extensions"
                 ln -sf "$dir" "$app/External Extensions"
