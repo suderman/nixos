@@ -1,19 +1,18 @@
 { config, lib, pkgs, ... }: let
 
   cfg = config.programs.chromium;
+  inherit (builtins) attrNames any foldl';
   inherit (lib) mkIf mkOption types;
-  inherit (lib) hasPrefix mapAttrsToList versions;
+  users = config.home-manager.users or {};
 
   # All enabled extensions from all home-manager users
-  extensions = builtins.foldl' (acc: user: 
-    acc // (config.home-manager.users.${user}.programs.chromium.lib.extensions or {})
-  ) {} (builtins.attrNames config.home-manager.users or {});
+  extensions = foldl' (acc: user: let
+    cfg = users.${user}.programs.chromium or {};
+    exts = (cfg.externalExtensions or {}) // (cfg.unpackedExtensions or {});
+  in acc // exts) {} (attrNames users);
 
-  # If any extensions are enabled, set this to true
-  enable = let 
-    inherit (builtins) any attrNames;
-    inherit (config.home-manager) users;
-  in any (user: users.${user}.programs.chromium.enable or false) (attrNames users); 
+  # If any home-manager chromium is enabled for any user,set this to true
+  enable = any (user: users.${user}.programs.chromium.enable or false) (attrNames users); 
 
 in {
 

@@ -8,17 +8,9 @@
   # Store cache on volatile disk
   runDir = "/run/user/${toString config.home.uid}/chromium-cache";
 
-  # Always load chromium web store
-  unpackedExtensions = cfg.unpackedExtensions // {
-    inherit (cfg.registry) chromium-web-store;
-  };
-
-  # All extensions in use
-  extensions = unpackedExtensions // cfg.externalExtensions;
-
   # Convert extension names to comma-separated directories
   unpackedExtensionsDirs = concatStringsSep "," (
-    map (name: "${oscfg.crxDir}/${name}/extension") (attrNames unpackedExtensions)
+    map (name: "${oscfg.crxDir}/${name}/extension") (attrNames cfg.unpackedExtensions)
   );
 
   # Enable these features in chromium
@@ -47,28 +39,32 @@
   ];
 
   # Add these switches to the wrapper or config
-  switches = [ 
-    "--disable-features=EnableTabMuting"
-    "--disk-cache-dir=${runDir}"
-    # "--user-data-dir=${dataDir}"
-    "--enable-accelerated-video-decode"
-    "--enable-features=${features}"
-    "--enable-gpu-rasterization"
-    "--no-default-browser-check"
-    "--ozone-platform=wayland"
-  ];
+  switches = {
 
-  # Additional switches just for the web browser
-  browserSwitches = [
-    "--disable-top-sites" # (relates to the browser's new tab page)
-    "--enable-incognito-themes" # (browser's incognito mode)
-    "--extension-mime-request-handling=always-prompt-for-install" # (browser extension handling)
-    "--fingerprinting-canvas-image-data-noise" # (browser-specific privacy feature)
-    "--fingerprinting-canvas-measuretext-noise" # (browser-specific privacy feature)
-    "--fingerprinting-client-rects-noise" # (browser-specific privacy feature)
-    "--load-extension=${unpackedExtensionsDirs}" # (browser extension loading)
-    "--remove-referrers" # (browser privacy feature)
-  ];
+    # Common with both webapps and browser
+    common = [ 
+      "--disable-features=EnableTabMuting"
+      "--disk-cache-dir=${runDir}"
+      "--enable-accelerated-video-decode"
+      "--enable-features=${features}"
+      "--enable-gpu-rasterization"
+      "--no-default-browser-check"
+      "--ozone-platform=wayland"
+    ];
+
+    # Additional switches just for the web browser
+    browser = [
+      "--disable-top-sites" # (relates to the browser's new tab page)
+      "--enable-incognito-themes" # (browser's incognito mode)
+      "--extension-mime-request-handling=always-prompt-for-install" # (browser extension handling)
+      "--fingerprinting-canvas-image-data-noise" # (browser-specific privacy feature)
+      "--fingerprinting-canvas-measuretext-noise" # (browser-specific privacy feature)
+      "--fingerprinting-client-rects-noise" # (browser-specific privacy feature)
+      "--load-extension=${unpackedExtensionsDirs}" # (browser extension loading)
+      "--remove-referrers" # (browser privacy feature)
+    ];
+
+  };
 
   # Create window class name from URL used by Chromium Web Apps 
   # without keydify: https://example.com --> chrome-example.com__-Default
@@ -92,7 +88,7 @@
   }: {
     "${class}" = {
       inherit name icon;
-      exec = "${getExe cfg.package} " + toString (switches ++ [ 
+      exec = "${getExe cfg.package} " + toString (switches.common ++ [ 
         ''--ozone-platform-hint="${platform}"''
         ''--class="${class}"''
         ''--user-data-dir="${config.xdg.dataHome}/chromium/webapps/${class}"''
@@ -108,7 +104,7 @@ in {
   options.programs.chromium.lib = mkOption {
     type = types.anything; 
     readOnly = true; 
-    default = { inherit mkClass mkWebApp switches browserSwitches extensions; };
+    default = { inherit switches mkClass mkWebApp; };
   };
 
 }

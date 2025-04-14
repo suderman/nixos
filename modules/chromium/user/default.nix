@@ -4,7 +4,7 @@
   cfg = config.programs.chromium;
   inherit (lib) mkIf mkOption types;
   inherit (config.services.keyd.lib) mkClass;
-  inherit (config.programs.chromium.lib) switches browserSwitches extensions;
+  inherit (config.programs.chromium.lib) switches;
 
   # Window class name
   class = "chromium-browser";
@@ -12,10 +12,17 @@
 in {
 
   # import chromium lib
-  imports = [ ./lib.nix ./registry.nix ];
+  imports = [ ./lib.nix ];
 
   # extra options to manage unpacked extensions
   options.programs.chromium = {
+
+    # Registry of chromium extensions
+    registry = mkOption {
+      type = types.anything; 
+      default = import ./registry.nix;
+      readOnly = true; 
+    };
 
     # Extensions to automatically download and include
     externalExtensions = mkOption {
@@ -26,17 +33,7 @@ in {
     # Extensions to automatically download and include unpacked
     unpackedExtensions = mkOption {
       type = types.anything; 
-      default = {};
-    };
-
-    # Registry of chromium extensions
-    registry = lib.mkOption {
-      type = types.anything; 
-      default = {};
-      example = {
-        chromium-web-store = "https://github.com/NeverDecaf/chromium-web-store/releases/download/v1.5.4.3/Chromium.Web.Store.crx";
-        ublock-origin = "cjpalhdlnbpafiamejdnhcphjbkeiagm";
-      };
+      default = { inherit (cfg.registry) chromium-web-store; };
     };
 
   };
@@ -47,7 +44,7 @@ in {
     programs.chromium = {
       package = osConfig.programs.chromium.package;
       dictionaries = [ pkgs.hunspellDictsChromium.en_US ];
-      commandLineArgs = switches ++ browserSwitches;  
+      commandLineArgs = switches.common ++ switches.browser;  
     };
 
     # keyboard shortcuts
@@ -71,15 +68,18 @@ in {
     xdg.configFile = let 
       configs = [ "chromium-flags.conf" "electron-flags.conf" ] ++ 
                 (map (v: "electron-flags${toString v}.conf") (lib.range 14 40));
-      value = { text = lib.concatStringsSep "\n" switches; };
+      value = { text = lib.concatStringsSep "\n" switches.common; };
     in builtins.listToAttrs (map (name: { inherit name value;  }) configs);
 
+    # Populate ~/.config/chromium/External Extensions
     systemd.user = let
       inherit (lib) mkShellScript;
-      inherit (builtins) attrNames concatStringsSep;
+      extNames = builtins.attrNames (cfg.externalExtensions // cfg.unpackedExtensions);
       crxDir = osConfig.programs.chromium.crxDir;
       extDir = "${config.xdg.configHome}/chromium/External Extensions";
     in {
+
+      # Symlink extensions from persistent storage
       services.crx = {
         Unit = {
           Description = "Symlink chromium extentions";
@@ -108,8 +108,8 @@ in {
               }
 
               # External extensions
-            '' + concatStringsSep "\n" ( 
-              map (name: "symlink ${name}") (attrNames extensions) 
+            '' + builtins.concatStringsSep "\n" ( 
+              map (name: "symlink ${name}") extNames 
             );
           };
           Restart = "no";
@@ -118,6 +118,7 @@ in {
         Install.WantedBy = [ "default.target" ];
       };
 
+      # Watch persistent storage for updates
       paths.crx = {
         Unit.Description = "Symlink chromium extentions";
         Path = {

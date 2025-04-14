@@ -1,5 +1,4 @@
-{ ... }: { programs.chromium.registry = {
-
+{
   alby = "iokeahhehimjnekafflcihljlcjccdbe";
   auto-tab-discard-suspend = "jhnleheckmknfcgijgkadoemagpecfol";
   built-with = "dapjbgnjinbpoindlpdmhochffioedbn";
@@ -16,5 +15,4 @@
   tampermonkey = "dhdgffkkebhmkfjojejmpbldmpobfkfo";
   ublock-origin = "cjpalhdlnbpafiamejdnhcphjbkeiagm";
   ublock-origin-lite = "ddkjiahejlhfcafbddmgiahcphecmpfh";
-
-}; }
+}
