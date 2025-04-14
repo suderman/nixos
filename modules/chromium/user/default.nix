@@ -4,7 +4,7 @@
   cfg = config.programs.chromium;
   inherit (lib) mkIf mkOption types;
   inherit (config.services.keyd.lib) mkClass;
-  inherit (config.programs.chromium.lib) switches;
+  inherit (config.programs.chromium.lib) switches browserSwitches;
 
   # Window class name
   class = "chromium-browser";
@@ -44,7 +44,7 @@ in {
     programs.chromium = {
       package = osConfig.programs.chromium.package;
       dictionaries = [ pkgs.hunspellDictsChromium.en_US ];
-      commandLineArgs = switches.common ++ switches.browser;  
+      commandLineArgs = switches ++ browserSwitches;  
     };
 
     # keyboard shortcuts
@@ -68,7 +68,7 @@ in {
     xdg.configFile = let 
       configs = [ "chromium-flags.conf" "electron-flags.conf" ] ++ 
                 (map (v: "electron-flags${toString v}.conf") (lib.range 14 40));
-      value = { text = lib.concatStringsSep "\n" switches.common; };
+      value = { text = lib.concatStringsSep "\n" switches; };
     in builtins.listToAttrs (map (name: { inherit name value;  }) configs);
 
     # Populate ~/.config/chromium/External Extensions

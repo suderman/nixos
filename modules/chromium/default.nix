@@ -18,17 +18,21 @@ in {
 
   options.programs.chromium = {
     package = mkOption {
+      description = "My preferred flavor of chromium is ungoogled-chromium";
       type = types.package;
       default = pkgs.ungoogled-chromium;
     };
     crxDir = mkOption {
+      description = "Path to directory where extensions are loaded from";
       type = types.path;
       default = "/nix/state/crx";
     };
   };
 
+  # Only enable the nixos module if the home-manager module is enabled
   config = mkIf enable {
 
+    # nixos module enables managed policies written to /etc
     programs.chromium = {
       enable = true;
 
@@ -38,38 +42,31 @@ in {
 
       # Policies
       extraOpts = {
-
-        # 5 = Open New Tab Page
-        # 1 = Restore the last session
-        # 4 = Open a list of URLs
-        # 6 = Open a list of URLs and restore the last session
-        "RestoreOnStartup" = 1;
-        # "RestoreOnStartupURLs" = [];
-
-        # 0 = Predict network actions on any network connection
-        # 2 = Do not predict network actions on any network connection
-        "NetworkPredictionOptions" = 0;
-
-        "HttpsOnlyMode" = "allowed";
-        "MemorySaverModeSavings" = 1;
-        # "SearchSuggestEnabled" = true;
-        "PasswordManagerEnabled" = false;
-        "SpellcheckEnabled" = true;
-        "SpellcheckLanguage" = [ "en-CA" ];
-
-        "BookmarksBarEnabled" = true;
-        "ManagedBookmarks" = [{ toplevel_name = "Extensions"; }] ++ map 
+        BuiltInDnsClientEnabled = false;
+        ShowFullUrlsInAddressBar = true;
+        DeveloperToolsAvailability = 1;
+        RestoreOnStartup = 1; # restore last session
+        NetworkPredictionOptions = 0;
+        HttpsOnlyMode = "allowed";
+        MemorySaverModeSavings = 1;
+        PasswordManagerEnabled = false;
+        SpellcheckEnabled = true;
+        SpellcheckLanguage = [ "en-CA" ];
+        # SearchSuggestEnabled = true;
+        BookmarksBarEnabled = true;
+        ManagedBookmarks = [{ toplevel_name = "Extensions"; }] ++ map 
           (name: { inherit name; url = "file://${cfg.crxDir}/${name}/extension.crx"; }) 
           (builtins.attrNames extensions);
       };
 
-      # The user has to confirm the installation of extensions on the first run
-      # initialPrefs = {
-      #   "first_run_tabs" = map url (builtins.attrValues bookmarkedExtensions);
-      # };
+      # Open these tabs on a first run of a new installation
+      initialPrefs = {
+        # first_run_tabs = "";
+      };
 
     };
 
+    # Downloads extensions found in home-manager and builds expected json for each
     systemd.services.crx = {
       description = "crx";
       after = [ "multi-user.target" ];
@@ -82,6 +79,7 @@ in {
         inherit (builtins) concatStringsSep;
         inherit (lib) hasPrefix mapAttrsToList versions;
 
+        # Convert an extension id to a download url (if it isn't a url already)
         url = id: if hasPrefix "http://" id || hasPrefix "https://" id then id else 
           "https://clients2.google.com/service/update2/crx" +
           "?response=redirect" +

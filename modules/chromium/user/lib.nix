@@ -5,68 +5,67 @@
   inherit (builtins) attrNames;
   inherit (lib) concatStringsSep mkOption types;
 
-  # Enable these features in chromium
-  features = concatStringsSep "," [
-    "DevToolsPrivacyUI"
-    "EnableFingerprintingProtectionFilter:activation_level/enabled/enable_console_logging/true"
-    "EnableFingerprintingProtectionFilterInIncognito:activation_level/enabled/enable_console_logging/true"
-    "ImprovedSettingsUIOnDesktop"
-    "MultiTabOrganization"
-    "OneTimePermission"
-    "TabOrganization"
-    "TabOrganizationSettingsVisibility"
-    "TabReorganization"
-    "TabReorganizationDivider"
-    "TabSearchPositionSetting"
-    "TabstripDeclutter"
-    "TabstripDedupe"
-    "TaskManagerDesktopRefresh"
-    "UseOzonePlatform"
-    "WaylandLinuxDrmSyncobj"  #wayland-linux-drm-syncobj
-    "WaylandPerSurfaceScale"  #wayland-per-window-scaling
-    "WaylandTextInputV3"      #wayland-text-input-v3
-    "WaylandUiScale"          #wayland-ui-scaling
-    "WebRTCPipeWireCapturer"
-    "WebUIDarkMode"
-  ];
-
   # Add these switches to the wrapper or config
   switches = let
 
     # Store cache on volatile disk
     runDir = "/run/user/${toString config.home.uid}/chromium-cache";
 
+    # Enable these features in chromium
+    features = concatStringsSep "," [
+      "DevToolsPrivacyUI"
+      "EnableFingerprintingProtectionFilter:activation_level/enabled/enable_console_logging/true"
+      "EnableFingerprintingProtectionFilterInIncognito:activation_level/enabled/enable_console_logging/true"
+      "ImprovedSettingsUIOnDesktop"
+      "MultiTabOrganization"
+      "OneTimePermission"
+      "TabOrganization"
+      "TabOrganizationSettingsVisibility"
+      "TabReorganization"
+      "TabReorganizationDivider"
+      "TabSearchPositionSetting"
+      "TabstripDeclutter"
+      "TabstripDedupe"
+      "TaskManagerDesktopRefresh"
+      "UseOzonePlatform"
+      "WaylandLinuxDrmSyncobj"  #wayland-linux-drm-syncobj
+      "WaylandPerSurfaceScale"  #wayland-per-window-scaling
+      "WaylandTextInputV3"      #wayland-text-input-v3
+      "WaylandUiScale"          #wayland-ui-scaling
+      "WebRTCPipeWireCapturer"
+      "WebUIDarkMode"
+    ];
+
+  # Used in webapps and browser
+  in [
+    "--disable-features=EnableTabMuting"
+    "--disk-cache-dir=${runDir}"
+    "--enable-accelerated-video-decode"
+    "--enable-features=${features}"
+    "--enable-gpu-rasterization"
+    "--no-default-browser-check"
+    "--ozone-platform=wayland"
+  ];
+
+  # Even more switches for the wrapper
+  browserSwitches = let 
+
     # Convert extension names to comma-separated directories
     unpackedExtensionsDirs = concatStringsSep "," (
       map (name: "${oscfg.crxDir}/${name}/extension") (attrNames cfg.unpackedExtensions)
     );
 
-  in {
-
-    # Common with both webapps and browser
-    common = [ 
-      "--disable-features=EnableTabMuting"
-      "--disk-cache-dir=${runDir}"
-      "--enable-accelerated-video-decode"
-      "--enable-features=${features}"
-      "--enable-gpu-rasterization"
-      "--no-default-browser-check"
-      "--ozone-platform=wayland"
-    ];
-
-    # Additional switches just for the web browser
-    browser = [
-      "--disable-top-sites" # (relates to the browser's new tab page)
-      "--enable-incognito-themes" # (browser's incognito mode)
-      "--extension-mime-request-handling=always-prompt-for-install" # (browser extension handling)
-      "--fingerprinting-canvas-image-data-noise" # (browser-specific privacy feature)
-      "--fingerprinting-canvas-measuretext-noise" # (browser-specific privacy feature)
-      "--fingerprinting-client-rects-noise" # (browser-specific privacy feature)
-      "--load-extension=${unpackedExtensionsDirs}" # (browser extension loading)
-      "--remove-referrers" # (browser privacy feature)
-    ];
-
-  };
+  # Just for the web browser
+  in [
+    "--disable-top-sites" # (relates to the browser's new tab page)
+    "--enable-incognito-themes" # (browser's incognito mode)
+    "--extension-mime-request-handling=always-prompt-for-install" # (browser extension handling)
+    "--fingerprinting-canvas-image-data-noise" # (browser-specific privacy feature)
+    "--fingerprinting-canvas-measuretext-noise" # (browser-specific privacy feature)
+    "--fingerprinting-client-rects-noise" # (browser-specific privacy feature)
+    "--load-extension=${unpackedExtensionsDirs}" # (browser extension loading)
+    "--remove-referrers" # (browser privacy feature)
+  ];
 
   # Create window class name from URL used by Chromium Web Apps 
   # without keydify: https://example.com --> chrome-example.com__-Default
@@ -92,7 +91,7 @@
   }: {
     "${class}" = {
       inherit name icon;
-      exec = "${lib.getExe cfg.package} " + toString (switches.common ++ [ 
+      exec = "${lib.getExe cfg.package} " + toString (switches ++ [ 
         ''--ozone-platform-hint="${platform}"''
         ''--class="${class}"''
         ''--user-data-dir="${config.xdg.dataHome}/chromium/webapps/${class}"''
@@ -107,8 +106,8 @@ in {
 
   options.programs.chromium.lib = mkOption {
     type = types.anything; 
+    default = { inherit mkClass mkWebApp switches browserSwitches; };
     readOnly = true; 
-    default = { inherit switches mkClass mkWebApp; };
   };
 
 }
