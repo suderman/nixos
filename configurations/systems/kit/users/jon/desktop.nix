@@ -40,9 +40,7 @@
 
     externalExtensions = {
       inherit (config.programs.chromium.registry) 
-        # alby
         auto-tab-discard-suspend
-        # built-with
         contextsearch
         dark-reader
         fake-data

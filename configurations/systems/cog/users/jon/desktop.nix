@@ -18,22 +18,20 @@
   programs.chromium = {
     enable = true;
 
-    externalExtensions = with config.programs.chromium; {
-      inherit (registry) 
-        alby
+    externalExtensions = {
+      inherit (config.programs.chromium.registry) 
         auto-tab-discard-suspend
-        built-with
+        contextsearch
+        dark-reader
         fake-data
         floccus-bookmarks-sync
         global-speed
         i-still-dont-care-about-cookies
         one-password
         return-youtube-dislike
+        sponsorblock
+        ublock-origin 
       ;
-    };
-
-    unpackedExtensions = with config.programs.chromium; {
-      inherit (registry) ublock-origin sponsorblock;
     };
 
   };
