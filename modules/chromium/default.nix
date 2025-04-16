@@ -57,6 +57,8 @@ in {
         #   FaviconURL = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
         #   Encoding = "UTF-8";
         # }];
+        BrowserAddPersonEnabled = false; # Disable user profiles
+        BrowserGuestModeEnabled = false; # Disable guest mode
         BuiltInDnsClientEnabled = false;
         ShowFullUrlsInAddressBar = true;
         DeveloperToolsAvailability = 1;

@@ -24,13 +24,6 @@ in {
       readOnly = true;
     };
 
-    # Store cache in volatile directory
-    runDir = mkOption {
-      type = types.path;              # /run/user/1000/chromium
-      default = "/run/user/${toString config.home.uid}/chromium";
-      readOnly = true;
-    };
-
     # Registry of chromium extensions
     registry = mkOption {
       type = types.anything; 
@@ -58,10 +51,7 @@ in {
     programs.chromium = {
       package = osConfig.programs.chromium.package;
       dictionaries = [ pkgs.hunspellDictsChromium.en_US ];
-      commandLineArgs = switches ++ [
-        "--user-data-dir=${cfg.dataDir}" 
-        "--disk-cache-dir=${cfg.runDir}/default"
-      ];  
+      commandLineArgs = switches;  
     };
 
     # keyboard shortcuts
@@ -94,7 +84,6 @@ in {
       extNames = builtins.attrNames (cfg.externalExtensions // cfg.unpackedExtensions);
       crxDir = osConfig.programs.chromium.crxDir;
       extDir = "${cfg.dataDir}/External Extensions";
-      appDir = "${cfg.dataDir}/profiles";
     in {
 
       # Symlink extensions from persistent storage
@@ -130,12 +119,6 @@ in {
             '' + builtins.concatStringsSep "\n" ( 
               map (name: "symlink ${name}") extNames 
             ) + ''
-
-              # Symlink extensions dir to each webapp profile
-              for app in ${appDir}/*; do
-                rm -rf "$app/External Extensions"
-                ln -sf "$dir" "$app/External Extensions"
-              done
 
               # Disable nullglob again
               shopt -u nullglob

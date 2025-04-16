@@ -41,11 +41,11 @@
     externalExtensions = {
       inherit (config.programs.chromium.registry) 
         auto-tab-discard-suspend
-        contextsearch
+        # contextsearch
         dark-reader
         fake-data
         floccus-bookmarks-sync
-        global-speed
+        # global-speed
         i-still-dont-care-about-cookies
         one-password
         return-youtube-dislike

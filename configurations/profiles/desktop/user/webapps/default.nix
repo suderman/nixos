@@ -24,7 +24,7 @@ in {
       name = "Google Analytics";
       icon = ./analytics.svg;
       url = "https://analytics.google.com/";
-      profile = "work-alt";
+      profile = "team";
     }
 
     {

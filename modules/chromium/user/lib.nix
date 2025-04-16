@@ -8,6 +8,9 @@
   # Add these switches to the wrapper or config
   switches = let
 
+    # Store cache in volatile directory
+    runDir = "/run/user/${toString config.home.uid}/chromium";
+
     # Convert extension names to comma-separated directories
     unpackedExtensionsDirs = concatStringsSep "," (
       map (name: "${oscfg.crxDir}/${name}/extension") (attrNames cfg.unpackedExtensions)
@@ -40,6 +43,9 @@
 
   # Used in webapps and browser
   in [
+    "--user-data-dir=${cfg.dataDir}"
+    "--disk-cache-dir=${runDir}"
+    "--profile-directory=Default"
     "--disable-features=EnableTabMuting"
     "--disable-top-sites" # (relates to the browser's new tab page)
     "--enable-accelerated-video-decode"
@@ -76,15 +82,11 @@
   mkWebApp = { 
     name, url, icon ? "internet-web-browser", profile ? null,
     class ? (mkClass { inherit url; keydify = false; }) # chrome-example.com__-Default
-  }: let 
-    dataDir = if isNull profile then cfg.dataDir else "${cfg.dataDir}/profiles/${profile}";
-    runDir = if isNull profile then "${cfg.runDir}/default" else "${cfg.runDir}/${profile}";
-  in {
+  }: let dir = if isNull profile then "Default" else "Profile.${profile}"; in {
     "${class}" = {
       inherit name icon;
       exec = "${lib.getExe cfg.package} " + toString (switches ++ [ 
-        ''--user-data-dir="${dataDir}"''
-        ''--disk-cache-dir="${runDir}"''
+        ''--profile-directory=${dir}''
         ''--class="${class}"''
         ''--app="${url}"''
         "%U"
