@@ -1,8 +1,11 @@
-{ config, lib, ... }: {
+{ config, lib, pkgs, ... }: {
   config = lib.mkIf config.wayland.windowManager.hyprland.enable {
 
     programs.freetube = {
       enable = true;
+      package = pkgs.writeShellScriptBin "freetube" ''
+        exec ${pkgs.freetube}/bin/freetube --enable-features=WaylandLinuxDrmSyncobj "$@"
+      '';
       settings = {
 
         allowDashAv1Formats  = true;

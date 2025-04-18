@@ -83,8 +83,8 @@ in {
     # keyboard shortcuts
     services.keyd.windows."${mkClass class}" = {
       "super.o" = "C-l"; # location bar
-      # "super.t" = "C-t"; # new tab
-      "super.t" = "C-A-t"; # new tab (in same container)
+      "super.t" = "C-t"; # new tab
+      # "super.t" = "C-A-t"; # new tab (in same container)
       "super.w" = "C-w"; # close tab
       "super.[" = "C-pageup"; # prev tab
       "super.]" = "C-pagedown"; # next tab
