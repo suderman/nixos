@@ -71,7 +71,7 @@ in {
       # quickemu # virtual machines
       qalculate-gtk # calculator
       newsflash # rss reader
-      tauon # mp3 player (and jellyfin client)
+      # tauon # mp3 player (and jellyfin client) FIXME: failed to build, retry later
 
       pulseaudio # pactl
       pavucontrol # sound control gui

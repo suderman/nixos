@@ -11,7 +11,7 @@
       windowrulev2 = [
         # Main window
         "tag +pwd, class:(1Password), title:^(1Password)$"
-        "float, tag:pwd"
+        # "float, tag:pwd"
         "size 1024 768, tag:pwd"
 
         # Dialog window

@@ -13,7 +13,7 @@
     newsflash # rss reader
     pavucontrol # audio control panel
     # slack # Slack chatroom
-    tauon # music player
+    # tauon # music player FIXME: failed to build, retry later
     tdesktop # Telegram messenger
     xorg.xeyes # test for x11
   ];

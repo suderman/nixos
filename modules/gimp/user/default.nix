@@ -17,16 +17,18 @@ in {
 
   config = mkIf cfg.enable {
 
-    services.flatpak = {
-      enable = true;
-      beta = [ "org.gimp.GIMP" ]; # https://www.gimp.org/downloads/devel
-    };
+    # services.flatpak = {
+    #   enable = true;
+    #   beta = [ "org.gimp.GIMP" ]; # https://www.gimp.org/downloads/devel
+    # };
 
     xdg.desktopEntries."${class}" = {
       name = "GIMP"; 
       icon = "org.gimp.GIMP"; 
       noDisplay = true;
     };
+
+    home.packages = [ pkgs.gimp3 ];
 
     services.keyd.windows."${mkClass class}" = {};
 
