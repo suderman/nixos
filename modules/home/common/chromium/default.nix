@@ -1,42 +1,56 @@
-# programs.chromium.enable = true;
-{ config, lib, perSystem, pkgs, ... }: let
+{ config, osConfig, lib, pkgs, perSystem, ... }: let
 
   cfg = config.programs.chromium;
-  inherit (lib) ls mkIf mkOption types;
+  inherit (lib) mkIf mkOption types;
   inherit (config.services.keyd.lib) mkClass;
-  inherit (config.programs.chromium.lib) switches browserSwitches unpackedExtensions;
+  inherit (config.programs.chromium.lib) switches;
 
   # Window class name
   class = "chromium-browser";
 
 in {
 
-  # import chromium lib
-  imports = ls ./.;
+  # Import chromium lib
+  imports = [ ./lib.nix ];
 
-  # extra options to manage unpacked extensions
+  # Extra options to manage external extensions
   options.programs.chromium = {
 
-    # Extensions to automatically download and include with --load-extension
-    unpackedExtensions = mkOption {
+    # home-manager module expects this default directory
+    dataDir = mkOption {
+      type = types.path;      # ~/.config/chromium
+      default = "${config.xdg.configHome}/chromium";
+      readOnly = true;
+    };
+
+    # Registry of chromium extensions
+    registry = mkOption {
+      type = types.anything; 
+      default = import ./registry.nix;
+      readOnly = true; 
+    };
+
+    # Extensions to automatically download and include
+    externalExtensions = mkOption {
       type = types.anything; 
       default = {};
     };
 
-    # Where to download to and load extensions from
-    unpackedExtensionsDir = mkOption {
-      type = types.path; 
-      default = "${config.xdg.dataHome}/chromium/extensions";
+    # Extensions to automatically download and include unpacked
+    unpackedExtensions = mkOption {
+      type = types.anything; 
+      default = { inherit (cfg.registry) chromium-web-store; };
     };
+
   };
 
   config = mkIf cfg.enable {
 
     # using Chromium without Google
     programs.chromium = {
-      package = pkgs.ungoogled-chromium;
+      package = osConfig.programs.chromium.package;
       dictionaries = [ pkgs.hunspellDictsChromium.en_US ];
-      commandLineArgs = switches ++ browserSwitches;  
+      commandLineArgs = switches;  
     };
 
     # keyboard shortcuts
@@ -46,6 +60,9 @@ in {
       "super.]" = "macro(C-tab)"; # next tab
       "super.w" = "C-w"; # close tab
       "super.t" = "C-t"; # new tab
+      "super.n" = "C-n"; # new window
+      "super.r" = "C-r"; # reload
+      "super.o" = "C-l"; # location bar
     };
 
     # tag Chromium and Picture-in-Picture windows
@@ -63,64 +80,64 @@ in {
       value = { text = lib.concatStringsSep "\n" switches; };
     in builtins.listToAttrs (map (name: { inherit name value;  }) configs);
 
-    # Download and keep chromium extensions up-to-date
+    # Populate ~/.config/chromium/External Extensions
     systemd.user = let
-
-      inherit (builtins) attrNames concatStringsSep;
-      inherit (lib) hasPrefix mapAttrsToList versions;
       inherit (perSystem.self) mkScript;
-
-      url = id: if hasPrefix "http://" id || hasPrefix "https://" id then id else 
-        "https://clients2.google.com/service/update2/crx" +
-        "?response=redirect" +
-        "&acceptformat=crx2,crx3" +
-        "&prodversion=${versions.major cfg.package.version}" + 
-        "&x=id%3D${id}%26installsource%3Dondemand%26uc";
-
+      extNames = builtins.attrNames (cfg.externalExtensions // cfg.unpackedExtensions);
+      crxDir = osConfig.programs.chromium.crxDir;
+      extDir = "${cfg.dataDir}/External Extensions";
     in {
-      services.chromium-download-extensions = {
-        Unit.Description = "Download chromium exentions";
-        Unit.After = [ "network-online.target" ];
-        Unit.Wants = [ "network-online.target" ];
-        Service.Type = "oneshot";
-        Service.ExecStart = mkScript {
-          path = [ pkgs.curl pkgs.zip ];
-          text = ''
 
-            # Create and move to extensions directory
-            mkdir -p ${cfg.unpackedExtensionsDir}
-            cd ${cfg.unpackedExtensionsDir}
+      # Symlink extensions from persistent storage
+      services.crx = {
+        Unit = {
+          Description = "Symlink chromium extentions";
+          StartLimitIntervalSec = 60;
+          StartLimitBurst = 5;
+        };
+        Service = {
+          Type = "oneshot";
+          ExecStart = mkScript ''
+            # Ensure external extensions directory exists
+            dir="${extDir}"
+            mkdir -p "$dir"
 
-            # Ensure the extension directories exists with stub manifest to avoid errors
-            for dir in ${toString (attrNames unpackedExtensions)}; do
-              if [[ ! -d $dir ]]; then
-                mkdir $dir
-                echo "{ \"manifest_version\": 3, \"name\": \"$dir\", \"version\": \"0.0.1\" }" > $dir/manifest.json
-                touch -d '2000-01-01 00:00:00' $dir/manifest.json
-              fi
-            done
+            # Change dirctory and clear it out
+            cd "$dir"
+            rm -f *.json
 
-          '' + concatStringsSep "\n" (mapAttrsToList ( name: id: ''
-            # Attempt to download the ${name} extension
-            curl -L "${url id}" > ${name}.zip || true
+            # Enable nullglob
+            shopt -s nullglob
 
-            # If successful, unzip contents into extension's directory
-            if [[ -f ${name}.zip && -s ${name}.zip ]]; then
-              unzip -ou ${name}.zip -d ${name} 2>/dev/null || true
-            fi
-          '' ) unpackedExtensions);
+            # Symlink each extension's json here
+            symlink() {
+              for json in ${crxDir}/$1/*.json; do
+                ln -sf $json .
+              done
+            }
+
+            # External extensions
+          '' + builtins.concatStringsSep "\n" ( 
+            map (name: "symlink ${name}") extNames 
+          ) + ''
+
+            # Disable nullglob again
+            shopt -u nullglob
+          '';
+          Restart = "no";
+          RestartSec = 5;
         };
         Install.WantedBy = [ "default.target" ];
       };
 
-      timers.chromium-download-extensions = {
-        Unit.Description = "Download chromium exentions every 6 hours";
-        Timer = {
-          OnBootSec = "1min";
-          OnUnitActiveSec = "6h";
-          Persistent = true;
+      # Watch persistent storage for updates
+      paths.crx = {
+        Unit.Description = "Symlink chromium extentions";
+        Path = {
+          PathChanged = "${crxDir}/last";
+          Unit = "crx.service";
         };
-        Install.WantedBy = [ "timers.target" ];
+        Install.WantedBy = [ "default.target" ];
       };
 
     };

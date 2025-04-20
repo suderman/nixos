@@ -4,11 +4,12 @@
   cfg = config.services.keyd;
   ini = pkgs.formats.ini {};
   inherit (perSystem.self) mkScript;
-  inherit (lib) concatStringsSep ls mapAttrsToList mkDefault mkIf mkOption types;
+  inherit (lib) concatStringsSep mapAttrsToList mkDefault mkIf mkOption types;
 
 in {
 
-  imports = ls ./.;
+  # Import keyd lib
+  imports = [ ./lib.nix ];
 
   options.services.keyd = {
     enable = lib.options.mkEnableOption "keyd"; 
