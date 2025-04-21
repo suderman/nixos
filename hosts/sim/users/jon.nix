@@ -6,18 +6,20 @@
 
   programs.chromium = {
     enable = true;
-    unpackedExtensions = {
-      alby = "iokeahhehimjnekafflcihljlcjccdbe";
-      dark-reader = "eimadpbcbfnmbkopoojfekhnkhdbieeh";
-      fake-data = "gchcfdihakkhjgfmokemfeembfokkajj";
-      global-speed = "jpbjcnkcffbooppibceonlgknpkniiff";
-      i-still-dont-care-about-cookies = "edibdbjcniadpccecjdfdjjppcpchdlm";
-      one-password = "aeblfdkhhhdcdjpifhhbdiojplfjncoa";
-      sponsorblock = "mnjggcdmjocbbbhaepdhchncahnbgone";
-      tampermonkey = "dhdgffkkebhmkfjojejmpbldmpobfkfo";
-      ublock-origin = "cjpalhdlnbpafiamejdnhcphjbkeiagm";
-      ublock-origin-lite = "ddkjiahejlhfcafbddmgiahcphecmpfh";
+    externalExtensions = {
+      inherit (config.programs.chromium.registry) 
+        auto-tab-discard-suspend
+        dark-reader
+        fake-data
+        floccus-bookmarks-sync
+        i-still-dont-care-about-cookies
+        one-password
+        return-youtube-dislike
+        sponsorblock
+        ublock-origin 
+      ;
     };
+
   };
 
 }

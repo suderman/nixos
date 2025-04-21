@@ -49,8 +49,11 @@ in perSystem.devshell.mkShell {
   } {
     category = "development";
     name = "vm";
-    help = "nixos-rebuild --flake .#sim build-vm && ./result/bin/run-sim-vm";
-    command = "nixos-rebuild --flake .#sim build-vm && ./result/bin/run-sim-vm";
+    # help = "nixos-rebuild --flake .#sim build-vm && ./result/bin/run-sim-vm";
+    # command = "nixos-rebuild --flake .#sim build-vm && ./result/bin/run-sim-vm";
+    help = "nix build -L '.#nixosConfigurations.sim.config.system.build.vmWithDisko'";
+    command = "nix build -L '.#nixosConfigurations.sim.config.system.build.vmWithDisko'";
+
   }];
 
   # Base list of packages for devshell, plus extra
@@ -65,6 +68,7 @@ in perSystem.devshell.mkShell {
     pkgs.openssl
     pkgs.smenu
     pkgs.rage
+    pkgs.qemu
     perSystem.agenix-rekey.default
     perSystem.self.qr
     perSystem.self.derive

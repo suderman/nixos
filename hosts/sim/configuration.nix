@@ -7,13 +7,13 @@ in {
     flake.nixosModules.common
     flake.nixosModules.vm
     flake.nixosModules.homelab
+    ./storage.nix
   ];
 
   config = {
 
     stable = false;
     
-    # networking.hostName = builtins.baseNameOf ./.;
     networking.domain = "tail";
     networking.firewall.allowPing = true;
 
@@ -26,6 +26,13 @@ in {
 
     services.tailscale.enable = true;
     services.openssh.enable = true;
+
+
+    # fileSystems."/" = { 
+    #   device = "/dev/sda4";
+    #   fsType = "btrfs";
+    #   options = [ "subvol=root" ];
+    # };
 
   };
 }

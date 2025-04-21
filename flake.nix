@@ -16,6 +16,10 @@
     # https://github.com/nix-community/impermanence
     impermanence.url = "github:nix-community/impermanence"; 
 
+    # https://github.com/nix-community/disko
+    disko.url = "github:nix-community/disko";
+    disko.inputs.nixpkgs.follows = "nixpkgs";
+
     # https://github.com/numtide/blueprint/
     blueprint.url = "github:numtide/blueprint";
     blueprint.inputs.nixpkgs.follows = "nixpkgs";
