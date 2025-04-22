@@ -34,7 +34,7 @@ in {
       content = {
         type = "btrfs";
         extraArgs = [ "-f" ];
-        inherit (mnt "/mnt/ssd1") mountpoint mountOptions;
+        inherit (mnt "/disk/1") mountpoint mountOptions;
         subvolumes = {
           root = mnt "/";
           persist = mnt "/persist";
