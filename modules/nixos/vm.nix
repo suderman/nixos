@@ -12,7 +12,6 @@
       kernelPackages = pkgs.linuxPackages_latest;
       loader = {
         grub.enable = true;              # Enable GRUB instead of systemd-boot
-        grub.device = "/dev/disk/by-id/ata-QEMU_HARDDISK_QM00001";
         systemd-boot.enable = false;     # Disable systemd-boot
         efi.canTouchEfiVariables = false; # No UEFI support needed for legacy BIOS boot
       };
@@ -21,6 +20,7 @@
     virtualisation = {
       diskSize = 4096;   # Disk size in MB
       memorySize = 2048; # RAM in MB
+      bootLoaderDevice = "/dev/disk/by-id/ata-QEMU_HARDDISK_QM00001";
     };
 
     services.openssh.enable = true;

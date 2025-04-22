@@ -7,11 +7,17 @@ in {
     device = "/dev/disk/by-id/ata-QEMU_HARDDISK_QM00001";
     content.type = "gpt";
 
-    content.partitions.boot = {
+    content.partitions.grub = {
       priority = 1;
+      name = "grub";
+      size = "1M";
+      type = "EF02";
+    };
+
+    content.partitions.boot = {
+      priority = 2;
       name = "boot";
-      start = "1M";
-      end = "128M";
+      size = "512M";
       type = "EF00";
       content = {
         type = "filesystem";
@@ -22,7 +28,7 @@ in {
     };
 
     content.partitions.data = {
-      priority = 2;
+      priority = 3;
       name = "data";
       size = "100%";
       content = {
