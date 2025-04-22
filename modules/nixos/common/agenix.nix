@@ -58,6 +58,7 @@
 
       # Derive machine id from decrypted hex (if agenix decrypting)
       ''
+        echo 00000000000000000000000000000000 > /etc/machine-id
         [[ -f ${hex} ]] && cat ${hex} | 
         derive hex ${hostName} 32 > /etc/machine-id
         chmod 444 /etc/machine-id

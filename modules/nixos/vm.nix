@@ -11,9 +11,9 @@
       kernelParams = [ "console=ttyS0" "console=tty1" "boot.shell_on_fail" ];
       kernelPackages = pkgs.linuxPackages_latest;
       loader = {
-        grub.enable = false;
-        systemd-boot.enable = true;
-        efi.canTouchEfiVariables = false;
+        grub.enable = true;              # Enable GRUB instead of systemd-boot
+        systemd-boot.enable = false;     # Disable systemd-boot
+        efi.canTouchEfiVariables = false; # No UEFI support needed for legacy BIOS boot
       };
     };
 
