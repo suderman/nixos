@@ -69,6 +69,8 @@ in perSystem.devshell.mkShell {
     pkgs.smenu
     pkgs.rage
     pkgs.qemu
+    pkgs.nixos-anywhere
+    perSystem.disko.default
     perSystem.agenix-rekey.default
     perSystem.self.qr
     perSystem.self.derive

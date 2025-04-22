@@ -33,8 +33,8 @@ in {
           root = mnt "/";
           persist = mnt "/persist";
           nix = mnt "/nix";
-          snapshots = mnt {};
-          backups = mnt {};
+          snapshots = {};
+          backups = {};
         };
       };
     };

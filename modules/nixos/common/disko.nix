@@ -25,7 +25,7 @@ in {
   };
 
   config.environment.systemPackages = [ 
-    perSystem.disko
+    perSystem.disko.default
     pkgs.nixos-anywhere
   ];
 
