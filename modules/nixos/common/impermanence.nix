@@ -52,14 +52,13 @@ in {
 
     };
 
+    # Persistent volumes must be marked with neededForBoot
+    fileSystems."/persist".neededForBoot = true;
+
     # Allows users to allow others on their binds
     programs.fuse.userAllowOther = true;
 
-    # # Maintain machine identification
-    # environment.etc."machine-id".source = "/persist/etc/machine-id";
-
-
-    # Script to wipe the root subvolume at boot
+    # # Script to wipe the root subvolume at boot
     # boot.initrd.postResumeCommands = mkAfter ''
     #   # Mount btrfs disk to /mnt
     #   mkdir -p /mnt

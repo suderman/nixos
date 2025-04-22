@@ -34,8 +34,6 @@
 
         # Store rekeyed & generated secrets in repo
         storageMode = "local";
-        # localStorageDir = flake + /secrets/rekeyed/${hostName};
-        # generatedSecretsDir = flake + /secrets/generated/${hostName};
         localStorageDir = flake + /hosts/${hostName}/secrets;
         generatedSecretsDir = flake + /hosts/${hostName}/generated;
       };
