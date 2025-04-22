@@ -41,7 +41,7 @@
     };
 
     # Add /persist/etc/ssh/ssh_host_ed25519_key.pub and /etc/machine-id
-    system.activationScripts.etc.text = let
+    system.activationScripts.sshHostKeys.text = let
 
       inherit (config.age.rekey) hostPubkey;
       hex = config.age.secrets.hex.path;

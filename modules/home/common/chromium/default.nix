@@ -97,7 +97,7 @@ in {
         };
         Service = {
           Type = "oneshot";
-          ExecStart = mkScript ''
+          ExecStart = "${mkScript ''
             # Ensure external extensions directory exists
             dir="${extDir}"
             mkdir -p "$dir"
@@ -123,7 +123,7 @@ in {
 
             # Disable nullglob again
             shopt -u nullglob
-          '';
+          ''}";
           Restart = "no";
           RestartSec = 5;
         };
