@@ -9,6 +9,8 @@
     "-m 4096"
     "-cpu host"
     "-nic user,hostfwd=tcp::2222-:22"
+    # "-netdev bridge,id=net0,br=br0"
+    # "-device virtio-net-pci,netdev=net0"
     "-drive file=vm.img,format=qcow2"
   ];
 
