@@ -4,5 +4,6 @@
 .data
 .direnv
 *.qcow2
+*.img
 id.age
 id_age*

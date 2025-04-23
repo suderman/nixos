@@ -41,7 +41,7 @@
     };
 
     # Add /persist/etc/ssh/ssh_host_ed25519_key.pub and /etc/machine-id
-    system.activationScripts.sshHostKeys.text = let
+    system.activationScripts.etc.text = let
 
       inherit (config.age.rekey) hostPubkey;
       hex = config.age.secrets.hex.path;
@@ -64,12 +64,8 @@
 
     in lib.mkAfter "${perSystem.self.mkScript { inherit path text; }}";
 
-
-    # Tell sshd that ssh host keys are found in /persist
+    # Exclude auto-generated ssh ed25519 from this list
     services.openssh.hostKeys = [{
-      path = "/persist/etc/ssh/ssh_host_ed25519_key"; # derived and side-loaded
-      type = "ed25519";
-    } {
       path = "/persist/etc/ssh/ssh_host_rsa_key"; # automatically generated
       type = "rsa";
       bits = 4096;

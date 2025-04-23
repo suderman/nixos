@@ -3,6 +3,15 @@
   inherit (builtins) toString readFile;
   inherit (flake.lib) ls;
 
+  vm = toString [
+    "qemu-system-x86_64"
+    "-enable-kvm"
+    "-m 4096"
+    "-cpu host"
+    "-nic user,hostfwd=tcp::2222-:22"
+    "-drive file=vm.img,format=qcow2"
+  ];
+
 in perSystem.devshell.mkShell {
 
   # Set name of devshell from config
@@ -47,13 +56,25 @@ in perSystem.devshell.mkShell {
     help = "browse flake";
     command = "nix-inspect --path .";
   } {
-    category = "development";
+    category = "vm";
+    name = "vm-iso";
+    help = "create installer iso";
+    command = "nix build .#nixosConfigurations.iso.config.system.build.isoImage";
+  } {
+    category = "vm";
+    name = "vm-drive";
+    help = "create vm drive";
+    command = "qemu-img create -f qcow2 vm.img 20G";
+  } {
+    category = "vm";
+    name = "vm-install";
+    help = "boot vm with iso";
+    command = "${vm} -cdrom result/iso/nixos*.iso -boot d";
+  } {
+    category = "vm";
     name = "vm";
-    # help = "nixos-rebuild --flake .#sim build-vm && ./result/bin/run-sim-vm";
-    # command = "nixos-rebuild --flake .#sim build-vm && ./result/bin/run-sim-vm";
-    help = "nix build -L '.#nixosConfigurations.sim.config.system.build.vmWithDisko'";
-    command = "nix build -L '.#nixosConfigurations.sim.config.system.build.vmWithDisko'";
-
+    help = "run vm";
+    command = vm;
   }];
 
   # Base list of packages for devshell, plus extra
