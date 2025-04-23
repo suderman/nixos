@@ -13,9 +13,6 @@ fi
 # Remove this eventually
 git switch blueprint
 
-# Prefetch dependencies
-nix develop .#iso
-
 # Choose host from flake
 host="$(ls -1 hosts/*/configuration.nix | cut -d'/' -f2 | grep -v iso | gum choose)"
 
