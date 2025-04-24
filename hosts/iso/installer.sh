@@ -1,12 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Ensure root
+if [[ "$(id -u)" != "0" ]]; then
+  echo "Must run this script as root"
+  exit 1
+fi
+
 # Download flake from github
-if [ ! -d "$HOME/nixos/.git" ]; then
-  git clone https://github.com/suderman/nixos "$HOME/nixos"
-  cd $HOME/nixos
+if [ ! -d "/root/nixos/.git" ]; then
+  git clone https://github.com/suderman/nixos "/root/nixos"
+  cd /root/nixos
 else 
-  cd $HOME/nixos
+  cd /root/nixos
   git pull
 fi
 
@@ -23,6 +29,10 @@ fi
 
 # Format disks
 sudo disko -m destroy,format,mount -f .#$host
+
+# Persist hostname
+mkdir -p /mnt/persist/etc
+echo $host > /mnt/persist/etc/hostname
 
 # Install nixos
 sudo nixos-install --flake .#$host --no-root-passwd --root /mnt

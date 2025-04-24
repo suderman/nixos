@@ -8,9 +8,7 @@
     "-enable-kvm"
     "-m 4096"
     "-cpu host"
-    "-nic user,hostfwd=tcp::2222-:22"
-    # "-netdev bridge,id=net0,br=br0"
-    # "-device virtio-net-pci,netdev=net0"
+    "-nic user,hostfwd=tcp::2222-:22,hostfwd=tcp::12345-:12345"
     "-drive file=vm.img,format=qcow2"
   ];
 
@@ -58,8 +56,8 @@ in perSystem.devshell.mkShell {
     help = "browse flake";
     command = "nix-inspect --path .";
   } {
-    category = "vm";
-    name = "vm-iso";
+    category = "development";
+    name = "iso";
     help = "create installer iso";
     command = "nix build .#nixosConfigurations.iso.config.system.build.isoImage";
   } {
