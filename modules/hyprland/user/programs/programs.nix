@@ -60,6 +60,11 @@ in {
       tdesktop # family chat
       # slack # work chat
 
+      (lib.wrapWithFlags {
+        package = pkgs.slack;
+        flags = [ "--enable-features=WaylandLinuxDrmSyncobj" ];
+      })
+
       neovide # text editor
       lapce # text editor
       inkscape # vector editor

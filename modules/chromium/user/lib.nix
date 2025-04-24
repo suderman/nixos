@@ -69,10 +69,11 @@
     inherit (builtins) isString;
     inherit (lib) removePrefix removeSuffix replaceStrings;
     toKeydClass = config.services.keyd.lib.mkClass;
-    toClass = { url, keydify ? false }: let 
+    toClass = { url, profile ? null, keydify ? false }: let 
       removeProtocols = url: removePrefix "http://" (removePrefix "https://" url);
       removeSlashes = url: replaceStrings [ "/" ] [ "." ] (removeSuffix "/" url);
-      class = "chrome-${removeSlashes( removeProtocols url )}__-Default";
+      suffix = if isString profile then "-Profile.${profile}" else "-Default";
+      class = "chrome-${removeSlashes( removeProtocols url )}__${suffix}";
     in if keydify == true then (toKeydClass class) else class;
   in if isString arg then toClass { url = arg; keydify = true; } else toClass arg;
 
@@ -81,7 +82,7 @@
   # config.xdg.desktopEntries = mkWebApp { name = "Example"; url = "https://example.com/"; };
   mkWebApp = { 
     name, url, icon ? "internet-web-browser", profile ? null,
-    class ? (mkClass { inherit url; keydify = false; }) # chrome-example.com__-Default
+    class ? (mkClass { inherit url profile; keydify = false; }) # chrome-example.com__-Default
   }: let dir = if isNull profile then "Default" else "Profile.${profile}"; in {
     "${class}" = {
       inherit name icon;
