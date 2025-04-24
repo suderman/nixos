@@ -26,11 +26,14 @@ if [[ -z "$host" ]]; then
   exit 1
 fi
 
+# Get ready
+disko --flake .#$host --mode destroy,format,mount --dry-run
+
 # Format disks
-if gum confirm "disko --flake .#$host --mode" --affirmative="destroy,format,mount" --negative="mount"; then
-  disko --flake .#$host --mode destroy,format,mount
-else
-  disko --flake .#$host --mode mount
+header="disko --yes-wipe-all-disks --flake .#$host --mode"
+mode="$(echo destroy,format,mount mount SKIP | gum choose --header "$header" --input-delimiter=" ")"
+if [[ "$mode" != "SKIP" ]]; then
+  disko --yes-wipe-all-disks --flake .#$host --mode $mode
 fi
 
 # Persist hostname
@@ -43,6 +46,7 @@ if gum confirm "Receive SSH host key?" --affirmative="Now" --negative="Later"; t
   cd /mnt/persist/etc/ssh
   cp -f /root/nixos/hosts/$host/ssh_host_ed25519_key.pub .
   sshed receive
+  cd /root/nixos
 fi
 
 # Install nixos
