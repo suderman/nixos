@@ -20,8 +20,7 @@ fi
 git switch blueprint
 
 # Choose host from flake
-host="$(ls -1 hosts/*/configuration.nix | cut -d'/' -f2 | grep -v iso | gum choose)"
-
+host="$(ls -1 hosts/*/ssh_host_ed25519_key.pub | cut -d'/' -f2 | gum choose)"
 if [[ -z "$host" ]]; then
   echo "No host selected"
   exit 1
@@ -38,9 +37,11 @@ fi
 mkdir -p /mnt/persist/etc
 echo $host > /mnt/persist/etc/hostname
 
+# Offer to receive SSH host key ahead of nixos installation
 if gum confirm "Receive SSH host key?" --affirmative="Now" --negative="Later"; then
   mkdir -p /mnt/persist/etc/ssh
   cd /mnt/persist/etc/ssh
+  cp -f /root/nixos/hosts/$host/ssh_host_ed25519_key.pub .
   sshed receive
 fi
 
