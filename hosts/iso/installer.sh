@@ -41,7 +41,7 @@ echo $host > /mnt/persist/etc/hostname
 if gum confirm "Receive SSH host key?" --affirmative="Now" --negative="Later"; then
   mkdir -p /mnt/persist/etc/ssh
   cd /mnt/persist/etc/ssh
-  sshed-receive
+  sshed receive
 fi
 
 # Install nixos
