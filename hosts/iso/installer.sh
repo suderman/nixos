@@ -28,7 +28,7 @@ if [[ -z "$host" ]]; then
 fi
 
 # Format disks
-if gum confirm "disko --flake .#$host --mode" --affirmative="destory,format,mount" --negative="mount"; then
+if gum confirm "disko --flake .#$host --mode" --affirmative="destroy,format,mount" --negative="mount"; then
   disko --flake .#$host --mode destroy,format,mount
 else
   disko --flake .#$host --mode mount
