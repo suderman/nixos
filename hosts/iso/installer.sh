@@ -28,11 +28,25 @@ if [[ -z "$host" ]]; then
 fi
 
 # Format disks
-sudo disko -m destroy,format,mount -f .#$host
+if gum confirm "disko --flake .#$host --mode" --affirmative="destory,format,mount" --negative="mount"; then
+  disko --flake .#$host --mode destroy,format,mount
+else
+  disko --flake .#$host --mode mount
+fi
 
 # Persist hostname
 mkdir -p /mnt/persist/etc
 echo $host > /mnt/persist/etc/hostname
 
+if gum confirm "Receive SSH host key?" --affirmative="Now" --negative="Later"; then
+  mkdir -p /mnt/persist/etc/ssh
+  cd /mnt/persist/etc/ssh
+  sshed-receive
+fi
+
 # Install nixos
-sudo nixos-install --flake .#$host --no-root-passwd --root /mnt
+if gum confirm "Install NixOS?" --affirmative="Do it" --negative="No way"; then
+  nixos-install --flake .#$host --no-root-passwd --root /mnt
+  echo
+  echo "Power down, remove ISO, and boot up."
+fi
