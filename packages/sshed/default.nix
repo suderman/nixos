@@ -1,13 +1,13 @@
 { flake, pkgs, perSystem, ... }: let
 
   inherit (builtins) readFile;
-  inherit (pkgs) eza git inetutils iptables netcat rage;
+  inherit (pkgs) eza git gnugrep inetutils iptables netcat rage;
   inherit (perSystem.self) derive ipaddr;
 
 in perSystem.self.mkScript {
 
   name = "sshed";
-  path = [ derive eza git inetutils ipaddr iptables netcat rage ];
+  path = [ derive eza git gnugrep inetutils ipaddr iptables netcat rage ];
 
   # Derivation path for key
   env.derivation_path = "bip85-hex32-index${toString flake.derivationIndex}";

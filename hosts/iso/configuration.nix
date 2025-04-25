@@ -3,7 +3,7 @@
   imports = [
     (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix")
     (modulesPath + "/installer/cd-dvd/channel.nix")
-    (flake + /modules/nixos/common/agenix.nix)
+    flake.nixosModules.agenix
   ];
 
   # Set host platform and config options

@@ -1,44 +1,17 @@
-{ flake, inputs, perSystem, config, lib, pkgs, hostName, ... }: {
+{ flake, perSystem, config, lib, pkgs, hostName, ... }: {
 
   imports = [
-    inputs.agenix.nixosModules.default
-    inputs.agenix-rekey.nixosModules.default
+    flake.nixosModules.agenix
   ];
 
   # Configure agenix to work with derived identity and ssh keys
   config = {
 
-    # https://github.com/ryantm/agenix
-    age = {
-
-      # 32-byte hex imported from QR code
-      # > import-id
-      secrets.hex.rekeyFile = flake + /hex.age; 
-
-      # Private ssh host key must be side-loaded/persisted to decrypt secrets
-      # > sshed send hostName IP
-      identityPaths = [ "/persist/etc/ssh/ssh_host_ed25519_key" ];
-
-      # https://github.com/oddlama/agenix-rekey
-      rekey = {
-
-        # Public ssh host key derived from 32-byte hex
-        # > sshed generate
-        hostPubkey = builtins.readFile (
-          flake + /hosts/${hostName}/ssh_host_ed25519_key.pub
-        );
-
-        # Master identity decrypted to /tmp/id_age for rekeying
-        # > unlock-id
-        masterIdentities = [ /tmp/id_age /tmp/id_age_ ];
-
-        # Store rekeyed & generated secrets in repo
-        storageMode = "local";
-        localStorageDir = flake + /hosts/${hostName}/secrets;
-        generatedSecretsDir = flake + /hosts/${hostName}/generated;
-      };
-
-    };
+    # Public ssh host key derived from 32-byte hex
+    # > sshed generate
+    age.rekey.hostPubkey = builtins.readFile (
+      flake + /hosts/${hostName}/ssh_host_ed25519_key.pub
+    );
 
     # Add /persist/etc/ssh/ssh_host_ed25519_key.pub and /etc/machine-id
     system.activationScripts.etc.text = let

@@ -7,7 +7,7 @@
 [[ ! -d ./users ]] && error "./users directory missing"
 
 # Per each host...
-for host in $(eza -D hosts); do
+for host in $(eza -D hosts | grep -v iso); do
 
   # Write the public ssh host key
   cat hex.age |
