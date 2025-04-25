@@ -55,26 +55,26 @@ in perSystem.devshell.mkShell {
     name = "b";
     help = "browse flake";
     command = "nix-inspect --path .";
-  } {
-    category = "development";
-    name = "iso";
-    help = "create installer iso";
-    command = "nix build .#nixosConfigurations.iso.config.system.build.isoImage";
-  } {
-    category = "vm";
-    name = "vm-drive";
-    help = "create vm drive";
-    command = "qemu-img create -f qcow2 vm.img 20G";
-  } {
-    category = "vm";
-    name = "vm-install";
-    help = "boot vm with iso";
-    command = "${vm} -cdrom result/iso/nixos*.iso -boot d";
-  } {
-    category = "vm";
-    name = "vm";
-    help = "run vm";
-    command = vm;
+  # } {
+  #   category = "development";
+  #   name = "iso-first";
+  #   help = "create installer iso";
+  #   command = "nix build .#nixosConfigurations.iso.config.system.build.isoImage";
+  # } {
+  #   category = "vm";
+  #   name = "vm-drive";
+  #   help = "create vm drive";
+  #   command = "qemu-img create -f qcow2 vm.img 20G";
+  # } {
+  #   category = "vm";
+  #   name = "vm-install";
+  #   help = "boot vm with iso";
+  #   command = "${vm} -cdrom result/iso/nixos*.iso -boot d";
+  # } {
+  #   category = "vm";
+  #   name = "vm";
+  #   help = "run vm";
+  #   command = vm;
   }];
 
   # Base list of packages for devshell, plus extra
@@ -98,6 +98,8 @@ in perSystem.devshell.mkShell {
     perSystem.self.sshed
     perSystem.self.ipaddr
     perSystem.self.hello
+    perSystem.self.iso
+    perSystem.self.sim
   ];
 
 }

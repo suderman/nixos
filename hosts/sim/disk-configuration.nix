@@ -4,7 +4,7 @@ in {
 
   disko.devices.disk.ssd1 = {
     type = "disk";
-    device = "/dev/disk/by-id/ata-QEMU_HARDDISK_QM00001";
+    device = "/dev/disk/by-id/virtio-1";
     content.type = "gpt";
 
     content.partitions.grub = {
