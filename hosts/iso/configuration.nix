@@ -1,8 +1,9 @@
-{ config, lib, pkgs, perSystem, modulesPath, ... }: {
+{ flake, config, lib, pkgs, perSystem, modulesPath, ... }: {
 
   imports = [
     (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix")
     (modulesPath + "/installer/cd-dvd/channel.nix")
+    (flake + /modules/nixos/common/agenix.nix)
   ];
 
   # Set host platform and config options

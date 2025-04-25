@@ -4,10 +4,11 @@
 in {
 
   imports = [
+    ./hardware-configuration.nix
+    ./disk-configuration.nix
     flake.nixosModules.common
     flake.nixosModules.vm
     flake.nixosModules.homelab
-    ./storage.nix
   ];
 
   config = {

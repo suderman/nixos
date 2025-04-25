@@ -20,7 +20,7 @@ fi
 git switch blueprint
 
 # Choose host from flake
-host="$(ls -1 hosts/*/ssh_host_ed25519_key.pub | cut -d'/' -f2 | gum choose)"
+host="$(ls -1 hosts/*/disk-configuration.nix | cut -d'/' -f2 | gum choose)"
 if [[ -z "$host" ]]; then
   echo "No host selected"
   exit 1
