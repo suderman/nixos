@@ -10,7 +10,7 @@
   # Determine primary IP address for each host from configuration domain
   addresses = filterAttrs (n: v: v != "") ( mkAttrs flake.nixosConfigurations ( hostName: let
     inherit (flake.nixosConfigurations."${hostName}".config.networking) domain;
-    ip = zones.${domain}.${hostName} or "";
+    ip = if isNull domain then "" else (zones.${domain}.${hostName} or "");
   in ip ) );
 
   # Flatten the tree into a "hostName.domain = address" set
