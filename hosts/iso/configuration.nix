@@ -42,7 +42,6 @@
   # Start wireless 
   networking.networkmanager.enable = true;
   networking.wireless.enable = false;
-  # systemd.services.wpa_supplicant.wantedBy = lib.mkForce [ "multi-user.target" ];
 
   # Virtualization
   services.qemuGuest.enable = true;

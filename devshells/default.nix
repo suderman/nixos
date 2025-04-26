@@ -3,15 +3,6 @@
   inherit (builtins) toString readFile;
   inherit (flake.lib) ls;
 
-  vm = toString [
-    "qemu-system-x86_64"
-    "-enable-kvm"
-    "-m 4096"
-    "-cpu host"
-    "-nic user,hostfwd=tcp::2222-:22,hostfwd=tcp::12345-:12345"
-    "-drive file=vm.img,format=qcow2"
-  ];
-
 in perSystem.devshell.mkShell {
 
   # Set name of devshell from config
@@ -47,34 +38,29 @@ in perSystem.devshell.mkShell {
     command = readFile ./lock-id.sh;
   } {
     category = "development";
+    name = "agenix";
+    help = "Manage secrets";
+    package = perSystem.agenix-rekey.default;
+  } {
+    category = "development";
     name = "init";
     help = "Generate hosts, users and related files";
     command = readFile ./init.sh;
   } {
     category = "development";
-    name = "b";
-    help = "browse flake";
+    name = "browse";
+    help = "Browse flake";
     command = "nix-inspect --path .";
-  # } {
-  #   category = "development";
-  #   name = "iso-first";
-  #   help = "create installer iso";
-  #   command = "nix build .#nixosConfigurations.iso.config.system.build.isoImage";
-  # } {
-  #   category = "vm";
-  #   name = "vm-drive";
-  #   help = "create vm drive";
-  #   command = "qemu-img create -f qcow2 vm.img 20G";
-  # } {
-  #   category = "vm";
-  #   name = "vm-install";
-  #   help = "boot vm with iso";
-  #   command = "${vm} -cdrom result/iso/nixos*.iso -boot d";
-  # } {
-  #   category = "vm";
-  #   name = "vm";
-  #   help = "run vm";
-  #   command = vm;
+  } {
+    category = "virtual machine";
+    name = "sim";
+    help = "boot vm";
+    package = perSystem.self.sim;
+  } {
+    category = "virtual machine";
+    name = "iso";
+    help = "build iso";
+    package = perSystem.self.iso;
   }];
 
   # Base list of packages for devshell, plus extra
@@ -89,17 +75,12 @@ in perSystem.devshell.mkShell {
     pkgs.openssl
     pkgs.smenu
     pkgs.rage
-    pkgs.qemu
     pkgs.nixos-anywhere
-    perSystem.disko.default
-    perSystem.agenix-rekey.default
     perSystem.self.qr
     perSystem.self.derive
     perSystem.self.sshed
     perSystem.self.ipaddr
     perSystem.self.hello
-    perSystem.self.iso
-    perSystem.self.sim
   ];
 
 }

@@ -31,7 +31,7 @@ disko --flake .#$host --mode destroy,format,mount --dry-run
 
 # Format disks
 header="disko --yes-wipe-all-disks --flake .#$host --mode"
-mode="$(echo destroy,format,mount mount SKIP | gum choose --header "$header" --input-delimiter=" ")"
+mode="$(echo destroy,format,mount format,mount SKIP | gum choose --header "$header" --input-delimiter=" ")"
 if [[ "$mode" != "SKIP" ]]; then
   disko --yes-wipe-all-disks --flake .#$host --mode $mode
 fi

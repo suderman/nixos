@@ -10,7 +10,7 @@
         if [[ -z "$vpn" ]]; then 
           echo "$lan"
         elif [[ $lan == 10.0.2.* ]]; then 
-          echo "$vpn"
+          echo "127.0.0.1"
         else
           echo "$lan"
         fi
