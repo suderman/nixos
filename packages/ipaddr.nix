@@ -8,9 +8,9 @@
         lan="$(ip -4 a | awk '/state UP/{flag=1} flag && /inet /{split($2, ip, "/"); print ip[1]; exit}')"
         vpn="$(ip -4 a | awk '/tailscale0/{flag=1} flag && /inet /{split($2, ip, "/"); print ip[1]; exit}')"
         if [[ -z "$vpn" ]]; then 
-          echo "$lan"
+          [[ $lan == 10.0.2.* ]] && echo 127.0.0.1 || echo $lan 
         elif [[ $lan == 10.0.2.* ]]; then 
-          echo "127.0.0.1"
+          echo "$vpn"
         else
           echo "$lan"
         fi
@@ -26,7 +26,6 @@
         echo "  help"
         ;;
     esac
-    echo
   '';
 
 }
