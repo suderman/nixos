@@ -23,23 +23,23 @@
 
 in {
 
-  disko.devices.disk."1" = {
+  disko.devices.disk.disk1 = {
     type = "disk";
     device = "/dev/disk/by-id/virtio-1";
     content.type = "gpt";
 
     content.partitions.grub = {
-      priority = 1;
       name = "grub";
       size = "1M";
       type = "EF02";
+      priority = 1;
     };
 
     content.partitions.boot = {
-      priority = 2;
       name = "boot";
       size = "512M";
       type = "EF00";
+      priority = 2;
       content = {
         type = "filesystem";
         format = "vfat";
@@ -48,14 +48,23 @@ in {
       };
     };
 
-    content.partitions.root = {
+    content.partitions.swap = {
+      size = "4G";
       priority = 3;
-      name = "root";
-      size = "100%";
       content = {
+        type = "swap";
+        discardPolicy = "both";
+        resumeDevice = true; # support hibernation
+      };
+    };
+
+    content.partitions.disk1 = {
+      name = "disk1";
+      size = "100%";
+      priority = 4;
+      content = mount "/disk/disk1" // {
         type = "btrfs";
-        extraArgs = [ "-f" "-L disk1" ];
-        inherit (mount "/disk/1") mountpoint mountOptions;
+        extraArgs = [ "-fL disk1" ];
         subvolumes = {
           root = mount "/";
           persist = mount "/persist";
@@ -67,19 +76,18 @@ in {
     };
   };
 
-  disko.devices.disk."2" = {
+  disko.devices.disk.disk2 = {
     type = "disk";
     device = "/dev/disk/by-id/virtio-2";
     content.type = "gpt";
-    content.partitions.data = {
-      name = "data";
+    content.partitions.disk2 = {
+      name = "disk2";
       size = "100%";
-      content = {
+      content = automount "/disk/disk2" // {
         type = "btrfs";
-        extraArgs = [ "-f" "-L disk2" ];
-        inherit (automount "/disk/2") mountpoint mountOptions;
+        extraArgs = [ "-fL disk2" ];
         subvolumes = {
-          root = automount "/data";
+          data = automount "/data";
           snapshots = {};
           backups = {};
         };
@@ -87,39 +95,39 @@ in {
     };
   };
 
-  disko.devices.disk."3" = {
+  disko.devices.disk.disk3 = {
     type = "disk";
     device = "/dev/disk/by-id/virtio-3";
     content.type = "gpt";
-    content.partitions.pool = {
-      name = "pool";
+    content.partitions.disk3 = {
+      name = "disk3";
       size = "100%";
-      content = {
-        type = "btrfs";
-        extraArgs = [ "-f" "-L disk3" ];
-      };
+      content.type = "btrfs";
     };
   };
 
-  disko.devices.disk."4" = {
+  disko.devices.disk.disk4 = {
     type = "disk";
     device = "/dev/disk/by-id/virtio-4";
     content.type = "gpt";
-    content.partitions.pool = {
-      name = "pool";
+    content.partitions.disk4 = {
+      name = "disk4";
       size = "100%";
-      content = {
+      content = automount "/disk/disk34" // {
         type = "btrfs";
-        extraArgs = [ "-f" "-L disk4" "-d single /dev/disk/by-id/virtio-3 /dev/disk/by-id/virtio-4" ];
-        inherit (automount "/disk/4") mountpoint mountOptions;
+        extraArgs = [ 
+          "-fL disk34" 
+          "-d single /dev/disk/by-id/virtio-3-part1 /dev/disk/by-id/virtio-4-part1"
+        ];
         subvolumes = {
-          root = automount "/pool";
           snapshots = {};
           backups = {};
         };
       };
     };
   };
+
+
 
   # # Snapshots & backups
   # services.btrbk = {
@@ -129,5 +137,7 @@ in {
   #   #   # "/nix".target."ssh://eve/backups/${hostName}" = {}; # re-enable after eve is healthy again
   #   # };
   # };
+
+
 
 }
