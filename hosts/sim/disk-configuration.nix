@@ -89,7 +89,7 @@ in rec {
       size = "100%";
       content = automount "/mnt/data" // {
         type = "btrfs";
-        extraArgs = [ "-fL files" ];
+        extraArgs = [ "-fL data" ];
         subvolumes = {
           data = automount "/data";
           snapshots = {};
