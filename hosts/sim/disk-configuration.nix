@@ -66,7 +66,7 @@ in rec {
     content.partitions.part = {
       size = "100%";
       priority = 4;
-      content = mount "/volumes/main" // {
+      content = mount "/mnt/main" // {
         type = "btrfs";
         extraArgs = [ "-fL main" ];
         subvolumes = {
@@ -87,9 +87,9 @@ in rec {
     content.type = "gpt";
     content.partitions.part = {
       size = "100%";
-      content = automount "/volumes/data" // {
+      content = automount "/mnt/data" // {
         type = "btrfs";
-        extraArgs = [ "-fL data" ];
+        extraArgs = [ "-fL files" ];
         subvolumes = {
           data = automount "/data";
           snapshots = {};
@@ -117,7 +117,7 @@ in rec {
     content.type = "gpt";
     content.partitions.part = {
       size = "100%";
-      content = automount "/volumes/pool" // {
+      content = automount "/mnt/pool" // {
         type = "btrfs";
         extraArgs = with disko.devices.disk; [ 
           "-fL pool" 
