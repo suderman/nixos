@@ -1,4 +1,4 @@
-{ config, flake, pkgs, ... }: let 
+let 
 
   mount = mountpoint: {
     inherit mountpoint;
@@ -21,13 +21,15 @@
     ];
   };
 
-in {
+in rec {
 
-  disko.devices.disk.disk1 = {
+  # ssd1 is the main disk
+  disko.devices.disk.ssd1 = {
     type = "disk";
     device = "/dev/disk/by-id/virtio-1";
     content.type = "gpt";
 
+    # bios boot
     content.partitions.grub = {
       name = "grub";
       size = "1M";
@@ -35,6 +37,7 @@ in {
       priority = 1;
     };
 
+    # uefi boot
     content.partitions.boot = {
       name = "boot";
       size = "512M";
@@ -48,6 +51,7 @@ in {
       };
     };
 
+    # adjust size to match ram
     content.partitions.swap = {
       size = "4G";
       priority = 3;
@@ -58,13 +62,13 @@ in {
       };
     };
 
-    content.partitions.disk1 = {
-      name = "disk1";
+    # main partition
+    content.partitions.part = {
       size = "100%";
       priority = 4;
-      content = mount "/disk/disk1" // {
+      content = mount "/disk/main" // {
         type = "btrfs";
-        extraArgs = [ "-fL disk1" ];
+        extraArgs = [ "-fL main" ];
         subvolumes = {
           root = mount "/";
           persist = mount "/persist";
@@ -76,16 +80,16 @@ in {
     };
   };
 
-  disko.devices.disk.disk2 = {
+  # ssd2 is the data disk
+  disko.devices.disk.ssd2 = {
     type = "disk";
     device = "/dev/disk/by-id/virtio-2";
     content.type = "gpt";
-    content.partitions.disk2 = {
-      name = "disk2";
+    content.partitions.part = {
       size = "100%";
-      content = automount "/disk/disk2" // {
+      content = automount "/disk/data" // {
         type = "btrfs";
-        extraArgs = [ "-fL disk2" ];
+        extraArgs = [ "-fL data" ];
         subvolumes = {
           data = automount "/data";
           snapshots = {};
@@ -95,29 +99,31 @@ in {
     };
   };
 
-  disko.devices.disk.disk3 = {
+  # hdd1 supports the pool
+  disko.devices.disk.hdd1 = {
     type = "disk";
     device = "/dev/disk/by-id/virtio-3";
     content.type = "gpt";
-    content.partitions.disk3 = {
-      name = "disk3";
+    content.partitions.part = {
       size = "100%";
       content.type = "btrfs";
     };
   };
 
-  disko.devices.disk.disk4 = {
+  # hdd2 supports the pool
+  disko.devices.disk.hdd2 = {
     type = "disk";
     device = "/dev/disk/by-id/virtio-4";
     content.type = "gpt";
-    content.partitions.disk4 = {
-      name = "disk4";
+    content.partitions.part = {
       size = "100%";
-      content = automount "/disk/disk34" // {
+      content = automount "/disk/pool" // {
         type = "btrfs";
-        extraArgs = [ 
-          "-fL disk34" 
-          "-d single /dev/disk/by-id/virtio-3-part1 /dev/disk/by-id/virtio-4-part1"
+        extraArgs = with disko.devices.disk; [ 
+          "-fL pool" 
+          "-d single"
+          "${hdd1.device}-part1"
+          "${hdd2.device}-part1"
         ];
         subvolumes = {
           snapshots = {};
@@ -126,18 +132,5 @@ in {
       };
     };
   };
-
-
-
-  # # Snapshots & backups
-  # services.btrbk = {
-  #   # enable = false;
-  #   # backups = with config.networking; {
-  #   #   "/nix".target."ssh://fit/backups/${hostName}" = {};
-  #   #   # "/nix".target."ssh://eve/backups/${hostName}" = {}; # re-enable after eve is healthy again
-  #   # };
-  # };
-
-
 
 }
