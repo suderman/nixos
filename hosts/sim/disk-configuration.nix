@@ -31,7 +31,6 @@ in rec {
 
     # bios boot
     content.partitions.grub = {
-      name = "grub";
       size = "1M";
       type = "EF02";
       priority = 1;
@@ -39,13 +38,13 @@ in rec {
 
     # uefi boot
     content.partitions.boot = {
-      name = "boot";
-      size = "512M";
+      size = "4G";
       type = "EF00";
       priority = 2;
       content = {
         type = "filesystem";
         format = "vfat";
+        label = "boot";
         mountpoint = "/boot";
         mountOptions = [ "umask=0077" ];
       };
@@ -71,8 +70,8 @@ in rec {
         extraArgs = [ "-fL main" ];
         subvolumes = {
           root = mount "/";
-          persist = mount "/persist";
           nix = mount "/nix";
+          persist = mount "/persist";
           snapshots = {};
           backups = {};
         };
