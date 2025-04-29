@@ -44,7 +44,6 @@ in rec {
       content = {
         type = "filesystem";
         format = "vfat";
-        label = "boot";
         mountpoint = "/boot";
         mountOptions = [ "umask=0077" ];
       };
