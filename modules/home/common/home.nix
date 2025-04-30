@@ -34,24 +34,17 @@
 
     };
 
+    # xdg-user-dirs are better supported with this
     home.packages = [ pkgs.xdg-user-dirs ];
 
     # Create home folders (persisted)
     xdg = let home = config.home.homeDirectory; in {
       enable = true;
+      userDirs.enable = true;
       cacheHome = "${home}/.cache";
       configHome = "${home}/.config";
-      dataHome = "${home}/.local/share"; # persist
+      dataHome = "${home}/.local/share";
       stateHome = "${home}/.local/state";
-      userDirs.enable = true;
-      userDirs.createDirectories = true;
-      userDirs.desktop = "${home}/Action"; # persist
-      userDirs.download = "${home}/Downloads"; # persist
-      userDirs.documents = "${home}/Documents"; # persist
-      userDirs.music = "${home}/Music"; # persist
-      userDirs.pictures = "${home}/Pictures"; # persist
-      userDirs.videos = "${home}/Videos"; # persist
-      userDirs.publicShare = "${home}/Public"; # persist
     };
 
   };

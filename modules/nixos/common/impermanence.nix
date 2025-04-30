@@ -2,7 +2,7 @@
 
   cfg = config.persist;
   inherit (builtins) baseNameOf mapAttrs;
-  inherit (lib) mkAfter mkOption optionals types;
+  inherit (lib) mkAfter mkOption optionals types unique;
   users = config.home-manager.users or {};
 
 in {
@@ -63,12 +63,12 @@ in {
       hideMounts = true;
 
       # System directories
-      directories = [
+      directories = unique ([
         "/etc/nixos"
         "/etc/NetworkManager/system-connections"
         "/var/lib/nixos"
         "/var/lib/systemd/coredump"
-      ] ++ cfg.directories;
+      ] ++ cfg.directories);
 
       # System files
       files = cfg.files;
@@ -77,14 +77,14 @@ in {
       users = mapAttrs (name: user: {
 
         # User directories
-        directories = [
+        directories = unique ([
           "Downloads"
-        ] ++ user.persist.directories;
+        ] ++ user.persist.directories);
 
         # User files
-        files = [
+        files = unique ([
           ".bashrc"
-        ] ++ user.persist.files;
+        ] ++ user.persist.files);
 
       }) users; 
 
@@ -96,9 +96,9 @@ in {
       hideMounts = true;
 
       # System directories
-      directories = [
+      directories = unique ([
         "/var/log"  
-      ] ++ cfg.localDirectories;
+      ] ++ cfg.localDirectories);
 
       # System files
       files = cfg.localFiles;

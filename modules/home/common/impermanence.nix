@@ -37,14 +37,4 @@ in {
 
   };
 
-  # config.persist.directories = [
-  #   "Music"
-  # ] ++ (with config.xdg.userDirs; [
-  #   # config.home.homeDirectory
-  #   ".config/chromium"
-  #   # (baseNameOf pictures)
-  #   # (baseNameOf videos)
-  #   # (baseNameOf publicShare)
-  # ]);
-
 }

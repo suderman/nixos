@@ -44,6 +44,14 @@
           ${qemu-system}
         fi
         ;;
+      rebuild | r)
+        export NIX_SSHOPTS="-p2222"
+        if [[ ''${2-} == "boot" ]]; then
+          nixos-rebuild --target-host root@localhost --flake .#sim boot
+        else
+          nixos-rebuild --target-host root@localhost --flake .#sim switch
+        fi
+        ;;
       ssh | s)
         if [[ ''${2-} == "iso" ]]; then
           passh -p x ssh root@localhost -p2222
@@ -55,6 +63,7 @@
         echo "Usage: sim COMMAND"
         echo
         echo "  up [iso]"
+        echo "  rebuild [boot]"
         echo "  ssh [iso]"
         echo "  help"
         ;;
