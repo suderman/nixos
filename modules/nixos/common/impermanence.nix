@@ -1,7 +1,9 @@
 { config, inputs, lib, ... }: let
 
-  cfg = config.state;
-  inherit (lib) mkAfter mkOption types;
+  cfg = config.persist;
+  inherit (builtins) baseNameOf mapAttrs;
+  inherit (lib) mkAfter mkOption optionals types;
+  users = config.home-manager.users or {};
 
 in {
 
@@ -9,19 +11,43 @@ in {
   imports = [ inputs.impermanence.nixosModule ];
 
   # Extra options
-  options.state = {
+  options.persist = {
+
+    # Default is enabled
+    enable = mkOption {
+      description = "Enable persistent storage location";
+      type = types.bool;
+      default = true;
+      example = false;
+    };
 
     # Files relative to / root
     files = mkOption {
-      description = "System files to preserve";
+      description = "System files to persist reboots and snapshot";
+      type = with types; listOf (either str attrs);
+      default = [];
+      example = [ "/etc/machine-id" ];
+    };
+
+    # Files relative to / root
+    localFiles = mkOption {
+      description = "System files to persist reboots";
       type = with types; listOf (either str attrs);
       default = [];
       example = [ "/etc/machine-id" ];
     };
 
     # Directories relative to / root
-    dirs = mkOption {
-      description = "System directories to preserve";
+    directories = mkOption {
+      description = "System directories to persist reboots and snapshot";
+      type = with types; listOf (either str attrs);
+      default = [];
+      example = [ "/etc/nixos" ];
+    };
+
+    # Directories relative to / root
+    localDirectories = mkOption {
+      description = "System directories to persist reboots";
       type = with types; listOf (either str attrs);
       default = [];
       example = [ "/etc/nixos" ];
@@ -33,27 +59,68 @@ in {
 
     # Configuration impermanence module
     environment.persistence."/persist" = {
-
+      enable = cfg.enable;
       hideMounts = true;
+
+      # System directories
+      directories = [
+        "/etc/nixos"
+        "/etc/NetworkManager/system-connections"
+        "/var/lib/nixos"
+        "/var/lib/systemd/coredump"
+      ] ++ cfg.directories;
 
       # System files
       files = cfg.files;
 
+      # Persist user data
+      users = mapAttrs (name: user: {
+
+        # User directories
+        directories = [
+          "Personal"
+          "Work"
+        ] ++ user.persist.directories;
+
+        # directories = (optionals user.xdg.userDirs.createDirectories (
+        #   map (dir: baseNameOf user.xdg.userDirs."${dir}") 
+        #   ["desktop" "download" "documents" "music" "pictures" "videos" "publicShare"]
+        # )) ++ user.persist.directories;
+
+        # User files
+        files = [
+          ".bashrc"
+        ] ++ user.persist.files;
+
+      }) users; 
+      # }) { jon = {}; }; 
+
+    };
+
+    # Configuration impermanence module
+    environment.persistence."/persist/local" = {
+      enable = cfg.enable;
+      hideMounts = true;
+
       # System directories
       directories = [
-        # "/etc/nixos"
-        "/etc/NetworkManager/system-connections"
-        # "/var/lib"  
-        "/var/lib/nixos"
         "/var/log"  
-        "/var/lib/systemd/coredump"
-        # "/home"  
-      ] ++ cfg.dirs;
+      ] ++ cfg.localDirectories;
+
+      # System files
+      files = cfg.localFiles;
+
+      # Persist user data
+      users = mapAttrs (name: user: {
+        directories = user.persist.localDirectories;
+        files = user.persist.localFiles;
+      }) users; 
 
     };
 
     # Persistent volumes must be marked with neededForBoot
     fileSystems."/persist".neededForBoot = true;
+    fileSystems."/persist/local".neededForBoot = true;
 
     # Allows users to allow others on their binds
     programs.fuse.userAllowOther = true;
