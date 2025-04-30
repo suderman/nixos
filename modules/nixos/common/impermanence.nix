@@ -57,7 +57,7 @@ in {
 
   config = {
 
-    # Configuration impermanence module
+    # Persist reboots with snapshots and backups
     environment.persistence."/persist" = {
       enable = cfg.enable;
       hideMounts = true;
@@ -78,14 +78,8 @@ in {
 
         # User directories
         directories = [
-          "Personal"
-          "Work"
+          "Downloads"
         ] ++ user.persist.directories;
-
-        # directories = (optionals user.xdg.userDirs.createDirectories (
-        #   map (dir: baseNameOf user.xdg.userDirs."${dir}") 
-        #   ["desktop" "download" "documents" "music" "pictures" "videos" "publicShare"]
-        # )) ++ user.persist.directories;
 
         # User files
         files = [
@@ -93,11 +87,10 @@ in {
         ] ++ user.persist.files;
 
       }) users; 
-      # }) { jon = {}; }; 
 
     };
 
-    # Configuration impermanence module
+    # Persist reboots only
     environment.persistence."/persist/local" = {
       enable = cfg.enable;
       hideMounts = true;
