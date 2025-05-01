@@ -8,7 +8,7 @@
   fromPath = text: fromAttrs { inherit text; };
   fromString = text: fromAttrs { inherit text; };
 
-  fromAttrs = { name ? "script", text ? "", path ? [], env ? {} }: writeTextFile {
+  fromAttrs = { name ? "script", text ? "", path ? [], env ? {}, ... }: writeTextFile {
     inherit name;
     executable = true;
     destination = if name == "script" then "" else "/bin/${name}";
