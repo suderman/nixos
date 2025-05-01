@@ -1,7 +1,8 @@
-{ config, lib, inputs, ... }: let
+{ config, lib, flake, inputs, ... }: let
 
+  inherit (builtins) readFile toString;
   inherit (lib) mkIf mapAttrs;
-  inherit (builtins) toString;
+  inherit (flake.lib) ls;
 
 in {
 
@@ -28,10 +29,13 @@ in {
 
   };
 
-  # nix.sshServe = {
-  #   enable = true;
-  #   keys = config.secrets.keys.all;
-  # };
+  nix.sshServe = {
+    enable = true;
+    keys = let allKeys = ls { 
+      path = flake + /users; 
+      dirsWith = [ "id_ed25519.pub" ]; 
+    }; in map (key: readFile key) allKeys;
+  };
 
   # Automatic garbage collection
   nix.gc = {
@@ -45,8 +49,7 @@ in {
   nix.registry = mapAttrs (_: value: { flake = value; }) inputs;
 
   # Map registries to channels
-  # Very useful when using legacy commands
-  nix.nixPath = let path = toString ./.; in [ "repl=${path}/repl.nix" "nixpkgs=${inputs.nixpkgs}" ];
+  nix.nixPath = [ "repl=${flake}/repl.nix" "nixpkgs=${inputs.nixpkgs}" ];
 
   # Automatically upgrade this system while I sleep
   system.autoUpgrade = {
@@ -54,12 +57,12 @@ in {
     dates = "04:00";
     flake = "/etc/nixos#${config.networking.hostName}";
     flags = [ 
-      "--update-input" "nixpkgs"
-      "--update-input" "unstable"
-      "--update-input" "nur"
-      "--update-input" "home-manager"
-      "--update-input" "agenix"
-      "--update-input" "impermanence"
+      # "--update-input" "nixpkgs"
+      # "--update-input" "unstable"
+      # "--update-input" "nur"
+      # "--update-input" "home-manager"
+      # "--update-input" "agenix"
+      # "--update-input" "impermanence"
       # "--commit-lock-file" 
     ];
     allowReboot = true;
