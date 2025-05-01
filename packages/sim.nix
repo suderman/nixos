@@ -39,7 +39,8 @@
       "cat hex.age |"
       "rage -di /tmp/id_age |"
       "derive hex sim |"
-      "derive ssh > hosts/sim/ssh_host_ed25519_key"
+      "derive ssh > hosts/sim/ssh_host_ed25519_key &&"
+      "chmod 600 hosts/sim/ssh_host_ed25519_key"
     ];
 
   in ''
@@ -52,6 +53,7 @@
     ${qemu-img}
 
     case "''${1-}" in
+
       up | u)
         if [[ ''${2-} == "iso" ]]; then
           ${qemu-system} -boot d -cdrom $(iso path)
@@ -59,6 +61,7 @@
           ${qemu-system}
         fi
         ;;
+
       rebuild | r)
         if [[ ''${2-} == "boot" ]]; then
           nixos-rebuild --target-host root@localhost --flake .#sim boot
@@ -66,6 +69,7 @@
           nixos-rebuild --target-host root@localhost --flake .#sim switch
         fi
         ;;
+
       ssh | s)
         if [[ ''${2-} == "iso" ]]; then
           passh -p x ssh $NIX_SSHOPTS root@localhost
@@ -73,6 +77,7 @@
           ssh $NIX_SSHOPTS root@localhost
         fi
         ;;
+
       help | *)
         echo "Usage: sim COMMAND"
         echo

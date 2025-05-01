@@ -25,7 +25,7 @@ in {
     crxDir = mkOption {
       description = "Path to directory where extensions are loaded from";
       type = types.path;
-      default = "/nix/state/crx";
+      default = "/persist/crx";
     };
   };
 

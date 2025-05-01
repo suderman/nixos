@@ -23,6 +23,7 @@ in {
 
     environment.systemPackages = [
       pkgs.vim
+      pkgs.yazi
     ];
 
     services.tailscale.enable = true;
@@ -43,7 +44,16 @@ in {
 
     };
 
-    users.users.root.openssh.authorizedKeys.keyFiles = [ ./ssh_host_ed25519_key.pub ];
+    # Grant ssh host key access to root login
+    users.users.root.openssh.authorizedKeys.keyFiles = [ 
+      ./ssh_host_ed25519_key.pub 
+    ];
+
+    # Extra disks for motd
+    programs.rust-motd.settings.filesystems = {
+      data = "/mnt/data";
+      pool = "/mnt/pool";
+    };
 
   };
 }
