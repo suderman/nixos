@@ -1,9 +1,11 @@
 { pkgs, perSystem, ... }: perSystem.self.mkScript {
 
   path = [ 
+    perSystem.self.derive 
     perSystem.self.iso 
     pkgs.passh
     pkgs.qemu
+    pkgs.rage
   ];
 
   name = "sim";
@@ -33,11 +35,24 @@
       "qemu-img create -f qcow2 hosts/sim/disk${n}.img 20G"
     ]) disks);
 
+    derive-ssh = toString [
+      "cat hex.age |"
+      "rage -di /tmp/id_age |"
+      "derive hex sim |"
+      "derive ssh > hosts/sim/ssh_host_ed25519_key"
+    ];
+
   in ''
     [[ -z "''${PRJ_ROOT-}" ]] || cd $PRJ_ROOT
+    [[ ! -f hex.age ]] && error "./hex.age missing"
+    [[ ! -f /tmp/id_age ]] && error "Age identity locked"
+
+    export NIX_SSHOPTS="-p 2222 -i hosts/sim/ssh_host_ed25519_key"
+    ${derive-ssh}
+    ${qemu-img}
+
     case "''${1-}" in
       up | u)
-        ${qemu-img}
         if [[ ''${2-} == "iso" ]]; then
           ${qemu-system} -boot d -cdrom $(iso path)
         else
@@ -45,7 +60,6 @@
         fi
         ;;
       rebuild | r)
-        export NIX_SSHOPTS="-p2222"
         if [[ ''${2-} == "boot" ]]; then
           nixos-rebuild --target-host root@localhost --flake .#sim boot
         else
@@ -54,9 +68,9 @@
         ;;
       ssh | s)
         if [[ ''${2-} == "iso" ]]; then
-          passh -p x ssh root@localhost -p2222
+          passh -p x ssh $NIX_SSHOPTS root@localhost
         else
-          ssh ''${2-$USER}@localhost -p2222
+          ssh $NIX_SSHOPTS root@localhost
         fi
         ;;
       help | *)

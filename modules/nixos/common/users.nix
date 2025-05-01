@@ -19,24 +19,6 @@ in {
     });
   };
 
-  # Referenced in home-manager's xdg and impermanence
-  options.users.dirs = mkOption {
-    type = types.anything;
-    default = {
-      cacheHome = ".cache";
-      configHome = ".config";
-      dataHome = ".local/share"; # persist
-      stateHome = ".local/state";
-      desktop = "Action"; # persist
-      download = "Downloads"; # persist
-      documents = "Documents"; # persist
-      music = "Music"; # persist
-      pictures = "Pictures"; # persist
-      videos = "Videos"; # persist
-      publicShare = "Public"; # persist
-    };
-  };
-
   config = {
 
     # Update users with details found in flake.users

@@ -43,5 +43,7 @@ in {
 
     };
 
+    users.users.root.openssh.authorizedKeys.keyFiles = [ ./ssh_host_ed25519_key.pub ];
+
   };
 }
