@@ -33,6 +33,10 @@
     flake-registry.url = "github:NixOS/flake-registry";
     flake-registry.flake = false;
 
+    # NixOS profiles for different hardware
+    # <https://github.com/NixOS/nixos-hardware>
+    hardware.url = "github:NixOS/nixos-hardware";
+
   };
 
   outputs = inputs: let flake = inputs.self; in {
