@@ -28,22 +28,6 @@ in {
 
     services.tailscale.enable = true;
 
-    # Enable passwordless ssh access
-    services.openssh = {
-      enable = true;
-      settings.PasswordAuthentication = false;
-      settings.PermitRootLogin = "yes";
-
-      # Automatically remove stale sockets
-      extraConfig = ''
-        StreamLocalBindUnlink yes
-      '';
-
-      # Allow forwarding ports to everywhere
-      settings.GatewayPorts = "clientspecified";
-
-    };
-
     # Grant ssh host key access to root login
     users.users.root.openssh.authorizedKeys.keyFiles = [ 
       ./ssh_host_ed25519_key.pub 

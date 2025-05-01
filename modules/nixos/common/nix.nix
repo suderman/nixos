@@ -31,10 +31,10 @@ in {
 
   nix.sshServe = {
     enable = true;
-    keys = let allKeys = ls { 
+    keys = let userKeys = ls { 
       path = flake + /users; 
       dirsWith = [ "id_ed25519.pub" ]; 
-    }; in map (key: readFile key) allKeys;
+    }; in map (key: readFile key) userKeys;
   };
 
   # Automatic garbage collection
