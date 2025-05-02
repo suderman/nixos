@@ -1,4 +1,4 @@
-# perSystem.self.mkDesktopItem {}
+# perSystem.self.mkApplication {}
 { pkgs, perSystem, ... }: let
 
   inherit (builtins) isPath toString removeAttrs;

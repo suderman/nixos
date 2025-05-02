@@ -44,4 +44,6 @@
     ".bash_history"
   ];
 
+  programs.zwift.enable = true;
+
 }

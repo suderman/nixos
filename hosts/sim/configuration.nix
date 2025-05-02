@@ -1,7 +1,7 @@
 { config, flake, pkgs, lib, perSystem, ... }: let
   inherit (builtins) mapAttrs;
   inherit (lib) mkOption types;
-  inherit (perSystem.self) mkDesktopItem;
+  inherit (perSystem.self) mkApplication;
 in {
 
   imports = [
@@ -25,7 +25,7 @@ in {
     environment.systemPackages = [
       pkgs.vim
       pkgs.yazi
-      (mkDesktopItem { 
+      (mkApplication { 
         name = "yo"; 
         text = "echo yooooo";  
         desktopName = "Yo!";
@@ -46,7 +46,6 @@ in {
       data = "/mnt/data";
       pool = "/mnt/pool";
     };
-
 
   };
 }
