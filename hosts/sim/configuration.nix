@@ -25,7 +25,13 @@ in {
     environment.systemPackages = [
       pkgs.vim
       pkgs.yazi
-      # (mkDesktopItem { name = "hello"; text = "echo hello"; icon  })
+      (mkDesktopItem { 
+        name = "yo"; 
+        text = "echo yooooo";  
+        desktopName = "Yo!";
+        icon = flake + /prev/modules/zwift/user/zwift.svg;
+        version = "2.0";
+      })
     ];
 
     services.tailscale.enable = true;
