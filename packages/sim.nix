@@ -1,4 +1,4 @@
-{ pkgs, perSystem, ... }: perSystem.self.mkScript {
+{ pkgs, perSystem, flake, ... }: perSystem.self.mkScript {
 
   path = [ 
     perSystem.self.derive 
@@ -24,7 +24,7 @@
       "-device virtio-mouse-pci" # fake mouse
       # "-device virtio-net-pci,netdev=net0" # fake network interface
       "-device ich9-intel-hda,id=snd0 -device hda-output" # fake speaker
-      "-nic user,hostfwd=tcp::2222-:22,hostfwd=tcp::12345-:12345" # forward ports
+      "-nic user,hostfwd=tcp::2222-:22,hostfwd=tcp::12345-:12345,hostfwd=tcp::4443-:443" # forward ports
     ] ++ (map (n: toString [ 
       "-device virtio-blk-pci,drive=disk${n},serial=${n}"
       "-drive file=hosts/sim/disk${n}.img,format=qcow2,if=none,id=disk${n}"
@@ -44,6 +44,7 @@
     ];
 
   in ''
+    source ${flake.lib.bash}
     [[ -z "''${PRJ_ROOT-}" ]] || cd $PRJ_ROOT
     [[ ! -f hex.age ]] && error "./hex.age missing"
     [[ ! -f /tmp/id_age ]] && error "Age identity locked"
