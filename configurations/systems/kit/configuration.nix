@@ -25,6 +25,9 @@
   # Override DNS
   networking.extraHosts = ''
     18.191.53.91 www.parkwhiz.com
+    127.0.0.1 sim
+    127.0.0.1 traefik.sim
+    127.0.0.1 whoami.sim
     127.0.0.1 example.com
     127.0.0.1 local
   '';

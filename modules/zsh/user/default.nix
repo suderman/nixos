@@ -36,7 +36,7 @@ in {
         theme = "af-magic";
       };
 
-      initExtra = ''
+      initContent = ''
         # Extract mp4 video from *.MP.jpg 
         # https://linuxreviews.org/Google_Pixel_%22Motion_Photo%22
         extract () {

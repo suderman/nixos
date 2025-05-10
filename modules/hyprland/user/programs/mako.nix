@@ -9,31 +9,43 @@ in {
 
     services.mako = {
       enable = true;
-      font = mkDefault "JetBrainsMono 11";
-      anchor = "bottom-left";
-      width = 600;
-      height = 300;
-      borderRadius = 7;
-      borderSize = 2;
-      padding = "15";
-      defaultTimeout = 6000;
 
-      backgroundColor = mkDefault "#303446";
-      textColor = mkDefault "#c6d0f5";
-      borderColor = mkDefault "#8caaee";
-      progressColor = mkDefault "over #414559";
+      settings = {
+        default-timeout = 6000;
+        progress-color = mkDefault "over #414559";
+        border-radius = 7;
+        border-color = mkDefault "#8caaee";
+        border-size = 2;
+        padding = "15";
+        width = 600;
+        height = 300;
+        text-color = mkDefault "#c6d0f5";
+        background-color = mkDefault "#303446";
+        font = mkDefault "JetBrainsMono 11";
+        anchor = "bottom-left";
+        # "[urgency=normal]" = {
+        #   border-color = "#ef9f76";
+        # };
+        # "[urgency=low]" = {
+        #   border-color = "#ef9f76";
+        # };
+        # "[urgency=high]" = {
+        #   border-color = "#ef9f76";
+        #   default-timeout = "0";
+        # };
+      };
 
-      extraConfig = ''
-        [urgency=normal]
-        border-color=#ef9f76
-
-        [urgency=low]
-        border-color=#ef9f76
-
-        [urgency=high]
-        border-color=#ef9f76
-        default-timeout=0
-      '';
+      # extraConfig = ''
+      #   [urgency=normal]
+      #   border-color=#ef9f76
+      #
+      #   [urgency=low]
+      #   border-color=#ef9f76
+      #
+      #   [urgency=high]
+      #   border-color=#ef9f76
+      #   default-timeout=0
+      # '';
       # [mode=do-not-disturb]
       # invisible=1
     };

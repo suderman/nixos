@@ -37,15 +37,18 @@
   services.tlp.settings.SATA_LINKPWR_ON_BAT = "max_performance";
 
   networking = {
-    bridges.br0.interfaces = [ "enp0s13f0u4u1" ];
-    interfaces.br0.useDHCP = true;
-    interfaces.enp0s13f0u4u1.useDHCP = false;
+    # bridges.br0.interfaces = [ "enp0s13f0u4u1" ];
+    # interfaces.br0.useDHCP = true;
+    # interfaces.enp0s13f0u4u1.useDHCP = false;
 
     # Override DNS
     extraHosts = ''
       # 159.203.49.164 touchstoneexploration.com www.touchstoneexploration.com
       # 159.203.49.164 paramountres.com www.paramountres.com 
       18.191.53.91 www.parkwhiz.com
+      127.0.0.1 traefik.sim
+      127.0.0.1 whoami.sim
+      127.0.0.1 example.com
       127.0.0.1 example.com
       127.0.0.1 local
     '';
