@@ -3,8 +3,8 @@
 
   cfg = config.services.traefik // {
     inherit (config.networking) hostName;
-    inherit (flake.networking) domainName records;
-    certs = "/etc/traefik"; # dir for self-signed certificates
+    inherit (flake.networking) ca domainName records;
+    cert = "${cfg.dataDir}/cert"; # dir for self-signed certificates
     metricsPort = 81;
   };
 
@@ -212,14 +212,14 @@ in {
 
         # Add every module certificate into the default store
         tls.certificates = map (name: { 
-          certFile = "${cfg.certs}/${name}-cert.pem"; 
-          keyFile = "${cfg.certs}/${name}-key.pem"; 
+          certFile = "${cfg.cert}/${name}.crt"; 
+          keyFile = "${cfg.cert}/key"; 
         }) cfg.internalHostNames;
 
         # Also change the default certificate
         tls.stores.default.defaultCertificate = {
-          certFile = "${cfg.certs}/${cfg.hostName}-cert.pem"; 
-          keyFile = "${cfg.certs}/${cfg.hostName}-key.pem"; 
+          certFile = "${cfg.cert}/${cfg.hostName}.crt"; 
+          keyFile = "${cfg.cert}/key"; 
         };
 
       };
@@ -240,25 +240,74 @@ in {
       EnvironmentFile = [ config.age.secrets.cloudflare.path ];
     };
 
-    # Self-signed derived certificates
+    # Self-signed certificates
     system.activationScripts.traefik.text = let
 
-      inherit (lib) concatMapStrings unique;
-      hex = config.age.secrets.hex.path;
+      inherit (builtins) concatStringsSep toString;
+      inherit (lib) concatMapStrings imap1 unique;
+      caKey = config.age.secrets.ca.path;
 
-      perHostName = hostName: ''
-        cat ${hex} | derive key ${hostName} > ${cfg.certs}/${hostName}-key.pem
-        cat ${hex} | derive cert ${hostName} > ${cfg.certs}/${hostName}-cert.pem
+      # All IP addresses this host is reachable at
+      addresses = concatStringsSep "\n" (imap1 
+        (i: x: "IP.${toString i} = ${x}") config.networking.addresses
+      );
+
+      # openssl config file for each hostName
+      mkConfig = hostName: pkgs.writeTextFile {
+        name = "openssl.cnf";
+        text = ''
+          [ req ]
+          distinguished_name = req_distinguished_name
+          req_extensions = v3_req
+
+          [ req_distinguished_name ]
+          commonName = ${hostName}
+
+          [ v3_req ]
+          basicConstraints = CA:FALSE
+          keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+          subjectAltName = @alt_names
+
+          [ alt_names ]
+          DNS.1 = ${hostName}
+          DNS.2 = *.${hostName}
+          ${addresses}
+        '';
+      };
+
+      # openssl commands for each hostName
+      perHostName = hostName: let opensslConfig = mkConfig hostName; in ''
+        openssl req -new \
+          -key ${cfg.cert}/key \
+          -config ${opensslConfig} \
+          -extensions v3_req \
+          -subj "/CN=${hostName}" \
+          -out ${cfg.cert}/csr
+
+        openssl x509 -req \
+          -days 365 \
+          -in ${cfg.cert}/csr \
+          -extfile ${opensslConfig} \
+          -extensions v3_req \
+          -CA ${cfg.ca} \
+          -CAkey ${caKey} \
+          -CAserial ${cfg.cert}/serial \
+          -out ${cfg.cert}/${hostName}.crt
+
+        rm -f ${cfg.cert}/csr
       '';
 
+    # Create self-signed certificates for each hostName, signed by custom CA
     in ''
-      mkdir -p ${cfg.certs}
-      chmod 775 ${cfg.certs}
-      if [[ -f ${hex} ]]; then 
-        PATH="$PATH:${perSystem.self.derive}/bin"
+      PATH="$PATH:${pkgs.openssl}/bin"
+      mkdir -p ${cfg.cert}
+      chmod 775 ${cfg.cert}
+      [[ -e ${cfg.cert}/key ]] || openssl genrsa -out ${cfg.cert}/key 4096 
+      [[ -e ${cfg.cert}/serial ]] || echo 01 > ${cfg.cert}/serial
+      if [[ -f ${caKey} ]]; then 
         ${concatMapStrings perHostName (unique cfg.internalHostNames)}
       fi
-      chown -R traefik:traefik ${cfg.certs}
+      chown -R traefik:traefik ${cfg.cert}
     '';
 
     # Configure prometheus to check traefik's metrics

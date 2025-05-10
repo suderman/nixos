@@ -8,11 +8,13 @@ These are the networks I frequent. `home` and `work` both have a router I've con
 
 ## Certificate Authority
 
-The [CA certificate](https://github.com/suderman/nixos/raw/main/zones/ca.crt) and key can be generated with the following commands:
+The [CA certificate](https://github.com/suderman/nixos/raw/main/zones/ca.crt) and [key](https://github.com/suderman/nixos/raw/main/zones/ca.age) included in this repo were created with the following commands:
 
 ```bash
-cat hex.age | rage -di /tmp/id_age | derive cert
-cat hex.age | rage -di /tmp/id_age | derive key
+openssl genrsa -out ca.key 4096
+openssl req -new -x509 -nodes -extensions v3_ca -days 25568 -subj "/CN=Suderman CA" -key ca.key -out ca.crt
+cat ca.key | rage -er $(cat /tmp/id_age | derive public) > ca.age
+rm ca.key
 ```
 
 The CA won't expire in my lifetime, so installing it on each device is a one-time chore. Traefik uses this CA to generate brand new certificates used for internal services during each deploy. 

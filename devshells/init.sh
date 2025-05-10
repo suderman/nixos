@@ -97,13 +97,14 @@ case "${1-}" in
     echo "Generating SSH keys..."
     sshed generate
 
-    # Generate CA certificate
-    echo "Generating CA certificate..."
-    cat hex.age |
-      rage -di /tmp/id_age |
-      derive cert > zones/ca.crt
-    git add zones/ca.crt 2>/dev/null || true
-    show "./zones/ca.crt"
+    # # Generate CA certificate 
+    # # No browser support for X.509 certificates used in TLS :-(
+    # echo "Generating CA certificate..."
+    # cat hex.age |
+    #   rage -di /tmp/id_age |
+    #   derive cert > zones/ca.crt
+    # git add zones/ca.crt 2>/dev/null || true
+    # show "./zones/ca.crt"
 
     # Ensure secrets are rekeyed for all hosts
     agenix rekey -a
