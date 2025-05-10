@@ -102,7 +102,7 @@ in {
     };
 
     programs.zsh = {
-      initExtra = mkAfter ''
+      initContent = mkAfter ''
         # Alias ssh command if using kitty
         [ "$TERM" = "xterm-kitty" ] && alias ssh="kitty +kitten ssh"
         # Alias diff command if using kitty

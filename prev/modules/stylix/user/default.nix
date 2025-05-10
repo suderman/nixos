@@ -14,6 +14,7 @@ in {
     autoEnable = mkDefault oscfg.enable;
 
     targets = {
+      firefox.profileNames = [ "default" ];
       hyprpaper.enable = mkForce false; # don't set my wallpaper
       # alacritty.enable = false;
       # avizo.enable = false;
