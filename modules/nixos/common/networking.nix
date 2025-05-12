@@ -46,4 +46,7 @@ in {
 
   };
 
+  # Set your time zone
+  config.time.timeZone = mkDefault "America/Edmonton";
+
 }
