@@ -97,14 +97,42 @@ case "${1-}" in
     echo "Generating SSH keys..."
     sshed generate
 
-    # # Generate CA certificate 
-    # # No browser support for X.509 certificates used in TLS :-(
-    # echo "Generating CA certificate..."
-    # cat hex.age |
-    #   rage -di /tmp/id_age |
-    #   derive cert > zones/ca.crt
-    # git add zones/ca.crt 2>/dev/null || true
-    # show "./zones/ca.crt"
+    # Ensure Certificate Authority exists  
+    if [[ -s zones/ca.age && -s zones/ca.crt ]]; then
+      echo "Certificate Authority exists..."
+      show "./zones/ca.age"
+      show "./zones/ca.crt"
+
+    # If it doesn't, generate and add to git
+    else
+      echo "Generating Certificate Authority..."
+
+      # Generate CA key and save to variable
+      ca_key=$(mktemp)
+      openssl genrsa -out $ca_key 4096
+
+      # Generate CA certificate expiring in 70 years
+      openssl req -new -x509 -nodes \
+        -extensions v3_ca \
+        -days 25568 \
+        -subj "/CN=Suderman CA" \
+        -key $ca_key \
+        -out zones/ca.crt
+
+      git add zones/ca.crt 2>/dev/null || true
+      show "./zones/ca.crt"
+
+      # Encrypt CA key with age identity 
+      cat $ca_key | 
+        rage -er $(cat /tmp/id_age | derive public) \
+        > zones/ca.age
+
+      git add zones/ca.age 2>/dev/null || true
+      show "./zones/ca.age"
+
+      # Delete unencrypted key
+      shred -u $ca_key
+    fi
 
     # Ensure secrets are rekeyed for all hosts
     agenix rekey -a
