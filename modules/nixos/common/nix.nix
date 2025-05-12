@@ -15,8 +15,8 @@ in {
   # Nix Settings
   nix.settings = {
 
-    # Enable flakes and new 'nix' command
-    experimental-features = [ "nix-command" "flakes" ];
+    # Enable flakes and pipes
+    experimental-features = [ "nix-command" "flakes" "pipe-operators" ];
 
     # Deduplicate and optimize nix store
     auto-optimise-store = true;
@@ -35,7 +35,6 @@ in {
 
     # Binary caches
     substituters = caches.urls;  
-    trusted-substituters = caches.urls;  
     trusted-public-keys = caches.keys;
 
   };

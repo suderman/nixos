@@ -9,15 +9,14 @@
 
 in { 
 
-  # Enable flakes
+  # Enable flakes and pipes
   xdg.configFile = {
-    "nix/nix.conf".text = "experimental-features = nix-command flakes";
+    "nix/nix.conf".text = "experimental-features = nix-command flakes pipe-operators";
   };
 
   # Binary caches
   nix.settings = {
     substituters = caches.urls;  
-    trusted-substituters = caches.urls;  
     trusted-public-keys = caches.keys;
   };
 
