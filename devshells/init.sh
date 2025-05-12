@@ -98,10 +98,10 @@ case "${1-}" in
     sshed generate
 
     # Ensure Certificate Authority exists  
-    if [[ -s zones/ca.age && -s zones/ca.crt ]]; then
+    if [[ -s zones/ca.crt && -s zones/ca.age ]]; then
       echo "Certificate Authority exists..."
-      show "./zones/ca.age"
       show "./zones/ca.crt"
+      show "./zones/ca.age"
 
     # If it doesn't, generate and add to git
     else
@@ -126,12 +126,11 @@ case "${1-}" in
       cat $ca_key | 
         rage -er $(cat /tmp/id_age | derive public) \
         > zones/ca.age
+      shred -u $ca_key
 
       git add zones/ca.age 2>/dev/null || true
       show "./zones/ca.age"
 
-      # Delete unencrypted key
-      shred -u $ca_key
     fi
 
     # Ensure secrets are rekeyed for all hosts
