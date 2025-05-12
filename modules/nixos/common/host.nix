@@ -1,37 +1,11 @@
-{ flake, config, lib, hostName, ... }: let
-  inherit (lib) mkDefault mkOption types;
+{ lib, hostName, ... }: let
+  inherit (lib) mkDefault;
 in {
 
-  # Extra options for each host
-  options = {
+  # Derive hostName from blueprint ./hosts/dir
+  networking.hostName = hostName;
 
-    # Servers are stable, desktops can be unstable
-    stable = mkOption {
-      description = "Follow nixpkgs stable if true, unstable if false";
-      type = types.bool;
-      default = true;
-      example = false;
-    };
-
-  };
-
-  config = {
-
-    # Default to x86 linux
-    nixpkgs.hostPlatform = mkDefault "x86_64-linux";
-
-    # Accept agreements for unfree software
-    nixpkgs.config = {
-      allowUnfree = true;
-      nvidia.acceptLicense = true;
-    };
-
-    # Set your time zone.
-    time.timeZone = mkDefault "America/Edmonton";
-
-    # Derive hostName from blueprint ./hosts/dir
-    networking.hostName = hostName;
-
-  };
+  # Set your time zone.
+  time.timeZone = mkDefault "America/Edmonton";
 
 }

@@ -14,8 +14,6 @@ in {
 
   config = {
 
-    stable = false;
-    
     networking.domain = "tail";
     networking.firewall.allowPing = true;
 
@@ -32,6 +30,9 @@ in {
         icon = flake + /prev/modules/zwift/user/zwift.svg;
         version = "2.0";
       })
+      pkgs.fastfetch
+      pkgs.cmatrix
+      # pkgs.unstable.blocky
     ];
 
     services.tailscale.enable = true;
