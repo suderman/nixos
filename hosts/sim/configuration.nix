@@ -36,6 +36,7 @@ in {
 
     services.tailscale.enable = true;
     services.traefik.enable = true;
+    services.whoami.enable = true;
 
     # Grant ssh host key access to root login
     users.users.root.openssh.authorizedKeys.keyFiles = [ 
