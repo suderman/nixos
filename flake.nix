@@ -20,6 +20,7 @@
     stylix.inputs.home-manager.follows = "home-manager";
 
     # Nix Index Database
+    # <https://github.com/nix-community/nix-index-database>
     nix-index-database.url = "github:Mic92/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
 
