@@ -2,13 +2,7 @@
 
   inherit (builtins) readFile toString;
   inherit (lib) mkIf mapAttrs;
-  inherit (flake.lib) ls;
-  inherit (lib) hasPrefix mkDefault partition; 
-
-  caches = let part = (partition (value: (hasPrefix "https://" value)) flake.caches); in {
-    urls = part.right;
-    keys = part.wrong;
-  };
+  inherit (flake.lib) ls cacheUrl;
 
 in {
 
@@ -34,8 +28,8 @@ in {
     builders-use-substitutes = true;
 
     # Binary caches
-    substituters = caches.urls;  
-    trusted-public-keys = caches.keys;
+    substituters = map (key: cacheUrl key) flake.caches;  
+    trusted-public-keys = flake.caches;
 
   };
 

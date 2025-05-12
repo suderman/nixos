@@ -73,4 +73,14 @@ in rec {
   # List of home-manager users that match provided filter function
   filterUsers = fn: cfg: filter fn (if cfg ? home-manager then attrValues cfg.home-manager.users else []);
 
+  # Extract URL from cache public key
+  cacheUrl = pubKey: let name = lib.pipe pubKey [
+    (x: lib.split ":" x)
+    (x: builtins.elemAt x 0)
+    (x: lib.split "-" x)
+    (x: lib.flatten x)
+    (x: lib.take (builtins.length x - 1) x)
+    (x: lib.concatStringsSep "-" x)
+  ]; in "https://${name}";
+
 }

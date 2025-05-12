@@ -1,13 +1,4 @@
-{ flake, lib, ... }: let
-
-  inherit (lib) hasPrefix partition; 
-
-  caches = let part = (partition (value: (hasPrefix "https://" value)) flake.caches); in {
-    urls = part.right;
-    keys = part.wrong;
-  };
-
-in { 
+{ flake, ... }: { 
 
   # Enable flakes and pipes
   xdg.configFile = {
@@ -16,8 +7,8 @@ in {
 
   # Binary caches
   nix.settings = {
-    substituters = caches.urls;  
-    trusted-public-keys = caches.keys;
+    substituters = map (key: flake.lib.cacheUrl key) flake.caches;  
+    trusted-public-keys = flake.caches;
   };
 
   # Bounce user services when switching
