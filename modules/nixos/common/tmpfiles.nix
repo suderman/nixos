@@ -1,4 +1,5 @@
-{ config, lib, flake, ... }: let
+# Wrapper for systemd.tmpfiles.rules for my own sanity
+{ config, lib, ... }: let
 
   cfg = config.tmpfiles;
   inherit (builtins) isString head match stringLength;
@@ -32,14 +33,14 @@ in {
     # Z  /etc/foo-default 0775 me users - -
     map (x: let 
       directory = if isString x then { target = x; } else x;  
-      commandsFor = { target, mode ? "0775", user ? "root", group ? user, source ? "-", ... }:
+      rulesFor = { target, mode ? "0775", user ? "root", group ? user, source ? "-", ... }:
         trim ( if (toString source) != "-" then ''
           C+ ${toString target} - - - - ${toString source}
           Z  ${toString target} ${toMode mode} ${toString user} ${toString group} - -
         '' else ''
           d ${toString target} ${toMode mode} ${toString user} ${toString group} - -
         '' );
-    in commandsFor directory) cfg.directories
+    in rulesFor directory) cfg.directories
 
   ) ++ (
 
@@ -50,7 +51,7 @@ in {
     # z  /etc/foo-resolv 0775 jon users - -
     map (x: let 
       file = if isString x then { target = x; } else x;  
-      commandsFor = { target, mode ? "0775", user ? "root", group ? user, source ? "-", text ? "-", ... }:
+      rulesFor = { target, mode ? "0775", user ? "root", group ? user, source ? "-", text ? "-", ... }:
         trim ( if toString(source) != "-" then ''
           C+ ${toString target} - - - - ${toString source}
           z  ${toString target} ${toMode mode} ${toString user} ${toString group} - -
@@ -60,7 +61,7 @@ in {
           f ${toString target} ${toMode mode} ${toString user} ${toString group} -
         '' 
         ) );
-    in commandsFor file) cfg.files
+    in rulesFor file) cfg.files
 
   ) ++ (
 
@@ -68,11 +69,11 @@ in {
     # L+ /etc/foobar - - - - /etc/foobarlink
     map (x: let 
       symlink = if isString x then { target = x; } else x;  
-      commandsFor = { target, source ? "/dev/null", ... }:
+      rulesFor = { target, source ? "/dev/null", ... }:
         trim ''
           L+ ${toString target} - - - - ${toString source}
         '';
-    in commandsFor symlink) cfg.symlinks
+    in rulesFor symlink) cfg.symlinks
 
   );
 
