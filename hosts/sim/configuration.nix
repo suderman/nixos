@@ -40,6 +40,9 @@ in {
     services.whoami.enable = true;
     services.blocky.enable = true;
 
+    # App Store
+    services.flatpak.enable = true;
+
     # Grant ssh host key access to root login
     users.users.root.openssh.authorizedKeys.keyFiles = [ 
       ./ssh_host_ed25519_key.pub 
