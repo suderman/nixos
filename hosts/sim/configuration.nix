@@ -50,5 +50,9 @@ in {
       pool = "/mnt/pool";
     };
 
+    # Hub for monitoring other machines
+    services.beszel.enable = true; # Agent to monitor system
+    services.beszel.key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGo/UVSuyrSmtE3RA0rxXpwApHEGMGOTd2c0EtGeCGAr";
+
   };
 }
