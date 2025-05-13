@@ -45,5 +45,6 @@
   ];
 
   programs.zwift.enable = true;
+  programs.firefox.enable = true;
 
 }

@@ -1,4 +1,4 @@
-{ pkgs, lib, inputs, perSystem, ... }: let
+{ flake, pkgs, lib, inputs, perSystem, ... }: let
   inherit (lib) mkDefault;
 in {
 
@@ -44,6 +44,16 @@ in {
       plexamp          = enableWayland { type = "electron"; pkg = prev.plexamp; bin = "plexamp"; };
       signal-desktop   = enableWayland { type = "electron"; pkg = prev.signal-desktop; bin = "signal-desktop"; };
       # _1password-gui  = enableWayland { type = "electron"; pkg = prev._1password-gui; bin = "1password"; };
+
+      # Enable policies and import personal Certificate Authority
+      firefox = prev.firefox.override {
+        extraPolicies = {
+          DontCheckDefaultBrowser = true;
+          DisablePocket = true;
+          DisableFirefoxStudies = true;
+          Certificates = { ImportEnterpriseRoots = true; Install = [ flake.networking.ca ]; };
+        };
+      }; 
 
     }) 
   

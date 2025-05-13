@@ -101,12 +101,12 @@ in {
       ] ++ cfg.localDirectories);
 
       # System files
-      files = cfg.localFiles;
+      files = unique cfg.localFiles;
 
       # Persist user data
       users = mapAttrs (name: user: {
-        directories = user.persist.localDirectories;
-        files = user.persist.localFiles;
+        directories = unique user.persist.localDirectories;
+        files = unique user.persist.localFiles;
       }) users; 
 
     };
