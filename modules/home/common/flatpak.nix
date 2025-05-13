@@ -45,6 +45,10 @@ in {
       );
 
     }; 
+    
+    # Persist data
+    persist.directories = [ ".var" ".local/share/flatpak" ];
+
   };
 
 }

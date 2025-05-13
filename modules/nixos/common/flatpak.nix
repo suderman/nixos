@@ -55,6 +55,9 @@ in {
     # browse (and try) flatpaks via Gnome Software
     environment.systemPackages = with pkgs; [ gnome-software ];
 
+    # Persist data
+    persist.directories = [ "/var/lib/flatpak" ];
+
   };
 
 }
