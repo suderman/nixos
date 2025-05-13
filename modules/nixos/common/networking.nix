@@ -1,6 +1,6 @@
 { flake, config, lib, hostName, ... }: let
   inherit (builtins) attrNames attrValues filter;
-  inherit (lib) filterAttrs hasPrefix mkDefault mkOption naturalSort types unique;
+  inherit (lib) filterAttrs hasPrefix mkForce mkDefault mkOption naturalSort types unique;
 in {
 
   # Extra options for each host
@@ -26,27 +26,50 @@ in {
 
   };
 
-  config.networking = {
+  config = {
 
-    # Derive primary hostName from blueprint ./hosts/dir
-    hostName = hostName;
+    networking = {
 
-    # All the hostNames this host can be reached with
-    hostNames = filter 
-      (name: hasPrefix hostName name) 
-      (attrNames flake.networking.records);
+      # Derive primary hostName from blueprint ./hosts/dir
+      hostName = hostName;
 
-    # Primary IP address from flake's zones
-    address = flake.networking.records.${hostName} or "127.0.0.1";  
+      # All the hostNames this host can be reached with
+      hostNames = filter 
+        (name: hasPrefix hostName name) 
+        (attrNames flake.networking.records);
 
-    # All the IP addresses this host can be reached with
-    addresses = [ "127.0.0.1" ] ++ unique( naturalSort( attrValues( 
-      filterAttrs (name: ip: hasPrefix hostName name) flake.networking.records 
-    )));
+      # Primary IP address from flake's zones
+      address = flake.networking.records.${hostName} or "127.0.0.1";  
+
+      # All the IP addresses this host can be reached with
+      addresses = [ "127.0.0.1" ] ++ unique( naturalSort( attrValues( 
+        filterAttrs (name: ip: hasPrefix hostName name) flake.networking.records 
+      )));
+
+    };
+
+    # Set your time zone
+    time.timeZone = mkDefault "America/Edmonton";
+
+    # Editable hosts file
+    system.activationScripts.hosts = let 
+      inherit (config.networking) hostName domain;
+      source = "/persist/etc/hosts";
+      target = "/etc/hosts";
+    in {
+      text = ''
+        mkdir -p $(dirname ${source}) $(dirname ${target})
+        if [[ ! -s ${source} ]]; then
+          echo "127.0.0.1 localhost" > ${source}
+          echo "::1 localhost" >> ${source}
+          echo "127.0.0.2 ${hostName}.${domain} ${hostName}" >> ${source}
+        fi
+        chmod 644 ${source}
+        ln -sf ${source} ${target}
+      '';
+      deps = [ "etc" ];
+    };
 
   };
-
-  # Set your time zone
-  config.time.timeZone = mkDefault "America/Edmonton";
 
 }
