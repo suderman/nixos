@@ -25,9 +25,9 @@
     ROC_ENABLE_PRE_VEGA = "1";
   };
 
-  file."/opt/rocm/hip" = { 
-    type = "link"; 
-    source = "${pkgs.rocmPackages.clr}";
-  };
+  tmpfiles.symlinks = [{
+    target = "/opt/rocm/hip";
+    source = pkgs.rocmPackages.clr;
+  }];
 
 }

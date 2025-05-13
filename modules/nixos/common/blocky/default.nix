@@ -54,9 +54,7 @@ in {
     };
 
     # Ensure directory exists for downloaded lists
-    file."${cfg.dataDir}" = {
-      type = "dir"; mode = 775; 
-    };
+    tmpfiles.directories = [ cfg.dataDir ];
     persist.directories = [ cfg.dataDir ];
 
     # Blocky supports downloading lists automatically, but sometimes timeouts on slow connections. 

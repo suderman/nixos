@@ -36,7 +36,7 @@ in {
   config = mkIf cfg.enable {
 
     # Ensure data directory exists and is persisted
-    file."${cfg.dataDir}" = { type = "dir"; };
+    tmpfiles.directories = [ cfg.dataDir ];
     persist.directories = [ cfg.dataDir ];
 
     # Docker container

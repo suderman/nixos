@@ -12,12 +12,10 @@ in {
 
   config = mkIf cfg.enable {
 
-    file."${cfg.dataDir}/hub" = {
-      type = "dir"; 
-      mode = 775; 
+    tmpfiles.directories = [{
+      target = "${cfg.dataDir}/hub";
       user = "beszel";
-      group = "beszel";
-    };
+    }];
 
     systemd.services.beszel-hub = {
       wantedBy = [ "multi-user.target" ];

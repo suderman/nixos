@@ -30,12 +30,10 @@ in {
 
   config = mkIf cfg.enableAgent {
 
-    file."${cfg.dataDir}/agent" = {
-      type = "dir"; 
-      mode = 775; 
+    tmpfiles.directories = [{
+      target = "${cfg.dataDir}/agent";
       user = "beszel";
-      group = "beszel";
-    };
+    }];
 
     systemd.services.beszel-agent = {
       wantedBy = [ "multi-user.target" ];

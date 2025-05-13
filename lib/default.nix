@@ -30,9 +30,6 @@ in rec {
   # Create attrs from list, attr names, or path
   mkAttrs = import ./mkAttrs.nix args; 
 
-  # Use systemd tmpfiles rules to create files, directories, symlinks and permissions changes
-  mkRules = import ./mkRules.nix args; 
-
   # Create user attrs from path 
   mkUsers = import ./mkUsers.nix args; 
 
@@ -48,22 +45,8 @@ in rec {
   # > config.users.users = this.lib.extraGroups this.users [ "mygroup" ] ;
   extraGroups = users: extraGroups: mkAttrs users (_: { inherit extraGroups; });
 
-  # Convert 3-digit mode (ie: 775) to 4-digit mode (ie: 0775) by padding a zero
-  toMode = mode: let mode' = toString mode; in if stringLength mode' == 3 then "0${mode'}" else mode'; 
-
   # Format owner and group as "owner:group"
   toOwnership = owner: group: "${toString owner}:${toString group}";
-
-  # Trim whitespace from beginning and end of string
-  trim = str: let m = match "[[:space:]]*(.*[^[:space:]])[[:space:]]*" str; in
-    if m == null then
-      if str == "" || match "[[:space:]]*" str != null
-      then "" else str
-    else
-      head m;
-
-  # readFile with whitespace trimmed
-  trimFile = path: trim( readFile( path ) );
 
   # lib.derivationPath "salt"
   derivationPath = salt: let 
