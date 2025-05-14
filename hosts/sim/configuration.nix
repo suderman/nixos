@@ -39,6 +39,8 @@ in {
     services.traefik.enable = true;
     services.whoami.enable = true;
     services.blocky.enable = true;
+    services.earlyoom.enable = true;
+    services.btrbk.enable = true;
 
     # App Store
     services.flatpak.enable = true;
