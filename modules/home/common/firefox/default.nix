@@ -61,7 +61,7 @@ in {
           force = true;
           engines."Whoogle" = let whoogle = "g.sol"; in {
             urls = [{ template = "https://${whoogle}/search?q={searchTerms}"; }];
-            iconUpdateURL = "https://${whoogle}/static/img/favicon/apple-icon-144x144.png";
+            icon = "https://${whoogle}/static/img/favicon/apple-icon-144x144.png";
             updateInterval = 24 * 60 * 60 * 1000; # every day
             definedAliases = [ "@wh" ];
             method = "POST";
