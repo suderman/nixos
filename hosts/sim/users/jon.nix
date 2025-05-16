@@ -2,6 +2,7 @@
 
   imports = [
     flake.homeModules.common
+    flake.homeModules.jon
   ];
 
   programs.chromium = {
