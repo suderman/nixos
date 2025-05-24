@@ -1,5 +1,5 @@
 {
   hostName = "kit"; 
   domain = "home";
-  stable = false;
+  stable = true;
 }

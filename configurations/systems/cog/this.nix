@@ -1,5 +1,5 @@
 {
   hostName = "cog"; 
   domain = "tail";
-  stable = false;
+  stable = true;
 }
