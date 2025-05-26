@@ -42,6 +42,9 @@ in {
     services.btrbk.enable = true;
     services.postgresql.enable = true;
 
+    # Keyboard control
+    services.keyd.enable = true;
+
     # App Store
     services.flatpak.enable = true;
 
