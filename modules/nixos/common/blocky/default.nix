@@ -1,10 +1,13 @@
-# -- modified module --
 # services.blocky.enable = true;
-{ flake, config, lib, pkgs, ... }: let 
+{ flake, config, lib, pkgs, perSystem, ... }: let 
 
   cfg = config.services.blocky;
   inherit (builtins) attrValues mapAttrs toString;
   inherit (lib) concatStringsSep flatten foldl mkIf mkOption mkForce types;
+
+  # binary with config yaml passed as argument
+  blocky = let format = pkgs.formats.yaml {}; in 
+    "${lib.getExe cfg.package} --config ${format.generate "config.yaml" cfg.settings}";
 
 in {
 
@@ -54,26 +57,63 @@ in {
     };
 
     # Ensure directory exists for downloaded lists
-    tmpfiles.directories = [ cfg.dataDir ];
+    tmpfiles = {
+      directories = [{
+        target = cfg.dataDir;
+        user = "blocky";
+      }];
+      files = [ 
+        "${cfg.dataDir}/blacklist.txt"
+        "${cfg.dataDir}/blacklist-nsfw.txt"
+        "${cfg.dataDir}/blacklist-local.txt"
+        "${cfg.dataDir}/whitelist.txt"
+        "${cfg.dataDir}/whitelist-optional.txt"
+        "${cfg.dataDir}/whitelist-local.txt"
+      ];
+    };
+
     persist.directories = [ cfg.dataDir ];
+
+    # Blocky CLI with this config baked-in
+    environment.systemPackages = [
+      (perSystem.self.mkScript {
+        name = "blocky";
+        text = "${blocky} $@";
+      })
+    ];
+
+    # Force systemd service to use non-dynamic user (defined below)
+    systemd.services.blocky.serviceConfig = {
+      DynamicUser = mkForce false;
+      User = "blocky";
+      Group = "blocky";
+    };
+    users.users.blocky = {
+      isSystemUser = true;
+      description = "Blocky DNS";
+      group = "blocky";
+    };
+    users.groups.blocky = {};
 
     # Blocky supports downloading lists automatically, but sometimes timeouts on slow connections. 
     # Get around that by downloading these lists separately as a systemd service
     systemd.services.blocky-download-lists = {
       description = "Download copy of lists for Blocky";
-      after = [ "multi-user.target" ];
-      requires = [ "multi-user.target" ];
-      wantedBy = [ "sysinit.target" ];
+      after = [ "network-online.target" "blocky.service" ];
+      wants = [ "network-online.target" "blocky.service" ];
+      wantedBy = [ "blocky.service" ];
       serviceConfig = {
         Type = "oneshot";
-        RemainAfterExit = "yes";
+        RemainAfterExit = true;
       };
       path = with pkgs; [ curl ];
       script = ''
         curl https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light.txt > ${cfg.dataDir}/blacklist.txt
-        curl https://nsfw.oisd.nl/domainswild > ${cfg.dataDir}/nsfw.txt
+        curl https://nsfw.oisd.nl/domainswild > ${cfg.dataDir}/blacklist-nsfw.txt
         curl https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt > ${cfg.dataDir}/whitelist.txt
         curl https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/optional-list.txt > ${cfg.dataDir}/whitelist-optional.txt
+        chown blocky:blocky ${cfg.dataDir}/*.txt
+        ${blocky} lists refresh
       '';
     };
 
@@ -191,18 +231,20 @@ in {
             concurrency = 8;
             refreshPeriod = "4h";
           };
-          blackLists = {
+          denylists = {
             main = [ 
               "${cfg.dataDir}/blacklist.txt"
-              "${cfg.dataDir}/nsfw.txt"
+              "${cfg.dataDir}/blacklist-nsfw.txt"
               "https://raw.githubusercontent.com/suderman/nixos/main/modules/blocky/blacklist.txt"
+              "${cfg.dataDir}/blacklist-local.txt"
             ];
           };
-          whiteLists = {
+          allowlists = {
             main = [
               "${cfg.dataDir}/whitelist.txt"
               "${cfg.dataDir}/whitelist-optional.txt"
               "https://raw.githubusercontent.com/suderman/nixos/main/modules/blocky/whitelist.txt"
+              "${cfg.dataDir}/whitelist-local.txt"
             ];
           };
           blockTTL = "1m";

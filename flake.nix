@@ -5,17 +5,17 @@
 
     # Nix Packages 
     # <https://search.nixos.org/packages>
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"; # github:NixOS/nixpkgs/nixos-24.11
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     # Home Manager
     # <https://mipmip.github.io/home-manager-option-search>
-    home-manager.url = "github:nix-community/home-manager"; # github:nix-community/home-manager/release-24.11
+    home-manager.url = "github:nix-community/home-manager/release-25.05"; # github:nix-community/home-manager
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     # System-wide colorscheming & typography
     # <https://github.com/danth/stylix>
-    stylix.url = "github:danth/stylix"; # github:danth/stylix/release-24.11
+    stylix.url = "github:danth/stylix/release-25.05"; # github:danth/stylix
     stylix.inputs.nixpkgs.follows = "nixpkgs";
     stylix.inputs.home-manager.follows = "home-manager";
 
