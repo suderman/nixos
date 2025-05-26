@@ -40,6 +40,7 @@ in {
     services.whoami.enable = true;
     services.blocky.enable = true;
     services.btrbk.enable = true;
+    services.postgresql.enable = true;
 
     # App Store
     services.flatpak.enable = true;
