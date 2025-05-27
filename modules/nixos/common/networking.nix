@@ -74,9 +74,7 @@ in {
     networking.networkmanager.enable = true;
 
     # Add config's users to the networkmanager group
-    users.users = let 
-      userNames = builtins.attrNames (config.home-manager.users or {});
-    in flake.lib.extraGroups userNames [ "networkmanager" ];
+    users.users = flake.lib.extraGroups config [ "networkmanager" ];
 
     # Persist connections after reboots
     persist.directories = [ "/etc/NetworkManager/system-connections" ];

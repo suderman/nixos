@@ -37,7 +37,10 @@ in rec {
   moduleDirNames = path: filter(dir: pathExists ("${path}/${dir}/default.nix")) (dirNames path);
 
   # > config.users.users = flake.lib.extraGroups users [ "mygroup" ] ;
-  extraGroups = users: extraGroups: genAttrs users (_: { inherit extraGroups; });
+  extraGroups = x: extraGroups: let
+    inherit (builtins) isList attrNames;
+    userNames = if (isList x) then x else attrNames (x.home-manager.users or {});
+  in genAttrs userNames (_: { inherit extraGroups; });
 
   # Format owner and group as "owner:group"
   toOwnership = owner: group: "${toString owner}:${toString group}";

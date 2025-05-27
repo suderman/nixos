@@ -12,8 +12,6 @@
   persist.directories = [ "/var/lib/docker" ];
 
   # Add config's users to the docker group
-  users.users = let 
-    userNames = builtins.attrNames (config.home-manager.users or {});
-  in flake.lib.extraGroups userNames [ "docker" ];
+  users.users = flake.lib.extraGroups config [ "docker" ];
   
 }

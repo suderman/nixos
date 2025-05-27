@@ -58,9 +58,7 @@ in {
     users.groups.keyd = {};
 
     # Add config's users to the keyd, ydotool groups
-    users.users = let 
-      userNames = builtins.attrNames (config.home-manager.users or {});
-    in flake.lib.extraGroups userNames [ "keyd" "ydotool" ];
+    users.users = flake.lib.extraGroups config [ "keyd" "ydotool" ];
 
     # Also enable ydotool 
     programs.ydotool.enable = true;
