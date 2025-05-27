@@ -64,10 +64,10 @@ in {
       }];
       files = [ 
         "${cfg.dataDir}/blacklist.txt"
-        "${cfg.dataDir}/blacklist-nsfw.txt"
+        "${cfg.dataDir}/blacklist-extra.txt"
         "${cfg.dataDir}/blacklist-local.txt"
         "${cfg.dataDir}/whitelist.txt"
-        "${cfg.dataDir}/whitelist-optional.txt"
+        "${cfg.dataDir}/whitelist-extra.txt"
         "${cfg.dataDir}/whitelist-local.txt"
       ];
     };
@@ -97,42 +97,66 @@ in {
 
     # Blocky supports downloading lists automatically, but sometimes timeouts on slow connections. 
     # Get around that by downloading these lists separately as a systemd service
-    systemd.services.blocky-download-lists = {
+    systemd.services.blocky-lists-download = {
       description = "Download copy of lists for Blocky";
       after = [ "network-online.target" "blocky.service" ];
       wants = [ "network-online.target" "blocky.service" ];
       wantedBy = [ "blocky.service" ];
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-      };
-      path = with pkgs; [ curl ];
+      serviceConfig.Type = "oneshot";
+      path = [ pkgs.curl ];
       script = ''
-        curl https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light.txt > ${cfg.dataDir}/blacklist.txt
-        curl https://nsfw.oisd.nl/domainswild > ${cfg.dataDir}/blacklist-nsfw.txt
-        curl https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt > ${cfg.dataDir}/whitelist.txt
-        curl https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/optional-list.txt > ${cfg.dataDir}/whitelist-optional.txt
+        # Download url, ensure non-empty before replacing existing list
+        download() {
+          local file="${cfg.dataDir}/''${1}.txt"
+          local url="''${2}"
+          curl -sl ''${url} > ''${file}.tmp
+          if [[ -s ''${file}.tmp ]]; then
+            mv ''${file}.tmp $file
+          else
+            rm ''${file}.tmp
+          fi
+        }
+
+        # Pre-download these lists
+        download blacklist        https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light.txt
+        download blacklist-extra  https://nsfw.oisd.nl/domainswild
+        download whitelist        https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
+        download whitelist-extra  https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/optional-list.txt
+      '';
+      onSuccess = [ "blocky-lists-refresh.service" ];
+    };
+
+    # Run this script every day
+    systemd.timers.blocky-lists-download = {
+      wantedBy = [ "timers.target" ];
+      partOf = [ "blocky-lists-download.service" ];
+      timerConfig = {
+        OnCalendar = "daily";
+        Unit = "blocky-lists-download.service";
+      };
+    };
+
+    # Ensure permissions and refresh blocky's lists
+    systemd.services.blocky-lists-refresh = {
+      after = [ "blocky.service" ];
+      requires = [ "blocky.service" ];
+      serviceConfig.Type = "oneshot";
+      script = ''
         chown blocky:blocky ${cfg.dataDir}/*.txt
         ${blocky} lists refresh
       '';
     };
 
-    # Run this script every day
-    systemd.timers.blocky-download-lists = {
-      wantedBy = [ "timers.target" ];
-      partOf = [ "blocky-download-lists.service" ];
-      timerConfig = {
-        OnCalendar = "daily";
-        Unit = "blocky-download-lists.service";
+    # Watch local lists for changes
+    systemd.paths = let unit = { wantedBy = [ "paths.target" ]; }; in {
+      blocky-lists-blacklist = unit // {
+        pathConfig.PathChanged = "${cfg.dataDir}/blacklist-local.txt";
+        pathConfig.Unit = "blocky-lists-refresh.service";
       };
-    };
-
-    services.prometheus = {
-      scrapeConfigs = [{ 
-        job_name = "blocky"; static_configs = [ 
-          { targets = [ "127.0.0.1:${toString cfg.httpPort}" ]; } 
-        ]; 
-      }];
+      blocky-lists-whitelist = unit // {
+        pathConfig.PathChanged = "${cfg.dataDir}/whitelist-local.txt";
+        pathConfig.Unit = "blocky-lists-refresh.service";
+      };
     };
 
     # Use local blocky for DNS queries
@@ -234,7 +258,7 @@ in {
           denylists = {
             main = [ 
               "${cfg.dataDir}/blacklist.txt"
-              "${cfg.dataDir}/blacklist-nsfw.txt"
+              "${cfg.dataDir}/blacklist-extra.txt"
               "https://raw.githubusercontent.com/suderman/nixos/main/modules/blocky/blacklist.txt"
               "${cfg.dataDir}/blacklist-local.txt"
             ];
@@ -242,7 +266,7 @@ in {
           allowlists = {
             main = [
               "${cfg.dataDir}/whitelist.txt"
-              "${cfg.dataDir}/whitelist-optional.txt"
+              "${cfg.dataDir}/whitelist-extra.txt"
               "https://raw.githubusercontent.com/suderman/nixos/main/modules/blocky/whitelist.txt"
               "${cfg.dataDir}/whitelist-local.txt"
             ];
@@ -254,6 +278,14 @@ in {
           };
         };
       };
+    };
+
+    services.prometheus = {
+      scrapeConfigs = [{ 
+        job_name = "blocky"; static_configs = [ 
+          { targets = [ "127.0.0.1:${toString cfg.httpPort}" ]; } 
+        ]; 
+      }];
     };
 
   };
