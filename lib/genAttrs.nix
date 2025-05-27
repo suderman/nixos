@@ -1,27 +1,22 @@
-# Create attrs from list, attr names, or path
+# Extend nixpkgs' genAttrs to first convert provided paths or attrs to a list
 { lib, flake, ... }: x: fn: let
 
-  inherit (builtins) attrNames listToAttrs isAttrs isPath isList pathExists;
-  inherit (lib) removeSuffix;
-  inherit (flake.lib) ls;
+  # Ensure string and strip .nix suffix from any entries
+  fromList = list: map (name: lib.removeSuffix ".nix" (toString name)) list;
 
-  # Create attribute set from files and subdirectories of path
-  fromPath = path: listToAttrs ( map 
-    ( name: { name = (removeSuffix ".nix" name); value = (fn name); }) 
-    ( ls { inherit path; asPath = false; dirsExcept = []; } )
-  );
+  # List of directory and filenames in given path
+  fromPath = path: fromList ( flake.lib.ls { 
+    inherit path; asPath = false; dirsExcept = []; 
+  });
 
-  # Create attribute set list of values
-  fromList = list: listToAttrs ( map 
-    ( name: { name = (removeSuffix ".nix" name); value = (fn name); }) 
-    ( list ) 
-  );
+  # List of attribute names in given attr set
+  fromAttrs = attrs: fromList (builtins.attrNames attrs);
 
-  # Do the same as above using the attrNames
-  fromAttrs = attrs: fromList (attrNames attrs);
+  inherit (builtins) isAttrs isPath isList;
+  list = if (isPath x) then (fromPath x)
+    else if (isList x) then (fromList x)
+    else if (isAttrs x) then (fromAttrs x)
+    else [];
 
-in 
-  if (isPath x) then (fromPath x) 
-  else if (isList x) then (fromList x)
-  else if (isAttrs x) then (fromAttrs x)
-  else {}
+# Pass along modified list and provided function to nixpkgs's genAttrs
+in lib.genAttrs list fn
