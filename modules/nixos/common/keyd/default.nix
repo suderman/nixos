@@ -4,8 +4,6 @@
   cfg = config.services.keyd;
   inherit (lib) mkIf mkForce mkOption types;
   inherit (lib.options) mkEnableOption;
-  inherit (flake.lib) extraGroups;
-  homeUsers = builtins.attrNames (config.home-manager.users or {});
 
 in {
 
@@ -59,8 +57,10 @@ in {
     # Create keyd group
     users.groups.keyd = {};
 
-    # Add flake's users to the keyd (and ydotool) group
-    users.users = extraGroups homeUsers [ "keyd" "ydotool" ];
+    # Add config's users to the keyd, ydotool groups
+    users.users = let 
+      userNames = builtins.attrNames (config.home-manager.users or {});
+    in flake.lib.extraGroups userNames [ "keyd" "ydotool" ];
 
     # Also enable ydotool 
     programs.ydotool.enable = true;

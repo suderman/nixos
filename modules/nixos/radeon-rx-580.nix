@@ -1,5 +1,5 @@
 # AMD Radeon RX 580 8GB
-{ config, pkgs, lib, inputs, ... }: {
+{ config, lib, pkgs, inputs, ... }: {
 
   # https://github.com/NixOS/nixos-hardware/tree/master/common/gpu/amd
   imports = [ inputs.hardware.common-gpu-amd ];

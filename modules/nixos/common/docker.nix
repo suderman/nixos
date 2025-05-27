@@ -1,4 +1,4 @@
-{ lib, ... }: {
+{ config, lib, flake, ... }: {
 
   # Enable Docker and set to backend (over podman default)
   virtualisation = {
@@ -11,4 +11,9 @@
   # Persist data after reboots
   persist.directories = [ "/var/lib/docker" ];
 
+  # Add config's users to the docker group
+  users.users = let 
+    userNames = builtins.attrNames (config.home-manager.users or {});
+  in flake.lib.extraGroups userNames [ "docker" ];
+  
 }

@@ -5,7 +5,7 @@
 #   driveF = "/mnt/ssd/data";
 #   driveG = "/mnt/raid/media";
 # };
-{ inputs, config, lib, pkgs, ... }: let 
+{ config, lib, pkgs, ... }: let 
 
   # https://hub.docker.com/r/tessypowder/backblaze-personal-wine/tags
   version = "1.9";

@@ -1,4 +1,4 @@
-{ flake, config, lib, pkgs, perSystem, ... }: let
+{ config, lib, pkgs, perSystem, flake, ... }: let
 
   inherit (flake.lib) ls mkScript;
 

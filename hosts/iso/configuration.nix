@@ -1,4 +1,4 @@
-{ flake, config, lib, pkgs, perSystem, modulesPath, ... }: {
+{ config, lib, pkgs, perSystem, flake, modulesPath, ... }: {
 
   imports = [
     (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix")

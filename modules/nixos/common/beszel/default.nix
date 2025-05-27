@@ -1,6 +1,5 @@
-# -- custom module --
 # https://github.com/daviaaze/nixfiles/blob/main/modules/services/beszel.nix
-{ flake, config, lib, pkgs, ... }: let
+{ config, lib, pkgs, flake, ... }: let
 
   cfg = config.services.beszel;
   inherit (builtins) toString;

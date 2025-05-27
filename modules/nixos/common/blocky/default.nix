@@ -1,5 +1,5 @@
 # services.blocky.enable = true;
-{ flake, config, lib, pkgs, perSystem, ... }: let 
+{ config, lib, pkgs, perSystem, flake, ... }: let 
 
   cfg = config.services.blocky;
   inherit (builtins) attrValues mapAttrs toString;

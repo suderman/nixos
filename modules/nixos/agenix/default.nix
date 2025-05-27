@@ -1,5 +1,5 @@
 # Configure agenix to work with derived identity and ssh keys
-{ flake, inputs, hostName, lib, ... }: {
+{ lib, flake, inputs, hostName, ... }: {
 
   imports = [
     inputs.agenix.nixosModules.default

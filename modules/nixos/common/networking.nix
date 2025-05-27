@@ -1,4 +1,4 @@
-{ flake, config, lib, hostName, ... }: let
+{ config, lib, flake, hostName, ... }: let
   inherit (builtins) attrNames attrValues filter;
   inherit (lib) filterAttrs hasPrefix mkForce mkDefault mkOption naturalSort types unique;
 in {
@@ -69,6 +69,17 @@ in {
       '';
       deps = [ "etc" ];
     };
+
+    # NetworkManager
+    networking.networkmanager.enable = true;
+
+    # Add config's users to the networkmanager group
+    users.users = let 
+      userNames = builtins.attrNames (config.home-manager.users or {});
+    in flake.lib.extraGroups userNames [ "networkmanager" ];
+
+    # Persist connections after reboots
+    persist.directories = [ "/etc/NetworkManager/system-connections" ];
 
   };
 

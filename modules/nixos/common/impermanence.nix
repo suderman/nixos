@@ -1,4 +1,4 @@
-{ config, inputs, lib, ... }: let
+{ config, lib, inputs, ... }: let
 
   cfg = config.persist;
   inherit (builtins) baseNameOf mapAttrs;
@@ -65,7 +65,6 @@ in {
       # System directories
       directories = unique ([
         "/etc/nixos"
-        "/etc/NetworkManager/system-connections"
         "/var/lib/nixos"
         "/var/lib/systemd/coredump"
       ] ++ cfg.directories);

@@ -1,4 +1,4 @@
-{ config, lib, pkgs, this, ... }: {
+{ config, lib, pkgs, ... }: {
 
   # Custom user service
   systemd.user.services.foobar-hm = {

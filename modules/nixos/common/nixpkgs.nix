@@ -1,4 +1,4 @@
-{ flake, pkgs, lib, inputs, perSystem, ... }: let
+{ lib, pkgs, perSystem, flake, inputs, ... }: let
   inherit (lib) mkDefault;
 in {
 

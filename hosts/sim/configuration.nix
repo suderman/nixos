@@ -1,4 +1,4 @@
-{ config, flake, pkgs, lib, perSystem, ... }: let
+{ config, pkgs, lib, perSystem, flake, ... }: let
   inherit (builtins) mapAttrs;
   inherit (lib) mkOption types;
   inherit (perSystem.self) mkApplication;

@@ -1,5 +1,5 @@
 # programs.firefox.enable = true;
-{ flake, config, lib, pkgs, ... }: let
+{ config, lib, pkgs, flake, ... }: let
 
   cfg = config.programs.firefox;
   inherit (lib) mkIf;

@@ -36,7 +36,7 @@ in rec {
   # List of directory names containing default.nix
   moduleDirNames = path: filter(dir: pathExists ("${path}/${dir}/default.nix")) (dirNames path);
 
-  # > config.users.users = this.lib.extraGroups this.users [ "mygroup" ] ;
+  # > config.users.users = flake.lib.extraGroups users [ "mygroup" ] ;
   extraGroups = users: extraGroups: genAttrs users (_: { inherit extraGroups; });
 
   # Format owner and group as "owner:group"

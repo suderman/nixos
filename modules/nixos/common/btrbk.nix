@@ -1,5 +1,5 @@
 # services.btrbk.enable = true;
-{ flake, config, lib, pkgs, perSystem, ... }: let 
+{ config, lib, pkgs, perSystem, flake, ... }: let 
 
   cfg = config.services.btrbk;
   inherit (lib) mkAfter mkIf mkOption types recursiveUpdate;

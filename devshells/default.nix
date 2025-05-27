@@ -1,4 +1,4 @@
-{ flake, perSystem, pkgs, ... }: let 
+{ pkgs, perSystem, flake, ... }: let 
 
   inherit (builtins) toString readFile;
   inherit (flake.lib) ls;

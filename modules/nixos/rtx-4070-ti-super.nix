@@ -1,5 +1,5 @@
 # Nvidia GeForce RTX 4070 Ti Super
-{ config, pkgs, lib, inputs, ... }: let
+{ config, lib, pkgs, inputs, ... }: let
 
   # https://raw.githubusercontent.com/aaronp24/nvidia-versions/master/nvidia-versions.txt
   beta = true; # I want to use current LTS, so setting this to true

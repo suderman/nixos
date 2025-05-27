@@ -1,4 +1,4 @@
-{ config, lib, pkgs, this, ... }: let
+{ config, lib, pkgs, ... }: let
 
   cfg = config.services.traefik;
   inherit (builtins) length;

@@ -1,5 +1,5 @@
 # Attribute set describing my domains and IP addresses  
-{ flake, lib, ... }: let
+{ lib, flake, ... }: let
 
   inherit (flake.lib) genAttrs;
   inherit (lib) foldl filterAttrs mapAttrsToList mapAttrs' nameValuePair; 

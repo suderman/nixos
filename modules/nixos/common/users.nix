@@ -1,7 +1,7 @@
 { config, lib, pkgs, perSystem, flake, ... }: let
 
   # User names with home-manager config
-  homeUsers = builtins.attrNames (config.home-manager.users or {});
+  userNames = builtins.attrNames (config.home-manager.users or {});
 
 in {
 
@@ -17,13 +17,11 @@ in {
       inherit name;
       user = flake.users."${name}" or {};
       openssh = user.openssh or {};
-      extraGroups = user.extraGroups ++ ifTheyExist [ 
-        "networkmanager" "docker" "media" "photos" 
-      ];
+      extraGroups = user.extraGroups ++ ifTheyExist [ "media" "photos" ];
     };
 
     # Each user account found in flake.users
-    userAccounts = lib.genAttrs homeUsers (name: let u = flakeUser name; in u.user // {
+    userAccounts = lib.genAttrs userNames (name: let u = flakeUser name; in u.user // {
       inherit (u) extraGroups openssh;
       hashedPasswordFile = if config.users.users."${u.name}".password == null 
         then "/run/user/${u.name}" else null; # generated in activation script
@@ -60,7 +58,7 @@ in {
     hex = config.age.secrets.hex.path;
 
     # All users in this configuration including root
-    everyone = homeUsers ++ [ "root" ];
+    everyone = userNames ++ [ "root" ];
 
     usermeta = name: {
 

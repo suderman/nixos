@@ -1,5 +1,5 @@
 # Create attrs from list, attr names, or path
-{ flake, lib, ... }: x: fn: let
+{ lib, flake, ... }: x: fn: let
 
   inherit (builtins) attrNames listToAttrs isAttrs isPath isList pathExists;
   inherit (lib) removeSuffix;

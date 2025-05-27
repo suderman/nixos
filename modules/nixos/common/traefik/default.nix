@@ -1,5 +1,5 @@
 # services.traefik.enable = true;
-{ config, lib, pkgs, flake, perSystem, ... }: let
+{ config, lib, pkgs, perSystem, flake, ... }: let
 
   cfg = config.services.traefik // {
     inherit (config.networking) hostName;
