@@ -5,6 +5,7 @@
   inherit (lib) mkIf mkForce mkOption types;
   inherit (lib.options) mkEnableOption;
   inherit (flake.lib) extraGroups;
+  homeUsers = builtins.attrNames (config.home-manager.users or {});
 
 in {
 
@@ -59,7 +60,7 @@ in {
     users.groups.keyd = {};
 
     # Add flake's users to the keyd (and ydotool) group
-    users.users = extraGroups config.users.names [ "keyd" "ydotool" ];
+    users.users = extraGroups homeUsers [ "keyd" "ydotool" ];
 
     # Also enable ydotool 
     programs.ydotool.enable = true;

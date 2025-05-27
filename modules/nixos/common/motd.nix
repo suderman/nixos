@@ -1,6 +1,6 @@
-{ flake, config, lib, pkgs, this, ... }: let
+{ config, lib, pkgs, flake, ... }: let
 
-  inherit (flake.lib) mkAttrs;
+  inherit (flake.lib) genAttrs;
 
 in {
 
@@ -20,7 +20,7 @@ in {
         nix = "/nix";
         boot = "/boot";
       };
-      # last_login = mkAttrs this.users (user: 2);
+      # last_login = genAttrs this.users (user: 2);
       # docker = {};
       # fail2_ban = {};
       # last_run = {};

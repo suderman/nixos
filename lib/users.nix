@@ -1,6 +1,6 @@
 { flake, ... }: 
 
-  flake.lib.mkAttrs ../users ( dir: let
+  flake.lib.genAttrs ../users ( dir: let
     user = import ../users/${dir};
   in user // (
 

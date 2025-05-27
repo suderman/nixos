@@ -24,14 +24,8 @@ in rec {
   # List directories and files that can be imported by nix
   ls = import ./ls.nix args;
 
-  # Create list from path or list
-  mkList = import ./mkList.nix args; 
-
   # Create attrs from list, attr names, or path
-  mkAttrs = import ./mkAttrs.nix args; 
-
-  # Create user attrs from path 
-  mkUsers = import ./mkUsers.nix args; 
+  genAttrs = import ./genAttrs.nix args; 
 
   # List of directory names
   dirNames = path: attrNames (filterAttrs (n: v: v == "directory") (readDir path));
@@ -43,7 +37,7 @@ in rec {
   moduleDirNames = path: filter(dir: pathExists ("${path}/${dir}/default.nix")) (dirNames path);
 
   # > config.users.users = this.lib.extraGroups this.users [ "mygroup" ] ;
-  extraGroups = users: extraGroups: mkAttrs users (_: { inherit extraGroups; });
+  extraGroups = users: extraGroups: genAttrs users (_: { inherit extraGroups; });
 
   # Format owner and group as "owner:group"
   toOwnership = owner: group: "${toString owner}:${toString group}";

@@ -1,12 +1,11 @@
 # services.postgresql.enable = true;
-{ config, lib, pkgs, flake, ... }: let
+{ config, lib, pkgs, ... }: let
 
   cfg = config.services.postgresql;
   admins = config.users.groups.wheel.members ++ [ "root" ];
-  databases = mkAttrs (unique config.services.postgresql.ensureDatabases) ( database: admins );
+  databases = genAttrs (unique config.services.postgresql.ensureDatabases) ( database: admins );
   inherit (config.services.prometheus) exporters;
-  inherit (lib) mkIf mkOrder mkOption options types unique;
-  inherit (flake.lib) mkAttrs;
+  inherit (lib) genAttrs mkIf mkOrder mkOption options types unique;
 
 in {
 

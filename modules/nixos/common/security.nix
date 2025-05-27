@@ -1,8 +1,8 @@
 { config, lib, pkgs, flake, ... }: let
 
   inherit (builtins) readFile;
-  inherit (lib) filterAttrs mkAfter;
-  inherit (flake.lib) ls mkAttrs;
+  inherit (lib) filterAttrs genAttrs mkAfter;
+  inherit (flake.lib) ls;
   inherit (flake.networking) ca domainName;
 
 in {
@@ -70,7 +70,7 @@ in {
       asPath = false;
     }; 
   in {
-    knownHosts = mkAttrs hostNames (hostName: {
+    knownHosts = genAttrs hostNames (hostName: {
       publicKey = readFile (flake + /hosts/${hostName}/ssh_host_ed25519_key.pub);
       extraHostNames = [ "${hostName}.${domainName}" ];
     });

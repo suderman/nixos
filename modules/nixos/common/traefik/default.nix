@@ -8,8 +8,8 @@
     metricsPort = 81;
   };
 
-  inherit (lib) mapAttrs mkIf mkOption options subtractLists types;
-  inherit (flake.lib) ls mkAttrs;
+  inherit (lib) genAttrs mapAttrs mkIf mkOption options subtractLists types;
+  inherit (flake.lib) ls;
   inherit (cfg.lib) mkAlias mkHostName mkHostNames mkLabels mkMiddleware mkRouter mkService;
 
 in {
@@ -96,7 +96,7 @@ in {
       publicHostNames = mkHostNames { public = true; };
 
       # Collection of hostName to IP addresses from this Traefik configuration
-      records = mkAttrs cfg.privateHostNames ( _: cfg.records.${cfg.hostName} );
+      records = genAttrs cfg.privateHostNames ( _: cfg.records.${cfg.hostName} );
       # --------------------------------
 
       # v3.0.2

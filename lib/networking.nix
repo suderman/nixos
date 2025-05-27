@@ -1,14 +1,14 @@
 # Attribute set describing my domains and IP addresses  
 { flake, lib, ... }: let
 
-  inherit (flake.lib) mkAttrs;
+  inherit (flake.lib) genAttrs;
   inherit (lib) foldl filterAttrs mapAttrsToList mapAttrs' nameValuePair; 
 
   # Centralized hierarchy of IP addresses
-  zones = mkAttrs ../zones (zone: import ../zones/${zone});
+  zones = genAttrs ../zones (zone: import ../zones/${zone});
 
   # Determine primary IP address for each host from configuration domain
-  addresses = filterAttrs (n: v: v != "") ( mkAttrs flake.nixosConfigurations ( hostName: let
+  addresses = filterAttrs (n: v: v != "") ( genAttrs flake.nixosConfigurations ( hostName: let
     inherit (flake.nixosConfigurations."${hostName}".config.networking) domain;
     ip = if isNull domain then "" else (zones.${domain}.${hostName} or "");
   in ip ) );
