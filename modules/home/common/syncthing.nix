@@ -19,6 +19,8 @@ in {
       ];
     };
 
+    persist.directories = [ ".local/state/syncthing" ];
+
     # Update the listen port after syncthing starts running
     systemd.user.services.syncthing-config = {
       Unit = {
