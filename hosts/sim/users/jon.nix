@@ -3,6 +3,7 @@
   imports = [
     flake.homeModules.common
     flake.homeModules.jon
+    flake.homeModules.hyprland
   ];
 
   # File sync
