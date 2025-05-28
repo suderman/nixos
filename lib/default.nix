@@ -37,10 +37,13 @@ in rec {
   moduleDirNames = path: filter(dir: pathExists ("${path}/${dir}/default.nix")) (dirNames path);
 
   # > config.users.users = flake.lib.extraGroups users [ "mygroup" ] ;
-  extraGroups = x: extraGroups: let
+  extraGroups = cfg: extraGroups: let
     inherit (builtins) isList attrNames;
-    userNames = if (isList x) then x else attrNames (x.home-manager.users or {});
+    userNames = if (isList cfg) then cfg else attrNames (cfg.home-manager.users or {});
   in genAttrs userNames (_: { inherit extraGroups; });
+
+  # List of home-manager users that match provided filter function
+  filterUsers = cfg: fn: filter fn (if cfg ? home-manager then attrValues cfg.home-manager.users else []);
 
   # Format owner and group as "owner:group"
   toOwnership = owner: group: "${toString owner}:${toString group}";
@@ -49,9 +52,6 @@ in rec {
   derivationPath = salt: let 
     prefix = if salt == "" then "" else "${salt}@"; 
   in prefix + "bip85-hex32-index${toString flake.derivationIndex}";
-
-  # List of home-manager users that match provided filter function
-  filterUsers = fn: cfg: filter fn (if cfg ? home-manager then attrValues cfg.home-manager.users else []);
 
   # Extract URL from cache public key
   cacheUrl = pubKey: let name = lib.pipe pubKey [

@@ -5,6 +5,9 @@
     flake.homeModules.jon
   ];
 
+  # File sync
+  services.syncthing.enable = true;
+
   programs.chromium = {
     enable = true;
     externalExtensions = {
