@@ -8,6 +8,9 @@
   # File sync
   services.syncthing.enable = true;
 
+  # Music daemon
+  services.mpd.enable = true;
+
   programs.chromium = {
     enable = true;
     externalExtensions = {
