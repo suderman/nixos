@@ -33,6 +33,13 @@ in {
       pkgs.fastfetch
       pkgs.cmatrix
       # pkgs.unstable.blocky
+
+      pkgs.mesa
+      pkgs.vulkan-loader
+      pkgs.vulkan-tools # for `vulkaninfo`
+      pkgs.libvdpau-va-gl
+      pkgs.glxinfo       # for checking OpenGL
+
     ];
 
     services.tailscale.enable = true;
@@ -67,6 +74,35 @@ in {
     # Hub for monitoring other machines
     services.beszel.enable = true; # Agent to monitor system
     services.beszel.key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGo/UVSuyrSmtE3RA0rxXpwApHEGMGOTd2c0EtGeCGAr";
+
+    # # Enable OpenGL and hardware acceleration
+    # hardware.opengl = {
+    #   enable = true;
+    #   driSupport32Bit = true; # For 32-bit applications if needed
+    # };
+
+    # For newer NixOS versions (23.11+), use:
+    hardware.graphics = {
+      enable = true;
+      enable32Bit = true;
+    };
+
+    # Enable QEMU with GPU passthrough support
+    virtualisation.libvirtd.qemu = {
+      package = pkgs.qemu_kvm;
+      runAsRoot = false;
+      swtpm.enable = true;
+      ovmf = {
+        enable = true;
+        packages = [ pkgs.OVMFFull.fd ];
+      };
+    };
+
+    # Enable virtualization
+    virtualisation.libvirtd.enable = true;
+
+    # Add your user to the libvirtd group
+    users.users.jon.extraGroups = [ "libvirtd" ];
 
   };
 }
