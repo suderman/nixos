@@ -62,4 +62,6 @@
     ];
   };
 
+  persist.directories = [ ".local/state/wireplumber" ];
+
 }

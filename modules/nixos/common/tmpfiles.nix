@@ -2,8 +2,9 @@
 { config, lib, ... }: let
 
   cfg = config.tmpfiles;
-  inherit (builtins) isString head match stringLength;
-  inherit (lib) mkOption types;
+  inherit (builtins) isAttrs isString head match stringLength;
+  inherit (lib) flatten mkOption types mapAttrsToList unique;
+  users = config.home-manager.users or {};
 
   # Convert 3-digit mode (ie: 775) to 4-digit mode (ie: 0775) by padding a zero
   toMode = mode: let mode' = toString mode; in if stringLength mode' == 3 then "0${mode'}" else mode'; 
@@ -16,11 +17,39 @@
     else
       head m;
 
+  extractUserEntries = kind: flatten (mapAttrsToList (_: user: 
+    let
+      inherit (user.home) homeDirectory username;
+      toEntry = x: let
+        entry = if isAttrs x then x else {};
+        target = if isAttrs x 
+          then "${homeDirectory}/${toString (x.target or "target")}" 
+          else "${homeDirectory}/${toString x}";
+      in entry // {
+        inherit target username;
+        user = username;
+        group = "users";
+      };
+    in map toEntry (user.tmpfiles.${kind} or [])
+  ) users);
+
+  userDirectories = extractUserEntries "directories";
+  userFiles       = extractUserEntries "files";
+  userSymlinks    = extractUserEntries "symlinks";
+
+  allDirectories = unique (cfg.directories ++ userDirectories);
+  allFiles       = unique (cfg.files ++ userFiles);
+  allSymlinks    = unique (cfg.symlinks ++ userSymlinks);
+
 in {
 
   # Add "tmpfiles" options
   options.tmpfiles = let option = mkOption { type = types.listOf types.anything; default = []; }; in {
     directories = option; files = option; symlinks = option; 
+  };
+
+  config.test = {
+    inherit allDirectories allFiles allSymlinks;
   };
 
   # Add these paths to list found in systemd.tmpfiles.rules 
@@ -40,12 +69,12 @@ in {
         '' else ''
           d ${toString target} ${toMode mode} ${toString user} ${toString group} - -
         '' );
-    in rulesFor directory) cfg.directories
+    in rulesFor directory) allDirectories
 
   ) ++ (
 
     # tmpfiles.files { target = "/etc/foobar"; mode = "0775"; user = "jon"; group = "users"; text = "Hello world!"; }];
-    # f+ /etc/foobar 0775 jon users - Hello world!
+    # f+ /etc/foobar 0775 jon users - Hello worldk!
     # data.files { target = "/etc/foo-resolv"; mode = "0775"; user = "jon"; group = "users"; source = "/etc/resolv.conf"; }];
     # C+ /etc/foo-resolv - - - - /etc/resolv.conf
     # z  /etc/foo-resolv 0775 jon users - -
@@ -61,7 +90,7 @@ in {
           f ${toString target} ${toMode mode} ${toString user} ${toString group} -
         '' 
         ) );
-    in rulesFor file) cfg.files
+    in rulesFor file) allFiles
 
   ) ++ (
 
@@ -73,7 +102,7 @@ in {
         trim ''
           L+ ${toString target} - - - - ${toString source}
         '';
-    in rulesFor symlink) cfg.symlinks
+    in rulesFor symlink) allSymlinks
 
   );
 

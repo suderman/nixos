@@ -99,6 +99,9 @@ in {
     # Apply pretty colors
     # stylix.targets.firefox.profileNames = [ "default" ];
 
+    # Persist browser data
+    persist.directories = [ ".mozilla/firefox/default" ];
+
   };
 
 }
