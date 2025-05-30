@@ -1,17 +1,21 @@
-{ config, lib, flake, ... }: {
+{ config, lib, flake, ... }: let
+
+  cfg = config.virtualisation.docker;
+  inherit (lib) mkIf;
+
+in {
 
   # Enable Docker and set to backend (over podman default)
   virtualisation = {
-    docker.enable = lib.mkDefault true;
     docker.storageDriver = "overlay2";
     docker.liveRestore = false; # enabling this is incompatiable with docker swarm
     oci-containers.backend = "docker";
   };
 
   # Persist data after reboots
-  persist.directories = [ "/var/lib/docker" ];
+  persist.directories = mkIf cfg.enable [ "/var/lib/docker" ];
 
   # Add config's users to the docker group
-  users.users = flake.lib.extraGroups config [ "docker" ];
+  users.users = mkIf cfg.enable (flake.lib.extraGroups config [ "docker" ]);
   
 }

@@ -2,7 +2,7 @@
 { config, lib, pkgs, ... }: let
 
   cfg = config.services.tailscale;
-  inherit (lib) mkAfter mkIf mkOption types;
+  inherit (lib) mkAfter mkIf mkDefault mkOption types recursiveUpdate;
 
 in {
 

@@ -5,7 +5,6 @@
 in {
 
   programs.rust-motd = {
-    enable = true;
     settings = {
       global = {};
       banner = {

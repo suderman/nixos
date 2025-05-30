@@ -1,5 +1,5 @@
 # services.beszel.enableAgent = true;
-{ config, lib, pkgs, ... }: let
+{ config, lib, pkgs, flake, ... }: let
 
   cfg = config.services.beszel;
   inherit (builtins) toString;
@@ -11,7 +11,10 @@ in {
     key = mkOption {
       type = types.str;
       description = "Beszel hub public key";
-      default = "";
+      default = let
+        inherit (builtins) pathExists readFile;
+        sshPub = flake + /users/beszel/id_ed25519.pub;
+      in if pathExists sshPub then readFile sshPub else "";
     };
     enableAgent = mkOption {
       type = types.bool;
@@ -30,10 +33,10 @@ in {
 
   config = mkIf cfg.enableAgent {
 
-    tmpfiles.directories = [{
-      target = "${cfg.dataDir}/agent";
-      user = "beszel";
-    }];
+    # tmpfiles.directories = [{
+    #   target = "${cfg.dataDir}/agent";
+    #   user = "beszel";
+    # }];
 
     systemd.services.beszel-agent = {
       wantedBy = [ "multi-user.target" ];
@@ -46,7 +49,8 @@ in {
         User = "beszel";
         Group = "beszel";
         Restart = "always";
-        WorkingDirectory = "${cfg.dataDir}/agent";
+        # WorkingDirectory = "${cfg.dataDir}/agent";
+        WorkingDirectory = cfg.dataDir;
         ExecStart = "${cfg.package}/bin/beszel-agent";
         RestartSec = "5";
       };

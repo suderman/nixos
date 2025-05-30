@@ -4,7 +4,7 @@
 let 
 
   cfg = config.services.whoami;
-  inherit (lib) mkIf mkOption types;
+  inherit (lib) mkIf mkOption types mkDefault recursiveUpdate;
   inherit (config.services.traefik.lib) mkLabels;
 
 in {
@@ -33,6 +33,6 @@ in {
       ++ [ "--network=host" ];
     };
 
-  }; 
+  };
 
 }

@@ -33,6 +33,11 @@ in {
 
     users.groups.beszel = {};
 
+    tmpfiles.directories = [{
+      target = "${cfg.dataDir}/beszel_data";
+      user = "beszel";
+    }];
+
     persist.directories = [ cfg.dataDir ];
 
   };

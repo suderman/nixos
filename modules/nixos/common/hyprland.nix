@@ -3,7 +3,7 @@
   inherit (builtins) any attrNames toString; 
   inherit (lib) getExe mkIf; 
 
-  # If any hyprland is enabled for any home-manager user,set this to true
+  # If any hyprland is enabled for any home-manager user, set this to true
   enable = let users = config.home-manager.users or {}; in any 
     ( user: users.${user}.wayland.windowManager.hyprland.enable or false ) 
     ( attrNames users );

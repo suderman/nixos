@@ -42,21 +42,21 @@ in {
 
     ];
 
-    services.tailscale.enable = true;
-    services.traefik.enable = true;
-    services.whoami.enable = true;
-    services.blocky.enable = true;
-    services.btrbk.enable = true;
+    # services.tailscale.enable = true;
+    # services.traefik.enable = true;
+    # services.whoami.enable = true;
+    # services.blocky.enable = true;
+    # services.btrbk.enable = true;
     services.postgresql.enable = true;
 
-    # Keyboard control
-    services.keyd.enable = true;
+    # # Keyboard control
+    # services.keyd.enable = true;
 
     # App Store
     services.flatpak.enable = true;
 
-    # Prettify
-    stylix.enable = true;
+    # # Prettify
+    # stylix.enable = true;
 
     # Grant ssh host key access to root login
     users.users.root.openssh.authorizedKeys.keyFiles = [ 
@@ -72,14 +72,11 @@ in {
     programs.firefox.enable = true;
 
     # Hub for monitoring other machines
-    services.beszel.enable = true; # Agent to monitor system
-    services.beszel.key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGo/UVSuyrSmtE3RA0rxXpwApHEGMGOTd2c0EtGeCGAr";
+    services.beszel.enable = true; 
 
-    # # Enable OpenGL and hardware acceleration
-    # hardware.opengl = {
-    #   enable = true;
-    #   driSupport32Bit = true; # For 32-bit applications if needed
-    # };
+    # Agent to monitor system
+    # services.beszel.key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGo/UVSuyrSmtE3RA0rxXpwApHEGMGOTd2c0EtGeCGAr";
+
 
     # For newer NixOS versions (23.11+), use:
     hardware.graphics = {
