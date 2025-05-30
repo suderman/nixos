@@ -1,3 +1,4 @@
+# programs.fzf.enable = true;
 { config, lib, ... }: {
 
   programs.fzf = {

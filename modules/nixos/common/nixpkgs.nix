@@ -35,15 +35,15 @@ in {
       rofi-vpn = prev.rofi-vpn.override rofi-wayland;
 
       # These packages support Wayland but sometimes need to be persuaded
-      digikam          = enableWayland { type = "qt"; pkg = prev.digikam; bin = "digikam"; };
-      dolphin          = enableWayland { type = "qt"; pkg = prev.dolphin; bin = "dolphin"; };
-      element-desktop  = enableWayland { type = "electron"; pkg = prev.element-desktop; bin = "element-desktop"; };
-      figma-linux      = enableWayland { type = "electron"; pkg = prev.figma-linux; bin = "figma-linux"; };
-      nextcloud-client = enableWayland { type = "qt"; pkg = prev.nextcloud-client; bin = "nextcloud"; };
-      # owncloud-client  = enableWayland { type = "qt"; pkg = prev.owncloud-client; bin = "owncloud"; };
-      plexamp          = enableWayland { type = "electron"; pkg = prev.plexamp; bin = "plexamp"; };
-      signal-desktop   = enableWayland { type = "electron"; pkg = prev.signal-desktop; bin = "signal-desktop"; };
-      # _1password-gui  = enableWayland { type = "electron"; pkg = prev._1password-gui; bin = "1password"; };
+      digikam          = enableWayland { type = "qt"; package = prev.digikam; name = "digikam"; };
+      dolphin          = enableWayland { type = "qt"; package = prev.dolphin; name = "dolphin"; };
+      element-desktop  = enableWayland { type = "electron"; package = prev.element-desktop; name = "element-desktop"; };
+      figma-linux      = enableWayland { type = "electron"; package = prev.figma-linux; name = "figma-linux"; };
+      nextcloud-client = enableWayland { type = "qt"; package = prev.nextcloud-client; name = "nextcloud"; };
+      # owncloud-client  = enableWayland { type = "qt"; package = prev.owncloud-client; name = "owncloud"; };
+      plexamp          = enableWayland { type = "electron"; package = prev.plexamp; name = "plexamp"; };
+      signal-desktop   = enableWayland { type = "electron"; package = prev.signal-desktop; name = "signal-desktop"; };
+      # _1password-gui  = enableWayland { type = "electron"; package = prev._1password-gui; name = "1password"; };
 
       # Enable policies and import personal Certificate Authority
       firefox = prev.firefox.override {

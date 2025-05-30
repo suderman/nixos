@@ -7,7 +7,10 @@
 
 in {
 
-  imports = ls ./settings ++ ls ./programs;
+  imports = [
+    flake.homeModules.common
+    flake.homeModules.desktop
+  ] ++ ls ./settings ++ ls ./programs;
 
   options.wayland.windowManager.hyprland = {
     enablePlugins = lib.options.mkEnableOption "enablePlugins";

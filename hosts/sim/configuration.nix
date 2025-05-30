@@ -8,6 +8,7 @@ in {
     ./hardware-configuration.nix
     ./disk-configuration.nix
     flake.nixosModules.common
+    flake.nixosModules.desktop
     flake.nixosModules.vm
     flake.nixosModules.homelab
   ];

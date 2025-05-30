@@ -1,7 +1,6 @@
 { config, lib, pkgs, ... }: {
 
   programs.zsh = {
-    enable = lib.mkDefault true;
     autocd = true;
     # enableAutosuggestions = true;
     enableCompletion = true;

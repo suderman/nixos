@@ -10,9 +10,7 @@ in {
   home.packages = with pkgs; [ 
     yo # example script
     perSystem.self.fetchgithub # fetch hash from repo
-    lame # mp3 codec
     perSystem.self.shizuku # connect android to pc and run
-    imagemagick # animate compare composite conjure convert display identify import magick magick-script mogrify montage stream
   ];
 
   # Aliases 

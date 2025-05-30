@@ -1,7 +1,7 @@
+# programs.direnv.enable = true;
 { config, lib, ... }: {
 
   programs.direnv = {
-    enable = lib.mkDefault true;
     nix-direnv.enable = lib.mkDefault true;
     config = {
       global.load_dotenv = true;

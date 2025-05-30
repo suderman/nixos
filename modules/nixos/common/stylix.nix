@@ -16,19 +16,25 @@ in {
     polarity = mkDefault "either"; # dark light either
 
     image = mkDefault( pixel "base0A" );
-    base16Scheme = mkDefault "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
+    # base16Scheme = mkDefault "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
+    base16Scheme = mkDefault "${pkgs.base16-schemes}/share/themes/tokyo-city-dark.yaml";
 
     opacity = {
       applications = mkDefault 1.0;
-      terminal = mkDefault 0.92;
+      terminal = mkDefault 0.85;
       desktop = mkDefault 1.0;
       popups = mkDefault 1.0;
     };
 
+    # cursor = mkDefault {
+    #   name = "macOS";
+    #   package = pkgs.apple-cursor;
+    #   size = 36;
+    # };
     cursor = mkDefault {
-      name = "macOS";
-      package = pkgs.apple-cursor;
-      size = 36;
+      name = "Banana";
+      package = pkgs.banana-cursor;
+      size = mkDefault 36;
     };
 
     fonts = {
