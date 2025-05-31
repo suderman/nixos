@@ -60,7 +60,7 @@ in {
       ];
 
       extraConfig = ''
-        source = ~/.config/hypr/extra.conf
+        source = ~/.config/hypr/extra/hyprland.conf
       '';
 
     };
@@ -69,8 +69,8 @@ in {
     services.keyd.enable = true;
 
     # Persist extra config
-    persist.files = [ ".config/hypr/extra.conf" ];
-    tmpfiles.files = [ ".config/hypr/extra.conf" ];
+    persist.directories = [ ".config/hypr/extra" ];
+    tmpfiles.files = [ ".config/hypr/extra/hyprland.conf" ];
 
   };
 
