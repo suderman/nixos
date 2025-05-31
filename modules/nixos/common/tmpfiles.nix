@@ -27,7 +27,7 @@
           then "${homeDirectory}/${toString (x.target or "target")}" 
           else "${homeDirectory}/${toString x}";
       in rule // {
-        inherit target username;
+        inherit target;
         user = username;
         group = "users";
       };
