@@ -17,39 +17,39 @@
     else
       head m;
 
-  extractUserEntries = kind: flatten (mapAttrsToList (_: user: 
+  # Include tmpfiles rules found in home-manager users
+  userRulesFor = kind: flatten (mapAttrsToList (_: user: 
     let
       inherit (user.home) homeDirectory username;
-      toEntry = x: let
-        entry = if isAttrs x then x else {};
+      toRule = x: let
+        rule = if isAttrs x then x else {};
         target = if isAttrs x 
           then "${homeDirectory}/${toString (x.target or "target")}" 
           else "${homeDirectory}/${toString x}";
-      in entry // {
+      in rule // {
         inherit target username;
         user = username;
         group = "users";
       };
-    in map toEntry (user.tmpfiles.${kind} or [])
+    in map toRule (user.tmpfiles.${kind} or [])
   ) users);
 
-  userDirectories = extractUserEntries "directories";
-  userFiles       = extractUserEntries "files";
-  userSymlinks    = extractUserEntries "symlinks";
-
-  allDirectories = unique (cfg.directories ++ userDirectories);
-  allFiles       = unique (cfg.files ++ userFiles);
-  allSymlinks    = unique (cfg.symlinks ++ userSymlinks);
+  userDirectories = userRulesFor "directories";
+  userFiles = userRulesFor "files";
+  userSymlinks = userRulesFor "symlinks";
 
 in {
 
   # Add "tmpfiles" options
-  options.tmpfiles = let option = mkOption { type = types.listOf types.anything; default = []; }; in {
-    directories = option; files = option; symlinks = option; 
-  };
-
-  config.test = {
-    inherit allDirectories allFiles allSymlinks;
+  options.tmpfiles = let
+    option = mkOption {
+      type = with types; listOf (either str attrs);
+      default = [];
+    };
+  in {
+    directories = option;
+    files = option;
+    symlinks = option;
   };
 
   # Add these paths to list found in systemd.tmpfiles.rules 
@@ -69,7 +69,7 @@ in {
         '' else ''
           d ${toString target} ${toMode mode} ${toString user} ${toString group} - -
         '' );
-    in rulesFor directory) allDirectories
+    in rulesFor directory) ( unique ( cfg.directories ++ userDirectories ) )
 
   ) ++ (
 
@@ -90,7 +90,7 @@ in {
           f ${toString target} ${toMode mode} ${toString user} ${toString group} -
         '' 
         ) );
-    in rulesFor file) allFiles
+    in rulesFor file) ( unique ( cfg.files ++ userFiles ) )
 
   ) ++ (
 
@@ -102,7 +102,7 @@ in {
         trim ''
           L+ ${toString target} - - - - ${toString source}
         '';
-    in rulesFor symlink) allSymlinks
+    in rulesFor symlink) ( unique ( cfg.symlinks ++ userSymlinks ) )
 
   );
 
