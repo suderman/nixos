@@ -8,7 +8,6 @@
 in {
 
   imports = [
-    flake.homeModules.common
     flake.homeModules.desktop
   ] ++ ls ./settings ++ ls ./programs;
 

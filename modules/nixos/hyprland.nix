@@ -1,19 +1,20 @@
-{ config, lib, pkgs, ... }: let
+{ config, lib, pkgs, flake, ... }: let
 
-  inherit (builtins) any attrNames toString; 
-  inherit (lib) getExe mkIf; 
-
-  # If any hyprland is enabled for any home-manager user, set this to true
-  enable = let users = config.home-manager.users or {}; in any 
-    ( user: users.${user}.wayland.windowManager.hyprland.enable or false ) 
-    ( attrNames users );
-
-  autologin = null;
+  cfg = config.programs.hyprland;
+  inherit (builtins) toString; 
+  inherit (lib) getExe mkOption types;
 
 in {
 
-  # Only enable the nixos module if the home-manager module is enabled
-  config = mkIf enable {
+  imports = [ flake.nixosModules.desktop ];
+
+  # Set this to a username to automatically login at boot
+  options.programs.hyprland.autologin = mkOption {
+    type = with lib.types; nullOr str;
+    default = null;
+  };
+
+  config = {
 
     # Login screen
     services.greetd = let command = getExe pkgs.hyprland; in {
@@ -31,9 +32,9 @@ in {
             "--cmd ${command}"
           ];
         };
-      } // ( if autologin == null then {} else { 
+      } // ( if cfg.autologin == null then {} else { 
         initial_session = { 
-          user = autologin;
+          user = cfg.autologin;
           inherit command; 
         };
       } );

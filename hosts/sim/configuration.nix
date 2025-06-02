@@ -8,7 +8,8 @@ in {
     ./hardware-configuration.nix
     ./disk-configuration.nix
     flake.nixosModules.common
-    flake.nixosModules.desktop
+    # flake.nixosModules.gnome
+    flake.nixosModules.hyprland
     flake.nixosModules.vm
     flake.nixosModules.homelab
   ];
@@ -93,6 +94,14 @@ in {
       ovmf = {
         enable = true;
         packages = [ pkgs.OVMFFull.fd ];
+      };
+    };
+
+    services = {
+      xserver = {
+        desktopManager.gnome.enable = true;
+        displayManager.gdm.enable = true;
+        displayManager.gdm.autoSuspend = true;
       };
     };
 

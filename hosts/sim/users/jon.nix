@@ -1,6 +1,10 @@
 { flake, config, lib, ... }: {
 
-  imports = [ flake.homeModules.hyprland ];
+  imports = [
+    flake.homeModules.common
+    # flake.homeModules.gnome
+    flake.homeModules.hyprland
+  ];
 
   # File sync
   services.syncthing.enable = true;
