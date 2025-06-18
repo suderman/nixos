@@ -58,7 +58,6 @@ in {
 
     neovide # text editor
     lapce # text editor
-    inkscape # vector editor
     libreoffice # documents & spreadsheets
 
     nemo-with-extensions # file manager gui
