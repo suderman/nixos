@@ -68,6 +68,11 @@
     # <https://github.com/gmodena/nix-flatpak>
     nix-flatpak.url = "github:gmodena/nix-flatpak"; 
 
+    # Quickshell
+    # <https://quickshell.outfoxxed.me>
+    quickshell.url = "github:quickshell-mirror/quickshell?ref=v0.1.0";
+    quickshell.inputs.nixpkgs.follows = "nixpkgs";
+
   };
 
   outputs = inputs: let flake = inputs.self; in {
