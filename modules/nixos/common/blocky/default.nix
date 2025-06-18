@@ -99,9 +99,8 @@ in {
     # Get around that by downloading these lists separately as a systemd service
     systemd.services.blocky-lists-download = {
       description = "Download copy of lists for Blocky";
-      after = [ "network-online.target" "blocky.service" ];
-      wants = [ "network-online.target" "blocky.service" ];
-      wantedBy = [ "blocky.service" ];
+      after = [ "network-online.target" ];
+      wants = [ "network-online.target" ];
       serviceConfig.Type = "oneshot";
       path = [ pkgs.curl ];
       script = ''
@@ -132,6 +131,7 @@ in {
       partOf = [ "blocky-lists-download.service" ];
       timerConfig = {
         OnCalendar = "daily";
+        OnBootSec = "5min"; # run 5 minutes after boot
         Unit = "blocky-lists-download.service";
       };
     };

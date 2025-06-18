@@ -37,7 +37,7 @@
 
     qemu-img = builtins.concatStringsSep "\n" (map (n: toString [
       "[[ -e hosts/sim/disk${n}.img ]] ||"
-      "qemu-img create -f qcow2 hosts/sim/disk${n}.img 50G"
+      "qemu-img create -f qcow2 hosts/sim/disk${n}.img 100G"
     ]) disks);
 
     derive-ssh = toString [

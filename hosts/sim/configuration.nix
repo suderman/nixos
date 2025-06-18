@@ -97,13 +97,13 @@ in {
       };
     };
 
-    services = {
-      xserver = {
-        desktopManager.gnome.enable = true;
-        displayManager.gdm.enable = true;
-        displayManager.gdm.autoSuspend = true;
-      };
-    };
+    # services = {
+    #   xserver = {
+    #     desktopManager.gnome.enable = true;
+    #     displayManager.gdm.enable = true;
+    #     displayManager.gdm.autoSuspend = true;
+    #   };
+    # };
 
     # Enable virtualization
     virtualisation.libvirtd.enable = true;
