@@ -3,7 +3,7 @@ source $LIB; cd $PRJ_ROOT
 id="$(input)"
 if [[ -z "$id" ]]; then
   [[ ! -f id.age ]] && error "./id.age missing"
-  id="$(cat id.age | rage -d)"
+  id="$(cat id.age | age -d)"
   [[ -z "$id" ]] && error "Failed to unlock age identity"
 fi
 

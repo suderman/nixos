@@ -18,7 +18,7 @@ fi
 
 # Send ssh key for selected host to provided IP address
 cat hex.age |
-  rage -di /tmp/id_age |
+  age -di /tmp/id_age |
   derive hex "$host" |
   derive ssh |
   nc -N $ip 12345

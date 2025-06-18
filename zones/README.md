@@ -13,7 +13,7 @@ The [CA certificate](https://github.com/suderman/nixos/raw/main/zones/ca.crt) an
 ```bash
 openssl genrsa -out ca.key 4096
 openssl req -new -x509 -nodes -extensions v3_ca -days 25568 -subj "/CN=Suderman CA" -key ca.key -out ca.crt
-cat ca.key | rage -er $(cat /tmp/id_age | derive public) > ca.age
+cat ca.key | age -er $(cat /tmp/id_age | derive public) > ca.age
 rm ca.key
 ```
 

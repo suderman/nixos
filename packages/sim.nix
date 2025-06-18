@@ -5,7 +5,7 @@
     perSystem.self.iso 
     pkgs.passh
     pkgs.qemu
-    pkgs.rage
+    pkgs.age
   ];
 
   name = "sim";
@@ -42,7 +42,7 @@
 
     derive-ssh = toString [
       "cat hex.age |"
-      "rage -di /tmp/id_age |"
+      "age -di /tmp/id_age |"
       "derive hex sim |"
       "derive ssh > hosts/sim/ssh_host_ed25519_key &&"
       "chmod 600 hosts/sim/ssh_host_ed25519_key"

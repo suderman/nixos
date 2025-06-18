@@ -1,13 +1,13 @@
 { flake, pkgs, perSystem, ... }: let
 
   inherit (builtins) readFile;
-  inherit (pkgs) gnugrep openssh openssl rage ssh-to-age;
+  inherit (pkgs) gnugrep openssh openssl age ssh-to-age;
   python3 = ( pkgs.python3.withPackages (ps: [ ps.cryptography ]) );
 
 in perSystem.self.mkScript {
 
   name = "derive";
-  path = [ gnugrep openssl openssh python3 rage ssh-to-age ];
+  path = [ gnugrep openssl openssh python3 age ssh-to-age ];
   text = ''
     source ${flake.lib.bash}
 

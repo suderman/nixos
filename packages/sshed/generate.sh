@@ -11,7 +11,7 @@ for host in $(eza -D hosts | grep -v iso); do
 
   # Write the public ssh host key
   cat hex.age |
-    rage -di /tmp/id_age |
+    age -di /tmp/id_age |
     derive hex "$host" |
     derive ssh |
     derive public "$host@${derivation_path-}" \
@@ -25,7 +25,7 @@ done
 for user in $(eza -D users); do
 
   cat hex.age |
-    rage -di /tmp/id_age |
+    age -di /tmp/id_age |
     derive hex "$user" |
     derive ssh |
     derive public "$user@${derivation_path-}" \

@@ -74,7 +74,7 @@ in perSystem.devshell.mkShell {
     pkgs.nix-inspect
     pkgs.openssl
     pkgs.smenu
-    pkgs.rage
+    pkgs.age
     pkgs.nixos-anywhere
     perSystem.self.qr
     perSystem.self.derive

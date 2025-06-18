@@ -18,7 +18,7 @@ hex="$(qr)"
 # Write a password-protected copy of the age identity
 echo "$hex" | 
   derive age | 
-  rage -ep > id.age
+  age -ep > id.age
 info "Private age identity written: ./id.age"
 
 # Write the age identity's public key
@@ -30,7 +30,7 @@ info "Public age identity written: ./id.pub"
 
 # Write the 32-byte hex (protected by age identity)
 echo "$hex" | 
-  rage -eR id.pub > hex.age
+  age -eR id.pub > hex.age
 git add hex.age 2>/dev/null || true
 info "Private 32-byte hex written: ./hex.age"
 

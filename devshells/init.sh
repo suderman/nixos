@@ -73,7 +73,7 @@ case "${1-}" in
 
       # Create an encrypted password.age file (value is x)
       echo "x" \
-        | rage -er $(cat /tmp/id_age | derive public) \
+        | age -er $(cat /tmp/id_age | derive public) \
         > $user/password.age
 
       # Create a basic default.nix in this directory
@@ -124,7 +124,7 @@ case "${1-}" in
 
       # Encrypt CA key with age identity 
       cat $ca_key | 
-        rage -er $(cat /tmp/id_age | derive public) \
+        age -er $(cat /tmp/id_age | derive public) \
         > zones/ca.age
       shred -u $ca_key
 
