@@ -42,7 +42,7 @@
 
     derive-ssh = toString [
       "cat hex.age |"
-      "age -di /tmp/id_age |"
+      "age -d -i /tmp/id_age |"
       "derive hex sim |"
       "derive ssh > hosts/sim/ssh_host_ed25519_key &&"
       "chmod 600 hosts/sim/ssh_host_ed25519_key"
