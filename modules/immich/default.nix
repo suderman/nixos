@@ -3,7 +3,7 @@
 { config, lib, pkgs, this, ... }: let
 
   # https://github.com/immich-app/immich/releases
-  version = "1.132.3";
+  version = "1.135.0";
 
   cfg = config.services.immich;
 
