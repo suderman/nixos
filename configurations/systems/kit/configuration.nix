@@ -24,7 +24,7 @@
 
   # Override DNS
   networking.extraHosts = ''
-    18.191.53.91 www.parkwhiz.com
+    # 18.191.53.91 www.parkwhiz.com
     127.0.0.1 sim
     127.0.0.1 traefik.sim
     127.0.0.1 whoami.sim
@@ -32,8 +32,8 @@
     127.0.0.1 local
   '';
 
-  networking.bridges.bridge0.interfaces = [ "enp58s0u1u2u3" ];
-  networking.interfaces.bridge0.useDHCP = true;
+  # networking.bridges.bridge0.interfaces = [ "enp58s0u1u2u3" ];
+  # networking.interfaces.bridge0.useDHCP = true;
 
   # Allow powerkey to be intercepted, but still poweroff for longpress
   services.logind = {
