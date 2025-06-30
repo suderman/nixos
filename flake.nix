@@ -73,6 +73,11 @@
     quickshell.url = "github:quickshell-mirror/quickshell?ref=v0.1.0";
     quickshell.inputs.nixpkgs.follows = "nixpkgs";
 
+    # Neovim
+    # https://notashelf.github.io/nvf/
+    nvf.url = "github:notashelf/nvf";
+    nvf.inputs.nixpkgs.follows = "nixpkgs";
+
   };
 
   outputs = inputs: let flake = inputs.self; in {
