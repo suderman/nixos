@@ -7,10 +7,30 @@
 
     startPlugins = [ "plenary-nvim" ];
 
+    mini.ai.enable = true;
+    mini.align.enable = true;
+    mini.animate.enable = true;
+    mini.basics.enable = true;
+    mini.bracketed.enable = true;
+    # mini.bufremove.enable = true;
+    # mini.clue.enable = tccue;
+    mini.comment.enable = true;
+    # mini.completion.enable = true;
+    mini.diff.enable = true;
+    mini.files.enable = true;
+    mini.git.enable = true;
+    mini.surround.enable = true;
+
+    utility.snacks-nvim.enable = true;
+    utility.snacks-nvim.setupOpts = {
+      toggle.enabled = true;
+      toggle.which_key = true;
+    };
+
     goose.enable = true;
 
-    spellcheck.enable = true;
-    autocomplete.nvim-cmp.enable = true;
+    # spellcheck.enable = true;
+    # autocomplete.nvim-cmp.enable = true;
     statusline.lualine.enable = true;
     # statusline.lualine.theme = "catppuccin";
 
@@ -76,7 +96,6 @@
     projects = {
       project-nvim.enable = true;
     };
-
 
     utility = {
       ccc.enable = false;

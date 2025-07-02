@@ -27,10 +27,6 @@ in {
       setup = ''
         require('goose').setup {};
 
-        -- Visual shifting
-        vim.keymap.set("v", "<", "<gv", { noremap = true, silent = true })
-        vim.keymap.set("v", ">", ">gv", { noremap = true, silent = true })
-
         -- Better block mode behavior
         vim.opt.virtualedit:append({ "block", "insert", "onemore" })
       '';
