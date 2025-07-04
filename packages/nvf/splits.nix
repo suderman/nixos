@@ -52,6 +52,16 @@ in {
     (keymap "i" "<M-k>" "<Up>")
     (keymap "i" "<M-l>" "<Right>")
 
+    # Split windows
+    (keymap "n" "<leader>u" ":sp<CR>")
+    (keymap "n" "<leader>i" ":vs<CR>")
+    (keymap "n" "<M-U>" ":sp<CR>")
+    (keymap "n" "<M-I>" ":vs<CR>")
+
   ];
+
+  vim.options.splitbelow = true; # horizontal splits will be below
+  vim.options.splitright = true; # vertical splits will be to the right
+  vim.options.splitkeep = "screen"; # reduce scroll during window split
 
 }

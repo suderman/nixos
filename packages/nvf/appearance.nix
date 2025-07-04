@@ -1,0 +1,25 @@
+{ pkgs, lib, ... }: { 
+
+  vim.options.cursorlineopt = "line"; # line, screenline, number, both
+  vim.options.breakindent = true; # indent wrapped lines to match line start
+  vim.options.linebreak = true; # wrap long lines at 'breakat' (if 'wrap' is set)
+  vim.options.number = true; # show line numbers
+  vim.options.ruler = true; # show cursor position in command line
+  vim.options.wrap = true; # display long lines as just one line
+  vim.options.signcolumn = "yes"; # always show sign column (otherwise it will shift text)
+  vim.options.fillchars = "eob: "; # don't show `~` outside of buffer
+  vim.options.termguicolors = true; # enable gui colors
+
+  vim.statusline.lualine.enable = true;
+  vim.options.showmode = lib.mkForce false; # show mode in command line
+
+  vim.mini.animate.enable = true;
+
+  vim.theme.enable = true;
+  vim.theme.transparent = true;
+
+  vim.options.pumblend = 10; # make builtin completion menus slightly transparent
+  vim.options.pumheight = 10; # make popup menu smaller
+  vim.options.winblend = 10; # make floating windows slightly transparent
+
+}

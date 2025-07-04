@@ -1,81 +1,60 @@
-{ flake, pkgs, inputs, ... }: let
+{
+  flake,
+  pkgs,
+  inputs,
+  ...
+}: let
   inherit (flake.lib) ls;
   inherit (inputs.nvf.lib) neovimConfiguration;
 
-  basic = [( { lib, ...}: let
-    inherit (lib) mkLuaInline;
-  in { 
+  basic = [
+    ({lib, ...}: let
+      inherit (lib) mkLuaInline;
+    in {
+      # general
+      vim.viAlias = true;
+      vim.vimAlias = true;
+      vim.startPlugins = ["plenary-nvim"];
+      vim.globals.mapleader = " "; # use space as leader key
+      vim.globals.maplocalleader = ","; # use comma as local leader key
+      vim.undoFile.enable = true;
+      vim.undoFile.path = mkLuaInline "vim.fn.stdpath('state') .. '/undo'";
+      vim.options.mouse = "nvi"; # normal, visual, insert, commandline, help, all, r
 
-    # general
-    vim.viAlias = true;
-    vim.vimAlias = true;
-    vim.startPlugins = [ "plenary-nvim" ];
-    vim.globals.mapleader = " "; # use space as leader key
-    vim.globals.maplocalleader = ","; # use comma as local leader key
-    vim.undoFile.enable = true;
-    vim.undoFile.path = mkLuaInline "vim.fn.stdpath('state') .. '/undo'";
-    vim.options.mouse = "nvi"; # normal, visual, insert, commandline, help, all, r
+      # indenting and tab behaviour
+      vim.options.tabstop = 2; # number of visual spaces per tab
+      vim.options.softtabstop = 2; # number of spaces when pressing tab in insert mode
+      vim.options.expandtab = true; # tabs are spaces
+      vim.options.shiftwidth = 2; # number of spaces to use for autoindent
+      vim.options.wildmode = "list:longest,list:full";
+    })
+  ];
 
-    # appearance
-    vim.options.cursorlineopt = "line"; # line, screenline, number, both
-    vim.options.breakindent = true; # indent wrapped lines to match line start
-    vim.options.linebreak = true; # wrap long lines at 'breakat' (if 'wrap' is set)
-    vim.options.number = true; # show line numbers
-    vim.options.splitbelow = true; # horizontal splits will be below
-    vim.options.splitright = true; # vertical splits will be to the right
-    vim.options.ruler = true; # show cursor position in command line
-    vim.options.showmode = true; # show mode in command line
-    vim.options.wrap = true; # display long lines as just one line
-    vim.options.signcolumn = "yes"; # always show sign column (otherwise it will shift text)
-    vim.options.fillchars = "eob: "; # don't show `~` outside of buffer
-    vim.options.termguicolors = true; # enable gui colors
+  local = [
+    ({...}: {
+      vim.luaConfigRC.local = ''
+        -- Expands to full path
+        local dir = vim.fn.expand("~/.config/nvf/lua/local")
+        local file = dir .. "/init.lua"
 
-    # editing
-    vim.searchCase = "smart"; # ignore, smart, sensitive
-    vim.options.completeopt = "menuone,noselect"; # customize completions
-    vim.options.virtualedit = "block,insert,onemore"; # allow positioning cursor where no character exists
-    vim.options.formatoptions = "qjl1"; # don't autoformat comments
-    vim.options.splitkeep = "screen"; # reduce scroll during window split
-    vim.options.pumblend = 10; # make builtin completion menus slightly transparent
-    vim.options.pumheight = 10; # make popup menu smaller
-    vim.options.winblend = 10; # make floating windows slightly transparent
-    vim.options.listchars = "tab:> ,extends:…,precedes:…,nbsp:␣"; # define which helper symbols to show
-    vim.options.list = true; # show some helper symbols
+        -- Create directory & file if it doesn't exist
+        if vim.fn.filereadable(file) == 0 then
+          vim.fn.system({ "mkdir", "-p", dir })
+          vim.fn.system({ "touch", file })
 
-    # indenting and tab behaviour
-    vim.options.tabstop = 2; # number of visual spaces per tab
-    vim.options.softtabstop = 2; # number of spaces when pressing tab in insert mode
-    vim.options.expandtab = true; # tabs are spaces
-    vim.options.shiftwidth = 2; # number of spaces to use for autoindent
-    vim.options.wildmode = "list:longest,list:full";
-
-  })];
-
-  local = [( {...}: { 
-    vim.luaConfigRC.local = ''
-      -- Expands to full path
-      local dir = vim.fn.expand("~/.config/nvf/lua/local")
-      local file = dir .. "/init.lua"
-
-      -- Create directory & file if it doesn't exist
-      if vim.fn.filereadable(file) == 0 then
-        vim.fn.system({ "mkdir", "-p", dir })
-        vim.fn.system({ "touch", file })
-
-      -- Otherwise, require the package
-      else
-        require("local")
-      end
-    '';
-  })];
-
-
-in (neovimConfiguration {
-  inherit pkgs;
-  modules = basic ++ (ls ./.) ++ local; 
-}).neovim
-
-# { pkgs, lib, ... }: { 
+        -- Otherwise, require the package
+        else
+          require("local")
+        end
+      '';
+    })
+  ];
+in
+  (neovimConfiguration {
+    inherit pkgs;
+    modules = basic ++ (ls ./.) ++ local;
+  }).neovim
+# { pkgs, lib, ... }: {
 #
 #   vim = {
 #
@@ -157,7 +136,7 @@ in (neovimConfiguration {
 #     #
 #     # minimap = {
 #     #   minimap-vim.enable = false;
-#     #   codewindow.enable = true; 
+#     #   codewindow.enable = true;
 #     # };
 #     #
 #     # dashboard = {
@@ -196,7 +175,7 @@ in (neovimConfiguration {
 #     # };
 #     #
 #     # notes = {
-#     #   obsidian.enable = false; 
+#     #   obsidian.enable = false;
 #     #   neorg.enable = false;
 #     #   orgmode.enable = false;
 #     #   mind-nvim.enable = false;
@@ -249,7 +228,7 @@ in (neovimConfiguration {
 #     # presence.neocord.enable = false;
 #     #
 #     # languages = {
-#     #   enableFormat = true; 
+#     #   enableFormat = true;
 #     #   enableTreesitter = true;
 #     #   enableExtraDiagnostics = true;
 #     #
@@ -358,3 +337,4 @@ in (neovimConfiguration {
 #
 #   };
 # }
+

@@ -27,4 +27,20 @@ in {
 
   ];
 
+  # [b]uffer
+  # [c]omment
+  # [x]conflict
+  # [d]iagnostic
+  # [f]ile
+  # [i]ndent
+  # [j]ump
+  # [l]ocation
+  # [o]ldfile
+  # [q]uickfix
+  # [t]reesitter
+  # [u]ndo
+  # [w]indow
+  # [y]ank
+  vim.mini.bracketed.enable = true;
+
 }
