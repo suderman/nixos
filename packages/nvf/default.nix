@@ -72,7 +72,7 @@
 
 in (neovimConfiguration {
   inherit pkgs;
-  modules = basic ++ (ls ./plugins) ++ (ls ./config) ++ local; 
+  modules = basic ++ (ls ./.) ++ local; 
 }).neovim
 
 # { pkgs, lib, ... }: { 

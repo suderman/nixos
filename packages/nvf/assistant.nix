@@ -4,8 +4,8 @@
     enable = true;
   };
 
-  vim.assistant.goose = {
-    enable = true;
-  };
+  # vim.assistant.goose = {
+  #   enable = true;
+  # };
 
 }

@@ -1,7 +1,4 @@
-{ config, lib, pkgs, ...}: let
-
-  inherit (lib) mkIf;
-  cfg = config.vim.assistant.goose;
+{ lib, pkgs, ...}: let
 
   package = pkgs.vimUtils.buildVimPlugin rec {
     pname = "goose.nvim";
@@ -17,16 +14,10 @@
 
 in {
 
-  options.vim = {
-    assistant.goose.enable = lib.options.mkEnableOption "goose ai";
-  };
-
-  config.vim = mkIf cfg.enable {
-    extraPlugins.goose = {
-      inherit package;
-      setup = ''
-        require('goose').setup {};
-      '';
-    };
+  vim.lazy.plugins."goose.nvim" = {
+    inherit package;
+    setupModule = "goose";
+    setupOpts = {};
+    after = "print('goose loaded')";
   };
 }

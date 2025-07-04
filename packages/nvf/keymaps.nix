@@ -7,9 +7,6 @@
 
 in { 
 
-  # Navigate seamlessly between tmux panes and neovim windows
-  vim.vim-tmux-navigator.enable = true;
-
   # Personal mappings
   vim.keymaps = [
 
