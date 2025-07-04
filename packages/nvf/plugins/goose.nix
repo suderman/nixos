@@ -1,7 +1,7 @@
 { config, lib, pkgs, ...}: let
 
   inherit (lib) mkIf;
-  cfg = config.vim.goose;
+  cfg = config.vim.assistant.goose;
 
   package = pkgs.vimUtils.buildVimPlugin rec {
     pname = "goose.nvim";
@@ -18,7 +18,7 @@
 in {
 
   options.vim = {
-    goose.enable = lib.options.mkEnableOption "goose ai";
+    assistant.goose.enable = lib.options.mkEnableOption "goose ai";
   };
 
   config.vim = mkIf cfg.enable {
@@ -26,9 +26,6 @@ in {
       inherit package;
       setup = ''
         require('goose').setup {};
-
-        -- Better block mode behavior
-        vim.opt.virtualedit:append({ "block", "insert", "onemore" })
       '';
     };
   };

@@ -1,23 +1,33 @@
-{ pkgs, lib, ... }: { 
+{ pkgs, lib, ... }: let
 
-  vim.keymaps = [
-    { mode = "n"; key = ";"; action = ":"; silent = true; }
-    { mode = "v"; key = "<"; action = "<gv"; silent = true; }
-    { mode = "v"; key = ">"; action = ">gv"; silent = true; }
-  ];
-
-  vim.utility.smart-splits = {
-    enable = true;
-    keymaps = {
-      resize_left = "<A-H>";
-      resize_down = "<A-J>";
-      resize_up = "<A-K>";
-      resize_right = "<A-L>";
-      move_cursor_left = "<A-h>";
-      move_cursor_down = "<A-j>";
-      move_cursor_up = "<A-k>";
-      move_cursor_right = "<A-l>";
-    };
+  keymap = mode: key: action: {
+    inherit mode key action;
+    silent = true;
   };
+
+in { 
+
+  # Navigate seamlessly between tmux panes and neovim windows
+  vim.vim-tmux-navigator.enable = true;
+
+  # Personal mappings
+  vim.keymaps = [
+
+    # Enter command mode with semi-colon
+    (keymap "n" ";" ":")
+
+    # Tab navigation 
+    (keymap "n" "<M-[>" ":tabprevious<CR>")
+    (keymap "n" "<M-]>" ":tabnext<CR>")
+
+    # wrapped lines goes down/up to next row, rather than next line in file
+    (keymap "n" "j" "gj")
+    (keymap "n" "k" "gk")
+
+    # repeat indent/outdent
+    (keymap "v" "<" "<gv")
+    (keymap "v" ">" ">gv")
+
+  ];
 
 }
