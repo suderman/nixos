@@ -43,4 +43,6 @@ in {
   # [y]ank
   vim.mini.bracketed.enable = true;
 
+  vim.comments.comment-nvim.enable = true;
+
 }

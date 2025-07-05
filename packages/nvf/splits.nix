@@ -55,8 +55,12 @@ in {
     # Split windows
     (keymap "n" "<leader>u" ":sp<CR>")
     (keymap "n" "<leader>i" ":vs<CR>")
+    (keymap "n" "<M-u>" ":sp<CR>")
+    (keymap "n" "<M-i>" ":vs<CR>")
     (keymap "n" "<M-U>" ":sp<CR>")
     (keymap "n" "<M-I>" ":vs<CR>")
+    (keymap "n" "gu" ":sp<CR>")
+    (keymap "n" "gi" ":vs<CR>")
 
   ];
 

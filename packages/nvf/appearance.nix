@@ -22,4 +22,24 @@
   vim.options.pumheight = 10; # make popup menu smaller
   vim.options.winblend = 10; # make floating windows slightly transparent
 
+  vim.visuals.nvim-scrollbar.enable = true;
+  vim.visuals.nvim-web-devicons.enable = true;
+  vim.visuals.nvim-cursorline.enable = true;
+  vim.visuals.cinnamon-nvim.enable = true;
+  vim.visuals.fidget-nvim.enable = true;
+  vim.visuals.highlight-undo.enable = true;
+  vim.visuals.indent-blankline.enable = true;
+
+  vim.ui.borders.enable = true;
+  vim.ui.colorizer.enable = true;
+  vim.ui.smartcolumn = {
+    enable = true;
+    setupOpts.custom_colorcolumn = {
+      nix = "110";
+      ruby = "120";
+      java = "130";
+      go = ["90" "130"];
+    };
+  };
+
 }

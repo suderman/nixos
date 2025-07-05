@@ -1,4 +1,9 @@
-{ pkgs, lib, ... }: { 
+{ pkgs, lib, ... }: let
+
+  # Toggle the filebrowser with one key
+  toggleKey = "-";
+
+in { 
 
   vim.mini.files.enable = true;
   vim.mini.files.setupOpts.mappings = {
@@ -19,7 +24,7 @@
 
   vim.keymaps = [{
     mode = "n";
-    key = ",";
+    key = toggleKey;
     action = ":lua MiniFiles.open()<CR>";
     desc = "Toggle file browser";
     silent = true;
@@ -34,8 +39,8 @@
         local map = function(lhs)
           vim.keymap.set('n', lhs, '<Cmd>lua MiniFiles.close()<CR>', { buffer = buf_id, nowait = true })
         end
+        map('${toggleKey}')
         map('<Esc>')
-        map(',')
       end,
     })
   '';

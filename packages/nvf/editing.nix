@@ -9,7 +9,7 @@
 
   vim.mini.ai.enable = true;
   vim.mini.align.enable = true;
-
+  vim.mini.surround.enable = true;
   vim.autopairs.nvim-autopairs.enable = true;
 
 }
