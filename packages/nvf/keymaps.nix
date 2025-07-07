@@ -1,29 +1,34 @@
-{ pkgs, lib, ... }: let
+{ pkgs, lib', ... }: let
 
   keymap = mode: key: action: {
     inherit mode key action;
     silent = true;
   };
 
+  inherit (lib') nmap vmap imap;
+
 in { 
 
   # Personal mappings
   vim.keymaps = [
 
+    (imap "\\" "|" "Swap slash with pipe")
+    (nmap "\\" "function() require('fzf-lua').buffers() end" "list buffers")
+
     # Enter command mode with semi-colon
-    (keymap "n" ";" ":")
+    (nmap ";" ":" "Enter command mode")
 
     # Tab navigation 
-    (keymap "n" "<M-[>" ":tabprevious<CR>")
-    (keymap "n" "<M-]>" ":tabnext<CR>")
+    (nmap "<M-[>" ":tabprevious<CR>" "Previous tab")
+    (nmap "<M-]>" ":tabnext<CR>" "Next tab")
 
     # wrapped lines goes down/up to next row, rather than next line in file
-    (keymap "n" "j" "gj")
-    (keymap "n" "k" "gk")
+    (nmap "j" "gj" "Down a row")
+    (nmap "k" "gk" "Up a row")
 
     # repeat indent/outdent
-    (keymap "v" "<" "<gv")
-    (keymap "v" ">" ">gv")
+    (vmap "<" "<gv" "Outdent")
+    (vmap ">" ">gv" "Indent")
 
   ];
 

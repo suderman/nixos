@@ -12,4 +12,11 @@
   vim.mini.surround.enable = true;
   vim.autopairs.nvim-autopairs.enable = true;
 
+  # indenting and tab behaviour
+  vim.options.tabstop = 2; # number of visual spaces per tab
+  vim.options.softtabstop = 2; # number of spaces when pressing tab in insert mode
+  vim.options.expandtab = true; # tabs are spaces
+  vim.options.shiftwidth = 2; # number of spaces to use for autoindent
+  vim.options.wildmode = "list:longest,list:full";
+
 }

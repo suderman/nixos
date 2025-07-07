@@ -7,6 +7,34 @@
   inherit (flake.lib) ls;
   inherit (inputs.nvf.lib) neovimConfiguration;
 
+  # custom lib
+  lib' = let
+    inherit (inputs.nixpkgs.lib) hasPrefix stringLength;
+  in rec {
+    # Build keymap attr and detect if action is lua
+    keyMap = mode: key: action: desc: {
+      inherit mode key action desc;
+      noremap = true;
+      silent = true;
+      lua =
+        if hasPrefix "function(" action
+        then true
+        else
+          !(hasPrefix ":" action
+            || hasPrefix "<" action
+            || stringLength action < 10);
+    };
+
+    imap = key: action: desc: keyMap "i" key action desc;
+    nmap = key: action: desc: keyMap "n" key action desc;
+    tmap = key: action: desc: keyMap "t" key action desc;
+    vmap = key: action: desc: keyMap "v" key action desc;
+  };
+
+  foo = bar: (
+    "one" + "two"
+  );
+
   basic = [
     ({lib, ...}: let
       inherit (lib) mkLuaInline;
@@ -20,13 +48,6 @@
       vim.undoFile.enable = true;
       vim.undoFile.path = mkLuaInline "vim.fn.stdpath('state') .. '/undo'";
       vim.options.mouse = "nvi"; # normal, visual, insert, commandline, help, all, r
-
-      # indenting and tab behaviour
-      vim.options.tabstop = 2; # number of visual spaces per tab
-      vim.options.softtabstop = 2; # number of spaces when pressing tab in insert mode
-      vim.options.expandtab = true; # tabs are spaces
-      vim.options.shiftwidth = 2; # number of spaces to use for autoindent
-      vim.options.wildmode = "list:longest,list:full";
     })
   ];
 
@@ -52,6 +73,7 @@
 in
   (neovimConfiguration {
     inherit pkgs;
+    extraSpecialArgs = {inherit lib';};
     modules = basic ++ (ls ./.) ++ local;
   }).neovim
 # { pkgs, lib, ... }: {

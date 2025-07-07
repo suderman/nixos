@@ -1,4 +1,6 @@
-{ pkgs, lib, ... }: let
+{ pkgs, lib, utility, ... }: let
+
+  inherit (lib.generators) mkLuaInline; 
 
   fzfMap = key: fzfCommand: desc: {
     inherit key desc;
@@ -11,14 +13,24 @@ in {
 
   vim.fzf-lua = {
     enable = true;
-    profile = "default";
+    # profile = "default";
     setupOpts = {
-      "0" = "ivy";
+      "@1" = "ivy";
       fzf_bin = "${pkgs.fzf.out}/bin/fzf";
     };
   };
   
   vim.keymaps = [
+
+    { 
+      mode = "n";
+      silent = true;
+      key = "<C-p>"; 
+      action = "function() require('fzf-lua').buffers() end";
+      lua = true;
+      desc = "Find files";
+    }
+
     (fzfMap "<leader>ff" "files" "[F]ind [F]iles")
     (fzfMap "<C-f>" "files" "[F]ind [F]iles")
     (fzfMap "<leader>fb" "buffers" "[F]ind [B]uffers")
