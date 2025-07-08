@@ -73,14 +73,14 @@ in {
       };
       layout_strategy = "horizontal"; # vertical center cursor flex
       path_display = [ "absolute" ]; # hidden tail smart shorten truncate
-      pickers.find_command = [ "\${pkgs.fd}/bin/fd" ];
+      pickers.find_command = [ "${pkgs.fd}/bin/fd" ];
       prompt_prefix = "  ";
       selection_caret = " ";
       selection_strategy = "reset"; # follow row closest none
       set_env.COLORTERM = "truecolor";
       sorting_strategy = "ascending"; # descending
       vimgrep_arguments = [
-        "\${pkgs.ripgrep}/bin/rg"
+        "${pkgs.ripgrep}/bin/rg"
         "--color=never"
         "--no-heading"
         "--with-filename"
@@ -94,7 +94,7 @@ in {
     };
 
     setupOpts.pickers.find_files.find_command = [
-      "\${pkgs.fd}/bin/fd"
+      "${pkgs.fd}/bin/fd"
       "--type=file"
     ];
 
