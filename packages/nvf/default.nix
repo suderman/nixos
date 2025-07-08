@@ -36,17 +36,14 @@
   );
 
   basic = [
-    ({lib, ...}: let
-      inherit (lib) mkLuaInline;
-    in {
+    ({lib, ...}: {
       # general
       vim.viAlias = true;
       vim.vimAlias = true;
-      vim.startPlugins = ["plenary-nvim"];
       vim.globals.mapleader = " "; # use space as leader key
       vim.globals.maplocalleader = ","; # use comma as local leader key
       vim.undoFile.enable = true;
-      vim.undoFile.path = mkLuaInline "vim.fn.stdpath('state') .. '/undo'";
+      vim.undoFile.path = lib.mkLuaInline "vim.fn.stdpath('state') .. '/undo'";
       vim.options.mouse = "nvi"; # normal, visual, insert, commandline, help, all, r
     })
   ];
