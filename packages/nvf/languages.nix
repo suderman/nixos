@@ -10,7 +10,15 @@
       format.enable = true;
       format.type = "alejandra"; # nixfmt
     };
-    markdown.enable = true;
+
+    markdown = {
+      enable = true;
+      extensions.render-markdown-nvim = {
+        enable = true;
+        setupOpts.file_types = ["markdown" "Avante"];
+      };
+      format.extraFiletypes = ["org"];
+    };
 
     bash.enable = true;
     clang.enable = true;

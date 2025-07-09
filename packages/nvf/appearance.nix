@@ -28,7 +28,7 @@
   vim.visuals.cinnamon-nvim.enable = true;
   vim.visuals.fidget-nvim.enable = true;
   vim.visuals.highlight-undo.enable = true;
-  vim.visuals.indent-blankline.enable = true;
+  # vim.visuals.indent-blankline.enable = true;
 
   vim.ui.borders.enable = true;
   vim.ui.colorizer.enable = true;

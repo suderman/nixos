@@ -1,10 +1,5 @@
-{ lib, pkgs, ...}: let
-
-  keymap = mode: key: action: {
-    inherit mode key action;
-    silent = true;
-  };
-
+{ pkgs, flake, ... }: let
+  inherit (flake.lib) nmap tmap imap vmap;
 in {
 
   # Navigate seamlessly between tmux panes and neovim windows
@@ -21,46 +16,46 @@ in {
   vim.keymaps = [
 
     # Navigate window focus. Alt-[h,j,k,l]
-    (keymap "n" "<M-h>" ":TmuxNavigateLeft<CR>")
-    (keymap "n" "<M-j>" ":TmuxNavigateDown<CR>")
-    (keymap "n" "<M-k>" ":TmuxNavigateUp<CR>")
-    (keymap "n" "<M-l>" ":TmuxNavigateRight<CR>")
-    (keymap "n" "<M-;>" ":TmuxNavigatePrevious<CR>")
+    (nmap "<M-h>" ":TmuxNavigateLeft<CR>" "Navigate focus left")
+    (nmap "<M-j>" ":TmuxNavigateDown<CR>" "Navigate focus down")
+    (nmap "<M-k>" ":TmuxNavigateUp<CR>" "Navigate focus up")
+    (nmap "<M-l>" ":TmuxNavigateRight<CR>" "Navigate focus right")
+    (nmap "<M-;>" ":TmuxNavigatePrevious<CR>" "Navigate focus previous")
 
     # Escape terminal insert mode. Alt-[h,j,k,l]
-    (keymap "t" "<M-h>" "<C-\\><C-n>")
-    (keymap "t" "<M-j>" "<C-\\><C-n>")
-    (keymap "t" "<M-k>" "<C-\\><C-n>")
-    (keymap "t" "<M-l>" "<C-\\><C-n>")
-    (keymap "t" "<M-;>" "<C-\\><C-n>")
+    (tmap "<M-h>" "<C-\\><C-n>" "Terminal normal mode")
+    (tmap "<M-j>" "<C-\\><C-n>" "Terminal normal mode")
+    (tmap "<M-k>" "<C-\\><C-n>" "Terminal normal mode")
+    (tmap "<M-l>" "<C-\\><C-n>" "Terminal normal mode")
+    (tmap "<M-;>" "<C-\\><C-n>" "Terminal normal mode")
 
     # Resize windows. Alt-[h,j,k,l]
-    (keymap "n" "<M-H>" "<c-w><")
-    (keymap "n" "<M-J>" "<c-w>+")
-    (keymap "n" "<M-K>" "<c-w>-")
-    (keymap "n" "<M-L>" "<c-w>>")
+    (nmap "<M-H>" "<c-w><" "Resize window left")
+    (nmap "<M-J>" "<c-w>+" "Resize window down")
+    (nmap "<M-K>" "<c-w>-" "Resize window up")
+    (nmap "<M-L>" "<c-w>>" "Resize window right")
 
     # Resize windows in visual mode. Alt-[h,j,k,l]
-    (keymap "v" "<M-h>" "<c-w><")
-    (keymap "v" "<M-j>" "<c-w>+")
-    (keymap "v" "<M-k>" "<c-w>-")
-    (keymap "v" "<M-l>" "<c-w>>")
+    (vmap "<M-h>" "<c-w><" "Resize window left")
+    (vmap "<M-j>" "<c-w>+" "Resize window down")
+    (vmap "<M-k>" "<c-w>-" "Resize window up")
+    (vmap "<M-l>" "<c-w>>" "Resize window right")
 
     # Cursor movement in command mode
-    (keymap "i" "<M-h>" "<Left>")
-    (keymap "i" "<M-j>" "<Down>")
-    (keymap "i" "<M-k>" "<Up>")
-    (keymap "i" "<M-l>" "<Right>")
+    (imap "<M-h>" "<Left>" "Move cursor left")
+    (imap "<M-j>" "<Down>" "Move cursor down")
+    (imap "<M-k>" "<Up>" "Move cursor up")
+    (imap "<M-l>" "<Right>" "Move cursor right")
 
     # Split windows
-    (keymap "n" "<leader>u" ":sp<CR>")
-    (keymap "n" "<leader>i" ":vs<CR>")
-    (keymap "n" "<M-u>" ":sp<CR>")
-    (keymap "n" "<M-i>" ":vs<CR>")
-    (keymap "n" "<M-U>" ":sp<CR>")
-    (keymap "n" "<M-I>" ":vs<CR>")
-    (keymap "n" "gu" ":sp<CR>")
-    (keymap "n" "gi" ":vs<CR>")
+    (nmap "<leader>u" ":sp<CR>" "Split horizontal")
+    (nmap "<leader>i" ":vs<CR>" "Split vertical")
+    (nmap "<M-u>" ":sp<CR>" "Split horizontal")
+    (nmap "<M-i>" ":vs<CR>" "Split vertical")
+    (nmap "<M-U>" ":sp<CR>" "Split horizontal")
+    (nmap "<M-I>" ":vs<CR>" "Split vertical")
+    (nmap "gu" ":sp<CR>" "Split horizontal")
+    (nmap "gi" ":vs<CR>" "Split vertical")
 
   ];
 

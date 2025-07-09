@@ -1,19 +1,12 @@
-{ pkgs, lib', ... }: let
-
-  keymap = mode: key: action: {
-    inherit mode key action;
-    silent = true;
-  };
-
-  inherit (lib') nmap vmap imap;
-
+{ pkgs, flake, ... }: let
+  inherit (flake.lib) nmap vmap imap;
 in { 
 
   # Personal mappings
   vim.keymaps = [
 
-    (imap "\\" "|" "Swap slash with pipe")
-    (nmap "\\" "function() require('fzf-lua').buffers() end" "list buffers")
+    # Prevent spacebar from doing anything on its own
+    (nmap "<leader>" "<nop>" "No operation")
 
     # Enter command mode with semi-colon
     (nmap ";" ":" "Enter command mode")
