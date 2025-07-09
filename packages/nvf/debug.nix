@@ -1,4 +1,4 @@
-{ flake, ... }: let
+{ pkgs, flake, ... }: let
   inherit (flake.lib) nmap tmap;
 in { 
 
@@ -6,8 +6,8 @@ in {
     enable = true;
     formatOnSave = true;
     # lspkind.enable = true;
-    lightbulb.enable = false;
-    trouble.enable = false;
+    lightbulb.enable = true;
+    trouble.enable = true;
     # lspSignature.enable = true;
     # otter-nvim.enable = false;
     nvim-docs-view.enable = true;
@@ -38,6 +38,14 @@ in {
 
   vim.keymaps = [
     (nmap "gC" ":TSContext toggle<CR>" "Toggle treesitter conte[x]t")
+
+    (nmap "<leader>xx" "<cmd>Trouble diagnostics toggle<cr>" "Diagnostics (Trouble)")
+    (nmap "<leader>xb" "<cmd>Trouble diagnostics toggle filter.buf=0<cr>" "Buffer Diagnostics (Trouble)")
+    (nmap "<leader>cs" "<cmd>Trouble symbols toggle focus=false<cr>" "Symbols (Trouble)")
+    (nmap "<leader>cl" "<cmd>Trouble lsp toggle focus=false win.position=right<cr>" "LSP Definitions / references / ... (Trouble)")
+    (nmap "<leader>xl" "<cmd>Trouble loclist toggle<cr>" "Location List (Trouble)")
+    (nmap "<leader>xq" "<cmd>Trouble qflist toggle<cr>" "Quickfix List (Trouble)")
+
     # (nmap "gB" ":Lspsaga winbar_toggle<CR>" "LSP [b]readcrumb toggle")
     # (nmap "go" ":Lspsaga outline<CR>" "LSP [o]utline toggle")
     # (nmap "ga" ":Lspsaga code_action<CR>" "Code [a]ction")
@@ -49,5 +57,13 @@ in {
     # (nmap "<M-/>" ":Lspsaga term_toggle<CR>" "Toggle terminal")
     # (tmap "<M-/>" ":Lspsaga term_toggle<CR>" "Toggle terminal")
   ];
+
+  # Better Quickfix
+  vim.lazy.plugins.nvim-bqf = {
+    package = pkgs.vimPlugins.nvim-bqf;
+  };
+  vim.luaConfigRC.local = ''
+    require('bqf').setup{}
+  '';
 
 }

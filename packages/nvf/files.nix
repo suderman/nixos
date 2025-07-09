@@ -29,6 +29,30 @@ in {
     (nmap "<leader>e" (mkLuaCallback "Snacks.explorer" {}) "File Explorer")
   ];
 
+  vim.utility.snacks-nvim.setupOpts.image = {
+    enabled = true;
+    force = true;
+    inline = true;
+  };
+
+  # https://github.com/folke/snacks.nvim/blob/main/docs/bigfile.md
+  vim.utility.snacks-nvim.setupOpts.bigfile.enable = true; 
+
+  # https://github.com/keonly/nvf-config/blob/af0cabe84288798f018c70d411a23a0ebc9a2932/config/plugins/utility/yazi-nvim.nix
+  vim.utility.yazi-nvim = {
+    enable = true;
+
+    mappings = {
+      openYazi = "<leader>-";
+      openYaziDir = "<leader>cw";
+      yaziToggle = "<C-y>";
+    };
+
+    setupOpts = {
+      open_for_directories = true;
+    };
+  };
+
   # vim.mini.files.enable = true;
   # vim.mini.files.setupOpts.mappings = {
   #   close       = "q";

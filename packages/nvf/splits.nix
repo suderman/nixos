@@ -1,7 +1,10 @@
-{ pkgs, flake, ... }: let
+{
+  pkgs,
+  flake,
+  ...
+}: let
   inherit (flake.lib) nmap tmap imap vmap;
 in {
-
   # Navigate seamlessly between tmux panes and neovim windows
   vim.lazy.plugins.vim-tmux-navigator = {
     package = pkgs.vimPlugins.vim-tmux-navigator;
@@ -14,7 +17,6 @@ in {
   vim.globals.tmux_navigator_no_mappings = 1;
 
   vim.keymaps = [
-
     # Navigate window focus. Alt-[h,j,k,l]
     (nmap "<M-h>" ":TmuxNavigateLeft<CR>" "Navigate focus left")
     (nmap "<M-j>" ":TmuxNavigateDown<CR>" "Navigate focus down")
@@ -57,10 +59,12 @@ in {
     (nmap "gu" ":sp<CR>" "Split horizontal")
     (nmap "gi" ":vs<CR>" "Split vertical")
 
+    # Quit split (window)
+    (nmap "<leader>q" ":q<CR>" "Quit split")
+    (nmap "<M-q>" ":q<CR>" "Quit split")
   ];
 
   vim.options.splitbelow = true; # horizontal splits will be below
   vim.options.splitright = true; # vertical splits will be to the right
   vim.options.splitkeep = "screen"; # reduce scroll during window split
-
 }

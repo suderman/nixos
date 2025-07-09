@@ -2,53 +2,8 @@
   inherit (flake.lib) nmap mkLuaCallback mkLuaInline;
 in {
 
-  vim.utility.motion.flash-nvim.enable = true; 
-
   vim.utility.snacks-nvim.enable = true; 
   vim.utility.snacks-nvim.setupOpts.styles.notification.wo.wrap = true; 
-
-  # vim.utility.snacks-nvim.setupOpts.scope.enabled = true; 
-  #
-  # vim.utility.snacks-nvim.setupOpts.indent = {
-  #   enabled = true;
-  #   animate.duration.step = 10;
-  #   animate.duration.total = 200;
-  #   scope.enabled = true;
-  #   scope.hl = "LineNr";
-  #   scope.underline = true;
-  # };
-
-  # https://github.com/folke/snacks.nvim/blob/main/docs/bigfile.md
-  vim.utility.snacks-nvim.setupOpts.bigfile.enable = true; 
-
-  # vim.utility.snacks-nvim.setupOpts.toggle = {
-  #   enabled = true;
-  #   # which_key = true;
-  # };
-
-  vim.utility.snacks-nvim.setupOpts.input.enabled = true;
-
-
-  vim.utility.snacks-nvim.setupOpts.notifier = {
-    enabled = true;
-    level = "INFO";
-    style = "minimal";
-    top_down = false;
-  };
-
-  vim.utility.snacks-nvim.setupOpts.dim = {
-    enabled = true;
-    animate.duration.step = 10;
-    animate.duration.total = 200;
-  };
-
-  vim.utility.snacks-nvim.setupOpts.image = {
-    enabled = true;
-    force = true;
-    inline = true;
-  };
-
-
 
   vim.utility.snacks-nvim.setupOpts.picker = {
     enabled = true;
@@ -79,7 +34,6 @@ in {
     '';
 
   }; 
-
 
   vim.keymaps = [
 

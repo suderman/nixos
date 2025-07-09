@@ -17,4 +17,16 @@
   vim.options.shiftwidth = 2; # number of spaces to use for autoindent
   vim.options.wildmode = "list:longest,list:full";
 
+  vim.utility.snacks-nvim.setupOpts.indent = {
+    enabled = true;
+    animate.duration.step = 10;
+    animate.duration.total = 200;
+    scope.enabled = true;
+    scope.hl = "LineNr";
+    scope.underline = true;
+  };
+
+  # navigate cursor with "s"
+  vim.utility.motion.flash-nvim.enable = true; 
+
 }

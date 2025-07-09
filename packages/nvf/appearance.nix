@@ -13,7 +13,7 @@
   vim.statusline.lualine.enable = true;
   vim.options.showmode = lib.mkForce false; # show mode in command line
 
-  vim.mini.animate.enable = true;
+  # vim.mini.animate.enable = true;
 
   vim.theme.enable = true;
   vim.theme.transparent = true;
@@ -25,7 +25,7 @@
   vim.visuals.nvim-scrollbar.enable = true;
   vim.visuals.nvim-web-devicons.enable = true;
   vim.visuals.nvim-cursorline.enable = true;
-  vim.visuals.cinnamon-nvim.enable = true;
+  # vim.visuals.cinnamon-nvim.enable = true;
   vim.visuals.fidget-nvim.enable = true;
   vim.visuals.highlight-undo.enable = true;
   # vim.visuals.indent-blankline.enable = true;
@@ -40,6 +40,28 @@
       java = "130";
       go = ["90" "130"];
     };
+  };
+
+  vim.utility.snacks-nvim.setupOpts.scroll = {
+    enabled = true;
+    animate.duration.step = 10;
+    animate.duration.total = 200;
+  };
+
+  vim.utility.snacks-nvim.setupOpts.scope.enabled = true; 
+  vim.utility.snacks-nvim.setupOpts.dim = {
+    enabled = true;
+    animate.duration.step = 10;
+    animate.duration.total = 200;
+  };
+
+  vim.utility.snacks-nvim.setupOpts.input.enabled = true;
+
+  vim.utility.snacks-nvim.setupOpts.notifier = {
+    enabled = true;
+    level = "INFO";
+    style = "minimal";
+    top_down = false;
   };
 
 }
