@@ -1,80 +1,81 @@
-{ pkgs, lib, flake, ... }: let
+{
+  pkgs,
+  lib,
+  flake,
+  ...
+}: let
   inherit (flake.lib) nmap mkLuaCallback mkLuaInline;
 in {
-
-  vim.utility.snacks-nvim.enable = true; 
-  vim.utility.snacks-nvim.setupOpts.styles.notification.wo.wrap = true; 
+  vim.utility.snacks-nvim.enable = true;
+  vim.utility.snacks-nvim.setupOpts.styles.notification.wo.wrap = true;
 
   vim.utility.snacks-nvim.setupOpts.picker = {
     enabled = true;
     layout.cycle = false;
-    
     win.input.keys = {
-      "s" = ["flash"];
+      "s" = { "@1" = "flash"; "mode" = [ "n" ]; };
+      "<c-s>" = { "@1" = "flash"; "mode" = [ "i" ]; };
     };
     actions.flash = mkLuaInline ''
-      function(picker)
-        require("flash").jump({
-          pattern = "^",
-          label = { after = { 0, 0 } },
-          search = {
-            mode = "search",
-            exclude = {
-              function(win)
-                return vim.bo[vim.api.nvim_win_get_buf(win)].filetype ~= "snacks_picker_list"
-             end,
-            },
-          },
-          action = function(match)
-            local idx = picker.list:row2idx(match.pos[1])
-            picker.list:_move(idx, true, true)
-         end,
-        })
-     end
+       function(picker)
+         require("flash").jump({
+           pattern = "^",
+           label = { after = { 0, 0 } },
+           search = {
+             mode = "search",
+             exclude = {
+               function(win)
+                 return vim.bo[vim.api.nvim_win_get_buf(win)].filetype ~= "snacks_picker_list"
+              end,
+             },
+           },
+           action = function(match)
+             local idx = picker.list:row2idx(match.pos[1])
+             picker.list:_move(idx, true, true)
+          end,
+         })
+      end
     '';
-
-  }; 
+  };
 
   vim.keymaps = [
-
-    (nmap "<leader><space>" (mkLuaCallback "Snacks.picker.pick" { 
-      source = "smart"; 
+    (nmap "<leader><space>" (mkLuaCallback "Snacks.picker.pick" {
+      source = "smart";
     }) "Smart Find Files")
 
-    (nmap "<leader>/" (mkLuaCallback "Snacks.picker.pick" { 
-      source = "grep"; 
+    (nmap "<leader>/" (mkLuaCallback "Snacks.picker.pick" {
+      source = "grep";
     }) "Grep")
 
-    (nmap "<leader>;" (mkLuaCallback "Snacks.picker.pick" { 
-      source = "command_history"; 
+    (nmap "<leader>;" (mkLuaCallback "Snacks.picker.pick" {
+      source = "command_history";
     }) "Command History")
 
-    (nmap "<leader>n" (mkLuaCallback "Snacks.picker.pick" { 
-      source = "notifications"; 
+    (nmap "<leader>n" (mkLuaCallback "Snacks.picker.pick" {
+      source = "notifications";
     }) "Notification History")
 
     (nmap "<leader>p" (mkLuaCallback "Snacks.picker" {}) "Pickers")
-
   ];
 
   # vim.telescope = {
   #   enable = false;
   #
   #   extensions = [
-  #     { 
-  #       name = "fzf"; 
+  #     {
+  #       name = "fzf";
   #       packages = [ pkgs.vimPlugins.telescope-fzf-native-nvim ];
-  #       setup.fzf = { 
+  #       setup.fzf = {
   #         fuzzy = true; # false will only do exact matching
   #         override_generic_sorter = true; # override the generic sorter
   #         override_file_sorter = true; # override the file sorter
   #         case_mode = "smart_case"; # ignore_case respect_case
-  #       }; 
+  #       };
   #     }
-  #     { 
-  #       name = "frecency"; 
+  #     {
+  #       name = "frecency";
   #       packages = [ pkgs.vimPlugins.telescope-frecency-nvim ];
-  #       setup.frecency = {}; 
+  #       setup.frecency = {};
   #     }
   #   ];
   #
@@ -156,14 +157,14 @@ in {
   #   setupOpts.pickers.buffers = {
   #     initial_mode = "normal";
   #     layout_strategy = "center";
-  #     path_display = [ "smart" ]; 
+  #     path_display = [ "smart" ];
   #     prompt_prefix = " 󰈚 ";
   #     selection_caret = "▸";
   #     selection_strategy = "follow";
-  #     sort_mru = true; 
-  #     mappings.n = mkLuaInline ''{ 
-  #       ["K"] = require('telescope.actions').close, 
-  #       ["J"] = require('telescope.actions').close, 
+  #     sort_mru = true;
+  #     mappings.n = mkLuaInline ''{
+  #       ["K"] = require('telescope.actions').close,
+  #       ["J"] = require('telescope.actions').close,
   #       ["d"] = require("telescope.actions").delete_buffer,
   #     }'';
   #   };
@@ -206,10 +207,10 @@ in {
   #
   # vim.keymaps = [
   #
-  #   # { 
+  #   # {
   #   #   mode = "n";
   #   #   silent = true;
-  #   #   key = "<C-p>"; 
+  #   #   key = "<C-p>";
   #   #   action = "function() require('fzf-lua').buffers() end";
   #   #   lua = true;
   #   #   desc = "Find files";
@@ -228,6 +229,4 @@ in {
   #   mode = "n";
   #   silent = true;
   # };
-
-
 }
