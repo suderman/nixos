@@ -5,7 +5,7 @@
   ...
 }: let
   inherit (inputs.nixpkgs) lib;
-  inherit (lib) hasPrefix match stringLength recursiveUpdate;
+  inherit (lib) hasPrefix match stringLength;
   inherit (lib.generators) mkLuaInline; 
   inherit (inputs.nvf.lib.nvim.lua) toLuaObject;
 
@@ -73,6 +73,6 @@
 in
   (inputs.nvf.lib.neovimConfiguration {
     inherit pkgs;
-    extraSpecialArgs.flake = (recursiveUpdate flake extend);
+    extraSpecialArgs.flake = (lib.recursiveUpdate flake extend);
     modules = basic ++ (flake.lib.ls ./.) ++ local;
   }).neovim
