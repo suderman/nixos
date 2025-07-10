@@ -6,7 +6,7 @@
 }: let
   inherit (inputs.nixpkgs) lib;
   inherit (lib) hasPrefix match stringLength;
-  inherit (lib.generators) mkLuaInline; 
+  inherit (lib.generators) mkLuaInline;
   inherit (inputs.nvf.lib.nvim.lua) toLuaObject;
 
   # extend flake lib
@@ -14,7 +14,9 @@
     inherit mkLuaInline toLuaObject;
 
     # function name and options argument
-    mkLuaCallback = name: options: ''
+    mkLuaCallback = name: options:
+    # lua
+    ''
       function()
         ${name}(${toLuaObject options})
       end
@@ -41,38 +43,43 @@
     nmap = key: action: desc: keyMap "n" key action desc;
     tmap = key: action: desc: keyMap "t" key action desc;
     vmap = key: action: desc: keyMap "v" key action desc;
-
   };
 
-  basic = [{
-    vim.viAlias = true;
-    vim.vimAlias = true;
-    vim.enableLuaLoader = true;
-    vim.globals.mapleader = " "; # use space as leader key
-    vim.globals.maplocalleader = ","; # use comma as local leader key
-    vim.options.mouse = "nvi"; # normal, visual, insert, commandline, help, all, r
-  }];
+  basic = [
+    {
+      vim.viAlias = true;
+      vim.vimAlias = true;
+      vim.enableLuaLoader = true;
+      vim.globals.mapleader = " "; # use space as leader key
+      vim.globals.maplocalleader = ","; # use comma as local leader key
+      vim.options.mouse = "nvi"; # normal, visual, insert, commandline, help, all, r
+    }
+  ];
 
-  local = [{
-    vim.luaConfigRC.local = ''
-      -- Expands to full path
-      local dir = vim.fn.expand("~/.config/nvf/lua/local")
-      local file = dir .. "/init.lua"
+  local = [
+    {
+      vim.luaConfigRC.local =
+        # lua
+        ''
+          -- Expands to full path
+          local dir = vim.fn.expand("~/.config/nvf/lua/local")
+          local file = dir .. "/init.lua"
 
-      -- Create directory & file if it doesn't exist
-      if vim.fn.filereadable(file) == 0 then
-        vim.fn.system({ "mkdir", "-p", dir })
-        vim.fn.system({ "touch", file })
+          -- Create directory & file if it doesn't exist
+          if vim.fn.filereadable(file) == 0 then
+            vim.fn.system({ "mkdir", "-p", dir })
+            vim.fn.system({ "touch", file })
 
-      -- Otherwise, require the package
-      else
-        require("local")
-      end
-    '';
-  }];
+          -- Otherwise, require the package
+          else
+            require("local")
+          end
+        '';
+    }
+  ];
 in
   (inputs.nvf.lib.neovimConfiguration {
     inherit pkgs;
-    extraSpecialArgs.flake = (lib.recursiveUpdate flake extend);
+    extraSpecialArgs.flake = lib.recursiveUpdate flake extend;
     modules = basic ++ (flake.lib.ls ./.) ++ local;
   }).neovim

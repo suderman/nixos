@@ -1,7 +1,14 @@
-{ ... }: { 
-
+{
+  pkgs,
+  flake,
+  ...
+}: let
+  inherit (flake.lib) nmap;
+  inherit (pkgs.nodePackages) prettier;
+in {
   vim.languages = {
-    enableFormat = true; 
+    # enableDap = true;
+    enableFormat = true;
     enableTreesitter = true;
     enableExtraDiagnostics = true;
 
@@ -15,19 +22,25 @@
       enable = true;
       extensions.render-markdown-nvim = {
         enable = true;
-        setupOpts.file_types = ["markdown" "Avante"];
+        setupOpts.file_types = ["markdown"];
       };
       format.extraFiletypes = ["org"];
     };
 
     bash.enable = true;
     clang.enable = true;
-    # css.enable = true;
+    css = {
+      enable = true;
+      format.package = prettier;
+    };
     html.enable = true;
     sql.enable = true;
     java.enable = false;
     kotlin.enable = false;
-    # ts.enable = true;
+    ts = {
+      enable = true;
+      format.package = prettier;
+    };
     go.enable = true;
     lua.enable = true;
     zig.enable = false;
@@ -62,6 +75,7 @@
       lsp.enable = true;
       treesitter.enable = true;
     };
+
     # python = {
     #   enable = true;
     #   lsp.enable = true;
@@ -71,4 +85,17 @@
     # };
   };
 
+  vim.keymaps = [
+    (
+      nmap "<leader>f"
+      #lua
+      ''
+        function()
+          vim.b.disableFormatSave = not vim.b.disableFormatSave
+          print("Autoformat: " .. (vim.b.disableFormatSave and "disabled" or "enabled"))
+        end
+      ''
+      "Toggle autoformat"
+    )
+  ];
 }

@@ -7,6 +7,7 @@ in {
     formatOnSave = true;
     # lspkind.enable = true;
     lightbulb.enable = true;
+    lightbulb.setupOpts.sign.text = "💡";
     trouble.enable = true;
     # lspSignature.enable = true;
     # otter-nvim.enable = false;
@@ -38,6 +39,9 @@ in {
 
   vim.keymaps = [
     (nmap "gC" ":TSContext toggle<CR>" "Toggle treesitter conte[x]t")
+    (nmap "ga" "vim.lsp.buf.code_action" "Code Actions")
+    (nmap "gl" "vim.diagnostic.open_float" "Error, Warnings, Hints")
+    (nmap "gh" "vim.lsp.buf.hover" "LSP Hover")
 
     (nmap "<leader>xx" "<cmd>Trouble diagnostics toggle<cr>" "Diagnostics (Trouble)")
     (nmap "<leader>xb" "<cmd>Trouble diagnostics toggle filter.buf=0<cr>" "Buffer Diagnostics (Trouble)")
