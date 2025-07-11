@@ -1,4 +1,8 @@
-{flake, ...}: let
+{
+  pkgs,
+  flake,
+  ...
+}: let
   inherit (flake.lib) nmap mkLuaCallback mkLuaInline;
 in {
   vim.utility.snacks-nvim.enable = true;
@@ -62,5 +66,17 @@ in {
     }) "Notification History")
 
     (nmap "<leader>p" (mkLuaCallback "Snacks.picker" {}) "Pickers")
+  ];
+
+  vim.extraPackages = with pkgs; [
+    fd
+    ghostscript
+    git
+    imagemagick
+    lazygit
+    mermaid-cli
+    ripgrep
+    sqlite
+    tectonic
   ];
 }

@@ -85,6 +85,12 @@ in {
     # };
   };
 
+  vim.extraPackages = with pkgs; [
+    gcc
+    python313Packages.pylatexenc
+    sqlfluff
+  ];
+
   vim.keymaps = [
     (
       nmap "<leader>f"

@@ -1,17 +1,17 @@
-{ pkgs, flake, ... }: let
-  inherit (flake.lib) nmap vmap imap;
-in { 
-
-  # Personal mappings
+{flake, ...}: let
+  inherit (flake.lib) nmap vmap;
+in {
   vim.keymaps = [
-
     # Prevent spacebar from doing anything on its own
     (nmap "<leader>" "<nop>" "No operation")
 
     # Enter command mode with semi-colon
     (nmap ";" ":" "Enter command mode")
 
-    # Tab navigation 
+    # Clear highlighted search
+    (nmap "<leader>c" ":noh<CR>:match none<CR>:2match none<CR>:3match none<CR>" "Clear search")
+
+    # Tab navigation
     (nmap "<M-[>" ":tabprevious<CR>" "Previous tab")
     (nmap "<M-]>" ":tabnext<CR>" "Next tab")
 
@@ -22,7 +22,6 @@ in {
     # repeat indent/outdent
     (vmap "<" "<gv" "Outdent")
     (vmap ">" ">gv" "Indent")
-
   ];
 
   # [b]uffer
@@ -42,5 +41,4 @@ in {
   vim.mini.bracketed.enable = true;
 
   vim.comments.comment-nvim.enable = true;
-
 }

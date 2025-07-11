@@ -1,5 +1,12 @@
-{ pkgs, lib, ... }: { 
-
+{
+  lib,
+  pkgs,
+  flake,
+  ...
+}: let
+  inherit (lib) mkForce;
+  inherit (flake.lib) mkLuaInline;
+in {
   vim.options.cursorlineopt = "line"; # line, screenline, number, both
   vim.options.breakindent = true; # indent wrapped lines to match line start
   vim.options.linebreak = true; # wrap long lines at 'breakat' (if 'wrap' is set)
@@ -11,7 +18,7 @@
   vim.options.termguicolors = true; # enable gui colors
 
   vim.statusline.lualine.enable = true;
-  vim.options.showmode = lib.mkForce false; # show mode in command line
+  vim.options.showmode = mkForce false; # show mode in command line
 
   # vim.mini.animate.enable = true;
 
@@ -48,7 +55,7 @@
     animate.duration.total = 200;
   };
 
-  vim.utility.snacks-nvim.setupOpts.scope.enabled = true; 
+  vim.utility.snacks-nvim.setupOpts.scope.enabled = true;
   vim.utility.snacks-nvim.setupOpts.dim = {
     enabled = true;
     animate.duration.step = 10;
@@ -64,4 +71,18 @@
     top_down = false;
   };
 
+  vim.extraPlugins = {
+    "transparent.nvim" = {
+      package = pkgs.vimPlugins.transparent-nvim;
+      setup =
+        # lua
+        ''
+          require("transparent").setup({
+          	extra_groups = {
+          		"NormalFloat",
+          	},
+          })
+        '';
+    };
+  };
 }
