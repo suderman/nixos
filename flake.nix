@@ -2,8 +2,7 @@
   description = "playing with numtide blueprint for nixos";
 
   inputs = {
-
-    # Nix Packages 
+    # Nix Packages
     # <https://search.nixos.org/packages>
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -17,7 +16,6 @@
     # <https://github.com/danth/stylix>
     stylix.url = "github:danth/stylix/release-25.05"; # github:danth/stylix
     stylix.inputs.nixpkgs.follows = "nixpkgs";
-    stylix.inputs.home-manager.follows = "home-manager";
 
     # Nix Index Database
     # <https://github.com/nix-community/nix-index-database>
@@ -35,7 +33,7 @@
 
     # Persist state
     # <https://github.com/nix-community/impermanence>
-    impermanence.url = "github:nix-community/impermanence"; 
+    impermanence.url = "github:nix-community/impermanence";
 
     # NixOS secrets
     # <https://github.com/ryantm/agenix>
@@ -62,11 +60,11 @@
 
     # Nix User Repository
     # <https://nur.nix-community.org>
-    nur.url = "github:nix-community/NUR";                                   
+    nur.url = "github:nix-community/NUR";
 
     # Declarative flatpak manager
     # <https://github.com/gmodena/nix-flatpak>
-    nix-flatpak.url = "github:gmodena/nix-flatpak"; 
+    nix-flatpak.url = "github:gmodena/nix-flatpak";
 
     # Quickshell
     # <https://quickshell.outfoxxed.me>
@@ -78,14 +76,30 @@
     nvf.url = "github:notashelf/nvf";
     nvf.inputs.nixpkgs.follows = "nixpkgs";
 
+    # <https://ravitemer.github.io/mcphub.nvim>
+    mcphub-nvim.url = "github:ravitemer/mcphub.nvim";
+    mcphub-nvim.inputs.nixpkgs.follows = "nixpkgs";
+
+    # <https://github.com/ravitemer/mcp-hub>
+    mcp-hub.url = "github:ravitemer/mcp-hub";
+    mcp-hub.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs: let flake = inputs.self; in {
-
+  outputs = inputs: let
+    flake = inputs.self;
+  in {
     # Blueprint automatically maps: devshells, hosts, lib, modules, packages
-    inherit (inputs.blueprint { inherit inputs; })
-      devShells packages formatter checks lib 
-      nixosConfigurations homeModules nixosModules;
+    inherit
+      (inputs.blueprint {inherit inputs;})
+      devShells
+      packages
+      formatter
+      checks
+      lib
+      nixosConfigurations
+      homeModules
+      nixosModules
+      ;
 
     # Map additional folders to custom outputs
     inherit (flake.lib) agenix-rekey networking users;
@@ -102,7 +116,5 @@
 
     # Derive Seeds (BIP-85) > 32-bytes hex > Index Number:
     derivationIndex = 1;
-
   };
-
 }

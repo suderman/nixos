@@ -2,6 +2,7 @@
   flake,
   pkgs,
   inputs,
+  perSystem,
   ...
 }: let
   inherit (inputs.nixpkgs) lib;
@@ -80,6 +81,9 @@
 in
   (inputs.nvf.lib.neovimConfiguration {
     inherit pkgs;
-    extraSpecialArgs.flake = lib.recursiveUpdate flake extend;
+    extraSpecialArgs = {
+      inherit perSystem;
+      flake = lib.recursiveUpdate flake extend;
+    };
     modules = basic ++ (flake.lib.ls ./.) ++ local;
   }).neovim

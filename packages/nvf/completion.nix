@@ -17,7 +17,8 @@ in {
     mappings = {
       close = "<C-h>";
       complete = "<C-space>";
-      confirm = "<C-l>";
+      # confirm = "<C-l>";
+      confirm = "<Tab>";
       next = "<C-j>";
       previous = "<C-k>";
       scrollDocsDown = "<C-d>";

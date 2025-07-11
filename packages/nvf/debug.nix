@@ -1,7 +1,10 @@
-{ pkgs, flake, ... }: let
+{
+  pkgs,
+  flake,
+  ...
+}: let
   inherit (flake.lib) nmap tmap;
-in { 
-
+in {
   vim.lsp = {
     enable = true;
     formatOnSave = true;
@@ -20,7 +23,6 @@ in {
     #     code_action.keys.quit = "<Esc>";
     #   };
     # };
-
   };
 
   vim.treesitter.context = {
@@ -66,8 +68,7 @@ in {
   vim.lazy.plugins.nvim-bqf = {
     package = pkgs.vimPlugins.nvim-bqf;
   };
-  vim.luaConfigRC.local = ''
+  vim.luaConfigRC.nvim-bqf = ''
     require('bqf').setup{}
   '';
-
 }
