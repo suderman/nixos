@@ -11,15 +11,27 @@ in {
   vim.assistant.avante-nvim = {
     enable = true;
     setupOpts = {
+      # provider = "openrouter";
       provider = "ollama";
       providers.ollama = {
         endpoint = "http://10.1.0.6:11434";
-        model = "qwen3:8b";
+        # model = "qwen3:8b";
+        model = "okamototk/deepseek-r1:8b";
         timeout = 30000; # Timeout in milliseconds
         extra_request_body.options = {
           temperature = 0.75;
           num_ctx = 20480;
           keep_alive = "5m";
+        };
+      };
+      providers.openrouter = {
+        __inherited_from = "openai";
+        endpoint = "https://openrouter.ai/api/v1";
+        api_key_name = "OPENROUTER_API_KEY";
+        model = "anthropic/claude-3.5-haiku-20241022:beta";
+        extra_request_body = {
+          temperature = 0.75;
+          max_tokens = 4096;
         };
       };
       behaviour.enable_token_counting = true;
