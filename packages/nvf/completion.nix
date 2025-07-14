@@ -25,6 +25,7 @@ in {
       scrollDocsUp = "<C-u>";
     };
     setupOpts = {
+      sources.default = ["lsp" "path" "snippets" "buffer"];
       keymap.preset = "none";
       completion.ghost_text.enabled = true;
       completion.menu.auto_show = false;

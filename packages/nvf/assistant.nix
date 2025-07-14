@@ -5,18 +5,11 @@
   flake,
   ...
 }: let
-  inherit (flake.lib) mkLuaInline;
-  ollamaUrl = "http://10.1.0.6:11434";
-  ollamaModel = "qwen3:30b-a3b";
+  inherit (flake.lib) nmap vmap mkLuaInline;
 in {
   vim.assistant.codecompanion-nvim = {
     enable = true;
     setupOpts = {
-      strategies = {
-        chat.adapter = "ollama";
-        inline.adapter = "ollama";
-        cmd.adapter = "ollama";
-      };
       display.chat = {
         auto_scroll = true;
         intro_message = "Welcome to CodeCompanion ✨! Press ? for options";
@@ -37,21 +30,34 @@ in {
           show_default_prompt_library = true; # Show the default prompt library in the action palette?
         };
       };
-      adapters =
+      strategies = {
+        chat.adapter = "ollama";
+        chat.slash_commands = mkLuaInline "{ opts = { provider = 'snacks' }, }";
+        inline.adapter = "ollama";
+        cmd.adapter = "ollama";
+      };
+      adapters = let
+        ollama = {
+          url = "http://10.1.0.6:11434";
+          model = "qwen3:30b-a3b";
+        };
+        claude = {
+          url = "https://openrouter.ai/api";
+          model = "anthropic/claude-3.7-sonnet";
+          api_key = "OPENROUTER_API_KEY";
+        };
+      in
         mkLuaInline
         # lua
         ''
           {
-            opts = {
-              show_defaults = false,
-            },
             ollama = function()
               return require("codecompanion.adapters").extend("ollama", {
-                env = { url = "${ollamaUrl}", },
+                env = { url = "${ollama.url}", },
                 headers = { ["Content-Type"] = "application/json", },
                 parameters = { sync = true, },
                 schema = {
-                  model = { default = "${ollamaModel}", },
+                  model = { default = "${ollama.model}", },
                   temperature = { default = 0.6, },
                   top_p = { default = 0.95, },
                   top_k = { default = 20, },
@@ -59,6 +65,20 @@ in {
                 },
               })
             end,
+            claude = function()
+              return require("codecompanion.adapters").extend("openai_compatible", {
+                env = {
+                  url = "${claude.url}",
+                  api_key = "${claude.api_key}",
+                },
+                schema = {
+                  model = { default = "${claude.model}", },
+                },
+              })
+            end,
+            opts = {
+              show_defaults = false,
+            },
           }
         '';
       extensions = {
@@ -112,8 +132,20 @@ in {
     # "Avante"
   ];
 
+  vim.autocomplete.blink-cmp.setupOpts.sources.per_filetype = {
+    codecompanion = ["codecompanion"];
+  };
+
   # Add mcphub to lualine
   vim.statusline.lualine.extraActiveSection.x = [
     "require('mcphub.extensions.lualine')"
+  ];
+
+  vim.keymaps = [
+    (nmap "<leader>ac" "<cmd>CodeCompanionChat<cr>" "CodeCompanion Chat")
+    (nmap "<leader>at" "<cmd>CodeCompanionChat Toggle<cr>" "CodeCompanion Chat")
+    (nmap "<C-a>" "<cmd>CodeCompanionChat Toggle<cr>" "Toggle CodeCompanion Chat")
+    (nmap "<leader>aa" "<cmd>CodeCompanionActions<cr>" "CodeCompanion Actions")
+    (vmap "<leader>ay" "<cmd>CodeCompanionChat Add<cr>" "Yank to chat")
   ];
 }
