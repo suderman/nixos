@@ -5,95 +5,88 @@
   flake,
   ...
 }: let
-  inherit (lib) mkForce;
   inherit (flake.lib) mkLuaInline;
+  ollamaUrl = "http://10.1.0.6:11434";
+  ollamaModel = "qwen3:30b-a3b";
 in {
-  vim.assistant.avante-nvim = {
+  vim.assistant.codecompanion-nvim = {
     enable = true;
     setupOpts = {
-      # provider = "openrouter";
-      provider = "ollama";
-      providers.ollama = {
-        endpoint = "http://10.1.0.6:11434";
-        # model = "qwen3:8b";
-        model = "okamototk/deepseek-r1:8b";
-        timeout = 30000; # Timeout in milliseconds
-        extra_request_body.options = {
-          temperature = 0.75;
-          num_ctx = 20480;
-          keep_alive = "5m";
+      strategies = {
+        chat.adapter = "ollama";
+        inline.adapter = "ollama";
+        cmd.adapter = "ollama";
+      };
+      display.chat = {
+        auto_scroll = true;
+        intro_message = "Welcome to CodeCompanion ✨! Press ? for options";
+        show_header_separator = false; # Show header separators in the chat buffer?
+        separator = "─"; # The separator between the different messages in the chat buffer
+        show_references = true; # Show references (from slash commands and variables) in the chat buffer?
+        show_settings = true; # Show LLM settings at the top of the chat buffer?
+        show_token_count = true; # Show the token count for each response?
+        start_in_insert_mode = false; # Open the chat buffer in insert mode?
+      };
+      display.action_palette = {
+        width = 95;
+        height = 10;
+        prompt = "Prompt "; # Prompt used for interactive LLM calls
+        provider = "default"; # snacks
+        opts = {
+          show_default_actions = true; # Show the default actions in the action palette?
+          show_default_prompt_library = true; # Show the default prompt library in the action palette?
         };
       };
-      providers.openrouter = {
-        __inherited_from = "openai";
-        endpoint = "https://openrouter.ai/api/v1";
-        api_key_name = "OPENROUTER_API_KEY";
-        model = "anthropic/claude-3.5-haiku-20241022:beta";
-        extra_request_body = {
-          temperature = 0.75;
-          max_tokens = 4096;
-        };
-      };
-      behaviour.enable_token_counting = true;
-      auto_suggestions_provider = "ollama";
-      dual_boost = {
-        enabled = false;
-        first_provider = "ollama";
-        prompt = ''
-          Based on the two reference outputs below, generate a response that incorporates
-          elements from both but reflects your own judgment and unique perspective.
-          Do not provide any explanation, just give the response directly. Reference Output 1:
-          [{{provider1_output}}], Reference Output 2: [{{provider2_output}}
-        '';
-      };
-      system_prompt =
+      adapters =
         mkLuaInline
         # lua
         ''
-          function()
-            local hub = require("mcphub").get_hub_instance()
-            return hub and hub:get_active_servers_prompt() or ""
-          end
+          {
+            opts = {
+              show_defaults = false,
+            },
+            ollama = function()
+              return require("codecompanion.adapters").extend("ollama", {
+                env = { url = "${ollamaUrl}", },
+                headers = { ["Content-Type"] = "application/json", },
+                parameters = { sync = true, },
+                schema = {
+                  model = { default = "${ollamaModel}", },
+                  temperature = { default = 0.6, },
+                  top_p = { default = 0.95, },
+                  top_k = { default = 20, },
+                  min_p = { default = 0, },
+                },
+              })
+            end,
+          }
         '';
-      custom_tools =
-        mkLuaInline
-        # lua
-        ''
-          function()
-            return {
-              require("mcphub.extensions.avante").mcp_tool(),
-            }
-          end
-        '';
-      disabled_tools = [
-        "list_files" # Built-in file operations
-        "search_files"
-        "read_file"
-        "create_file"
-        "rename_file"
-        "delete_file"
-        "create_dir"
-        "rename_dir"
-        "delete_dir"
-        "bash" # Built-in terminal access
-      ];
+      extensions = {
+        mcphub = {
+          callback = "mcphub.extensions.codecompanion";
+          opts = {
+            show_result_in_chat = true; #  Show mcp tool results in chat
+            make_vars = true; #  Convert resources to #variables
+            make_slash_commands = true; #  Add prompts as /slash commands
+          };
+        };
+      };
     };
   };
 
-  vim.luaConfigRC."avante.nvim" =
-    # lua
-    ''
-      require("transparent").clear_prefix("Avante");
-      require('transparent').toggle(true);
-    '';
-
-  vim.lazy.plugins = {
-    "avante.nvim".package = mkForce perSystem.nixpkgs-unstable.vimPlugins.avante-nvim;
-    "mcphub.nvim".package = perSystem.mcphub-nvim.default;
+  # Override plugin with latest from Github (via flake input)
+  # and include dependency of mcphub-nvim
+  vim.pluginOverrides.codecompanion-nvim = pkgs.vimUtils.buildVimPlugin {
+    pname = "codecompanion-nvim";
+    src = flake.inputs.codecompanion-nvim;
+    version = "main";
+    doCheck = false;
+    dependencies = [perSystem.mcphub-nvim.default];
   };
 
   # https://ravitemer.github.io/mcphub.nvim/extensions/avante.html
   vim.luaConfigRC."mcphub.nvim" =
+    lib.nvim.dag.entryBefore ["lazyConfigs"]
     # lua
     ''
       require('mcphub').setup {
@@ -116,17 +109,8 @@ in {
 
   vim.languages.markdown.extensions.render-markdown-nvim.setupOpts.file_types = [
     "codecompanion"
-    "Avante"
+    # "Avante"
   ];
-
-  # https://github.com/Kaiser-Yang/blink-cmp-avante
-  vim.autocomplete.blink-cmp.sourcePlugins = {
-    blink-cmp-avante = {
-      enable = true;
-      package = perSystem.nixpkgs-unstable.vimPlugins.blink-cmp-avante;
-      module = "blink-cmp-avante";
-    };
-  };
 
   # Add mcphub to lualine
   vim.statusline.lualine.extraActiveSection.x = [
