@@ -10,6 +10,9 @@
   # Enable email/calendars/contacts
   accounts.enable = true;
 
+  programs.neovim.enable = lib.mkForce false;
+  # programs.nvf.enable = true;
+
   # Enhance btop with GPU support
   programs.btop = {
     package = pkgs.btop.overrideAttrs (prev: rec {
@@ -19,4 +22,8 @@
     });
   };
 
+  home.packages = with pkgs; [ 
+
+    goose-cli
+  ];
 }
