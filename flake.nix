@@ -71,22 +71,9 @@
     quickshell.url = "github:quickshell-mirror/quickshell?ref=v0.1.0";
     quickshell.inputs.nixpkgs.follows = "nixpkgs";
 
-    # Neovim
-    # <https://notashelf.github.io/nvf>
-    nvf.url = "github:notashelf/nvf";
-    nvf.inputs.nixpkgs.follows = "nixpkgs";
-
-    # <https://github.com/olimorris/codecompanion.nvim>
-    codecompanion-nvim.url = "github:olimorris/codecompanion.nvim";
-    codecompanion-nvim.flake = false;
-
-    # <https://ravitemer.github.io/mcphub.nvim>
-    mcphub-nvim.url = "github:ravitemer/mcphub.nvim";
-    mcphub-nvim.inputs.nixpkgs.follows = "nixpkgs";
-
-    # <https://github.com/ravitemer/mcp-hub>
-    mcp-hub.url = "github:ravitemer/mcp-hub";
-    mcp-hub.inputs.nixpkgs.follows = "nixpkgs";
+    # Neovim flake
+    # <https://github.com/suderman/neovim>
+    neovim.url = "github:suderman/neovim";
   };
 
   outputs = inputs: let

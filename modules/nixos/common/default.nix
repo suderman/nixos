@@ -1,11 +1,15 @@
-{ lib, flake, ... }: {
-
+{
+  lib,
+  flake,
+  ...
+}: {
   # Import all *.nix files in this directory
   imports = flake.lib.ls ./.;
 
   # Default enable these common modules for all hosts
   programs.mosh.enable = lib.mkDefault true;
-  programs.neovim.enable = lib.mkDefault true;
+  # programs.neovim.enable = lib.mkDefault true;
+  # programs.nvf.enable = lib.mkDefault true;
   programs.rust-motd.enable = lib.mkDefault true;
   services.blocky.enable = lib.mkDefault true;
   services.btrbk.enable = lib.mkDefault true;
@@ -17,7 +21,6 @@
   stylix.enable = lib.mkDefault true;
   virtualisation.docker.enable = lib.mkDefault true;
 
-  # Precious memories 
+  # Precious memories
   system.stateVersion = "24.11";
-
 }
