@@ -10,18 +10,18 @@ else
 fi
 
 # Ensure private key exists
-[[ -f "$private_key" ]] || 
+[[ -f "$private_key" ]] ||
   error "$(pwd)/$private_key missing"
 
 # Ensure public key exists
-[[ -f "$public_key" ]] || 
+[[ -f "$public_key" ]] ||
   error "$(pwd)/$public_key missing"
 
 # Extract type from current public key (should be ssh-ed25519)
-current_pub_type="$(cut -d' ' -f1 < "$public_key")"
+current_pub_type="$(cut -d' ' -f1 <"$public_key")"
 
 # Extract key from current public key (without comment)
-current_pub_key="$(cut -d' ' -f1,2 < "$public_key")"
+current_pub_key="$(cut -d' ' -f1,2 <"$public_key")"
 
 # Derive expected public key from current private key (should match above)
 derived_pub_key="$(cat "$private_key" | derive public)"

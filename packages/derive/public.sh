@@ -11,7 +11,7 @@ elif [[ ! -z "$(echo "$input" | grep "OPENSSH PRIVATE KEY")" ]]; then
 
 # If ed25519 key detected, extract private key from secret and output
 elif [[ ! -z "$(echo "$input" | grep "BEGIN PRIVATE KEY")" ]]; then
-  openssl ec -in <(echo "$input") -pubout  2>/dev/null
+  openssl ec -in <(echo "$input") -pubout 2>/dev/null
 
 # If certificate detected, extract private key from secret and output
 elif [[ ! -z "$(echo "$input" | grep "BEGIN CERTIFICATE")" ]]; then

@@ -15,7 +15,7 @@ mkdir -p $DATA_DIR
 # Create credentials file for auto-login
 CREDENTIALS="$DATA_DIR/.zwift-credentials"
 if [[ ! -f $CREDENTIALS ]]; then
-  echo -e "ZWIFT_USERNAME=\nZWIFT_PASSWORD=" > $CREDENTIALS
+  echo -e "ZWIFT_USERNAME=\nZWIFT_PASSWORD=" >$CREDENTIALS
 fi
 
 # Get user and group ids

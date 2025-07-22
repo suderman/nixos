@@ -1,10 +1,10 @@
 # Ensure public key exists
-has ./ssh_host_ed25519_key.pub \
-  || error "$(pwd)/ssh_host_ed25519_key.pub missing"
+has ./ssh_host_ed25519_key.pub ||
+  error "$(pwd)/ssh_host_ed25519_key.pub missing"
 
 # Open port for netcat (if running as root)
-[[ "$(id -u)" == "0" ]] \
-  && iptables -A INPUT -p tcp --dport 12345 -j ACCEPT
+[[ "$(id -u)" == "0" ]] &&
+  iptables -A INPUT -p tcp --dport 12345 -j ACCEPT
 
 # Make and switch to tmp directory to receive key
 dir=$(pwd) tmp=$(pwd)/tmp
@@ -21,7 +21,7 @@ info "sshed send ${host:-$(hostname)} $(ipaddr lan)"
 while true; do
 
   # Wait for private key to be received over netcat
-  nc -l -N 12345 > $tmp/ssh_host_ed25519_key
+  nc -l -N 12345 >$tmp/ssh_host_ed25519_key
 
   if $0 verify; then
     mv $tmp/ssh_host_ed25519_key $dir/ssh_host_ed25519_key
