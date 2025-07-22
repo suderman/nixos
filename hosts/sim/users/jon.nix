@@ -1,5 +1,9 @@
-{ flake, config, lib, ... }: {
-
+{
+  flake,
+  config,
+  lib,
+  ...
+}: {
   imports = [
     flake.homeModules.common
     # flake.homeModules.gnome
@@ -15,7 +19,8 @@
   programs.chromium = {
     enable = true;
     externalExtensions = {
-      inherit (config.programs.chromium.registry) 
+      inherit
+        (config.programs.chromium.registry)
         auto-tab-discard-suspend
         dark-reader
         fake-data
@@ -24,14 +29,15 @@
         one-password
         return-youtube-dislike
         sponsorblock
-        ublock-origin 
-      ;
+        ublock-origin
+        ;
     };
-
   };
 
   # Create home folders (persisted)
-  xdg.userDirs = let home = config.home.homeDirectory; in {
+  xdg.userDirs = let
+    home = config.home.homeDirectory;
+  in {
     desktop = "${home}/Personal/Action"; # persist
     download = "${home}/Downloads"; # persist
     documents = "${home}/Personal/Documents"; # persist
@@ -54,5 +60,4 @@
 
   programs.zwift.enable = true;
   programs.firefox.enable = true;
-
 }

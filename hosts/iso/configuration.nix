@@ -1,5 +1,12 @@
-{ config, lib, pkgs, perSystem, flake, modulesPath, ... }: {
-
+{
+  config,
+  lib,
+  pkgs,
+  perSystem,
+  flake,
+  modulesPath,
+  ...
+}: {
   imports = [
     (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix")
     (modulesPath + "/installer/cd-dvd/channel.nix")
@@ -15,7 +22,7 @@
 
   # Enable flakes and larger download buffer
   nix.settings = {
-    experimental-features = [ "nix-command" "flakes" ];
+    experimental-features = ["nix-command" "flakes"];
     download-buffer-size = 500000000; # 500MB buffer
   };
 
@@ -25,7 +32,7 @@
   };
 
   # Set passwords to x
-  users.users = lib.genAttrs [ "root" "nixos" ] (name: {
+  users.users = lib.genAttrs ["root" "nixos"] (name: {
     password = "x";
     initialHashedPassword = lib.mkForce null;
   });
@@ -37,9 +44,9 @@
   };
 
   # Allow sshed to listen with netcat
-  networking.firewall.allowedTCPPorts = [ 12345 ];
+  networking.firewall.allowedTCPPorts = [12345];
 
-  # Start wireless 
+  # Start wireless
   networking.networkmanager.enable = true;
   networking.wireless.enable = false;
 
@@ -53,8 +60,8 @@
     perSystem.self.sshed
     pkgs.gum
     pkgs.networkmanager
-    ( pkgs.writeShellScriptBin "wifi" "nmtui-connect" )
-    ( pkgs.writeShellScriptBin "installer" (builtins.readFile ./installer.sh) )
+    (pkgs.writeShellScriptBin "wifi" "nmtui-connect")
+    (pkgs.writeShellScriptBin "installer" (builtins.readFile ./installer.sh))
   ];
 
   # Update /etc/issue with custom info
@@ -63,5 +70,4 @@
     If you need a wireless connection, type `wifi`.
     To run installer script, type `installer`.
   '';
-
 }

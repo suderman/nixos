@@ -1,9 +1,15 @@
-{ config, pkgs, lib, perSystem, flake, ... }: let
+{
+  config,
+  pkgs,
+  lib,
+  perSystem,
+  flake,
+  ...
+}: let
   inherit (builtins) mapAttrs;
   inherit (lib) mkOption types;
   inherit (perSystem.self) mkApplication;
 in {
-
   imports = [
     ./hardware-configuration.nix
     ./disk-configuration.nix
@@ -11,11 +17,10 @@ in {
     # flake.nixosModules.gnome
     flake.nixosModules.hyprland
     flake.nixosModules.vm
-    flake.nixosModules.homelab
+    # flake.nixosModules.homelab
   ];
 
   config = {
-
     networking.domain = "tail";
     networking.firewall.allowPing = true;
 
@@ -25,9 +30,9 @@ in {
     environment.systemPackages = [
       pkgs.vim
       pkgs.yazi
-      (mkApplication { 
-        name = "yo"; 
-        text = "echo yooooo";  
+      (mkApplication {
+        name = "yo";
+        text = "echo yooooo";
         desktopName = "Yo!";
         icon = flake + /prev/modules/zwift/user/zwift.svg;
         version = "2.0";
@@ -40,8 +45,7 @@ in {
       pkgs.vulkan-loader
       pkgs.vulkan-tools # for `vulkaninfo`
       pkgs.libvdpau-va-gl
-      pkgs.glxinfo       # for checking OpenGL
-
+      pkgs.glxinfo # for checking OpenGL
     ];
 
     # services.tailscale.enable = true;
@@ -61,8 +65,8 @@ in {
     # stylix.enable = true;
 
     # Grant ssh host key access to root login
-    users.users.root.openssh.authorizedKeys.keyFiles = [ 
-      ./ssh_host_ed25519_key.pub 
+    users.users.root.openssh.authorizedKeys.keyFiles = [
+      ./ssh_host_ed25519_key.pub
     ];
 
     # Extra disks for motd
@@ -74,11 +78,10 @@ in {
     programs.firefox.enable = true;
 
     # Hub for monitoring other machines
-    services.beszel.enable = true; 
+    services.beszel.enable = true;
 
     # Agent to monitor system
     # services.beszel.key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGo/UVSuyrSmtE3RA0rxXpwApHEGMGOTd2c0EtGeCGAr";
-
 
     # For newer NixOS versions (23.11+), use:
     hardware.graphics = {
@@ -93,7 +96,7 @@ in {
       swtpm.enable = true;
       ovmf = {
         enable = true;
-        packages = [ pkgs.OVMFFull.fd ];
+        packages = [pkgs.OVMFFull.fd];
       };
     };
 
@@ -109,7 +112,6 @@ in {
     virtualisation.libvirtd.enable = true;
 
     # Add your user to the libvirtd group
-    users.users.jon.extraGroups = [ "libvirtd" ];
-
+    users.users.jon.extraGroups = ["libvirtd"];
   };
 }

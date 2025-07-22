@@ -8,4 +8,5 @@ This is a work-in-progress.
 
 Type `import-id` to scan this QR code (index 1):
 
-`Advanced/Tools` > `Derive Seeds (BIP-85)` > `32-bytes hex` > `Index Number 1` > `QR`
+`Advanced/Tools` > `Derive Seeds (BIP-85)` > `32-bytes hex` > `Index Number 1` >
+`QR`

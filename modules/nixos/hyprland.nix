@@ -1,12 +1,15 @@
-{ config, lib, pkgs, flake, ... }: let
-
+{
+  config,
+  lib,
+  pkgs,
+  flake,
+  ...
+}: let
   cfg = config.programs.hyprland;
-  inherit (builtins) toString; 
+  inherit (builtins) toString;
   inherit (lib) getExe mkOption types;
-
 in {
-
-  imports = [ flake.nixosModules.desktop ];
+  imports = [flake.nixosModules.desktop];
 
   # Set this to a username to automatically login at boot
   options.programs.hyprland.autologin = mkOption {
@@ -15,46 +18,50 @@ in {
   };
 
   config = {
-
     # Login screen
-    services.greetd = let command = getExe pkgs.hyprland; in {
-      enable = true;
-      settings = {
-        terminal.vt = 1;
-        default_session = {
-          user = "greeter";
-          command = toString [ "${getExe pkgs.greetd.tuigreet}"
-            "--greeting 'Welcome to NixOS!'" 
-            "--asterisks" # display asterisks when a secret is typed
-            "--remember" # remember last logged-in username
-            "--remember-user-session" # remember last selected session for each user
-            "--time" # display the current date and time
-            "--cmd ${command}"
-          ];
-        };
-      } // ( if cfg.autologin == null then {} else { 
-        initial_session = { 
-          user = cfg.autologin;
-          inherit command; 
-        };
-      } );
+    services.greetd = let
+      command = getExe pkgs.hyprland;
+    in {
+      enable = false;
+      settings =
+        {
+          terminal.vt = 1;
+          default_session = {
+            user = "greeter";
+            command = toString [
+              "${getExe pkgs.greetd.tuigreet}"
+              "--greeting 'Welcome to NixOS!'"
+              "--remember-user-session" # remember last selected session for each user
+              "--time" # display the current date and time
+              "--cmd ${command}"
+            ];
+          };
+        }
+        // (
+          if cfg.autologin == null
+          then {}
+          else {
+            initial_session = {
+              user = cfg.autologin;
+              inherit command;
+            };
+          }
+        );
     };
 
     # Extend systemd service
     systemd.services.greetd.serviceConfig = {
-
       Type = "idle";
       StandardInput = "tty";
       StandardOutput = "tty";
 
       # Without this errors will spam on screen
-      StandardError = "journal"; 
+      StandardError = "journal";
 
       # Without these bootlogs will spam on screen
       TTYReset = true;
       TTYVHangup = true;
       TTYVTDisallocate = true;
-
     };
 
     # Enable screen brightness control
@@ -93,7 +100,7 @@ in {
 
     # https://wiki.hyprland.org/Useful-Utilities/xdg-desktop-portal-hyprland/
     # > XDPH doesn’t implement a file picker. For that, I recommend installing xdg-desktop-portal-gtk alongside XDPH.
-    xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+    xdg.portal.extraPortals = [pkgs.xdg-desktop-portal-gtk];
 
     # https://www.reddit.com/r/NixOS/comments/199dm3j/how_do_i_retain_nextcloud_session_on_hyprland/
     services.gnome.gnome-keyring.enable = true;
@@ -107,7 +114,5 @@ in {
 
     # https://home-manager-options.extranix.com/?query=swaylock&release=release-24.11
     security.pam.services.swaylock = {};
-
   };
-
 }

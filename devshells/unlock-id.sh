@@ -1,4 +1,6 @@
-source $LIB; cd $PRJ_ROOT
+#!/usr/bin/env bash
+source "$LIB"
+cd "$PRJ_ROOT" || exit
 
 id="$(input)"
 if [[ -z "$id" ]]; then
@@ -9,7 +11,7 @@ fi
 
 [[ -f /tmp/id_age ]] && mv /tmp/id_age /tmp/id_age_
 touch /tmp/id_age_
-echo "$id" > /tmp/id_age
+echo "$id" >/tmp/id_age
 chmod 600 /tmp/id_age /tmp/id_age_
 
 info "Age identity unlocked"

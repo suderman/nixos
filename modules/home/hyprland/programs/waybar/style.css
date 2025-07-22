@@ -6,16 +6,21 @@
  *
 */
 
-
 #waybar {
   background-color: rgba(21, 21, 33, 0.85);
   color: #f5e0dc;
   border-bottom: none;
 }
 
-.modules-left { background-color: transparent; }
-.modules-center { background-color: transparent; }
-.modules-right { background-color: transparent; }
+.modules-left {
+  background-color: transparent;
+}
+.modules-center {
+  background-color: transparent;
+}
+.modules-right {
+  background-color: transparent;
+}
 
 #custom-launcher {
   /* background: rgba(21, 21, 33, 0.5); */
@@ -49,13 +54,19 @@
   transition: padding 0.6s;
 }
 
-#workspaces button:first-child { border-radius: 10px 0 0 10px; }
-#workspaces button:last-child { border-radius: 0 10px 10px 0; }
-#workspaces button:first-child:last-child { border-radius: 10px; }
+#workspaces button:first-child {
+  border-radius: 10px 0 0 10px;
+}
+#workspaces button:last-child {
+  border-radius: 0 10px 10px 0;
+}
+#workspaces button:first-child:last-child {
+  border-radius: 10px;
+}
 
 #workspaces button.active {
   background-color: rgba(183, 189, 248, 0.6);
-  color: rgba(21, 21, 33, 1.0);
+  color: rgba(21, 21, 33, 1);
   padding: 5px 15px;
 }
 
@@ -105,16 +116,15 @@
   transition: all 0.3s;
   letter-spacing: 4px;
   font-size: 17px;
-  font-family: monospace; 
+  font-family: monospace;
 }
 
 #custom-groupies:hover {
   background: rgba(21, 21, 33, 0.5);
 }
 
-
 #window {
- font-size: 20px; 
+  font-size: 20px;
 }
 
 #custom-power {
@@ -132,7 +142,6 @@
   margin: 0;
   padding: 5px 20px 5px 15px;
 }
-
 
 #temperature {
   margin: 0;
@@ -156,7 +165,7 @@
 
 #custom-bluetooth {
   margin: 0;
-  padding : 5px 6px;
+  padding: 5px 6px;
 }
 
 #network {
