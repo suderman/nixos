@@ -10,33 +10,32 @@
   environment = {
     # List packages installed in system profile
     systemPackages = with pkgs; [
-      inetutils
-      mtr
-      sysstat
-      gnumake
-      git # basics
-      curl
-      btop
-      htop
-      tmux
-      rsync
-      vim
-      jq
-      usbutils
-      pciutils
-      zip
-      unzip
-      nmap
       arp-scan
-      dig
-      lsof
-      nix-zsh-completions
-      zsh-completions
-      nix-bash-completions
       bash-completion
-      home-manager # include home-manager command
+      btop
       cachix # binary cache
-      perSystem.neovim.default
+      curl
+      dig
+      git # basics
+      gnumake
+      home-manager # include home-manager command
+      htop
+      inetutils
+      jq
+      lsof
+      mtr
+      nix-bash-completions
+      nix-zsh-completions
+      nmap
+      pciutils
+      rsync
+      sysstat
+      tmux
+      unzip
+      usbutils
+      vim
+      zip
+      zsh-completions
     ];
 
     # Add terminfo files

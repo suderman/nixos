@@ -8,8 +8,6 @@
 
   # Default enable these common modules for all hosts
   programs.mosh.enable = lib.mkDefault true;
-  # programs.neovim.enable = lib.mkDefault true;
-  # programs.nvf.enable = lib.mkDefault true;
   programs.rust-motd.enable = lib.mkDefault true;
   services.blocky.enable = lib.mkDefault true;
   services.btrbk.enable = lib.mkDefault true;

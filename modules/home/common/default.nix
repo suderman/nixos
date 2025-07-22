@@ -1,9 +1,14 @@
-{ lib, pkgs, perSystem, flake, ... }: {
-
+{
+  lib,
+  pkgs,
+  perSystem,
+  flake,
+  ...
+}: {
   # Import all *.nix files in this directory
   imports = flake.lib.ls ./.;
 
-  home.packages = with pkgs; [ 
+  home.packages = with pkgs; [
     _1password-cli # op
     # calcure # calendar viewer
     # distrobox distrobox-tui
@@ -38,7 +43,7 @@
   programs.lesspipe.enable = true;
   programs.lsd.enable = true;
   programs.micro.enable = true; # easy text editor
-  programs.neovim.enable = true; # good text editor
+  programs.neovim.enable = false; # using nvf instead
   programs.nnn.enable = true;
   programs.ripgrep.enable = true;
   programs.tealdeer.enable = true;
@@ -49,7 +54,6 @@
   services.mpd.enable = true; # play pretty music plz
   services.syncthing.enable = true; # sync muh stuff
 
-  # Precious memories 
+  # Precious memories
   home.stateVersion = "24.11";
-
 }

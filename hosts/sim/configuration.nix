@@ -28,7 +28,6 @@ in {
     # users.users.jon.password = "x";
 
     environment.systemPackages = [
-      pkgs.vim
       pkgs.yazi
       (mkApplication {
         name = "yo";
