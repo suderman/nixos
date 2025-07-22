@@ -1,86 +1,98 @@
-{ pkgs, perSystem, flake, ... }: let 
-
+{
+  pkgs,
+  perSystem,
+  flake,
+  ...
+}: let
   inherit (builtins) toString readFile;
-  inherit (flake.lib) ls;
+in
+  perSystem.devshell.mkShell {
+    # Set name of devshell from config
+    devshell.name = "suderman/nixos";
 
-in perSystem.devshell.mkShell {
+    # Startup script of devshell, plus extra
+    devshell.startup.nixos.text = "";
 
-  # Set name of devshell from config
-  devshell.name = "suderman/nixos";
+    env = [
+      {
+        name = "LIB";
+        value = toString flake.lib.bash;
+      }
+      {
+        name = "DERIVATION_INDEX";
+        value = toString flake.derivationIndex;
+      }
+    ];
 
-  # Startup script of devshell, plus extra
-  devshell.startup.nixos.text = ''
-  ''; 
+    # Base list of commands for devshell, plus extra
+    commands = [
+      {
+        category = "key management";
+        name = "import-id";
+        help = "Generate age identity from QR code";
+        command = readFile ./import-id.sh;
+      }
+      {
+        category = "key management";
+        name = "unlock-id";
+        help = "Unlock age identity";
+        command = readFile ./unlock-id.sh;
+      }
+      {
+        category = "key management";
+        name = "lock-id";
+        help = "Lock age identity";
+        command = readFile ./lock-id.sh;
+      }
+      {
+        category = "development";
+        name = "agenix";
+        help = "Manage secrets";
+        package = perSystem.agenix-rekey.default;
+      }
+      {
+        category = "development";
+        name = "init";
+        help = "Generate hosts, users and related files";
+        command = readFile ./init.sh;
+      }
+      {
+        category = "development";
+        name = "browse";
+        help = "Browse flake";
+        command = "nix-inspect --path .";
+      }
+      {
+        category = "virtual machine";
+        name = "sim";
+        help = "boot vm";
+        package = perSystem.self.sim;
+      }
+      {
+        category = "virtual machine";
+        name = "iso";
+        help = "build iso";
+        package = perSystem.self.iso;
+      }
+    ];
 
-  env = [{
-    name = "LIB";
-    value = toString flake.lib.bash;
-  } {
-    name ="DERIVATION_INDEX";
-    value = toString flake.derivationIndex;
-  }];
-
-  # Base list of commands for devshell, plus extra
-  commands = [{
-    category = "key management";
-    name = "import-id";
-    help = "Generate age identity from QR code";
-    command = readFile ./import-id.sh;
-  } {
-    category = "key management";
-    name = "unlock-id";
-    help = "Unlock age identity";
-    command = readFile ./unlock-id.sh;
-  } {
-    category = "key management";
-    name = "lock-id";
-    help = "Lock age identity";
-    command = readFile ./lock-id.sh;
-  } {
-    category = "development";
-    name = "agenix";
-    help = "Manage secrets";
-    package = perSystem.agenix-rekey.default;
-  } {
-    category = "development";
-    name = "init";
-    help = "Generate hosts, users and related files";
-    command = readFile ./init.sh;
-  } {
-    category = "development";
-    name = "browse";
-    help = "Browse flake";
-    command = "nix-inspect --path .";
-  } {
-    category = "virtual machine";
-    name = "sim";
-    help = "boot vm";
-    package = perSystem.self.sim;
-  } {
-    category = "virtual machine";
-    name = "iso";
-    help = "build iso";
-    package = perSystem.self.iso;
-  }];
-
-  # Base list of packages for devshell, plus extra
-  packages = [
-    pkgs.eza
-    pkgs.gh
-    pkgs.git
-    pkgs.gnumake
-    pkgs.lazydocker
-    pkgs.lazygit
-    pkgs.nix-inspect
-    pkgs.openssl
-    pkgs.smenu
-    pkgs.age
-    pkgs.nixos-anywhere
-    perSystem.self.qr
-    perSystem.self.derive
-    perSystem.self.sshed
-    perSystem.self.ipaddr
-    perSystem.self.hello
-  ];
-
-}
+    # Base list of packages for devshell, plus extra
+    packages = [
+      pkgs.eza
+      pkgs.gh
+      pkgs.git
+      pkgs.gnumake
+      pkgs.lazydocker
+      pkgs.lazygit
+      pkgs.nix-inspect
+      pkgs.openssl
+      pkgs.smenu
+      pkgs.age
+      pkgs.nixos-anywhere
+      perSystem.self.qr
+      perSystem.self.derive
+      perSystem.self.sshed
+      perSystem.self.ipaddr
+      perSystem.self.hello
+    ];
+  }
