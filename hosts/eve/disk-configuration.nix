@@ -25,7 +25,7 @@ in rec {
   # ssd1 is the main disk
   disko.devices.disk.ssd1 = {
     type = "disk";
-    device = "/dev/disk/by-id/virtio-1";
+    device = "/dev/disk/by-id/ata-WDC_WDS500G2B0A-00SM50_181703805719";
     content.type = "gpt";
 
     # bios boot
@@ -50,7 +50,7 @@ in rec {
 
     # adjust size to match ram
     content.partitions.swap = {
-      size = "4G";
+      size = "8G";
       priority = 3;
       content = {
         type = "swap";
@@ -80,31 +80,10 @@ in rec {
     };
   };
 
-  # ssd2 is the data disk
-  disko.devices.disk.ssd2 = {
-    type = "disk";
-    device = "/dev/disk/by-id/virtio-2";
-    content.type = "gpt";
-    content.partitions.part = {
-      size = "100%";
-      content =
-        automount "/mnt/data"
-        // {
-          type = "btrfs";
-          extraArgs = ["-fL data"];
-          subvolumes = {
-            data = automount "/data";
-            snapshots = {};
-            backups = {};
-          };
-        };
-    };
-  };
-
   # hdd1 supports the pool
   disko.devices.disk.hdd1 = {
     type = "disk";
-    device = "/dev/disk/by-id/virtio-3";
+    device = "/dev/disk/by-id/ata-ST12000NM0538-2K2101_ZHZ29F82";
     content.type = "gpt";
     content.partitions.part = {
       size = "100%";
@@ -115,7 +94,7 @@ in rec {
   # hdd2 supports the pool
   disko.devices.disk.hdd2 = {
     type = "disk";
-    device = "/dev/disk/by-id/virtio-4";
+    device = "/dev/disk/by-id/ata-ST12000NM0538-2K2101_ZHZ5F9VF";
     content.type = "gpt";
     content.partitions.part = {
       size = "100%";

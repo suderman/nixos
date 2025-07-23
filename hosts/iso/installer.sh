@@ -11,7 +11,7 @@ fi
 if [ ! -d "/root/nixos/.git" ]; then
   git clone https://github.com/suderman/nixos "/root/nixos"
   cd /root/nixos
-else 
+else
   cd /root/nixos
   git pull
 fi
@@ -38,7 +38,7 @@ fi
 
 # Persist hostname
 mkdir -p /mnt/persist/etc
-echo $host > /mnt/persist/etc/hostname
+echo $host >/mnt/persist/etc/hostname
 
 # Offer to receive SSH host key ahead of nixos installation
 if gum confirm "Receive SSH host key?" --affirmative="Now" --negative="Later"; then
