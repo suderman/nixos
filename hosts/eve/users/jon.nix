@@ -1,1 +1,5 @@
-{ config, lib, pkgs, ... }: {}
+{flake, ...}: {
+  imports = [
+    flake.homeModules.common
+  ];
+}
