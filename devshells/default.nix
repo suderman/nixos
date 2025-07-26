@@ -78,6 +78,8 @@ in
 
     # Base list of packages for devshell, plus extra
     packages = [
+      pkgs.age
+      pkgs.alejandra
       pkgs.eza
       pkgs.gh
       pkgs.git
@@ -85,10 +87,9 @@ in
       pkgs.lazydocker
       pkgs.lazygit
       pkgs.nix-inspect
+      pkgs.nixos-anywhere
       pkgs.openssl
       pkgs.smenu
-      pkgs.age
-      pkgs.nixos-anywhere
       perSystem.self.qr
       perSystem.self.derive
       perSystem.self.sshed

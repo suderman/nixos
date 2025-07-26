@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1090
 source "$LIB"
 cd "$PRJ_ROOT" || exit
 
@@ -27,7 +28,7 @@ host | h)
   host="hosts/${2-}"
 
   # Ensure it doesn't already exist
-  if has $host; then
+  if has "$host"; then
     hint "Host configuration exists: ./$host"
   else
 
@@ -36,23 +37,24 @@ host | h)
 
     # Add users for home-manager configuration
     for user in $(eza -D users); do
-      cfg="$host/users/$user.nix"
       if [[ "$user" != "root" ]]; then
-        echo "{ flake, ... }: {" >$cfg
-        echo "  imports = [ flake.homeModules.common ];" >>$cfg
-        echo "}" >>$cfg
+        {
+          echo '{ flake, ... }: {'
+          echo '  imports = [ flake.homeModules.common ];'
+          echo '}'
+        } | alejandra -q >"$host/users/$user.nix"
       fi
     done
 
     # Create a basic configuration.nix in this directory
-    cfg="$host/configuration.nix"
-    echo "{ flake, ... }: {" >$cfg
-    echo "  imports = [ flake.nixosModules.common ];" >>$cfg
-    echo "  config = { path = ./.; };" >>$cfg
-    echo "}" >>$cfg
+    {
+      echo '{ flake, ... }: {'
+      echo '  imports = [ flake.nixosModules.common ];'
+      echo '}'
+    } | alejandra -q >"$host/configuration.nix"
 
     # Stage in git
-    git add $host 2>/dev/null || true
+    git add "$host" 2>/dev/null || true
     info "Host configuration staged: ./$host"
 
   fi
@@ -66,27 +68,29 @@ user | u)
   user="users/${2-}"
 
   # Ensure it doesn't already exist
-  if has $user; then
+  if has "$user"; then
     hint "User configuration exists: ./$user"
   else
 
     # Create host directory
-    mkdir -p $user
+    mkdir -p "$user"
 
     # Create an encrypted password.age file (value is x)
     echo "x" |
-      age -er $(cat /tmp/id_age | derive public) \
-        >$user/password.age
+      age -e -r "$(derive public </tmp/id_age)" \
+        >"$user"/password.age
 
     # Create a basic default.nix in this directory
-    cfg="$user/default.nix"
-    echo "{" >$cfg
-    echo "  uid = null;" >>$cfg
-    echo "  description = \"User\";" >>$cfg
-    echo "}" >>$cfg
+    {
+      echo '{'
+      echo '  uid = null;'
+      echo '  description = "User";'
+      echo '  openssh.authorizedKeys.keyFiles = [./id_ed25519.pub];'
+      echo '}'
+    } | alejandra -q >"$user/default.nix"
 
     # Stage in git
-    git add $user 2>/dev/null || true
+    git add "$user" 2>/dev/null || true
     info "User configuration staged: ./$user"
 
   fi
@@ -111,24 +115,23 @@ all | *)
 
     # Generate CA key and save to variable
     ca_key=$(mktemp)
-    openssl genrsa -out $ca_key 4096
+    openssl genrsa -out "$ca_key" 4096
 
     # Generate CA certificate expiring in 70 years
     openssl req -new -x509 -nodes \
       -extensions v3_ca \
       -days 25568 \
       -subj "/CN=Suderman CA" \
-      -key $ca_key \
+      -key "$ca_key" \
       -out zones/ca.crt
 
     git add zones/ca.crt 2>/dev/null || true
     show "./zones/ca.crt"
 
     # Encrypt CA key with age identity
-    cat $ca_key |
-      age -er $(cat /tmp/id_age | derive public) \
-        >zones/ca.age
-    shred -u $ca_key
+    age -e -r "$(derive public </tmp/id_age)" <"$ca_key" \
+      >zones/ca.age
+    shred -u "$ca_key"
 
     git add zones/ca.age 2>/dev/null || true
     show "./zones/ca.age"

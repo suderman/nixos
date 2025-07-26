@@ -1,4 +1,0 @@
-{
-  uid = null;
-  description = "User";
-}
