@@ -26,29 +26,29 @@ in
 
     # Base list of commands for devshell, plus extra
     commands = [
-      {
-        category = "key management";
-        name = "import-id";
-        help = "Generate age identity from QR code";
-        command = readFile ./import-id.sh;
-      }
-      {
-        category = "key management";
-        name = "unlock-id";
-        help = "Unlock age identity";
-        command = readFile ./unlock-id.sh;
-      }
-      {
-        category = "key management";
-        name = "lock-id";
-        help = "Lock age identity";
-        command = readFile ./lock-id.sh;
-      }
+      # {
+      #   category = "key management";
+      #   name = "import-id";
+      #   help = "Generate age identity from QR code";
+      #   command = readFile ./import-id.sh;
+      # }
+      # {
+      #   category = "key management";
+      #   name = "unlock-id";
+      #   help = "Unlock age identity";
+      #   command = readFile ./unlock-id.sh;
+      # }
+      # {
+      #   category = "key management";
+      #   name = "lock-id";
+      #   help = "Lock age identity";
+      #   command = readFile ./lock-id.sh;
+      # }
       {
         category = "development";
         name = "agenix";
-        help = "Manage secrets";
-        package = perSystem.agenix-rekey.default;
+        help = "Manage secrets and identity";
+        package = perSystem.self.agenix;
       }
       {
         category = "development";
@@ -90,7 +90,7 @@ in
       pkgs.nixos-anywhere
       pkgs.openssl
       pkgs.smenu
-      perSystem.self.qr
+      perSystem.self.agenix
       perSystem.self.derive
       perSystem.self.sshed
       perSystem.self.ipaddr
