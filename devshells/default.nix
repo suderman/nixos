@@ -26,24 +26,6 @@ in
 
     # Base list of commands for devshell, plus extra
     commands = [
-      # {
-      #   category = "key management";
-      #   name = "import-id";
-      #   help = "Generate age identity from QR code";
-      #   command = readFile ./import-id.sh;
-      # }
-      # {
-      #   category = "key management";
-      #   name = "unlock-id";
-      #   help = "Unlock age identity";
-      #   command = readFile ./unlock-id.sh;
-      # }
-      # {
-      #   category = "key management";
-      #   name = "lock-id";
-      #   help = "Lock age identity";
-      #   command = readFile ./lock-id.sh;
-      # }
       {
         category = "development";
         name = "agenix";

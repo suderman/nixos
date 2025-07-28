@@ -28,7 +28,7 @@ perSystem.self.mkScript {
         cd "$PRJ_ROOT" || exit
 
         # Confirm derivation path
-        pause "Derive Seeds (BIP-85) > 32-bytes hex > Index Number $DERIVATION_INDEX"
+        pause "Derive Seeds (BIP-85) > 32-bytes hex > Index Number ${toString flake.derivationIndex}";
 
         if [[ -f id.age ]]; then
           [[ ! -s id.age ]] &&
