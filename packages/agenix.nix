@@ -33,9 +33,11 @@ perSystem.self.mkScript {
         return 0
       }
 
+      # If PRJ_ROOT is set, change to that directory
+      [[ -n "$PRJ_ROOT" ]] && cd "$PRJ_ROOT"
+
       # Import 32 byte hex from QR saved as hex.age and generate identity id.age
       import() {
-        cd "$PRJ_ROOT" || exit
 
         # Confirm derivation path
         gum confirm "Derive Seeds (BIP-85) > 32-bytes hex > Index Number ${toString flake.derivationIndex}";
@@ -76,7 +78,6 @@ perSystem.self.mkScript {
 
       # Decrypt id.age to /tmp/id_age using passhrase
       unlock() {
-        cd "$PRJ_ROOT" || exit
 
         id="$([ -t 0 ] || cat)"
         if [[ -z "$id" ]]; then
@@ -99,7 +100,6 @@ perSystem.self.mkScript {
 
       # Delete decrypted /tmp/id_age
       lock() {
-        cd "$PRJ_ROOT" || exit
         rm -f /tmp/id_age /tmp/id_age_
         gum style \
           --border="rounded" \
