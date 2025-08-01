@@ -77,5 +77,6 @@ in
       perSystem.self.sshed
       perSystem.self.ipaddr
       perSystem.self.hello
+      perSystem.self.default
     ];
   }
