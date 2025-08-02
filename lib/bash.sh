@@ -62,7 +62,7 @@ function hasnt {
 
 # True if variable is not empty
 function defined {
-  if [[ -z "$1" ]]; then return 1; fi  
+  if [[ -z "$1" ]]; then return 1; fi
   return 0
 }
 
@@ -75,37 +75,38 @@ function empty {
 # Echo any standard input (if exists)
 function input {
   [ -t 0 ] || cat
-} 
+}
 
 # Echo information
-function info { 
-  echo "$(green_bold "#") $(green "$*")" 
+function info {
+  echo "$(green_bold "#") $(green "$*")"
 }
 
 # Echo hint
-function hint { 
-  echo "$(blue_bold "#") $(blue "$*")" 
+function hint {
+  echo "$(blue_bold "#") $(blue "$*")"
 }
 
 # Echo warning
-function warn { 
-  echo "$(red_bold "#") $(red "$*")" 
+function warn {
+  echo "$(red_bold "#") $(red "$*")"
 }
 
 # Return error
-function error { 
+function error {
   warn "Error: ${*-exiting}" && exit 1
 }
 
 # Show arguments
 function show {
-  echo "$(magenta_bold ">") $(magenta "$*")";
+  # echo "$(magenta_bold ">") $(magenta "$*")"
+  echo "    $(magenta "$*")"
 }
 
 # Echo task and execute command (unless --dry-run)
-function task { 
+function task {
   show "${@}"
-  eval "${@}" > /tmp/task
+  eval "${@}" >/tmp/task
 }
 
 # Echo output from last task
@@ -115,18 +116,18 @@ function last {
 }
 
 # Echo URL, copy to clipboard, and open in browser
-function url { 
+function url {
   has wl-copy && echo "$1" | wl-copy # linux
-  has pbcopy && echo "$1" | pbcopy #macos
-  has xdg-open && xdg-open "$1" # linux
-  has open && open "$1" # macos
+  has pbcopy && echo "$1" | pbcopy   #macos
+  has xdg-open && xdg-open "$1"      # linux
+  has open && open "$1"              # macos
   echo "$(magenta_bold ">") $(cyan_underlined "$1")"
 }
 
 # Pause script until input
 function pause {
   [[ -n "$*" ]] && info "${*}"
-  smenu -d -i "continue" -a e:7 i:2,br c:2,blr <<< "Press enter to continue ..."
+  smenu -d -i "continue" -a e:7 i:2,br c:2,blr <<<"Press enter to continue ..."
 }
 
 # Echo but spaces replaced with newlines
@@ -141,28 +142,33 @@ function explode {
 #   echo "You don't :("
 # fi
 function confirm {
-  [[ "$(ask "yes no")" == "yes" ]] && return 0 || return 1 
+  [[ "$(ask "yes no")" == "yes" ]] && return 0 || return 1
 }
 
 # info "What is your name?"
 # name="$(ask)"
 # info "Which color?"
 # color="$(ask "red green blue" "green")"
-function ask { 
+function ask {
   # Check for 1st arg or stdin
-  local words="${1-}"; [[ -p /dev/stdin ]] && words="$(cat -)"
+  local words="${1-}"
+  [[ -p /dev/stdin ]] && words="$(cat -)"
   # Check for 2nd arg as search word
-  local search="${2-}"; [[ -n "$search" ]] && search="-s ${search}" 
+  local search="${2-}"
+  [[ -n "$search" ]] && search="-s ${search}"
   # Check for 3rd arg as timer seconds
-  local timer="${3-}"; [[ -n "$timer" ]] && timer="-X ${timer}" 
+  local timer="${3-}"
+  [[ -n "$timer" ]] && timer="-X ${timer}"
   # If any words, get choice from smenu
   if [[ -n "$words" && "$words" != "-" ]]; then
-    smenu -c -a i:3,b c:3,br $search $timer <<< "$words"
+    smenu -c -a i:3,b c:3,br $search $timer <<<"$words"
   # Otherwise, prompt for input
   else
-    local reply=""; while [[ -z "$reply" ]]; do
+    local reply=""
+    while [[ -z "$reply" ]]; do
       read -p "$(blue_bold :) " -i "${2-}" -e reply
-    done; echo "$reply"
+    done
+    echo "$reply"
   fi
 }
 
@@ -179,7 +185,7 @@ function ask_ip {
     else
       [[ -n "$ip" ]] && search="-s $ip" || search=""
       ips="$(echo "${ips} ${ip}" | tr ' ' '\n' | sort | uniq | xargs)"
-      ip="$(smenu -m "Retrying IP address" -q -d -a i:3,b c:3,br $search -x 10 <<< "[new] $ips [cancel]" )"
+      ip="$(smenu -m "Retrying IP address" -q -d -a i:3,b c:3,br $search -x 10 <<<"[new] $ips [cancel]")"
       [[ "$ip" == "[cancel]" ]] && return 1
       [[ "$ip" == "[new]" ]] && ip="$(ask - "$last_ip")"
     fi
@@ -211,7 +217,7 @@ function flake {
 # 0: black    1: red    2: green
 # 3: yellow   4: blue   5: purple
 # 6: aqua     7: white  8: gray
-# 
+#
 # [b]old b[l]inking [r]everse [u]nderline
 #
 # -N                   :: numbers added for selection
@@ -222,5 +228,4 @@ function flake {
 # -1 '^[a-z].' '1/0,b' :: regex for formatting
 # -m                   :: Message for title
 # -d                   :: Clear menu after selection
-# -W$'\n'              :: 
-
+# -W$'\n'              ::

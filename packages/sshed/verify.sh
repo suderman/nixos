@@ -1,3 +1,5 @@
+#! /usr/bin/env bash
+
 # Determine which key pair to check
 if [[ -f ssh_host_ed25519_key ]]; then
   private_key="ssh_host_ed25519_key"
@@ -6,16 +8,16 @@ elif [[ -f id_ed25519 ]]; then
   private_key="id_ed25519"
   public_key="id_ed25519.pub"
 else
-  error "No valid ed25519 key pair found in $(pwd)"
+  gum_warn "No valid ed25519 key pair found in $(pwd)"
 fi
 
 # Ensure private key exists
 [[ -f "$private_key" ]] ||
-  error "$(pwd)/$private_key missing"
+  gum_warn "$(pwd)/$private_key missing"
 
 # Ensure public key exists
 [[ -f "$public_key" ]] ||
-  error "$(pwd)/$public_key missing"
+  gum_warn "$(pwd)/$public_key missing"
 
 # Extract type from current public key (should be ssh-ed25519)
 current_pub_type="$(cut -d' ' -f1 <"$public_key")"
@@ -24,14 +26,14 @@ current_pub_type="$(cut -d' ' -f1 <"$public_key")"
 current_pub_key="$(cut -d' ' -f1,2 <"$public_key")"
 
 # Derive expected public key from current private key (should match above)
-derived_pub_key="$(cat "$private_key" | derive public)"
+derived_pub_key="$(derive public <"$private_key")"
 
 # Ensure public key type
 [[ "ssh-ed25519" == "$current_pub_type" ]] ||
-  error "$(pwd)/$public_key ssh-ed25519 NOT detected"
+  gum_warn "$(pwd)/$public_key ssh-ed25519 NOT detected"
 
 # Ensure key pair actually matches
 [[ "$current_pub_key" == "$derived_pub_key" ]] ||
-  error "$(pwd)/$private_key INVALID, does NOT match existing public key"
+  gum_warn "$(pwd)/$private_key INVALID, does NOT match existing public key"
 
-info "VALID: SSH host private & public keys match!"
+gum_info "VALID: SSH host private & public keys match!"
