@@ -31,6 +31,6 @@ for user in $(dirs users); do
     derive public "$user@${derivation_path-}" \
       >"users/$user/id_ed25519.pub"
   git add "users/$user/id_ed25519.pub" 2>/dev/null || true
-  show "./users/$user/id_ed25519.pub"
+  gum_show "./users/$user/id_ed25519.pub"
 
 done
