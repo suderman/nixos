@@ -72,6 +72,7 @@ in
       pkgs.nixos-anywhere
       pkgs.openssl
       pkgs.smenu
+      (pkgs.python3.withPackages (ps: [ps.cryptography]))
       perSystem.self.agenix
       perSystem.self.derive
       perSystem.self.sshed
