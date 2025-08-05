@@ -3,18 +3,24 @@
   perSystem,
   flake,
   ...
-}: let
-  inherit (builtins) readFile;
-  inherit (pkgs) git gnugrep gum inetutils iptables netcat age;
-  inherit (perSystem.self) derive ipaddr;
-in
-  perSystem.self.mkScript {
-    name = "sshed";
-    path = [derive git gnugrep gum inetutils ipaddr iptables netcat age];
+}:
+perSystem.self.mkScript {
+  name = "sshed";
+  path = [
+    perSystem.self.derive
+    perSystem.self.ipaddr
+    pkgs.age
+    pkgs.git
+    pkgs.gnugrep
+    pkgs.gum
+    pkgs.inetutils
+    pkgs.iptables
+    pkgs.netcat
+  ];
 
-    # Derivation path for key
-    env.derivation_path = "bip85-hex32-index${toString flake.derivationIndex}";
+  # Derivation path for key
+  env.derivation_path = "bip85-hex32-index${toString flake.derivationIndex}";
 
-    # Bash script
-    text = readFile ./sshed.sh;
-  }
+  # Bash script
+  text = builtins.readFile ./sshed.sh;
+}
