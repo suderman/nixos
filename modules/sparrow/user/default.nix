@@ -32,7 +32,7 @@ in {
       sparrow-desktop-wrapper = mkShellScript {
         name = "sparrow-desktop-wrapper";
         text = ''
-          JAVA_TOOL_OPTIONS="-Dglass.gtk.uiScale=${toString cfg.scale}" ${getExe pkgs.sparrow} -d ${cfg.configDir}
+          JAVA_TOOL_OPTIONS="-Dglass.gtk.uiScale=${toString cfg.scale}" ${getExe pkgs.unstable.sparrow} -d ${cfg.configDir}
         '';
       };
     in {
