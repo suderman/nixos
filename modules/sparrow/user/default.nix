@@ -1,6 +1,10 @@
 # programs.sparrow.enable = true;
-{ config, lib, pkgs, ... }: let
-
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
   cfg = config.programs.sparrow;
   inherit (lib) mkIf mkOption types getExe mkShellScript;
   inherit (builtins) toString;
@@ -8,14 +12,12 @@
 
   # Window class name
   class = "Sparrow";
-
 in {
-
   options.programs.sparrow = {
-    enable = lib.options.mkEnableOption "sparrow"; 
-    scale = mkOption { 
-      type = types.float; 
-      default = 1.5; 
+    enable = lib.options.mkEnableOption "sparrow";
+    scale = mkOption {
+      type = types.float;
+      default = 1.5;
     };
     configDir = mkOption {
       type = types.path;
@@ -24,24 +26,20 @@ in {
   };
 
   config = mkIf cfg.enable {
+    home.packages = [pkgs.unstable.sparrow];
 
-    home.packages = [ pkgs.sparrow ];
-
-    xdg.desktopEntries = let 
-
+    xdg.desktopEntries = let
       sparrow-desktop-wrapper = mkShellScript {
         name = "sparrow-desktop-wrapper";
         text = ''
-          JAVA_TOOL_OPTIONS="-Dglass.gtk.uiScale=${toString cfg.scale}" ${getExe pkgs.sparrow} -d ${cfg.configDir}  
+          JAVA_TOOL_OPTIONS="-Dglass.gtk.uiScale=${toString cfg.scale}" ${getExe pkgs.sparrow} -d ${cfg.configDir}
         '';
       };
-
     in {
-
       "sparrow-desktop" = {
-        name = "Sparrow Bitcoin Wallet"; 
+        name = "Sparrow Bitcoin Wallet";
         genericName = "Bitcoin Wallet";
-        icon = "sparrow-desktop"; 
+        icon = "sparrow-desktop";
         terminal = false;
         type = "Application";
         exec = "${getExe sparrow-desktop-wrapper}";
@@ -59,7 +57,5 @@ in {
         "noblur,class:^${class}$,title:^()$"
       ];
     };
-
   };
-
 }
