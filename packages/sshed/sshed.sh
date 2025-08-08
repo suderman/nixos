@@ -26,7 +26,7 @@ main() {
     sshed_receive "$@"
     ;;
   send | s)
-    ssshed_send "$@"
+    sshed_send "$@"
     ;;
   verify | v)
     sshed_verify "$@"

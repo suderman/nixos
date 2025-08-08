@@ -130,6 +130,7 @@ nixos_add_host() {
     {
       echo '{ flake, ... }: {'
       echo '  imports = [ flake.nixosModules.common ];'
+      echo '  config.networking.domain = "home";'
       echo '}'
     } | alejandra -q >"$host/configuration.nix"
 
