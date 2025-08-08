@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Pretty output
-gum_warn() { gum style --foreground=196 "✖ Error: $*" && return 1; }
+gum_warn() { gum style --foreground=196 "✖ Error: $*" && exit 1; }
 gum_info() { gum style --foreground=29 "➜ $*"; }
 gum_head() { gum style --foreground=99 "$*"; }
 gum_show() { gum style --foreground=177 "    $*"; }
