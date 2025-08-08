@@ -18,14 +18,8 @@ main() {
   age | a)
     derive_age "$@" <<<"$input"
     ;;
-  cert | c)
-    derive_cert "$@" <<<"$input"
-    ;;
   hex | h)
     derive_hex "$@" <<<"$input"
-    ;;
-  key | k)
-    derive_key "$@" <<<"$input"
     ;;
   public | p)
     derive_public "$@" <<<"$input"
@@ -48,9 +42,7 @@ help() {
 Usage: derive FORMAT [ARGS] <<<123
 
   age
-  cert [NAME]
   hex [SALT] [LEN]
-  key [NAME]
   public [COMMENT]
   ssh [PASSPHRASE]
   help
@@ -81,37 +73,6 @@ derive_age() {
   echo "# imported from: $(derive_public <<<"$ssh")"
   echo "# public key: $(derive_public <<<"$age")"
   echo "$age"
-
-}
-
-# ---------------------------------------------------------------------
-# DERIVE_CERT
-# ---------------------------------------------------------------------
-derive_cert() {
-
-  # Exit if standard input is missing
-  local input
-  input="$([ -t 0 ] || cat)"
-  [[ -z "$input" ]] && exit 0
-
-  local cakey
-  cakey="$(derive_key <<<"$input")"
-
-  local cacert
-  cacert="$(python3 "${path_to_cert_py-}" <<<"$cakey")"
-
-  local common_name
-  common_name="${2-}"
-
-  if [[ -z "$common_name" ]]; then
-    echo "$cacert"
-  else
-    python3 "${path_to_cert_py-}" \
-      --name "$common_name" \
-      --cacert <(echo "$cacert") \
-      --cakey <(echo "$cakey") \
-      <<<"$(derive_key "$common_name" <<<"$input")"
-  fi
 
 }
 
@@ -172,14 +133,6 @@ derive_public() {
   elif grep -q "OPENSSH PRIVATE KEY" <<<"$input"; then
     local comment="${1-}" # optional ssh comment
     echo "$(ssh-keygen -y -f <(echo "$input") | cut -d ' ' -f 1,2) $comment"
-
-  # If ed25519 key detected, extract private key from secret and output
-  elif grep -q "BEGIN PRIVATE KEY" <<<"$input"; then
-    openssl ec -in <(echo "$input") -pubout 2>/dev/null
-
-  # If certificate detected, extract private key from secret and output
-  elif grep "BEGIN CERTIFICATE" <<<"$input"; then
-    openssl x509 -in <(echo "$input") -pubkey -noout 2>/dev/null
 
   # Fallback on echoing the input to output
   else

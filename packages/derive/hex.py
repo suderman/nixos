@@ -1,4 +1,17 @@
 #!/usr/bin/env python3
+"""
+Parse input data into a 32-byte key, optionally mixing in a salt.
+
+Supported input formats:
+- Base64 string
+- Hex string
+- Raw text
+
+If salt is provided, the input is salted and hashed.
+If input is exactly 32 bytes and no salt is provided, it is returned unchanged.
+"""
+
+from __future__ import annotations
 
 import sys
 import base64
@@ -6,50 +19,48 @@ import hashlib
 import binascii
 
 
-def parse_input(input_data, salt=None):
+def parse_input(input_data: str, salt: str | None = None) -> bytes:
     """
-    Parse input data, supporting multiple formats:
-    - Base64 encoded string
-    - Hex encoded string
-    - Raw bytes/string
+    Parse input into a 32-byte key.
 
-    Optionally mix with salt to create a derivative key.
-    If input is exactly 32 bytes and no salt is provided, return it unchanged.
+    Args:
+        input_data: Input string (Base64, hex, or raw text).
+        salt: Optional salt to mix in before hashing.
 
-    Returns 32-byte key
+    Returns:
+        32-byte key.
+
+    Raises:
+        ValueError: If the input cannot be parsed.
     """
     try:
-        # Try base64 decoding first
+        # Base64 decode
         try:
-            data_bytes = base64.b64decode(input_data)
+            data_bytes = base64.b64decode(input_data, validate=True)
             if len(data_bytes) == 32 and salt is None:
                 return data_bytes
-        except:
+        except (binascii.Error, ValueError):
             pass
 
-        # Try hex decoding
+        # Hex decode
         try:
             data_bytes = binascii.unhexlify(input_data)
             if len(data_bytes) == 32 and salt is None:
                 return data_bytes
-        except:
+        except (binascii.Error, ValueError):
             pass
 
-        # Try direct string to bytes (UTF-8)
+        # UTF-8 encode
         data_bytes = input_data.encode("utf-8")
 
-        # Special case: If input is exactly 32 bytes and no salt, return unchanged
+        # If exactly 32 bytes and no salt → return directly
         if len(data_bytes) == 32 and salt is None:
             return data_bytes
 
-        # If salt is provided, mix it with the input
-        if salt:
+        if salt is not None:
             salt_bytes = salt.encode("utf-8")
-            # Create a combined input for hashing
             mixed_input = data_bytes + b":" + salt_bytes
-            # Always hash when salt is provided for consistent derivation
             result_bytes = hashlib.sha256(mixed_input).digest()
-        # If input without salt is not exactly 32 bytes, hash to get 32 bytes
         elif len(data_bytes) != 32:
             result_bytes = hashlib.sha256(data_bytes).digest()
         else:
@@ -57,33 +68,27 @@ def parse_input(input_data, salt=None):
 
         return result_bytes[:32]
 
-    except Exception as e:
-        raise ValueError(f"Could not parse input data: {e}")
+    except Exception as err:
+        raise ValueError(f"Could not parse input data: {err}") from err
 
 
-def main():
-    try:
-        # Get salt from first command line argument if provided
-        salt = sys.argv[1] if len(sys.argv) > 1 else None
+def main() -> None:
+    """Read stdin and optional salt from argv, output derived 32-byte key as hex."""
+    salt = sys.argv[1] if len(sys.argv) > 1 else None
+    input_data = sys.stdin.read().strip()
 
-        # Read input from standard input
-        input_data = sys.stdin.read().strip()
-
-        if not input_data:
-            print("Error: No input data provided on standard input", file=sys.stderr)
-            sys.exit(1)
-
-        # Parse input with flexible input and optional salt
-        key_bytes = parse_input(input_data, salt)
-
-        # Output the key in hex format
-        print(binascii.hexlify(key_bytes).decode("utf-8"), end="")
-
-    except ValueError as e:
-        print(f"Error: {e}", file=sys.stderr)
+    if not input_data:
+        print("Error: No input data provided on standard input", file=sys.stderr)
         sys.exit(1)
-    except Exception as e:
-        print(f"Unexpected error: {e}", file=sys.stderr)
+
+    try:
+        key_bytes = parse_input(input_data, salt)
+        print(binascii.hexlify(key_bytes).decode("utf-8"), end="")
+    except ValueError as err:
+        print(f"Error: {err}", file=sys.stderr)
+        sys.exit(1)
+    except Exception as err:
+        print(f"Unexpected error: {err}", file=sys.stderr)
         sys.exit(1)
 
 

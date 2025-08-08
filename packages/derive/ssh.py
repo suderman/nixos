@@ -1,112 +1,116 @@
 #!/usr/bin/env python3
+"""
+Generate a deterministic ED25519 SSH private key from a provided seed.
+
+The seed may be provided as:
+- Base64 string
+- Hex string
+- Raw string/bytes
+- Any other string (will be SHA-256 hashed to 32 bytes)
+"""
+
+from __future__ import annotations
+
 import sys
 import base64
 import hashlib
 import binascii
-import cryptography.hazmat.primitives.asymmetric.ed25519 as crypto_ed25519
-import cryptography.hazmat.primitives.serialization as serialization
+
+from cryptography.hazmat.primitives.asymmetric import ed25519 as crypto_ed25519
+from cryptography.hazmat.primitives import serialization
 
 
-def parse_seed(seed_input):
+def parse_seed(seed_input: str) -> bytes:
     """
-    Parse seed input, supporting multiple formats:
-    - Base64 encoded string
-    - Hex encoded string
-    - Raw bytes/string
-
-    Returns 32-byte seed
-    """
-    try:
-        # Try base64 decoding first
-        try:
-            seed_bytes = base64.b64decode(seed_input)
-            if len(seed_bytes) == 32:
-                return seed_bytes
-        except:
-            pass
-
-        # Try hex decoding
-        try:
-            seed_bytes = binascii.unhexlify(seed_input)
-            if len(seed_bytes) == 32:
-                return seed_bytes
-        except:
-            pass
-
-        # Try direct string to bytes (UTF-8)
-        seed_bytes = seed_input.encode("utf-8")
-
-        # If input is not exactly 32 bytes, hash to get 32 bytes
-        if len(seed_bytes) != 32:
-            seed_bytes = hashlib.sha256(seed_bytes).digest()
-
-        return seed_bytes[:32]
-
-    except Exception as e:
-        raise ValueError(f"Could not parse seed: {e}")
-
-
-def generate_deterministic_keypair(seed):
-    """
-    Generate a deterministic ED25519 key pair from a 32-byte seed.
+    Parse seed input and normalize to 32 bytes.
 
     Args:
-        seed (bytes): 32-byte seed for key generation
+        seed_input: Seed string (Base64, hex, or raw text).
 
     Returns:
-        private_key: Ed25519 private key
+        A 32-byte seed.
+
+    Raises:
+        ValueError: If input cannot be parsed into a valid seed.
     """
-    # Ensure seed is exactly 32 bytes
+    # Try Base64
+    try:
+        seed_bytes = base64.b64decode(seed_input, validate=True)
+        if len(seed_bytes) == 32:
+            return seed_bytes
+    except (binascii.Error, ValueError):
+        pass
+
+    # Try Hex
+    try:
+        seed_bytes = binascii.unhexlify(seed_input)
+        if len(seed_bytes) == 32:
+            return seed_bytes
+    except (binascii.Error, ValueError):
+        pass
+
+    # Raw UTF-8
+    seed_bytes = seed_input.encode("utf-8")
+
+    # If not exactly 32 bytes, hash to 32 bytes
+    if len(seed_bytes) != 32:
+        seed_bytes = hashlib.sha256(seed_bytes).digest()
+
+    return seed_bytes[:32]
+
+
+def generate_deterministic_keypair(seed: bytes) -> crypto_ed25519.Ed25519PrivateKey:
+    """
+    Generate a deterministic ED25519 private key from a 32-byte seed.
+
+    Args:
+        seed: 32-byte seed.
+
+    Returns:
+        An Ed25519PrivateKey instance.
+
+    Raises:
+        ValueError: If the seed is not 32 bytes.
+    """
     if len(seed) != 32:
         raise ValueError("Seed must be exactly 32 bytes long")
-
-    # Generate private key from seed using cryptography library
-    private_key = crypto_ed25519.Ed25519PrivateKey.from_private_bytes(seed)
-
-    return private_key
+    return crypto_ed25519.Ed25519PrivateKey.from_private_bytes(seed)
 
 
-def format_ssh_private_key(private_key):
+def format_ssh_private_key(private_key: crypto_ed25519.Ed25519PrivateKey) -> str:
     """
-    Format private key in OpenSSH format.
+    Format the private key in OpenSSH format.
 
     Args:
-        private_key: Cryptography Ed25519 private key
+        private_key: Ed25519 private key.
 
     Returns:
-        str: Formatted SSH private key
+        String containing the OpenSSH private key.
     """
-    # Serialize to OpenSSH format
     pem_private = private_key.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.OpenSSH,
         encryption_algorithm=serialization.NoEncryption(),
     )
-
     return pem_private.decode("utf-8")
 
 
-def main():
+def main() -> None:
+    """
+    Main entry point: read seed from stdin, generate key, output to stdout.
+    """
+    seed_input = sys.stdin.read().strip()
+    if not seed_input:
+        print("Error: No seed provided on standard input", file=sys.stderr)
+        sys.exit(1)
+
     try:
-        # Read seed from standard input
-        seed_input = sys.stdin.read().strip()
-
-        if not seed_input:
-            print("Error: No seed provided on standard input", file=sys.stderr)
-            sys.exit(1)
-
-        # Parse seed with flexible input
         seed_bytes = parse_seed(seed_input)
-
-        # Generate deterministic key pair
         private_key = generate_deterministic_keypair(seed_bytes)
-
-        # Output private key to stdout
         formatted_key = format_ssh_private_key(private_key)
         print(formatted_key, end="")
-
-    except ValueError as e:
-        print(f"Error: {e}", file=sys.stderr)
+    except ValueError as err:
+        print(f"Error: {err}", file=sys.stderr)
         sys.exit(1)
 
 
