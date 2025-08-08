@@ -20,19 +20,19 @@ main() {
 
   case "$cmd" in
   generate | gen | g)
-    generate "$@"
+    sshed_generate "$@"
     ;;
   receive | r)
-    receive "$@"
+    sshed_receive "$@"
     ;;
   send | s)
-    send "$@"
+    ssshed_send "$@"
     ;;
   verify | v)
-    verify "$@"
+    sshed_verify "$@"
     ;;
   help | *)
-    help
+    sshed_help
     ;;
   esac
 
@@ -41,7 +41,7 @@ main() {
 # ---------------------------------------------------------------------
 # HELP
 # ---------------------------------------------------------------------
-help() {
+sshed_help() {
   cat <<EOF
 Usage: sshed COMMAND
 
@@ -56,7 +56,7 @@ EOF
 # ---------------------------------------------------------------------
 # GENERATE
 # ---------------------------------------------------------------------
-generate() {
+sshed_generate() {
 
   # Ensure key exists and identity unlocked
   [[ ! -f hex.age ]] && gum_warn "./hex.age missing"
@@ -98,7 +98,7 @@ generate() {
 # ---------------------------------------------------------------------
 # RECEIVE
 # ---------------------------------------------------------------------
-receive() {
+sshed_receive() {
 
   # Ensure public key exists
   [[ -e ./ssh_host_ed25519_key.pub ]] ||
@@ -145,7 +145,7 @@ receive() {
 # ---------------------------------------------------------------------
 # SEND
 # ---------------------------------------------------------------------
-send() {
+sshed_send() {
 
   # Ensure key exists and identity unlocked
   [[ ! -f hex.age ]] && gum_warn "./hex.age missing"
@@ -202,7 +202,7 @@ send() {
 # ---------------------------------------------------------------------
 # VERIFY
 # ---------------------------------------------------------------------
-verify() {
+sshed_verify() {
 
   # Determine which key pair to check
   if [[ -f ssh_host_ed25519_key ]]; then

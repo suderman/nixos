@@ -7,12 +7,55 @@ gum_info() { gum style --foreground=29 "➜ $*"; }
 gum_head() { gum style --foreground=99 "$*"; }
 gum_show() { gum style --foreground=177 "    $*"; }
 
-add() {
-  add_type=$(gum choose --header="Add to this flake:" "user" "host")
-  "add_${add_type}"
+# List subdirectories for given directory
+dirs() { find "$1" -mindepth 1 -maxdepth 1 -type d -printf '%f\n'; }
+
+# ---------------------------------------------------------------------
+# MAIN
+# ---------------------------------------------------------------------
+main() {
+
+  local cmd="${1-}"
+  shift
+
+  case "$cmd" in
+  add | a)
+    nixos_add "$@"
+    ;;
+  generate | gen | g)
+    nixos_generate "$@"
+    ;;
+  help | *)
+    nixos_help
+    ;;
+  esac
+
 }
 
-add_user() {
+# ---------------------------------------------------------------------
+# HELP
+# ---------------------------------------------------------------------
+nixos_help() {
+  cat <<EOF
+Usage: nixos COMMAND
+
+  deploy
+  repl
+  add
+  generate
+  help
+EOF
+}
+
+# ---------------------------------------------------------------------
+# ADD
+# ---------------------------------------------------------------------
+nixos_add() {
+  add_type=$(gum choose --header="Add to this flake:" "user" "host")
+  "nixos_add_${add_type}"
+}
+
+nixos_add_user() {
   gum_head "Add a user to this flake:"
   local username
   username="$(gum input --placeholder "username")"
@@ -50,10 +93,10 @@ add_user() {
   fi
 
   # Generate missing files
-  generate
+  nixos_generate
 }
 
-add_host() {
+nixos_add_host() {
   gum_head "Add a host to this flake:"
   local hostname
   hostname="$(gum input --placeholder "hostname")"
@@ -72,9 +115,7 @@ add_host() {
     mkdir -p "$host"/users
 
     # Add users for home-manager configuration
-    find users -mindepth 1 -maxdepth 1 -type d -print0 | while IFS= read -r -d '' user_path; do
-      local user
-      user=$(basename "$user_path")
+    for user in $(dirs users); do
       local expr="({ isSystemUser = false; } // (import ./users/$user)).isSystemUser"
       if [[ "$(nix eval --impure --expr "$expr")" == "false" ]]; then
         {
@@ -98,10 +139,13 @@ add_host() {
   fi
 
   # Generate missing files
-  generate
+  nixos_generate
 }
 
-generate() {
+# ---------------------------------------------------------------------
+# GENERATE
+# ---------------------------------------------------------------------
+nixos_generate() {
 
   # Generate missing SSH keys for hosts and users
   gum_info "Generating SSH keys..."
@@ -147,18 +191,4 @@ generate() {
   agenix rekey -a
 }
 
-# Command dispatch
-cmd="${1:-}"
-case "$cmd" in
-add | generate | repl | deploy)
-  "$cmd"
-  exit 0
-  ;;
-"" | --help | -h | help)
-  echo "Usage: nix run . COMMAND"
-  echo
-  echo "  add"
-  echo "  generate"
-  echo "  help"
-  ;;
-esac
+main "${@-}"

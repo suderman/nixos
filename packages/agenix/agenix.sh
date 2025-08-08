@@ -9,6 +9,47 @@ gum_show() { gum style --foreground=177 "    $*"; }
 # If PRJ_ROOT is set, change to that directory
 [[ -n "$PRJ_ROOT" ]] && cd "$PRJ_ROOT"
 
+# ---------------------------------------------------------------------
+# MAIN
+# ---------------------------------------------------------------------
+main() {
+
+  case "${1:-}" in
+  import | i)
+    agenix_import
+    exit 0
+    ;;
+  unlock | u)
+    agenix_unlock
+    exit 0
+    ;;
+  lock | l)
+    agenix_lock
+    exit 0
+    ;;
+  "" | --help | -h | help)
+    agenix --help "$@" || true
+    agenix_help
+    exit 0
+    ;;
+  *)
+    agenix "$@"
+    ;;
+  esac
+
+}
+
+# Display extended commands with agenix help
+agenix_help() {
+  cat <<EOF
+
+EXTENDED COMMANDS:
+  import                  Import a QR-derived age identity to id.age
+  unlock                  Unlock id.age to /tmp/id_age
+  lock                    Remove temporary age identity from /tmp/id_age
+EOF
+}
+
 # Import 32 byte hex from QR saved as hex.age and generate identity id.age
 agenix_import() {
 
@@ -85,38 +126,4 @@ agenux_lock() {
     "🔒 Age identity locked"
 }
 
-# Display extended commands with agenix help
-agenix_help() {
-  cat <<EOF
-
-EXTENDED COMMANDS:
-  import                  Import a QR-derived age identity to id.age
-  unlock                  Unlock id.age to /tmp/id_age
-  lock                    Remove temporary age identity from /tmp/id_age
-EOF
-}
-
-# Command dispatch
-cmd="${1:-}"
-case "$cmd" in
-import | i)
-  agenix_import
-  exit 0
-  ;;
-unlock | u)
-  agenix_unlock
-  exit 0
-  ;;
-lock | l)
-  agenix_lock
-  exit 0
-  ;;
-"" | --help | -h | help)
-  agenix --help "$@" || true
-  agenix_help
-  exit 0
-  ;;
-*)
-  agenix "$@"
-  ;;
-esac
+main "${@-}"
