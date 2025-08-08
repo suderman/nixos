@@ -73,7 +73,7 @@ agenix_import() {
   fi
 
   # Write a password-protected copy of the age identity
-  derive age <<<"$hex" | age -ep >id.age
+  derive age <<<"$hex" | age -e -p >id.age
   gum_info "Private age identity written:"
   gum_show "./id.age"
 

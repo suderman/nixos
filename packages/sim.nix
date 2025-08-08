@@ -1,24 +1,24 @@
 {
   pkgs,
   perSystem,
-  flake,
   ...
 }:
 perSystem.self.mkScript {
+  name = "sim";
   path = [
     perSystem.self.derive
     perSystem.self.iso
+    pkgs.age
+    pkgs.gum
     pkgs.passh
     pkgs.qemu
-    pkgs.age
   ];
-
-  name = "sim";
 
   text = let
     disks = map toString [1 2 3 4];
 
-    qemu-system = toString ([
+    qemu-system = toString (
+      [
         "qemu-system-x86_64"
         "-enable-kvm" # kernel-based virtual machine
         "-m 6144" # 6GB of RAM
@@ -42,9 +42,8 @@ perSystem.self.mkScript {
           "-device virtio-blk-pci,drive=disk${n},serial=${n}"
           "-drive file=hosts/sim/disk${n}.img,format=qcow2,if=none,id=disk${n}"
         ])
-      disks));
-
-    # qemu-system-x86_64 -enable-kvm -m 8G -smp 4 -device virtio-vga-gl -display gtk,gl=on -device AC97 -nic user,hostfwd=tcp::2222-:22,hostfwd=tcp::12345-:12345,hostfwd=tcp::4443-:443 -device virtio-blk-pci,drive=disk1,serial=1 -drive file=hosts/sim/disk1.img,format=qcow2,if=none,id=disk1 -device virtio-blk-pci,drive=disk2,serial=2 -drive file=hosts/sim/disk2.img,format=qcow2,if=none,id=disk2 -device virtio-blk-pci,drive=disk3,serial=3 -drive file=hosts/sim/disk3.img,format=qcow2,if=none,id=disk3 -device virtio-blk-pci,drive=disk4,serial=4 -drive file=hosts/sim/disk4.img,format=qcow2,if=none,id=disk4
+      disks)
+    );
 
     qemu-img = builtins.concatStringsSep "\n" (map (n:
       toString [
@@ -52,26 +51,34 @@ perSystem.self.mkScript {
         "qemu-img create -f qcow2 hosts/sim/disk${n}.img 100G"
       ])
     disks);
-
-    derive-ssh = toString [
-      "cat hex.age |"
-      "age -d -i /tmp/id_age |"
-      "derive hex sim |"
-      "derive ssh > hosts/sim/ssh_host_ed25519_key &&"
-      "chmod 600 hosts/sim/ssh_host_ed25519_key"
-    ];
   in
     # bash
     ''
-      source ${flake.lib.bash}
-      [[ -z "''${PRJ_ROOT-}" ]] || cd $PRJ_ROOT
-      [[ ! -f hex.age ]] && error "./hex.age missing"
-      [[ ! -f /tmp/id_age ]] && error "Age identity locked"
+      # Pretty output
+      gum_warn() { gum style --foreground=196 "✖ Error: $*" && exit 1; }
+      gum_info() { gum style --foreground=29 "➜ $*"; }
+      gum_show() { gum style --foreground=177 "    $*"; }
 
+      # If PRJ_ROOT is set, change to that directory
+      [[ -n "$PRJ_ROOT" ]] && cd "$PRJ_ROOT"
+
+      # Ensure key exists and identity unlocked
+      [[ ! -f hex.age ]] && gum_warn "./hex.age missing"
+      [[ ! -f /tmp/id_age ]] && gum_warn "Age identity locked"
+
+      # Derive ssh private key
+      age -d -i /tmp/id_age <hex.age |
+        derive hex sim |
+        derive ssh > hosts/sim/ssh_host_ed25519_key &&
+        chmod 600 hosts/sim/ssh_host_ed25519_key
+
+      # Set path to ssh private key in env variable
       export NIX_SSHOPTS="-p 2222 -i hosts/sim/ssh_host_ed25519_key"
-      ${derive-ssh}
+
+      # Ensure disk images exist
       ${qemu-img}
 
+      # Dispatch
       case "''${1-}" in
 
         up | u)
