@@ -126,7 +126,7 @@ sshed_receive() {
     # Wait for private key to be received over netcat
     nc -l -N 12345 >"$tmp/ssh_host_ed25519_key"
 
-    if $0 verify; then
+    if ssh_verify; then
       mv "$tmp/ssh_host_ed25519_key" "$dir/ssh_host_ed25519_key"
       chmod 600 "$dir/ssh_host_ed25519_key"
       cd "$dir" && rm -rf "$tmp"
@@ -224,13 +224,13 @@ sshed_verify() {
     gum_warn "$(pwd)/$public_key missing"
 
   # Extract type from current public key (should be ssh-ed25519)
-  current_pub_type="$(cut -d' ' -f1 <"$public_key")"
+  current_pub_type="$(cut -d' ' -f1 <"$public_key" | xargs)"
 
   # Extract key from current public key (without comment)
-  current_pub_key="$(cut -d' ' -f1,2 <"$public_key")"
+  current_pub_key="$(cut -d' ' -f1,2 <"$public_key" | xargs)"
 
   # Derive expected public key from current private key (should match above)
-  derived_pub_key="$(derive public <"$private_key")"
+  derived_pub_key="$(derive public <"$private_key" | xargs)"
 
   # Ensure public key type
   [[ "ssh-ed25519" == "$current_pub_type" ]] ||

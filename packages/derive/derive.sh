@@ -132,7 +132,7 @@ derive_public() {
   # If ssh ed25519 detected, extract public key from secret and output
   elif grep -q "OPENSSH PRIVATE KEY" <<<"$input"; then
     local comment="${1-}" # optional ssh comment
-    echo "$(ssh-keygen -y -f <(echo "$input") | cut -d ' ' -f 1,2) $comment"
+    xargs <<<"$(ssh-keygen -y -f <(echo "$input") | cut -d ' ' -f 1,2) $comment"
 
   # Fallback on echoing the input to output
   else
