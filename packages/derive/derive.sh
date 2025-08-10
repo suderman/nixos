@@ -97,25 +97,6 @@ derive_hex() {
 }
 
 # ---------------------------------------------------------------------
-# DERIVE_KEY
-# ---------------------------------------------------------------------
-derive_key() {
-
-  # Exit if standard input is missing
-  local input
-  input="$([ -t 0 ] || cat)"
-  [[ -z "$input" ]] && exit 0
-
-  if grep -q "BEGIN PRIVATE KEY" <<<"$input"; then
-    echo "$input"
-  else
-    local name="${1-}" # optional key name
-    derive_hex "$name" <<<"$input" | python3 "${path_to_key_py-}"
-  fi
-
-}
-
-# ---------------------------------------------------------------------
 # DERIVE_PUBLIC
 # ---------------------------------------------------------------------
 derive_public() {
