@@ -28,15 +28,15 @@ in
     commands = [
       {
         category = "development";
-        name = "agenix";
-        help = "Manage secrets and identity";
-        package = perSystem.self.agenix;
+        name = "nixos";
+        help = "Deploy hosts and generate files";
+        package = perSystem.self.default;
       }
       {
         category = "development";
-        name = "init";
-        help = "Generate hosts, users and related files";
-        command = readFile ./init.sh;
+        name = "agenix";
+        help = "Manage secrets and identity";
+        package = perSystem.self.agenix;
       }
       {
         category = "development";
@@ -49,12 +49,6 @@ in
         name = "sim";
         help = "boot vm";
         package = perSystem.self.sim;
-      }
-      {
-        category = "virtual machine";
-        name = "iso";
-        help = "build iso";
-        package = perSystem.self.iso;
       }
     ];
 

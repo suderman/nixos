@@ -10,6 +10,9 @@ gum_show() { gum style --foreground=177 "    $*"; }
 # List subdirectories for given directory
 dirs() { find "$1" -mindepth 1 -maxdepth 1 -type d -printf '%f\n'; }
 
+# If PRJ_ROOT is set, change to that directory
+[[ -n "$PRJ_ROOT" ]] && cd "$PRJ_ROOT"
+
 # ---------------------------------------------------------------------
 # MAIN
 # ---------------------------------------------------------------------
@@ -25,6 +28,9 @@ main() {
   generate | gen | g)
     nixos_generate "$@"
     ;;
+  iso | i)
+    nixos_iso "$@"
+    ;;
   help | *)
     nixos_help
     ;;
@@ -39,11 +45,15 @@ nixos_help() {
   cat <<EOF
 Usage: nixos COMMAND
 
-  deploy
-  repl
-  add
-  generate
-  help
+  deploy    Deploy a NixOS host configuration
+  repl      Start the NixOS REPL
+  add       Add a NixOS host or user
+  generate  Generate missing files
+  iso       Manage NixOS ISO image
+    path    Show path to NixOS ISO
+    build   Build NixOS ISO
+    flash   Flash NixOS ISO to a USB device
+  help      Show this help
 EOF
 }
 
@@ -190,6 +200,87 @@ nixos_generate() {
   # Ensure secrets are rekeyed for all hosts
   gum_info "Rekeying secrets..."
   agenix rekey -a
+}
+
+# ---------------------------------------------------------------------
+# ISO
+# ---------------------------------------------------------------------
+nixos_iso() {
+
+  case "${1:-help}" in
+  path | p)
+    nixos_iso_path
+    ;;
+  build | b)
+    nixos_iso_build
+    ;;
+  flash | f)
+    nixos_iso_flash
+    ;;
+  help | *)
+    echo test-help
+    nixos_help
+    ;;
+  esac
+
+}
+
+# ---------------------------------------------------------------------
+# ISO PATH
+# ---------------------------------------------------------------------
+nixos_iso_path() {
+  shopt -s nullglob
+  local files=(result/iso/nixos*.iso)
+  shopt -u nullglob
+  if [[ ${#files[@]} -gt 0 ]]; then
+    readlink -f "${files[0]}"
+  else
+    echo ""
+  fi
+}
+
+# ---------------------------------------------------------------------
+# ISO BUILD
+# ---------------------------------------------------------------------
+nixos_iso_build() {
+  nix build .#nixosConfigurations.iso.config.system.build.isoImage
+}
+
+# ---------------------------------------------------------------------
+# ISO FLASH
+# ---------------------------------------------------------------------
+nixos_iso_flash() {
+  local usb_devices usb_selection device
+  usb_devices=$(lsblk -dpno NAME,SIZE,MODEL,TRAN | grep -i usb || true)
+
+  # Ensure a USB drive is plugged in
+  [[ -z "$usb_devices" ]] && gum_warn "No USB drives detected."
+
+  # Select USB device
+  usb_selection=$(echo "$usb_devices" | gum choose --header "Select USB drive to flash the ISO to")
+  device="$(awk '{print $1}' <<<"$usb_selection")"
+
+  # Get path to ISO
+  local iso_path
+  iso_path="$(nixos_iso_path)"
+  if [[ -z "$iso_path" ]]; then
+    nixos_iso_build
+    iso_path="$(nixos_iso_path)"
+  fi
+
+  # Final confirmation
+  gum_info "You are about to write:"
+  gum_show "ISO file: $iso_path"
+  gum_show "To device: $device"
+  echo
+  gum confirm "Are you sure? This will erase all data on $device." || exit 1
+
+  # Run dd
+  gum_info "Flashing ISO to $device..."
+  gum_show "sudo dd if=\"$iso_path\" of=\"$device\" bs=4M status=progress oflag=sync"
+  sudo dd if="$iso_path" of="$device" bs=4M status=progress oflag=sync
+
+  gum_info "Done. ISO flashed to $device."
 }
 
 main "${@-}"
