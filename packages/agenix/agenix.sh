@@ -20,11 +20,15 @@ main() {
     exit 0
     ;;
   unlock | u)
-    agenix_unlock
+    agenix_unlock "${2:-}"
     exit 0
     ;;
   lock | l)
     agenix_lock
+    exit 0
+    ;;
+  hex | h)
+    agenix_hex
     exit 0
     ;;
   "" | --help | -h | help)
@@ -47,6 +51,7 @@ EXTENDED COMMANDS:
   import                  Import a QR-derived age identity to id.age
   unlock                  Unlock id.age to /tmp/id_age
   lock                    Remove temporary age identity from /tmp/id_age
+  hex                     Output decrypted hex.age using age identity
 EOF
 }
 
@@ -96,27 +101,43 @@ agenix_import() {
 # Decrypt id.age to /tmp/id_age using passhrase
 agenix_unlock() {
 
+  # If quiet and the decrypted age identity already exists, stop here
+  if [[ "${1:-}" == "quiet" ]]; then
+    [[ -f /tmp/id_age ]] && return 0
+  fi
+
+  # Optionally accept an age identity through standard input
   id="$([ -t 0 ] || cat)"
+
+  # Attempt to decrypt age identity using passphrse
   if [[ -z "$id" ]]; then
     [[ ! -f id.age ]] && gum_warn "./id.age missing"
     id="$(age -d <id.age 2>/dev/null || true)"
     [[ -z "$id" ]] && gum_warn "Incorrect passphrase"
   fi
+
+  # Shift any existing phrase to backup
   [[ -f /tmp/id_age ]] && mv /tmp/id_age /tmp/id_age_
   touch /tmp/id_age_
+
+  # Write decrypted age identity to tmp directory
   echo "$id" >/tmp/id_age
   chmod 600 /tmp/id_age /tmp/id_age_
 
-  gum style \
-    --border="rounded" \
-    --border-foreground="29" \
-    --foreground="82" \
-    --padding="0 1" \
-    "🔓 Age identity unlocked"
+  # Notify user unless quiet
+  if [[ "${1:-}" != "quiet" ]]; then
+    gum style \
+      --border="rounded" \
+      --border-foreground="29" \
+      --foreground="82" \
+      --padding="0 1" \
+      "🔓 Age identity unlocked"
+  fi
+
 }
 
 # Delete decrypted /tmp/id_age
-agenux_lock() {
+agenix_lock() {
   rm -f /tmp/id_age /tmp/id_age_
   gum style \
     --border="rounded" \
@@ -124,6 +145,11 @@ agenux_lock() {
     --foreground="196" \
     --padding="0 1" \
     "🔒 Age identity locked"
+}
+
+agenix_hex() {
+  agenix_unlock quiet
+  age -d -i /tmp/id_age <hex.age
 }
 
 main "${@-}"

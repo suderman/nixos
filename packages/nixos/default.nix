@@ -6,6 +6,7 @@
 perSystem.self.mkScript {
   name = "nixos";
   path = [
+    perSystem.self.agenix
     perSystem.self.derive
     perSystem.self.ipaddr
     pkgs.age

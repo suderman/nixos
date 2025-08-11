@@ -73,6 +73,10 @@ nixos_add() {
 }
 
 nixos_add_user() {
+
+  # Ensure access to age identity
+  agenix unlock quiet
+
   gum_head "Add a user to this flake:"
   local username
   username="$(gum input --placeholder "username")"
@@ -164,6 +168,9 @@ nixos_add_host() {
 # GENERATE
 # ---------------------------------------------------------------------
 nixos_generate() {
+
+  # Ensure access to age identity
+  agenix unlock quiet
 
   # Generate missing SSH keys for hosts and users
   gum_info "Generating SSH keys..."
@@ -295,12 +302,8 @@ nixos_iso_flash() {
 # ---------------------------------------------------------------------
 nixos_sim() {
 
-  # Ensure key exists and identity unlocked
-  [[ ! -f hex.age ]] && gum_warn "./hex.age missing"
-  [[ ! -f /tmp/id_age ]] && gum_warn "Age identity locked"
-
   # Derive ssh private key
-  age -d -i /tmp/id_age <hex.age |
+  agenix hex |
     derive hex sim |
     derive ssh >hosts/sim/ssh_host_ed25519_key &&
     chmod 600 hosts/sim/ssh_host_ed25519_key
