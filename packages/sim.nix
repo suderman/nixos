@@ -6,8 +6,8 @@
 perSystem.self.mkScript {
   name = "sim";
   path = [
+    perSystem.self.default
     perSystem.self.derive
-    perSystem.self.iso
     pkgs.age
     pkgs.gum
     pkgs.passh
@@ -83,7 +83,7 @@ perSystem.self.mkScript {
 
         up | u)
           if [[ ''${2-} == "iso" ]]; then
-            ${qemu-system} -boot d -cdrom $(iso path)
+            ${qemu-system} -boot d -cdrom $(nixos iso path)
           else
             ${qemu-system}
           fi
