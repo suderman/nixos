@@ -46,7 +46,7 @@ main() {
 # ---------------------------------------------------------------------
 nixos_help() {
   cat <<EOF
-Usage: nixos COMMAND
+Usage: nixos COMMAND [SUBCOMMAND]
 
   deploy            Deploy a NixOS host configuration
   repl              Start the NixOS REPL
@@ -334,8 +334,8 @@ nixos_sim() {
 # ---------------------------------------------------------------------
 nixos_sim_up() {
 
-  local boot=""
-  [[ "$1" == "iso" ]] && boot="-boot d -cdrom $(nixos iso path)"
+  local boot=()
+  [[ "$1" == "iso" ]] && boot=(-boot d -cdrom "$(nixos iso path)")
 
   qemu-system-x86_64 \
     -enable-kvm \
@@ -355,7 +355,7 @@ nixos_sim_up() {
     -drive file=hosts/sim/disk3.img,format=qcow2,if=none,id=disk3 \
     -device virtio-blk-pci,drive=disk4,serial=4 \
     -drive file=hosts/sim/disk4.img,format=qcow2,if=none,id=disk4 \
-    "$boot"
+    "${boot[@]}"
 
 }
 
