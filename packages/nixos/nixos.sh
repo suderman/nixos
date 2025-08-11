@@ -31,6 +31,9 @@ main() {
   iso | i)
     nixos_iso "$@"
     ;;
+  sim | s)
+    nixos_sim "$@"
+    ;;
   help | *)
     nixos_help
     ;;
@@ -45,15 +48,19 @@ nixos_help() {
   cat <<EOF
 Usage: nixos COMMAND
 
-  deploy    Deploy a NixOS host configuration
-  repl      Start the NixOS REPL
-  add       Add a NixOS host or user
-  generate  Generate missing files
-  iso       Manage NixOS ISO image
-    path    Show path to NixOS ISO
-    build   Build NixOS ISO
-    flash   Flash NixOS ISO to a USB device
-  help      Show this help
+  deploy            Deploy a NixOS host configuration
+  repl              Start the NixOS REPL
+  add               Add a NixOS host or user
+  generate          Generate missing files
+  iso               Manage NixOS ISO image
+    path            Show path to NixOS ISO
+    build           Build NixOS ISO
+    flash           Flash NixOS ISO to a USB device
+  sim               Manage NixOS virtual machine
+    up [iso]        Run virtual machine (default disk, optional ISO)
+    rebuild [boot]  Rebuild virtual machine (default switch, optional boot)
+    ssh [iso]       SSH into virtual machine (default disk, optinal ISO)
+  help              Show this help
 EOF
 }
 
@@ -218,7 +225,6 @@ nixos_iso() {
     nixos_iso_flash
     ;;
   help | *)
-    echo test-help
     nixos_help
     ;;
   esac
@@ -281,6 +287,104 @@ nixos_iso_flash() {
   sudo dd if="$iso_path" of="$device" bs=4M status=progress oflag=sync
 
   gum_info "Done. ISO flashed to $device."
+}
+
+# ---------------------------------------------------------------------
+# SIM
+# ---------------------------------------------------------------------
+nixos_sim() {
+
+  # Ensure key exists and identity unlocked
+  [[ ! -f hex.age ]] && gum_warn "./hex.age missing"
+  [[ ! -f /tmp/id_age ]] && gum_warn "Age identity locked"
+
+  # Derive ssh private key
+  age -d -i /tmp/id_age <hex.age |
+    derive hex sim |
+    derive ssh >hosts/sim/ssh_host_ed25519_key &&
+    chmod 600 hosts/sim/ssh_host_ed25519_key
+
+  # Set path to ssh private key in env variable
+  export NIX_SSHOPTS="-p 2222 -i hosts/sim/ssh_host_ed25519_key"
+
+  [[ -e hosts/sim/disk1.img ]] || qemu-img create -f qcow2 hosts/sim/disk1.img 100G
+  [[ -e hosts/sim/disk2.img ]] || qemu-img create -f qcow2 hosts/sim/disk2.img 100G
+  [[ -e hosts/sim/disk3.img ]] || qemu-img create -f qcow2 hosts/sim/disk3.img 100G
+  [[ -e hosts/sim/disk4.img ]] || qemu-img create -f qcow2 hosts/sim/disk4.img 100G
+
+  case "${1:-help}" in
+  up | u)
+    nixos_sim_up "${2:-disk}"
+    ;;
+  rebuild | r)
+    nixos_sim_rebuild "${2:-switch}"
+    ;;
+  ssh | s)
+    nixos_sim_ssh "${2:-disk}"
+    ;;
+  help | *)
+    nixos_help
+    ;;
+  esac
+
+}
+
+# ---------------------------------------------------------------------
+# SIM UP
+# ---------------------------------------------------------------------
+nixos_sim_up() {
+
+  local boot=""
+  [[ "$1" == "iso" ]] && boot="-boot d -cdrom $(nixos iso path)"
+
+  qemu-system-x86_64 \
+    -enable-kvm \
+    -m 6144 \
+    -cpu host \
+    -smp 4 \
+    -device virtio-vga-gl \
+    -display gtk,gl=on \
+    -device ich9-intel-hda,id=snd0 -device hda-output \
+    -device virtio-tablet-pci \
+    -nic user,hostfwd=tcp::2222-:22,hostfwd=tcp::12345-:12345,hostfwd=tcp::4443-:443 \
+    -device virtio-blk-pci,drive=disk1,serial=1 \
+    -drive file=hosts/sim/disk1.img,format=qcow2,if=none,id=disk1 \
+    -device virtio-blk-pci,drive=disk2,serial=2 \
+    -drive file=hosts/sim/disk2.img,format=qcow2,if=none,id=disk2 \
+    -device virtio-blk-pci,drive=disk3,serial=3 \
+    -drive file=hosts/sim/disk3.img,format=qcow2,if=none,id=disk3 \
+    -device virtio-blk-pci,drive=disk4,serial=4 \
+    -drive file=hosts/sim/disk4.img,format=qcow2,if=none,id=disk4 \
+    "$boot"
+
+}
+
+# ---------------------------------------------------------------------
+# SIM REBUILD
+# ---------------------------------------------------------------------
+nixos_sim_rebuild() {
+
+  if [[ "${1-switch}" == "boot" ]]; then
+    nixos-rebuild --target-host root@localhost --flake .#sim boot
+  else
+    nixos-rebuild --target-host root@localhost --flake .#sim switch
+  fi
+
+}
+
+# ---------------------------------------------------------------------
+# SIM SSH
+# ---------------------------------------------------------------------
+nixos_sim_ssh() {
+
+  if [[ "${1-disk}" == "iso" ]]; then
+    # shellcheck disable=SC2086
+    passh -p x ssh $NIX_SSHOPTS root@localhost
+  else
+    # shellcheck disable=SC2086
+    ssh $NIX_SSHOPTS root@localhost
+  fi
+
 }
 
 main "${@-}"

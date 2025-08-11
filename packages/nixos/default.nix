@@ -16,6 +16,8 @@ perSystem.self.mkScript {
     pkgs.inetutils
     pkgs.iptables
     pkgs.netcat
+    pkgs.passh
+    pkgs.qemu
   ];
 
   # Bash script
