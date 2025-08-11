@@ -58,9 +58,8 @@ EOF
 # ---------------------------------------------------------------------
 sshed_generate() {
 
-  # Ensure key exists and identity unlocked
-  [[ ! -f hex.age ]] && gum_warn "./hex.age missing"
-  [[ ! -f /tmp/id_age ]] && gum_warn "Age identity locked"
+  # Ensure access to age identity
+  agenix unlock quiet
 
   # Ensure directories exist
   [[ ! -d ./hosts ]] && gum_warn "./hosts directory missing"
@@ -70,7 +69,7 @@ sshed_generate() {
   for host in $(dirs hosts | grep -v iso); do
 
     # Write the public ssh host key
-    age -d -i /tmp/id_age <hex.age |
+    agenix hex |
       derive hex "$host" |
       derive ssh |
       derive public "$host@${derivation_path-}" \
@@ -83,7 +82,7 @@ sshed_generate() {
   # Per each user...
   for user in $(dirs users); do
 
-    age -d -i /tmp/id_age <hex.age |
+    agenix hex |
       derive hex "$user" |
       derive ssh |
       derive public "$user@${derivation_path-}" \
@@ -147,10 +146,6 @@ sshed_receive() {
 # ---------------------------------------------------------------------
 sshed_send() {
 
-  # Ensure key exists and identity unlocked
-  [[ ! -f hex.age ]] && gum_warn "./hex.age missing"
-  [[ ! -f /tmp/id_age ]] && gum_warn "Age identity locked"
-
   # Ensure directories exist
   [[ ! -d ./hosts ]] && gum_warn "./hosts directory missing"
 
@@ -192,7 +187,7 @@ sshed_send() {
   [[ -z "$ip" ]] && gum_warn "Missing destination IP address"
 
   # Send ssh key for selected host to provided IP address
-  age -d -i /tmp/id_age <hex.age |
+  agenix hex |
     derive hex "$host" |
     derive ssh |
     nc -N "$ip" 12345

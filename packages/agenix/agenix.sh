@@ -4,6 +4,7 @@ set -euo pipefail
 # Pretty output
 gum_warn() { gum style --foreground=196 "✖ Error: $*" && exit 1; }
 gum_info() { gum style --foreground=29 "➜ $*"; }
+gum_head() { gum style --foreground=99 "$*"; }
 gum_show() { gum style --foreground=177 "    $*"; }
 
 # If PRJ_ROOT is set, change to that directory
@@ -59,23 +60,39 @@ EOF
 agenix_import() {
 
   # Confirm derivation path
-  gum confirm "Derive Seeds (BIP-85) > 32-bytes hex > Index Number ${derivation_index-}"
+  local path="Derive Seeds (BIP-85) > 32-bytes hex > Index Number ${derivation_index-}"
+  gum confirm "$path"
+  gum_head "$path"
+
+  # Master key (32-byte hex)
+  local hex=""
+
+  # If GUI detected, offer QR scanning
+  if [[ -n $DISPLAY || -n $WAYLAND_DISPLAY ]]; then
+    if [[ "$(gum choose "Scan QR code" "Enter manually")" == "Scan QR code" ]]; then
+      hex="$(qr || true)"
+    fi
+  fi
+
+  # If hex not entered via QR, allow manual input
+  if [[ -z "$hex" ]]; then
+    hex="$(gum input --placeholder "Enter 32-byte hex" | xargs)"
+  fi
+
+  # Ensure valid 32-byte hex code receieved
+  if [[ $hex =~ ^[0-9a-fA-F]{64}$ ]]; then
+    gum_info "32-byte hex code validated"
+  else
+    gum_warn "Failed to receive valid hex code"
+  fi
 
   # Delete id.age if it exists but is empty
   [[ ! -s id.age ]] &&
     rm -f id.age
 
-  # Stop if there is already an id.age that exists
+  # Confirm to overwrite existing id.age
   [[ -f id.age ]] &&
-    gum_warn "./id.age already exists"
-
-  # Attempt to read QR code master key (hex32)
-  hex="$(qr)"
-  if [[ -z "$hex" ]]; then
-    gum_warn "Failed to read QR code"
-  else
-    gum_info "QR code scanned!"
-  fi
+    gum confirm "./id.age already exists. Overwrite?"
 
   # Write a password-protected copy of the age identity
   derive age <<<"$hex" | age -e -p >id.age
@@ -89,13 +106,13 @@ agenix_import() {
   gum_show "./id.pub"
 
   # Write the 32-byte hex (protected by age identity)
-  age -eR id.pub <<<"$hex" >hex.age
+  age -e -R id.pub <<<"$hex" >hex.age
   git add hex.age 2>/dev/null || true
   gum_info "Private 32-byte hex written:"
   gum_show "./hex.age"
 
   # Unlock the id right away
-  derive age <<<"$hex" | unlock
+  derive age <<<"$hex" | agenix_unlock
 }
 
 # Decrypt id.age to /tmp/id_age using passhrase
@@ -147,7 +164,9 @@ agenix_lock() {
     "🔒 Age identity locked"
 }
 
+# Output decrypted hex.age (32-byte hex)
 agenix_hex() {
+  [[ ! -f hex.age ]] && gum_warn "./hex.age missing"
   agenix_unlock quiet
   age -d -i /tmp/id_age <hex.age
 }
