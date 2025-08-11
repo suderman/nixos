@@ -249,6 +249,7 @@ nixos_iso_path() {
 # ISO BUILD
 # ---------------------------------------------------------------------
 nixos_iso_build() {
+  gum_show "nix build .#nixosConfigurations.iso.config.system.build.isoImage"
   nix build .#nixosConfigurations.iso.config.system.build.isoImage
 }
 
@@ -365,8 +366,10 @@ nixos_sim_up() {
 nixos_sim_rebuild() {
 
   if [[ "${1-switch}" == "boot" ]]; then
+    gum_show "nixos-rebuild --target-host root@localhost --flake .#sim boot"
     nixos-rebuild --target-host root@localhost --flake .#sim boot
   else
+    gum_show "nixos-rebuild --target-host root@localhost --flake .#sim switch"
     nixos-rebuild --target-host root@localhost --flake .#sim switch
   fi
 
@@ -378,9 +381,11 @@ nixos_sim_rebuild() {
 nixos_sim_ssh() {
 
   if [[ "${1-disk}" == "iso" ]]; then
+    gum_show "passh -p x ssh $NIX_SSHOPTS root@localhost"
     # shellcheck disable=SC2086
     passh -p x ssh $NIX_SSHOPTS root@localhost
   else
+    gum_show "ssh $NIX_SSHOPTS root@localhost"
     # shellcheck disable=SC2086
     ssh $NIX_SSHOPTS root@localhost
   fi
