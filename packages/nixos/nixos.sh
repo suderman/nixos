@@ -11,7 +11,7 @@ gum_show() { gum style --foreground=177 "    $*"; }
 dirs() { find "$1" -mindepth 1 -maxdepth 1 -type d -printf '%f\n'; }
 
 # If PRJ_ROOT is set, change to that directory
-[[ -n "$PRJ_ROOT" ]] && cd "$PRJ_ROOT"
+[[ -n "${PRJ_ROOT-}" ]] && cd "$PRJ_ROOT"
 
 # ---------------------------------------------------------------------
 # MAIN
@@ -46,7 +46,7 @@ main() {
 # ---------------------------------------------------------------------
 nixos_help() {
   cat <<EOF
-Usage: nixos COMMAND [SUBCOMMAND]
+Usage: nixos [COMMAND]
 
   deploy            Deploy a NixOS host configuration
   repl              Start the NixOS REPL
