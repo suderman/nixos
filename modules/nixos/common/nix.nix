@@ -1,22 +1,23 @@
-{ config, lib, flake, inputs, ... }: let
-
-  inherit (builtins) readFile toString;
-  inherit (lib) mkIf mapAttrs;
+{
+  config,
+  lib,
+  flake,
+  inputs,
+  ...
+}: let
+  inherit (lib) mapAttrs imap1;
   inherit (flake.lib) ls cacheUrl;
-
 in {
-
   # Nix Settings
   nix.settings = {
-
     # Enable flakes and pipes
-    experimental-features = [ "nix-command" "flakes" "pipe-operators" ];
+    experimental-features = ["nix-command" "flakes" "pipe-operators"];
 
     # Deduplicate and optimize nix store
     auto-optimise-store = true;
 
     # Root and sudo users
-    trusted-users = [ "root" "@wheel" ];
+    trusted-users = ["root" "@wheel"];
 
     # Supress annoying warning
     warn-dirty = false;
@@ -28,17 +29,19 @@ in {
     builders-use-substitutes = true;
 
     # Binary caches
-    substituters = map (key: cacheUrl key) flake.caches;  
+    substituters = imap1 (index: key: cacheUrl index key) flake.caches;
     trusted-public-keys = flake.caches;
-
   };
 
   nix.sshServe = {
     enable = true;
-    keys = let userKeys = ls { 
-      path = flake + /users; 
-      dirsWith = [ "id_ed25519.pub" ]; 
-    }; in map (key: readFile key) userKeys;
+    keys = let
+      userKeys = ls {
+        path = flake + /users;
+        dirsWith = ["id_ed25519.pub"];
+      };
+    in
+      map (key: builtins.readFile key) userKeys;
   };
 
   # Automatic garbage collection
@@ -50,26 +53,25 @@ in {
 
   # Add each flake input as a registry
   # To make nix3 commands consistent with the flake
-  nix.registry = mapAttrs (_: value: { flake = value; }) inputs;
+  nix.registry = mapAttrs (_: value: {flake = value;}) inputs;
 
   # Map registries to channels
-  nix.nixPath = [ "repl=${flake}/repl.nix" "nixpkgs=${inputs.nixpkgs}" ];
+  nix.nixPath = ["repl=${flake}/repl.nix" "nixpkgs=${inputs.nixpkgs}"];
 
   # Automatically upgrade this system while I sleep
   system.autoUpgrade = {
     enable = false;
     dates = "04:00";
     flake = "/etc/nixos#${config.networking.hostName}";
-    flags = [ 
+    flags = [
       # "--update-input" "nixpkgs"
       # "--update-input" "unstable"
       # "--update-input" "nur"
       # "--update-input" "home-manager"
       # "--update-input" "agenix"
       # "--update-input" "impermanence"
-      # "--commit-lock-file" 
+      # "--commit-lock-file"
     ];
     allowReboot = true;
   };
-
 }

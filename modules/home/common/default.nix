@@ -23,12 +23,11 @@
     nano # text editor
     ncdu # recover available disk space
     parted # manage disks
-    perSystem.self.hello # HEY
     perSystem.self.ipaddr # where you at?
     perSystem.self.sv # wrapper for systemctl/journalctl
+    perSystem.nix-ai-tools.crush # ai coding agent
     rclone # sync webdav and other remote stores
     sysz # systemctl tui
-    wget # download the internet
   ];
 
   programs.bat.enable = true;

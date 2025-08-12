@@ -68,17 +68,19 @@
 
     # Quickshell
     # <https://quickshell.outfoxxed.me>
-    quickshell.url = "github:quickshell-mirror/quickshell?ref=v0.1.0";
+    quickshell.url = "github:quickshell-mirror/quickshell?ref=v0.2.0";
     quickshell.inputs.nixpkgs.follows = "nixpkgs";
 
     # Neovim flake
     # <https://github.com/suderman/neovim>
     neovim.url = "github:suderman/neovim";
+
+    # AI coding agents
+    # <https://github.com/numtide/nix-ai-tools>
+    nix-ai-tools.url = "github:numtide/nix-ai-tools";
   };
 
-  outputs = inputs: let
-    flake = inputs.self;
-  in {
+  outputs = inputs: {
     # Blueprint automatically maps: devshells, hosts, lib, modules, packages
     inherit
       (inputs.blueprint {inherit inputs;})
@@ -93,15 +95,13 @@
       ;
 
     # Map additional folders to custom outputs
-    inherit (flake.lib) agenix-rekey networking users;
+    inherit (inputs.self.lib) agenix-rekey networking users;
 
     caches = [
       "suderman.cachix.org-1:8lYeb2gOOVDPbUn1THnL5J3/L4tFWU30/uVPk7sCGmI="
-      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
-      "fufexan.cachix.org-1:LwCDjCJNJQf5XD2BV+yamQIMZfcKWR9ISIFy5curUsY="
-      "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4="
-      "ai.cachix.org-1:N9dzRK+alWwoKXQlnn0H6aUx0lU/mspIoz8hMvGvbbc="
+      "numtide.cachix.org-1:2ps1kLBUWjxIneOy1Ik6cQjb41X0iXVXeHigGmycPPE="
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
     ];
 
