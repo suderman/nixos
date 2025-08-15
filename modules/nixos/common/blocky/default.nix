@@ -9,7 +9,7 @@
 }: let
   cfg = config.services.blocky;
   inherit (builtins) attrValues mapAttrs toString;
-  inherit (lib) concatStringsSep flatten foldl mkIf mkOption mkForce types;
+  inherit (lib) concatStringsSep foldl mkIf mkOption mkForce types;
 
   # binary with config yaml passed as argument
   blocky = let
@@ -45,7 +45,7 @@ in {
       type = with types; anything;
       readOnly = true;
       default = foldl (a: b: a // b) {} (
-        attrValues (mapAttrs (name: host: host.config.services.traefik.records or {}) flake.nixosConfigurations)
+        attrValues (mapAttrs (_: host: host.config.services.traefik.records or {}) flake.nixosConfigurations)
       );
     };
   };
@@ -104,29 +104,29 @@ in {
     # Get around that by downloading these lists separately as a systemd service
     systemd.services.blocky-lists-download = {
       description = "Download copy of lists for Blocky";
-      after = ["network-online.target"];
-      wants = ["network-online.target"];
       serviceConfig.Type = "oneshot";
       path = [pkgs.curl];
-      script = ''
-        # Download url, ensure non-empty before replacing existing list
-        download() {
-          local file="${cfg.dataDir}/''${1}.txt"
-          local url="''${2}"
-          curl -sl ''${url} > ''${file}.tmp
-          if [[ -s ''${file}.tmp ]]; then
-            mv ''${file}.tmp $file
-          else
-            rm ''${file}.tmp
-          fi
-        }
+      script =
+        # bash
+        ''
+          # Download url, ensure non-empty before replacing existing list
+          download() {
+            local file="${cfg.dataDir}/''${1}.txt"
+            local url="''${2}"
+            curl -sl ''${url} > ''${file}.tmp
+            if [[ -s ''${file}.tmp ]]; then
+              mv ''${file}.tmp $file
+            else
+              rm ''${file}.tmp
+            fi
+          }
 
-        # Pre-download these lists
-        download blacklist        https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light.txt
-        download blacklist-extra  https://nsfw.oisd.nl/domainswild
-        download whitelist        https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
-        download whitelist-extra  https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/optional-list.txt
-      '';
+          # Pre-download these lists
+          download blacklist        https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light.txt
+          download blacklist-extra  https://nsfw.oisd.nl/domainswild
+          download whitelist        https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
+          download whitelist-extra  https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/optional-list.txt
+        '';
       onSuccess = ["blocky-lists-refresh.service"];
     };
 
@@ -175,7 +175,7 @@ in {
 
     # Public firewall rules
     networking.firewall =
-      if cfg.public == true
+      if cfg.public
       then {
         allowedTCPPorts = [cfg.dnsPort cfg.httpPort];
         allowedUDPPorts = [cfg.dnsPort];
@@ -261,7 +261,9 @@ in {
           customTTL = "1h";
         };
 
-        blocking = {
+        blocking = let
+          repo = "https://raw.githubusercontent.com/suderman/nixos/refs/heads/main";
+        in {
           loading = {
             strategy = "fast";
             concurrency = 8;
@@ -271,7 +273,7 @@ in {
             main = [
               "${cfg.dataDir}/blacklist.txt"
               "${cfg.dataDir}/blacklist-extra.txt"
-              "https://raw.githubusercontent.com/suderman/nixos/main/modules/blocky/blacklist.txt"
+              "${repo}/modules/nixos/common/blocky/blacklist.txt"
               "${cfg.dataDir}/blacklist-local.txt"
             ];
           };
@@ -279,7 +281,7 @@ in {
             main = [
               "${cfg.dataDir}/whitelist.txt"
               "${cfg.dataDir}/whitelist-extra.txt"
-              "https://raw.githubusercontent.com/suderman/nixos/main/modules/blocky/whitelist.txt"
+              "${repo}/modules/nixos/common/blocky/whitelist.txt"
               "${cfg.dataDir}/whitelist-local.txt"
             ];
           };
