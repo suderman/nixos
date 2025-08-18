@@ -56,6 +56,12 @@ in rec {
       inherit extraGroups;
     });
 
+  # Users in "wheel" group
+  sudoers = users:
+    map (u: u.name) (builtins.attrValues (
+      lib.filterAttrs (_: user: user ? extraGroups && builtins.elem "wheel" user.extraGroups) users
+    ));
+
   # List of home-manager users that match provided filter function
   filterUsers = cfg: fn:
     filter fn (

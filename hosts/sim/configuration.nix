@@ -54,6 +54,13 @@ in {
     # services.btrbk.enable = true;
     services.postgresql.enable = true;
 
+    services.immich = {
+      enable = true;
+      # photosDir = "/data/photos/immich";
+      # externalDir = "/data/photos/collections";
+      # alias = "immich.suderman.org";
+    };
+
     # # Keyboard control
     # services.keyd.enable = true;
 
