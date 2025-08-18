@@ -1,13 +1,21 @@
-{ config, pkgs, lib, hardware, profiles, ... }: {
-
+{
+  config,
+  pkgs,
+  lib,
+  hardware,
+  profiles,
+  ...
+}: {
   # Import all *.nix files in this directory
-  imports = lib.ls ./. ++ [
-    hardware.rtx-4070-ti-super
-    profiles.services # system services I use everywhere
-    profiles.terminal # tui apps on all my workstations
-    profiles.desktop # gui apps on all my workstations
-    profiles.gaming # steam and emulation
-  ];
+  imports =
+    lib.ls ./.
+    ++ [
+      hardware.rtx-4070-ti-super
+      profiles.services # system services I use everywhere
+      profiles.terminal # tui apps on all my workstations
+      profiles.desktop # gui apps on all my workstations
+      profiles.gaming # steam and emulation
+    ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -37,5 +45,4 @@
 
   # Services
   services.garmin.enable = true;
-
 }
