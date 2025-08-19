@@ -7,6 +7,7 @@
     ./hardware-configuration.nix
     ./disk-configuration.nix
     flake.nixosModules.common
+    flake.nixosModules.extra
   ];
 
   config = {

@@ -8,50 +8,49 @@
   # Import all *.nix files in this directory
   imports = flake.lib.ls ./.;
 
-  home.packages = with pkgs; [
-    _1password-cli # op
-    # calcure # calendar viewer
-    # distrobox distrobox-tui
-    imagemagick # animate compare composite conjure convert display identify import magick magick-script mogrify montage stream
-    killall # kill by process name
-    lame # mp3 codec
-    lazydocker # docker tui
-    lf
-    linode-cli # control linode virtual servers
-    lsd
-    mosh # ssh despite bad networks
-    nano # text editor
-    ncdu # recover available disk space
-    parted # manage disks
+  # List packages installed in user profile
+  home.packages = [
+    perSystem.nix-ai-tools.crush # ai coding agent
     perSystem.self.ipaddr # where you at?
     perSystem.self.sv # wrapper for systemctl/journalctl
-    perSystem.nix-ai-tools.crush # ai coding agent
-    rclone # sync webdav and other remote stores
-    sysz # systemctl tui
+    pkgs._1password-cli # op
+    # pkgs.calcure # calendar viewer
+    # pkgs.distrobox pkgs.distrobox-tui
+    pkgs.imagemagick # animate compare composite conjure convert display identify import magick magick-script mogrify montage stream
+    pkgs.killall # kill by process name
+    pkgs.lame # mp3 codec
+    pkgs.lazydocker # docker tui
+    pkgs.lf
+    pkgs.linode-cli # control linode virtual servers
+    pkgs.lsd
+    pkgs.mosh # ssh despite bad networks
+    pkgs.nano # text editor
+    pkgs.ncdu # recover available disk space
+    pkgs.parted # manage disks
+    pkgs.rclone # sync webdav and other remote stores
+    pkgs.sysz # systemctl tui
   ];
 
-  programs.bat.enable = true;
-  programs.btop.enable = true;
-  programs.direnv.enable = true;
-  programs.fastfetch.enable = true;
-  programs.fish.enable = true; # shell
-  programs.fzf.enable = true;
-  programs.git.enable = true;
-  programs.lazygit.enable = true;
-  programs.less.enable = true;
-  programs.lesspipe.enable = true;
-  programs.lsd.enable = true;
-  programs.micro.enable = true; # easy text editor
-  programs.neovim.enable = false; # using nvf instead
-  programs.nnn.enable = true;
-  programs.ripgrep.enable = true;
-  programs.tealdeer.enable = true;
-  programs.yazi.enable = true; # browse muh filez
-  programs.yt-dlp.enable = true; # yt-dlp -f mp4-240p -x --audio-format mp3 https://rumble.com/...
-  programs.zoxide.enable = true;
-  programs.zsh.enable = true; # shell
-  services.mpd.enable = true; # play pretty music plz
-  services.syncthing.enable = true; # sync muh stuff
+  programs.bat.enable = lib.mkDefault true;
+  programs.btop.enable = lib.mkDefault true;
+  programs.direnv.enable = lib.mkDefault true;
+  programs.fastfetch.enable = lib.mkDefault true;
+  programs.fish.enable = lib.mkDefault true; # shell
+  programs.fzf.enable = lib.mkDefault true;
+  programs.git.enable = lib.mkDefault true;
+  programs.lazygit.enable = lib.mkDefault true;
+  programs.less.enable = lib.mkDefault true;
+  programs.lesspipe.enable = lib.mkDefault true;
+  programs.lsd.enable = lib.mkDefault true;
+  programs.micro.enable = lib.mkDefault true; # easy text editor
+  programs.neovim.enable = lib.mkDefault false; # using nvf instead
+  programs.nnn.enable = lib.mkDefault true;
+  programs.ripgrep.enable = lib.mkDefault true;
+  programs.tealdeer.enable = lib.mkDefault true;
+  programs.yazi.enable = lib.mkDefault true; # browse muh filez
+  programs.yt-dlp.enable = lib.mkDefault true; # yt-dlp -f mp4-240p -x --audio-format mp3 https://rumble.com/...
+  programs.zoxide.enable = lib.mkDefault true;
+  programs.zsh.enable = lib.mkDefault true; # shell
 
   # Precious memories
   home.stateVersion = "24.11";

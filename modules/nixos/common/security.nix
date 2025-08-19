@@ -85,4 +85,7 @@ in {
   # Custom CA private key
   # openssl genrsa -out ca.key 4096
   age.secrets.ca.rekeyFile = flake + /zones/ca.age;
+
+  # Add terminfo files
+  environment.enableAllTerminfo = true;
 }

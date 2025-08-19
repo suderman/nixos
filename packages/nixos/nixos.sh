@@ -141,7 +141,10 @@ nixos_add_host() {
       if [[ "$(nix eval --impure --expr "$expr")" == "false" ]]; then
         {
           echo '{ flake, ... }: {'
-          echo '  imports = [ flake.homeModules.common ];'
+          echo '  imports = ['
+          echo '    flake.homeModules.common'
+          echo '    flake.homeModules.extra'
+          echo '  ];'
           echo '}'
         } | alejandra -q >"$host/users/$user.nix"
       fi
@@ -150,8 +153,11 @@ nixos_add_host() {
     # Create a basic configuration.nix in this directory
     {
       echo '{ flake, ... }: {'
-      echo '  imports = [ flake.nixosModules.common ];'
-      echo '  config.networking.domain = "home";'
+      echo '  imports = ['
+      echo '    flake.nixosModules.common'
+      echo '    flake.nixosModules.extra'
+      echo '  ];'
+      echo '  networking.domain = "home";'
       echo '}'
     } | alejandra -q >"$host/configuration.nix"
 

@@ -14,6 +14,7 @@ in {
     ./hardware-configuration.nix
     ./disk-configuration.nix
     flake.nixosModules.common
+    flake.nixosModules.extra
     # flake.nixosModules.gnome
     flake.nixosModules.hyprland
     flake.nixosModules.vm

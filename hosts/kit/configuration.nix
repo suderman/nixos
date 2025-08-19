@@ -15,6 +15,7 @@ in {
     ./disk-configuration.nix
     flake.nixosModules.rtx-4070-ti-super
     flake.nixosModules.common
+    flake.nixosModules.extra
     flake.nixosModules.hyprland
     flake.nixosModules.gaming
   ];
