@@ -1,4 +1,9 @@
-let
+{disk ? "all", ...}: let
+  mkDisk = diskName: cfg:
+    if disk == "all" || disk == diskName
+    then {"${diskName}" = {type = "disk";} // cfg;}
+    else {};
+
   mount = mountpoint: {
     inherit mountpoint;
     mountOptions = [
@@ -18,7 +23,7 @@ let
         "nofail" # continue boot even if disk is missing
         "x-systemd.automount" # create automount unit to mount when accessed
         "x-systemd.device-timeout=1ms" # assume device is already plugged in and do not wait
-        "x-systemd.idle-timout=5m" # unmount after 5 min of inactivity
+        "x-systemd.idle-timeout=5m" # unmount after 5 min of inactivity
       ];
   };
   # lsblk -f && ls -1 /dev/disk/by-id | grep '^nvme-eui.*n1$'
@@ -26,103 +31,110 @@ let
   nvme1n1 = "nvme-eui.000000000000000100a07524462d7584"; # behind GPU
   nvme2n1 = "nvme-eui.e8238fa6bf530001001b448b4a20d09b"; # behind GPU riser
 in {
-  # ssd1 is the main disk
-  disko.devices.disk.ssd1 = {
-    type = "disk"; # below CPU
-    device = "/dev/disk/by-id/${nvme0n1}";
-    content.type = "gpt";
+  disko.devices.disk =
+    # main disk
+    # disko hosts/kit/disk-configuration.nix --argstr disk ssd1 --mode destroy,format,mount
+    mkDisk "ssd1" {
+      device = "/dev/disk/by-id/${nvme0n1}"; # below CPU
+      content.type = "gpt";
 
-    # bios boot
-    content.partitions.grub = {
-      size = "1M";
-      type = "EF02";
-      priority = 1;
-    };
+      # bios boot
+      content.partitions.grub = {
+        size = "1M";
+        type = "EF02";
+        priority = 1;
+      };
 
-    # uefi boot
-    content.partitions.boot = {
-      size = "4G";
-      type = "EF00";
-      priority = 2;
-      content = {
-        type = "filesystem";
-        format = "vfat";
-        mountpoint = "/boot";
-        mountOptions = ["umask=0077"];
+      # uefi boot
+      content.partitions.boot = {
+        size = "4G";
+        type = "EF00";
+        priority = 2;
+        content = {
+          type = "filesystem";
+          format = "vfat";
+          mountpoint = "/boot";
+          mountOptions = ["umask=0077"];
+        };
+      };
+
+      # adjust size to match ram
+      content.partitions.swap = {
+        size = "8G";
+        priority = 3;
+        content = {
+          type = "swap";
+          discardPolicy = "both";
+          resumeDevice = true; # support hibernation
+        };
+      };
+
+      # main partition
+      content.partitions.part = let
+        label = "main";
+      in {
+        size = "100%";
+        priority = 4;
+        content =
+          mount "/mnt/${label}"
+          // {
+            type = "btrfs";
+            extraArgs = ["-fL ${label}"];
+            subvolumes = {
+              root = mount "/";
+              nix = mount "/nix";
+              persist = mount "/persist";
+              persist-local = mount "/persist/local";
+              snapshots = {};
+              backups = {};
+            };
+          };
+      };
+    }
+    # data disk
+    # disko hosts/kit/disk-configuration.nix --argstr disk ssd2 --mode destroy,format,mount
+    // mkDisk "ssd2" {
+      device = "/dev/disk/by-id/${nvme1n1}"; # behind GPU
+      content.type = "gpt";
+      content.partitions.part = let
+        label = "data";
+      in {
+        size = "100%";
+        content =
+          automount "/mnt/${label}"
+          // {
+            type = "btrfs";
+            extraArgs = ["-fL ${label}"];
+            subvolumes = {
+              persist = automount "/${label}";
+              persist-local = automount "/${label}/local";
+              snapshots = {};
+              backups = {};
+            };
+          };
+      };
+    }
+    # game disk
+    # disko hosts/kit/disk-configuration.nix --argstr disk ssd3 --mode destroy,format,mount
+    // mkDisk "ssd3" {
+      device = "/dev/disk/by-id/${nvme2n1}"; # behind GPU riser
+      content.type = "gpt";
+      content.partitions.part = let
+        label = "game";
+      in {
+        size = "100%";
+        content =
+          automount "/mnt/${label}"
+          // {
+            type = "btrfs";
+            extraArgs = ["-fL ${label}"];
+            subvolumes = {
+              persist = automount "/${label}";
+              persist-local = automount "/${label}/local";
+              snapshots = {};
+              backups = {};
+            };
+          };
       };
     };
-
-    # adjust size to match ram
-    content.partitions.swap = {
-      size = "8G";
-      priority = 3;
-      content = {
-        type = "swap";
-        discardPolicy = "both";
-        resumeDevice = true; # support hibernation
-      };
-    };
-
-    # main partition
-    content.partitions.part = {
-      size = "100%";
-      priority = 4;
-      content =
-        mount "/mnt/main"
-        // {
-          type = "btrfs";
-          extraArgs = ["-fL main"];
-          subvolumes = {
-            root = mount "/";
-            nix = mount "/nix";
-            persist = mount "/persist";
-            persist-local = mount "/persist/local";
-            snapshots = {};
-            backups = {};
-          };
-        };
-    };
-  };
-
-  # ssd2 is the data disk
-  disko.devices.disk.ssd2 = {
-    type = "disk"; # behind GPU
-    device = "/dev/disk/by-id/${nvme1n1}";
-    content.type = "gpt";
-    content.partitions.part = {
-      size = "100%";
-      content =
-        automount "/mnt/data"
-        // {
-          type = "btrfs";
-          extraArgs = ["-fL data"];
-          subvolumes = {
-            data = automount "/data";
-            snapshots = {};
-            backups = {};
-          };
-        };
-    };
-  };
-
-  # ssd3 is the game disk
-  disko.devices.disk.ssd3 = {
-    type = "disk"; # behind GPU riser
-    device = "/dev/disk/by-id/${nvme2n1}";
-    content.type = "gpt";
-    content.partitions.part = {
-      size = "100%";
-      content =
-        automount "/mnt/game"
-        // {
-          type = "btrfs";
-          extraArgs = ["-fL data"];
-          subvolumes = {
-            data = automount "/game";
-            snapshots = {};
-            backups = {};
-          };
-        };
-    };
-  };
 }
