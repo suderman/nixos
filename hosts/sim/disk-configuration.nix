@@ -30,7 +30,7 @@
   ssd2 = "virtio-2"; # hosts/sim/disk2.img
   hdd1 = "virtio-3"; # hosts/sim/disk3.img
   hdd2 = "virtio-4"; # hosts/sim/disk4.img
-in rec {
+in {
   disko.devices.disk =
     # main disk
     # disko hosts/sim/disk-configuration.nix --argstr disk ssd1 --mode destroy,format,mount
@@ -135,11 +135,11 @@ in rec {
           automount "/mnt/pool"
           // {
             type = "btrfs";
-            extraArgs = with disko.devices.disk; [
+            extraArgs = [
               "-fL pool"
               "-d single"
-              "${hdd1.device}-part1"
-              "${hdd2.device}-part1"
+              "/dev/disk/by-id/${hdd1}-part1"
+              "/dev/disk/by-id/${hdd2}-part1"
             ];
             subvolumes = {
               snapshots = {};

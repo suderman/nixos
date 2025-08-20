@@ -29,7 +29,7 @@
   ssd1 = "ata-WDC_WDS500G2B0A-00SM50_181703805719";
   hdd1 = "ata-ST12000NM0538-2K2101_ZHZ29F82";
   hdd2 = "ata-ST12000NM0538-2K2101_ZHZ5F9VF";
-in rec {
+in {
   # ssd1 is the main disk
   disko.devices.disk =
     # main disk
@@ -112,11 +112,11 @@ in rec {
           automount "/mnt/pool"
           // {
             type = "btrfs";
-            extraArgs = with disko.devices.disk; [
+            extraArgs = [
               "-fL pool"
               "-d single"
-              "${hdd1.device}-part1"
-              "${hdd2.device}-part1"
+              "/dev/disk/by-id/${hdd1}-part1"
+              "/dev/disk/by-id/${hdd2}-part1"
             ];
             subvolumes = {
               snapshots = {};
