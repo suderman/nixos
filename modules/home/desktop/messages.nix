@@ -1,11 +1,10 @@
-{ config, pkgs, ... }: {
-
-  home.packages = with pkgs; [ 
-    slack # Slack chatroom
-    tdesktop # Telegram messenger
-  ];
+{pkgs, ...}: {
+  # Telegram
+  home.packages = [pkgs.tdesktop];
 
   # iMessage
   programs.bluebubbles.enable = true;
 
+  # Slack
+  programs.slack.enable = true;
 }
