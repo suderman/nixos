@@ -32,7 +32,7 @@
   };
 
   # Set passwords to x
-  users.users = lib.genAttrs ["root" "nixos"] (name: {
+  users.users = lib.genAttrs ["root" "nixos"] (_: {
     password = "x";
     initialHashedPassword = lib.mkForce null;
   });
@@ -56,18 +56,23 @@
   # Include disko and installer script
   environment.systemPackages = [
     perSystem.disko.default
+    perSystem.neovim.default
+    perSystem.self.default
+    perSystem.self.derive
     perSystem.self.ipaddr
     perSystem.self.sshed
     pkgs.gum
     pkgs.networkmanager
-    (pkgs.writeShellScriptBin "wifi" "nmtui-connect")
     (pkgs.writeShellScriptBin "installer" (builtins.readFile ./installer.sh))
+    (pkgs.writeShellScriptBin "lsblk" "${pkgs.util-linux}/bin/lsblk -o ID-LINK,NAME,FSTYPE,LABEL,SIZE,FSUSE%,MOUNTPOINTS --tree=ID-LINK")
+    (pkgs.writeShellScriptBin "wifi" "nmtui-connect")
   ];
 
   # Update /etc/issue with custom info
   services.getty.helpLine = lib.mkForce ''
     The "nixos" and "root" accounts have their passwords set to `x`.
     If you need a wireless connection, type `wifi`.
+    To view detected disks, type `lsblk`.
     To run installer script, type `installer`.
   '';
 }

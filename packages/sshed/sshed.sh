@@ -212,11 +212,11 @@ sshed_verify() {
 
   # Ensure private key exists
   [[ -f "$private_key" ]] ||
-    gum_warn "$(pwd)/$private_key missing"
+    gum_warn "[sshed] $(pwd)/$private_key missing"
 
   # Ensure public key exists
   [[ -f "$public_key" ]] ||
-    gum_warn "$(pwd)/$public_key missing"
+    gum_warn "[sshed] $(pwd)/$public_key missing"
 
   # Extract type from current public key (should be ssh-ed25519)
   current_pub_type="$(cut -d' ' -f1 <"$public_key" | xargs)"
@@ -229,13 +229,13 @@ sshed_verify() {
 
   # Ensure public key type
   [[ "ssh-ed25519" == "$current_pub_type" ]] ||
-    gum_warn "$(pwd)/$public_key ssh-ed25519 NOT detected"
+    gum_warn "[sshed] $(pwd)/$public_key ssh-ed25519 NOT detected"
 
   # Ensure key pair actually matches
   [[ "$current_pub_key" == "$derived_pub_key" ]] ||
-    gum_warn "$(pwd)/$private_key INVALID, does NOT match existing public key"
+    gum_warn "[sshed] $(pwd)/$private_key invalid match"
 
-  gum_info "VALID: SSH host private & public keys match!"
+  gum_info "[sshed] $(pwd)/$private_key valid match"
 
 }
 

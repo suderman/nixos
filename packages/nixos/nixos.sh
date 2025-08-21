@@ -150,7 +150,8 @@ nixos_add_host() {
     # Generate hardware config or use template
     if gum confirm "Detect hardware on this host?"; then
       nixos-generate-config --no-filesystems --show-hardware-config 2>/dev/null |
-        alejandra -q | tee "$host/hardware-configuration.nix" | ssh x0.at
+        alejandra -q | tee "$host/hardware-configuration.nix" |
+        ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null x0.at || true
     else
       alejandra -q <"${templates-}"/hardware-configuration.nix >"$host/disk-configuration.nix"
     fi
@@ -159,14 +160,16 @@ nixos_add_host() {
     if gum confirm "Detect disks on this host?"; then
       lsblk -o ID-LINK,NAME,FSTYPE,LABEL,SIZE,FSUSE%,MOUNTPOINTS --tree=ID-LINK |
         sed 's/^/# /' | cat - "${templates-}"/disk-configuration.nix |
-        alejandra -q | tee "$host/disk-configuration.nix" | ssh x0.at
+        alejandra -q | tee "$host/disk-configuration.nix" |
+        ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null x0.at || true
+
     else
       alejandra -q <"${templates-}"/disk-configuration.nix >"$host/disk-configuration.nix"
     fi
 
     # Edit configuration files in neovim
-    if gum confirm "Edit host configuration?"; then
-      nvim "$host/configuration.nix" "$host/hardware-configuration.nix" "$host/disk-configuration.nix"
+    if gum confirm "Edit host configuration files?"; then
+      nvim "$host/configuration.nix" "$host/hardware-configuration.nix" "$host/disk-configuration.nix" || true
     fi
 
   fi

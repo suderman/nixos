@@ -8,7 +8,7 @@ gum_head() { gum style --foreground=99 "$*"; }
 gum_show() { gum style --foreground=177 "    $*"; }
 
 # If PRJ_ROOT is set, change to that directory
-[[ -n "$PRJ_ROOT" ]] && cd "$PRJ_ROOT"
+[[ -n "${PRJ_ROOT-}" ]] && cd "$PRJ_ROOT"
 
 # ---------------------------------------------------------------------
 # MAIN
