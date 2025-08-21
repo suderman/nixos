@@ -1,9 +1,16 @@
-{disk ? "all", ...}: let
-  mkDisk = diskName: cfg:
-    if disk == "all" || disk == diskName
-    then {"${diskName}" = {type = "disk";} // cfg;}
+{disks ? [], ...}: let
+  # Named disk devices
+  ssd1 = "ata-WDC_WDS500G2B0A-00SM50_181703805719";
+  hdd1 = "ata-ST12000NM0538-2K2101_ZHZ29F82";
+  hdd2 = "ata-ST12000NM0538-2K2101_ZHZ5F9VF";
+
+  # Create named disk attr if name found in disks list OR if disks is empty list
+  disk = name: cfg:
+    if disks == [] || builtins.elem name disks
+    then {"${name}" = {type = "disk";} // cfg;}
     else {};
 
+  # Default btrfs mount options with mountpoint
   mount = mountpoint: {
     inherit mountpoint;
     mountOptions = [
@@ -14,6 +21,7 @@
     ];
   };
 
+  # Extended mount options to support automount
   automount = mountpoint: {
     inherit mountpoint;
     mountOptions =
@@ -23,18 +31,14 @@
         "nofail" # continue boot even if disk is missing
         "x-systemd.automount" # create automount unit to mount when accessed
         "x-systemd.device-timeout=1ms" # assume device is already plugged in and do not wait
-        "x-systemd.idle-timout=5m" # unmount after 5 min of inactivity
+        "x-systemd.idle-timeout=5m" # unmount after 5 min of inactivity
       ];
   };
-  ssd1 = "ata-WDC_WDS500G2B0A-00SM50_181703805719";
-  hdd1 = "ata-ST12000NM0538-2K2101_ZHZ29F82";
-  hdd2 = "ata-ST12000NM0538-2K2101_ZHZ5F9VF";
 in {
-  # ssd1 is the main disk
   disko.devices.disk =
     # main disk
-    # disko hosts/sim/disk-configuration.nix --argstr disk ssd1 --mode destroy,format,mount
-    mkDisk "ssd1" {
+    # disko disk-configuration.nix -m destroy,format,mount --arg disks '["ssd1"]'
+    disk "ssd1" {
       device = "/dev/disk/by-id/${ssd1}";
       content.type = "gpt";
 
@@ -91,9 +95,9 @@ in {
           };
       };
     }
-    # hdd1 supports the pool
-    # disko hosts/eve/disk-configuration.nix --argstr disk hdd1 --mode destroy,format,mount
-    // mkDisk "hdd1" {
+    # hdd1,hdd2 make up the pool
+    # disko disk-configuration.nix -m destroy,format,mount --arg disks '["hdd1" "hdd2"]'
+    // disk "hdd1" {
       device = "/dev/disk/by-id/${hdd1}";
       content.type = "gpt";
       content.partitions.part = {
@@ -101,9 +105,7 @@ in {
         content.type = "btrfs";
       };
     }
-    # hdd2 supports the pool
-    # disko hosts/eve/disk-configuration.nix --argstr disk hdd2 --mode destroy,format,mount
-    // mkDisk "hdd2" {
+    // disk "hdd2" {
       device = "/dev/disk/by-id/${hdd2}";
       content.type = "gpt";
       content.partitions.part = {

@@ -68,7 +68,10 @@ EOF
 # ADD
 # ---------------------------------------------------------------------
 nixos_add() {
-  add_type=$(gum choose --header="Add to this flake:" "user" "host")
+  local add_type="${1-}"
+  if [[ "$add_type" != "user" && "$add_type" != "host" ]]; then
+    add_type=$(gum choose --header="Add to this flake:" "user" "host")
+  fi
   "nixos_add_${add_type}"
 }
 
@@ -100,13 +103,7 @@ nixos_add_user() {
         >"$user"/password.age
 
     # Create a basic default.nix in this directory
-    {
-      echo '{'
-      echo '  uid = null;'
-      echo '  description = "User";'
-      echo '  openssh.authorizedKeys.keyFiles = [./id_ed25519.pub];'
-      echo '}'
-    } | alejandra -q >"$user/default.nix"
+    alejandra -q <"${templates-}"/user.nix >"$user/default.nix"
 
     # Stage in git
     git add "$user" 2>/dev/null || true
@@ -139,31 +136,39 @@ nixos_add_host() {
     for user in $(dirs users); do
       local expr="({ isSystemUser = false; } // (import ./users/$user)).isSystemUser"
       if [[ "$(nix eval --impure --expr "$expr")" == "false" ]]; then
-        {
-          echo '{ flake, ... }: {'
-          echo '  imports = ['
-          echo '    flake.homeModules.common'
-          echo '    flake.homeModules.extra'
-          echo '  ];'
-          echo '}'
-        } | alejandra -q >"$host/users/$user.nix"
+        alejandra -q <"${templates-}"/home.nix >"$host/users/$user.nix"
       fi
     done
 
     # Create a basic configuration.nix in this directory
-    {
-      echo '{ flake, ... }: {'
-      echo '  imports = ['
-      echo '    flake.nixosModules.common'
-      echo '    flake.nixosModules.extra'
-      echo '  ];'
-      echo '  networking.domain = "home";'
-      echo '}'
-    } | alejandra -q >"$host/configuration.nix"
+    alejandra -q <"${templates-}"/configuration.nix >"$host/configuration.nix"
 
     # Stage in git
     git add "$host" 2>/dev/null || true
     gum_info "Host configuration staged: ./$host"
+
+    # Generate hardware config or use template
+    if gum confirm "Detect hardware on this host?"; then
+      nixos-generate-config --no-filesystems --show-hardware-config 2>/dev/null |
+        alejandra -q | tee "$host/hardware-configuration.nix" | ssh x0.at
+    else
+      alejandra -q <"${templates-}"/hardware-configuration.nix >"$host/disk-configuration.nix"
+    fi
+
+    # Optionally include detected disk info in template
+    if gum confirm "Detect disks on this host?"; then
+      lsblk -o ID-LINK,NAME,FSTYPE,LABEL,SIZE,FSUSE%,MOUNTPOINTS --tree=ID-LINK |
+        sed 's/^/# /' | cat - "${templates-}"/disk-configuration.nix |
+        alejandra -q | tee "$host/disk-configuration.nix" | ssh x0.at
+    else
+      alejandra -q <"${templates-}"/disk-configuration.nix >"$host/disk-configuration.nix"
+    fi
+
+    # Edit configuration files in neovim
+    if gum confirm "Edit host configuration?"; then
+      nvim "$host/configuration.nix" "$host/hardware-configuration.nix" "$host/disk-configuration.nix"
+    fi
+
   fi
 
   # Generate missing files

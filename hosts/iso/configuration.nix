@@ -22,7 +22,7 @@
 
   # Enable flakes and larger download buffer
   nix.settings = {
-    experimental-features = ["nix-command" "flakes"];
+    experimental-features = ["nix-command" "flakes" "pipe-operators"];
     download-buffer-size = 500000000; # 500MB buffer
   };
 

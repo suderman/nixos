@@ -1,9 +1,16 @@
-{disk ? "all", ...}: let
-  mkDisk = diskName: cfg:
-    if disk == "all" || disk == diskName
-    then {"${diskName}" = {type = "disk";} // cfg;}
+{disks ? [], ...}: let
+  # Named disk devices
+  ssd1 = "nvme-eui.e8238fa6bf530001001b448b4ca4ccdd"; # below CPU
+  ssd2 = "nvme-eui.000000000000000100a07524462d7584"; # behind GPU
+  ssd3 = "nvme-eui.e8238fa6bf530001001b448b4a20d09b"; # behind GPU riser
+
+  # Create named disk attr if name found in disks list OR if disks is empty list
+  disk = name: cfg:
+    if disks == [] || builtins.elem name disks
+    then {"${name}" = {type = "disk";} // cfg;}
     else {};
 
+  # Default btrfs mount options with mountpoint
   mount = mountpoint: {
     inherit mountpoint;
     mountOptions = [
@@ -14,6 +21,7 @@
     ];
   };
 
+  # Extended mount options to support automount
   automount = mountpoint: {
     inherit mountpoint;
     mountOptions =
@@ -26,16 +34,12 @@
         "x-systemd.idle-timeout=5m" # unmount after 5 min of inactivity
       ];
   };
-  # lsblk -f && ls -1 /dev/disk/by-id | grep '^nvme-eui.*n1$'
-  nvme0n1 = "nvme-eui.e8238fa6bf530001001b448b4ca4ccdd"; # below CPU
-  nvme1n1 = "nvme-eui.000000000000000100a07524462d7584"; # behind GPU
-  nvme2n1 = "nvme-eui.e8238fa6bf530001001b448b4a20d09b"; # behind GPU riser
 in {
   disko.devices.disk =
     # main disk
-    # disko hosts/kit/disk-configuration.nix --argstr disk ssd1 --mode destroy,format,mount
-    mkDisk "ssd1" {
-      device = "/dev/disk/by-id/${nvme0n1}"; # below CPU
+    # disko disk-configuration.nix -m destroy,format,mount --arg disks '["ssd1"]'
+    disk "ssd1" {
+      device = "/dev/disk/by-id/${ssd1}"; # below CPU
       content.type = "gpt";
 
       # bios boot
@@ -60,7 +64,7 @@ in {
 
       # adjust size to match ram
       content.partitions.swap = {
-        size = "8G";
+        size = "64G";
         priority = 3;
         content = {
           type = "swap";
@@ -71,7 +75,7 @@ in {
 
       # main partition
       content.partitions.part = let
-        label = "main";
+        label = "main"; # system disk
       in {
         size = "100%";
         priority = 4;
@@ -92,12 +96,12 @@ in {
       };
     }
     # data disk
-    # disko hosts/kit/disk-configuration.nix --argstr disk ssd2 --mode destroy,format,mount
-    // mkDisk "ssd2" {
-      device = "/dev/disk/by-id/${nvme1n1}"; # behind GPU
+    # disko disk-configuration.nix -m destroy,format,mount --arg disks '["ssd2"]'
+    // disk "ssd2" {
+      device = "/dev/disk/by-id/${ssd2}"; # behind GPU
       content.type = "gpt";
       content.partitions.part = let
-        label = "data";
+        label = "data"; # AI models and video project
       in {
         size = "100%";
         content =
@@ -115,12 +119,12 @@ in {
       };
     }
     # game disk
-    # disko hosts/kit/disk-configuration.nix --argstr disk ssd3 --mode destroy,format,mount
-    // mkDisk "ssd3" {
-      device = "/dev/disk/by-id/${nvme2n1}"; # behind GPU riser
+    # disko disk-configuration.nix -m destroy,format,mount --arg disks '["ssd3"]'
+    // disk "ssd3" {
+      device = "/dev/disk/by-id/${ssd3}"; # behind GPU riser
       content.type = "gpt";
       content.partitions.part = let
-        label = "game";
+        label = "game"; # steam and other games
       in {
         size = "100%";
         content =

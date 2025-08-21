@@ -55,9 +55,9 @@ perSystem.devshell.mkShell {
     pkgs.openssl
     (pkgs.python3.withPackages (ps: [ps.cryptography]))
     perSystem.self.agenix
-    perSystem.self.derive
-    perSystem.self.sshed
-    perSystem.self.ipaddr
     perSystem.self.default
+    perSystem.self.derive
+    perSystem.self.ipaddr
+    perSystem.self.sshed
   ];
 }

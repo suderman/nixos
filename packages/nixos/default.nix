@@ -21,6 +21,11 @@ perSystem.self.mkScript {
     pkgs.qemu
   ];
 
+  # Path to template files
+  env = {
+    templates = ./templates;
+  };
+
   # Bash script
   text = builtins.readFile ./nixos.sh;
 }
