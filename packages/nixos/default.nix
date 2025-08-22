@@ -11,12 +11,14 @@ perSystem.self.mkScript {
     perSystem.self.ipaddr
     pkgs.age
     pkgs.alejandra
+    pkgs.bat
     pkgs.git
     pkgs.gnugrep
     pkgs.gum
     pkgs.inetutils
     pkgs.iptables
     pkgs.netcat
+    pkgs.openssh
     pkgs.passh
     pkgs.qemu
   ];

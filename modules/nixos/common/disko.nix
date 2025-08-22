@@ -9,8 +9,8 @@
   ];
 
   # Allow disk override using disko cli, default to all disks
-  # disko disk-configuration.nix --argstr disk ssd1 --mode destroy,format,mount
-  _module.args.disk = "all";
+  # disko disk-configuration.nix -m destroy,format,mount --arg disks '["ssd1"]'
+  _module.args.disks = [];
 
   environment.systemPackages = [
     perSystem.disko.default
