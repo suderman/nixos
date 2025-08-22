@@ -38,7 +38,7 @@ in {
   disko.devices.disk =
     # main disk
     # disko disk-configuration.nix -m destroy,format,mount --arg disks '["ssd1"]'
-    disk "ssd1" {
+    disk ssd1 {
       device = "/dev/disk/by-id/${ssd1}";
       content.type = "gpt";
 
@@ -97,7 +97,7 @@ in {
     };
   # # data disk
   # # disko disk-configuration.nix -m destroy,format,mount --arg disks '["ssd2"]'
-  # // disk "ssd2" {
+  # // disk ssd2 {
   #   device = "/dev/disk/by-id/${ssd2}";
   #   content.type = "gpt";
   #   content.partitions.part = let
@@ -120,7 +120,7 @@ in {
   # }
   # # hdd1,hdd2 make up the pool
   # # disko disk-configuration.nix -m destroy,format,mount --arg disks '["hdd1" "hdd2"]'
-  # // disk "hdd1" {
+  # // disk hdd1 {
   #   device = "/dev/disk/by-id/${hdd1}";
   #   content.type = "gpt";
   #   content.partitions.part = {
@@ -128,7 +128,7 @@ in {
   #     content.type = "btrfs";
   #   };
   # }
-  # // disk "hdd2" {
+  # // disk hdd2 {
   #   device = "/dev/disk/by-id/${hdd2}";
   #   content.type = "gpt";
   #   content.partitions.part = let

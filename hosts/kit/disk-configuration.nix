@@ -1,8 +1,8 @@
 {disks ? [], ...}: let
   # Named disk devices
-  ssd1 = "nvme-eui.e8238fa6bf530001001b448b4ca4ccdd"; # below CPU
-  ssd2 = "nvme-eui.000000000000000100a07524462d7584"; # behind GPU
-  ssd3 = "nvme-eui.e8238fa6bf530001001b448b4a20d09b"; # behind GPU riser
+  ssd1 = "nvme-WD_BLACK_SN850X_2000GB_23442U803383"; # below CPU
+  ssd2 = "nvme-CT2000T500SSD8_2402462D7584"; # behind GPU
+  ssd3 = "nvme-WD_BLACK_SN850X_2000GB_23325G800881"; # behind GPU riser
 
   # Create named disk attr if name found in disks list OR if disks is empty list
   disk = name: cfg:
