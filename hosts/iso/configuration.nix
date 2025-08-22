@@ -61,6 +61,7 @@
     perSystem.self.derive
     perSystem.self.ipaddr
     perSystem.self.sshed
+    pkgs.bat
     pkgs.gum
     pkgs.networkmanager
     (pkgs.writeShellScriptBin "installer" (builtins.readFile ./installer.sh))
