@@ -73,7 +73,8 @@
   services.getty.helpLine = lib.mkForce ''
     The "nixos" and "root" accounts have their passwords set to `x`.
     If you need a wireless connection, type `wifi`.
-    To view detected disks, type `lsblk`.
+    To detect hardware, type `nixos detect hardware`.
+    To detect disks, type `nixos detect disks`.
     To run installer script, type `installer`.
   '';
 }

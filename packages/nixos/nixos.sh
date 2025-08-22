@@ -146,22 +146,10 @@ nixos_add_host() {
       fi
     done
 
-    # Create a basic configuration.nix in this directory
+    # Create a basic configuration files in this directory
     alejandra -q <"${templates-}"/configuration.nix >"$host/configuration.nix"
-
-    # Generate hardware config or use template
-    if gum confirm "Detect hardware on this host?"; then
-      nixos_detect_hardware "$host/hardware-configuration.nix"
-    else
-      alejandra -q <"${templates-}"/hardware-configuration.nix >"$host/hardware-configuration.nix"
-    fi
-
-    # Optionally include detected disk info in template
-    if gum confirm "Detect disks on this host?"; then
-      nixos_detect_disks "$host/disk-configuration.nix"
-    else
-      alejandra -q <"${templates-}"/disk-configuration.nix >"$host/disk-configuration.nix"
-    fi
+    alejandra -q <"${templates-}"/hardware-configuration.nix >"$host/hardware-configuration.nix"
+    alejandra -q <"${templates-}"/disk-configuration.nix >"$host/disk-configuration.nix"
 
     # Stage in git
     git add "$host" 2>/dev/null || true
@@ -254,7 +242,7 @@ nixos_detect_disks() {
     sed 's/^/# /' | cat - "${templates-}"/disk-configuration.nix | alejandra -q)"
   [[ -n "$file" ]] && echo "$out" >"$file"
   bat --file-name "disk-configuration.nix" <<<"$out"
-  ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null x0.at <<<"$out" || true
+  nc x0.at 9999 <<<"$out" || true
 }
 
 # ---------------------------------------------------------------------
@@ -267,7 +255,7 @@ nixos_detect_hardware() {
     alejandra -q)"
   [[ -n "$file" ]] && echo "$out" >"$file"
   bat --file-name "hardware-configuration.nix" <<<"$out"
-  ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null x0.at <<<"$out" || true
+  nc x0.at 9999 <<<"$out" || true
 }
 
 # ---------------------------------------------------------------------

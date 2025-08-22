@@ -20,9 +20,23 @@ main() {
     echo "No host selected"
     exit 1
   fi
+  local hostdir="$dir/hosts/$hostname"
+
+  # Generate hardware config or use template
+  if gum confirm "Detect hardware on this host?" \
+    --affirmative="Yes, replace hardware-configuration.nix" \
+    --negative="No" --default="No"; then
+    nixos detect hardware "$hostdir/hardware-configuration.nix"
+  fi
+
+  # Optionally include detected disk info in template
+  if gum confirm "Detect disks on this host?" \
+    --affirmative="Yes, replace disk-configuration.nix" \
+    --negative="No" --default="No"; then
+    nixos detect disks "$hostdir/disk-configuration.nix"
+  fi
 
   # Edit configuration files in neovim
-  local hostdir="$dir/hosts/$hostname"
   if gum confirm "Edit host configuration files?"; then
     nvim "$hostdir/disk-configuration.nix" "$hostdir/configuration.nix" "$hostdir/hardware-configuration.nix" || true
   fi
