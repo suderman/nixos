@@ -1,4 +1,3 @@
-# lsblk -o ID-LINK,NAME,FSTYPE,LABEL,SIZE,FSUSE%,MOUNTPOINTS --tree=ID-LINK | \ssh x0.at
 {disks ? [], ...}: let
   # Named disk devices
   ssd1 = "REPLACE_WITH_SYSTEM_DISK_ID"; # system disk

@@ -28,6 +28,9 @@ main() {
   generate | gen | g)
     nixos_generate "$@"
     ;;
+  detect | t)
+    nixos_detect "$@"
+    ;;
   iso | i)
     nixos_iso "$@"
     ;;
@@ -52,6 +55,9 @@ Usage: nixos [COMMAND]
   repl              Start the NixOS REPL
   add               Add a NixOS host or user
   generate          Generate missing files
+  detect            Detect system devices to generate configuration   
+    disks [FILE]    Generate disk-configuration.nix
+    hardware [FILE] Generate hardware-configuration.nix
   iso               Manage NixOS ISO image
     path            Show path to NixOS ISO
     build           Build NixOS ISO
@@ -143,34 +149,23 @@ nixos_add_host() {
     # Create a basic configuration.nix in this directory
     alejandra -q <"${templates-}"/configuration.nix >"$host/configuration.nix"
 
-    # Stage in git
-    git add "$host" 2>/dev/null || true
-    gum_info "Host configuration staged: ./$host"
-
     # Generate hardware config or use template
     if gum confirm "Detect hardware on this host?"; then
-      nixos-generate-config --no-filesystems --show-hardware-config 2>/dev/null |
-        alejandra -q | tee "$host/hardware-configuration.nix" |
-        ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null x0.at || true
+      nixos_detect_hardware "$host/hardware-configuration.nix"
     else
-      alejandra -q <"${templates-}"/hardware-configuration.nix >"$host/disk-configuration.nix"
+      alejandra -q <"${templates-}"/hardware-configuration.nix >"$host/hardware-configuration.nix"
     fi
 
     # Optionally include detected disk info in template
     if gum confirm "Detect disks on this host?"; then
-      lsblk -o ID-LINK,NAME,FSTYPE,LABEL,SIZE,FSUSE%,MOUNTPOINTS --tree=ID-LINK |
-        sed 's/^/# /' | cat - "${templates-}"/disk-configuration.nix |
-        alejandra -q | tee "$host/disk-configuration.nix" |
-        ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null x0.at || true
-
+      nixos_detect_disks "$host/disk-configuration.nix"
     else
       alejandra -q <"${templates-}"/disk-configuration.nix >"$host/disk-configuration.nix"
     fi
 
-    # Edit configuration files in neovim
-    if gum confirm "Edit host configuration files?"; then
-      nvim "$host/configuration.nix" "$host/hardware-configuration.nix" "$host/disk-configuration.nix" || true
-    fi
+    # Stage in git
+    git add "$host" 2>/dev/null || true
+    gum_info "Host configuration staged: ./$host"
 
   fi
 
@@ -228,6 +223,51 @@ nixos_generate() {
   # Ensure secrets are rekeyed for all hosts
   gum_info "Rekeying secrets..."
   agenix rekey -a
+}
+
+# ---------------------------------------------------------------------
+# DETECT
+# ---------------------------------------------------------------------
+nixos_detect() {
+
+  case "${1:-help}" in
+  disks | d)
+    nixos_detect_disks "${2:-}"
+    ;;
+  hardware | h)
+    nixos_detect_hardware "${2:-}"
+    ;;
+  help | *)
+    nixos_help
+    ;;
+  esac
+
+}
+
+# ---------------------------------------------------------------------
+# DETECT DISKS
+# ---------------------------------------------------------------------
+nixos_detect_disks() {
+  local file="${1-}"
+  local out
+  out="$(lsblk -o ID-LINK,NAME,FSTYPE,LABEL,SIZE,FSUSE%,MOUNTPOINTS --tree=ID-LINK |
+    sed 's/^/# /' | cat - "${templates-}"/disk-configuration.nix | alejandra -q)"
+  [[ -n "$file" ]] && echo "$out" >"$file"
+  bat --file-name "disk-configuration.nix" <<<"$out"
+  ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null x0.at <<<"$out" || true
+}
+
+# ---------------------------------------------------------------------
+# DETECT HARDWARE
+# ---------------------------------------------------------------------
+nixos_detect_hardware() {
+  local file="${1-}"
+  local out
+  out="$(sudo nixos-generate-config --no-filesystems --show-hardware-config 2>/dev/null |
+    alejandra -q)"
+  [[ -n "$file" ]] && echo "$out" >"$file"
+  bat --file-name "hardware-configuration.nix" <<<"$out"
+  ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null x0.at <<<"$out" || true
 }
 
 # ---------------------------------------------------------------------

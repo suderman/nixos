@@ -1,5 +1,5 @@
 # Replace with a generated version using `nixos-generate-config` when possible.
-# sudo nixos-generate-config --no-filesystems --show-hardware-config 2>/dev/null | alejandra -q | \ssh x0.at
+# sudo nixos-generate-config --no-filesystems --show-hardware-config 2>/dev/null | alejandra -q
 {
   config,
   lib,

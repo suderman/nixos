@@ -11,6 +11,7 @@ main() {
 
   local dir="/root/nixos"
   git_clone https://github.com/suderman/nixos $dir
+  cd $dir
 
   # Get hostname (or create new one)
   local hostname
