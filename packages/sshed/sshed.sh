@@ -125,7 +125,7 @@ sshed_receive() {
     # Wait for private key to be received over netcat
     nc -l -N 12345 >"$tmp/ssh_host_ed25519_key"
 
-    if ssh_verify; then
+    if sshed_verify; then
       mv "$tmp/ssh_host_ed25519_key" "$dir/ssh_host_ed25519_key"
       chmod 600 "$dir/ssh_host_ed25519_key"
       cd "$dir" && rm -rf "$tmp"
