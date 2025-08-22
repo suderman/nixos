@@ -40,7 +40,7 @@ main() {
   if gum confirm "Edit host configuration files?" \
     --affirmative="Yes, make edits" \
     --negative="No" --default="No"; then
-    nvim "$hostdir/disk-configuration.nix" "$hostdir/configuration.nix" "$hostdir/hardware-configuration.nix"
+    nvim "$hostdir/disk-configuration.nix" "$hostdir/configuration.nix" "$hostdir/hardware-configuration.nix" || true
   fi
 
   # Destroy, format, and mount disks
@@ -76,15 +76,8 @@ git_clone() {
 
 # Choose host from flake
 get_hostname() {
-  local hostname
   # shellcheck disable=SC2012
-  hostname="$(echo -e "$(ls -1 hosts/*/disk-configuration.nix | cut -d'/' -f2)\n[new]" | gum choose)"
-  if [[ "$hostname" == "[new]" ]]; then
-    nixos add host
-    # shellcheck disable=SC2012
-    hostname="$(ls -1 hosts/*/disk-configuration.nix | cut -d'/' -f2 | gum choose)"
-  fi
-  [[ -n "$hostname" ]] && echo "$hostname"
+  ls -1 hosts/*/disk-configuration.nix | cut -d'/' -f2 | gum choose
 }
 
 # Detect disks
