@@ -38,7 +38,7 @@ in {
   disko.devices.disk =
     # main disk
     # disko disk-configuration.nix -m destroy,format,mount --arg disks '["ssd1"]'
-    disk "ssd1" {
+    disk ssd1 {
       device = "/dev/disk/by-id/${ssd1}"; # below CPU
       content.type = "gpt";
 
@@ -97,7 +97,7 @@ in {
     }
     # data disk
     # disko disk-configuration.nix -m destroy,format,mount --arg disks '["ssd2"]'
-    // disk "ssd2" {
+    // disk ssd2 {
       device = "/dev/disk/by-id/${ssd2}"; # behind GPU
       content.type = "gpt";
       content.partitions.part = let
@@ -120,7 +120,7 @@ in {
     }
     # game disk
     # disko disk-configuration.nix -m destroy,format,mount --arg disks '["ssd3"]'
-    // disk "ssd3" {
+    // disk ssd3 {
       device = "/dev/disk/by-id/${ssd3}"; # behind GPU riser
       content.type = "gpt";
       content.partitions.part = let
