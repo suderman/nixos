@@ -2,7 +2,8 @@
 set -euo pipefail
 
 # Pretty output
-gum_warn() { gum style --foreground=196 "✖ Error: $*" && exit 1; }
+gum_exit() { gum style --foreground=196 "✖ $*" && return 1; }
+gum_warn() { gum style --foreground=124 "✖ $*"; }
 gum_info() { gum style --foreground=29 "➜ $*"; }
 gum_head() { gum style --foreground=99 "$*"; }
 gum_show() { gum style --foreground=177 "    $*"; }
@@ -21,6 +22,9 @@ main() {
   case "$cmd" in
   generate | gen | g)
     sshed_generate "$@"
+    ;;
+  import | i)
+    sshed_import "$@"
     ;;
   receive | r)
     sshed_receive "$@"
@@ -46,9 +50,10 @@ sshed_help() {
 Usage: sshed COMMAND
 
   generate
-  receive
+  import [DIR]
+  receive [DIR]
   send [HOST] [IP]
-  verify
+  verify [DIR]
   help
 EOF
 }
@@ -62,8 +67,8 @@ sshed_generate() {
   agenix unlock quiet
 
   # Ensure directories exist
-  [[ ! -d ./hosts ]] && gum_warn "./hosts directory missing"
-  [[ ! -d ./users ]] && gum_warn "./users directory missing"
+  [[ ! -d ./hosts ]] && gum_exit "./hosts directory missing"
+  [[ ! -d ./users ]] && gum_exit "./users directory missing"
 
   # Per each host...
   for host in $(dirs hosts | grep -v iso); do
@@ -95,29 +100,72 @@ sshed_generate() {
 }
 
 # ---------------------------------------------------------------------
+# IMPORT
+# ---------------------------------------------------------------------
+sshed_import() {
+
+  local dir="${1:-$(pwd)}"
+  local tmp="$dir/tmp"
+
+  # Ensure public key exists
+  [[ -e $dir/ssh_host_ed25519_key.pub ]] ||
+    gum_exit "$dir/ssh_host_ed25519_key.pub missing"
+
+  # Determine hostname from key
+  local hostname
+  hostname="$(cut -d' ' -f3 <"$dir/ssh_host_ed25519_key.pub" | cut -d'@' -f1)"
+
+  # Copy existing public key to tmp dir
+  mkdir -p "$tmp"
+  cp -f "$dir/ssh_host_ed25519_key.pub" "$tmp/ssh_host_ed25519_key.pub"
+
+  # Loop until private key validated
+  while true; do
+
+    # Write the public ssh host key
+    gum input --placeholder "Enter 32-byte hex" | xargs |
+      derive hex "${hostname:-$(hostname)}" |
+      derive ssh >"$tmp/ssh_host_ed25519_key"
+
+    if sshed_verify "$tmp"; then
+      mv "$tmp/ssh_host_ed25519_key" "$dir/ssh_host_ed25519_key"
+      chmod 600 "$dir/ssh_host_ed25519_key"
+      rm -rf "$tmp"
+      break
+    fi
+
+    sleep 1
+
+  done
+
+}
+
+# ---------------------------------------------------------------------
 # RECEIVE
 # ---------------------------------------------------------------------
 sshed_receive() {
 
+  local dir="${1:-$(pwd)}"
+  local tmp="$dir/tmp"
+
   # Ensure public key exists
-  [[ -e ./ssh_host_ed25519_key.pub ]] ||
-    gum_warn "$(pwd)/ssh_host_ed25519_key.pub missing"
+  [[ -e $dir/ssh_host_ed25519_key.pub ]] ||
+    gum_exit "$dir/ssh_host_ed25519_key.pub missing"
 
   # Open port for netcat (if running as root)
   [[ "$(id -u)" == "0" ]] &&
     iptables -A INPUT -p tcp --dport 12345 -j ACCEPT
 
-  # Make and switch to tmp directory to receive key
-  dir=$(pwd) tmp=$(pwd)/tmp
-  mkdir -p "$tmp"
-  cd "$tmp" || gum_warn "Failed to cd into $tmp"
+  # Determine hostname from key
+  local hostname
+  hostname="$(cut -d' ' -f3 <"$dir/ssh_host_ed25519_key.pub" | cut -d'@' -f1)"
 
   # Copy existing public key to tmp dir
+  mkdir -p "$tmp"
   cp -f "$dir/ssh_host_ed25519_key.pub" "$tmp/ssh_host_ed25519_key.pub"
 
   # Demonstrate command to enter on client
-  host="$(cut -d' ' -f3 <ssh_host_ed25519_key.pub | cut -d'@' -f1)"
-  gum_info "sshed send ${host:-$(hostname)} $(ipaddr lan)"
+  gum_info "sshed send ${hostname:-$(hostname)} $(ipaddr lan)"
 
   # Loop until private key validated
   while true; do
@@ -125,14 +173,11 @@ sshed_receive() {
     # Wait for private key to be received over netcat
     nc -l -N 12345 >"$tmp/ssh_host_ed25519_key"
 
-    if sshed_verify; then
+    if sshed_verify "$tmp"; then
       mv "$tmp/ssh_host_ed25519_key" "$dir/ssh_host_ed25519_key"
       chmod 600 "$dir/ssh_host_ed25519_key"
-      cd "$dir" && rm -rf "$tmp"
-      gum_info "VALID ed25519 key received"
+      rm -rf "$tmp"
       break
-    else
-      gum_warn "INVALID ed25519 key received"
     fi
 
     sleep 1
@@ -147,7 +192,7 @@ sshed_receive() {
 sshed_send() {
 
   # Ensure directories exist
-  [[ ! -d ./hosts ]] && gum_warn "./hosts directory missing"
+  [[ ! -d ./hosts ]] && gum_exit "./hosts directory missing"
 
   # Get IP address and test with ping
   input_ip() {
@@ -176,7 +221,7 @@ sshed_send() {
     # shellcheck disable=SC2046
     host="$(gum choose --header="Hostname of this SSH host key:" $(dirs hosts | grep -v iso))"
   fi
-  [[ -z "$host" ]] && gum_warn "Missing host name"
+  [[ -z "$host" ]] && gum_exit "Missing host name"
 
   # Ensure IP is provided
   local ip="${2-}"
@@ -184,7 +229,7 @@ sshed_send() {
     gum_head "IP address destination to send this SSH host key:"
     ip="$(input_ip)"
   fi
-  [[ -z "$ip" ]] && gum_warn "Missing destination IP address"
+  [[ -z "$ip" ]] && gum_exit "Missing destination IP address"
 
   # Send ssh key for selected host to provided IP address
   agenix hex |
@@ -199,43 +244,49 @@ sshed_send() {
 # ---------------------------------------------------------------------
 sshed_verify() {
 
+  local dir="${1:-$(pwd)}"
+
   # Determine which key pair to check
-  if [[ -f ssh_host_ed25519_key ]]; then
-    private_key="ssh_host_ed25519_key"
-    public_key="ssh_host_ed25519_key.pub"
-  elif [[ -f id_ed25519 ]]; then
-    private_key="id_ed25519"
-    public_key="id_ed25519.pub"
+  if [[ -f "$dir/ssh_host_ed25519_key" ]]; then
+    private_key_file="$dir/ssh_host_ed25519_key"
+    public_key_file="$dir/ssh_host_ed25519_key.pub"
+  elif [[ -f "$dir/id_ed25519" ]]; then
+    private_key_file="$dir/id_ed25519"
+    public_key_file="$dir/id_ed25519.pub"
   else
-    gum_warn "No valid ed25519 key pair found in $(pwd)"
+    gum_exit "[sshed] no valid ed25519 key pair found in $dir"
   fi
 
   # Ensure private key exists
-  [[ -f "$private_key" ]] ||
-    gum_warn "[sshed] $(pwd)/$private_key missing"
+  [[ -f "$private_key_file" ]] ||
+    gum_exit "[sshed] $private_key_file missing"
 
   # Ensure public key exists
-  [[ -f "$public_key" ]] ||
-    gum_warn "[sshed] $(pwd)/$public_key missing"
+  [[ -f "$public_key_file" ]] ||
+    gum_exit "[sshed] $public_key_file missing"
 
   # Extract type from current public key (should be ssh-ed25519)
-  current_pub_type="$(cut -d' ' -f1 <"$public_key" | xargs)"
+  current_pub_type="$(cut -d' ' -f1 <"$public_key_file" | xargs)"
 
   # Extract key from current public key (without comment)
-  current_pub_key="$(cut -d' ' -f1,2 <"$public_key" | xargs)"
+  current_pub_key="$(cut -d' ' -f1,2 <"$public_key_file" | xargs)"
 
   # Derive expected public key from current private key (should match above)
-  derived_pub_key="$(derive public <"$private_key" | xargs)"
+  derived_pub_key="$(derive public <"$private_key_file" | xargs)"
 
   # Ensure public key type
-  [[ "ssh-ed25519" == "$current_pub_type" ]] ||
-    gum_warn "[sshed] $(pwd)/$public_key ssh-ed25519 NOT detected"
+  if [[ "ssh-ed25519" != "$current_pub_type" ]]; then
+    gum_warn "[sshed] $public_key_file ssh-ed25519 NOT detected"
+    return 1
+  fi
 
   # Ensure key pair actually matches
-  [[ "$current_pub_key" == "$derived_pub_key" ]] ||
-    gum_warn "[sshed] $(pwd)/$private_key invalid match"
-
-  gum_info "[sshed] $(pwd)/$private_key valid match"
+  if [[ "$current_pub_key" == "$derived_pub_key" ]]; then
+    gum_info "[sshed] $private_key_file valid match"
+  else
+    gum_warn "[sshed] $private_key_file invalid match"
+    return 1
+  fi
 
 }
 
