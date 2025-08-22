@@ -106,13 +106,14 @@ set_disks() {
   # Destroy & format disks
   disks="$(get_disks "$hostdir")"
   if [[ -n "$disks" ]]; then
-    # shellcheck disable=SC2086,SC2116
-    disko "$hostdir/disk-configuration.nix" -m destroy --arg disks "$disks"
-    # shellcheck disable=SC2086,SC2116
-    disko "$hostdir/disk-configuration.nix" -m format --arg disks "$disks"
+    # shellcheck disable=SC2086
+    disko $hostdir/disk-configuration.nix -m destroy --arg disks $disks
+    # shellcheck disable=SC2086
+    disko $hostdir/disk-configuration.nix -m format --arg disks $disks
   fi
   # Mount disks
-  disko "$hostdir/disk-configuration.nix" -m mount
+  # shellcheck disable=SC2086
+  disko $hostdir/disk-configuration.nix -m mount
 }
 
 # Persist hostname
