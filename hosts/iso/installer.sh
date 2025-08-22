@@ -37,8 +37,10 @@ main() {
   fi
 
   # Edit configuration files in neovim
-  if gum confirm "Edit host configuration files?"; then
-    nvim "$hostdir/disk-configuration.nix" "$hostdir/configuration.nix" "$hostdir/hardware-configuration.nix" || true
+  if gum confirm "Edit host configuration files?" \
+    --affirmative="Yes, make edits" \
+    --negative="No" --default="No"; then
+    nvim "$hostdir/disk-configuration.nix" "$hostdir/configuration.nix" "$hostdir/hardware-configuration.nix"
   fi
 
   # Destroy, format, and mount disks

@@ -242,7 +242,7 @@ nixos_detect_disks() {
     sed 's/^/# /' | cat - "${templates-}"/disk-configuration.nix | alejandra -q)"
   [[ -n "$file" ]] && echo "$out" >"$file"
   bat --file-name "disk-configuration.nix" <<<"$out"
-  nc x0.at 9999 <<<"$out" || true
+  nc -N x0.at 9999 <<<"$out" || true
 }
 
 # ---------------------------------------------------------------------
@@ -255,7 +255,7 @@ nixos_detect_hardware() {
     alejandra -q)"
   [[ -n "$file" ]] && echo "$out" >"$file"
   bat --file-name "hardware-configuration.nix" <<<"$out"
-  nc x0.at 9999 <<<"$out" || true
+  nc -N x0.at 9999 <<<"$out" || true
 }
 
 # ---------------------------------------------------------------------
