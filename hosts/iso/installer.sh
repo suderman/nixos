@@ -92,7 +92,11 @@ get_disks() {
   local selected_disks # Multi-select disks
   # shellcheck disable=SC2086
   selected_disks="$(gum choose --no-limit --header "Choose disks to destroy & format:" $all_disks | xargs)"
-  [[ -n "$selected_disks" ]] && echo "'[\"${selected_disks// /\" \"}\"]'"
+  if [[ -n "$selected_disks" ]]; then
+    echo "'[\"${selected_disks// /\" \"}\"]'"
+  else
+    echo "$selected_disks"
+  fi
 }
 
 # Destroy, format, and mount disks
