@@ -123,11 +123,16 @@ set_hostname() {
 # Offer to receive SSH host key ahead of nixos installation
 set_hostkey() {
   local hostdir="${1-}"
-  if gum confirm "Receive SSH host key?" --affirmative="Now" --negative="Later"; then
-    mkdir -p /mnt/persist/etc/ssh
-    cd /mnt/persist/etc/ssh
-    cp -f "$hostdir/ssh_host_ed25519_key.pub" .
-    sshed receive
+  local sshdir="/mnt/persist/etc/ssh"
+  mkdir -p "$sshdir"
+  cp -f "$hostdir/ssh_host_ed25519_key.pub" "$sshdir/ssh_host_ed25519_key.pub"
+  if gum confirm "Configure SSH host key?" --affirmative="Now" --negative="Later"; then
+    if gum confirm "Receive key from another host or manually type hex?" \
+      --affirmative="Receive SSH key" --negative="Import 32-byte hex"; then
+      sshed receive "$sshdir"
+    else
+      sshed import "$sshdir"
+    fi
   fi
 }
 
