@@ -93,7 +93,7 @@ get_disks() {
   # shellcheck disable=SC2086
   selected_disks="$(gum choose --no-limit --header "Choose disks to destroy & format:" $all_disks | xargs)"
   if [[ -n "$selected_disks" ]]; then
-    echo "'[\"${selected_disks// /\" \"}\"]'"
+    echo "[\"${selected_disks// /\" \"}\"]"
   else
     echo "$selected_disks"
   fi
@@ -106,14 +106,11 @@ set_disks() {
   # Destroy & format disks
   disks="$(get_disks "$hostdir")"
   if [[ -n "$disks" ]]; then
-    # shellcheck disable=SC2086
-    disko $hostdir/disk-configuration.nix -m destroy --arg disks $disks
-    # shellcheck disable=SC2086
-    disko $hostdir/disk-configuration.nix -m format --arg disks $disks
+    disko "$hostdir/disk-configuration.nix" -m destroy --arg disks "$disks"
+    disko "$hostdir/disk-configuration.nix" -m format --arg disks "$disks"
   fi
   # Mount disks
-  # shellcheck disable=SC2086
-  disko $hostdir/disk-configuration.nix -m mount
+  disko "$hostdir/disk-configuration.nix" -m mount
 }
 
 # Persist hostname
