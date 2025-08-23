@@ -1,14 +1,25 @@
 {disks ? [], ...}: let
   # Named disk devices
-  ssd1 = "virtio-1"; # hosts/sim/disk1.img
-  ssd2 = "virtio-2"; # hosts/sim/disk2.img
-  hdd1 = "virtio-3"; # hosts/sim/disk3.img
-  hdd2 = "virtio-4"; # hosts/sim/disk4.img
+  dev = {
+    ssd1 = "virtio-1"; # hosts/sim/disk1.img
+    ssd2 = "virtio-2"; # hosts/sim/disk2.img
+    hdd1 = "virtio-3"; # hosts/sim/disk3.img
+    hdd2 = "virtio-4"; # hosts/sim/disk4.img
+  };
 
   # Create named disk attr if name found in disks list OR if disks is empty list
-  disk = name: cfg:
+  disk = name: partitions:
     if disks == [] || builtins.elem name disks
-    then {"${name}" = {type = "disk";} // cfg;}
+    then {
+      "${name}" = {
+        type = "disk";
+        device = "/dev/disk/by-id/${builtins.getAttr name dev}";
+        content = {
+          type = "gpt";
+          inherit partitions;
+        };
+      };
+    }
     else {};
 
   # Default btrfs mount options with mountpoint
@@ -39,19 +50,16 @@ in {
   disko.devices.disk =
     # main disk
     # disko disk-configuration.nix -m destroy,format,mount --arg disks '["ssd1"]'
-    disk ssd1 {
-      device = "/dev/disk/by-id/${ssd1}";
-      content.type = "gpt";
-
+    disk "ssd1" {
       # bios boot
-      content.partitions.grub = {
+      grub = {
         size = "1M";
         type = "EF02";
         priority = 1;
       };
 
       # uefi boot
-      content.partitions.boot = {
+      boot = {
         size = "4G";
         type = "EF00";
         priority = 2;
@@ -64,7 +72,7 @@ in {
       };
 
       # adjust size to match ram
-      content.partitions.swap = {
+      swap = {
         size = "4G";
         priority = 3;
         content = {
@@ -75,16 +83,14 @@ in {
       };
 
       # main partition
-      content.partitions.part = let
-        label = "main"; # system disk
-      in {
+      part = {
         size = "100%";
         priority = 4;
         content =
-          mount "/mnt/${label}"
+          mount "/mnt/main"
           // {
             type = "btrfs";
-            extraArgs = ["-fL ${label}"];
+            extraArgs = ["-fL main"];
             subvolumes = {
               root = mount "/";
               nix = mount "/nix";
@@ -98,21 +104,17 @@ in {
     }
     # data disk
     # disko hosts/sim/disk-configuration.nix -m destroy,format,mount --arg disks '["ssd2"]'
-    // disk ssd2 {
-      device = "/dev/disk/by-id/${ssd2}";
-      content.type = "gpt";
-      content.partitions.part = let
-        label = "data"; # data example
-      in {
+    // disk "ssd2" {
+      part = {
         size = "100%";
         content =
-          automount "/mnt/${label}"
+          automount "/mnt/data"
           // {
             type = "btrfs";
-            extraArgs = ["-fL ${label}"];
+            extraArgs = ["-fL data"];
             subvolumes = {
-              persist = automount "/${label}";
-              persist-local = automount "/${label}/local";
+              persist = automount "/data";
+              persist-local = automount "/data/local";
               snapshots = {};
               backups = {};
             };
@@ -121,30 +123,24 @@ in {
     }
     # hdd1,hdd2 make up the pool
     # disko disk-configuration.nix -m destroy,format,mount --arg disks '["hdd1" "hdd2"]'
-    // disk hdd1 {
-      device = "/dev/disk/by-id/${hdd1}";
-      content.type = "gpt";
-      content.partitions.part = {
+    // disk "hdd1" {
+      part = {
         size = "100%";
         content.type = "btrfs";
       };
     }
-    // disk hdd2 {
-      device = "/dev/disk/by-id/${hdd2}";
-      content.type = "gpt";
-      content.partitions.part = let
-        label = "pool"; # pool example
-      in {
+    // disk "hdd2" {
+      part = {
         size = "100%";
         content =
-          automount "/mnt/${label}"
+          automount "/mnt/pool"
           // {
             type = "btrfs";
             extraArgs = [
-              "-fL ${label}"
+              "-fL pool"
               "-d single"
-              "/dev/disk/by-id/${hdd1}-part1"
-              "/dev/disk/by-id/${hdd2}-part1"
+              "/dev/disk/by-id/${dev.hdd1}-part1"
+              "/dev/disk/by-id/${dev.hdd2}-part1"
             ];
             subvolumes = {
               snapshots = {};

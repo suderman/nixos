@@ -80,22 +80,24 @@ get_hostname() {
   ls -1 hosts/*/disk-configuration.nix | cut -d'/' -f2 | gum choose
 }
 
-# Detect disks
+# Select disks to destroy and format
 get_disks() {
   local hostdir="${1-}"
-  # Get disko command ready
-  disko "$hostdir/disk-configuration.nix" -m destroy,format,mount --dry-run &>/dev/null
-  # Detect all disks in this host
-  local all_disks
-  all_disks="$(nix eval --extra-experimental-features pipe-operators --impure --expr \
-    "(import $hostdir/disk-configuration.nix {}).disko.devices.disk |> builtins.attrNames |> toString" | xargs)"
-  local selected_disks # Multi-select disks
-  # shellcheck disable=SC2086
-  selected_disks="$(gum choose --no-limit --header "Choose disks to destroy & format:" $all_disks | xargs)"
-  if [[ -n "$selected_disks" ]]; then
-    echo "[\"${selected_disks// /\" \"}\"]"
+  if [[ -e "$hostdir/disk-configuration.nix" ]]; then
+    nix eval --extra-experimental-features pipe-operators --impure --expr \
+      "(import $hostdir/disk-configuration.nix {}).disko.devices.disk |> 
+        builtins.mapAttrs (name: disk: name + disk.device) |> 
+        builtins.attrValues |> 
+        toString" | xargs |
+      tr ' ' '\n' |
+      sed -E 's|^ssd|0ssd|g' | sort | sed -E 's|^0ssd|ssd|g' |
+      sed -E 's|/dev/disk/by-id/| |g' |
+      gum choose --no-limit --header "Choose disks to destroy & format:" |
+      awk 'BEGIN { printf "[" }
+         NF { printf (n++ ? " \"%s\"" : "\"%s\"", $1) }
+         END { print "]" }' | cat
   else
-    echo "$selected_disks"
+    echo "[]"
   fi
 }
 
@@ -105,7 +107,8 @@ set_disks() {
   lsblk -o ID-LINK,NAME,FSTYPE,LABEL,SIZE,FSUSE%,MOUNTPOINTS --tree=ID-LINK
   # Destroy & format disks
   disks="$(get_disks "$hostdir")"
-  if [[ -n "$disks" ]]; then
+  disko "$hostdir/disk-configuration.nix" -m destroy,format,mount --dry-run &>/dev/null
+  if [[ "$disks" != "[]" ]]; then
     disko "$hostdir/disk-configuration.nix" -m destroy --arg disks "$disks"
     disko "$hostdir/disk-configuration.nix" -m format --arg disks "$disks"
   fi
