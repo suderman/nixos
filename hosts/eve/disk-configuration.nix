@@ -1,13 +1,24 @@
 {disks ? [], ...}: let
   # Named disk devices
-  ssd1 = "ata-WDC_WDS500G2B0A-00SM50_181703805719";
-  hdd1 = "ata-ST12000NM0538-2K2101_ZHZ29F82";
-  hdd2 = "ata-ST12000NM0538-2K2101_ZHZ5F9VF";
+  dev = {
+    ssd1 = "ata-WDC_WDS500G2B0A-00SM50_181703805719";
+    hdd1 = "ata-ST12000NM0538-2K2101_ZHZ29F82";
+    hdd2 = "ata-ST12000NM0538-2K2101_ZHZ5F9VF";
+  };
 
   # Create named disk attr if name found in disks list OR if disks is empty list
-  disk = name: cfg:
-    if disks == [] || builtins.elem name disks
-    then {"${name}" = {type = "disk";} // cfg;}
+  disk = name: partitions:
+    if disks == [] || (builtins.hasAttr name dev && builtins.elem name disks)
+    then {
+      "${name}" = {
+        type = "disk";
+        device = "/dev/disk/by-id/${builtins.getAttr name dev}";
+        content = {
+          type = "gpt";
+          inherit partitions;
+        };
+      };
+    }
     else {};
 
   # Default btrfs mount options with mountpoint
@@ -38,19 +49,16 @@ in {
   disko.devices.disk =
     # main disk
     # disko disk-configuration.nix -m destroy,format,mount --arg disks '["ssd1"]'
-    disk ssd1 {
-      device = "/dev/disk/by-id/${ssd1}";
-      content.type = "gpt";
-
+    disk "ssd1" {
       # bios boot
-      content.partitions.grub = {
+      grub = {
         size = "1M";
         type = "EF02";
         priority = 1;
       };
 
       # uefi boot
-      content.partitions.boot = {
+      boot = {
         size = "4G";
         type = "EF00";
         priority = 2;
@@ -63,8 +71,8 @@ in {
       };
 
       # adjust size to match ram
-      content.partitions.swap = {
-        size = "8G";
+      swap = {
+        size = "4G";
         priority = 3;
         content = {
           type = "swap";
@@ -74,16 +82,14 @@ in {
       };
 
       # main partition
-      content.partitions.part = let
-        label = "main";
-      in {
+      part = {
         size = "100%";
         priority = 4;
         content =
-          mount "/mnt/${label}"
+          mount "/mnt/main"
           // {
             type = "btrfs";
-            extraArgs = ["-fL ${label}"];
+            extraArgs = ["-fL main"];
             subvolumes = {
               root = mount "/";
               nix = mount "/nix";
@@ -97,18 +103,14 @@ in {
     }
     # hdd1,hdd2 make up the pool
     # disko disk-configuration.nix -m destroy,format,mount --arg disks '["hdd1" "hdd2"]'
-    // disk hdd1 {
-      device = "/dev/disk/by-id/${hdd1}";
-      content.type = "gpt";
-      content.partitions.part = {
+    // disk "hdd1" {
+      part = {
         size = "100%";
         content.type = "btrfs";
       };
     }
-    // disk hdd2 {
-      device = "/dev/disk/by-id/${hdd2}";
-      content.type = "gpt";
-      content.partitions.part = {
+    // disk "hdd2" {
+      part = {
         size = "100%";
         content =
           automount "/mnt/pool"
@@ -117,8 +119,8 @@ in {
             extraArgs = [
               "-fL pool"
               "-d single"
-              "/dev/disk/by-id/${hdd1}-part1"
-              "/dev/disk/by-id/${hdd2}-part1"
+              "/dev/disk/by-id/${dev.hdd1}-part1"
+              "/dev/disk/by-id/${dev.hdd2}-part1"
             ];
             subvolumes = {
               snapshots = {};

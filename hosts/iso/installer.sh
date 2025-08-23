@@ -11,7 +11,6 @@ main() {
 
   local dir="/root/nixos"
   git_clone https://github.com/suderman/nixos $dir
-  cd $dir
 
   # Get hostname (or create new one)
   local hostname
@@ -20,37 +19,40 @@ main() {
     echo "No host selected"
     exit 1
   fi
-  local hostdir="$dir/hosts/$hostname"
+
+  local hostcfg="$dir/hosts/$hostname/configuration.nix"
+  local diskcfg="$dir/hosts/$hostname/disk-configuration.nix"
+  local hardcfg="$dir/hosts/$hostname/hardware-configuration.nix"
 
   # Generate hardware config or use template
   if gum confirm "Detect hardware on this host?" \
     --affirmative="Yes, replace hardware-configuration.nix" \
     --negative="No" --default="No"; then
-    nixos detect hardware "$hostdir/hardware-configuration.nix"
+    nixos detect hardware "$hardcfg"
   fi
 
   # Optionally include detected disk info in template
   if gum confirm "Detect disks on this host?" \
     --affirmative="Yes, replace disk-configuration.nix" \
     --negative="No" --default="No"; then
-    nixos detect disks "$hostdir/disk-configuration.nix"
+    nixos detect disks "$diskcfg"
   fi
 
   # Edit configuration files in neovim
   if gum confirm "Edit host configuration files?" \
     --affirmative="Yes, make edits" \
     --negative="No" --default="No"; then
-    nvim "$hostdir/disk-configuration.nix" "$hostdir/configuration.nix" "$hostdir/hardware-configuration.nix" || true
+    nvim "$diskcfg" "$hostcfg" "$hardcfg" || true
   fi
 
   # Destroy, format, and mount disks
-  set_disks "$hostdir"
+  set_disks "$diskcfg"
 
   # Persist hostname
   set_hostname "$hostname"
 
   # Receive ssh host key
-  set_hostkey "$hostdir"
+  set_hostkey "$hostcfg"
 
   # Install nixos
   if gum confirm "Install NixOS?" --affirmative="Do it" --negative="No way"; then
@@ -82,38 +84,35 @@ get_hostname() {
 
 # Select disks to destroy and format
 get_disks() {
-  local hostdir="${1-}"
-  if [[ -e "$hostdir/disk-configuration.nix" ]]; then
-    nix eval --extra-experimental-features pipe-operators --impure --expr \
-      "(import $hostdir/disk-configuration.nix {}).disko.devices.disk |> 
-        builtins.mapAttrs (name: disk: name + disk.device) |> 
-        builtins.attrValues |> 
-        toString" | xargs |
-      tr ' ' '\n' |
-      sed -E 's|^ssd|0ssd|g' | sort | sed -E 's|^0ssd|ssd|g' |
-      sed -E 's|/dev/disk/by-id/| |g' |
-      gum choose --no-limit --header "Choose disks to destroy & format:" |
-      awk 'BEGIN { printf "[" }
-         NF { printf (n++ ? " \"%s\"" : "\"%s\"", $1) }
-         END { print "]" }' | cat
-  else
-    echo "[]"
-  fi
+  nix eval --extra-experimental-features pipe-operators --impure --expr \
+    "(import $1 {}).disko.devices.disk |> 
+      builtins.mapAttrs (name: disk: name + disk.device) |> 
+      builtins.attrValues |> 
+      toString" | xargs |
+    tr ' ' '\n' |
+    sed -E 's|^ssd|0ssd|g' | sort | sed -E 's|^0ssd|ssd|g' |
+    sed -E 's|/dev/disk/by-id/| |g' |
+    gum choose --no-limit --header "Choose disks to destroy & format:" |
+    awk 'BEGIN { printf "[" }
+       NF { printf (n++ ? " \"%s\"" : "\"%s\"", $1) }
+       END { print "]" }' | cat
 }
 
 # Destroy, format, and mount disks
 set_disks() {
-  local hostdir="${1-}"
-  lsblk -o ID-LINK,NAME,FSTYPE,LABEL,SIZE,FSUSE%,MOUNTPOINTS --tree=ID-LINK
-  # Destroy & format disks
-  disks="$(get_disks "$hostdir")"
-  disko "$hostdir/disk-configuration.nix" -m destroy,format,mount --dry-run &>/dev/null
-  if [[ "$disks" != "[]" ]]; then
-    disko "$hostdir/disk-configuration.nix" -m destroy --arg disks "$disks"
-    disko "$hostdir/disk-configuration.nix" -m format --arg disks "$disks"
+  local diskcfg="${1}"
+  if [[ -e "$diskcfg" ]]; then
+    lsblk -o ID-LINK,NAME,FSTYPE,LABEL,SIZE,FSUSE%,MOUNTPOINTS --tree=ID-LINK
+    # Destroy & format disks
+    disks="$(get_disks "$diskcfg")"
+    disko "$diskcfg" -m destroy,format,mount --dry-run &>/dev/null
+    if [[ "$disks" != "[]" ]]; then
+      disko "$diskcfg" -m destroy --arg disks "$disks"
+      disko "$diskcfg" -m format --arg disks "$disks"
+    fi
+    # Mount disks
+    disko "$diskcfg" -m mount
   fi
-  # Mount disks
-  disko "$hostdir/disk-configuration.nix" -m mount
 }
 
 # Persist hostname
@@ -125,7 +124,8 @@ set_hostname() {
 
 # Offer to receive SSH host key ahead of nixos installation
 set_hostkey() {
-  local hostdir="${1-}"
+  local hostdir
+  hostdir="$(dirname ${1-})"
   local sshdir="/mnt/persist/etc/ssh"
   mkdir -p "$sshdir"
   cp -f "$hostdir/ssh_host_ed25519_key.pub" "$sshdir/ssh_host_ed25519_key.pub"

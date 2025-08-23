@@ -9,7 +9,7 @@
 
   # Create named disk attr if name found in disks list OR if disks is empty list
   disk = name: partitions:
-    if disks == [] || builtins.elem name disks
+    if disks == [] || (builtins.hasAttr name dev && builtins.elem name disks)
     then {
       "${name}" = {
         type = "disk";
@@ -103,7 +103,7 @@ in {
       };
     }
     # data disk
-    # disko hosts/sim/disk-configuration.nix -m destroy,format,mount --arg disks '["ssd2"]'
+    # disko disk-configuration.nix -m destroy,format,mount --arg disks '["ssd2"]'
     // disk "ssd2" {
       part = {
         size = "100%";

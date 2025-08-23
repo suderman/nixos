@@ -1,15 +1,26 @@
 {disks ? [], ...}: let
-  # lsblk -o ID-LINK,NAME,FSTYPE,LABEL,SIZE,FSUSE%,MOUNTPOINTS --tree=ID-LINK
   # Named disk devices
-  ssd1 = "REPLACE_WITH_SYSTEM_DISK_ID"; # system disk
-  # ssd2 = "REPLACE_WITH_ID_2";
-  # hdd1 = "REPLACE_WITH_ID_3";
-  # hdd2 = "REPLACE_WITH_ID_4";
+  # lsblk -o ID-LINK,NAME,FSTYPE,LABEL,SIZE,FSUSE%,MOUNTPOINTS --tree=ID-LINK
+  dev = {
+    ssd1 = "REPLACE_WITH_SYSTEM_DISK_ID"; # system disk
+    # ssd2 = "REPLACE_WITH_ID_2";
+    # hdd1 = "REPLACE_WITH_ID_3";
+    # hdd2 = "REPLACE_WITH_ID_4";
+  };
 
   # Create named disk attr if name found in disks list OR if disks is empty list
-  disk = name: cfg:
-    if disks == [] || builtins.elem name disks
-    then {"${name}" = {type = "disk";} // cfg;}
+  disk = name: partitions:
+    if disks == [] || (builtins.hasAttr name dev && builtins.elem name disks)
+    then {
+      "${name}" = {
+        type = "disk";
+        device = "/dev/disk/by-id/${builtins.getAttr name dev}";
+        content = {
+          type = "gpt";
+          inherit partitions;
+        };
+      };
+    }
     else {};
 
   # Default btrfs mount options with mountpoint
@@ -22,36 +33,34 @@
       "noatime" # disables access time updates on files
     ];
   };
-  # # Extended mount options to support automount
-  # automount = mountpoint: {
-  #   inherit mountpoint;
-  #   mountOptions =
-  #     (mount null).mountOptions
-  #     ++ [
-  #       "noauto" # do not mount on boot
-  #       "nofail" # continue boot even if disk is missing
-  #       "x-systemd.automount" # create automount unit to mount when accessed
-  #       "x-systemd.device-timeout=1ms" # assume device is already plugged in and do not wait
-  #       "x-systemd.idle-timeout=5m" # unmount after 5 min of inactivity
-  #     ];
-  # };
+
+  # Extended mount options to support automount
+  automount = mountpoint: {
+    inherit mountpoint;
+    mountOptions =
+      (mount null).mountOptions
+      ++ [
+        "noauto" # do not mount on boot
+        "nofail" # continue boot even if disk is missing
+        "x-systemd.automount" # create automount unit to mount when accessed
+        "x-systemd.device-timeout=1ms" # assume device is already plugged in and do not wait
+        "x-systemd.idle-timeout=5m" # unmount after 5 min of inactivity
+      ];
+  };
 in {
   disko.devices.disk =
     # main disk
     # disko disk-configuration.nix -m destroy,format,mount --arg disks '["ssd1"]'
-    disk ssd1 {
-      device = "/dev/disk/by-id/${ssd1}";
-      content.type = "gpt";
-
+    disk "ssd1" {
       # bios boot
-      content.partitions.grub = {
+      grub = {
         size = "1M";
         type = "EF02";
         priority = 1;
       };
 
       # uefi boot
-      content.partitions.boot = {
+      boot = {
         size = "4G";
         type = "EF00";
         priority = 2;
@@ -64,8 +73,8 @@ in {
       };
 
       # adjust size to match ram
-      content.partitions.swap = {
-        size = "8G";
+      swap = {
+        size = "4G";
         priority = 3;
         content = {
           type = "swap";
@@ -75,16 +84,14 @@ in {
       };
 
       # main partition
-      content.partitions.part = let
-        label = "main"; # system disk
-      in {
+      part = {
         size = "100%";
         priority = 4;
         content =
-          mount "/mnt/${label}"
+          mount "/mnt/main"
           // {
             type = "btrfs";
-            extraArgs = ["-fL ${label}"];
+            extraArgs = ["-fL main"];
             subvolumes = {
               root = mount "/";
               nix = mount "/nix";
@@ -95,62 +102,52 @@ in {
             };
           };
       };
+    }
+    # data disk
+    # disko disk-configuration.nix -m destroy,format,mount --arg disks '["ssd2"]'
+    // disk "ssd2" {
+      part = {
+        size = "100%";
+        content =
+          automount "/mnt/data"
+          // {
+            type = "btrfs";
+            extraArgs = ["-fL data"];
+            subvolumes = {
+              persist = automount "/data";
+              persist-local = automount "/data/local";
+              snapshots = {};
+              backups = {};
+            };
+          };
+      };
+    }
+    # hdd1,hdd2 make up the pool
+    # disko disk-configuration.nix -m destroy,format,mount --arg disks '["hdd1" "hdd2"]'
+    // disk "hdd1" {
+      part = {
+        size = "100%";
+        content.type = "btrfs";
+      };
+    }
+    // disk "hdd2" {
+      part = {
+        size = "100%";
+        content =
+          automount "/mnt/pool"
+          // {
+            type = "btrfs";
+            extraArgs = [
+              "-fL pool"
+              "-d single"
+              "/dev/disk/by-id/${dev.hdd1}-part1"
+              "/dev/disk/by-id/${dev.hdd2}-part1"
+            ];
+            subvolumes = {
+              snapshots = {};
+              backups = {};
+            };
+          };
+      };
     };
-  # # data disk
-  # # disko disk-configuration.nix -m destroy,format,mount --arg disks '["ssd2"]'
-  # // disk ssd2 {
-  #   device = "/dev/disk/by-id/${ssd2}";
-  #   content.type = "gpt";
-  #   content.partitions.part = let
-  #     label = "data"; # data example
-  #   in {
-  #     size = "100%";
-  #     content =
-  #       automount "/mnt/${label}"
-  #       // {
-  #         type = "btrfs";
-  #         extraArgs = ["-fL ${label}"];
-  #         subvolumes = {
-  #           persist = automount "/${label}";
-  #           persist-local = automount "/${label}/local";
-  #           snapshots = {};
-  #           backups = {};
-  #         };
-  #       };
-  #   };
-  # }
-  # # hdd1,hdd2 make up the pool
-  # # disko disk-configuration.nix -m destroy,format,mount --arg disks '["hdd1" "hdd2"]'
-  # // disk hdd1 {
-  #   device = "/dev/disk/by-id/${hdd1}";
-  #   content.type = "gpt";
-  #   content.partitions.part = {
-  #     size = "100%";
-  #     content.type = "btrfs";
-  #   };
-  # }
-  # // disk hdd2 {
-  #   device = "/dev/disk/by-id/${hdd2}";
-  #   content.type = "gpt";
-  #   content.partitions.part = let
-  #     label = "pool"; # pool example
-  #   in {
-  #     size = "100%";
-  #     content =
-  #       automount "/mnt/${label}"
-  #       // {
-  #         type = "btrfs";
-  #         extraArgs = [
-  #           "-fL ${label}"
-  #           "-d single"
-  #           "/dev/disk/by-id/${hdd1}-part1"
-  #           "/dev/disk/by-id/${hdd2}-part1"
-  #         ];
-  #         subvolumes = {
-  #           snapshots = {};
-  #           backups = {};
-  #         };
-  #       };
-  #   };
-  # };
 }

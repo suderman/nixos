@@ -1,13 +1,24 @@
 {disks ? [], ...}: let
   # Named disk devices
-  ssd1 = "nvme-WD_BLACK_SN850X_2000GB_23442U803383"; # below CPU
-  ssd2 = "nvme-CT2000T500SSD8_2402462D7584"; # behind GPU
-  ssd3 = "nvme-WD_BLACK_SN850X_2000GB_23325G800881"; # behind GPU riser
+  dev = {
+    ssd1 = "nvme-WD_BLACK_SN850X_2000GB_23442U803383"; # below CPU
+    ssd2 = "nvme-CT2000T500SSD8_2402462D7584"; # behind GPU
+    ssd3 = "nvme-WD_BLACK_SN850X_2000GB_23325G800881"; # behind GPU riser
+  };
 
   # Create named disk attr if name found in disks list OR if disks is empty list
-  disk = name: cfg:
-    if disks == [] || builtins.elem name disks
-    then {"${name}" = {type = "disk";} // cfg;}
+  disk = name: partitions:
+    if disks == [] || (builtins.hasAttr name dev && builtins.elem name disks)
+    then {
+      "${name}" = {
+        type = "disk";
+        device = "/dev/disk/by-id/${builtins.getAttr name dev}";
+        content = {
+          type = "gpt";
+          inherit partitions;
+        };
+      };
+    }
     else {};
 
   # Default btrfs mount options with mountpoint
@@ -38,19 +49,16 @@ in {
   disko.devices.disk =
     # main disk
     # disko disk-configuration.nix -m destroy,format,mount --arg disks '["ssd1"]'
-    disk ssd1 {
-      device = "/dev/disk/by-id/${ssd1}"; # below CPU
-      content.type = "gpt";
-
+    disk "ssd1" {
       # bios boot
-      content.partitions.grub = {
+      grub = {
         size = "1M";
         type = "EF02";
         priority = 1;
       };
 
       # uefi boot
-      content.partitions.boot = {
+      boot = {
         size = "4G";
         type = "EF00";
         priority = 2;
@@ -63,7 +71,7 @@ in {
       };
 
       # adjust size to match ram
-      content.partitions.swap = {
+      swap = {
         size = "64G";
         priority = 3;
         content = {
@@ -74,16 +82,14 @@ in {
       };
 
       # main partition
-      content.partitions.part = let
-        label = "main"; # system disk
-      in {
+      part = {
         size = "100%";
         priority = 4;
         content =
-          mount "/mnt/${label}"
+          mount "/mnt/main"
           // {
             type = "btrfs";
-            extraArgs = ["-fL ${label}"];
+            extraArgs = ["-fL main"];
             subvolumes = {
               root = mount "/";
               nix = mount "/nix";
@@ -96,22 +102,18 @@ in {
       };
     }
     # data disk
-    # disko disk-configuration.nix -m destroy,format,mount --arg disks '["ssd2"]'
-    // disk ssd2 {
-      device = "/dev/disk/by-id/${ssd2}"; # behind GPU
-      content.type = "gpt";
-      content.partitions.part = let
-        label = "data"; # AI models and video project
-      in {
+    # disko hosts/sim/disk-configuration.nix -m destroy,format,mount --arg disks '["ssd2"]'
+    // disk "ssd2" {
+      part = {
         size = "100%";
         content =
-          automount "/mnt/${label}"
+          automount "/mnt/data"
           // {
             type = "btrfs";
-            extraArgs = ["-fL ${label}"];
+            extraArgs = ["-fL data"];
             subvolumes = {
-              persist = automount "/${label}";
-              persist-local = automount "/${label}/local";
+              persist = automount "/data";
+              persist-local = automount "/data/local";
               snapshots = {};
               backups = {};
             };
@@ -120,21 +122,17 @@ in {
     }
     # game disk
     # disko disk-configuration.nix -m destroy,format,mount --arg disks '["ssd3"]'
-    // disk ssd3 {
-      device = "/dev/disk/by-id/${ssd3}"; # behind GPU riser
-      content.type = "gpt";
-      content.partitions.part = let
-        label = "game"; # steam and other games
-      in {
+    // disk "ssd3" {
+      part = {
         size = "100%";
         content =
-          automount "/mnt/${label}"
+          automount "/mnt/game"
           // {
             type = "btrfs";
-            extraArgs = ["-fL ${label}"];
+            extraArgs = ["-fL game"];
             subvolumes = {
-              persist = automount "/${label}";
-              persist-local = automount "/${label}/local";
+              persist = automount "/game";
+              persist-local = automount "/game/local";
               snapshots = {};
               backups = {};
             };
