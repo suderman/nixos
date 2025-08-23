@@ -64,6 +64,7 @@
     pkgs.bat
     pkgs.gum
     pkgs.networkmanager
+    pkgs.rsync
     (pkgs.writeShellScriptBin "installer" (builtins.readFile ./installer.sh))
     (pkgs.writeShellScriptBin "lsblk" "${pkgs.util-linux}/bin/lsblk -o ID-LINK,NAME,FSTYPE,LABEL,SIZE,FSUSE%,MOUNTPOINTS --tree=ID-LINK")
     (pkgs.writeShellScriptBin "wifi" "nmtui-connect")

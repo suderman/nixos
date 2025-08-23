@@ -48,11 +48,12 @@ main() {
   # Destroy, format, and mount disks
   set_disks "$diskcfg"
 
-  # Persist hostname
-  set_hostname "$hostname"
-
   # Receive ssh host key
   set_hostkey "$hostcfg"
+
+  # Persist hostename and save copy of repo
+  echo "$hostname" >/mnt/persist/etc/hostname
+  rsync -a --delete "$dir"/ /mnt/persist/etc/nixos/
 
   # Install nixos
   if gum confirm "Install NixOS?" --affirmative="Do it" --negative="No way"; then
@@ -115,14 +116,7 @@ set_disks() {
   fi
 }
 
-# Persist hostname
-set_hostname() {
-  local hostname="${1-}"
-  mkdir -p /mnt/persist/etc
-  echo "$hostname" >/mnt/persist/etc/hostname
-}
-
-# Offer to receive SSH host key ahead of nixos installation
+# Offer to receive/import SSH host key ahead of nixos installation
 set_hostkey() {
   local hostdir
   hostdir="$(dirname ${1-})"
