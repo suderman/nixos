@@ -9,9 +9,6 @@ fi
 
 main() {
 
-  local dir="/root/nixos"
-  git_clone https://github.com/suderman/nixos $dir
-
   # Get hostname (or create new one)
   local hostname
   hostname="$(get_hostname)"
@@ -20,22 +17,23 @@ main() {
     exit 1
   fi
 
-  local hostcfg="$dir/hosts/$hostname/configuration.nix"
-  local diskcfg="$dir/hosts/$hostname/disk-configuration.nix"
-  local hardcfg="$dir/hosts/$hostname/hardware-configuration.nix"
+  local hostdir="/etc/nixos/hosts/$hostname"
+  local hostcfg="$hostdir/configuration.nix"
+  local diskcfg="$hostdir/disk-configuration.nix"
+  local hardcfg="$hostdir/hardware-configuration.nix"
 
   # Generate hardware config or use template
   if gum confirm "Detect hardware on this host?" \
     --affirmative="Yes, replace hardware-configuration.nix" \
     --negative="No" --default="No"; then
-    nixos detect hardware "$hardcfg"
+    nix run /etc/nixos detect hardware "$hardcfg"
   fi
 
   # Optionally include detected disk info in template
   if gum confirm "Detect disks on this host?" \
     --affirmative="Yes, replace disk-configuration.nix" \
     --negative="No" --default="No"; then
-    nixos detect disks "$diskcfg"
+    nix run /etc/nixos detect disks "$diskcfg"
   fi
 
   # Edit configuration files in neovim
@@ -49,32 +47,24 @@ main() {
   set_disks "$diskcfg"
 
   # Receive ssh host key
-  set_hostkey "$hostcfg"
+  set_hostkey "$hostdir"
 
   # Persist hostename and save copy of repo
   echo "$hostname" >/mnt/persist/etc/hostname
-  rsync -a --delete --chown=1000:100 "$dir"/ /mnt/persist/etc/nixos/
+  rsync -a --delete --chown=1000:100 /etc/nixos/ /mnt/persist/etc/nixos/
 
   # Install nixos
   if gum confirm "Install NixOS?" --affirmative="Do it" --negative="No way"; then
-    nixos-install --flake "$dir/#$hostname" --no-root-passwd --root /mnt
+    nixos-install --flake "/etc/nixos/#$hostname" --no-root-passwd --root /mnt
     echo
-    echo "Power down, remove ISO, and boot up."
+    gum style \
+      --border="rounded" \
+      --border-foreground="29" \
+      --foreground="82" \
+      --padding="0 1" \
+      "❄ Power down, remove ISO, and boot up."
   fi
 
-}
-
-# Download flake from github
-git_clone() {
-  local url="${1-}"
-  local dir="${2-}"
-  if [ ! -d "$dir/.git" ]; then
-    git clone --depth=1 "${url-}" "$dir"
-    cd "$dir"
-  else
-    cd "$dir"
-    git pull
-  fi
 }
 
 # Choose host from flake
@@ -118,17 +108,16 @@ set_disks() {
 
 # Offer to receive/import SSH host key ahead of nixos installation
 set_hostkey() {
-  local hostdir
-  hostdir="$(dirname ${1-})"
+  local hostdir="${1}"
   local sshdir="/mnt/persist/etc/ssh"
   mkdir -p "$sshdir"
   cp -f "$hostdir/ssh_host_ed25519_key.pub" "$sshdir/ssh_host_ed25519_key.pub"
   if gum confirm "Configure SSH host key?" --affirmative="Now" --negative="Later"; then
     if gum confirm "Receive key from another host or manually type hex?" \
       --affirmative="Receive SSH key" --negative="Import 32-byte hex"; then
-      sshed receive "$sshdir"
+      nix run /etc/nixos#sshed receive "$sshdir"
     else
-      sshed import "$sshdir"
+      nix run /etc/nixos#sshed import "$sshdir"
     fi
   fi
 }

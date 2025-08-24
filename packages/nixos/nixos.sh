@@ -345,10 +345,6 @@ nixos_iso_flash() {
 # ---------------------------------------------------------------------
 nixos_sim() {
 
-  # Ensure qemu is installed
-  command -v qemu-system-x86_644 >/dev/null 2>&1 ||
-    gum_exit "qemu not found on PATH"
-
   # Derive ssh private key
   agenix hex |
     derive hex sim |
@@ -388,7 +384,7 @@ nixos_sim_up() {
   local boot=()
   [[ "$1" == "iso" ]] && boot=(-boot d -cdrom "$(nixos iso path)")
 
-  qemu-system-x86_64 \
+  nix run nixpkgs#qemu -- \
     -enable-kvm \
     -m 6144 \
     -cpu host \
