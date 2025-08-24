@@ -44,14 +44,8 @@ perSystem.devshell.mkShell {
   packages = [
     pkgs.age
     pkgs.alejandra
-    pkgs.eza
-    pkgs.gh
     pkgs.git
-    pkgs.gnumake
-    pkgs.lazydocker
-    pkgs.lazygit
     pkgs.nix-inspect
-    pkgs.nixos-anywhere
     pkgs.openssl
     (pkgs.python3.withPackages (ps: [ps.cryptography]))
     perSystem.self.agenix

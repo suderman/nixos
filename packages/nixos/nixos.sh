@@ -2,7 +2,8 @@
 set -euo pipefail
 
 # Pretty output
-gum_warn() { gum style --foreground=196 "✖ Error: $*" && exit 1; }
+gum_exit() { gum style --foreground=196 "✖ $*" && return 1; }
+gum_warn() { gum style --foreground=124 "✖ $*"; }
 gum_info() { gum style --foreground=29 "➜ $*"; }
 gum_head() { gum style --foreground=99 "$*"; }
 gum_show() { gum style --foreground=177 "    $*"; }
@@ -91,7 +92,7 @@ nixos_add_user() {
   username="$(gum input --placeholder "username")"
 
   # Ensure a username was provided
-  [[ -z "$username" ]] && gum_warn "Missing username"
+  [[ -z "$username" ]] && gum_exit "Missing username"
   local user="users/${username}"
 
   # Ensure it doesn't already exist
@@ -126,7 +127,7 @@ nixos_add_host() {
   hostname="$(gum input --placeholder "hostname")"
 
   # Ensure a hostname was provided
-  [[ -z "$hostname" ]] && gum_warn "Missing hostname"
+  [[ -z "$hostname" ]] && gum_exit "Missing hostname"
   local host="hosts/${hostname}"
 
   # Ensure it doesn't already exist
@@ -310,7 +311,7 @@ nixos_iso_flash() {
   usb_devices=$(lsblk -dpno NAME,SIZE,MODEL,TRAN | grep -i usb || true)
 
   # Ensure a USB drive is plugged in
-  [[ -z "$usb_devices" ]] && gum_warn "No USB drives detected."
+  [[ -z "$usb_devices" ]] && gum_exit "No USB drives detected."
 
   # Select USB device
   usb_selection=$(echo "$usb_devices" | gum choose --header "Select USB drive to flash the ISO to")
@@ -343,6 +344,10 @@ nixos_iso_flash() {
 # SIM
 # ---------------------------------------------------------------------
 nixos_sim() {
+
+  # Ensure qemu is installed
+  command -v qemu-system-x86_644 >/dev/null 2>&1 ||
+    gum_exit "qemu not found on PATH"
 
   # Derive ssh private key
   agenix hex |

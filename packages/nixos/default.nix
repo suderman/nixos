@@ -18,10 +18,9 @@ perSystem.self.mkScript {
     pkgs.inetutils
     pkgs.iptables
     pkgs.netcat
-    pkgs.netcat-gnu
     pkgs.openssh
     pkgs.passh
-    pkgs.qemu
+    # pkgs.qemu (install separately on desktops)
   ];
 
   # Path to template files

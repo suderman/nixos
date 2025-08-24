@@ -53,7 +53,7 @@ main() {
 
   # Persist hostename and save copy of repo
   echo "$hostname" >/mnt/persist/etc/hostname
-  rsync -a --delete "$dir"/ /mnt/persist/etc/nixos/
+  rsync -a --delete --chown=1000:100 "$dir"/ /mnt/persist/etc/nixos/
 
   # Install nixos
   if gum confirm "Install NixOS?" --affirmative="Do it" --negative="No way"; then
