@@ -1,26 +1,27 @@
 # programs.zwift.enable = true;
-{ config, lib, pkgs, perSystem, ... }: let
-
+{
+  config,
+  lib,
+  perSystem,
+  ...
+}: let
   cfg = config.programs.zwift;
-  inherit (lib) mkIf mkOption options types;
+  inherit (lib) mkIf options;
   inherit (config.services.keyd.lib) mkClass;
 
   # Window class name
   class = "zwiftapp.exe";
-
 in {
-
   options.programs.zwift = {
-    enable = options.mkEnableOption "zwift"; 
+    enable = options.mkEnableOption "zwift";
   };
 
   config = mkIf cfg.enable {
-
     # Add to path
-    home.packages = [ perSystem.self.zwift ]; 
+    home.packages = [perSystem.self.zwift];
 
     # Persist credentials
-    persist.directories = [ ".local/share/zwift" ];
+    impermanence.persist.directories = [".local/share/zwift"];
 
     # Window rules
     wayland.windowManager.hyprland.settings = {
@@ -34,7 +35,7 @@ in {
       # "h" = "left";
       # "j" = "down"; # u-turn
       # "k" = "up"; # show menu
-      # "l" = "right"; 
+      # "l" = "right";
       # "f" = "f1"; # elbow flick
       # "w" = "f2"; # wave hand
       # "r" = "f3"; # ride on
@@ -75,7 +76,5 @@ in {
       # 0-9 = camera angles
       # tab = skip workout block
     };
-
   };
-
 }

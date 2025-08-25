@@ -1,11 +1,14 @@
-{ config, pkgs, flake, ... }: {
-
+{
+  pkgs,
+  flake,
+  ...
+}: {
   # Import all *.nix files in this directory
   imports = flake.lib.ls ./.;
 
-  home.packages = with pkgs; [ 
-    lapce # text editor 
-    libreoffice  # office suite (writing, spreadsheets, etc)
+  home.packages = with pkgs; [
+    lapce # text editor
+    libreoffice # office suite (writing, spreadsheets, etc)
     newsflash # rss reader
   ];
 
@@ -15,6 +18,5 @@
 
   services.flatpak.enable = true;
 
-  persist.directories = [ ".local/state/wireplumber" ];
-
+  impermanence.persist.directories = [".local/state/wireplumber"];
 }

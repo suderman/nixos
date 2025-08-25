@@ -70,6 +70,6 @@ in {
     };
 
     # Persist data
-    persist.localDirectories = [".var/app" ".local/share/flatpak"];
+    impermanence.scratch.directories = [".var/app" ".local/share/flatpak"];
   };
 }

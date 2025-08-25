@@ -21,14 +21,14 @@
     videos = "${home}/Personal/Movies"; # persist
   };
 
-  persist.directories = [
+  impermanence.persist.directories = [
     ".ssh"
     "Downloads"
     "Personal"
     "Work"
   ];
 
-  persist.files = [
+  impermanence.persist.files = [
     ".zsh_history"
     ".bash_history"
   ];

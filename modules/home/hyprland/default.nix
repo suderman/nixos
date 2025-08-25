@@ -71,7 +71,7 @@ in {
     services.keyd.enable = true;
 
     # Persist extra config
-    persist.directories = [".config/hypr/extra"];
+    impermanence.persist.directories = [".config/hypr/extra"];
     tmpfiles.files = [".config/hypr/extra/hyprland.conf"];
   };
 }

@@ -94,7 +94,7 @@ in {
               root = mount "/";
               nix = mount "/nix";
               persist = mount "/persist";
-              persist-local = mount "/persist/local";
+              scratch = mount "/scratch";
               snapshots = {};
               backups = {};
             };

@@ -95,7 +95,7 @@ in {
               root = mount "/";
               nix = mount "/nix";
               persist = mount "/persist";
-              persist-local = mount "/persist/local";
+              scratch = mount "/scratch";
               snapshots = {};
               backups = {};
             };
@@ -114,7 +114,6 @@ in {
             extraArgs = ["-fL data"];
             subvolumes = {
               persist = automount "/data";
-              persist-local = automount "/data/local";
               snapshots = {};
               backups = {};
             };

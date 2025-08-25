@@ -1,10 +1,12 @@
-{ config, lib, flake, ... }: let
-
+{
+  config,
+  lib,
+  flake,
+  ...
+}: let
   cfg = config.virtualisation.docker;
   inherit (lib) mkIf;
-
 in {
-
   # Enable Docker and set to backend (over podman default)
   virtualisation = {
     docker.storageDriver = "overlay2";
@@ -13,9 +15,8 @@ in {
   };
 
   # Persist data after reboots
-  persist.directories = mkIf cfg.enable [ "/var/lib/docker" ];
+  impermanence.persist.directories = mkIf cfg.enable ["/var/lib/docker"];
 
   # Add config's users to the docker group
-  users.users = mkIf cfg.enable (flake.lib.extraGroups config [ "docker" ]);
-  
+  users.users = mkIf cfg.enable (flake.lib.extraGroups config ["docker"]);
 }

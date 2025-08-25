@@ -1,11 +1,15 @@
-{ config, lib, flake, hostName, ... }: let
+{
+  config,
+  lib,
+  flake,
+  hostName,
+  ...
+}: let
   inherit (builtins) attrNames attrValues filter;
-  inherit (lib) filterAttrs hasPrefix mkForce mkDefault mkOption naturalSort types unique;
+  inherit (lib) filterAttrs hasPrefix mkDefault mkOption naturalSort types unique;
 in {
-
   # Extra options for each host
   options.networking = {
-
     hostNames = mkOption {
       description = "All hostnames this host can be reached at";
       type = with types; listOf str;
@@ -23,36 +27,35 @@ in {
       type = with types; listOf str;
       default = [];
     };
-
   };
 
   config = {
-
     networking = {
-
       # Derive primary hostName from blueprint ./hosts/dir
       hostName = hostName;
 
       # All the hostNames this host can be reached with
-      hostNames = filter 
-        (name: hasPrefix hostName name) 
+      hostNames =
+        filter
+        (name: hasPrefix hostName name)
         (attrNames flake.networking.records);
 
       # Primary IP address from flake's zones
-      address = flake.networking.records.${hostName} or "127.0.0.1";  
+      address = flake.networking.records.${hostName} or "127.0.0.1";
 
       # All the IP addresses this host can be reached with
-      addresses = [ "127.0.0.1" ] ++ unique( naturalSort( attrValues( 
-        filterAttrs (name: ip: hasPrefix hostName name) flake.networking.records 
-      )));
-
+      addresses =
+        ["127.0.0.1"]
+        ++ unique (naturalSort (attrValues (
+          filterAttrs (name: ip: hasPrefix hostName name) flake.networking.records
+        )));
     };
 
     # Set your time zone
     time.timeZone = mkDefault "America/Edmonton";
 
     # Editable hosts file
-    system.activationScripts.hosts = let 
+    system.activationScripts.hosts = let
       inherit (config.networking) hostName domain;
       source = "/persist/etc/hosts";
       target = "/etc/hosts";
@@ -67,18 +70,16 @@ in {
         chmod 644 ${source}
         ln -sf ${source} ${target}
       '';
-      deps = [ "etc" ];
+      deps = ["etc"];
     };
 
     # NetworkManager
     networking.networkmanager.enable = true;
 
     # Add config's users to the networkmanager group
-    users.users = flake.lib.extraGroups config [ "networkmanager" ];
+    users.users = flake.lib.extraGroups config ["networkmanager"];
 
     # Persist connections after reboots
-    persist.directories = [ "/etc/NetworkManager/system-connections" ];
-
+    impermanence.persist.directories = ["/etc/NetworkManager/system-connections"];
   };
-
 }

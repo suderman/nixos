@@ -1,5 +1,9 @@
-{ config, lib, pkgs, ... }: {
-
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
   programs.zsh = {
     autocd = true;
     # enableAutosuggestions = true;
@@ -27,7 +31,7 @@
     };
 
     initContent = ''
-      # Extract mp4 video from *.MP.jpg 
+      # Extract mp4 video from *.MP.jpg
       # https://linuxreviews.org/Google_Pixel_%22Motion_Photo%22
       extract () {
         extractposition=$(grep --binary --byte-offset --only-matching --text -P "\x00\x00\x00\x1C\x66\x74\x79\x70\x69\x73\x6f\x6d" $1 | sed 's/^\([0-9]*\).*/\1/')
@@ -50,11 +54,10 @@
     # Custom location for history and more
     dotDir = ".config/zsh";
     history.path = "${config.xdg.dataHome}/zsh/zsh_history";
-  };  
+  };
 
   # Persist zsh history
-  persist.directories = [ ".local/share/zsh" ];
+  impermanence.persist.directories = [".local/share/zsh"];
 
-  home.packages = [ pkgs.zsh-fzf-tab ];
-
+  home.packages = [pkgs.zsh-fzf-tab];
 }

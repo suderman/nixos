@@ -1,18 +1,18 @@
-{ config, lib, inputs, ... }: let
-
-  cfg = config.persist;
-  inherit (builtins) baseNameOf mapAttrs;
-  inherit (lib) mkAfter mkOption optionals types unique;
+{
+  config,
+  lib,
+  inputs,
+  ...
+}: let
+  inherit (builtins) mapAttrs;
+  inherit (lib) mkAfter mkOption types unique;
   users = config.home-manager.users or {};
-
 in {
-
   # Import impermanence module
-  imports = [ inputs.impermanence.nixosModule ];
+  imports = [inputs.impermanence.nixosModule];
 
   # Extra options
-  options.persist = {
-
+  options.impermanence.persist = {
     # Default is enabled
     enable = mkOption {
       description = "Enable persistent storage location";
@@ -26,15 +26,7 @@ in {
       description = "System files to persist reboots and snapshot";
       type = with types; listOf (either str attrs);
       default = [];
-      example = [ "/etc/machine-id" ];
-    };
-
-    # Files relative to / root
-    localFiles = mkOption {
-      description = "System files to persist reboots";
-      type = with types; listOf (either str attrs);
-      default = [];
-      example = [ "/etc/machine-id" ];
+      example = ["/etc/machine-id"];
     };
 
     # Directories relative to / root
@@ -42,77 +34,97 @@ in {
       description = "System directories to persist reboots and snapshot";
       type = with types; listOf (either str attrs);
       default = [];
-      example = [ "/etc/nixos" ];
+      example = ["/etc/nixos"];
+    };
+  };
+
+  options.impermanence.scratch = {
+    # Default is enabled
+    enable = mkOption {
+      description = "Enable scratch storage location";
+      type = types.bool;
+      default = true;
+      example = false;
+    };
+
+    # Files relative to / root
+    files = mkOption {
+      description = "System files to persist reboots";
+      type = with types; listOf (either str attrs);
+      default = [];
+      example = ["/etc/machine-id"];
     };
 
     # Directories relative to / root
-    localDirectories = mkOption {
+    directories = mkOption {
       description = "System directories to persist reboots";
       type = with types; listOf (either str attrs);
       default = [];
-      example = [ "/etc/nixos" ];
+      example = ["/etc/nixos"];
     };
-
   };
 
   config = {
-
     # Persist reboots with snapshots and backups
     environment.persistence."/persist" = {
-      enable = cfg.enable;
+      enable = config.impermanence.persist.enable;
       hideMounts = true;
 
       # System directories
       directories = unique ([
-        "/etc/nixos"
-        "/var/lib/nixos"
-        "/var/lib/systemd/coredump"
-      ] ++ cfg.directories);
+          "/etc/nixos"
+          "/var/lib/nixos"
+          "/var/lib/systemd/coredump"
+        ]
+        ++ config.impermanence.persist.directories);
 
       # System files
-      files = cfg.files;
+      files = config.impermanence.persist.files;
 
       # Persist user data
-      users = mapAttrs (name: user: {
+      users =
+        mapAttrs (name: user: {
+          # User directories
+          directories = unique ([
+              "Downloads"
+            ]
+            ++ user.impermanence.persist.directories);
 
-        # User directories
-        directories = unique ([
-          "Downloads"
-        ] ++ user.persist.directories);
-
-        # User files
-        files = unique ([
-          ".bashrc"
-        ] ++ user.persist.files);
-
-      }) users; 
-
+          # User files
+          files = unique ([
+              ".bashrc"
+            ]
+            ++ user.impermanence.persist.files);
+        })
+        users;
     };
 
     # Persist reboots only
-    environment.persistence."/persist/local" = {
-      enable = cfg.enable;
+    environment.persistence."/scratch" = {
+      enable = config.impermanence.scratch.enable;
       hideMounts = true;
 
       # System directories
       directories = unique ([
-        "/var/log"  
-      ] ++ cfg.localDirectories);
+          "/var/log"
+        ]
+        ++ config.impermanence.scratch.directories);
 
       # System files
-      files = unique cfg.localFiles;
+      files = unique config.impermanence.scratch.files;
 
       # Persist user data
-      users = mapAttrs (name: user: {
-        directories = unique user.persist.localDirectories;
-        files = unique user.persist.localFiles;
-      }) users; 
-
+      users =
+        mapAttrs (name: user: {
+          directories = unique user.impermanence.scratch.directories;
+          files = unique user.impermanence.scratch.files;
+        })
+        users;
     };
 
     # Persistent volumes must be marked with neededForBoot
     fileSystems."/persist".neededForBoot = true;
-    fileSystems."/persist/local".neededForBoot = true;
+    fileSystems."/scratch".neededForBoot = true;
 
     # Allows users to allow others on their binds
     programs.fuse.userAllowOther = true;
@@ -144,7 +156,5 @@ in {
       # Clean up
       umount /mnt
     '';
-
   };
-
 }

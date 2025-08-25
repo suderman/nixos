@@ -1,6 +1,11 @@
 # programs.firefox.enable = true;
-{ config, lib, pkgs, flake, ... }: let
-
+{
+  config,
+  lib,
+  pkgs,
+  flake,
+  ...
+}: let
   cfg = config.programs.firefox;
   inherit (lib) mkIf;
   inherit (flake.lib) ls;
@@ -8,17 +13,13 @@
 
   # Window class name
   class = "firefox";
-
 in {
-
   # Extra addons not found in nur
   imports = ls ./.;
 
   config = mkIf cfg.enable {
-
     programs.firefox = {
       profiles.default = {
-
         settings = {
           "ui.key.menuAccessKeyFocuses" = false; # don't toggle menu with alt key
           "browser.tabs.tabClipWidth" = 999; # hide close button on inactive tabs
@@ -59,20 +60,21 @@ in {
         search = {
           default = "Whoogle";
           force = true;
-          engines."Whoogle" = let whoogle = "g.sol"; in {
-            urls = [{ template = "https://${whoogle}/search?q={searchTerms}"; }];
+          engines."Whoogle" = let
+            whoogle = "g.sol";
+          in {
+            urls = [{template = "https://${whoogle}/search?q={searchTerms}";}];
             icon = "https://${whoogle}/static/img/favicon/apple-icon-144x144.png";
             updateInterval = 24 * 60 * 60 * 1000; # every day
-            definedAliases = [ "@wh" ];
+            definedAliases = ["@wh"];
             method = "POST";
           };
           engines."Nix Code" = {
-            urls = [{ template = "https://github.com/search?type=code&q=lang%3Anix+{searchTerms}"; }];
+            urls = [{template = "https://github.com/search?type=code&q=lang%3Anix+{searchTerms}";}];
             icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
-            definedAliases = [ "@nix" ];
+            definedAliases = ["@nix"];
           };
         };
-
       };
     };
 
@@ -100,8 +102,6 @@ in {
     # stylix.targets.firefox.profileNames = [ "default" ];
 
     # Persist browser data
-    persist.directories = [ ".mozilla/firefox/default" ];
-
+    impermanence.persist.directories = [".mozilla/firefox/default"];
   };
-
 }
