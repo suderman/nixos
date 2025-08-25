@@ -57,7 +57,7 @@ in {
     # Editable hosts file
     system.activationScripts.hosts = let
       inherit (config.networking) hostName domain;
-      source = "/persist/etc/hosts";
+      source = "/persist/storage/etc/hosts";
       target = "/etc/hosts";
     in {
       text = ''

@@ -1,60 +1,69 @@
 # Configure agenix to work with derived identity and ssh keys
-{ config, lib, pkgs, perSystem, flake, hostName, ... }: {
-
+{
+  config,
+  lib,
+  pkgs,
+  perSystem,
+  flake,
+  hostName,
+  ...
+}: {
   imports = [
     flake.nixosModules.agenix
   ];
 
   # Add /persist/etc/ssh/ssh_host_ed25519_key.pub and /etc/machine-id
   system.activationScripts.etc.text = let
-
     inherit (config.age.rekey) hostPubkey;
     hex = config.age.secrets.hex.path;
-    path = [ perSystem.self.derive ];
+    path = [perSystem.self.derive];
 
-    # Copy public ssh host key from this repo to /persist
-    text = ''
-      mkdir -p /persist/etc/ssh
-      echo "${hostPubkey}" > /persist/etc/ssh/ssh_host_ed25519_key.pub
-      chmod 644 /persist/etc/ssh/ssh_host_ed25519_key.pub
-    '' + 
-
-    # Derive machine id from decrypted hex (if agenix decrypting)
-    ''
-      echo 00000000000000000000000000000000 > /etc/machine-id
-      [[ -f ${hex} ]] && cat ${hex} | 
-      derive hex ${hostName} 32 > /etc/machine-id
-      chmod 444 /etc/machine-id
-    ''; 
-
-  in lib.mkAfter "${perSystem.self.mkScript { inherit path text; }}";
+    # Copy public ssh host key from this repo to /persist/storage
+    text =
+      ''
+        mkdir -p /persist/storage/etc/ssh
+        echo "${hostPubkey}" > /persist/storage/etc/ssh/ssh_host_ed25519_key.pub
+        chmod 644 /persist/storage/etc/ssh/ssh_host_ed25519_key.pub
+      ''
+      +
+      # Derive machine id from decrypted hex (if agenix decrypting)
+      ''
+        echo 00000000000000000000000000000000 > /etc/machine-id
+        [[ -f ${hex} ]] && cat ${hex} |
+        derive hex ${hostName} 32 > /etc/machine-id
+        chmod 444 /etc/machine-id
+      '';
+  in
+    lib.mkAfter "${perSystem.self.mkScript {inherit path text;}}";
 
   # Exclude auto-generated ssh ed25519 from this list
-  services.openssh.hostKeys = [{
-    path = "/persist/etc/ssh/ssh_host_rsa_key"; # automatically generated
-    type = "rsa";
-    bits = 4096;
-  }];
+  services.openssh.hostKeys = [
+    {
+      path = "/persist/storage/etc/ssh/ssh_host_rsa_key"; # automatically generated
+      type = "rsa";
+      bits = 4096;
+    }
+  ];
 
   # Helps bootstrap a new system with expected SSH private key
   # When needed, listens on port 12345 for a key to be sent via netcat
   # Also updates the /etc/issue with the command required
   systemd.services.sshed = {
     description = "Verify and/or receive SSH host key via sshed receive";
-    wantedBy = [ "multi-user.target" ]; 
-    after = [ "network.target" ]; 
-    before = [ "sshd.service" ]; 
-    requiredBy = [ "sshd.service" ]; 
+    wantedBy = ["multi-user.target"];
+    after = ["network.target"];
+    before = ["sshd.service"];
+    requiredBy = ["sshd.service"];
     serviceConfig.Type = "oneshot";
-    path = [ 
-      perSystem.self.sshed 
-      perSystem.self.ipaddr 
-      pkgs.hostname 
-      pkgs.systemd 
+    path = [
+      perSystem.self.sshed
+      perSystem.self.ipaddr
+      pkgs.hostname
+      pkgs.systemd
     ];
     script = ''
       # Verify private ssh key matches public key
-      cd /persist/etc/ssh 
+      cd /persist/storage/etc/ssh
       if sshed verify; then
         echo "SSH host keys VALID"
       else
@@ -88,5 +97,4 @@
     pkgs.netcat
     pkgs.openssh
   ];
-
 }
