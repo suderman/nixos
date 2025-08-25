@@ -228,7 +228,7 @@ in {
     };
 
     # Persist data after reboots
-    impermanence.persist.directories = [cfg.dataDir];
+    persist.storage.directories = [cfg.dataDir];
 
     # Give traefik user permission to read secrets
     users.users.traefik.extraGroups = ["secrets"];

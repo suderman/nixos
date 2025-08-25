@@ -80,6 +80,6 @@ in {
     users.users = flake.lib.extraGroups config ["networkmanager"];
 
     # Persist connections after reboots
-    impermanence.persist.directories = ["/etc/NetworkManager/system-connections"];
+    persist.storage.directories = ["/etc/NetworkManager/system-connections"];
   };
 }

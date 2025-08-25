@@ -41,6 +41,6 @@ in {
       }
     ];
 
-    impermanence.persist.directories = [cfg.dataDir];
+    persist.storage.directories = [cfg.dataDir];
   };
 }

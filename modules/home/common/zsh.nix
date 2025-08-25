@@ -57,7 +57,7 @@
   };
 
   # Persist zsh history
-  impermanence.persist.directories = [".local/share/zsh"];
+  persist.storage.directories = [".local/share/zsh"];
 
   home.packages = [pkgs.zsh-fzf-tab];
 }

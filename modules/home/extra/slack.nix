@@ -27,6 +27,6 @@ in {
     };
 
     # Persist reboots, skip backups
-    impermanence.scratch.directories = [".config/Slack"];
+    persist.scratch.directories = [".config/Slack"];
   };
 }

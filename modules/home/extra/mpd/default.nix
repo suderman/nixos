@@ -89,7 +89,7 @@ in {
         );
     };
 
-    impermanence.persist.directories = [".local/share/mpd"];
+    persist.storage.directories = [".local/share/mpd"];
 
     services.mpd-mpris.enable = true;
     services.mpris-proxy.enable = true;

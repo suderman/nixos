@@ -31,7 +31,7 @@ in {
       windowrulev2 = [];
     };
 
-    impermanence.persist.directories = [
+    persist.storage.directories = [
       ".var/app/app.bluebubbles.BlueBubbles/config"
       ".var/app/app.bluebubbles.BlueBubbles/data"
     ];

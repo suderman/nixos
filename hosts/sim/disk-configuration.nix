@@ -94,8 +94,8 @@ in {
             subvolumes = {
               root = mount "/";
               nix = mount "/nix";
-              persist = mount "/persist";
-              scratch = mount "/scratch";
+              storage = mount "/persist/storage";
+              scratch = mount "/persist/scratch";
               snapshots = {};
               backups = {};
             };
@@ -113,7 +113,7 @@ in {
             type = "btrfs";
             extraArgs = ["-fL data"];
             subvolumes = {
-              persist = automount "/data";
+              storage = automount "/data";
               snapshots = {};
               backups = {};
             };

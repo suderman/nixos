@@ -15,6 +15,6 @@ in {
       package = pkgs.zoxide;
     };
 
-    impermanence.persist.directories = [".local/share/zoxide"];
+    persist.storage.directories = [".local/share/zoxide"];
   };
 }

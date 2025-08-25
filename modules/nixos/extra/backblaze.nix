@@ -49,7 +49,7 @@ in {
   config = mkIf cfg.enable {
     # Ensure data directory exists and is persisted
     tmpfiles.directories = [cfg.dataDir];
-    impermanence.persist.directories = [cfg.dataDir];
+    persist.storage.directories = [cfg.dataDir];
 
     # Docker container
     virtualisation.oci-containers.containers."backblaze" = {

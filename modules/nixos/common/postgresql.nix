@@ -68,7 +68,7 @@ in {
     networking.firewall.allowedTCPPorts = [config.services.postgresql.settings.port];
 
     # Persist the data directory
-    impermanence.persist.directories = ["/var/lib/postgresql"];
+    persist.storage.directories = ["/var/lib/postgresql"];
 
     # Metrics
     services.prometheus = {

@@ -1,9 +1,9 @@
 {lib, ...}: let
   inherit (lib) mkOption types;
 in {
-  options.impermanence.persist = {
+  options.persist = {
     # Files relative to ~/ home
-    files = mkOption {
+    storage.files = mkOption {
       description = "Home files to persist reboots and snapshot";
       type = with types; listOf (either str attrs);
       default = [];
@@ -11,7 +11,7 @@ in {
     };
 
     # Directories relative to ~/ home
-    directories = mkOption {
+    storage.directories = mkOption {
       description = "Home directories to persist reboots and snapshot";
       type = with types; listOf (either str attrs);
       default = [];
@@ -19,9 +19,9 @@ in {
     };
   };
 
-  options.impermanence.scratch = {
+  options.persist = {
     # Files relative to ~/ home
-    files = mkOption {
+    scratch.files = mkOption {
       description = "Home files to persist reboots";
       type = with types; listOf (either str attrs);
       default = [];
@@ -29,7 +29,7 @@ in {
     };
 
     # Directories relative to ~/ home
-    directories = mkOption {
+    scratch.directories = mkOption {
       description = "Home directories to persist reboots";
       type = with types; listOf (either str attrs);
       default = [];

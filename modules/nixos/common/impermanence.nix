@@ -12,8 +12,7 @@ in {
   imports = [inputs.impermanence.nixosModule];
 
   # Extra options
-  options.impermanence.persist = {
-    # Default is enabled
+  options.persist = {
     enable = mkOption {
       description = "Enable persistent storage location";
       type = types.bool;
@@ -22,7 +21,7 @@ in {
     };
 
     # Files relative to / root
-    files = mkOption {
+    storage.files = mkOption {
       description = "System files to persist reboots and snapshot";
       type = with types; listOf (either str attrs);
       default = [];
@@ -30,25 +29,15 @@ in {
     };
 
     # Directories relative to / root
-    directories = mkOption {
+    storage.directories = mkOption {
       description = "System directories to persist reboots and snapshot";
       type = with types; listOf (either str attrs);
       default = [];
       example = ["/etc/nixos"];
     };
-  };
-
-  options.impermanence.scratch = {
-    # Default is enabled
-    enable = mkOption {
-      description = "Enable scratch storage location";
-      type = types.bool;
-      default = true;
-      example = false;
-    };
 
     # Files relative to / root
-    files = mkOption {
+    scratch.files = mkOption {
       description = "System files to persist reboots";
       type = with types; listOf (either str attrs);
       default = [];
@@ -56,7 +45,7 @@ in {
     };
 
     # Directories relative to / root
-    directories = mkOption {
+    scratch.directories = mkOption {
       description = "System directories to persist reboots";
       type = with types; listOf (either str attrs);
       default = [];
@@ -66,8 +55,8 @@ in {
 
   config = {
     # Persist reboots with snapshots and backups
-    environment.persistence."/persist" = {
-      enable = config.impermanence.persist.enable;
+    environment.persistence."/persist/storage" = {
+      inherit (config.persist) enable;
       hideMounts = true;
 
       # System directories
@@ -76,55 +65,55 @@ in {
           "/var/lib/nixos"
           "/var/lib/systemd/coredump"
         ]
-        ++ config.impermanence.persist.directories);
+        ++ config.persist.storage.directories);
 
       # System files
-      files = config.impermanence.persist.files;
+      files = unique config.persist.storage.files;
 
       # Persist user data
       users =
-        mapAttrs (name: user: {
+        mapAttrs (_: user: {
           # User directories
           directories = unique ([
               "Downloads"
             ]
-            ++ user.impermanence.persist.directories);
+            ++ user.persist.storage.directories);
 
           # User files
           files = unique ([
               ".bashrc"
             ]
-            ++ user.impermanence.persist.files);
+            ++ user.persist.storage.files);
         })
         users;
     };
 
     # Persist reboots only
-    environment.persistence."/scratch" = {
-      enable = config.impermanence.scratch.enable;
+    environment.persistence."/persist/scratch" = {
+      inherit (config.persist) enable;
       hideMounts = true;
 
       # System directories
       directories = unique ([
           "/var/log"
         ]
-        ++ config.impermanence.scratch.directories);
+        ++ config.persist.scratch.directories);
 
       # System files
-      files = unique config.impermanence.scratch.files;
+      files = unique config.persist.scratch.files;
 
       # Persist user data
       users =
-        mapAttrs (name: user: {
-          directories = unique user.impermanence.scratch.directories;
-          files = unique user.impermanence.scratch.files;
+        mapAttrs (_: user: {
+          directories = unique user.persist.scratch.directories;
+          files = unique user.persist.scratch.files;
         })
         users;
     };
 
     # Persistent volumes must be marked with neededForBoot
-    fileSystems."/persist".neededForBoot = true;
-    fileSystems."/scratch".neededForBoot = true;
+    fileSystems."/persist/storage".neededForBoot = true;
+    fileSystems."/persist/scratch".neededForBoot = true;
 
     # Allows users to allow others on their binds
     programs.fuse.userAllowOther = true;

@@ -18,5 +18,5 @@
 
   services.flatpak.enable = true;
 
-  impermanence.persist.directories = [".local/state/wireplumber"];
+  persist.storage.directories = [".local/state/wireplumber"];
 }

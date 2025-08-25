@@ -48,6 +48,6 @@ in {
     '';
 
     # Persist data between reboots
-    impermanence.persist.directories = ["/var/lib/tailscale"];
+    persist.storage.directories = ["/var/lib/tailscale"];
   };
 }

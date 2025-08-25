@@ -21,7 +21,7 @@ in {
     home.packages = [perSystem.self.zwift];
 
     # Persist credentials
-    impermanence.persist.directories = [".local/share/zwift"];
+    persist.storage.directories = [".local/share/zwift"];
 
     # Window rules
     wayland.windowManager.hyprland.settings = {

@@ -102,6 +102,6 @@ in {
     # stylix.targets.firefox.profileNames = [ "default" ];
 
     # Persist browser data
-    impermanence.persist.directories = [".mozilla/firefox/default"];
+    persist.storage.directories = [".mozilla/firefox/default"];
   };
 }

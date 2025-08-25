@@ -77,7 +77,7 @@ in {
       ];
     };
 
-    impermanence.persist.directories = [cfg.dataDir];
+    persist.storage.directories = [cfg.dataDir];
 
     # Blocky CLI with this config baked-in
     environment.systemPackages = [

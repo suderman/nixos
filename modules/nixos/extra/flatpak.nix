@@ -81,6 +81,6 @@ in {
     environment.systemPackages = with pkgs; [gnome-software];
 
     # Persist data
-    impermanence.scratch.directories = ["/var/lib/flatpak"];
+    persist.scratch.directories = ["/var/lib/flatpak"];
   };
 }
