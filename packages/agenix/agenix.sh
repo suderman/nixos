@@ -68,7 +68,7 @@ agenix_import() {
   local hex=""
 
   # If GUI detected, offer QR scanning
-  if [[ -n $DISPLAY || -n $WAYLAND_DISPLAY ]]; then
+  if [[ -n "${DISPLAY-}" || -n "${WAYLAND_DISPLAY-}" ]]; then
     if [[ "$(gum choose "Scan QR code" "Enter manually")" == "Scan QR code" ]]; then
       hex="$(qr || true)"
     fi
