@@ -17,20 +17,16 @@
     inherit (config.age.rekey) hostPubkey;
     hex = config.age.secrets.hex.path;
     path = [perSystem.self.derive];
-
-    # Copy public ssh host key from this repo to /persist/storage
     text =
+      # bash
       ''
+        # Copy public ssh host key from this repo to /persist/storage
         mkdir -p /persist/storage/etc/ssh
-        echo "${hostPubkey}" > /persist/storage/etc/ssh/ssh_host_ed25519_key.pub
+        echo "${hostPubkey}" >/persist/storage/etc/ssh/ssh_host_ed25519_key.pub
         chmod 644 /persist/storage/etc/ssh/ssh_host_ed25519_key.pub
-      ''
-      +
-      # Derive machine id from decrypted hex (if agenix decrypting)
-      ''
-        echo 00000000000000000000000000000000 > /etc/machine-id
-        [[ -f ${hex} ]] && cat ${hex} |
-        derive hex ${hostName} 32 > /etc/machine-id
+        # Derive machine id from decrypted hex (if agenix decrypting)
+        echo 00000000000000000000000000000000 >/etc/machine-id
+        [[ -f ${hex} ]] && derive hex ${hostName} 32 <${hex} >/etc/machine-id
         chmod 444 /etc/machine-id
       '';
   in
@@ -75,8 +71,8 @@
         # Append issue with sshed send command including IP address
         rm /etc/issue && cp /etc/static/issue /etc/issue
         echo "SSH host keys INVALID" | tee -a /etc/issue
-        echo "Send missing private SSH key from another computer with the following command:" >> /etc/issue
-        echo -e "\n> sshed send $(hostname) $(ipaddr lan)\n" >> /etc/issue
+        echo "Send missing private SSH key from another computer with the following command:" >>/etc/issue
+        echo -e "\n> sshed send $(hostname) $(ipaddr lan)\n" >>/etc/issue
 
         # Wait for private ssh key to be received and then reboot
         sshed receive

@@ -119,31 +119,34 @@ in {
     programs.fuse.userAllowOther = true;
 
     # Script to wipe the root subvolume at boot
-    boot.initrd.postResumeCommands = mkAfter ''
-      # Mount btrfs disk to /mnt
-      mkdir -p /mnt
-      mount /dev/disk/by-label/main /mnt
+    boot.initrd.postResumeCommands =
+      mkAfter
+      # bash
+      ''
+        # Mount btrfs disk to /mnt
+        mkdir -p /mnt
+        mount /dev/disk/by-label/main /mnt
 
-      # Check if root subvolume exists
-      if btrfs subvolume show /mnt/root &>/dev/null; then
+        # Check if root subvolume exists
+        if btrfs subvolume show /mnt/root &>/dev/null; then
 
-        # Delete all of root's subvolumes
-        btrfs subvolume list -o /mnt/root |
-        cut -f9 -d' ' |
-        while read subvolume; do
-          btrfs subvolume delete "/mnt/$subvolume"
-        done
+          # Delete all of root's subvolumes
+          btrfs subvolume list -o /mnt/root |
+          cut -f9 -d' ' |
+          while read subvolume; do
+            btrfs subvolume delete "/mnt/$subvolume"
+          done
 
-        # Delete root itself
-        btrfs subvolume delete /mnt/root
+          # Delete root itself
+          btrfs subvolume delete /mnt/root
 
-      fi
+        fi
 
-      # Create a new blank subvolume at the same path
-      btrfs subvolume create /mnt/root
+        # Create a new blank subvolume at the same path
+        btrfs subvolume create /mnt/root
 
-      # Clean up
-      umount /mnt
-    '';
+        # Clean up
+        umount /mnt
+      '';
   };
 }

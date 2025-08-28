@@ -60,16 +60,20 @@ in {
       source = "/persist/storage/etc/hosts";
       target = "/etc/hosts";
     in {
-      text = ''
-        mkdir -p $(dirname ${source}) $(dirname ${target})
-        if [[ ! -s ${source} ]]; then
-          echo "127.0.0.1 localhost" > ${source}
-          echo "::1 localhost" >> ${source}
-          echo "127.0.0.2 ${hostName}.${domain} ${hostName}" >> ${source}
-        fi
-        chmod 644 ${source}
-        ln -sf ${source} ${target}
-      '';
+      text =
+        # bash
+        ''
+          mkdir -p $(dirname ${source}) $(dirname ${target})
+          if [[ ! -s ${source} ]]; then
+            {
+              echo "127.0.0.1 localhost"
+              echo "::1 localhost"
+              echo "127.0.0.2 ${hostName}.${domain} ${hostName}"
+            } >"${source}"
+          fi
+          chmod 644 ${source}
+          ln -sf ${source} ${target}
+        '';
       deps = ["etc"];
     };
 
