@@ -93,8 +93,8 @@ in {
             subvolumes = {
               root = mount "/";
               nix = mount "/nix";
-              storage = mount "/persist/storage";
-              scratch = mount "/persist/scratch";
+              scratch = {};
+              storage = {};
               snapshots = {};
               backups = {};
             };

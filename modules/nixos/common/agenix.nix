@@ -12,7 +12,7 @@
     flake.nixosModules.agenix
   ];
 
-  # Add /persist/etc/ssh/ssh_host_ed25519_key.pub and /etc/machine-id
+  # Add /mnt/main/storage/etc/ssh/ssh_host_ed25519_key.pub and /etc/machine-id
   system.activationScripts.etc.text = let
     inherit (config.age.rekey) hostPubkey;
     hex = config.age.secrets.hex.path;
@@ -20,10 +20,10 @@
     text =
       # bash
       ''
-        # Copy public ssh host key from this repo to /persist/storage
-        mkdir -p /persist/storage/etc/ssh
-        echo "${hostPubkey}" >/persist/storage/etc/ssh/ssh_host_ed25519_key.pub
-        chmod 644 /persist/storage/etc/ssh/ssh_host_ed25519_key.pub
+        # Copy public ssh host key from this repo to /mnt/main/storage
+        mkdir -p /mnt/main/storage/etc/ssh
+        echo "${hostPubkey}" >/mnt/main/storage/etc/ssh/ssh_host_ed25519_key.pub
+        chmod 644 /mnt/main/storage/etc/ssh/ssh_host_ed25519_key.pub
         # Derive machine id from decrypted hex (if agenix decrypting)
         echo 00000000000000000000000000000000 >/etc/machine-id
         [[ -f ${hex} ]] && derive hex ${hostName} 32 <${hex} >/etc/machine-id
@@ -35,7 +35,7 @@
   # Exclude auto-generated ssh ed25519 from this list
   services.openssh.hostKeys = [
     {
-      path = "/persist/storage/etc/ssh/ssh_host_rsa_key"; # automatically generated
+      path = "/mnt/main/storage/etc/ssh/ssh_host_rsa_key"; # automatically generated
       type = "rsa";
       bits = 4096;
     }
@@ -59,7 +59,7 @@
     ];
     script = ''
       # Verify private ssh key matches public key
-      cd /persist/storage/etc/ssh
+      cd /mnt/main/storage/etc/ssh
       if sshed verify; then
         echo "SSH host keys VALID"
       else

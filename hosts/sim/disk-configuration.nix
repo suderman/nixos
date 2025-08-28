@@ -94,8 +94,8 @@ in {
             subvolumes = {
               root = mount "/";
               nix = mount "/nix";
-              storage = mount "/persist/storage";
-              scratch = mount "/persist/scratch";
+              scratch = {};
+              storage = {};
               snapshots = {};
               backups = {};
             };
@@ -142,6 +142,7 @@ in {
               "/dev/disk/by-id/${dev.hdd2}-part1"
             ];
             subvolumes = {
+              storage = {};
               snapshots = {};
               backups = {};
             };

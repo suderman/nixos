@@ -50,8 +50,8 @@ main() {
   set_hostkey "$hostdir"
 
   # Persist hostename and save copy of repo
-  echo "$hostname" >/mnt/persist/storage/etc/hostname
-  rsync -a --delete --chown=1000:100 /etc/nixos/ /mnt/persist/storage/etc/nixos/
+  echo "$hostname" >/mnt/mnt/main/storage/etc/hostname
+  rsync -a --delete --chown=1000:100 /etc/nixos/ /mnt/mnt/main/storage/etc/nixos/
 
   # Install nixos
   if gum confirm "Install NixOS?" --affirmative="Do it" --negative="No way"; then
@@ -109,7 +109,7 @@ set_disks() {
 # Offer to receive/import SSH host key ahead of nixos installation
 set_hostkey() {
   local hostdir="${1}"
-  local sshdir="/mnt/persist/storage/etc/ssh"
+  local sshdir="/mnt/mnt/main/storage/etc/ssh"
   mkdir -p "$sshdir"
   cp -f "$hostdir/ssh_host_ed25519_key.pub" "$sshdir/ssh_host_ed25519_key.pub"
   if gum confirm "Configure SSH host key?" --affirmative="Now" --negative="Later"; then

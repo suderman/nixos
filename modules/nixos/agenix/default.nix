@@ -18,7 +18,7 @@
 
     # Private ssh host key must be side-loaded/persisted to decrypt secrets
     # > sshed send hostName IP
-    identityPaths = ["/persist/storage/etc/ssh/ssh_host_ed25519_key"];
+    identityPaths = ["/mnt/main/storage/etc/ssh/ssh_host_ed25519_key"];
 
     # https://github.com/oddlama/agenix-rekey
     rekey = {

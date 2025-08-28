@@ -55,7 +55,7 @@ in {
 
   config = {
     # Persist reboots with snapshots and backups
-    environment.persistence."/persist/storage" = {
+    environment.persistence."/mnt/main/storage" = {
       inherit (config.persist) enable;
       hideMounts = true;
 
@@ -89,7 +89,7 @@ in {
     };
 
     # Persist reboots only
-    environment.persistence."/persist/scratch" = {
+    environment.persistence."/mnt/main/scratch" = {
       inherit (config.persist) enable;
       hideMounts = true;
 
@@ -110,10 +110,6 @@ in {
         })
         users;
     };
-
-    # Persistent volumes must be marked with neededForBoot
-    fileSystems."/persist/storage".neededForBoot = true;
-    fileSystems."/persist/scratch".neededForBoot = true;
 
     # Allows users to allow others on their binds
     programs.fuse.userAllowOther = true;
