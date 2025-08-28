@@ -111,6 +111,9 @@ in {
         users;
     };
 
+    # Persistent volumes must be marked with neededForBoot
+    fileSystems."/mnt/main".neededForBoot = true;
+
     # Allows users to allow others on their binds
     programs.fuse.userAllowOther = true;
 
