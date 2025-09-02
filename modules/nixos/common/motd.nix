@@ -5,8 +5,8 @@
   flake,
   ...
 }: let
-  # List normal non-system users
-  users = flake.lib.normies flake.users;
+  # List home-manager users users
+  users = (config.home-manager.users or {}) |> builtins.attrNames;
 
   # Format btrbk volumes as { main = "/mnt/main"; }
   volumes =

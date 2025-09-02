@@ -8,7 +8,7 @@
   imports = [
     ./hardware-configuration.nix
     ./disk-configuration.nix
-    inputs.hardware.nixosModules.common-gpu-nvidia-nonprime
+    inputs.hardware.nixosModules.framework-11th-gen-intel
     flake.nixosModules.common
     flake.nixosModules.extra
     flake.nixosModules.hyprland
