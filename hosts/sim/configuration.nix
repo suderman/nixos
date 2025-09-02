@@ -76,12 +76,6 @@ in {
       ./ssh_host_ed25519_key.pub
     ];
 
-    # Extra disks for motd
-    programs.rust-motd.settings.filesystems = {
-      data = "/mnt/data";
-      pool = "/mnt/pool";
-    };
-
     programs.firefox.enable = true;
 
     # Hub for monitoring other machines
@@ -120,5 +114,12 @@ in {
 
     # Add your user to the libvirtd group
     users.users.jon.extraGroups = ["libvirtd"];
+
+    # Snapshots
+    services.btrbk.volumes = {
+      "/mnt/main" = [];
+      "/mnt/data" = [];
+      "/mnt/pool" = [];
+    };
   };
 }

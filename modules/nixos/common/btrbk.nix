@@ -1,4 +1,3 @@
-# services.btrbk.enable = true;
 {
   config,
   lib,
@@ -8,56 +7,27 @@
   ...
 }: let
   cfg = config.services.btrbk;
-  inherit (lib) mkAfter mkIf mkOption types recursiveUpdate;
-
-  # mkSnapshots = volumes: builtins.mapAttrs (_: _: {subvolume.storage = {};}) volumes;
-  #
-  # mkBackups = volumes: builtins.mapAttrs (_: targets: {
-  #   subvolume.storage = {};
-  #   target = builtins.listToAttrs (map (t: { name = t; value = {}; }) targets);
-  # }) volumes;
-  #
-  # snapshots = {
-  #   "/mnt/main" = {
-  #     subvolume."storage" = {};
-  #   };
-  # };
-  #
-  # backups = {
-  #   "/mnt/main" = {
-  #     subvolume."storage" = {};
-  #     target."ssh://fit/backups" = {};
-  #     target."ssh://eve/backups" = {};
-  #   };
-  # };
+  inherit (lib) mkAfter mkIf mkOption types;
 
   # Path to private and public ssh key
   sshKey = "/etc/btrbk/id_ed25519";
   sshPubKey = flake + /users/btrbk/id_ed25519.pub;
+
+  # Enable if there are any volumes set (default true)
+  enable = builtins.length (builtins.attrNames cfg.volumes) > 0;
 in {
-  options.services.btrbk = {
-    enable = lib.options.mkEnableOption "btrbk";
-    volumes = mkOption {
-      type = types.attrs;
-      default = {
-        "/mnt/main" = [];
-      };
-      example = {
-        "/mnt/main" = ["ssh://eve/mnt/pool/backups/${config.networking.hostName}"];
-      };
+  options.services.btrbk.volumes = mkOption {
+    type = types.attrs;
+    default = {
+      "/mnt/main" = [];
     };
-    snapshots = mkOption {
-      type = types.attrs;
-      default = {};
-    };
-    backups = mkOption {
-      type = types.attrs;
-      default = {};
+    example = {
+      "/mnt/main" = ["ssh://eve/mnt/pool/backups/${config.networking.hostName}"];
     };
   };
 
   # Use btrbk to snapshot persistent states and home
-  config = mkIf cfg.enable {
+  config = mkIf enable {
     services.btrbk.sshAccess = [
       {
         key = builtins.readFile sshPubKey;
@@ -88,12 +58,11 @@ in {
             snapshot_create = "onchange";
             snapshot_preserve_min = "6h";
             snapshot_preserve = "48h 7d 4w";
-            volume = builtins.mapAttrs (_: _: {subvolume.storage = {};}) cfg.volumes;
-            # volume =
-            #   recursiveUpdate {
-            #     "/mnt/main".subvolume."storage" = {};
-            #   }
-            #   cfg.snapshots;
+            volume =
+              builtins.mapAttrs (_: _: {
+                subvolume.storage = {};
+              })
+              cfg.volumes;
           };
       };
 
@@ -118,11 +87,6 @@ in {
                   targets);
               })
               cfg.volumes;
-            # volume =
-            #   recursiveUpdate {
-            #     "/mnt/main".subvolume."storage" = {};
-            #   }
-            #   cfg.backups;
           };
       };
     };

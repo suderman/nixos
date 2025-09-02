@@ -56,10 +56,16 @@ in rec {
       inherit extraGroups;
     });
 
-  # Users in "wheel" group
+  # Filter only sudo users (in "wheel" group)
   sudoers = users:
     map (u: u.name) (builtins.attrValues (
       lib.filterAttrs (_: user: user ? extraGroups && builtins.elem "wheel" user.extraGroups) users
+    ));
+
+  # Filter only normal users (non-system users)
+  normies = users:
+    map (u: u.name) (builtins.attrValues (
+      lib.filterAttrs (_: user: user.isNormalUser) users
     ));
 
   # List of home-manager users that match provided filter function

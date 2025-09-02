@@ -41,7 +41,6 @@
   programs.mosh.enable = lib.mkDefault true;
   programs.rust-motd.enable = lib.mkDefault true;
   services.blocky.enable = lib.mkDefault true;
-  services.btrbk.enable = lib.mkDefault true;
   services.earlyoom.enable = lib.mkDefault true;
   services.keyd.enable = lib.mkDefault true;
   services.tailscale.enable = lib.mkDefault true;
