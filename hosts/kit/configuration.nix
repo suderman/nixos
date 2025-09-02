@@ -70,4 +70,26 @@ in {
   # services.traefik.proxy."chat" = config.services.open-webui.port;
 
   # environment.systemPackages = with pkgs; [ goose-cli ];
+
+  services.btrbk = {
+    volumes = with config.networking; {
+      "/mnt/main" = ["ssh://fit/mnt/pool/backups/${hostName}" "ssh://eve/mnt/pool/backups/${hostName}"];
+      "/mnt/data" = ["ssh://fit/mnt/pool/backups/${hostName}"];
+      "/mnt/game" = [];
+    };
+    # volumes = {
+    #   "/mnt/main" = ["ssh://fit/mnt/pool/backups/kit" "ssh://eve/mnt/pool/backups/kit"];
+    #   "/mnt/data" = ["ssh://fit/mnt/pool/backups/kit"];
+    #   "/mnt/game" = [];
+    # }
+    # "/mnt/main".subvolume."storage" = {};
+    # "/mnt/data".subvolume."storage" = {};
+    # "/mnt/game".subvolume."storage" = {};
+    # };
+    # backups = with config.networking; {
+    #   "/mnt/main".subvolume."storage" = {};
+    #   "/mnt/main".target."ssh://fit/backups/${hostName}" = {};
+    #   "/mnt/main".target."ssh://eve/backups/${hostName}" = {};
+    # };
+  };
 }

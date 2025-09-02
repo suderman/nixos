@@ -10,12 +10,42 @@
   cfg = config.services.btrbk;
   inherit (lib) mkAfter mkIf mkOption types recursiveUpdate;
 
+  # mkSnapshots = volumes: builtins.mapAttrs (_: _: {subvolume.storage = {};}) volumes;
+  #
+  # mkBackups = volumes: builtins.mapAttrs (_: targets: {
+  #   subvolume.storage = {};
+  #   target = builtins.listToAttrs (map (t: { name = t; value = {}; }) targets);
+  # }) volumes;
+  #
+  # snapshots = {
+  #   "/mnt/main" = {
+  #     subvolume."storage" = {};
+  #   };
+  # };
+  #
+  # backups = {
+  #   "/mnt/main" = {
+  #     subvolume."storage" = {};
+  #     target."ssh://fit/backups" = {};
+  #     target."ssh://eve/backups" = {};
+  #   };
+  # };
+
   # Path to private and public ssh key
   sshKey = "/etc/btrbk/id_ed25519";
   sshPubKey = flake + /users/btrbk/id_ed25519.pub;
 in {
   options.services.btrbk = {
     enable = lib.options.mkEnableOption "btrbk";
+    volumes = mkOption {
+      type = types.attrs;
+      default = {
+        "/mnt/main" = [];
+      };
+      example = {
+        "/mnt/main" = ["ssh://eve/mnt/pool/backups/${config.networking.hostName}"];
+      };
+    };
     snapshots = mkOption {
       type = types.attrs;
       default = {};
@@ -58,11 +88,12 @@ in {
             snapshot_create = "onchange";
             snapshot_preserve_min = "6h";
             snapshot_preserve = "48h 7d 4w";
-            volume =
-              recursiveUpdate {
-                "/mnt/main".subvolume."storage" = {};
-              }
-              cfg.snapshots;
+            volume = builtins.mapAttrs (_: _: {subvolume.storage = {};}) cfg.volumes;
+            # volume =
+            #   recursiveUpdate {
+            #     "/mnt/main".subvolume."storage" = {};
+            #   }
+            #   cfg.snapshots;
           };
       };
 
@@ -78,10 +109,20 @@ in {
             target_preserve_min = "1d";
             target_preserve = "7d 4w 6m";
             volume =
-              recursiveUpdate {
-                "/mnt/main".subvolume."storage" = {};
-              }
-              cfg.backups;
+              builtins.mapAttrs (_: targets: {
+                subvolume.storage = {};
+                target = builtins.listToAttrs (map (t: {
+                    name = t;
+                    value = {};
+                  })
+                  targets);
+              })
+              cfg.volumes;
+            # volume =
+            #   recursiveUpdate {
+            #     "/mnt/main".subvolume."storage" = {};
+            #   }
+            #   cfg.backups;
           };
       };
     };
