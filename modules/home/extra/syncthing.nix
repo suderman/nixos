@@ -14,10 +14,7 @@ in {
   config = mkIf cfg.enable {
     services.syncthing = {
       tray.enable = false;
-      extraOptions = [
-        "--gui-address=http://0.0.0.0:${toString (webguiPort + offset)}"
-        "--no-default-folder"
-      ];
+      extraOptions = ["--gui-address=http://0.0.0.0:${toString (webguiPort + offset)}"];
     };
 
     persist.storage.directories = [".local/state/syncthing"];
