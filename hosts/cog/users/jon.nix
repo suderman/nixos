@@ -42,6 +42,7 @@
 
   persist.storage.directories = [
     ".ssh"
+    "Code"
     "Downloads"
     "Personal"
     "Work"
@@ -50,6 +51,7 @@
   persist.storage.files = [
     ".zsh_history"
     ".bash_history"
+    ".git-credentials"
   ];
 
   # Hyprland enabled in configuration.nix
