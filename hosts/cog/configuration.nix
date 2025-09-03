@@ -26,10 +26,14 @@
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Good graphics
-  hardware.graphics.extraPackages = [
-    pkgs.mesa.drivers
-    pkgs.vaapiVdpau
-  ];
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true;
+    extraPackages = [
+      pkgs.mesa
+      pkgs.vaapiVdpau
+    ];
+  };
 
   # Snapshots and backups
   services.btrbk.volumes = {

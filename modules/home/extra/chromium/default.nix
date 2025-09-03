@@ -1,5 +1,11 @@
-{ config, osConfig, lib, pkgs, perSystem, ... }: let
-
+{
+  config,
+  osConfig,
+  lib,
+  pkgs,
+  perSystem,
+  ...
+}: let
   cfg = config.programs.chromium;
   inherit (lib) mkIf mkOption types;
   inherit (config.services.keyd.lib) mkClass;
@@ -7,50 +13,45 @@
 
   # Window class name
   class = "chromium-browser";
-
 in {
-
   # Import chromium lib
-  imports = [ ./lib.nix ];
+  imports = [./lib.nix];
 
   # Extra options to manage external extensions
   options.programs.chromium = {
-
     # home-manager module expects this default directory
     dataDir = mkOption {
-      type = types.path;      # ~/.config/chromium
+      type = types.path; # ~/.config/chromium
       default = "${config.xdg.configHome}/chromium";
       readOnly = true;
     };
 
     # Registry of chromium extensions
     registry = mkOption {
-      type = types.anything; 
+      type = types.anything;
       default = import ./registry.nix;
-      readOnly = true; 
+      readOnly = true;
     };
 
     # Extensions to automatically download and include
     externalExtensions = mkOption {
-      type = types.anything; 
+      type = types.anything;
       default = {};
     };
 
     # Extensions to automatically download and include unpacked
     unpackedExtensions = mkOption {
-      type = types.anything; 
-      default = { inherit (cfg.registry) chromium-web-store; };
+      type = types.anything;
+      default = {inherit (cfg.registry) chromium-web-store;};
     };
-
   };
 
   config = mkIf cfg.enable {
-
     # using Chromium without Google
     programs.chromium = {
       package = osConfig.programs.chromium.package;
-      dictionaries = [ pkgs.hunspellDictsChromium.en_US ];
-      commandLineArgs = switches;  
+      dictionaries = [pkgs.hunspellDictsChromium.en_US];
+      commandLineArgs = switches;
     };
 
     # keyboard shortcuts
@@ -74,11 +75,13 @@ in {
     };
 
     # Share switches with electron apps in ~/.config
-    xdg.configFile = let 
-      configs = [ "chromium-flags.conf" "electron-flags.conf" ] ++ 
-                (map (v: "electron-flags${toString v}.conf") (lib.range 14 40));
-      value = { text = lib.concatStringsSep "\n" switches; };
-    in builtins.listToAttrs (map (name: { inherit name value;  }) configs);
+    xdg.configFile = let
+      configs =
+        ["chromium-flags.conf" "electron-flags.conf"]
+        ++ (map (v: "electron-flags${toString v}.conf") (lib.range 14 40));
+      value = {text = lib.concatStringsSep "\n" switches;};
+    in
+      builtins.listToAttrs (map (name: {inherit name value;}) configs);
 
     # Populate ~/.config/chromium/External Extensions
     systemd.user = let
@@ -87,7 +90,6 @@ in {
       crxDir = osConfig.programs.chromium.crxDir;
       extDir = "${cfg.dataDir}/External Extensions";
     in {
-
       # Symlink extensions from persistent storage
       services.crx = {
         Unit = {
@@ -97,37 +99,69 @@ in {
         };
         Service = {
           Type = "oneshot";
-          ExecStart = "${mkScript ''
-            # Ensure external extensions directory exists
-            dir="${extDir}"
-            mkdir -p "$dir"
+          # ExecStart = "${mkScript ''
+          #   # Ensure external extensions directory exists
+          #   dir="${extDir}"
+          #   mkdir -p "$dir"
+          #
+          #   # Change dirctory and clear it out
+          #   cd "$dir"
+          #   rm -f *.json
+          #
+          #   # Enable nullglob
+          #   shopt -s nullglob
+          #
+          #   # Symlink each extension's json here
+          #   symlink() {
+          #     for json in ${crxDir}/$1/*.json; do
+          #       ln -sf $json .
+          #     done
+          #   }
+          #
+          #   # External extensions
+          # '' + builtins.concatStringsSep "\n" (
+          #   map (name: "symlink ${name}") extNames
+          # ) + ''
+          #
+          #   # Disable nullglob again
+          #   shopt -u nullglob
+          # ''}";
+          ExecStart = mkScript {
+            text =
+              ''
+                # Ensure external extensions directory exists
+                dir="${extDir}"
+                mkdir -p "$dir"
 
-            # Change dirctory and clear it out
-            cd "$dir"
-            rm -f *.json
+                # Change dirctory and clear it out
+                cd "$dir"
+                rm -f *.json
 
-            # Enable nullglob
-            shopt -s nullglob
+                # Enable nullglob
+                shopt -s nullglob
 
-            # Symlink each extension's json here
-            symlink() {
-              for json in ${crxDir}/$1/*.json; do
-                ln -sf $json .
-              done
-            }
+                # Symlink each extension's json here
+                symlink() {
+                  for json in ${crxDir}/$1/*.json; do
+                    ln -sf $json .
+                  done
+                }
 
-            # External extensions
-          '' + builtins.concatStringsSep "\n" ( 
-            map (name: "symlink ${name}") extNames 
-          ) + ''
+                # External extensions
+              ''
+              + builtins.concatStringsSep "\n" (
+                map (name: "symlink ${name}") extNames
+              )
+              + ''
 
-            # Disable nullglob again
-            shopt -u nullglob
-          ''}";
+                # Disable nullglob again
+                shopt -u nullglob
+              '';
+          };
           Restart = "no";
           RestartSec = 5;
         };
-        Install.WantedBy = [ "default.target" ];
+        Install.WantedBy = ["default.target"];
       };
 
       # Watch persistent storage for updates
@@ -137,11 +171,8 @@ in {
           PathChanged = "${crxDir}/last";
           Unit = "crx.service";
         };
-        Install.WantedBy = [ "default.target" ];
+        Install.WantedBy = ["default.target"];
       };
-
     };
-
   };
-
 }

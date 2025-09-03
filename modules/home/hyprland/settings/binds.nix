@@ -1,8 +1,11 @@
-{ config, lib, pkgs, ... }: {
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
   wayland.windowManager.hyprland.settings = {
-
     bind = [
-
       # Exit hyprland
       "super+shift, q, exit,"
 
@@ -19,19 +22,18 @@
       "super+control, period, exec, 1password"
 
       # Browser
-      "super, b, exec, firefox"
-      "super+shift, b, exec, firefox --private-window"
+      "super, b, exec, chromium-browser"
+      "super+shift, b, exec, chromium-browser --incognito"
 
       # Alt browser
-      "super+alt, b, exec, chromium-browser"
-      "super+alt+shift, b, exec, chromium-browser --incognito"
+      "super+alt, b, exec, firefox"
+      "super+alt+shift, b, exec, firefox --private-window"
 
       # Navigate workspaces
       "super, right, workspace, e+1" # cyclenext
       "super, apostrophe, workspace, e+1"
       "super, left, workspace, e-1" # cyclenext, prev
       "super, semicolon, workspace, e-1"
-
 
       # Navigation windows with super tab
       "super, tab, exec, hypr-supertab"
@@ -43,7 +45,6 @@
 
       # Focus urgent windows
       "super, u, focusurgentorlast"
-
 
       # Manage windows
       "super, i, togglesplit"
@@ -127,12 +128,10 @@
       # Scroll through existing workspaces with super + scroll
       "super, mouse_down, workspace, e+1"
       "super, mouse_up, workspace, e-1"
-
     ];
 
     binde = [
-
-      # Move window 
+      # Move window
       "super+alt, h, exec, hypr-movewindoworgrouporactive l -40 0"
       "super+alt, j, exec, hypr-movewindoworgrouporactive d 0 40"
       "super+alt, k, exec, hypr-movewindoworgrouporactive u 0 -40"
@@ -143,17 +142,12 @@
       "super+shift, j, resizeactive, 0 80"
       "super+shift, k, resizeactive, 0 -80"
       "super+shift, l, resizeactive, 80 0"
-
     ];
 
     bindm = [
-
       # Move/resize windows with super + LMB/RMB and dragging
       "super, mouse:272, movewindow"
       "super, mouse:273, resizewindow"
-
     ];
-
   };
-
 }
