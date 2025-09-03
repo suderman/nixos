@@ -14,14 +14,14 @@ in {
     oci-containers.backend = "docker";
   };
 
-  # Persist data after reboots
   persist = mkIf cfg.enable {
-    scratch.files = ["/var/lib/docker/engine-id"];
+    # Persist these directories between reboots
     scratch.directories = [
       "/var/lib/docker/containers"
       "/var/lib/docker/image"
       "/var/lib/docker/overlay2"
     ];
+    # Persist these as well, but also make snapshots
     storage.directories = [
       "/var/lib/docker/volumes"
       "/var/lib/docker/swarm"

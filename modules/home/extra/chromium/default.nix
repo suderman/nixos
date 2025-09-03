@@ -11,6 +11,9 @@
   inherit (config.services.keyd.lib) mkClass;
   inherit (config.programs.chromium.lib) switches;
 
+  # home-manager module expects this default directory
+  dataDir = ".config/chromium";
+
   # Window class name
   class = "chromium-browser";
 in {
@@ -19,10 +22,9 @@ in {
 
   # Extra options to manage external extensions
   options.programs.chromium = {
-    # home-manager module expects this default directory
     dataDir = mkOption {
       type = types.path; # ~/.config/chromium
-      default = "${config.xdg.configHome}/chromium";
+      default = "${config.home.homeDirectory}/${dataDir}";
       readOnly = true;
     };
 
@@ -53,6 +55,9 @@ in {
       dictionaries = [pkgs.hunspellDictsChromium.en_US];
       commandLineArgs = switches;
     };
+
+    # Persist reboots but skip backups
+    persist.scratch.directories = [dataDir];
 
     # keyboard shortcuts
     services.keyd.windows."${mkClass class}" = {
@@ -99,65 +104,40 @@ in {
         };
         Service = {
           Type = "oneshot";
-          # ExecStart = "${mkScript ''
-          #   # Ensure external extensions directory exists
-          #   dir="${extDir}"
-          #   mkdir -p "$dir"
-          #
-          #   # Change dirctory and clear it out
-          #   cd "$dir"
-          #   rm -f *.json
-          #
-          #   # Enable nullglob
-          #   shopt -s nullglob
-          #
-          #   # Symlink each extension's json here
-          #   symlink() {
-          #     for json in ${crxDir}/$1/*.json; do
-          #       ln -sf $json .
-          #     done
-          #   }
-          #
-          #   # External extensions
-          # '' + builtins.concatStringsSep "\n" (
-          #   map (name: "symlink ${name}") extNames
-          # ) + ''
-          #
-          #   # Disable nullglob again
-          #   shopt -u nullglob
-          # ''}";
-          ExecStart = mkScript {
-            text =
-              ''
-                # Ensure external extensions directory exists
-                dir="${extDir}"
-                mkdir -p "$dir"
+          ExecStart = "${mkScript (
+            # bash
+            ''
+              # Ensure external extensions directory exists
+              dir="${extDir}"
+              mkdir -p "$dir"
 
-                # Change dirctory and clear it out
-                cd "$dir"
-                rm -f *.json
+              # Change dirctory and clear it out
+              cd "$dir"
+              rm -f *.json
 
-                # Enable nullglob
-                shopt -s nullglob
+              # Enable nullglob
+              shopt -s nullglob
 
-                # Symlink each extension's json here
-                symlink() {
-                  for json in ${crxDir}/$1/*.json; do
-                    ln -sf $json .
-                  done
-                }
+              # Symlink each extension's json here
+              symlink() {
+                for json in ${crxDir}/$1/*.json; do
+                  ln -sf $json .
+                done
+              }
 
-                # External extensions
-              ''
-              + builtins.concatStringsSep "\n" (
-                map (name: "symlink ${name}") extNames
-              )
-              + ''
+              # External extensions
+            ''
+            + builtins.concatStringsSep "\n" (
+              map (name: "symlink ${name}") extNames
+            )
+            # bash
+            + ''
 
-                # Disable nullglob again
-                shopt -u nullglob
-              '';
-          };
+
+              # Disable nullglob again
+              shopt -u nullglob
+            ''
+          )}";
           Restart = "no";
           RestartSec = 5;
         };

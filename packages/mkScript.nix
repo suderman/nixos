@@ -10,7 +10,7 @@
   fromAttrs = {
     name ? "script",
     text ? "",
-    path ? [],
+    path ? [pkgs.coreutils],
     env ? {},
     ...
   }:
@@ -29,7 +29,8 @@
         ''
         + optionalString (path != []) ''
           set -euo pipefail
-          export PATH="${makeBinPath path}:$PATH"
+          export PATH="${makeBinPath path}:''${PATH-}"
+
         ''
         + concatLines (mapAttrsToList (n: v: "export ${n}=\"${v}\"") env)
         + ''

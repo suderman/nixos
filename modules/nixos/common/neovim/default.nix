@@ -21,7 +21,7 @@ in {
           ''
             if [[ -f ${nvimSecrets} ]]; then
               while IFS='=' read -r key value; do
-                if [[ -n "$key" && -z "''${!key}" ]]; then
+                if [[ -n "$key" && -z "''${!key-}" ]]; then
                   export "$key"="$value"
                 fi
               done < ${nvimSecrets}
