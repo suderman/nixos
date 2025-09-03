@@ -14,6 +14,12 @@
     flake.nixosModules.hyprland
   ];
 
+  boot.loader = {
+    grub.enable = true;
+    grub.efiSupport = true;
+    grub.efiInstallAsRemovable = true;
+  };
+
   networking.domain = "tail";
 
   # Use freshest kernel
