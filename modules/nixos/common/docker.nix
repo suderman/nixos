@@ -15,7 +15,18 @@ in {
   };
 
   # Persist data after reboots
-  persist.storage.directories = mkIf cfg.enable ["/var/lib/docker"];
+  persist = mkIf cfg.enable {
+    scratch.files = ["/var/lib/docker/engine-id"];
+    scratch.directories = [
+      "/var/lib/docker/containers"
+      "/var/lib/docker/image"
+      "/var/lib/docker/overlay2"
+    ];
+    storage.directories = [
+      "/var/lib/docker/volumes"
+      "/var/lib/docker/swarm"
+    ];
+  };
 
   # Add config's users to the docker group
   users.users = mkIf cfg.enable (flake.lib.extraGroups config ["docker"]);
