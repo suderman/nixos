@@ -1,14 +1,19 @@
-{ config, pkgs, flake, ... }: {
-
-  home.packages = with pkgs; [ 
-    _1password-gui # password manager
+{
+  config,
+  pkgs,
+  flake,
+  ...
+}: {
+  home.packages = with pkgs; [
     asunder # cd ripper
     gnome-disk-utility # format and partition gui
-    junction # browser chooser 
+    junction # browser chooser
     loupe # png/jpg viewer
     pavucontrol # audio control panel
     xorg.xeyes # test for x11
   ];
+
+  programs.onepassword.enable = true;
 
   # programs.home-assistant = {
   #   enable = true;
@@ -20,5 +25,4 @@
     "org.emptyflow.ArdorQuery"
     "com.github.treagod.spectator"
   ];
-
 }

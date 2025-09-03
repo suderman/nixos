@@ -1,6 +1,6 @@
 {pkgs, ...}: {
   # Telegram
-  home.packages = [pkgs.tdesktop];
+  programs.telegram.enable = true;
 
   # iMessage
   programs.bluebubbles.enable = true;
