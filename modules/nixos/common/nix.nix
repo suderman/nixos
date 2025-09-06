@@ -13,6 +13,9 @@ in {
     # Enable flakes and pipes
     experimental-features = ["nix-command" "flakes" "pipe-operators"];
 
+    # 500MB buffer
+    download-buffer-size = 500000000;
+
     # Deduplicate and optimize nix store
     auto-optimise-store = true;
 
