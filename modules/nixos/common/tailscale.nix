@@ -17,13 +17,18 @@ in {
   };
 
   config = mkIf cfg.enable {
-    # tailscale-1.82.5 (stable) fails to build (and why isn't it in the binary cache?)
-    services.tailscale.package = perSystem.nixpkgs-unstable.tailscale;
-
-    networking.firewall = {
-      checkReversePath = "loose"; # https://github.com/tailscale/tailscale/issues/4432
-      allowedUDPPorts = [41641]; # Facilitate firewall punching
+    services.tailscale = {
+      # tailscale-1.82.5 (stable) fails to build (and isn't in binary cache)
+      package = perSystem.nixpkgs-unstable.tailscale;
+      extraSetFlags = [
+        "--accept-routes" # accept routes from LAN router
+        "--accept-dns=false" # Use local Blocky for DNS, not Tailscale
+      ];
+      openFirewall = true;
     };
+
+    # https://github.com/tailscale/tailscale/issues/4432
+    networking.firewall.checkReversePath = "loose";
 
     systemd.services."tailscale-delete-route" = {
       serviceConfig.Type = "simple";
