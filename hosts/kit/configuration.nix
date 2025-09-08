@@ -13,9 +13,8 @@ in {
   imports = [
     ./hardware-configuration.nix
     ./disk-configuration.nix
+    flake.nixosModules.default
     flake.nixosModules.rtx-4070-ti-super
-    flake.nixosModules.common
-    flake.nixosModules.extra
     flake.nixosModules.hyprland
     flake.nixosModules.gaming
   ];

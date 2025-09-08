@@ -5,8 +5,8 @@
   flake,
   ...
 }: {
-  # Import all *.nix files in this directory
-  imports = flake.lib.ls ./.;
+  # Import all *.nix files in this directory and modules directory
+  imports = flake.lib.ls ./. ++ flake.lib.ls ../modules;
 
   # List packages installed in user profile
   home.packages = [

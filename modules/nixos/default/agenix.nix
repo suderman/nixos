@@ -8,9 +8,7 @@
   hostName,
   ...
 }: {
-  imports = [
-    flake.nixosModules.agenix
-  ];
+  imports = [flake.nixosModules.secrets];
 
   # Add /mnt/main/storage/etc/ssh/ssh_host_ed25519_key.pub and /etc/machine-id
   system.activationScripts.etc.text = let

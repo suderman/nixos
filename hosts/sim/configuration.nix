@@ -13,11 +13,9 @@ in {
   imports = [
     ./hardware-configuration.nix
     ./disk-configuration.nix
-    flake.nixosModules.common
-    flake.nixosModules.extra
-    # flake.nixosModules.gnome
-    flake.nixosModules.hyprland
+    flake.nixosModules.default
     flake.nixosModules.vm
+    flake.nixosModules.hyprland
     # flake.nixosModules.homelab
   ];
 

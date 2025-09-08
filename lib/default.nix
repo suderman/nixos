@@ -32,6 +32,10 @@ in rec {
   # List directories and files that can be imported by nix
   ls = import ./ls.nix args;
 
+  # Lisst dirctories and files that can be imported by nix as an attribute set
+  ls' = path:
+    inputs.blueprint.lib.importDir path (lib.mapAttrs (_name: {path, ...}: path));
+
   # Create attrs from list, attr names, or path
   genAttrs = import ./genAttrs.nix args;
 

@@ -9,8 +9,7 @@
     ./hardware-configuration.nix
     ./disk-configuration.nix
     inputs.hardware.nixosModules.framework-11th-gen-intel
-    flake.nixosModules.common
-    flake.nixosModules.extra
+    flake.nixosModules.default
     flake.nixosModules.hyprland
   ];
 

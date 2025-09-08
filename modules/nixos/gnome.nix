@@ -1,6 +1,11 @@
-{ config, lib, pkgs, flake, ... }: {
-
-  imports = [ flake.nixosModules.desktop ];
+{
+  config,
+  lib,
+  pkgs,
+  flake,
+  ...
+}: {
+  imports = [flake.nixosModules.desktop];
 
   services = {
     libinput.enable = true; # enable touchpad support
@@ -15,7 +20,6 @@
   };
 
   environment = {
-
     systemPackages = with pkgs; [
       wl-clipboard
     ];
@@ -28,15 +32,14 @@
       QT_AUTO_SCREEN_SCALE_FACTOR = "1";
       NIXOS_OZONE_WL = "1";
     };
-
   };
 
   # Enable sound.
   services.pipewire.enable = true;
-  
+
   # # Gnome has a hard-coded screenshots directory # Watch that directory for screenshots, move contents to new directory and delete old
   # # https://discourse.gnome.org/t/feature-request-change-screenshot-directory/14001/9
-  # systemd = let old = "${home}/data/images/Screenshots"; new = "${home}/data/images/screens"; in { 
+  # systemd = let old = "${home}/data/images/Screenshots"; new = "${home}/data/images/screens"; in {
   #
   #   # Watch the "old" path and when it exists, trigger the ssmv service
   #   paths.ssmv = {
@@ -56,5 +59,4 @@
   #   };
   #
   # };
-
 }
