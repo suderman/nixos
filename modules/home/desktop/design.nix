@@ -1,11 +1,12 @@
-{ config, pkgs, ... }: {
-
-  home.packages = with pkgs; [ 
+{pkgs, ...}: {
+  home.packages = with pkgs; [
     audacity
-    gimp3-with-plugins
+    # gimp3-with-plugins
     imagemagick # animate compare composite conjure convert display identify import magick magick-script mogrify montage stream
     inkscape-with-extensions
   ];
+
+  programs.gimp.enable = true;
 
   programs.obs-studio = with pkgs; {
     enable = true;
@@ -22,5 +23,4 @@
   #   enable = true;
   #   url = "https://immich.lux";
   # };
-
 }

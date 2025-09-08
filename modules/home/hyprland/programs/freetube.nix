@@ -1,21 +1,22 @@
-{ config, lib, ... }: {
-
+{
+  config,
+  lib,
+  ...
+}: {
   programs.freetube = {
     enable = true;
     settings = {
-
-      allowDashAv1Formats  = true;
-      checkForUpdates      = false;
-      defaultQuality       = "1080";
-      baseTheme            = "catppuccinMocha";
-      defaultTheatreMode   = true;
-      useSponsorBlock      = true;
-      useDeArrowTitles     = true;
+      allowDashAv1Formats = true;
+      checkForUpdates = false;
+      defaultQuality = "1080";
+      baseTheme = "catppuccinMocha";
+      defaultTheatreMode = true;
+      useSponsorBlock = true;
+      useDeArrowTitles = true;
       useDeArrowThumbnails = true;
-      hideLabelsSideBar    = true;
-      hideHeaderLogo       = true;
-      region               = "CA";
-
+      hideLabelsSideBar = true;
+      hideHeaderLogo = true;
+      region = "CA";
     };
   };
 
@@ -38,4 +39,6 @@
     };
   };
 
+  # Persist reboots but skip backups
+  persist.scratch.directories = [".config/FreeTube"];
 }

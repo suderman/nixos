@@ -54,6 +54,29 @@ in {
   };
 
   config = {
+    # Persist reboots only
+    environment.persistence."/mnt/main/scratch" = {
+      inherit (config.persist) enable;
+      hideMounts = true;
+
+      # System directories
+      directories = unique ([
+          "/var/log"
+        ]
+        ++ config.persist.scratch.directories);
+
+      # System files
+      files = unique config.persist.scratch.files;
+
+      # Persist user data
+      users =
+        mapAttrs (_: user: {
+          directories = unique user.persist.scratch.directories;
+          files = unique user.persist.scratch.files;
+        })
+        users;
+    };
+
     # Persist reboots with snapshots and backups
     environment.persistence."/mnt/main/storage" = {
       inherit (config.persist) enable;
@@ -84,29 +107,6 @@ in {
               ".bashrc"
             ]
             ++ user.persist.storage.files);
-        })
-        users;
-    };
-
-    # Persist reboots only
-    environment.persistence."/mnt/main/scratch" = {
-      inherit (config.persist) enable;
-      hideMounts = true;
-
-      # System directories
-      directories = unique ([
-          "/var/log"
-        ]
-        ++ config.persist.scratch.directories);
-
-      # System files
-      files = unique config.persist.scratch.files;
-
-      # Persist user data
-      users =
-        mapAttrs (_: user: {
-          directories = unique user.persist.scratch.directories;
-          files = unique user.persist.scratch.files;
         })
         users;
     };
