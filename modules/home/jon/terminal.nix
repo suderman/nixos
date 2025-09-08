@@ -1,21 +1,18 @@
-{ config, lib, pkgs, perSystem, flake, ... }: let
-
-  inherit (flake.lib) ls mkScript;
-
-  # example bash script
-  coffee = mkScript { name = "coffee"; text = ./bin/coffee.sh; };
-
+{
+  pkgs,
+  perSystem,
+  ...
+}: let
+  inherit (perSystem.self) mkScript;
 in {
-
-  home.packages = with pkgs; [ 
+  home.packages = with pkgs; [
     yo # example script
     perSystem.self.fetchgithub # fetch hash from repo
     perSystem.self.shizuku # connect android to pc and run
   ];
 
-  # Aliases 
+  # Aliases
   home.shellAliases = {
-
     neofetch = "fastfetch";
 
     # 5 second countdown until the clipboard gets typed out
@@ -35,8 +32,6 @@ in {
     bashly = "docker run --rm -it --user $(id -u):$(id -g) --volume \"$PWD:/app\" dannyben/bashly";
 
     # manage systemd units
-    isd = "nix run github:isd-project/isd"; 
-
+    isd = "nix run github:isd-project/isd";
   };
-
 }
