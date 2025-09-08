@@ -39,8 +39,8 @@
 
       # Store rekeyed & generated secrets in this module's directory
       storageMode = "local";
-      localStorageDir = flake + /modules/nixos/agenix/${hostName};
-      generatedSecretsDir = flake + /modules/nixos/agenix/${hostName};
+      localStorageDir = flake + /modules/nixos/secrets/${hostName};
+      generatedSecretsDir = flake + /modules/nixos/secrets/${hostName};
     };
   };
 }
