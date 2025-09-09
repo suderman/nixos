@@ -21,26 +21,11 @@ in rec {
   # Extra flake outputs
   users = import ./users.nix args;
   networking = import ./networking.nix args;
-
   agenix-rekey = inputs.agenix-rekey.configure {
     userFlake = flake;
     inherit (flake) nixosConfigurations;
   };
-
-  homeModules = {
-    default = ../modules/home/default;
-    options = ../modules/home/options;
-    profiles = ls' ../modules/home/profiles;
-    users = ls' ../modules/home/users;
-  };
-
-  nixosModules = {
-    default = ../modules/nixos/default;
-    options = ../modules/nixos/options;
-    profiles = ls' ../modules/nixos/profiles;
-    hardware = ls' ../modules/nixos/hardware;
-    secrets = ../modules/nixos/secrets;
-  };
+  inherit (import ../modules args) homeModules nixosModules;
 
   # Bash script library
   bash = ./bash.sh;
