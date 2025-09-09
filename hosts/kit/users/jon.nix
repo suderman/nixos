@@ -5,7 +5,7 @@
 }: {
   imports = [
     flake.homeModules.default
-    flake.homeModules.hyprland
+    flake.homeModules.profiles.hyprland
   ];
 
   # Create home folders (persisted)

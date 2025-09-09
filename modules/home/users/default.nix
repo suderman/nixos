@@ -1,0 +1,1 @@
+{flake, ...}: flake.lib.ls' ./.

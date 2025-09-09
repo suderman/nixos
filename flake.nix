@@ -90,12 +90,10 @@
       checks
       lib
       nixosConfigurations
-      homeModules
-      nixosModules
       ;
 
     # Map additional folders to custom outputs
-    inherit (inputs.self.lib) agenix-rekey networking users;
+    inherit (inputs.self.lib) agenix-rekey networking users homeModules nixosModules;
 
     caches = [
       "suderman.cachix.org-1:8lYeb2gOOVDPbUn1THnL5J3/L4tFWU30/uVPk7sCGmI="

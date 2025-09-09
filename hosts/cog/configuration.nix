@@ -10,7 +10,7 @@
     ./disk-configuration.nix
     inputs.hardware.nixosModules.framework-11th-gen-intel
     flake.nixosModules.default
-    flake.nixosModules.hyprland
+    flake.nixosModules.profiles.hyprland
   ];
 
   boot.loader = {

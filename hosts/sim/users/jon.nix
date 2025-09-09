@@ -6,8 +6,8 @@
 }: {
   imports = [
     flake.homeModules.default
-    # flake.homeModules.gnome
-    flake.homeModules.hyprland
+    # flake.homeModules.profiles.gnome
+    flake.homeModules.profiles.hyprland
   ];
 
   # File sync

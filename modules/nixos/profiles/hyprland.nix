@@ -9,7 +9,7 @@
   inherit (builtins) toString;
   inherit (lib) getExe mkOption types;
 in {
-  imports = [flake.nixosModules.desktop];
+  imports = [flake.nixosModules.profiles.desktop];
 
   # Set this to a username to automatically login at boot
   options.programs.hyprland.autologin = mkOption {

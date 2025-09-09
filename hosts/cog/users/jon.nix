@@ -5,8 +5,8 @@
 }: {
   imports = [
     flake.homeModules.default
-    flake.homeModules.hyprland
-    flake.homeModules.jon
+    flake.homeModules.profiles.hyprland
+    flake.homeModules.users.jon
   ];
 
   programs.chromium = {

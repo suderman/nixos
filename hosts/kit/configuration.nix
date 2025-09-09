@@ -14,9 +14,9 @@ in {
     ./hardware-configuration.nix
     ./disk-configuration.nix
     flake.nixosModules.default
-    flake.nixosModules.rtx-4070-ti-super
-    flake.nixosModules.hyprland
-    flake.nixosModules.gaming
+    flake.nixosModules.hardware.rtx-4070-ti-super
+    flake.nixosModules.profiles.hyprland
+    flake.nixosModules.profiles.gaming
   ];
   networking.domain = "home";
   networking.firewall.allowPing = true;

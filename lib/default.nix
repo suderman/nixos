@@ -21,9 +21,25 @@ in rec {
   # Extra flake outputs
   users = import ./users.nix args;
   networking = import ./networking.nix args;
+
   agenix-rekey = inputs.agenix-rekey.configure {
     userFlake = flake;
     inherit (flake) nixosConfigurations;
+  };
+
+  homeModules = {
+    default = ../modules/home/default;
+    options = ../modules/home/options;
+    profiles = ls' ../modules/home/profiles;
+    users = ls' ../modules/home/users;
+  };
+
+  nixosModules = {
+    default = ../modules/nixos/default;
+    options = ../modules/nixos/options;
+    profiles = ls' ../modules/nixos/profiles;
+    hardware = ls' ../modules/nixos/hardware;
+    secrets = ../modules/nixos/secrets;
   };
 
   # Bash script library
@@ -34,7 +50,7 @@ in rec {
 
   # Lisst dirctories and files that can be imported by nix as an attribute set
   ls' = path:
-    inputs.blueprint.lib.importDir path (lib.mapAttrs (_name: {path, ...}: path));
+    inputs.blueprint.lib.importDir path (lib.mapAttrs (_name: {path, ...}: toString path));
 
   # Create attrs from list, attr names, or path
   genAttrs = import ./genAttrs.nix args;
