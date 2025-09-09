@@ -19,23 +19,20 @@
   # Personal helper library
 in rec {
   # Extra flake outputs
+  homeModules = import ./homeModules.nix args;
+  nixosModules = import ./nixosModules.nix args;
   users = import ./users.nix args;
   networking = import ./networking.nix args;
   agenix-rekey = inputs.agenix-rekey.configure {
     userFlake = flake;
     inherit (flake) nixosConfigurations;
   };
-  inherit (import ../modules args) homeModules nixosModules;
 
   # Bash script library
   bash = ./bash.sh;
 
   # List directories and files that can be imported by nix
   ls = import ./ls.nix args;
-
-  # Lisst dirctories and files that can be imported by nix as an attribute set
-  ls' = path:
-    inputs.blueprint.lib.importDir path (lib.mapAttrs (_name: {path, ...}: toString path));
 
   # Create attrs from list, attr names, or path
   genAttrs = import ./genAttrs.nix args;
