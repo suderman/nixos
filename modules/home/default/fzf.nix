@@ -1,6 +1,5 @@
 # programs.fzf.enable = true;
-{ config, lib, ... }: {
-
+{lib, ...}: {
   programs.fzf = {
     enable = lib.mkDefault true;
     enableZshIntegration = lib.mkDefault true;
@@ -10,7 +9,7 @@
     rg = "rg --glob '!package-lock.json' --glob '!.git/*' --glob '!yarn.lock' --glob '!.yarn/*' --smart-case --hidden";
   in {
     FZF_DEFAULT_COMMAND = "command ${rg} --files --no-ignore-vcs";
-    FZF_DEFAULT_OPTS = lib.mkDefault( builtins.toString [
+    FZF_DEFAULT_OPTS = lib.mkDefault (builtins.toString [
       "--cycle"
       "--filepath-word"
       "--inline-info"
@@ -22,5 +21,4 @@
       "--color=light"
     ]);
   };
-
 }

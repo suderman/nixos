@@ -1,8 +1,4 @@
-{
-  config,
-  lib,
-  ...
-}: {
+{...}: {
   programs.freetube = {
     enable = true;
     settings = {

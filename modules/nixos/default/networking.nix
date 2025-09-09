@@ -1,8 +1,8 @@
 {
   config,
   lib,
-  flake,
   hostName,
+  flake,
   ...
 }: let
   inherit (builtins) attrNames attrValues filter;

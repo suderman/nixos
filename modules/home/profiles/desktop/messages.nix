@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{...}: {
   # Telegram
   programs.telegram.enable = true;
 

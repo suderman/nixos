@@ -2,8 +2,8 @@
 
 # Check if input file is provided
 if [ -z "${1-}" ]; then
-    echo "Usage: $0 <input_file.mov>"
-    exit 1
+  echo "Usage: $0 <input_file.mov>"
+  exit 1
 fi
 
 file="$1"

@@ -1,21 +1,23 @@
 # stylix.enable = true;
-{ config, lib, pkgs, inputs, ... }: let
-
+{
+  config,
+  lib,
+  pkgs,
+  flake,
+  ...
+}: let
   cfg = config.stylix;
   inherit (lib) mkDefault mkIf;
   inherit (config.lib.stylix) pixel;
-
 in {
-
   # Import stylix module
-  imports = [ inputs.stylix.nixosModules.stylix ];
+  imports = [flake.inputs.stylix.nixosModules.stylix];
 
   config.stylix = {
-
     autoEnable = mkDefault cfg.enable;
     polarity = mkDefault "either"; # dark light either
 
-    image = mkDefault( pixel "base0A" );
+    image = mkDefault (pixel "base0A");
     # base16Scheme = mkDefault "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
     base16Scheme = mkDefault "${pkgs.base16-schemes}/share/themes/tokyo-city-dark.yaml";
 
@@ -38,7 +40,6 @@ in {
     };
 
     fonts = {
-
       sizes = {
         applications = mkDefault 11;
         terminal = mkDefault 12;
@@ -65,7 +66,6 @@ in {
         package = pkgs.noto-fonts-emoji;
         name = "Noto Color Emoji";
       };
-
     };
 
     targets = {
@@ -84,7 +84,5 @@ in {
       # regreet.enable = false;
       # spicetify.enable = false;
     };
-
   };
-
 }

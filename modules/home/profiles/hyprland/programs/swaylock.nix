@@ -1,10 +1,12 @@
-{ config, lib, pkgs, ... }: let 
-
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
   cfg = config.wayland.windowManager.hyprland;
   inherit (lib) mkDefault mkForce;
-
 in {
-
   programs.swaylock = {
     enable = true;
     # package = pkgs.swaylock-effects;
@@ -22,7 +24,7 @@ in {
       indicator-radius = 150;
       indicator-thickness = 30;
       show-failed-attempts = true;
-      ignore-empty-password = true; 
+      ignore-empty-password = true;
     };
   };
 
@@ -34,8 +36,7 @@ in {
     swaylock = "${config.programs.swaylock.package}/bin/swaylock";
   in {
     enable = true;
-    settings = { 
-
+    settings = {
       general = {
         ignore_dbus_inhibit = false;
         lock_cmd = "pidof swaylock || ${swaylock}"; # avoid starting multiple hyprlock instances.
@@ -45,25 +46,27 @@ in {
       };
 
       # Screenlock
-      listener = [{
-        timeout = 600;
-        on-timeout = "${swaylock}";
-        # on-resume = ${notify-send} "Welcome back ${username}!"
+      listener = [
+        {
+          timeout = 600;
+          on-timeout = "${swaylock}";
+          # on-resume = ${notify-send} "Welcome back ${username}!"
 
-      # Screen off
-      } {
-        timeout = 1200;
-        on-timeout = "${hyprctl} dispatch dpms off";
-        on-resume = "${hyprctl} dispatch dpms on";
-      }];
-
+          # Screen off
+        }
+        {
+          timeout = 1200;
+          on-timeout = "${hyprctl} dispatch dpms off";
+          on-resume = "${hyprctl} dispatch dpms on";
+        }
+      ];
     };
   };
 
   systemd.user.services.hypridle = {
-    Install.WantedBy = mkForce [ cfg.systemd.target ];
-    Unit.PartOf = mkForce [ cfg.systemd.target ];
-    Unit.After = mkForce [ cfg.systemd.target ]; 
+    Install.WantedBy = mkForce [cfg.systemd.target];
+    Unit.PartOf = mkForce [cfg.systemd.target];
+    Unit.After = mkForce [cfg.systemd.target];
   };
 
   # Keyboard shortcut to turn off screen immediately with numlock
@@ -72,5 +75,4 @@ in {
       ", num_lock, exec, sleep 1 && hyprctl dispatch dpms off"
     ];
   };
-
 }

@@ -1,5 +1,9 @@
-{ config, osConfig, lib, pkgs, ... }: let
-
+{
+  config,
+  osConfig,
+  lib,
+  ...
+}: let
   cfg = config.programs.chromium;
   oscfg = osConfig.programs.chromium;
   inherit (builtins) attrNames;
@@ -7,7 +11,6 @@
 
   # Add these switches to the wrapper or config
   switches = let
-
     # Store cache in volatile directory
     runDir = "/run/user/${toString config.home.uid}/chromium";
 
@@ -33,15 +36,14 @@
       "TabstripDedupe"
       "TaskManagerDesktopRefresh"
       "UseOzonePlatform"
-      "WaylandLinuxDrmSyncobj"  #wayland-linux-drm-syncobj (min kernel v6.11)
-      "WaylandPerSurfaceScale"  #wayland-per-window-scaling
-      "WaylandTextInputV3"      #wayland-text-input-v3
-      "WaylandUiScale"          #wayland-ui-scaling
+      "WaylandLinuxDrmSyncobj" #wayland-linux-drm-syncobj (min kernel v6.11)
+      "WaylandPerSurfaceScale" #wayland-per-window-scaling
+      "WaylandTextInputV3" #wayland-text-input-v3
+      "WaylandUiScale" #wayland-ui-scaling
       "WebRTCPipeWireCapturer"
       "WebUIDarkMode"
     ];
-
-  # Used in webapps and browser
+    # Used in webapps and browser
   in [
     "--user-data-dir=${cfg.dataDir}"
     "--disk-cache-dir=${runDir}"
@@ -62,45 +64,72 @@
     "--remove-referrers" # (browser privacy feature)
   ];
 
-  # Create window class name from URL used by Chromium Web Apps 
+  # Create window class name from URL used by Chromium Web Apps
   # without keydify: https://example.com --> chrome-example.com__-Default
   #    with keydify: https://example.com --> chrome-example-com-default
- mkClass = arg: let
+  mkClass = arg: let
     inherit (builtins) isString;
     inherit (lib) removePrefix removeSuffix replaceStrings;
     toKeydClass = config.services.keyd.lib.mkClass;
-    toClass = { url, profile ? null, keydify ? false }: let 
+    toClass = {
+      url,
+      profile ? null,
+      keydify ? false,
+    }: let
       removeProtocols = url: removePrefix "http://" (removePrefix "https://" url);
-      removeSlashes = url: replaceStrings [ "/" ] [ "." ] (removeSuffix "/" url);
-      suffix = if isString profile then "-Profile.${profile}" else "-Default";
-      class = "chrome-${removeSlashes( removeProtocols url )}__${suffix}";
-    in if keydify == true then (toKeydClass class) else class;
-  in if isString arg then toClass { url = arg; keydify = true; } else toClass arg;
-
+      removeSlashes = url: replaceStrings ["/"] ["."] (removeSuffix "/" url);
+      suffix =
+        if isString profile
+        then "-Profile.${profile}"
+        else "-Default";
+      class = "chrome-${removeSlashes (removeProtocols url)}__${suffix}";
+    in
+      if keydify == true
+      then (toKeydClass class)
+      else class;
+  in
+    if isString arg
+    then
+      toClass {
+        url = arg;
+        keydify = true;
+      }
+    else toClass arg;
 
   # Create web app as desktop entry
   # config.xdg.desktopEntries = mkWebApp { name = "Example"; url = "https://example.com/"; };
-  mkWebApp = { 
-    name, url, icon ? "internet-web-browser", profile ? null,
-    class ? (mkClass { inherit url profile; keydify = false; }) # chrome-example.com__-Default
-  }: let dir = if isNull profile then "Default" else "Profile.${profile}"; in {
+  mkWebApp = {
+    name,
+    url,
+    icon ? "internet-web-browser",
+    profile ? null,
+    class ? (mkClass {
+      inherit url profile;
+      keydify = false;
+    }), # chrome-example.com__-Default
+  }: let
+    dir =
+      if isNull profile
+      then "Default"
+      else "Profile.${profile}";
+  in {
     "${class}" = {
       inherit name icon;
-      exec = "${lib.getExe cfg.package} " + toString (switches ++ [ 
-        ''--profile-directory=${dir}''
-        ''--class="${class}"''
-        ''--app="${url}"''
-        "%U"
-      ]);
+      exec =
+        "${lib.getExe cfg.package} "
+        + toString (switches
+          ++ [
+            ''--profile-directory=${dir}''
+            ''--class="${class}"''
+            ''--app="${url}"''
+            "%U"
+          ]);
     };
   };
-
 in {
-
   options.programs.chromium.lib = mkOption {
-    type = types.anything; 
-    default = { inherit mkClass mkWebApp switches; };
-    readOnly = true; 
+    type = types.anything;
+    default = {inherit mkClass mkWebApp switches;};
+    readOnly = true;
   };
-
 }

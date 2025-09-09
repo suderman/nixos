@@ -1,13 +1,11 @@
-{ config, lib, pkgs, ... }: {
-
-  home.packages = with pkgs; [ 
+{pkgs, ...}: {
+  home.packages = with pkgs; [
     nautilus
   ];
 
   # keyboard shortcuts
   services.keyd.windows = {
     org-gnome-nautilus = {
-
       "alt.enter" = "f2";
       "alt.r" = "f2";
       "super.r" = "f2";
@@ -26,8 +24,6 @@
       "super.c" = "C-c";
       "super.x" = "C-x";
       "super.v" = "C-v";
-
     };
   };
-
 }

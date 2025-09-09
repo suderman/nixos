@@ -1,9 +1,6 @@
-{ config, lib, pkgs, ... }: let
-
+{lib, ...}: let
   inherit (lib) mkDefault;
-
 in {
-
   programs.mpv = {
     enable = true;
     config = {
@@ -19,5 +16,4 @@ in {
       "Ctrl+l" = "ab-loop";
     };
   };
-
 }

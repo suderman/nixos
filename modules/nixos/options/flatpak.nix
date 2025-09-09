@@ -3,14 +3,14 @@
   config,
   lib,
   pkgs,
-  inputs,
+  flake,
   ...
 }: let
   cfg = config.services.flatpak;
   inherit (lib) mkIf mkOption types;
 in {
   # https://github.com/gmodena/nix-flatpak/blob/main/modules/nixos.nix
-  imports = [inputs.nix-flatpak.nixosModules.nix-flatpak];
+  imports = [flake.inputs.nix-flatpak.nixosModules.nix-flatpak];
 
   # options shared with home-manager module
   options.services.flatpak = {

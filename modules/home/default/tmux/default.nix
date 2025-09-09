@@ -1,5 +1,4 @@
-{ config, lib, pkgs, ... }: {
-
+{pkgs, ...}: {
   # programs.tmux.enable = true;
   programs.tmux = {
     enable = true;
@@ -63,7 +62,7 @@
       #   '';
       # }
     ];
-    extraConfig = (builtins.readFile ./tmux.conf);
+    extraConfig = builtins.readFile ./tmux.conf;
   };
 
   home.packages = with pkgs; [
@@ -75,5 +74,4 @@
   # Adding helper functions to improve zsh and tmux
   # programs.zsh.initExtraBeforeCompInit = zshrcBeforeCompInit;
   # programs.zsh.initExtra = zshrcExtra;
-
 }

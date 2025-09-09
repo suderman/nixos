@@ -1,15 +1,19 @@
-{ flake, config, lib, pkgs, ... }: let 
-
+{
+  config,
+  lib,
+  pkgs,
+  flake,
+  ...
+}: let
   cfg = config.accounts;
   inherit (lib) mkForce mkIf;
   inherit (flake.lib) mkScript;
-
 in {
-
   config = mkIf cfg.enable {
-
     # Passwords for accounts
-    age.secrets = let inherit (config.home) username; in {
+    age.secrets = let
+      inherit (config.home) username;
+    in {
       fastmail.file = config.secrets.files."password-${username}-fastmail";
       icloud.file = config.secrets.files."password-${username}-icloud";
       gmail.file = config.secrets.files."password-${username}-gmail";
@@ -17,22 +21,21 @@ in {
 
     # Configure email/calendar/contacts accounts
     # https://home-manager-options.extranix.com/?query=accounts.&release=master
-    accounts = let 
-
+    accounts = let
       # Get account password: pass fastmail|icloud|gmail
-      pass = mkScript { text = ''
-        case "$@" in
-          fastmail) cat ${config.age.secrets.fastmail.path};;
-          icloud) cat ${config.age.secrets.icloud.path};;
-          gmail) cat ${config.age.secrets.gmail.path};;
-        esac
-      ''; };
-
-    # I've configured Fastmail to syncronize shared calendars from iCloud & Gmail. 
-    # This way, I only need to configure the below calendars to talk to Fastmail
-    # to sync with my computers.
+      pass = mkScript {
+        text = ''
+          case "$@" in
+            fastmail) cat ${config.age.secrets.fastmail.path};;
+            icloud) cat ${config.age.secrets.icloud.path};;
+            gmail) cat ${config.age.secrets.gmail.path};;
+          esac
+        '';
+      };
+      # I've configured Fastmail to syncronize shared calendars from iCloud & Gmail.
+      # This way, I only need to configure the below calendars to talk to Fastmail
+      # to sync with my computers.
     in {
-
       # Calendars are stored at ~/Calendars
       calendar = {
         basePath = ".";
@@ -41,7 +44,7 @@ in {
           primaryCollection = "Personal";
           remote = {
             userName = "suderman@fastmail.com";
-            passwordCommand = [ "bash" "${pass}" "fastmail" ];
+            passwordCommand = ["bash" "${pass}" "fastmail"];
             url = "https://caldav.fastmail.com/";
             type = "caldav";
           };
@@ -51,14 +54,15 @@ in {
           };
           vdirsyncer = {
             enable = true;
-            collections = [ # Config, Remote, Local
-              [ "Personal" "80287d4d-d09b-4865-b3e0-80e315491c6f" "Personal" ] # Jon@Fastmail
-              [ "Wife" "5d5661e7-8492-4982-b587-52c7cc67a951" "Wife" ] # Janessa@iCloud
-              [ "Family" "d421551e-94f8-4969-9ca2-f78781706030" "Family" ] # Family@iCloud
-              [ "Work" "ed95445c-6ec6-4de0-9615-df506ef0af37" "Work" ] # nonfiction@Gmail
+            collections = [
+              # Config, Remote, Local
+              ["Personal" "80287d4d-d09b-4865-b3e0-80e315491c6f" "Personal"] # Jon@Fastmail
+              ["Wife" "5d5661e7-8492-4982-b587-52c7cc67a951" "Wife"] # Janessa@iCloud
+              ["Family" "d421551e-94f8-4969-9ca2-f78781706030" "Family"] # Family@iCloud
+              ["Work" "ed95445c-6ec6-4de0-9615-df506ef0af37" "Work"] # nonfiction@Gmail
             ];
             conflictResolution = "remote wins";
-            metadata = [ "color" "displayname" "description" "order" ];
+            metadata = ["color" "displayname" "description" "order"];
           };
           khal = {
             enable = true;
@@ -76,7 +80,7 @@ in {
         accounts."Contacts" = {
           remote = {
             userName = "suderman@fastmail.com";
-            passwordCommand = [ "bash" "${pass}" "fastmail" ];
+            passwordCommand = ["bash" "${pass}" "fastmail"];
             url = "https://carddav.fastmail.com/";
             type = "carddav";
           };
@@ -87,8 +91,8 @@ in {
           vdirsyncer = {
             enable = true;
             collections = [
-              [ "Personal" "Default" "Personal" ] # default address book
-              [ "Shared" "masteruser_autoyk908y8@fastmail.com.Shared" "Shared" ]
+              ["Personal" "Default" "Personal"] # default address book
+              ["Shared" "masteruser_autoyk908y8@fastmail.com.Shared" "Shared"]
             ];
             conflictResolution = "remote wins";
           };
@@ -102,7 +106,7 @@ in {
       # Personal email
       email.accounts."Personal" = rec {
         userName = "suderman@fastmail.com";
-        passwordCommand = [ "bash" "${pass}" "fastmail" ];
+        passwordCommand = ["bash" "${pass}" "fastmail"];
         flavor = "fastmail.com";
         primary = true;
         realName = "Jon Suderman";
@@ -127,7 +131,7 @@ in {
         };
         neomutt = {
           enable = true;
-          extraMailboxes = [ "Archive" "Drafts" "Sent" "Trash" ];
+          extraMailboxes = ["Archive" "Drafts" "Sent" "Trash"];
         };
         notmuch.enable = true;
         msmtp.enable = true;
@@ -136,7 +140,7 @@ in {
       # Work email
       email.accounts."Work" = rec {
         userName = "jon@nonfiction.ca";
-        passwordCommand = [ "bash" "${pass}" "gmail" ];
+        passwordCommand = ["bash" "${pass}" "gmail"];
         flavor = "gmail.com";
         realName = "Jon Suderman";
         address = "jon@nonfiction.ca";
@@ -160,12 +164,11 @@ in {
         };
         neomutt = {
           enable = true;
-          extraMailboxes = [ "Archive" "Drafts" "Sent" "Trash" ];
+          extraMailboxes = ["Archive" "Drafts" "Sent" "Trash"];
         };
         notmuch.enable = true;
         msmtp.enable = true;
       };
-
     };
 
     # Email reader
@@ -181,7 +184,7 @@ in {
     # Email indexer
     programs.notmuch = {
       enable = true;
-      # hooks.preNew = "mbsync --all"; 
+      # hooks.preNew = "mbsync --all";
     };
 
     # DAV sync
@@ -190,7 +193,7 @@ in {
 
     programs.qcal.enable = true;
     programs.khal = {
-      enable = true; 
+      enable = true;
       package = pkgs.stable.khal; # https://github.com/NixOS/nixpkgs/pull/380358
       settings = {
         default = {
@@ -249,7 +252,5 @@ in {
       [vcard]
       private_objects=Jabber, Skype, Twitter
     '';
-
   };
-
 }

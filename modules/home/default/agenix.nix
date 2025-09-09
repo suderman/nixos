@@ -1,3 +1,3 @@
-{ inputs, ... }:  {
-  imports = [ inputs.agenix.homeManagerModules.default ];
+{flake, ...}: {
+  imports = [flake.inputs.agenix.homeManagerModules.default];
 }

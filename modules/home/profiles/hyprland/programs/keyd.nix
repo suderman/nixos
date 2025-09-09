@@ -1,15 +1,11 @@
-{ config, lib, pkgs, ... }: let 
-
+{config, ...}: let
   cfg = config.wayland.windowManager.hyprland;
-
 in {
-
   services.keyd = {
     enable = true;
     systemdTarget = cfg.systemd.target;
     windows = {
       "*" = {
-
         # Map meta a/z to ctrl a/z
         "super.a" = "C-a";
         "super.z" = "C-z";
@@ -22,11 +18,8 @@ in {
         "alt.s" = "volumeup";
         "alt.d" = "mute";
         # "alt.space" = "playpause";
-
       };
     };
     layers = {};
-
   };
-
 }

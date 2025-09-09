@@ -7,7 +7,7 @@ grouped_windows_count="$(hyprctl activewindow -j | jq '.grouped | length')"
 # toggle group lock
 if [[ "$btn" == "right" ]]; then
 
-  if (( grouped_windows_count > 1 )); then
+  if ((grouped_windows_count > 1)); then
     hyprctl dispatch lockactivegroup toggle
   else
     hyprctl dispatch togglegroup
@@ -15,7 +15,7 @@ if [[ "$btn" == "right" ]]; then
 
 # prev window in group
 elif [[ "$btn" == "middle" ]]; then
-  if (( grouped_windows_count > 1 )); then
+  if ((grouped_windows_count > 1)); then
     hyprctl dispatch lockactivegroup lock
     hyprctl dispatch changegroupactive b
   else
@@ -24,7 +24,7 @@ elif [[ "$btn" == "middle" ]]; then
 
 # next window in group
 else
-  if (( grouped_windows_count > 1 )); then
+  if ((grouped_windows_count > 1)); then
     hyprctl dispatch lockactivegroup lock
     hyprctl dispatch changegroupactive f
   else

@@ -1,7 +1,6 @@
-{ config, lib, ... }: {
-
+{...}: {
   programs.git = {
-    ignores = [ "*~" "*.swp" ];
+    ignores = ["*~" "*.swp"];
     extraConfig = {
       user = {
         name = "Jon Suderman";
@@ -41,5 +40,4 @@
       };
     };
   };
-
 }

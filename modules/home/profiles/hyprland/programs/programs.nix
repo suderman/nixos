@@ -1,25 +1,28 @@
 # Programs and packages required by my Hyprland
-{ config, lib, pkgs, perSystem, ... }: let
-
+{
+  lib,
+  pkgs,
+  perSystem,
+  ...
+}: let
   # Ensure portals and other systemd user services are running
   # https://wiki.hyprland.org/Useful-Utilities/xdg-desktop-portal-hyprland/
   bounce = perSystem.self.mkScript {
-    path = [ pkgs.systemd ]; name = "bounce"; text = let 
+    path = [pkgs.systemd];
+    name = "bounce";
+    text = let
       restart = name: "sleep 1 && systemctl --user stop ${name} && systemctl --user start ${name}";
-    in lib.concatStringsSep "\n" [ 
-
-      # Ensure portals and other systemd user services are running
-      # https://wiki.hyprland.org/Useful-Utilities/xdg-desktop-portal-hyprland/
-      ( restart "xdg-desktop-portal-hyprland" )
-      ( restart "xdg-desktop-portal-gtk" )
-      ( restart "xdg-desktop-portal" )
-      ( restart "hyprland-ready.target" )
-
-    ];
+    in
+      lib.concatStringsSep "\n" [
+        # Ensure portals and other systemd user services are running
+        # https://wiki.hyprland.org/Useful-Utilities/xdg-desktop-portal-hyprland/
+        (restart "xdg-desktop-portal-hyprland")
+        (restart "xdg-desktop-portal-gtk")
+        (restart "xdg-desktop-portal")
+        (restart "hyprland-ready.target")
+      ];
   };
-
 in {
-
   xdg.mime.enable = true;
   xdg.mimeApps = {
     enable = true;
@@ -37,13 +40,12 @@ in {
   };
 
   # Add these to my path
-  home.packages = with pkgs; [ 
-
+  home.packages = with pkgs; [
     bounce # defined above
     swww # wallpaper
     brightnessctl
     wl-clipboard # copying and pasting
-    hyprpicker  # color picker
+    hyprpicker # color picker
     hyprcursor
     # wf-recorder # screen recording - broken?
     grim # taking screenshots
@@ -71,7 +73,5 @@ in {
     pulseaudio # pactl
     pavucontrol # sound control gui
     ncpamixer # sound control tui
-
   ];
-
 }

@@ -1,8 +1,6 @@
 {
-
-  # Super (meta) layer 
+  # Super (meta) layer
   "super:M" = {
-
     # Open window switcher (super tab)
     tab = "swapm(switcher, M-tab)";
 
@@ -10,12 +8,10 @@
     x = "S-delete";
     c = "C-insert";
     v = "S-insert";
-
   };
 
   # Switcher (while holding down meta/super-tab)
   "switcher:M" = {
-
     # Super-Tab: Switch to next window
     tab = "M-A-tab";
 
@@ -26,12 +22,10 @@
     # Next and back
     n = "M-right";
     b = "M-left";
-
-  }; 
+  };
 
   # Nav (Vim & Emacs style navigation)
   nav = {
-
     # vi keys
     k = "up";
     l = "right";
@@ -90,7 +84,6 @@
 
     # Toggle capslock
     rightshift = "capslock";
-
   };
 
   # Shift+volume keys control tracks
@@ -99,5 +92,4 @@
     volumeup = "nextsong";
     mute = "micmute";
   };
-
 }

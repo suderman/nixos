@@ -1,11 +1,7 @@
-{ config, lib, pkgs, ... }: let 
-
-  inherit (lib) mkDefault mkForce; 
-
+{lib, ...}: let
+  inherit (lib) mkDefault mkForce;
 in {
-
   wayland.windowManager.hyprland.settings = {
-
     # env = [
     #   "XCURSO_SIZE,84"
     # ];
@@ -48,20 +44,19 @@ in {
         color = mkDefault "rgba(00000080)";
       };
 
-        dim_inactive = false;
-        dim_strength = 0.1;
-        dim_special = 0.5;
+      dim_inactive = false;
+      dim_strength = 0.1;
+      dim_special = 0.5;
 
-        blur = {
-          enabled = true;
-          size = 4;
-          passes = 3;
-          ignore_opacity = true;
-          special = true;
-          xray = true;
-        };
+      blur = {
+        enabled = true;
+        size = 4;
+        passes = 3;
+        ignore_opacity = true;
+        special = true;
+        xray = true;
       };
-
+    };
 
     animations = {
       enabled = true;
@@ -97,7 +92,6 @@ in {
         "specialWorkspace, 1, 3, overshot, slidefadevert -50%"
         "layers, 1, 0.1, default, fade"
       ];
-
     };
 
     # animation slide/popin/fade
@@ -111,7 +105,5 @@ in {
       "animation fade, rofi"
       "dimaround, rofi"
     ];
-
   };
-
 }

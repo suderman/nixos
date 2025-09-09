@@ -1,10 +1,11 @@
-{ config, lib, pkgs, ... }: let
-
+{
+  config,
+  lib,
+  ...
+}: let
   cfg = config.services.mako;
   inherit (lib) getExe' mkIf mkDefault;
-
 in {
-
   services.mako = {
     enable = true;
 
@@ -48,11 +49,10 @@ in {
     # invisible=1
   };
 
-  wayland.windowManager.hyprland.settings = let 
+  wayland.windowManager.hyprland.settings = let
     makoctl = getExe' config.services.mako.package "makoctl";
   in {
-    bindn = [ ", escape, exec, ${makoctl} dismiss" ];
-    bind = [ "super+alt, u, exec, ${makoctl} restore" ];
+    bindn = [", escape, exec, ${makoctl} dismiss"];
+    bind = ["super+alt, u, exec, ${makoctl} restore"];
   };
-
 }

@@ -1,6 +1,5 @@
 # programs.ripgrep.enable = true;
-{ config, lib, pkgs, ... }: {
-
+{pkgs, ...}: {
   programs.ripgrep = {
     package = pkgs.ripgrep-all;
     arguments = [
@@ -10,15 +9,14 @@
       "--smart-case"
       "--hidden" # search hidden files/directories
       "--glob=!package-lock.json"
-      "--glob=!node_modules/*" 
+      "--glob=!node_modules/*"
       "--glob=!.git/*"
       "--glob=!yarn.lock"
       "--glob=!.yarn/*"
-      "--glob=!dist/*" 
+      "--glob=!dist/*"
       "--glob=!build/*"
-      "--glob=!.cache/*" 
+      "--glob=!.cache/*"
       "--glob=!.vscode/*"
     ];
   };
-
 }

@@ -1,13 +1,14 @@
-{ config, lib, pkgs, ... }: let
-
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
   cfg = config.services.mpd;
   inherit (config.home) offset;
   inherit (lib) mkIf;
-
 in {
-
   config = mkIf cfg.enable {
-
     # NCurses Music Player Client (Plus Plus) is a lot
     home.shellAliases = {
       pp = "ncmpcpp";
@@ -16,8 +17,8 @@ in {
     programs.ncmpcpp = {
       enable = true;
 
-      package = pkgs.ncmpcpp.override { 
-        visualizerSupport = true; 
+      package = pkgs.ncmpcpp.override {
+        visualizerSupport = true;
         clockSupport = true;
         taglibSupport = true;
       };
@@ -83,7 +84,7 @@ in {
         search_engine_display_mode = "columns";
         browser_display_mode = "columns";
 
-        # nav        
+        # nav
         cyclic_scrolling = "yes";
         header_text_scrolling = "yes";
         lines_scrolled = "2";
@@ -108,51 +109,162 @@ in {
         display_bitrate = "yes";
         enable_window_title = "yes";
         empty_tag_marker = "";
-
       };
 
       bindings = [
-        { key = "l"; command = [ "next_column" ]; } # right
-        { key = "l"; command = [ "enter_directory" ]; } # right
-        { key = "l"; command = [ "run_action" ]; } # right
-        { key = "right"; command = [ "next_column" ]; } # right
-        { key = "right"; command = [ "enter_directory" ]; } # right
-        { key = "right"; command = [ "run_action" ]; } # right
-        { key = "h"; command = [ "reset_search_engine" ]; } # left
-        { key = "h"; command = [ "previous_column" ]; } # left
-        { key = "h"; command = [ "jump_to_parent_directory" ]; } # left
-        { key = "left"; command = [ "reset_search_engine" ]; } # left
-        { key = "left"; command = [ "previous_column" ]; } # left
-        { key = "left"; command = [ "jump_to_parent_directory" ]; } # left
-        { key = "j"; command = [ "scroll_down" ]; } # down
-        { key = "k"; command = [ "scroll_up" ]; } # up
-        { key = "J"; command = [ "select_item" "scroll_down" ]; }
-        { key = "K"; command = [ "select_item" "scroll_up" ]; }
-        { key = "ctrl-j"; command = [ "move_selected_items_down" ]; }
-        { key = "ctrl-k"; command = [ "move_selected_items_up" ]; }
-        { key = "ctrl-u"; command = [ "page_up" ]; } # pageup
-        { key = "ctrl-d"; command = [ "page_down" ]; } # pagedown
-        { key = "g"; command = [ "move_home" ]; } # home
-        { key = "G"; command = [ "move_end" ]; } # end 
-        { key = "d"; command = [ "delete_playlist_items" ]; } # delete
-        { key = "="; command = [ "volume_up" ]; } # +
-        { key = ";"; command = [ "execute_command" ]; } # :
-        { key = "?"; command = [ "show_help" ]; } # f1
-        { key = "f11"; command = [ "show_clock" ]; } # =
-        { key = "f12"; command = [ "show_server_info" ]; } # @ 
-        { key = "t"; command = [ "show_lyrics" ]; } # l
-        { key = "ctrl-t"; command = [ "toggle_lyrics_fetcher" ]; } # l
-        { key = "/"; command = [ "find" ]; } # /
-        { key = "/"; command = [ "find_item_forward" ]; } # /
-        { key = "space"; command = [ "start_searching" ]; } # y
-        { key = "space"; command = [ "select_item" ]; } # insert
-        { key = "space"; command = [ "toggle_lyrics_update_on_song_change" ]; } 
-        { key = "space"; command = [ "toggle_visualization_type" ]; }  
-        { key = "a"; command = [ "add_selected_items" ]; } 
-        { key = "ctrl-a"; command = [ "add_item_to_playlist" ]; } 
+        {
+          key = "l";
+          command = ["next_column"];
+        } # right
+        {
+          key = "l";
+          command = ["enter_directory"];
+        } # right
+        {
+          key = "l";
+          command = ["run_action"];
+        } # right
+        {
+          key = "right";
+          command = ["next_column"];
+        } # right
+        {
+          key = "right";
+          command = ["enter_directory"];
+        } # right
+        {
+          key = "right";
+          command = ["run_action"];
+        } # right
+        {
+          key = "h";
+          command = ["reset_search_engine"];
+        } # left
+        {
+          key = "h";
+          command = ["previous_column"];
+        } # left
+        {
+          key = "h";
+          command = ["jump_to_parent_directory"];
+        } # left
+        {
+          key = "left";
+          command = ["reset_search_engine"];
+        } # left
+        {
+          key = "left";
+          command = ["previous_column"];
+        } # left
+        {
+          key = "left";
+          command = ["jump_to_parent_directory"];
+        } # left
+        {
+          key = "j";
+          command = ["scroll_down"];
+        } # down
+        {
+          key = "k";
+          command = ["scroll_up"];
+        } # up
+        {
+          key = "J";
+          command = ["select_item" "scroll_down"];
+        }
+        {
+          key = "K";
+          command = ["select_item" "scroll_up"];
+        }
+        {
+          key = "ctrl-j";
+          command = ["move_selected_items_down"];
+        }
+        {
+          key = "ctrl-k";
+          command = ["move_selected_items_up"];
+        }
+        {
+          key = "ctrl-u";
+          command = ["page_up"];
+        } # pageup
+        {
+          key = "ctrl-d";
+          command = ["page_down"];
+        } # pagedown
+        {
+          key = "g";
+          command = ["move_home"];
+        } # home
+        {
+          key = "G";
+          command = ["move_end"];
+        } # end
+        {
+          key = "d";
+          command = ["delete_playlist_items"];
+        } # delete
+        {
+          key = "=";
+          command = ["volume_up"];
+        } # +
+        {
+          key = ";";
+          command = ["execute_command"];
+        } # :
+        {
+          key = "?";
+          command = ["show_help"];
+        } # f1
+        {
+          key = "f11";
+          command = ["show_clock"];
+        } # =
+        {
+          key = "f12";
+          command = ["show_server_info"];
+        } # @
+        {
+          key = "t";
+          command = ["show_lyrics"];
+        } # l
+        {
+          key = "ctrl-t";
+          command = ["toggle_lyrics_fetcher"];
+        } # l
+        {
+          key = "/";
+          command = ["find"];
+        } # /
+        {
+          key = "/";
+          command = ["find_item_forward"];
+        } # /
+        {
+          key = "space";
+          command = ["start_searching"];
+        } # y
+        {
+          key = "space";
+          command = ["select_item"];
+        } # insert
+        {
+          key = "space";
+          command = ["toggle_lyrics_update_on_song_change"];
+        }
+        {
+          key = "space";
+          command = ["toggle_visualization_type"];
+        }
+        {
+          key = "a";
+          command = ["add_selected_items"];
+        }
+        {
+          key = "ctrl-a";
+          command = ["add_item_to_playlist"];
+        }
       ];
     };
-
   };
-
 }

@@ -1,10 +1,10 @@
 {
-  inputs,
   lib,
+  flake,
   ...
 }: {
   imports = [
-    inputs.nix-index-database.homeModules.nix-index
+    flake.inputs.nix-index-database.homeModules.nix-index
   ];
 
   # Prepare nix-index module with weekly updated database and comma integration

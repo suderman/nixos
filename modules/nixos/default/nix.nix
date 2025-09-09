@@ -2,7 +2,6 @@
   config,
   lib,
   flake,
-  inputs,
   ...
 }: let
   inherit (lib) mapAttrs imap1;
@@ -26,7 +25,7 @@ in {
     warn-dirty = false;
 
     # https://discourse.nixos.org/t/how-to-prevent-flake-from-downloading-registry-at-every-flake-command/32003/3
-    flake-registry = "${inputs.flake-registry}/flake-registry.json";
+    flake-registry = "${flake.inputs.flake-registry}/flake-registry.json";
 
     # Speed up remote builds
     builders-use-substitutes = true;
@@ -56,10 +55,10 @@ in {
 
   # Add each flake input as a registry
   # To make nix3 commands consistent with the flake
-  nix.registry = mapAttrs (_: value: {flake = value;}) inputs;
+  nix.registry = mapAttrs (_: value: {flake = value;}) flake.inputs;
 
   # Map registries to channels
-  nix.nixPath = ["repl=${flake}/repl.nix" "nixpkgs=${inputs.nixpkgs}"];
+  nix.nixPath = ["repl=${flake}/repl.nix" "nixpkgs=${flake.inputs.nixpkgs}"];
 
   # Automatically upgrade this system while I sleep
   system.autoUpgrade = {

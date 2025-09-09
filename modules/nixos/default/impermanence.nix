@@ -1,7 +1,7 @@
 {
   config,
   lib,
-  inputs,
+  flake,
   ...
 }: let
   inherit (builtins) mapAttrs;
@@ -9,7 +9,7 @@
   users = config.home-manager.users or {};
 in {
   # Import impermanence module
-  imports = [inputs.impermanence.nixosModule];
+  imports = [flake.inputs.impermanence.nixosModule];
 
   # Extra options
   options.persist = {

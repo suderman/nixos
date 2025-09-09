@@ -4,9 +4,8 @@ echo -en "\0prompt\x1f\n"
 # Prep dirs/files
 dir=$XDG_RUNTIME_DIR/sinks
 mkdir -p $dir
-echo "$(cat ~/.config/rofi/extra.sinks)" > $dir/extra
-cat ~/.config/rofi/hidden.sinks > $dir/hidden
-
+echo "$(cat ~/.config/rofi/extra.sinks)" >$dir/extra
+cat ~/.config/rofi/hidden.sinks >$dir/hidden
 
 # Create a rofi-formatted option for a provided sink that appears nice
 named_sink() {
@@ -31,9 +30,9 @@ named_sink() {
 
     # All else fails, try to pretty-up this unknown sink name
     else
-      name="$(echo "$sink" |\
-        sed -r 's/^(.+)_output.//' |\
-        sed 's/.*/\L&/; s/[a-z]*/\u&/g' |\
+      name="$(echo "$sink" |
+        sed -r 's/^(.+)_output.//' |
+        sed 's/.*/\L&/; s/[a-z]*/\u&/g' |
         tr _ ' ')"
 
     fi
@@ -41,7 +40,6 @@ named_sink() {
 
   echo -en $name
 }
-
 
 # Attempt to connect a sink to bluetooth where applicable
 connect_sink() {
@@ -62,7 +60,6 @@ connect_sink() {
   fi
 }
 
-
 # List all sinks if no arguments provided
 if [ -z "${1-}" ]; then
 
@@ -74,10 +71,10 @@ if [ -z "${1-}" ]; then
     (if .name == "'$(pactl get-default-sink)'" then "audio-on" else "audio-ready" end) as $icon |
     (.name) as $sink |
     "\($ports)\\t\($device)\\0icon\\x1f\($icon)\\x1finfo\\x1f\($sink)"
-    ' | uniq > $dir/detected
+    ' | uniq >$dir/detected
 
   # extra sinks added to copy of file
-  cat $dir/detected > $dir/appended
+  cat $dir/detected >$dir/appended
   while read sink; do
 
     # ensure this extra sink wasn't already detected
@@ -85,13 +82,13 @@ if [ -z "${1-}" ]; then
 
       # Add the sink to the list, formatted nice for rofi
       icon="audio-off"
-      echo -n "$(named_sink $sink)\\0icon\\x1f${icon}\\x1finfo\\x1f${sink}" >> $dir/appended
+      echo -n "$(named_sink $sink)\\0icon\\x1f${icon}\\x1finfo\\x1f${sink}" >>$dir/appended
 
     fi
-  done < $dir/extra
+  done <$dir/extra
 
   # output sinks, filtering any sinks to be hidden
-  filter="$(sed -z s/.$// $dir/hidden | tr '\n' '|' )"
+  filter="$(sed -z s/.$// $dir/hidden | tr '\n' '|')"
 
   # if there are no hidden sinks to filter, just output appended
   if [[ -z "$filter" ]]; then
@@ -101,7 +98,6 @@ if [ -z "${1-}" ]; then
   else
     echo -en "$(grep -vE "${filter}" $dir/appended)"
   fi
-
 
 # If there is an argument, change to the selected sink
 else

@@ -1,9 +1,4 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: {
+{...}: {
   wayland.windowManager.hyprland.settings = {
     bind = [
       # Exit hyprland

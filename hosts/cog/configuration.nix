@@ -1,14 +1,13 @@
 {
   config,
   pkgs,
-  inputs,
   flake,
   ...
 }: {
   imports = [
     ./hardware-configuration.nix
     ./disk-configuration.nix
-    inputs.hardware.nixosModules.framework-11th-gen-intel
+    flake.inputs.hardware.nixosModules.framework-11th-gen-intel
     flake.nixosModules.default
     flake.nixosModules.profiles.hyprland
   ];

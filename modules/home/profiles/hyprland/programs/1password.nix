@@ -1,8 +1,7 @@
-{ config, lib, pkgs, ... }: {
-
-  home.packages = with pkgs; [ 
+{pkgs, ...}: {
+  home.packages = with pkgs; [
     _1password-cli
-    _1password-gui 
+    _1password-gui
   ];
 
   # Float and resize
@@ -28,5 +27,4 @@
       "esc" = "C-w";
     };
   };
-
 }

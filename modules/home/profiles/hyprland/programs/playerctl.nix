@@ -1,5 +1,9 @@
-{ config, lib, pkgs, perSystem, ... }: let 
-
+{
+  lib,
+  pkgs,
+  perSystem,
+  ...
+}: let
   #          KEY | ACTION
   # ------------ | ------------------------------
   #   VolumeDown | Decrease Volume
@@ -17,13 +21,12 @@
   #
   #        Media | Shift current speaker
   #      ⇧ Media | Toggle Bluetooth connection
-
   inherit (lib) getExe;
   inherit (perSystem.self) mkScript;
 
   # If more than one player is detected, shift to the next one and notify
   shiftPlayer = mkScript {
-    path = with pkgs; [ playerctl libnotify mako ]; 
+    path = with pkgs; [playerctl libnotify mako];
     text = ''
       if [[ "$(playerctl -l | wc -l)" != "1" ]]; then
         playerctld shift
@@ -34,7 +37,7 @@
   };
 
   rewindOrPrevious = mkScript {
-    path = with pkgs; [ playerctl mpc-cli ]; 
+    path = with pkgs; [playerctl mpc-cli];
     text = ''
       if [[ "$(playerctl -l | head -n1)" == "mpd" ]]; then
         mpc seek -15
@@ -45,7 +48,7 @@
   };
 
   fastForwardOrNext = mkScript {
-    path = with pkgs; [ playerctl mpc-cli ]; 
+    path = with pkgs; [playerctl mpc-cli];
     text = ''
       if [[ "$(playerctl -l | head -n1)" == "mpd" ]]; then
         mpc seek +30
@@ -54,15 +57,12 @@
       fi
     '';
   };
-
 in {
-
-  services.playerctld.enable = true; 
-  home.packages = [ pkgs.playerctl ];
+  services.playerctld.enable = true;
+  home.packages = [pkgs.playerctl];
 
   wayland.windowManager.hyprland.settings = {
     bindl = [
-
       # play and pause active player
       ", XF86AudioPlay,  exec, playerctl play-pause"
       ", XF86AudioStop,  exec, playerctl pause"
@@ -78,12 +78,9 @@ in {
       ", XF86AudioPrev,  exec, ${rewindOrPrevious}"
       ", XF86AudioNext,  exec, ${fastForwardOrNext}"
 
-      # always skip tracks with alt 
+      # always skip tracks with alt
       "alt, XF86AudioPrev,  exec, playerctl previous"
       "alt, XF86AudioNext,  exec, playerctl next"
-
     ];
-
   };
-
 }

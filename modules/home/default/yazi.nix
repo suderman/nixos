@@ -1,7 +1,9 @@
-{ config, lib, pkgs, ... }: let 
-
+{
+  lib,
+  pkgs,
+  ...
+}: let
   plugins = {
-
     # https://github.com/yazi-rs/plugins/
     yazi = pkgs.fetchFromGitHub {
       owner = "yazi-rs";
@@ -25,11 +27,8 @@
       rev = "247f49da1c408235202848c0897289ed51b69343";
       hash = "sha256-0J6hxcdDX9b63adVlNVWysRR5htwAtP5WhIJ2AK2+Gs=";
     };
-
   };
-
 in {
-
   programs.yazi = {
     enable = lib.mkDefault true;
 
@@ -49,7 +48,7 @@ in {
     settings.manager = {
       sort_dir_first = true;
       linemode = "permissions";
-      ratio = [ 1 3 4 ];
+      ratio = [1 3 4];
     };
 
     settings.preview = {
@@ -61,9 +60,10 @@ in {
     };
 
     keymap.manager.prepend_keymap = [
-      { run = "remove --force"; on = [ "d" ]; }
+      {
+        run = "remove --force";
+        on = ["d"];
+      }
     ];
-
   };
-
 }

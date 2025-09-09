@@ -1,17 +1,19 @@
-{ config, lib, pkgs, ... }: let 
-
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
   cfg = config.wayland.windowManager.hyprland;
   inherit (builtins) readFile;
-  inherit (lib) getExe mkIf mkShellScript mkForce;
+  inherit (lib) getExe mkIf mkForce;
   term = getExe pkgs.kitty;
-
 in {
-
   systemd.user.services.waybar = {
-    Install.WantedBy = mkForce [ cfg.systemd.target ];
+    Install.WantedBy = mkForce [cfg.systemd.target];
     Unit = {
-      PartOf = mkForce [ cfg.systemd.target ];
-      After = mkForce [ cfg.systemd.target ]; 
+      PartOf = mkForce [cfg.systemd.target];
+      After = mkForce [cfg.systemd.target];
     };
   };
 
@@ -31,43 +33,43 @@ in {
       height = 39;
       exclusive = true;
       persistent_workspaces = {
-        "1" = [ ];
-        "2" = [ ];
-        "3" = [ ];
-        "4" = [ ];
-        "5" = [ ];
-        "6" = [ ];
-        "7" = [ ];
-        "8" = [ ];
-        "9" = [ ];
-        "10" = [ ];
+        "1" = [];
+        "2" = [];
+        "3" = [];
+        "4" = [];
+        "5" = [];
+        "6" = [];
+        "7" = [];
+        "8" = [];
+        "9" = [];
+        "10" = [];
       };
 
       # modules layout
-      modules-left = [ 
-        "custom/launcher" 
-        # "hyprland/workspaces" 
-        "custom/expo" 
-        "custom/special" 
-        "custom/groupies" 
+      modules-left = [
+        "custom/launcher"
+        # "hyprland/workspaces"
+        "custom/expo"
+        "custom/special"
+        "custom/groupies"
         # "wlr/taskbar"
       ];
       # modules-center = [ "hyprland/window" ];
-      modules-center = [ 
-        # "clock" 
-        "hyprland/workspaces" 
+      modules-center = [
+        # "clock"
+        "hyprland/workspaces"
       ];
-      modules-right = [ 
-        "pulseaudio" 
-        "idle_inhibitor" 
-        "custom/bluetooth" 
-        "network" 
-        "temperature" 
-        "cpu" 
-        "tray" 
-        "battery" 
-        "clock" 
-        "custom/power" 
+      modules-right = [
+        "pulseaudio"
+        "idle_inhibitor"
+        "custom/bluetooth"
+        "network"
+        "temperature"
+        "cpu"
+        "tray"
+        "battery"
+        "clock"
+        "custom/power"
       ];
 
       # modules config
@@ -126,7 +128,7 @@ in {
           phone-muted = "";
           portable = "";
           car = "";
-          default = [ "" "" ];
+          default = ["" ""];
         };
         scroll-step = 1;
         on-click = "rofi-toggle -show sinks -cycle -theme-str 'window {width: 50%;}'";
@@ -185,7 +187,7 @@ in {
         tooltip-format = "{title}";
         on-click = "activate";
         on-click-middle = "close";
-        ignore-list = [ "kitty" ];
+        ignore-list = ["kitty"];
         rewrite = {
           "Firefox Web Browser" = "Firefox";
         };
@@ -200,9 +202,12 @@ in {
         interval = 60;
         format = "{icon}";
         format-charging = " ";
-        format-icons = [ "󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹" ];
+        format-icons = ["󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹"];
         format-plugged = "󰚦 ";
-        states = { warning = 30; critical = 15; };
+        states = {
+          warning = 30;
+          critical = 15;
+        };
         tooltip = true;
       };
 
@@ -210,11 +215,8 @@ in {
         on-click = "powerkey";
         format = " ";
       };
-
     };
 
     style = readFile ./style.css;
-
   };
-
 }

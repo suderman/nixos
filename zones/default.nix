@@ -1,4 +1,4 @@
-{ 
+{
   # Self-signed CA certificate
   ca = ./ca.crt;
 

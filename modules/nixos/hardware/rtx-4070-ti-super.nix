@@ -2,14 +2,14 @@
 {
   config,
   pkgs,
-  inputs,
+  flake,
   ...
 }: let
   # https://raw.githubusercontent.com/aaronp24/nvidia-versions/master/nvidia-versions.txt
   beta = true; # I want to use current LTS, so setting this to true
 in {
   # https://github.com/NixOS/nixos-hardware/tree/master/common/gpu/nvidia
-  imports = [inputs.hardware.nixosModules.common-gpu-nvidia-nonprime];
+  imports = [flake.inputs.hardware.nixosModules.common-gpu-nvidia-nonprime];
 
   boot.initrd.kernelModules = ["nvidia"];
   boot.extraModulePackages = with config.boot.kernelPackages;

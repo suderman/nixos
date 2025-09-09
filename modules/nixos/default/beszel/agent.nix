@@ -1,12 +1,14 @@
 # services.beszel.enableAgent = true;
-{ config, lib, pkgs, flake, ... }: let
-
+{
+  config,
+  lib,
+  flake,
+  ...
+}: let
   cfg = config.services.beszel;
   inherit (builtins) toString;
   inherit (lib) mkIf mkOption types;
-
 in {
-
   options.services.beszel = {
     key = mkOption {
       type = types.str;
@@ -14,16 +16,22 @@ in {
       default = let
         inherit (builtins) pathExists readFile;
         sshPub = flake + /users/beszel/id_ed25519.pub;
-      in if pathExists sshPub then readFile sshPub else "";
+      in
+        if pathExists sshPub
+        then readFile sshPub
+        else "";
     };
     enableAgent = mkOption {
       type = types.bool;
       description = "Enable beszel agent";
-      default = if cfg.key == "" then false else true;
+      default =
+        if cfg.key == ""
+        then false
+        else true;
     };
     agentPort = mkOption {
       type = types.port;
-      default = 45876; 
+      default = 45876;
     };
     extraPackages = mkOption {
       type = with types; listOf package;
@@ -32,14 +40,13 @@ in {
   };
 
   config = mkIf cfg.enableAgent {
-
     # tmpfiles.directories = [{
     #   target = "${cfg.dataDir}/agent";
     #   user = "beszel";
     # }];
 
     systemd.services.beszel-agent = {
-      wantedBy = [ "multi-user.target" ];
+      wantedBy = ["multi-user.target"];
       environment = {
         PORT = toString cfg.agentPort;
         KEY = cfg.key;
@@ -57,9 +64,7 @@ in {
       startLimitIntervalSec = 180;
       startLimitBurst = 30;
     };
-    
-    networking.firewall.allowedTCPPorts = [ cfg.agentPort ];
 
+    networking.firewall.allowedTCPPorts = [cfg.agentPort];
   };
-
 }

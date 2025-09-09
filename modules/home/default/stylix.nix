@@ -1,20 +1,21 @@
 # osConfig.stylix.enable = true;
-{ config, osConfig, lib, pkgs, ... }: let
-
+{
+  config,
+  osConfig,
+  lib,
+  ...
+}: let
   cfg = config.stylix;
   oscfg = osConfig.stylix;
   inherit (lib) mkIf mkDefault mkForce;
-
 in {
-
   config.stylix = mkIf oscfg.enable {
-
     # Enable with nixos module
     enable = mkDefault true;
     autoEnable = mkDefault oscfg.enable;
 
     targets = {
-      firefox.profileNames = [ "default" ];
+      firefox.profileNames = ["default"];
       hyprpaper.enable = mkForce false; # don't set my wallpaper
       # alacritty.enable = false;
       # avizo.enable = false;
@@ -76,5 +77,4 @@ in {
       # zellij.enable = false;
     };
   };
-
 }

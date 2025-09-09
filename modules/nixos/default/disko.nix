@@ -1,11 +1,11 @@
 {
   pkgs,
   perSystem,
-  inputs,
+  flake,
   ...
 }: {
   imports = [
-    inputs.disko.nixosModules.disko
+    flake.inputs.disko.nixosModules.disko
   ];
 
   # Allow disk override using disko cli, default to all disks

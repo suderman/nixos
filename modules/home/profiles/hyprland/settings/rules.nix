@@ -1,14 +1,11 @@
-{ config, lib, pkgs, ... }: {
-
+{...}: {
   wayland.windowManager.hyprland.settings = {
-
     windowrulev2 = [
-
       # forbid windows from maximizing/fullscreening themselves
       "suppressevent maximize, class:.*"
       "suppressevent fullscreen, class:.*"
 
-      # idle inhibit while fullscreen (games, videos, etc) 
+      # idle inhibit while fullscreen (games, videos, etc)
       "idleinhibit fullscreen, class:.*"
 
       # Picture-in-Picture for any windows tagged pip
@@ -61,9 +58,6 @@
       # "workspace special silent, title:^(.*is sharing (your screen|a window)\.)$"
 
       "float, class:^(org.telegram.desktop|telegramdesktop)$, title:^(Media viewer)$"
-
     ];
-
   };
-
 }

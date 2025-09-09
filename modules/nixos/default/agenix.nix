@@ -2,10 +2,10 @@
 {
   config,
   lib,
+  hostName,
   pkgs,
   perSystem,
   flake,
-  hostName,
   ...
 }: {
   imports = [flake.nixosModules.secrets];

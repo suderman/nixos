@@ -1,9 +1,4 @@
-{
-  config,
-  pkgs,
-  flake,
-  ...
-}: {
+{pkgs, ...}: {
   home.packages = with pkgs; [
     asunder # cd ripper
     gnome-disk-utility # format and partition gui

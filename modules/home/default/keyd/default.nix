@@ -1,18 +1,21 @@
 # services.keyd.enable = true;
-{ config, lib, pkgs, perSystem, ... }: let 
-
+{
+  config,
+  lib,
+  pkgs,
+  perSystem,
+  ...
+}: let
   cfg = config.services.keyd;
   ini = pkgs.formats.ini {};
   inherit (perSystem.self) mkScript;
   inherit (lib) concatStringsSep mapAttrsToList mkDefault mkIf mkOption types;
-
 in {
-
   # Import keyd lib
-  imports = [ ./lib.nix ];
+  imports = [./lib.nix];
 
   options.services.keyd = {
-    enable = lib.options.mkEnableOption "keyd"; 
+    enable = lib.options.mkEnableOption "keyd";
     systemdTarget = mkOption {
       type = types.str;
       default = "";
@@ -29,66 +32,66 @@ in {
 
   # Configuration for each application
   config.xdg.configFile = {
-    "keyd/app.conf".source = ini.generate "app.conf" ( {
-
-      # [geary]
-      # [telegramdesktop]
-      # [fluffychat]
-      # [gimp-2-9]
-      # [obsidian]
-      # [slack]
-
-    } // cfg.windows );
-
+    "keyd/app.conf".source = ini.generate "app.conf" ({
+        # [geary]
+        # [telegramdesktop]
+        # [fluffychat]
+        # [gimp-2-9]
+        # [obsidian]
+        # [slack]
+      }
+      // cfg.windows);
   };
 
   # User service runs keyd-application-mapper
-  config.systemd.user.services = (if cfg.systemdTarget == "" then {} else {
+  config.systemd.user.services =
+    if cfg.systemdTarget == ""
+    then {}
+    else {
+      keyd.Unit = {
+        Description = "Keyd Application Mapper";
+        After = [cfg.systemdTarget];
+        Requires = [cfg.systemdTarget];
+      };
+      keyd.Install.WantedBy = [cfg.systemdTarget];
+      keyd.Service = {
+        Type = "simple";
+        Restart = "always";
+        ExecStart = mkScript {
+          path = [pkgs.keyd];
+          text = "keyd-application-mapper";
+        };
+      };
 
-    keyd.Unit = {
-      Description = "Keyd Application Mapper";
-      After = [ cfg.systemdTarget ];
-      Requires = [ cfg.systemdTarget ];
-    };
-    keyd.Install.WantedBy = [ cfg.systemdTarget ];
-    keyd.Service = {
-      Type = "simple";
-      Restart = "always";
-      ExecStart = mkScript {
-        path = [ pkgs.keyd ];
-        text = "keyd-application-mapper";
+      # Similar functionality as keyd-application-mapper, but watch for hyprland layer changes instead of windows
+      keyd-layers.Unit = {
+        Description = "Keyd Hyprland Layer Events";
+        After = [cfg.systemdTarget];
+        Requires = [cfg.systemdTarget];
+      };
+      keyd-layers.Install.WantedBy = [cfg.systemdTarget];
+      keyd-layers.Service = {
+        Type = "simple";
+        Restart = "always";
+        ExecStart = mkScript {
+          path = with pkgs; [socat keyd];
+          text = let
+            openlayers = concatStringsSep "\n" (
+              mapAttrsToList (layer: pairs: let
+                binds = mapAttrsToList (from: to: "${from}=${to}") pairs;
+              in "openlayer\\>\\>${layer}) keyd bind ${toString binds} ;;")
+              cfg.layers
+            );
+          in ''
+            handle() {
+              case $1 in
+                closelayer\>\>*) keyd bind reset ;;
+                ${openlayers}
+              esac
+            }
+            socat -U - UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock | while read -r line; do handle "$line"; done
+          '';
+        };
       };
     };
-
-    # Similar functionality as keyd-application-mapper, but watch for hyprland layer changes instead of windows
-    keyd-layers.Unit = {
-      Description = "Keyd Hyprland Layer Events";
-      After = [ cfg.systemdTarget ];
-      Requires = [ cfg.systemdTarget ];
-    };
-    keyd-layers.Install.WantedBy = [ cfg.systemdTarget ];
-    keyd-layers.Service = {
-      Type = "simple";
-      Restart = "always";
-      ExecStart = mkScript {
-        path = with pkgs; [ socat keyd ];
-        text = let
-          openlayers = concatStringsSep "\n" ( 
-            mapAttrsToList( layer: pairs: let 
-              binds = mapAttrsToList( from: to: "${from}=${to}" ) pairs; 
-            in "openlayer\\>\\>${layer}) keyd bind ${toString binds} ;;") cfg.layers );
-        in ''
-          handle() {
-            case $1 in 
-              closelayer\>\>*) keyd bind reset ;;
-              ${openlayers}
-            esac
-          }
-          socat -U - UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock | while read -r line; do handle "$line"; done
-        '';
-      };
-    };
-
-  });
-
 }

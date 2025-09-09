@@ -1,11 +1,15 @@
-{ config, lib, pkgs, perSystem, ... }: let 
-
+{
+  lib,
+  pkgs,
+  perSystem,
+  ...
+}: let
   inherit (lib) concatStringsSep mkIf;
   inherit (perSystem.self) mkScript;
 
   init = mkScript {
-    path = with pkgs; [ coreutils swww ]; text = concatStringsSep "\n" [ 
-
+    path = with pkgs; [coreutils swww];
+    text = concatStringsSep "\n" [
       # Temporary symlink
       "ln -sf $XDG_RUNTIME_DIR/hypr /tmp/hypr"
 
@@ -14,22 +18,18 @@
 
       # Wallpaper
       "swww-daemon"
-
     ];
   };
-
 in {
-
   wayland.windowManager.hyprland.settings = {
-
     # default display
-    monitor = [ ", preferred, 0x0, 1" ];
+    monitor = [", preferred, 0x0, 1"];
 
     # Let xwayland be tiny, not blurry
     xwayland.force_zero_scaling = true;
 
     # Execute at launch
-    exec-once = [ "${init}" ];
+    exec-once = ["${init}"];
 
     input = {
       kb_layout = "us";
@@ -77,9 +77,7 @@ in {
     };
 
     binds = {
-       workspace_back_and_forth = true;
+      workspace_back_and_forth = true;
     };
-
   };
-
 }

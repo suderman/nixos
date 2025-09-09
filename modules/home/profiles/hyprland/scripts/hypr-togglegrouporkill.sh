@@ -8,7 +8,7 @@ if [[ "$btn" == "right" ]]; then
 # disperse group (if exists) else kill window
 else
   grouped_windows_count="$(hyprctl activewindow -j | jq '.grouped | length')"
-  if (( grouped_windows_count > 1 )); then
+  if ((grouped_windows_count > 1)); then
     hyprctl dispatch togglegroup
   else
     hyprctl dispatch killactive

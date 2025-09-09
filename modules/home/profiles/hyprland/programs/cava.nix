@@ -1,15 +1,13 @@
 # Audio visualizer
-{ config, lib, pkgs, ... }: {
-
+{config, ...}: {
   programs.cava = {
     enable = true;
     settings = {
-
       input = {
         method = "pulse";
         source = "auto";
       };
-      
+
       color = with config.lib.stylix.colors.withHashtag; {
         background = "'${base00}'";
         gradient = 1;
@@ -23,8 +21,6 @@
         gradient_color_7 = "'${base0E}'";
         gradient_color_8 = "'${base0F}'";
       };
-
     };
   };
-
 }
