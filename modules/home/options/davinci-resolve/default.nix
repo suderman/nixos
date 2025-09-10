@@ -38,9 +38,7 @@ in {
 
       # Convert video from format to another
       ffmpeg
-
-      # Alternative video editing software
-      shotcut
     ];
+    persist.storage.directories = [".local/share/DaVinciResolve"];
   };
 }
