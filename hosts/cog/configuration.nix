@@ -67,4 +67,6 @@
     quirks = true;
     keyboard = config.services.keyd.internalKeyboards.framework;
   };
+
+  services.gitea.enable = true;
 }
