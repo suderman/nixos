@@ -1,0 +1,75 @@
+# Loads default set of integrations. Do not remove.
+default_config:
+
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 127.0.0.1/32
+    - 192.168.0.0/16
+    - 10.0.0.0/8
+    - 172.16.0.0/12
+    - 100.64.0.0/10
+
+recorder:
+  db_url: postgresql://@/hass
+  purge_keep_days: 365
+
+homekit:
+  advertise_ip: !env_var HOST_IP
+
+panel_custom:
+  - name: ha_automation
+    sidebar_title: Automation
+    sidebar_icon: mdi:cog-transfer
+    js_url: /api/hassio/app/entrypoint.js
+    url_path: 'config/automation/dashboard'
+    embed_iframe: true
+    require_admin: true
+    config:
+      ingress: core_configurator  
+  - name: ha_integ
+    sidebar_title: Integrations
+    sidebar_icon: mdi:checkerboard
+    js_url: /api/hassio/app/entrypoint.js
+    url_path: 'config/integrations'
+    embed_iframe: true
+    require_admin: true
+    config:
+      ingress: core_configurator
+
+panel_iframe:
+  isy:
+    title: "ISY"
+    url: !env_var ISY_URL
+    icon: mdi:fridge
+  zwave:
+    title: "Z-Wave"
+    url: !env_var ZWAVE_URL
+    icon: mdi:chip
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+# Text to speech
+tts:
+  - platform: google_translate
+
+# influxdb:
+#   api_version: 2
+#   ssl: false
+#   verify_ssl: false
+#   host: influx_web
+#   port: 8086
+#   token: !env_var PASSWORD
+#   organization: self
+#   bucket: home_assistant
+#   tags:
+#     source: HA
+#   tags_attributes:
+#     - friendly_name
+#   default_measurement: units
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml

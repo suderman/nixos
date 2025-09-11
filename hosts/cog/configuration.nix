@@ -70,4 +70,9 @@
 
   services.gitea.enable = true;
   services.grafana.enable = true;
+  services.home-assistant = {
+    enable = true;
+    name = "hass";
+    ip = flake.networking.zones.tail.cog;
+  };
 }
