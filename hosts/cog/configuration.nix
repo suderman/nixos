@@ -69,4 +69,5 @@
   };
 
   services.gitea.enable = true;
+  services.grafana.enable = true;
 }
