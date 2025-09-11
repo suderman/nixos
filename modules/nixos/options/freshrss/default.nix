@@ -18,9 +18,10 @@ in {
   };
 
   config = mkIf cfg.enable {
+    age.secrets.freshrss.rekeyFile = ./password.age;
     services.freshrss = {
       defaultUser = builtins.head (flake.lib.sudoers config.users.users);
-      passwordFile = config.age.secrets.password.path;
+      passwordFile = config.age.secrets.freshrss.path;
       baseUrl = "https://${cfg.name}.${config.networking.hostName}";
       virtualHost = "freshrss";
       database = {
