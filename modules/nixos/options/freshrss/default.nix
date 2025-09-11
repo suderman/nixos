@@ -18,7 +18,7 @@ in {
   };
 
   config = mkIf cfg.enable {
-    age.secrets.freshrss.rekeyFile = ./password.age;
+    age.secrets.freshrss.rekeyFile = ./freshrss.age;
     services.freshrss = {
       defaultUser = builtins.head (flake.lib.sudoers config.users.users);
       passwordFile = config.age.secrets.freshrss.path;
