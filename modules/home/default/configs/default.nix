@@ -46,6 +46,7 @@
   programs.nnn.enable = lib.mkDefault true;
   programs.ripgrep.enable = lib.mkDefault true;
   programs.tealdeer.enable = lib.mkDefault true;
+  programs.tmux.enable = lib.mkDefault true;
   programs.yazi.enable = lib.mkDefault true; # browse muh filez
   programs.yt-dlp.enable = lib.mkDefault true; # yt-dlp -f mp4-240p -x --audio-format mp3 https://rumble.com/...
   programs.zoxide.enable = lib.mkDefault true;

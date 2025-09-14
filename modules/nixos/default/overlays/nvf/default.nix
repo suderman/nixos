@@ -12,7 +12,7 @@
     (_final: _prev: {
       nvf = (
         perSystem.self.mkScript {
-          name = "nvim";
+          name = "nvf";
           text =
             # bash
             ''

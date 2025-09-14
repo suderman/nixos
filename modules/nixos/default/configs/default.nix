@@ -33,8 +33,6 @@ in {
     pkgs.tmux
     pkgs.unzip
     pkgs.usbutils
-    pkgs.vim
-    pkgs.nvf
     pkgs.zip
     pkgs.zsh-completions
   ];

@@ -1,6 +1,6 @@
 {pkgs, ...}: {
-  home = {
-    packages = [pkgs.nvf];
+  environment = {
+    systemPackages = [pkgs.nvf];
     sessionVariables.EDITOR = "nvf";
     shellAliases = {
       v = "${pkgs.nvf}/bin/nvf";
