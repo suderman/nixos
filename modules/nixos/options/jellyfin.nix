@@ -42,5 +42,8 @@ in {
         jellyfin-web = route // {tls = false;};
       };
     };
+
+    # Persist data between reboots
+    persist.storage.directories = ["/var/lib/jellyfin"];
   };
 }
