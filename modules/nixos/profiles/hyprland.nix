@@ -78,6 +78,7 @@ in {
 
     # Mount, trash, and other functionalities
     services.gvfs.enable = true;
+    services.udisks2.enable = true;
 
     # Quick Look
     services.gnome.sushi.enable = true;

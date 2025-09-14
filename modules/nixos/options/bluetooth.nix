@@ -8,7 +8,7 @@
     # Bluetuith client, and throw in bluetui as well
     environment.systemPackages = [
       pkgs.bluez
-      pkgs.bluetuith
+      pkgs.unstable.bluetuith
       pkgs.bluetui
     ];
 

@@ -3,7 +3,6 @@
   config,
   lib,
   pkgs,
-  perSystem,
   ...
 }: let
   cfg = config.services.tailscale;
@@ -19,7 +18,7 @@ in {
   config = mkIf cfg.enable {
     services.tailscale = {
       # tailscale-1.82.5 (stable) fails to build (and isn't in binary cache)
-      package = perSystem.nixpkgs-unstable.tailscale;
+      package = pkgs.unstable.tailscale;
       extraSetFlags = [
         "--accept-routes" # accept routes from LAN router
         "--accept-dns=false" # Use local Blocky for DNS, not Tailscale

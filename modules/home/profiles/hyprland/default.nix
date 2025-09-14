@@ -3,7 +3,6 @@
   config,
   lib,
   pkgs,
-  perSystem,
   flake,
   ...
 }: let
@@ -40,7 +39,7 @@ in {
     # Automatically enable home-manager module if nixos module is enabled
     wayland.windowManager.hyprland = {
       enable = true;
-      package = perSystem.nixpkgs-unstable.hyprland;
+      package = pkgs.unstable.hyprland;
 
       systemd = {
         enable = true;
@@ -58,10 +57,10 @@ in {
       };
 
       # plugins = with pkgs.hyprlandPlugins;
-      plugins = with perSystem.nixpkgs-unstable.hyprlandPlugins;
-        mkIf cfg.enablePlugins [
-          hypr-dynamic-cursors
-        ];
+      # plugins = with perSystem.unstable.hyprlandPlugins;
+      #   mkIf cfg.enablePlugins [
+      #     hypr-dynamic-cursors
+      #   ];
 
       extraConfig = ''
         source = ~/.config/hypr/extra/hyprland.conf

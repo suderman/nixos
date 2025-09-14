@@ -4,8 +4,11 @@
   flake,
   ...
 }: {
-  # Import all *.nix files in this directory and options directory
-  imports = flake.lib.ls ./. ++ flake.lib.ls ../options;
+  # Import all *.nix files in this directory plus options & overlays directories
+  imports =
+    flake.lib.ls ./.
+    ++ flake.lib.ls ../options
+    ++ flake.lib.ls ../overlays;
 
   # List packages installed in system profile
   environment.systemPackages = [

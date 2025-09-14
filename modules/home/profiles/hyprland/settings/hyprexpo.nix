@@ -8,7 +8,7 @@
 in {
   wayland.windowManager.hyprland = {
     # plugins = mkIf cfg.enablePlugins [pkgs.hyprlandPlugins.hyprexpo];
-    # plugins = mkIf cfg.enablePlugins [perSystem.nixpkgs-unstable.hyprlandPlugins.hyprexpo];
+    # plugins = mkIf cfg.enablePlugins [pkgs.unstable.hyprlandPlugins.hyprexpo];
 
     # settings = {
     #   "plugin:hyprexpo" = {

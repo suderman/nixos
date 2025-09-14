@@ -1,7 +1,7 @@
 {
   config,
   lib,
-  perSystem,
+  pkgs,
   ...
 }: let
   cfg = config.wayland.windowManager.hyprland;
@@ -9,7 +9,7 @@
 in {
   wayland.windowManager.hyprland = {
     # plugins = mkIf cfg.enablePlugins [ pkgs.hyprlandPlugins.hyprbars ];
-    plugins = mkIf cfg.enablePlugins [perSystem.nixpkgs-unstable.hyprlandPlugins.hyprbars];
+    plugins = mkIf cfg.enablePlugins [pkgs.unstable.hyprlandPlugins.hyprbars];
 
     settings = {
       "plugin:hyprbars" = {
