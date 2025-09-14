@@ -28,7 +28,7 @@
       }}' >/root/.bluetuith/bluetuith.conf
     '';
 
-    # Persist bluetooth parings between reboots
+    # Persist bluetooth pairings between reboots
     persist.storage.directories = ["/var/lib/bluetooth"];
   };
 }
