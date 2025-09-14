@@ -72,6 +72,11 @@
 
   programs.home-assistant = {
     enable = true;
-    url = "https://hass.hub";
+    url = "https://hass.cog";
+  };
+
+  programs.jellyfin = {
+    enable = true;
+    url = "https://jellyfin.cog";
   };
 }

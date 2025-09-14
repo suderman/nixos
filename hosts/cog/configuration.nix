@@ -75,4 +75,5 @@
     name = "hass";
     ip = flake.networking.zones.tail.cog;
   };
+  services.jellyfin.enable = true;
 }
