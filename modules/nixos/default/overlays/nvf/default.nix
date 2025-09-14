@@ -3,8 +3,8 @@
   perSystem,
   ...
 }: {
-  age.secrets.neovim = {
-    rekeyFile = ./neovim.age;
+  age.secrets.nvf = {
+    rekeyFile = ./nvf.age;
     mode = "440";
     group = "users";
   };
@@ -16,7 +16,7 @@
           text =
             # bash
             ''
-              if [[ -f ${config.age.secrets.neovim.path} ]]; then
+              if [[ -f ${config.age.secrets.nvf.path} ]]; then
                 while IFS='=' read -r key value; do
                   if [[ -n "$key" && -z "''${!key-}" ]]; then
                     export "$key"="$value"
