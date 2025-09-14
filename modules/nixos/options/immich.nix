@@ -112,6 +112,9 @@ in {
       }
     ];
 
+    # Persist photos
+    persist.storage.directories = [cfg.dataDir];
+
     # Enable redis
     services.redis.servers.immich = {
       enable = true;
