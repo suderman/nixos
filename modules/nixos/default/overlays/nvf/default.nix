@@ -21,7 +21,7 @@
                   if [[ -n "$key" && -z "''${!key-}" ]]; then
                     export "$key"="$value"
                   fi
-                done <${config.age.secrets.neovim.path}
+                done <${config.age.secrets.nvf.path}
               fi
               exec ${perSystem.neovim.default}/bin/nvim "$@"
             '';
