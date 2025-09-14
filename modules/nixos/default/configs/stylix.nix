@@ -14,6 +14,7 @@ in {
   imports = [flake.inputs.stylix.nixosModules.stylix];
 
   config.stylix = {
+    enable = mkDefault true;
     autoEnable = mkDefault cfg.enable;
     polarity = mkDefault "either"; # dark light either
 

@@ -5,12 +5,15 @@
   ...
 }: let
   cfg = config.virtualisation.docker;
-  inherit (lib) mkIf;
+  inherit (lib) mkDefault mkIf;
 in {
   # Enable Docker and set to backend (over podman default)
   virtualisation = {
-    docker.storageDriver = "overlay2";
-    docker.liveRestore = false; # enabling this is incompatiable with docker swarm
+    docker = {
+      enable = mkDefault true;
+      storageDriver = "overlay2";
+      liveRestore = false; # enabling this is incompatiable with docker swarm
+    };
     oci-containers.backend = "docker";
   };
 
