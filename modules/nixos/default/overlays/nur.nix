@@ -1,6 +1,6 @@
 {flake, ...}: {
   nixpkgs.overlays = [
-    (final: prev: {
+    (final: _prev: {
       # Nix User Repositories
       nur = import flake.inputs.nur {
         pkgs = final;

@@ -1,6 +1,6 @@
 {flake, ...}: {
   nixpkgs.overlays = [
-    (final: prev: {
+    (_final: prev: {
       # Enable policies and import personal Certificate Authority
       firefox = prev.firefox.override {
         extraPolicies = {

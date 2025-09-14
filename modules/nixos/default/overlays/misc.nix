@@ -2,7 +2,7 @@
   inherit (perSystem.self) enableWayland;
 in {
   nixpkgs.overlays = [
-    (final: prev: {
+    (_final: prev: {
       # These packages support Wayland but sometimes need to be persuaded
       digikam = enableWayland {
         type = "qt";

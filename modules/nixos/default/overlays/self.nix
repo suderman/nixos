@@ -1,7 +1,7 @@
 {perSystem, ...}: {
   nixpkgs.overlays = [
     (_final: _prev: {
-      unstable = perSystem.nixpkgs-unstable;
+      inherit (perSystem) self;
     })
   ];
 }

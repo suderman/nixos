@@ -1,6 +1,6 @@
 {...}: {
   nixpkgs.overlays = [
-    (final: prev: let
+    (_final: prev: let
       wayland = {rofi-unwrapped = prev.rofi-wayland-unwrapped;};
     in {
       # Rofi plugins
