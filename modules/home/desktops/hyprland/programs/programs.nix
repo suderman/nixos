@@ -31,8 +31,8 @@ in {
   # Check modules directory for extra configuration
   programs = {
     bluebubbles.enable = true; # ios chat
-    chromium.enable = true; # alt browser
-    firefox.enable = true; # web browser
+    chromium.enable = true; # web browser
+    firefox.enable = true; # alt browser
     kitty.enable = true; # term
     mpv.enable = true; # media player
     yazi.enable = true; # file manager tui
