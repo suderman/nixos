@@ -6,9 +6,10 @@
     loupe # png/jpg viewer
     pavucontrol # audio control panel
     xorg.xeyes # test for x11
+    lapce # text editor
+    libreoffice # office suite (writing, spreadsheets, etc)
+    newsflash # rss reader
   ];
-
-  programs.onepassword.enable = true;
 
   # programs.home-assistant = {
   #   enable = true;
@@ -20,4 +21,9 @@
     "org.emptyflow.ArdorQuery"
     "com.github.treagod.spectator"
   ];
+
+  programs.chromium.enable = true;
+  programs.foot.enable = false;
+  programs.wezterm.enable = false;
+  programs.onepassword.enable = true;
 }

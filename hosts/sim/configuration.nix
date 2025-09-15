@@ -15,8 +15,8 @@ in {
     ./disk-configuration.nix
     flake.nixosModules.default
     flake.nixosModules.hardware.vm
-    flake.nixosModules.profiles.hyprland
-    # flake.nixosModules.profiles.homelab
+    flake.nixosModules.desktops.hyprland
+    # flake.nixosModules.desktops.homelab
   ];
 
   config = {

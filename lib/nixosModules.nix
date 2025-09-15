@@ -4,9 +4,8 @@
     (inputs.nixpkgs.lib.mapAttrs (_name: {path, ...}: path));
 in {
   default = ../modules/nixos/default;
-  options = ../modules/nixos/options;
-  overlays = ../modules/nixos/overlays;
-  profiles = pathAttrs ../modules/nixos/profiles;
+  desktops = pathAttrs ../modules/nixos/desktops;
   hardware = pathAttrs ../modules/nixos/hardware;
+  overlays = ../modules/nixos/overlays;
   secrets = ../modules/nixos/secrets;
 }

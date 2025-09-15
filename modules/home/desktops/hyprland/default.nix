@@ -11,7 +11,7 @@
   inherit (flake.lib) ls;
 in {
   imports =
-    [flake.homeModules.profiles.desktop]
+    [flake.homeModules.desktops.default]
     ++ ls ./settings ++ ls ./programs;
 
   options.wayland.windowManager.hyprland = {

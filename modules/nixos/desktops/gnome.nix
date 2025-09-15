@@ -3,7 +3,7 @@
   flake,
   ...
 }: {
-  imports = [flake.nixosModules.profiles.desktop];
+  imports = [flake.nixosModules.desktops.default];
 
   services = {
     libinput.enable = true; # enable touchpad support
