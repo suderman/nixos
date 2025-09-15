@@ -65,7 +65,12 @@ in {
       split_width_multiplier = 1.35;
     };
 
-    gestures.workspace_swipe = true;
+    gesture = [
+      "3, horizontal, workspace"
+      "3, vertical, special, special"
+      # "3, vertical, dispatcher, togglespecialworkspace"
+    ];
+    # gestures.workspace_swipe = true;
 
     misc = {
       mouse_move_enables_dpms = true;

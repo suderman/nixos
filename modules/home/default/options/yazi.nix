@@ -1,8 +1,11 @@
 {
+  config,
   lib,
   pkgs,
   ...
 }: let
+  cfg = config.programs.yazi;
+  inherit (lib) mkIf;
   plugins = {
     # https://github.com/yazi-rs/plugins/
     yazi = pkgs.fetchFromGitHub {
@@ -29,41 +32,41 @@
     };
   };
 in {
-  programs.yazi = {
-    enable = lib.mkDefault true;
+  config = mkIf cfg.enable {
+    programs.yazi = {
+      shellWrapperName = "y";
 
-    shellWrapperName = "y";
+      plugins = {
+        chmod = "${plugins.yazi}/chmod.yazi";
+        simple-mtpfs = plugins.simple-mtpfs;
+        starship = plugins.starship;
+      };
 
-    plugins = {
-      chmod = "${plugins.yazi}/chmod.yazi";
-      simple-mtpfs = plugins.simple-mtpfs;
-      starship = plugins.starship;
+      enableBashIntegration = true;
+      enableZshIntegration = true;
+      enableNushellIntegration = true;
+      enableFishIntegration = true;
+
+      settings.manager = {
+        sort_dir_first = true;
+        linemode = "permissions";
+        ratio = [1 3 4];
+      };
+
+      settings.preview = {
+        tab_size = 4;
+        image_filter = "lanczos3";
+        max_width = 1920;
+        max_height = 1080;
+        image_quality = 90;
+      };
+
+      keymap.manager.prepend_keymap = [
+        {
+          run = "remove --force";
+          on = ["d"];
+        }
+      ];
     };
-
-    enableBashIntegration = true;
-    enableZshIntegration = true;
-    enableNushellIntegration = true;
-    enableFishIntegration = true;
-
-    settings.manager = {
-      sort_dir_first = true;
-      linemode = "permissions";
-      ratio = [1 3 4];
-    };
-
-    settings.preview = {
-      tab_size = 4;
-      image_filter = "lanczos3";
-      max_width = 1920;
-      max_height = 1080;
-      image_quality = 90;
-    };
-
-    keymap.manager.prepend_keymap = [
-      {
-        run = "remove --force";
-        on = ["d"];
-      }
-    ];
   };
 }
