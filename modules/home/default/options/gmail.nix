@@ -17,7 +17,7 @@ in {
     };
     profile = mkOption {
       type = with lib.types; nullOr str;
-      default = null;
+      default = "work";
     };
   };
 
@@ -29,8 +29,8 @@ in {
       };
     };
     xdg.desktopEntries = mkWebApp {
-      name = "Gmail";
       inherit (cfg) url profile;
+      name = "Gmail";
       icon =
         pkgs.writeText "icon.svg"
         # html
