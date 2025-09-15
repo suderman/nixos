@@ -273,7 +273,7 @@ in {
             main = [
               "${cfg.dataDir}/blacklist.txt"
               "${cfg.dataDir}/blacklist-extra.txt"
-              "${repo}/modules/nixos/common/blocky/blacklist.txt"
+              "${repo}/modules/nixos/default/options/blocky/blacklist.txt"
               "${cfg.dataDir}/blacklist-local.txt"
             ];
           };
@@ -281,7 +281,7 @@ in {
             main = [
               "${cfg.dataDir}/whitelist.txt"
               "${cfg.dataDir}/whitelist-extra.txt"
-              "${repo}/modules/nixos/common/blocky/whitelist.txt"
+              "${repo}/modules/nixos/default/options/blocky/whitelist.txt"
               "${cfg.dataDir}/whitelist-local.txt"
             ];
           };
