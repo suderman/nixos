@@ -20,6 +20,12 @@ in {
       example = false;
     };
 
+    storage.path = mkOption {
+      description = "Path to storage directory";
+      type = types.str;
+      default = "/mnt/main/storage";
+    };
+
     # Files relative to / root
     storage.files = mkOption {
       description = "System files to persist reboots and snapshot";
@@ -34,6 +40,12 @@ in {
       type = with types; listOf (either str attrs);
       default = [];
       example = ["/etc/nixos"];
+    };
+
+    scratch.path = mkOption {
+      description = "Path to scratch directory";
+      type = types.str;
+      default = "/mnt/main/scratch";
     };
 
     # Files relative to / root
@@ -55,7 +67,7 @@ in {
 
   config = {
     # Persist reboots only
-    environment.persistence."/mnt/main/scratch" = {
+    environment.persistence."${config.persist.scratch.path}" = {
       inherit (config.persist) enable;
       hideMounts = true;
 
@@ -78,7 +90,7 @@ in {
     };
 
     # Persist reboots with snapshots and backups
-    environment.persistence."/mnt/main/storage" = {
+    environment.persistence."${config.persist.storage.path}" = {
       inherit (config.persist) enable;
       hideMounts = true;
 
