@@ -76,4 +76,6 @@
     ip = flake.networking.zones.tail.cog;
   };
   services.jellyfin.enable = true;
+
+  programs.steam.enable = true;
 }
