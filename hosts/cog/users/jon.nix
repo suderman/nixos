@@ -27,4 +27,5 @@
   };
   programs.sparrow.enable = true;
   programs.steam.enable = true;
+  programs.dolphin-emu.enable = true;
 }
