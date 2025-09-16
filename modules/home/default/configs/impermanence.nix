@@ -1,7 +1,18 @@
-{lib, ...}: let
+{
+  config,
+  osConfig,
+  lib,
+  ...
+}: let
   inherit (lib) mkOption types;
 in {
   options.persist = {
+    storage.path = mkOption {
+      description = "Path to storage directory";
+      type = types.str;
+      default = "${osConfig.persist.storage.path}/${config.home.homeDirectory}";
+    };
+
     # Files relative to ~/ home
     storage.files = mkOption {
       description = "Home files to persist reboots and snapshot";
@@ -17,9 +28,13 @@ in {
       default = [];
       example = ["Documents"];
     };
-  };
 
-  options.persist = {
+    scratch.path = mkOption {
+      description = "Path to scratch directory";
+      type = types.str;
+      default = "${osConfig.persist.scratch.path}/${config.home.homeDirectory}";
+    };
+
     # Files relative to ~/ home
     scratch.files = mkOption {
       description = "Home files to persist reboots";

@@ -1,21 +1,19 @@
-# osConfig.programs.steam.enable = true;
+# config.programs.steam.enable = true;
 {
   config,
-  osConfig,
   lib,
   pkgs,
   perSystem,
   ...
 }: let
-  oscfg = osConfig.programs.steam;
-  inherit (lib) mkIf;
+  cfg = config.programs.steam;
+  inherit (lib) mkIf options;
+  dataDir = ".local/share/Steam"; # steam expects this path
 in {
-  config = mkIf oscfg.enable {
+  options.programs.steam.enable = options.mkEnableOption "steam";
+  config = mkIf cfg.enable {
     # Persist data directory Steam uses
-    persist.scratch.directories = [".local/share/Steam"];
-
-    # Create a storage directory to snapshot select backup files
-    persist.storage.directories = [".config/steam"]; # custom dir
+    persist.scratch.directories = [dataDir];
 
     # Timer to run backup script daily
     systemd.user.timers.steam-backup = {
@@ -34,9 +32,9 @@ in {
         Type = "oneshot";
         ExecStart = perSystem.self.mkScript {
           path = [pkgs.coreutils pkgs.rsync];
-          env = with config.home; {
-            SCRATCH = "${homeDirectory}/.local/share/Steam";
-            STORAGE = "${homeDirectory}/.config/steam";
+          env = {
+            SCRATCH = "${config.persist.scratch.path}/${dataDir}";
+            STORAGE = "${config.persist.storage.path}/${dataDir}";
           };
           text =
             # bash

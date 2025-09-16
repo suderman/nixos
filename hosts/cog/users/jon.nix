@@ -25,4 +25,6 @@
     enable = true;
     url = "https://jellyfin.cog";
   };
+  programs.sparrow.enable = true;
+  programs.steam.enable = true;
 }

@@ -16,7 +16,7 @@
   in
     acc // exts) {} (attrNames users);
 
-  # If any home-manager chromium is enabled for any user,set this to true
+  # If any home-manager chromium is enabled for any user, set this to true
   enable = any (user: users.${user}.programs.chromium.enable or false) (attrNames users);
 in {
   options.programs.chromium = {
