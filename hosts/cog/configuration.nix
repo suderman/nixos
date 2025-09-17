@@ -76,4 +76,5 @@
     ip = flake.networking.zones.tail.cog;
   };
   services.jellyfin.enable = true;
+  services.tandoor-recipes.enable = true;
 }
