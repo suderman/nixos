@@ -1,15 +1,13 @@
 {
   config,
   lib,
+  flake,
   ...
 }: let
-  inherit (builtins) attrNames any;
+  inherit (flake.lib) homeService;
   inherit (lib) mkIf;
-  # If any home-manager withings-sync is enabled for any user, set this to true
-  users = config.home-manager.users or {};
-  enable = any (user: users.${user}.services.withings-sync.enable or false) (attrNames users);
 in {
-  config = mkIf enable {
+  config = mkIf (homeService config "withings-sync") {
     # Access secret with login credentials
     age.secrets.withings-sync = {
       rekeyFile = ./withings-sync.age;
