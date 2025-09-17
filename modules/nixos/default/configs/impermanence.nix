@@ -129,6 +129,14 @@ in {
     # Allows users to allow others on their binds
     programs.fuse.userAllowOther = true;
 
+    # Ensure directory structure
+    tmpfiles.directories = [
+      {
+        target = "/var/lib/private";
+        mode = "0700";
+      }
+    ];
+
     # Script to wipe the root subvolume at boot
     boot.initrd.postResumeCommands =
       mkAfter
