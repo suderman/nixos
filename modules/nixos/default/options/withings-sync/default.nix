@@ -4,10 +4,10 @@
   flake,
   ...
 }: let
-  inherit (flake.lib) homeService;
   inherit (lib) mkIf;
+  enable = flake.lib.anyUser config (user: user.services.withings-sync.enable);
 in {
-  config = mkIf (homeService config "withings-sync") {
+  config = mkIf enable {
     # Access secret with login credentials
     age.secrets.withings-sync = {
       rekeyFile = ./withings-sync.age;

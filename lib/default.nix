@@ -71,26 +71,16 @@ in rec {
     ));
 
   # List of home-manager users that match provided filter function
-  filterUsers = cfg: fn:
-    filter fn (
+  filterUsers = cfg: pred: let
+    users =
       if cfg ? home-manager
       then attrValues cfg.home-manager.users
-      else []
-    );
-
-  # If this home-manager service is enabled for any user, set true
-  homeService = cfg: name: let
-    users = cfg.home-manager.users or {};
-    inherit (builtins) attrNames any;
+      else [];
   in
-    any (user: users.${user}.services.${name}.enable or false) (attrNames users);
+    filter pred users;
 
-  # If this home-manager program is enabled for any user, set true
-  homeProgram = cfg: name: let
-    users = cfg.home-manager.users or {};
-    inherit (builtins) attrNames any;
-  in
-    any (user: users.${user}.programs.${name}.enable or false) (attrNames users);
+  # Boolean if any use matches the above filter function
+  anyUser = cfg: pred: (filterUsers cfg pred) != [];
 
   # Format owner and group as "owner:group"
   toOwnership = owner: group: "${toString owner}:${toString group}";
