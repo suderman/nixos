@@ -14,14 +14,15 @@
   system.activationScripts.etc.text = let
     inherit (config.age.rekey) hostPubkey;
     hex = config.age.secrets.hex.path;
+    storage = config.persist.storage.path;
     path = [perSystem.self.derive];
     text =
       # bash
       ''
         # Copy public ssh host key from this repo to /mnt/main/storage
-        mkdir -p /mnt/main/storage/etc/ssh
-        echo "${hostPubkey}" >/mnt/main/storage/etc/ssh/ssh_host_ed25519_key.pub
-        chmod 644 /mnt/main/storage/etc/ssh/ssh_host_ed25519_key.pub
+        mkdir -p ${storage}/etc/ssh
+        echo "${hostPubkey}" >${storage}/etc/ssh/ssh_host_ed25519_key.pub
+        chmod 644 ${storage}/etc/ssh/ssh_host_ed25519_key.pub
         # Derive machine id from decrypted hex (if agenix decrypting)
         echo 00000000000000000000000000000000 >/etc/machine-id
         [[ -f ${hex} ]] && derive hex ${hostName} 32 <${hex} >/etc/machine-id
@@ -33,7 +34,7 @@
   # Exclude auto-generated ssh ed25519 from this list
   services.openssh.hostKeys = [
     {
-      path = "/mnt/main/storage/etc/ssh/ssh_host_rsa_key"; # automatically generated
+      path = "${config.persist.storage.path}/etc/ssh/ssh_host_rsa_key"; # automatically generated
       type = "rsa";
       bits = 4096;
     }
@@ -57,7 +58,7 @@
     ];
     script = ''
       # Verify private ssh key matches public key
-      cd /mnt/main/storage/etc/ssh
+      cd ${config.persist.storage.path}/etc/ssh
       if sshed verify; then
         echo "SSH host keys VALID"
       else

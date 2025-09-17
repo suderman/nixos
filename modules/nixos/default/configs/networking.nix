@@ -47,7 +47,7 @@ in {
       addresses =
         ["127.0.0.1"]
         ++ unique (naturalSort (attrValues (
-          filterAttrs (name: ip: hasPrefix hostName name) flake.networking.records
+          filterAttrs (name: _ip: hasPrefix hostName name) flake.networking.records
         )));
     };
 
@@ -57,7 +57,7 @@ in {
     # Editable hosts file
     system.activationScripts.hosts = let
       inherit (config.networking) hostName domain;
-      source = "/mnt/main/storage/etc/hosts";
+      source = "${config.persist.storage.path}/etc/hosts";
       target = "/etc/hosts";
     in {
       text =

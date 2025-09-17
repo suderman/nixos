@@ -21,6 +21,7 @@ main() {
   local hostcfg="$hostdir/configuration.nix"
   local diskcfg="$hostdir/disk-configuration.nix"
   local hardcfg="$hostdir/hardware-configuration.nix"
+  local storage="/mnt/main/storage"
 
   # Generate hardware config or use template
   if gum confirm "Detect hardware on this host?" \
@@ -47,11 +48,11 @@ main() {
   set_disks "$diskcfg"
 
   # Receive ssh host key
-  set_hostkey "$hostdir"
+  set_hostkey "$hostdir" "/mnt/$storage/etc/ssh"
 
   # Persist hostename and save copy of repo
-  echo "$hostname" >/mnt/mnt/main/storage/etc/hostname
-  rsync -a --delete --chown=1000:100 /etc/nixos/ /mnt/mnt/main/storage/etc/nixos/
+  echo "$hostname" >/mnt/$storage/etc/hostname
+  rsync -a --delete --chown=1000:100 /etc/nixos/ /mnt/$storage/etc/nixos/
 
   # Install nixos
   if gum confirm "Install NixOS?" --affirmative="Do it" --negative="No way"; then
@@ -109,7 +110,7 @@ set_disks() {
 # Offer to receive/import SSH host key ahead of nixos installation
 set_hostkey() {
   local hostdir="${1}"
-  local sshdir="/mnt/mnt/main/storage/etc/ssh"
+  local sshdir="${2}"
   mkdir -p "$sshdir"
   cp -f "$hostdir/ssh_host_ed25519_key.pub" "$sshdir/ssh_host_ed25519_key.pub"
   if gum confirm "Configure SSH host key?" --affirmative="Now" --negative="Later"; then

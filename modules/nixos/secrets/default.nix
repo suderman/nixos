@@ -1,5 +1,6 @@
 # Configure agenix to work with derived identity and ssh keys
 {
+  config,
   hostName,
   flake,
   ...
@@ -17,7 +18,7 @@
 
     # Private ssh host key must be side-loaded/persisted to decrypt secrets
     # > sshed send hostName IP
-    identityPaths = ["/mnt/main/storage/etc/ssh/ssh_host_ed25519_key"];
+    identityPaths = ["${config.persist.storage.path}/etc/ssh/ssh_host_ed25519_key"];
 
     # https://github.com/oddlama/agenix-rekey
     rekey = {

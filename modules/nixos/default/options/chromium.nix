@@ -28,7 +28,7 @@ in {
     crxDir = mkOption {
       description = "Path to directory where extensions are loaded from";
       type = types.path;
-      default = "/mnt/main/storage/crx";
+      default = "${config.persist.storage.path}/crx";
     };
   };
 
