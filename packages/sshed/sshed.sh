@@ -95,6 +95,14 @@ sshed_generate() {
     git add "users/$user/id_ed25519.pub" 2>/dev/null || true
     gum_show "./users/$user/id_ed25519.pub"
 
+    agenix hex |
+      derive hex "$user" |
+      derive age |
+      derive public \
+        >"users/$user/recipients.txt"
+    git add "users/$user/recipients.txt" 2>/dev/null || true
+    gum_show "./users/$user/recipients.txt"
+
   done
 
 }

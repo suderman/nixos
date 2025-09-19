@@ -117,42 +117,42 @@ in {
     users.text = let
       perUser = userName: let
         inherit (usermeta userName) user publicKey password;
+        runDir = "/run/ssh/${userName}";
+        sshDir = "${user.home}/.ssh";
       in
         # bash
         ''
-          # Ensure ~/.ssh exists
-          mkdir -p ${user.home}/.ssh
-          cd ${user.home}/.ssh
-
-          # Copy public ssh user key from this repo to ~/.ssh
-          cat ${publicKey} \
-          >${user.home}/.ssh/id_ed25519.pub
+          # Copy public ssh user key from this repo to /run/ssh/user
+          mkdir -p ${runDir} ${sshDir}
+          tee ${runDir}/id_ed25519.pub ${sshDir}/id_ed25519.pub <${publicKey} >/dev/null
 
           # Generate private ssh user key derived from 32-byte hex
           # Delete if derived private key doesn't verify with repo's public key
           if [[ -f ${hex} ]]; then
             derive hex ${userName}<${hex} |
-            derive ssh >${user.home}/.ssh/id_ed25519
-            sshed verify || rm -f ${user.home}/.ssh/id_ed25519
+            derive ssh >${runDir}/id_ed25519
+            sshed verify ${runDir} || rm -f ${runDir}/id_ed25519
           fi
 
           # If matching private key successfully derived, do it again
-          # Encrypted with passphrase matching user password
-          if [[ -f ${hex} && -f ${user.home}/.ssh/id_ed25519 ]]; then
+          # encrypted with passphrase matching user password into ~/.ssh
+          if [[ -f ${hex} && -f ${runDir}/id_ed25519 ]]; then
             derive hex ${userName}<${hex} |
             derive ssh "$(cat ${password})" \
-            >${user.home}/.ssh/id_ed25519
+            >${sshDir}/id_ed25519
           fi
 
-          # Ensure proper permissions and ownership in ~/.ssh
-          [[ -f ${user.home}/.ssh/id_ed25519 ]] &&
-          chmod 600 ${user.home}/.ssh/id_ed25519
+          # Ensure proper permissions and ownership
+          for dir in ${runDir} ${sshDir}; do
+            [[ -f $dir/id_ed25519 ]] &&
+            chmod 600 $dir/id_ed25519
 
-          [[ -f ${user.home}/.ssh/id_ed25519.pub ]] &&
-          chmod 644 ${user.home}/.ssh/id_ed25519.pub
+            [[ -f $dir/id_ed25519.pub ]] &&
+            chmod 644 $dir/id_ed25519.pub
 
-          chmod 700 ${user.home}/.ssh
-          chown -R ${user.name}:${user.group} ${user.home}/.ssh
+            chmod 700 $dir
+            chown -R ${user.name}:${user.group} $dir
+          done
         '';
 
       text = concatMapStrings perUser everyone;

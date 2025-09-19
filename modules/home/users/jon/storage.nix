@@ -1,4 +1,8 @@
-{config, ...}: {
+{
+  config,
+  lib,
+  ...
+}: {
   # Create home folders (persisted)
   xdg.userDirs = let
     home = config.home.homeDirectory;
@@ -24,4 +28,14 @@
     ".bash_history"
     ".git-credentials"
   ];
+
+  # Learning about home-manager agenix
+  age.secrets.mysecret.rekeyFile = ./secret.age;
+  home.activation.secrets = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    # Symlink
+    ln -sf ${config.age.secrets.mysecret.path} "${config.home.homeDirectory}/my-link.txt"
+
+    # Real file copy
+    cp ${config.age.secrets.mysecret.path} "${config.home.homeDirectory}/my-file.txt"
+  '';
 }
