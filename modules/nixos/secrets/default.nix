@@ -30,7 +30,7 @@
       in
         if pathExists sshPub
         then readFile sshPub
-        else readFile (flake + /id.pub);
+        else readFile (flake + /id_age.pub);
 
       # Master identity decrypted to /tmp/id_age for rekeying
       # > unlock-id

@@ -29,7 +29,7 @@
       in
         if pathExists agePub
         then readFile agePub
-        else readFile (flake + /id.pub);
+        else readFile (flake + /id_age.pub);
 
       localStorageDir = flake + /modules/nixos/secrets/${hostName}-${username};
       generatedSecretsDir = flake + /modules/nixos/secrets/${hostName}-${username};
