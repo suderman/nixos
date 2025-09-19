@@ -1,7 +1,6 @@
 {
   pkgs,
   perSystem,
-  flake,
   ...
 }:
 perSystem.self.mkScript {
@@ -17,9 +16,6 @@ perSystem.self.mkScript {
     pkgs.iptables
     pkgs.netcat
   ];
-
-  # Derivation path for key
-  env.derivation_path = "bip85-hex32-index${toString flake.derivationIndex}";
 
   # Bash script
   text = builtins.readFile ./sshed.sh;

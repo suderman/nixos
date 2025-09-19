@@ -36,6 +36,6 @@
     ln -sf ${config.age.secrets.mysecret.path} "${config.home.homeDirectory}/my-link.txt"
 
     # Real file copy
-    cp ${config.age.secrets.mysecret.path} "${config.home.homeDirectory}/my-file.txt"
+    cp -f ${config.age.secrets.mysecret.path} "${config.home.homeDirectory}/my-file.txt"
   '';
 }

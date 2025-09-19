@@ -1,6 +1,7 @@
 {
   pkgs,
   perSystem,
+  flake,
   ...
 }:
 perSystem.self.mkScript {
@@ -24,9 +25,10 @@ perSystem.self.mkScript {
   ];
 
   # Path to template files
-  env = {
-    templates = ./templates;
-  };
+  env.templates = ./templates;
+
+  # Derivation path for key
+  env.derivation_path = "bip85-hex32-index${toString flake.derivationIndex}";
 
   # Bash script
   text = builtins.readFile ./nixos.sh;
