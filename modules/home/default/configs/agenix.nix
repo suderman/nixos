@@ -15,7 +15,7 @@
     inherit (osConfig.networking) hostName;
   in {
     # secretsDir = "/run/user/${toString config.home.uid}/agenix";
-    identityPaths = ["${config.home.homeDirectory}/.config/age/keys.txt"];
+    identityPaths = ["${config.home.homeDirectory}/.config/age/id_age"];
 
     # https://github.com/oddlama/agenix-rekey
     rekey = {
@@ -25,7 +25,7 @@
       # > nixos generate
       hostPubkey = let
         inherit (builtins) pathExists readFile;
-        agePub = flake + /users/${username}/recipients.txt;
+        agePub = flake + /users/${username}/id_age.pub;
       in
         if pathExists agePub
         then readFile agePub

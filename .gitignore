@@ -7,5 +7,5 @@
 *.qcow2
 *.img
 id.age
-id_age*
+/id_age*
 ssh_host_ed25519_key

@@ -191,16 +191,16 @@ nixos_generate() {
     gum_show "./users/$user/id_ed25519.pub"
   done
 
-  # Generate missing age recipients for each user
-  gum_info "Generating age recipients..."
+  # Generate missing age identities for each user
+  gum_info "Generating age identities..."
   for user in $(dirs users); do
     agenix hex |
       derive hex "$user" |
       derive age |
       derive public \
-        >"users/$user/recipients.txt"
-    git add "users/$user/recipients.txt" 2>/dev/null || true
-    gum_show "./users/$user/recipients.txt"
+        >"users/$user/id_age.pub"
+    git add "users/$user/id_age.pub" 2>/dev/null || true
+    gum_show "./users/$user/id_age.pub"
   done
 
   # Ensure Certificate Authority exists

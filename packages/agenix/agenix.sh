@@ -58,7 +58,7 @@ EXTENDED COMMANDS:
   unlock                  Unlock id.age to /tmp/id_age
   lock                    Remove temporary age identity from /tmp/id_age
   hex                     Output decrypted hex.age using age identity
-  verify [DIR]            Verify match in directory's keys.txt & recipients.txt
+  verify [DIR]            Verify match in directory's id_age & id_age.pub
 EOF
 }
 
@@ -177,33 +177,33 @@ agenix_hex() {
   age -d -i /tmp/id_age <hex.age
 }
 
-# Check if directory with keys.txt and recipients.txt are valid match
+# Check if directory with id_age and id_age.pub are valid match
 agenix_verify() {
 
   local dir="${1:-$(pwd)}"
 
-  local identity_file="$dir/keys.txt"
-  local recipients_file="$dir/recipients.txt"
+  local private_id_file="$dir/id_age"
+  local public_id_file="$dir/id_age.pub"
 
   # Ensure private key exists
-  [[ -f "$identity_file" ]] ||
-    gum_exit "[agenix] $identity_file missing"
+  [[ -f "$private_id_file" ]] ||
+    gum_exit "[agenix] $private_id_file missing"
 
   # Ensure public key exists
-  [[ -f "$recipients_file" ]] ||
-    gum_exit "[agenix] $recipients_file missing"
+  [[ -f "$public_id_file" ]] ||
+    gum_exit "[agenix] $public_id_file missing"
 
-  # Extract recipients from current file
-  current_recipients="$(xargs <"$recipients_file")"
+  # Extract public id from current file
+  current_public_id="$(xargs <"$public_id_file")"
 
-  # Derive expected recipients from current identity file (should match above)
-  derived_recipients="$(derive public <"$identity_file" | xargs)"
+  # Derive expected public id from current private id file (should match above)
+  derived_public_id="$(derive public <"$private_id_file" | xargs)"
 
   # Ensure key pair actually matches
-  if [[ "$current_recipients" == "$derived_recipients" ]]; then
-    gum_info "[agenix] $identity_file valid match"
+  if [[ "$current_public_id" == "$derived_public_id" ]]; then
+    gum_info "[agenix] $private_id_file valid match"
   else
-    gum_warn "[agenix] $identity_file invalid match"
+    gum_warn "[agenix] $private_id_file invalid match"
     return 1
   fi
 
