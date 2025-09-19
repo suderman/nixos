@@ -2,7 +2,8 @@
 set -euo pipefail
 
 # Pretty output
-gum_warn() { gum style --foreground=196 "✖ Error: $*" && exit 1; }
+gum_exit() { gum style --foreground=196 "✖ $*" && return 1; }
+gum_warn() { gum style --foreground=124 "✖ $*"; }
 gum_info() { gum style --foreground=29 "➜ $*"; }
 gum_head() { gum style --foreground=99 "$*"; }
 gum_show() { gum style --foreground=177 "    $*"; }
@@ -32,6 +33,10 @@ main() {
     agenix_hex
     exit 0
     ;;
+  verify | v)
+    agenix_verify "${2:-}"
+    exit 0
+    ;;
   "" | --help | -h | help)
     agenix --help "$@" || true
     agenix_help
@@ -53,6 +58,7 @@ EXTENDED COMMANDS:
   unlock                  Unlock id.age to /tmp/id_age
   lock                    Remove temporary age identity from /tmp/id_age
   hex                     Output decrypted hex.age using age identity
+  verify [DIR]            Verify match in directory's keys.txt & recipients.txt
 EOF
 }
 
@@ -83,7 +89,7 @@ agenix_import() {
   if [[ $hex =~ ^[0-9a-fA-F]{64}$ ]]; then
     gum_info "32-byte hex code validated"
   else
-    gum_warn "Failed to receive valid hex code"
+    gum_exit "Failed to receive valid hex code"
   fi
 
   # Delete id.age if it exists but is empty
@@ -128,9 +134,9 @@ agenix_unlock() {
 
   # Attempt to decrypt age identity using passphrse
   if [[ -z "$id" ]]; then
-    [[ ! -f id.age ]] && gum_warn "./id.age missing"
+    [[ ! -f id.age ]] && gum_exit "./id.age missing"
     id="$(age -d <id.age 2>/dev/null || true)"
-    [[ -z "$id" ]] && gum_warn "Incorrect passphrase"
+    [[ -z "$id" ]] && gum_exit "Incorrect passphrase"
   fi
 
   # Shift any existing phrase to backup
@@ -166,9 +172,41 @@ agenix_lock() {
 
 # Output decrypted hex.age (32-byte hex)
 agenix_hex() {
-  [[ ! -f hex.age ]] && gum_warn "./hex.age missing"
+  [[ ! -f hex.age ]] && gum_exit "./hex.age missing"
   agenix_unlock quiet
   age -d -i /tmp/id_age <hex.age
+}
+
+# Check if directory with keys.txt and recipients.txt are valid match
+agenix_verify() {
+
+  local dir="${1:-$(pwd)}"
+
+  local identity_file="$dir/keys.txt"
+  local recipients_file="$dir/recipients.txt"
+
+  # Ensure private key exists
+  [[ -f "$identity_file" ]] ||
+    gum_exit "[agenix] $identity_file missing"
+
+  # Ensure public key exists
+  [[ -f "$recipients_file" ]] ||
+    gum_exit "[agenix] $recipients_file missing"
+
+  # Extract recipients from current file
+  current_recipients="$(xargs <"$recipients_file")"
+
+  # Derive expected recipients from current identity file (should match above)
+  derived_recipients="$(derive public <"$identity_file" | xargs)"
+
+  # Ensure key pair actually matches
+  if [[ "$current_recipients" == "$derived_recipients" ]]; then
+    gum_info "[agenix] $identity_file valid match"
+  else
+    gum_warn "[agenix] $identity_file invalid match"
+    return 1
+  fi
+
 }
 
 main "${@-}"

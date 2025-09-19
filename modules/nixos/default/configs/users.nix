@@ -88,6 +88,9 @@ in {
       # Public ssh user key derived from 32-byte hex
       publicKey = flake + /users/${name}/id_ed25519.pub;
 
+      # User age recipients derived from 32-byte hex
+      recipients = flake + /users/${name}/recipients.txt;
+
       # Password encrypted with age identity
       password = config.age.secrets."${name}-password".path;
     };
@@ -116,47 +119,57 @@ in {
     # Write SSH keys to each ~/.ssh directory
     users.text = let
       perUser = userName: let
-        inherit (usermeta userName) user publicKey password;
-        runDir = "/run/ssh/${userName}";
+        inherit (usermeta userName) user recipients publicKey password;
         sshDir = "${user.home}/.ssh";
+        ageDir = "${user.home}/.config/age";
       in
         # bash
         ''
-          # Copy public ssh user key from this repo to /run/ssh/user
-          mkdir -p ${runDir} ${sshDir}
-          tee ${runDir}/id_ed25519.pub ${sshDir}/id_ed25519.pub <${publicKey} >/dev/null
+          # Copy age recipients from this repo to ~/.config/age
+          install -d -m 700 ${ageDir}
+          cat ${recipients} >${ageDir}/recipients.txt
+
+          # Generate age user identity derived from 32-byte hex
+          # Delete if derived identity doesn't verify with repo's recipients
+          if [[ -f ${hex} ]]; then
+            derive hex ${userName}<${hex} |
+            derive age >${ageDir}/keys.txt
+            agenix verify ${ageDir} || rm -f ${ageDir}/keys.txt
+          fi
+
+          # Ensure proper permissions and ownership
+          [[ -f ${ageDir}/keys.txt ]] && chmod 600 ${ageDir}/keys.txt
+          [[ -f ${ageDir}/recipients.txt ]] && chmod 644 ${ageDir}/recipients.txt
+          chown -R ${user.name}:${user.group} ${ageDir}
+
+          # Copy public ssh user key from this repo to ~/.ssh
+          install -d -m 700 ${sshDir}
+          cat ${publicKey} >${sshDir}/id_ed25519.pub
 
           # Generate private ssh user key derived from 32-byte hex
           # Delete if derived private key doesn't verify with repo's public key
           if [[ -f ${hex} ]]; then
             derive hex ${userName}<${hex} |
-            derive ssh >${runDir}/id_ed25519
-            sshed verify ${runDir} || rm -f ${runDir}/id_ed25519
+            derive ssh >${sshDir}/id_ed25519
+            sshed verify ${sshDir} || rm -f ${sshDir}/id_ed25519
           fi
 
           # If matching private key successfully derived, do it again
           # encrypted with passphrase matching user password into ~/.ssh
-          if [[ -f ${hex} && -f ${runDir}/id_ed25519 ]]; then
+          if [[ -f ${hex} && -f ${sshDir}/id_ed25519 ]]; then
             derive hex ${userName}<${hex} |
             derive ssh "$(cat ${password})" \
             >${sshDir}/id_ed25519
           fi
 
           # Ensure proper permissions and ownership
-          for dir in ${runDir} ${sshDir}; do
-            [[ -f $dir/id_ed25519 ]] &&
-            chmod 600 $dir/id_ed25519
-
-            [[ -f $dir/id_ed25519.pub ]] &&
-            chmod 644 $dir/id_ed25519.pub
-
-            chmod 700 $dir
-            chown -R ${user.name}:${user.group} $dir
-          done
+          [[ -f ${sshDir}/id_ed25519 ]] && chmod 600 ${sshDir}/id_ed25519
+          [[ -f ${sshDir}/id_ed25519.pub ]] && chmod 644 ${sshDir}/id_ed25519.pub
+          chown -R ${user.name}:${user.group} ${sshDir}
         '';
 
       text = concatMapStrings perUser everyone;
-      path = [perSystem.self.derive perSystem.self.sshed];
+      path = [perSystem.self.agenix perSystem.self.derive perSystem.self.sshed];
     in
       mkAfter "${mkScript {inherit text path;}}";
   };

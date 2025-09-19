@@ -20,9 +20,6 @@ main() {
   shift
 
   case "$cmd" in
-  generate | gen | g)
-    sshed_generate "$@"
-    ;;
   import | i)
     sshed_import "$@"
     ;;
@@ -49,62 +46,12 @@ sshed_help() {
   cat <<EOF
 Usage: sshed COMMAND
 
-  generate
   import [DIR]
   receive [DIR]
   send [HOST] [IP]
   verify [DIR]
   help
 EOF
-}
-
-# ---------------------------------------------------------------------
-# GENERATE
-# ---------------------------------------------------------------------
-sshed_generate() {
-
-  # Ensure access to age identity
-  agenix unlock quiet
-
-  # Ensure directories exist
-  [[ ! -d ./hosts ]] && gum_exit "./hosts directory missing"
-  [[ ! -d ./users ]] && gum_exit "./users directory missing"
-
-  # Per each host...
-  for host in $(dirs hosts | grep -v iso); do
-
-    # Write the public ssh host key
-    agenix hex |
-      derive hex "$host" |
-      derive ssh |
-      derive public "$host@${derivation_path-}" \
-        >"hosts/$host/ssh_host_ed25519_key.pub"
-    git add "hosts/$host/ssh_host_ed25519_key.pub" 2>/dev/null || true
-    gum_show "./hosts/$host/ssh_host_ed25519_key.pub"
-
-  done
-
-  # Per each user...
-  for user in $(dirs users); do
-
-    agenix hex |
-      derive hex "$user" |
-      derive ssh |
-      derive public "$user@${derivation_path-}" \
-        >"users/$user/id_ed25519.pub"
-    git add "users/$user/id_ed25519.pub" 2>/dev/null || true
-    gum_show "./users/$user/id_ed25519.pub"
-
-    agenix hex |
-      derive hex "$user" |
-      derive age |
-      derive public \
-        >"users/$user/recipients.txt"
-    git add "users/$user/recipients.txt" 2>/dev/null || true
-    gum_show "./users/$user/recipients.txt"
-
-  done
-
 }
 
 # ---------------------------------------------------------------------

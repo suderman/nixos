@@ -23,15 +23,14 @@
     # https://github.com/oddlama/agenix-rekey
     rekey = {
       # Public ssh host key derived from 32-byte hex
-      # > sshed generate
+      # > nixos generate
       hostPubkey = let
         inherit (builtins) pathExists readFile;
         sshPub = flake + /hosts/${hostName}/ssh_host_ed25519_key.pub;
-        agePub = flake + /id.pub;
       in
         if pathExists sshPub
         then readFile sshPub
-        else readFile agePub;
+        else readFile (flake + /id.pub);
 
       # Master identity decrypted to /tmp/id_age for rekeying
       # > unlock-id

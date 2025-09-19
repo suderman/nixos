@@ -15,25 +15,21 @@
     inherit (osConfig.networking) hostName;
   in {
     # secretsDir = "/run/user/${toString config.home.uid}/agenix";
-    # Private ssh host key must be side-loaded/persisted to decrypt secrets
-    # > sshed send hostName IP
-    # identityPaths = ["${osConfig.persist.storage.path}/etc/ssh/ssh_host_ed25519_key"];
-    identityPaths = ["${config.home.homeDirectory}/.ssh/id_ed25519"];
+    identityPaths = ["${config.home.homeDirectory}/.config/age/keys.txt"];
 
     # https://github.com/oddlama/agenix-rekey
     rekey = {
       inherit (osConfig.age.rekey) masterIdentities storageMode;
 
-      # Public ssh user key derived from 32-byte hex
-      # > sshed generate
+      # User age receipients derived from 32-byte hex
+      # > nixos generate
       hostPubkey = let
         inherit (builtins) pathExists readFile;
-        sshPub = flake + /users/${username}/id_ed25519.pub;
-        agePub = flake + /id.pub;
+        agePub = flake + /users/${username}/recipients.txt;
       in
-        if pathExists sshPub
-        then readFile sshPub
-        else readFile agePub;
+        if pathExists agePub
+        then readFile agePub
+        else readFile (flake + /id.pub);
 
       localStorageDir = flake + /modules/nixos/secrets/${hostName}-${username};
       generatedSecretsDir = flake + /modules/nixos/secrets/${hostName}-${username};

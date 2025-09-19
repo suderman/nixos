@@ -172,7 +172,36 @@ nixos_generate() {
 
   # Generate missing SSH keys for hosts and users
   gum_info "Generating SSH keys..."
-  sshed generate
+  for host in $(dirs hosts | grep -v iso); do
+    agenix hex |
+      derive hex "$host" |
+      derive ssh |
+      derive public "$host@${derivation_path-}" \
+        >"hosts/$host/ssh_host_ed25519_key.pub"
+    git add "hosts/$host/ssh_host_ed25519_key.pub" 2>/dev/null || true
+    gum_show "./hosts/$host/ssh_host_ed25519_key.pub"
+  done
+  for user in $(dirs users); do
+    agenix hex |
+      derive hex "$user" |
+      derive ssh |
+      derive public "$user@${derivation_path-}" \
+        >"users/$user/id_ed25519.pub"
+    git add "users/$user/id_ed25519.pub" 2>/dev/null || true
+    gum_show "./users/$user/id_ed25519.pub"
+  done
+
+  # Generate missing age recipients for each user
+  gum_info "Generating age recipients..."
+  for user in $(dirs users); do
+    agenix hex |
+      derive hex "$user" |
+      derive age |
+      derive public \
+        >"users/$user/recipients.txt"
+    git add "users/$user/recipients.txt" 2>/dev/null || true
+    gum_show "./users/$user/recipients.txt"
+  done
 
   # Ensure Certificate Authority exists
   if [[ -s zones/ca.crt && -s zones/ca.age ]]; then
