@@ -11,19 +11,18 @@
 #
 {
   config,
-  osConfig,
   lib,
   pkgs,
   perSystem,
   ...
 }: let
   cfg = config.services.withings-sync;
-  inherit (lib) getExe mkIf;
+  inherit (lib) getExe mkIf mkOption types;
 
   withings-sync-wrapped = perSystem.self.mkScript {
     name = "withings-sync";
     text = ''
-      source ${osConfig.age.secrets.withings-sync.path}
+      source ${config.age.secrets.withings-sync.path}
       export GARMIN_USERNAME
       export GARMIN_PASSWORD
       export PYTHONPATH=${pkgs.python312Packages.setuptools}/lib/python3.12/site-packages:${pkgs.python312}/lib/python3.12/site-packages
@@ -33,9 +32,15 @@
 in {
   options.services.withings-sync = {
     enable = lib.options.mkEnableOption "withings-sync";
+    secret = mkOption {
+      type = with types; nullOr path;
+      default = null;
+    };
   };
 
   config = mkIf cfg.enable {
+    age.secrets.withings-sync.rekeyFile = cfg.secret;
+
     # Add to path for initial setup and on-demand
     home.packages = [withings-sync-wrapped];
 

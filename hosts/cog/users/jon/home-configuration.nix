@@ -28,4 +28,9 @@
   programs.sparrow.enable = true;
   programs.steam.enable = true;
   programs.dolphin-emu.enable = true;
+
+  services.withings-sync = {
+    enable = true;
+    secret = ./withings-sync.age;
+  };
 }
