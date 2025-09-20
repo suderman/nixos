@@ -119,6 +119,7 @@ in {
     # Write SSH keys to each ~/.ssh directory
     users.text = let
       perUser = userName: let
+        inherit (builtins) dirOf;
         inherit (usermeta userName) user publicId publicKey password;
         sshDir = "${user.home}/.ssh";
         ageDir = "${user.home}/.config/age";
@@ -126,7 +127,7 @@ in {
         # bash
         ''
           # Copy public age id from this repo to ~/.config/age
-          install -d -o ${user.name} -g ${user.group} -m 700 $(dirname ${ageDir}) ${ageDir}
+          install -o ${user.name} -g ${user.group} -m 700 -d ${dirOf ageDir} ${ageDir}
           cat ${publicId} >${ageDir}/id_age.pub
 
           # Generate private age id derived from 32-byte hex
@@ -143,7 +144,7 @@ in {
           chown -R ${user.name}:${user.group} ${ageDir}
 
           # Copy public ssh user key from this repo to ~/.ssh
-          install -d -o ${user.name} -g ${user.group} -m 700 ${sshDir}
+          install -o ${user.name} -g ${user.group} -m 700 -d ${sshDir}
           cat ${publicKey} >${sshDir}/id_ed25519.pub
 
           # Generate private ssh user key derived from 32-byte hex
