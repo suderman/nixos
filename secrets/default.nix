@@ -6,10 +6,17 @@
 }: {
   # https://github.com/ryantm/agenix
   age = {
+    # List of recipient keys (age or ssh) used to decrypt secrets
     identityPaths =
       if builtins.hasAttr "home" config
       then ["${config.home.homeDirectory}/.config/age/id_age"]
       else ["${config.persist.storage.path}/etc/ssh/ssh_host_ed25519_key"];
+
+    # Directory where secrets are symlinked to by default
+    secretsDir =
+      if builtins.hasAttr "home" config
+      then "/run/user/${toString config.home.uid}/agenix"
+      else "/run/agenix";
 
     # https://github.com/oddlama/agenix-rekey
     rekey = let
@@ -32,12 +39,9 @@
       in
         if pathExists agePub
         then readFile agePub
-        else
-          (
-            if pathExists sshPub
-            then readFile sshPub
-            else readFile (flake + /id_age.pub)
-          );
+        else if pathExists sshPub
+        then readFile sshPub
+        else readFile (flake + /id_age.pub);
 
       storageMode = "local";
       localStorageDir = flake + /secrets/${target};

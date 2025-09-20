@@ -126,7 +126,7 @@ in {
         # bash
         ''
           # Copy public age id from this repo to ~/.config/age
-          install -d -m 700 ${ageDir}
+          install -d -o ${user.name} -g ${user.group} -m 700 $(dirname ${ageDir}) ${ageDir}
           cat ${publicId} >${ageDir}/id_age.pub
 
           # Generate private age id derived from 32-byte hex
@@ -143,7 +143,7 @@ in {
           chown -R ${user.name}:${user.group} ${ageDir}
 
           # Copy public ssh user key from this repo to ~/.ssh
-          install -d -m 700 ${sshDir}
+          install -d -o ${user.name} -g ${user.group} -m 700 ${sshDir}
           cat ${publicKey} >${sshDir}/id_ed25519.pub
 
           # Generate private ssh user key derived from 32-byte hex
