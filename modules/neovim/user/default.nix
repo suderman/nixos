@@ -1,5 +1,5 @@
 # programs.neovim.enable = true;
-{ config, lib, pkgs, ... }: let
+{ config, lib, pkgs, inputs, ... }: let
 
   cfg = config.programs.neovim;
   inherit (pkgs) fetchFromGitHub;
@@ -8,6 +8,7 @@
 in {
 
   config = mkIf cfg.enable {
+
     programs.neovim = {
 
       viAlias = true;
