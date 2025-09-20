@@ -383,11 +383,12 @@ nixos_sim() {
   # Set path to ssh private key in env variable
   export NIX_SSHOPTS="-p 2222 -i hosts/sim/ssh_host_ed25519_key"
 
-  [[ -e hosts/sim/disk1.img ]] || qemu-img create -f qcow2 hosts/sim/disk1.img 100G
-  [[ -e hosts/sim/disk2.img ]] || qemu-img create -f qcow2 hosts/sim/disk2.img 100G
-  [[ -e hosts/sim/disk3.img ]] || qemu-img create -f qcow2 hosts/sim/disk3.img 100G
-  [[ -e hosts/sim/disk4.img ]] || qemu-img create -f qcow2 hosts/sim/disk4.img 100G
+  [[ -e hosts/sim/disk1.img ]] || nix run nixpkgs#qemu-img create -f qcow2 hosts/sim/disk1.img 100G
+  [[ -e hosts/sim/disk2.img ]] || nix run nixpkgs#qemu-img create -f qcow2 hosts/sim/disk2.img 100G
+  [[ -e hosts/sim/disk3.img ]] || nix run nixpkgs#qemu-img create -f qcow2 hosts/sim/disk3.img 100G
+  [[ -e hosts/sim/disk4.img ]] || nix run nixpkgs#qemu-img create -f qcow2 hosts/sim/disk4.img 100G
 
+  echo iiiiiii
   case "${1:-help}" in
   up | u)
     nixos_sim_up "${2:-disk}"

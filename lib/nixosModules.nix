@@ -7,5 +7,4 @@ in {
   desktops = pathAttrs ../modules/nixos/desktops;
   hardware = pathAttrs ../modules/nixos/hardware;
   overlays = ../modules/nixos/overlays;
-  secrets = ../modules/nixos/secrets;
 }

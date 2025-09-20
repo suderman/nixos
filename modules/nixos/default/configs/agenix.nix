@@ -8,7 +8,15 @@
   flake,
   ...
 }: {
-  imports = [flake.nixosModules.secrets];
+  imports = [
+    flake.inputs.agenix.nixosModules.default
+    flake.inputs.agenix-rekey.nixosModules.default
+    (flake + /secrets)
+  ];
+
+  # 32-byte hex imported from QR code
+  # > import-id
+  age.secrets.hex.rekeyFile = flake + /hex.age;
 
   # Add /mnt/main/storage/etc/ssh/ssh_host_ed25519_key.pub and /etc/machine-id
   system.activationScripts.etc.text = let

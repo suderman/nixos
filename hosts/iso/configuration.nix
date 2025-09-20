@@ -10,7 +10,9 @@
   imports = [
     (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix")
     (modulesPath + "/installer/cd-dvd/channel.nix")
-    flake.nixosModules.secrets
+    flake.inputs.agenix.nixosModules.default
+    flake.inputs.agenix-rekey.nixosModules.default
+    (flake + /secrets)
   ];
 
   # Set host platform and config options
