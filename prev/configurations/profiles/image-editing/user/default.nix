@@ -3,7 +3,7 @@
   # cli packages
   home.packages = with pkgs; [ 
     darktable 
-    digikam
+    # digikam FIXME: failed to build, retry later
     inkscape 
   ];
 

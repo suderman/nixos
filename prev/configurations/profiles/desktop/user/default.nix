@@ -1,5 +1,7 @@
 { config, lib, pkgs, ... }: {
 
+  imports = [ ./webapps ];
+
   home.packages = with pkgs; [ 
     _1password-cli _1password-gui # password manager
     asunder # cd ripper
@@ -10,8 +12,8 @@
     loupe # png/jpg viewer
     newsflash # rss reader
     pavucontrol # audio control panel
-    slack # Slack chatroom
-    tauon # music player
+    # slack # Slack chatroom
+    # tauon # music player FIXME: failed to build, retry later
     tdesktop # Telegram messenger
     xorg.xeyes # test for x11
   ];

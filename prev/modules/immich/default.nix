@@ -1,26 +1,28 @@
 # -- custom module --
 # services.immich.enable = true;
-{ config, lib, pkgs, this, ... }: let
-
+{
+  config,
+  lib,
+  pkgs,
+  this,
+  ...
+}: let
   # https://github.com/immich-app/immich/releases
-  version = "1.126.1";
+  version = "1.138.0";
 
   cfg = config.services.immich;
 
   inherit (builtins) toString;
   inherit (lib) mkIf mkOption mkAfter mkBefore options types strings extraGroups ls;
   inherit (lib.strings) toInt;
-
 in {
-
   # Service order reference:
   # https://github.com/immich-app/immich/blob/main/docker/docker-compose.yml
   imports = ls ./.;
-  disabledModules = [ "services/web-apps/immich.nix" ];
+  disabledModules = ["services/web-apps/immich.nix"];
 
   options.services.immich = {
-
-    enable = options.mkEnableOption "immich"; 
+    enable = options.mkEnableOption "immich";
 
     version = mkOption {
       type = types.str;
@@ -32,8 +34,8 @@ in {
       default = "immich";
     };
 
-    alias = mkOption { 
-      type = types.anything; 
+    alias = mkOption {
+      type = types.anything;
       default = null;
     };
 
@@ -57,9 +59,9 @@ in {
       default = false; # Enable with nvidia gpu
     };
 
-    environment = mkOption { 
+    environment = mkOption {
       description = "Shared environment across Immich services";
-      type = types.anything; 
+      type = types.anything;
       default = {
         PUID = toString config.ids.uids.immich;
         PGID = toString config.ids.gids.immich;
@@ -68,44 +70,45 @@ in {
         REVERSE_GEOCODING_DUMP_DIRECTORY = "/usr/src/app/geocoding";
       };
     };
-
   };
 
   config = mkIf cfg.enable {
-
     # Unused uid/gid snagged from this list:
     # https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/misc/ids.nix
     ids.uids.immich = 911;
     ids.gids.immich = 911;
 
     users = {
-      users = {
+      users =
+        {
+          # Create immich user
+          immich = {
+            isSystemUser = true;
+            group = "photos";
+            description = "Immich daemon user";
+            home = cfg.dataDir;
+            uid = config.ids.uids.immich;
+          };
 
-        # Create immich user
-        immich = {
-          isSystemUser = true;
-          group = "photos";
-          description = "Immich daemon user";
-          home = cfg.dataDir;
-          uid = config.ids.uids.immich;
-        };
-
-      # Add admins to the immich group
-      } // extraGroups this.admins [ "immich" ];
+          # Add admins to the immich group
+        }
+        // extraGroups this.admins ["immich"];
 
       # Create immich group
       groups.immich = {
         gid = config.ids.gids.immich;
       };
-
     };
 
     # Ensure data directory exists with expected ownership
-    file = let dir = {
-      type = "dir"; mode = 775; 
-      user = config.ids.uids.immich; 
-      group = config.ids.gids.immich;
-    }; in {
+    file = let
+      dir = {
+        type = "dir";
+        mode = 775;
+        user = config.ids.uids.immich;
+        group = config.ids.gids.immich;
+      };
+    in {
       "${cfg.dataDir}" = dir;
       "${cfg.dataDir}/geocoding" = dir;
     };
@@ -119,11 +122,13 @@ in {
     # Postgres database configuration
     services.postgresql = {
       enable = true;
-      ensureUsers = [{
-        name = "immich";
-        ensureDBOwnership = true;
-      }];
-      ensureDatabases = [ "immich" ];
+      ensureUsers = [
+        {
+          name = "immich";
+          ensureDBOwnership = true;
+        }
+      ];
+      ensureDatabases = ["immich"];
 
       # Allow connections from any docker IP addresses
       authentication = mkBefore "host immich immich 172.16.0.0/12 md5";
@@ -135,7 +140,6 @@ in {
         })
       ];
       settings.shared_preload_libraries = "vectors.so";
-
     };
 
     # Immich expects its postgres user to be a "superuser"
@@ -145,27 +149,29 @@ in {
     '';
 
     # Init service
-    systemd.services.immich = let service = config.systemd.services.immich; in {
+    systemd.services.immich = let
+      service = config.systemd.services.immich;
+    in {
       enable = true;
       description = "Set up network & database";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "postgresql.service" ]; # run this after db
-      before = [ # run this before the rest:
+      wantedBy = ["multi-user.target"];
+      after = ["postgresql.service"]; # run this after db
+      before = [
+        # run this before the rest:
         "docker-immich-machine-learning.service"
         "docker-immich-server.service"
       ];
-      wants = service.after ++ service.before; 
+      wants = service.after ++ service.before;
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = "yes";
       };
-      path = with pkgs; [ docker postgresql sudo ];
+      path = with pkgs; [docker postgresql sudo];
       script = with config.virtualisation.oci-containers.containers; ''
         docker pull ${immich-machine-learning.image};
         docker pull ${immich-server.image};
         docker network create immich 2>/dev/null || true
       '';
     };
-
-
-  }; }
+  };
+}

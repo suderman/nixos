@@ -96,9 +96,6 @@ in {
       }];
     };
 
-    # Use local blocky for DNS queries
-    networking.nameservers = [ "127.0.0.1" ];
-
     # Public firewall rules
     networking.firewall = if cfg.public == true then {
       allowedTCPPorts = [ cfg.dnsPort cfg.httpPort ];

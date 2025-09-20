@@ -11,7 +11,6 @@ in {
   options.programs.home-assistant = {
     enable = options.mkEnableOption "home-assistant"; 
     url = mkOption { type = types.str; default = "http://hass"; };
-    platform = mkOption { type = types.str; default = "wayland"; };
   };
 
   config = mkIf cfg.enable {
@@ -20,7 +19,7 @@ in {
     xdg.desktopEntries = mkWebApp {
       name = "Home Assistant";
       icon = ./home-assistant.svg; 
-      inherit (cfg) url platform;
+      inherit (cfg) url;
     } // { 
 
       # ISY Java applet

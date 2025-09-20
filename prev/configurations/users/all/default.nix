@@ -1,12 +1,12 @@
-{ config, lib, this, ... }:
-
-let
-
+{
+  config,
+  lib,
+  this,
+  ...
+}: let
   inherit (lib) optionalAttrs recursiveUpdate;
   inherit (this.lib) ls;
-
 in {
-
   # Import all *.nix files in this directory
   imports = ls ./.;
 
@@ -16,7 +16,6 @@ in {
   # ---------------------------------------------------------------------------
   # Inherit any config settings in configuration's default.nix
   config = optionalAttrs (this ? config) (recursiveUpdate this.config {
-
     # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
     home.stateVersion = "22.05";
 
@@ -25,9 +24,7 @@ in {
 
     # Enable flakes
     xdg.configFile = {
-      "nix/nix.conf".text = "experimental-features = nix-command flakes";
+      "nix/nix.conf".text = "experimental-features = nix-command flakes pipe-operators";
     };
-
   });
-
 }

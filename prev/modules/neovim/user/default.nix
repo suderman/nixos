@@ -1,5 +1,5 @@
 # programs.neovim.enable = true;
-{ config, lib, pkgs, ... }: let
+{ config, lib, pkgs, inputs, ... }: let
 
   cfg = config.programs.neovim;
   inherit (pkgs) fetchFromGitHub;
@@ -8,10 +8,16 @@
 in {
 
   config = mkIf cfg.enable {
+
     programs.neovim = {
 
       viAlias = true;
       vimAlias = true;
+
+      extraLuaConfig = ''
+        require("goose").setup({})
+      '';
+      # anti_conceal = { enabled = false },
 
       package = pkgs.unstable.neovim-unwrapped;
 
@@ -29,6 +35,7 @@ in {
         { plugin = vim-tmux-navigator; config = builtins.readFile ./vim-tmux-navigator.vim; }
         { plugin = fzf-lua; config = builtins.readFile ./fzf-lua.vim; }
         { plugin = orgmode; config = builtins.readFile ./orgmode.vim; }
+        { plugin = render-markdown-nvim; }
 
         align
         delimitMate
@@ -44,6 +51,7 @@ in {
         vim-repeat
         vim-surround
         yuck-vim
+        plenary-nvim
 
         (pkgs.vimUtils.buildVimPlugin {
           name = "hyprland-vim-syntax";
@@ -55,12 +63,25 @@ in {
           };
         })
 
+        (pkgs.vimUtils.buildVimPlugin rec {
+          pname = "goose.nvim";
+          version = "5a72d3b3f7a2a01d174100c8c294da8cd3a2aeeb";
+          doCheck = false;
+          src = pkgs.fetchFromGitHub {
+            owner = "azorng";
+            repo = pname;
+            rev = version;
+            sha256 = "sha256-jVWggPmdINFNVHJSCpbTZq8wKwGjldu6PNSkb7naiQE=";
+          };
+        })
+
       ]; 
 
     };
 
     # ALso make default editor
     home.sessionVariables.EDITOR = "nvim";
+    home.packages = [ pkgs.goose-cli ];
 
   };
 

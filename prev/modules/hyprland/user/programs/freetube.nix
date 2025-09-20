@@ -1,8 +1,29 @@
-{ config, lib, ... }: {
+{ config, lib, pkgs, ... }: {
   config = lib.mkIf config.wayland.windowManager.hyprland.enable {
 
     programs.freetube = {
       enable = true;
+
+      # package' = pkgs.writeShellScriptBin "freetube" ''
+      #   exec ${pkgs.freetube}/bin/freetube --enable-features=WaylandLinuxDrmSyncobj "$@"
+      # '';
+
+      # package = pkgs.symlinkJoin {
+      #   name = "freetube";
+      #   paths = [ pkgs.freetube ];
+      #   buildInputs = [ pkgs.makeWrapper ];
+      #   postBuild = ''
+      #     wrapProgram $out/bin/freetube --add-flags "--enable-features=WaylandLinuxDrmSyncobj"
+      #   '';
+      # };
+
+      package = lib.wrapWithFlags {
+        package = pkgs.freetube;
+        flags = [ "--enable-features=WaylandLinuxDrmSyncobj" ];
+      };
+
+
+
       settings = {
 
         allowDashAv1Formats  = true;

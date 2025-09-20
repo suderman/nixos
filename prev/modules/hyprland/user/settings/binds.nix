@@ -26,12 +26,12 @@ in {
         "super+control, period, exec, 1password"
 
         # Browser
-        "super, b, exec, firefox"
-        "super+shift, b, exec, firefox --private-window"
+        "super, b, exec, chromium-browser"
+        "super+shift, b, exec, chromium-browser --incognito"
 
         # Alt browser
-        "super+alt, b, exec, chromium-browser"
-        "super+alt+shift, b, exec, chromium-browser --incognito"
+        "super+alt, b, exec, firefox"
+        "super+alt+shift, b, exec, firefox --private-window"
 
         # Navigate workspaces
         "super, right, workspace, e+1" # cyclenext

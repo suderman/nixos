@@ -58,7 +58,12 @@ in {
       jetbrains-mono # mono font
 
       tdesktop # family chat
-      slack # work chat
+      # slack # work chat
+
+      (lib.wrapWithFlags {
+        package = pkgs.slack;
+        flags = [ "--enable-features=WaylandLinuxDrmSyncobj" ];
+      })
 
       neovide # text editor
       lapce # text editor
@@ -71,7 +76,7 @@ in {
       # quickemu # virtual machines
       qalculate-gtk # calculator
       newsflash # rss reader
-      tauon # mp3 player (and jellyfin client)
+      # tauon # mp3 player (and jellyfin client) FIXME: failed to build, retry later
 
       pulseaudio # pactl
       pavucontrol # sound control gui

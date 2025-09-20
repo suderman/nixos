@@ -36,7 +36,8 @@ in {
         theme = "af-magic";
       };
 
-      initContent = ''
+      # initContent = ''
+      initExtra = ''
         # Extract mp4 video from *.MP.jpg 
         # https://linuxreviews.org/Google_Pixel_%22Motion_Photo%22
         extract () {
@@ -50,6 +51,7 @@ in {
 
         # Fix tab completion (disabled because this makes # useless)
         # setopt EXTENDED_GLOB
+        zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 
         # message of the day
         [[ -e /var/lib/rust-motd/motd ]] && cat /var/lib/rust-motd/motd
