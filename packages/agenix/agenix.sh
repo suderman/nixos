@@ -43,6 +43,7 @@ main() {
     exit 0
     ;;
   *)
+    agenix_unlock quiet
     agenix "$@"
     ;;
   esac
