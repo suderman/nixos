@@ -77,9 +77,6 @@
   };
   services.jellyfin.enable = true;
   services.tandoor-recipes.enable = true;
-  services.whoogle.enable = true;
+  # services.whoogle.enable = true;
   services.tiddlywiki.enable = true;
-
-  # fileSystems."/home/jon/storage".options = ["x-gvfs-trash"];
-  environment.systemPackages = [pkgs.glib pkgs.gvfs];
 }

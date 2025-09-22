@@ -4,12 +4,11 @@
   ...
 }: {
   xdg.userDirs = with config.home; {
-    download = "${scratchDirectory}";
-    desktop = "${storageDirectory}/Action";
-    documents = "${storageDirectory}/Documents";
-    music = "${storageDirectory}/Music";
-    pictures = "${storageDirectory}/Pictures";
-    videos = "${storageDirectory}/Movies";
+    documents = "${storageDirectory}/docs";
+    music = "${storageDirectory}/music";
+    pictures = "${storageDirectory}/pics";
+    videos = "${storageDirectory}/vids";
+    publicShare = "${storageDirectory}/sync";
   };
 
   # persist.storage.directories = [

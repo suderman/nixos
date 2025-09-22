@@ -5,7 +5,7 @@
   pkgs,
   ...
 }: let
-  inherit (lib) mkOption types;
+  inherit (lib) mkDefault mkOption types;
 in {
   # Lookup uid from flake.users.jon.uid and assign to config.home.uid
   options.home.uid = mkOption {
@@ -60,11 +60,21 @@ in {
     # Create home folders (persisted)
     xdg = with config.home; {
       enable = true;
-      userDirs.enable = true;
       cacheHome = "${homeDirectory}/.cache";
       configHome = "${homeDirectory}/.config";
       dataHome = "${homeDirectory}/.local/share";
       stateHome = "${homeDirectory}/.local/state";
+      userDirs = {
+        enable = mkDefault true;
+        download = mkDefault scratchDirectory;
+        desktop = mkDefault storageDirectory;
+        documents = mkDefault "${storageDirectory}/Documents";
+        music = mkDefault "${storageDirectory}/Music";
+        pictures = mkDefault "${storageDirectory}/Pictures";
+        publicShare = mkDefault "${storageDirectory}/Share";
+        templates = mkDefault "${storageDirectory}/Templates";
+        videos = mkDefault "${storageDirectory}/Movies";
+      };
     };
   };
 }
