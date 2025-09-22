@@ -4,32 +4,42 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  inherit (lib) mkOption types;
+in {
   # Lookup uid from flake.users.jon.uid and assign to config.home.uid
-  options.home.uid = let
-    inherit (lib) mkOption types;
-    inherit (config.home) username;
-  in
-    mkOption {
-      type = with types; nullOr int;
-      default = osConfig.users.users.${username}.uid or null;
-    };
+  options.home.uid = mkOption {
+    type = with types; nullOr int;
+    default = osConfig.users.users.${config.home.username}.uid or null;
+  };
 
   # Calculate offet added to ports (uid - 1000) and assign to config.home.offset
-  options.home.offset = let
-    inherit (lib) mkOption types;
-    uid =
-      if config.home.uid == null
-      then 1000
-      else config.home.uid;
-  in
-    mkOption {
-      type = with types; nullOr int;
-      default =
-        if uid >= 1000
-        then uid - 1000
-        else 0;
-    };
+  options.home.offset = mkOption {
+    type = with types; nullOr int;
+    default = let
+      uid =
+        if config.home.uid == null
+        then 1000
+        else config.home.uid;
+    in
+      if uid >= 1000
+      then uid - 1000
+      else 0;
+  };
+
+  # Convenience option for home storage directory (persists with snapshots)
+  options.home.storageDirectory = mkOption {
+    description = "Path to home storage directory";
+    type = types.str;
+    default = "${config.home.homeDirectory}/storage";
+  };
+
+  # Convenience option for home scratch directory (persists without snapshots)
+  options.home.scratchDirectory = mkOption {
+    description = "Path to home scratch directory";
+    type = types.str;
+    default = "${config.home.homeDirectory}/scratch";
+  };
 
   # ---------------------------------------------------------------------------
   # User Configuration
@@ -48,15 +58,13 @@
     home.packages = [pkgs.xdg-user-dirs];
 
     # Create home folders (persisted)
-    xdg = let
-      home = config.home.homeDirectory;
-    in {
+    xdg = with config.home; {
       enable = true;
       userDirs.enable = true;
-      cacheHome = "${home}/.cache";
-      configHome = "${home}/.config";
-      dataHome = "${home}/.local/share";
-      stateHome = "${home}/.local/state";
+      cacheHome = "${homeDirectory}/.cache";
+      configHome = "${homeDirectory}/.config";
+      dataHome = "${homeDirectory}/.local/share";
+      stateHome = "${homeDirectory}/.local/state";
     };
   };
 }

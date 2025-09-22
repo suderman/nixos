@@ -119,10 +119,12 @@ in {
         mapAttrs (_: user: {
           directories = unique ([
               "storage"
+              ".ssh"
             ]
             ++ user.persist.storage.directories);
           files = unique ([
               ".bashrc"
+              ".bash_history"
             ]
             ++ user.persist.storage.files);
         })

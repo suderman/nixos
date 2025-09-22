@@ -10,7 +10,7 @@ in {
     storage.path = mkOption {
       description = "Path to storage directory";
       type = types.str;
-      default = "${osConfig.persist.storage.path}/${config.home.homeDirectory}";
+      default = "${osConfig.persist.storage.path}${config.home.homeDirectory}";
     };
 
     # Files relative to ~/ home
@@ -32,7 +32,7 @@ in {
     scratch.path = mkOption {
       description = "Path to scratch directory";
       type = types.str;
-      default = "${osConfig.persist.scratch.path}/${config.home.homeDirectory}";
+      default = "${osConfig.persist.scratch.path}${config.home.homeDirectory}";
     };
 
     # Files relative to ~/ home

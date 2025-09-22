@@ -3,30 +3,27 @@
   lib,
   ...
 }: {
-  # Create home folders (persisted)
-  xdg.userDirs = let
-    home = config.home.homeDirectory;
-  in {
-    desktop = "${home}/Personal/Action"; # persist
-    download = "${home}/Downloads"; # persist
-    documents = "${home}/Personal/Documents"; # persist
-    music = "${home}/Personal/Music"; # persist
-    pictures = "${home}/Personal/Pictures"; # persist
-    videos = "${home}/Personal/Movies"; # persist
+  xdg.userDirs = with config.home; {
+    download = "${scratchDirectory}";
+    desktop = "${storageDirectory}/Action";
+    documents = "${storageDirectory}/Documents";
+    music = "${storageDirectory}/Music";
+    pictures = "${storageDirectory}/Pictures";
+    videos = "${storageDirectory}/Movies";
   };
 
-  persist.storage.directories = [
-    ".ssh"
-    "Code"
-    "Downloads"
-    "Personal"
-    "Work"
-  ];
+  # persist.storage.directories = [
+  #   ".ssh"
+  # ];
 
   persist.storage.files = [
     ".zsh_history"
-    ".bash_history"
     ".git-credentials"
+  ];
+
+  # Code cloned here, auto-whitelist for direnv
+  programs.direnv.config.whitelist.prefix = [
+    "${config.home.storageDirectory}/src"
   ];
 
   # Learning about home-manager agenix
