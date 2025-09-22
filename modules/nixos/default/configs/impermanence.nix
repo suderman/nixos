@@ -4,8 +4,8 @@
   flake,
   ...
 }: let
-  inherit (builtins) mapAttrs;
-  inherit (lib) mkAfter mkOption types unique;
+  inherit (builtins) attrNames mapAttrs;
+  inherit (lib) genAttrs mkAfter mkOption mkMerge types unique;
   users = config.home-manager.users or {};
 in {
   # Import impermanence module
@@ -131,8 +131,21 @@ in {
         users;
     };
 
-    # Persistent volumes must be marked with neededForBoot
-    fileSystems."${config.persist.path}".neededForBoot = true;
+    fileSystems = let
+      # Add extra mount option for this directory in each user
+      trashMountOption = dir:
+        genAttrs
+        (map (user: "/home/${user}/${dir}") (attrNames users))
+        (_: {options = ["x-gvfs-trash"];});
+    in
+      mkMerge [
+        # Support trash in these bind mounts
+        (trashMountOption "storage")
+        (trashMountOption "scratch")
+
+        # Persistent volumes must be marked with neededForBoot
+        {"${config.persist.path}".neededForBoot = true;}
+      ];
 
     # Allows users to allow others on their binds
     programs.fuse.userAllowOther = true;
