@@ -26,12 +26,12 @@
   ];
 
   # Learning about home-manager agenix
-  age.secrets.mysecret.rekeyFile = ./secret.age;
+  age.secrets.my-secret.rekeyFile = ./secret.age;
   home.activation.secrets = lib.hm.dag.entryAfter ["writeBoundary"] ''
     # Symlink
-    ln -sf ${config.age.secrets.mysecret.path} "${config.home.homeDirectory}/my-link.txt"
+    ln -sf ${config.age.secrets.my-secret.path} "${config.home.scratchDirectory}/my-secret-symlink.txt"
 
     # Real file copy
-    cp -f ${config.age.secrets.mysecret.path} "${config.home.homeDirectory}/my-file.txt"
+    cp -f ${config.age.secrets.my-secret.path} "${config.home.scratchDirectory}/my-secret-file.txt"
   '';
 }

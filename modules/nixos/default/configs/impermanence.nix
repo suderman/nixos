@@ -4,7 +4,7 @@
   flake,
   ...
 }: let
-  inherit (builtins) attrNames mapAttrs;
+  inherit (builtins) attrNames baseNameOf mapAttrs;
   inherit (lib) genAttrs mkAfter mkOption mkMerge types unique;
   users = config.home-manager.users or {};
 in {
@@ -140,8 +140,8 @@ in {
     in
       mkMerge [
         # Support trash in these bind mounts
-        (trashMountOption "storage")
-        (trashMountOption "scratch")
+        (trashMountOption (baseNameOf config.persist.storage.path))
+        (trashMountOption (baseNameOf config.persist.scratch.path))
 
         # Persistent volumes must be marked with neededForBoot
         {"${config.persist.path}".neededForBoot = true;}

@@ -5,41 +5,23 @@
   ...
 }: let
   cfg = config.programs.yazi;
+  inherit (builtins) baseNameOf;
   inherit (lib) mkIf;
-  plugins = {
-    # https://github.com/yazi-rs/plugins/
-    yazi = pkgs.fetchFromGitHub {
-      owner = "yazi-rs";
-      repo = "plugins";
-      rev = "40eafa3e4c7383db865ac1d61bbc0fa22be0ef01";
-      hash = "sha256-Ey3lDmhFLpp/sD3sC/kNgsN7JZz+i2dU+bvqKODOxzo=";
-    };
-
-    # https://github.com/boydaihungst/simple-mtpfs.yazi
-    simple-mtpfs = pkgs.fetchFromGitHub {
-      owner = "boydaihungst";
-      repo = "simple-mtpfs.yazi";
-      rev = "eb21ae5b73ea08d62e07256e92a89b1b4a0b81fd";
-      hash = "sha256-s+fNoH5wuhk43qxPplYECSX/aWFG2UWEHkow32xsacM=";
-    };
-
-    # https://github.com/Rolv-Apneseth/starship.yazi
-    starship = pkgs.fetchFromGitHub {
-      owner = "Rolv-Apneseth";
-      repo = "starship.yazi";
-      rev = "247f49da1c408235202848c0897289ed51b69343";
-      hash = "sha256-0J6hxcdDX9b63adVlNVWysRR5htwAtP5WhIJ2AK2+Gs=";
-    };
-  };
 in {
   config = mkIf cfg.enable {
     programs.yazi = {
       shellWrapperName = "y";
 
       plugins = {
-        chmod = "${plugins.yazi}/chmod.yazi";
-        simple-mtpfs = plugins.simple-mtpfs;
-        starship = plugins.starship;
+        mount = pkgs.yaziPlugins.mount;
+        chmod = pkgs.yaziPlugins.chmod;
+        starship = pkgs.yaziPlugins.starship;
+        gvfs = pkgs.fetchFromGitHub {
+          owner = "boydaihungst";
+          repo = "gvfs.yazi";
+          rev = "f07b496922c25c89c62305a292c6a53ccb4670cd";
+          hash = "sha256-s+fNoH5wuhk43qxPplYECSX/aWFG2UWEHkow32xsacM=";
+        };
       };
 
       enableBashIntegration = true;
@@ -47,7 +29,7 @@ in {
       enableNushellIntegration = true;
       enableFishIntegration = true;
 
-      settings.manager = {
+      settings.mgr = {
         sort_dir_first = true;
         linemode = "permissions";
         ratio = [1 3 4];
@@ -61,12 +43,52 @@ in {
         image_quality = 90;
       };
 
-      keymap.manager.prepend_keymap = [
+      keymap.mgr.prepend_keymap = [
         {
           run = "remove --force";
           on = ["d"];
         }
       ];
+      theme.icon.append_dirs = with config.xdg.userDirs; [
+        {
+          name = baseNameOf desktop; # XDG_DESKTOP_DIR
+          text = "";
+        }
+        {
+          name = baseNameOf download; # XDG_DOWNLOAD_DIR
+          text = "";
+        }
+        {
+          name = baseNameOf music; # XDG_MUSIC_DIR
+          text = "";
+        }
+        {
+          name = baseNameOf pictures; # XDG_PICTURES_DIR
+          text = "";
+        }
+        {
+          name = baseNameOf documents; # XDG_DOCUMENTS_DIR
+          text = "󰷏";
+        }
+        {
+          name = baseNameOf publicShare; # XDG_PUBLICSHARE_DIR
+          text = "";
+        }
+        {
+          name = baseNameOf videos; # XDG_VIDEOS_DIR
+          text = "";
+        }
+        {
+          name = baseNameOf extraConfig.XDG_DEVELOPMENT_DIR;
+          text = "";
+        }
+      ];
+
+      initLua =
+        # lua
+        ''
+
+        '';
     };
   };
 }

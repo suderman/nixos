@@ -2,10 +2,9 @@
   config,
   osConfig,
   lib,
-  pkgs,
   ...
 }: let
-  inherit (lib) mkDefault mkOption types;
+  inherit (lib) mkOption types;
 in {
   # Lookup uid from flake.users.jon.uid and assign to config.home.uid
   options.home.uid = mkOption {
@@ -27,20 +26,6 @@ in {
       else 0;
   };
 
-  # Convenience option for home storage directory (persists with snapshots)
-  options.home.storageDirectory = mkOption {
-    description = "Path to home storage directory";
-    type = types.str;
-    default = "${config.home.homeDirectory}/storage";
-  };
-
-  # Convenience option for home scratch directory (persists without snapshots)
-  options.home.scratchDirectory = mkOption {
-    description = "Path to home scratch directory";
-    type = types.str;
-    default = "${config.home.homeDirectory}/scratch";
-  };
-
   # ---------------------------------------------------------------------------
   # User Configuration
   # ---------------------------------------------------------------------------
@@ -50,31 +35,8 @@ in {
 
     # Additional env variables
     home.sessionVariables = {
-      # Accept agreements for unfree software (when installing impertively)
+      # Accept agreements for unfree software (when installing imperatively)
       NIXPKGS_ALLOW_UNFREE = "1";
-    };
-
-    # xdg-user-dirs are better supported with this
-    home.packages = [pkgs.xdg-user-dirs];
-
-    # Create home folders (persisted)
-    xdg = with config.home; {
-      enable = true;
-      cacheHome = "${homeDirectory}/.cache";
-      configHome = "${homeDirectory}/.config";
-      dataHome = "${homeDirectory}/.local/share";
-      stateHome = "${homeDirectory}/.local/state";
-      userDirs = {
-        enable = mkDefault true;
-        download = mkDefault scratchDirectory;
-        desktop = mkDefault storageDirectory;
-        documents = mkDefault "${storageDirectory}/Documents";
-        music = mkDefault "${storageDirectory}/Music";
-        pictures = mkDefault "${storageDirectory}/Pictures";
-        publicShare = mkDefault "${storageDirectory}/Share";
-        templates = mkDefault "${storageDirectory}/Templates";
-        videos = mkDefault "${storageDirectory}/Movies";
-      };
     };
   };
 }
