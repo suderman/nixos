@@ -1,8 +1,4 @@
-{
-  config,
-  flake,
-  ...
-}: {
+{flake, ...}: {
   imports = [
     flake.homeModules.default
     flake.homeModules.desktops.hyprland
@@ -33,4 +29,10 @@
     enable = true;
     secret = ./withings-sync.age;
   };
+
+  # File sync
+  services.syncthing.enable = true;
+
+  # Music daemon
+  services.mpd.enable = true;
 }

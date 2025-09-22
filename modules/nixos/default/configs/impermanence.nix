@@ -20,10 +20,16 @@ in {
       example = false;
     };
 
+    path = mkOption {
+      description = "Path to main mount";
+      type = types.str;
+      default = "/mnt/main"; # needed for boot
+    };
+
     storage.path = mkOption {
       description = "Path to storage directory";
       type = types.str;
-      default = "/mnt/main/storage";
+      default = "${config.persist.path}/storage";
     };
 
     # Files relative to / root
@@ -45,7 +51,7 @@ in {
     scratch.path = mkOption {
       description = "Path to scratch directory";
       type = types.str;
-      default = "/mnt/main/scratch";
+      default = "${config.persist.path}/scratch";
     };
 
     # Files relative to / root
@@ -74,6 +80,7 @@ in {
       # System directories
       directories = unique ([
           "/var/log"
+          "/var/lib/systemd/coredump"
         ]
         ++ config.persist.scratch.directories);
 
@@ -83,7 +90,10 @@ in {
       # Persist user data
       users =
         mapAttrs (_: user: {
-          directories = unique user.persist.scratch.directories;
+          directories = unique ([
+              "scratch"
+            ]
+            ++ user.persist.scratch.directories);
           files = unique user.persist.scratch.files;
         })
         users;
@@ -98,7 +108,6 @@ in {
       directories = unique ([
           "/etc/nixos"
           "/var/lib/nixos"
-          "/var/lib/systemd/coredump"
         ]
         ++ config.persist.storage.directories);
 
@@ -108,13 +117,10 @@ in {
       # Persist user data
       users =
         mapAttrs (_: user: {
-          # User directories
           directories = unique ([
-              "Downloads"
+              "storage"
             ]
             ++ user.persist.storage.directories);
-
-          # User files
           files = unique ([
               ".bashrc"
             ]
@@ -124,7 +130,7 @@ in {
     };
 
     # Persistent volumes must be marked with neededForBoot
-    fileSystems."/mnt/main".neededForBoot = true;
+    fileSystems."${config.persist.path}".neededForBoot = true;
 
     # Allows users to allow others on their binds
     programs.fuse.userAllowOther = true;
