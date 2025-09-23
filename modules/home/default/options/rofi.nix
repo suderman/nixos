@@ -1,3 +1,4 @@
+# config.programs.rofi.enable = true;
 {
   config,
   lib,
@@ -6,7 +7,7 @@
 }: let
   cfg = config.programs.rofi;
   ini = pkgs.formats.ini {};
-  inherit (lib) concatStringsSep getExe mkDefault mkOption types;
+  inherit (lib) concatStringsSep getExe mkDefault mkOption mkIf types;
 in {
   options.programs.rofi = {
     extraSinks = mkOption {
@@ -19,7 +20,7 @@ in {
     };
   };
 
-  config = {
+  config = mkIf cfg.enable {
     wayland.windowManager.hyprland.settings = let
       combi = "rofi-toggle -show combi";
       blezz = "rofi-toggle -show blezz -auto-select -matching normal -theme-str 'window {width: 50%;}'";
@@ -27,10 +28,10 @@ in {
     in {
       bindr = ["super, Super_L, exec, ${combi}"];
       bind = [
+        ", XF86AudioMedia, exec, ${sinks}"
         "super, space, exec, ${combi}"
         "super+alt, space, exec, ${blezz}"
         # "super, slash, exec, ${blezz}"
-        ", XF86AudioMedia, exec, ${sinks}"
       ];
       bindsn = [
         "super_l, a&s, exec, ${sinks}"
@@ -60,7 +61,6 @@ in {
     };
 
     programs.rofi = {
-      enable = true;
       package = pkgs.rofi-wayland;
       # plugins = with pkgs; [ rofi-calc rofi-emoji rofimoji rofi-blezz ];
       plugins = with pkgs; [rofi-calc rofi-emoji-wayland rofimoji rofi-blezz];

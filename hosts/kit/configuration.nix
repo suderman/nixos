@@ -1,30 +1,27 @@
 {
   config,
-  pkgs,
-  lib,
-  perSystem,
   flake,
   ...
-}: let
-  inherit (builtins) mapAttrs;
-  inherit (lib) mkOption types;
-  inherit (perSystem.self) mkApplication;
-in {
+}: {
   imports = [
     ./hardware-configuration.nix
     ./disk-configuration.nix
-    flake.nixosModules.default
     flake.nixosModules.hardware.rtx-4070-ti-super
+    flake.nixosModules.default
     flake.nixosModules.desktops.hyprland
-    flake.nixosModules.desktops.gaming
+    ./services.nix
+    ./homelab.nix
   ];
-  networking.domain = "home";
-  networking.firewall.allowPing = true;
 
-  # Use the systemd-boot EFI boot loader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.systemd-boot.consoleMode = "max";
-  boot.loader.efi.canTouchEfiVariables = true;
+  # Boot with newfangled systemd-boot
+  boot.loader = {
+    systemd-boot.enable = true;
+    systemd-boot.consoleMode = "max";
+    efi.canTouchEfiVariables = true;
+  };
+
+  # Always at home in my office
+  networking.domain = "home";
 
   # Sound & Bluetooth
   hardware.bluetooth.enable = true;
@@ -40,55 +37,10 @@ in {
     powerKeyLongPress = "poweroff";
   };
 
-  # ---
-
-  # Screen sharing
-  services.sunshine = {
-    enable = false;
-    autoStart = true;
-    capSysAdmin = true; # only needed for Wayland -- omit this when using with Xorg
-    openFirewall = true;
-  };
-
-  # Enable ollama server
-  services.ollama = {
-    enable = false;
-    host = "0.0.0.0";
-    openFirewall = true; # allow network access
-    acceleration = "cuda";
-    package = pkgs.ollama-cuda; # gpu power
-    models = "/data/models/ollama"; # model storage on separate disk
-  };
-
-  # https://chat.kit/
-  services.open-webui = {
-    enable = false;
-    package = pkgs.stable.open-webui; # https://github.com/NixOS/nixpkgs/issues/380636
-    port = 11111; # default is 8080
-  };
-  # services.traefik.proxy."chat" = config.services.open-webui.port;
-
-  # environment.systemPackages = with pkgs; [ goose-cli ];
-
-  services.btrbk = {
-    volumes = with config.networking; {
-      "/mnt/main" = ["ssh://fit/mnt/pool/backups/${hostName}" "ssh://eve/mnt/pool/backups/${hostName}"];
-      "/mnt/data" = ["ssh://fit/mnt/pool/backups/${hostName}"];
-      "/mnt/game" = [];
-    };
-    # volumes = {
-    #   "/mnt/main" = ["ssh://fit/mnt/pool/backups/kit" "ssh://eve/mnt/pool/backups/kit"];
-    #   "/mnt/data" = ["ssh://fit/mnt/pool/backups/kit"];
-    #   "/mnt/game" = [];
-    # }
-    # "/mnt/main".subvolume."storage" = {};
-    # "/mnt/data".subvolume."storage" = {};
-    # "/mnt/game".subvolume."storage" = {};
-    # };
-    # backups = with config.networking; {
-    #   "/mnt/main".subvolume."storage" = {};
-    #   "/mnt/main".target."ssh://fit/backups/${hostName}" = {};
-    #   "/mnt/main".target."ssh://eve/backups/${hostName}" = {};
-    # };
+  # Snapshots and backups
+  services.btrbk.volumes = with config.networking; {
+    "/mnt/main" = ["ssh://fit/mnt/pool/backups/${hostName}" "ssh://eve/mnt/pool/backups/${hostName}"];
+    "/mnt/data" = ["ssh://fit/mnt/pool/backups/${hostName}"];
+    "/mnt/game" = [];
   };
 }

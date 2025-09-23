@@ -35,6 +35,7 @@ in {
     firefox.enable = true; # alt browser
     kitty.enable = true; # term
     mpv.enable = true; # media player
+    rofi.enable = true; # launcher
     yazi.enable = true; # file manager tui
     zwift.enable = true; # fitness
   };

@@ -148,7 +148,7 @@ in {
       serviceConfig.Type = "oneshot";
       script = ''
         chown blocky:blocky ${cfg.dataDir}/*.txt
-        ${blocky} lists refresh
+        ${blocky} lists refresh || true
       '';
     };
 

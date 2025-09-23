@@ -1,38 +1,43 @@
-{flake, ...}: {
+{
+  config,
+  flake,
+  ...
+}: {
   imports = [
     flake.homeModules.default
-    flake.homeModules.desktops.hyprland
     flake.homeModules.users.jon
+    flake.homeModules.desktops.hyprland
   ];
 
-  # embedded display (laptop)
-  wayland.windowManager.hyprland.settings.monitor = [
-    "eDP-1, 2256x1504@59.9990001, 500x1440, 1.333333"
-  ];
-  # Set to false if plugins barf notification errors
-  wayland.windowManager.hyprland.enablePlugins = false;
-
-  programs.home-assistant = {
-    enable = true;
-    url = "https://hass.cog";
+  # Hyprland embedded display (laptop)
+  wayland.windowManager.hyprland = {
+    settings.monitor = ["eDP-1, 2256x1504@59.9990001, 500x1440, 1.333333"];
+    enablePlugins = false; # set false if plugins barf errors
   };
 
-  programs.jellyfin = {
-    enable = true;
-    url = "https://jellyfin.cog";
-  };
+  # Override homm-assistant client with local instance
+  programs.home-assistant.url = "https://hass.cog";
+
+  # Override jellyfin client with local instance
+  programs.jellyfin.url = "https://jellyfin.cog";
+
+  # Wallet
   programs.sparrow.enable = true;
+
+  # Gaming
   programs.steam.enable = true;
   programs.dolphin-emu.enable = true;
 
+  # User services
+  services.mpd.enable = true;
+  services.syncthing.enable = true;
   services.withings-sync = {
     enable = true;
     secret = ./withings-sync.age;
   };
-
-  # File sync
-  services.syncthing.enable = true;
-
-  # Music daemon
-  services.mpd.enable = true;
+  services.garmin = {
+    enable = true;
+    deviceId = "091e_4cda_0000cb7d522d";
+    dataDir = "${config.home.storageDirectory}/fenix";
+  };
 }

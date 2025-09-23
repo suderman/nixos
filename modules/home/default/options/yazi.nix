@@ -45,10 +45,15 @@ in {
 
       keymap.mgr.prepend_keymap = [
         {
-          run = "remove --force";
+          on = "M";
+          run = "plugin mount";
+        }
+        {
           on = ["d"];
+          run = "remove --force";
         }
       ];
+
       theme.icon.append_dirs = with config.xdg.userDirs; [
         {
           name = baseNameOf desktop; # XDG_DESKTOP_DIR

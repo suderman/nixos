@@ -12,12 +12,14 @@
     flake.nixosModules.desktops.hyprland
   ];
 
+  # Boot with good ol' grub
   boot.loader = {
     grub.enable = true;
     grub.efiSupport = true;
     grub.efiInstallAsRemovable = true;
   };
 
+  # Mobile computing
   networking.domain = "tail";
 
   # Use freshest kernel
@@ -68,6 +70,7 @@
     keyboard = config.services.keyd.internalKeyboards.framework;
   };
 
+  # Experiments
   services.gitea.enable = true;
   services.grafana.enable = true;
   services.home-assistant = {
@@ -75,8 +78,8 @@
     name = "hass";
     ip = flake.networking.zones.tail.cog;
   };
-  services.jellyfin.enable = true;
-  services.tandoor-recipes.enable = true;
-  # services.whoogle.enable = true;
+  services.jellyfin.enable = false;
+  services.tandoor-recipes.enable = false;
+  services.whoogle.enable = false;
   services.tiddlywiki.enable = true;
 }

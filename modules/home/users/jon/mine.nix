@@ -1,11 +1,11 @@
 {
-  osConfig,
+  config,
   pkgs,
   perSystem,
   ...
 }: let
   inherit (perSystem.self) mkScript;
-  inherit (osConfig.networking) hostName;
+  inherit (config.networking) hostName;
 
   xmrigd = mkScript {
     name = "xmrigd";
@@ -17,10 +17,6 @@
     '';
   };
 in {
-  # age.secrets = {
-  #   btc-env.file = config.secrets.files."btc-env";
-  # };
-
   home.packages = with pkgs; [
     xmrig
     xmrigd
