@@ -19,10 +19,10 @@ in {
   options.services.btrbk.volumes = mkOption {
     type = types.attrs;
     default = {
-      "/mnt/main" = [];
+      "${config.persist.path}" = [];
     };
     example = {
-      "/mnt/main" = ["ssh://eve/mnt/pool/backups/${config.networking.hostName}"];
+      "${config.persist.path}" = ["ssh://eve/mnt/pool/backups/${config.networking.hostName}"];
     };
   };
 
@@ -59,8 +59,8 @@ in {
             snapshot_preserve_min = "6h";
             snapshot_preserve = "48h 7d 4w";
             volume =
-              builtins.mapAttrs (_: _: {
-                subvolume.storage = {};
+              builtins.mapAttrs (path: _targets: {
+                subvolume.storage.snapshot_name = builtins.baseNameOf path;
               })
               cfg.volumes;
           };
@@ -78,8 +78,8 @@ in {
             target_preserve_min = "1d";
             target_preserve = "7d 4w 6m";
             volume =
-              builtins.mapAttrs (_: targets: {
-                subvolume.storage = {};
+              builtins.mapAttrs (path: targets: {
+                subvolume.storage.snapshot_name = builtins.baseNameOf path;
                 target = builtins.listToAttrs (map (t: {
                     name = t;
                     value = {};
