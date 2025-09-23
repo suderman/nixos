@@ -5,8 +5,6 @@
   ...
 }: let
   cfg = config.programs.chromium;
-  oscfg = osConfig.programs.chromium;
-  inherit (builtins) attrNames;
   inherit (lib) concatStringsSep mkOption types;
 
   # Add these switches to the wrapper or config
@@ -16,7 +14,9 @@
 
     # Convert extension names to comma-separated directories
     unpackedExtensionsDirs = concatStringsSep "," (
-      map (name: "${oscfg.crxDir}/${name}/extension") (attrNames cfg.unpackedExtensions)
+      map
+      (name: "${osConfig.programs.chromium.dataDir}/${name}/extension")
+      (builtins.attrNames cfg.unpackedExtensions)
     );
 
     # Enable these features in chromium

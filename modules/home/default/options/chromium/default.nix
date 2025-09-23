@@ -92,7 +92,7 @@ in {
     systemd.user = let
       inherit (perSystem.self) mkScript;
       extNames = builtins.attrNames (cfg.externalExtensions // cfg.unpackedExtensions);
-      crxDir = osConfig.programs.chromium.crxDir;
+      crxDir = osConfig.programs.chromium.dataDir;
       extDir = "${cfg.dataDir}/External Extensions";
     in {
       # Symlink extensions from persistent storage

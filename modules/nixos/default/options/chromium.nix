@@ -2,22 +2,23 @@
   config,
   lib,
   pkgs,
+  flake,
   ...
 }: let
   cfg = config.programs.chromium;
-  inherit (builtins) attrNames any foldl';
   inherit (lib) mkIf mkOption types;
-  users = config.home-manager.users or {};
 
   # All enabled extensions from all home-manager users
-  extensions = foldl' (acc: user: let
+  users = config.home-manager.users or {};
+  extensions = builtins.foldl' (acc: user: let
     cfg = users.${user}.programs.chromium or {};
     exts = (cfg.externalExtensions or {}) // (cfg.unpackedExtensions or {});
   in
-    acc // exts) {} (attrNames users);
+    acc // exts) {} (builtins.attrNames users);
 
   # If any home-manager chromium is enabled for any user, set this to true
-  enable = any (user: users.${user}.programs.chromium.enable or false) (attrNames users);
+  # enable = any (user: users.${user}.programs.chromium.enable or false) (attrNames users);
+  enable = flake.lib.anyUser config (user: user.programs.chromium.enable);
 in {
   options.programs.chromium = {
     package = mkOption {
@@ -25,10 +26,10 @@ in {
       type = types.package;
       default = pkgs.ungoogled-chromium;
     };
-    crxDir = mkOption {
+    dataDir = mkOption {
       description = "Path to directory where extensions are loaded from";
       type = types.path;
-      default = "${config.persist.storage.path}/crx";
+      default = "/var/lib/chromium";
     };
   };
 
@@ -77,7 +78,7 @@ in {
           ++ map
           (name: {
             inherit name;
-            url = "file://${cfg.crxDir}/${name}/extension.crx";
+            url = "file://${cfg.dataDir}/${name}/extension.crx";
           })
           (builtins.attrNames extensions);
       };
@@ -88,9 +89,12 @@ in {
       };
     };
 
+    # Persist downloaded crx extensions
+    persist.storage.directories = [cfg.dataDir];
+
     # Downloads extensions found in home-manager and builds expected json for each
-    systemd.services.crx = {
-      description = "crx";
+    systemd.services.chromium = {
+      description = "Fetch chromium extensions";
       after = ["multi-user.target"];
       requires = ["multi-user.target"];
       wantedBy = ["sysinit.target"];
@@ -116,7 +120,7 @@ in {
           update() {
 
             # First arg is crx name, create directory
-            dir="${cfg.crxDir}/$1"
+            dir="${cfg.dataDir}/$1"
             mkdir -p $dir; cd $dir
 
             # Second arg is crx url, download extension and validate id
@@ -148,17 +152,17 @@ in {
         + ''
 
           # Trigger user services to symlink extensions
-          date > ${cfg.crxDir}/last
+          date > ${cfg.dataDir}/last
         '';
     };
 
     # Run this script every day
-    systemd.timers.crx = {
+    systemd.timers.chromium = {
       wantedBy = ["timers.target"];
-      partOf = ["crx.service"];
+      partOf = ["chromium.service"];
       timerConfig = {
         OnCalendar = "daily";
-        Unit = "crx.service";
+        Unit = "chromium.service";
       };
     };
   };
