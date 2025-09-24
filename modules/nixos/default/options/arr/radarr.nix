@@ -27,7 +27,7 @@ in {
     services.traefik.proxy.${name} = "http://127.0.0.1:${toString port}";
 
     # Persist data between reboots
-    persist.storage.directories = [cfg.dataDir];
+    persist.storage.directories = [arr.dataDir];
 
     services.prometheus = {
       exporters."exportarr-${name}" = {

@@ -30,7 +30,7 @@ in {
     };
 
     # Persist data between reboots
-    persist.storage.directories = [cfg.dataDir];
+    persist.storage.directories = ["/var/lib/sabnzbd"];
 
     services.prometheus = {
       exporters."${name}" = {
