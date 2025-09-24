@@ -1,3 +1,6 @@
 {flake, ...}: {
-  imports = [flake.homeModules.default];
+  imports = [
+    flake.homeModules.default
+    flake.homeModules.users.jon
+  ];
 }
