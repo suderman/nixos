@@ -6,7 +6,7 @@
 .direnv
 *.qcow2
 *.img
-/id_age
-/id_age_
-/id_age.age
+/secrets/id_age
+/secrets/id_age_
+/secrets/id_age.age
 ssh_host_ed25519_key

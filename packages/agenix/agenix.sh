@@ -55,15 +55,15 @@ agenix_help() {
   cat <<EOF
 
 EXTENDED COMMANDS:
-  import                  Import a QR-derived age identity to id_age.age
-  unlock                  Unlock id_age.age to /tmp/id_age
+  import                  Import a QR-derived age identity to secrets/id_age.age
+  unlock                  Unlock secrets/id_age.age to /tmp/id_age
   lock                    Remove temporary age identity from /tmp/id_age
-  hex                     Output decrypted hex.age using age identity
+  hex                     Output decrypted secrets/hex.age using age identity
   verify [DIR]            Verify match in directory's id_age & id_age.pub
 EOF
 }
 
-# Import 32 byte hex from QR saved as hex.age and generate identity id_age.age
+# Import 32 byte hex from QR saved as secrets/hex.age and generate identity secrets/id_age.age
 agenix_import() {
 
   # Confirm derivation path
@@ -94,35 +94,35 @@ agenix_import() {
   fi
 
   # Delete id_age.age if it exists but is empty
-  [[ ! -s id_age.age ]] &&
-    rm -f id_age.age
+  [[ ! -s secrets/id_age.age ]] &&
+    rm -f secrets/id_age.age
 
-  # Confirm to overwrite existing id_age.age
-  [[ -f id_age.age ]] &&
-    gum confirm "./id_age.age already exists. Overwrite?"
+  # Confirm to overwrite existing secrets/id_age.age
+  [[ -f secerts/id_age.age ]] &&
+    gum confirm "./secrets/id_age.age already exists. Overwrite?"
 
   # Write a password-protected copy of the age identity
-  derive age <<<"$hex" | age -e -p >id_age.age
+  derive age <<<"$hex" | age -e -p >secrets/id_age.age
   gum_info "Private age identity written:"
-  gum_show "./id_age.age"
+  gum_show "./secrets/id_age.age"
 
   # Write the age identity's public key
-  derive age <<<"$hex" | derive public >id_age.pub
-  git add id_age.pub 2>/dev/null || true
+  derive age <<<"$hex" | derive public >secrets/id_age.pub
+  git add secrets/id_age.pub 2>/dev/null || true
   gum_info "Public age identity written:"
-  gum_show "./id_age.pub"
+  gum_show "./secrets/id_age.pub"
 
   # Write the 32-byte hex (protected by age identity)
-  age -e -R id_age.pub <<<"$hex" >hex.age
-  git add hex.age 2>/dev/null || true
+  age -e -R secrets/id_age.pub <<<"$hex" >secrets/hex.age
+  git add secrets/hex.age 2>/dev/null || true
   gum_info "Private 32-byte hex written:"
-  gum_show "./hex.age"
+  gum_show "./secrets/hex.age"
 
   # Unlock the id right away
   derive age <<<"$hex" | agenix_unlock
 }
 
-# Decrypt id_age.age to /tmp/id_age using passhrase
+# Decrypt secrets/id_age.age to /tmp/id_age using passhrase
 agenix_unlock() {
 
   # If quiet and the decrypted age identity already exists, stop here
@@ -135,8 +135,8 @@ agenix_unlock() {
 
   # Attempt to decrypt age identity using passphrse
   if [[ -z "$id" ]]; then
-    [[ ! -f id_age.age ]] && gum_exit "./id_age.age missing"
-    id="$(age -d <id_age.age 2>/dev/null || true)"
+    [[ ! -f secrets/id_age.age ]] && gum_exit "./secrets/id_age.age missing"
+    id="$(age -d <secrets/id_age.age 2>/dev/null || true)"
     [[ -z "$id" ]] && gum_exit "Incorrect passphrase"
   fi
 
@@ -171,11 +171,11 @@ agenix_lock() {
     "🔒 Age identity locked"
 }
 
-# Output decrypted hex.age (32-byte hex)
+# Output decrypted secrets/hex.age (32-byte hex)
 agenix_hex() {
-  [[ ! -f hex.age ]] && gum_exit "./hex.age missing"
+  [[ ! -f secrets/hex.age ]] && gum_exit "./secrets/hex.age missing"
   agenix_unlock quiet
-  age -d -i /tmp/id_age <hex.age
+  age -d -i /tmp/id_age <secrets/hex.age
 }
 
 # Check if directory with id_age and id_age.pub are valid match

@@ -1,6 +1,5 @@
 {
   config,
-  lib,
   flake,
   ...
 }: {
@@ -23,8 +22,9 @@
       inherit (config.networking) hostName;
       username = config.home.username or "";
       target =
-        lib.concatStringsSep "-"
-        (builtins.filter (s: s != "") [hostName username]);
+        if builtins.hasAttr "home" config
+        then "home/${hostName}-${username}"
+        else "nixos/${hostName}";
     in {
       # Master identity decrypted to /tmp/id_age for rekeying
       # > agenix unlock
@@ -41,7 +41,7 @@
         then readFile agePub
         else if pathExists sshPub
         then readFile sshPub
-        else readFile (flake + /id_age.pub);
+        else readFile (flake + /secrets/id_age.pub);
 
       storageMode = "local";
       localStorageDir = flake + /secrets/${target};
