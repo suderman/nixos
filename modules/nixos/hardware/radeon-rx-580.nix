@@ -5,7 +5,7 @@
   ...
 }: {
   # https://github.com/NixOS/nixos-hardware/tree/master/common/gpu/amd
-  imports = [flake.inputs.hardware.common-gpu-amd];
+  imports = [flake.inputs.hardware.nixosModules.common-gpu-amd];
 
   # LTS kernel
   boot.kernelPackages = pkgs.linuxPackages_6_12;
