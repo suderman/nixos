@@ -1,5 +1,0 @@
-analytics.google.com
-4chan.org
-7chan.org
-8chan.moe
-8kun.top
