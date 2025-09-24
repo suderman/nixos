@@ -3,11 +3,16 @@
 - `10.1.0.1` Unifi Router - USG 3P
 - `10.1.0.2` Unifi Switch - US 8 150W
 - `10.1.0.3` Unifi Access Point - nanoHD
-- `10.1.0.4` 2013 Intel NUC - NixOS 24.11 ([hub](https://github.com/suderman/nixos/tree/main/configurations/hub))
-- `10.1.0.5` 2021 Intel NUC - NixOS 24.11 ([lux](https://github.com/suderman/nixos/tree/main/configurations/lux))
-- `10.1.0.6` 2024 FormD T1 Desktop - NixOS Unstable ([kit](https://github.com/suderman/nixos/tree/main/configurations/kit))
-- `10.1.0.7` 2009 Mac Pro - NixOS 24.11 ([fit](https://github.com/suderman/nixos/tree/main/configurations/fit))
+- `10.1.0.4` 2013 Intel NUC - NixOS
+  ([hub](https://github.com/suderman/nixos/tree/main/hosts/hub))
+- `10.1.0.5` 2021 Intel NUC - NixOS
+  ([lux](https://github.com/suderman/nixos/tree/main/hosts/lux))
+- `10.1.0.6` 2024 FormD T1 Desktop - NixOS
+  ([kit](https://github.com/suderman/nixos/tree/main/hosts/kit))
+- `10.1.0.7` 2009 Mac Pro - NixOS
+  ([fit](https://github.com/suderman/nixos/tree/main/hosts/fit))
 - `10.1.0.8` Universal Devices - ISY-944i
+- `10.1.0.9` 2020 MacBook Air - macOS
 
 ## Router Configuration
 
@@ -15,9 +20,9 @@
 <summary><b>Unifi Devices</b></summary>
 
 |               | https://10.1.0.4:8443/manage/default/devices |
-| ------------- | ----------------------------------------------------- |
-| Unifi Devices |  _(see below)_                                        |
-  
+| ------------- | -------------------------------------------- |
+| Unifi Devices | _(see below)_                                |
+
 | Name   | Device    | Static IP | Subnet Mask   | Gateway  | Preferred DNS |
 | ------ | --------- | --------- | ------------- | -------- | ------------- |
 | logos  | USG 3P    | 10.1.0.1  | -             | -        | -             |
@@ -28,16 +33,16 @@
 
 <details>
 <summary><b>Client Devices</b></summary>
-  
-|                  | https://10.1.0.4:8443/manage/default/clients                                                       |
-| ---------------- | -------------------------------------------------------------------------------------------------- |
-| Fixed IP Address | [networks/home/default.nix](https://github.com/suderman/nixos/tree/main/networks/home/default.nix) |
+
+|                  | https://10.1.0.4:8443/manage/default/clients                                                 |
+| ---------------- | -------------------------------------------------------------------------------------------- |
+| Fixed IP Address | [zones/home/default.nix](https://github.com/suderman/nixos/tree/main/zones/home/default.nix) |
 
 </details>
 
 <details>
 <summary><b>Settings: Networks</b></summary>
-  
+
 |                 | https://10.1.0.4:8443/manage/default/settings/networks |
 | --------------- | ------------------------------------------------------ |
 | Network Name    | `home`                                                 |
@@ -58,8 +63,8 @@
 
 |               | https://10.1.0.4:8443/manage/default/settings/routing |
 | ------------- | ----------------------------------------------------- |
-| Static Routes |  _(see below)_                                        |
-  
+| Static Routes | _(see below)_                                         |
+
 | Name | Distance | Destination Network | Type     | Next Hop |
 | ---- | -------- | ------------------- | -------- | -------- |
 | tail | 5        | 100.64.0.0/10       | Next Hop | 10.1.0.4 |

@@ -1,13 +1,12 @@
-# Networks
+# Networking
 
-These are the networks I frequent. `home` and `work` both have a router I've
-configured to use a dedicated IP range, and the IP addresses on `tail` are
+These are the network zones I frequent. `home` and `work` both have a router
+I've configured to use a dedicated IP range, and the IP addresses on `tail` are
 copied from my Tailscale's dashboard.
 
-- [`home`](https://github.com/suderman/nixos/tree/main/networks/home) `10.1.x.x`
-- [`work`](https://github.com/suderman/nixos/tree/main/networks/work) `10.2.x.x`
-- [`tail`](https://github.com/suderman/nixos/tree/main/networks/tail)
-  `100.x.x.x`
+- [`home`](https://github.com/suderman/nixos/tree/main/zones/home) `10.1.x.x`
+- [`work`](https://github.com/suderman/nixos/tree/main/zones/work) `10.2.x.x`
+- [`tail`](https://github.com/suderman/nixos/tree/main/zones/tail) `100.x.x.x`
 
 ## Certificate Authority
 
@@ -18,7 +17,7 @@ this repo were created with the following commands:
 ```bash
 openssl genrsa -out ca.key 4096
 openssl req -new -x509 -nodes -extensions v3_ca -days 25568 -subj "/CN=Suderman CA" -key ca.key -out ca.crt
-cat ca.key | age -er $(derive public </tmp/id_age) > ca.age
+age -e -r $(derive public </tmp/id_age) <ca.key >ca.age
 rm ca.key
 ```
 

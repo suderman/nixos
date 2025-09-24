@@ -1,5 +1,5 @@
 {
-  description = "playing with numtide blueprint for nixos";
+  description = "NixOS system configuration & dotfiles";
 
   inputs = {
     # Nix Packages
