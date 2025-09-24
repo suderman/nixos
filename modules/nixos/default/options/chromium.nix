@@ -17,7 +17,6 @@
     acc // exts) {} (builtins.attrNames users);
 
   # If any home-manager chromium is enabled for any user, set this to true
-  # enable = any (user: users.${user}.programs.chromium.enable or false) (attrNames users);
   enable = flake.lib.anyUser config (user: user.programs.chromium.enable);
 in {
   options.programs.chromium = {

@@ -11,7 +11,7 @@
     };
   };
   age.secrets.git-credentials.rekeyFile = ./git-credentials.age;
-  home.activation.git-credentials = lib.hm.dag.entryAfter ["writeBoundary"] ''
+  home.activation.git-credentials = lib.hm.dag.entryAfter ["linkGeneration"] ''
     cat ${config.age.secrets.git-credentials.path} >${config.home.homeDirectory}/.git-credentials
   '';
 }

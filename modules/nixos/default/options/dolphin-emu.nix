@@ -2,13 +2,12 @@
   config,
   pkgs,
   lib,
+  flake,
   ...
 }: let
-  inherit (builtins) attrNames any;
   inherit (lib) mkIf;
   # If any home-manager dolphin-emu is enabled for any user, set this to true
-  users = config.home-manager.users or {};
-  enable = any (user: users.${user}.programs.dolphin-emu.enable or false) (attrNames users);
+  enable = flake.lib.anyUser config (user: user.programs.dolphin-emu.enable);
 in {
   config = mkIf enable {
     services.udev.packages = [pkgs.dolphin-emu];
