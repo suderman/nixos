@@ -9,7 +9,7 @@
   cfg = config.programs.gnome-shell;
   inherit (lib) mkOption types;
 in {
-  imports = [flake.homeModules.desktop];
+  imports = [flake.homeModules.desktops.default];
 
   options.programs.gnome-shell = with types; {
     meta = mkOption {
