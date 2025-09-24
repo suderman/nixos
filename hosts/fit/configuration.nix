@@ -14,11 +14,8 @@
     efi.canTouchEfiVariables = true;
   };
 
-  # Always at home in my gum
+  # Always at home in my gym
   networking.domain = "home";
-
-  # Bluetooth
-  hardware.bluetooth.enable = true;
 
   # Remove undesired route
   services.tailscale.deleteRoute = "10.1.0.0/16";

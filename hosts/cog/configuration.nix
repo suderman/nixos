@@ -40,19 +40,14 @@
     "/mnt/main" = ["ssh://fit/mnt/pool/backups/${config.networking.hostName}"];
   };
 
-  # Sound & Bluetooth
-  services.pipewire.enable = true;
-  security.rtkit.enable = true;
-  hardware.bluetooth.enable = true;
-
   # Laptop-specific
   services.fwupd.enable = true; # sudo fwupdmgr update
-  services.thermald.enable = true; # Lower fan noise
 
   # Power management
   services.power-profiles-daemon.enable = false;
   services.tlp.enable = true;
   services.tlp.settings.SATA_LINKPWR_ON_BAT = "max_performance";
+  services.thermald.enable = true; # Lower fan noise
 
   # Allow powerkey to be intercepted, but still poweroff for longpress
   services.logind = {
