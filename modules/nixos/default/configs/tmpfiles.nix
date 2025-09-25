@@ -75,9 +75,8 @@ in {
     (
       # tmpfiles.directories = [{ target = "/etc/foo-dir"; mode = "0775"; user = "jon"; group = "users"; }];
       # d /etc/foobaz 0755 jon users - -
-      # data.directories = [{ target = "/etc/foo-dir"; mode = "0775"; user = "jon"; group = "users"; source = "/etc/default"; }];
-      # C+ /etc/foo-default - - - - /etc/default
-      # Z  /etc/foo-default 0775 me users - -
+      # tmpfiles.directories = [{ target = "/etc/foo-dir"; mode = "0775"; user = "jon"; group = "users"; source = "/etc/default"; }];
+      # C+ /etc/foo-default 0775 me users - /etc/default
       map (x: let
         directory =
           if isString x
@@ -94,8 +93,7 @@ in {
           trim (
             if (toString source) != "-"
             then ''
-              C+ ${toString target} - - - - ${toString source}
-              Z  ${toString target} ${toMode mode} ${toString user} ${toString group} - -
+              C+ ${toString target} ${toMode mode} ${toString user} ${toString group} - ${toString source}
             ''
             else ''
               d ${toString target} ${toMode mode} ${toString user} ${toString group} - -
@@ -106,10 +104,9 @@ in {
     )
     ++ (
       # tmpfiles.files { target = "/etc/foobar"; mode = "0775"; user = "jon"; group = "users"; text = "Hello world!"; }];
-      # f+ /etc/foobar 0775 jon users - Hello worldk!
-      # data.files { target = "/etc/foo-resolv"; mode = "0775"; user = "jon"; group = "users"; source = "/etc/resolv.conf"; }];
-      # C+ /etc/foo-resolv - - - - /etc/resolv.conf
-      # z  /etc/foo-resolv 0775 jon users - -
+      # f+ /etc/foobar 0775 jon users - "Hello world!"
+      # tmpfiles.files { target = "/etc/foo-resolv"; mode = "0775"; user = "jon"; group = "users"; source = "/etc/resolv.conf"; }];
+      # C+ /etc/foo-resolv /etc/foo-resolv 0775 jon users - /etc/resolv.conf
       map (x: let
         file =
           if isString x
@@ -127,14 +124,13 @@ in {
           trim (
             if toString source != "-"
             then ''
-              C+ ${toString target} - - - - ${toString source}
-              z  ${toString target} ${toMode mode} ${toString user} ${toString group} - -
+              C+ ${toString target} ${toMode mode} ${toString user} ${toString group} - ${toString source}
             ''
             else
               (
                 if text != "-"
                 then ''
-                  f+ ${toString target} ${toMode mode} ${toString user} ${toString group} - ${toString text}
+                  f+ ${toString target} ${toMode mode} ${toString user} ${toString group} - "${toString text}"
                 ''
                 else ''
                   f ${toString target} ${toMode mode} ${toString user} ${toString group} -

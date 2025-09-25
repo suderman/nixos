@@ -64,7 +64,8 @@ in {
       (yaml
         // {
           target = "${cfg.dataDir}/configuration.yaml";
-          source = writeText "configuration.yaml" (readFile ./configuration.yaml);
+          # source = writeText "configuration.yaml" (readFile ./configuration.yaml);
+          source = ./configuration.yaml;
         })
     ];
 
