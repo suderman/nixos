@@ -1,8 +1,6 @@
 # NixOS & Home Manager modules
 
-Each of these directories are included via
-[numtide's blueprint](https://numtide.github.io/blueprint/main/getting-started/folder_structure/)
-and available under `flake.nixosModules.*` and `flake.homeModules.*`. The
+Each of these directories are available under `flake.nixosModules.*` and `flake.homeModules.*`. The
 `flake.nixosModules.default` module should be imported into every `host`
 configuration and includes shared NixOS configuration and custom module options.
 The `flake.homeModules.default` module should be imported into every `home`
@@ -17,7 +15,7 @@ home-manager modules:
 ### `config.persist`
 
 The `persist` option is a wrapper for `environment.persistence` and available
-for both NixOS and home-manager modules. Examples:
+for both [NixOS](https://github.com/suderman/nixos/blob/main/modules/nixos/default/configs/impermanence.nix) and [home-manager](https://github.com/suderman/nixos/blob/main/modules/home/default/configs/impermanence.nix) modules. Examples:
 
 ```nix
 # "storage" persists reboots and has snapshots + backups
@@ -47,7 +45,7 @@ config.persist.scratch.files = ["/opt/persist-without-backups.txt"];
 ### `config.tmpfiles`
 
 The `tmpfiles` option is a wrapper for `systemd.tmpfiles.rules` and available
-for both NixOS and home-manager modules. Examples:
+for both [NixOS](https://github.com/suderman/nixos/blob/main/modules/nixos/default/configs/tmpfiles.nix) and [home-manager](https://github.com/suderman/nixos/blob/main/modules/home/default/configs/tmpfiles.nix) modules. Examples:
 
 ```nix
 config.tmpfiles.directories = [
@@ -89,7 +87,7 @@ config.tmpfiles.symlinks = [
 
 ### `config.networking`
 
-The `networking` option was included in home-manager and extended in NixOS with
+The `networking` option was included in [home-manager](https://github.com/suderman/nixos/blob/main/modules/home/default/configs/networking.nix) and extended in [NixOS](https://github.com/suderman/nixos/blob/main/modules/nixos/default/configs/networking.nix) with
 the following options:
 
 ```nix
@@ -105,7 +103,7 @@ config.networking.addresses = ["127.0.0.1" "10.1.0.6" "100.110.44.15"];
 
 ### `config.home`
 
-The `home` option was extended in home-manager with the following options:
+The `home` option was extended in [home-manager](https://github.com/suderman/nixos/blob/main/modules/home/default/configs/home.nix) with the following options:
 
 ```nix
 # Path to home scratch directory
@@ -119,4 +117,17 @@ config.home.uid = 1000;
 
 # Calculate offet added to ports (uid - 1000)
 config.home.offset = 0;
+```
+
+### `config.services.btrbk`
+
+The `services.btrbk` module has been extended in [NixOS](https://github.com/suderman/nixos/blob/main/modules/nixos/default/options/btrbk.nix) with a new `volumes` option that declares 
+which mounts get snapshots (subvolume `storage`) and an option list of targets for backups:
+
+```nix
+services.btrbk.volumes = with config.networking; {
+  "/mnt/main" = ["ssh://fit/mnt/pool/backups/${hostName}" "ssh://eve/mnt/pool/backups/${hostName}"];
+  "/mnt/data" = ["ssh://fit/mnt/pool/backups/${hostName}"];
+  "/mnt/game" = []; # no backups, just local snapshots
+};
 ```
