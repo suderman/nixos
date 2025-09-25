@@ -77,4 +77,7 @@
   services.tandoor-recipes.enable = false;
   services.whoogle.enable = false;
   services.tiddlywiki.enable = true;
+
+  # Garmin fenix 6 pro
+  hardware.garmin.deviceId = "091e:4cda";
 }
