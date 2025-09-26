@@ -43,6 +43,7 @@ in {
 
     # Add to path for initial setup and on-demand
     home.packages = [withings-sync-wrapped];
+    persist.storage.files = [".withings_user.json"];
 
     # Run this command every couple of hours
     systemd.user = let

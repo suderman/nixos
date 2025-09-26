@@ -1,3 +1,3 @@
-# cog
+# cog ⚙
 
 Framework laptop

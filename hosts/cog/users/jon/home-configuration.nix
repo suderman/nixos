@@ -12,7 +12,7 @@
   # Hyprland embedded display (laptop)
   wayland.windowManager.hyprland = {
     settings.monitor = ["eDP-1, 2256x1504@59.9990001, 500x1440, 1.333333"];
-    enablePlugins = false; # set false if plugins barf errors
+    enablePlugins = true; # set false if plugins barf errors
   };
 
   # Override homm-assistant client with local instance
@@ -21,7 +21,7 @@
   # Override jellyfin client with local instance
   programs.jellyfin.url = "https://jellyfin.cog";
 
-  # Wallet
+  # Program
   programs.sparrow.enable = true;
 
   # Gaming
@@ -31,10 +31,6 @@
   # User services
   services.mpd.enable = true;
   services.syncthing.enable = true;
-  services.withings-sync = {
-    enable = true;
-    secret = ./withings-sync.age;
-  };
   services.garmin = {
     enable = true;
     deviceId = "091e_4cda_0000cb7d522d";

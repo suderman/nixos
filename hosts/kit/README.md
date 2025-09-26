@@ -1,4 +1,4 @@
-# kit
+# kit 🎮
 
 Hyprland custom build sitting on my home office desk:
 
