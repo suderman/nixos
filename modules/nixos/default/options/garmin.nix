@@ -11,7 +11,7 @@
   enable =
     if idVendor != "" && idProduct != ""
     then true
-    else null;
+    else false;
 in {
   options.hardware.garmin = {
     deviceId = lib.mkOption {
