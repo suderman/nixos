@@ -42,7 +42,7 @@
     secret = ./withings-sync.age;
   };
   services.garmin = {
-    enable = true;
+    enable = false;
     deviceId = "091e_4cda_0000cb7d522d";
     dataDir = "${config.home.storageDirectory}/fenix";
   };

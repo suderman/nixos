@@ -31,9 +31,4 @@
   # User services
   services.mpd.enable = true;
   services.syncthing.enable = true;
-  services.garmin = {
-    enable = true;
-    deviceId = "091e_4cda_0000cb7d522d";
-    dataDir = "${config.home.storageDirectory}/fenix";
-  };
 }

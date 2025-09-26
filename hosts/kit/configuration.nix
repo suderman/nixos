@@ -66,4 +66,7 @@
   # services.traefik.proxy."chat" = config.services.open-webui.port;
 
   services.immich.enable = false;
+
+  # Garmin fenix 6 pro
+  hardware.garmin.deviceId = "091e:4cda";
 }
