@@ -1,8 +1,8 @@
 {flake, ...}: {
   imports = [
     flake.homeModules.default
-    # flake.homeModules.users.jon
-    # flake.homeModules.desktops.hyprland
+    flake.homeModules.users.jon
+    flake.homeModules.desktops.hyprland
   ];
 
   # Hyprland on nvidia desktop

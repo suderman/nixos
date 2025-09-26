@@ -16,12 +16,12 @@ in {
         mount = pkgs.yaziPlugins.mount;
         chmod = pkgs.yaziPlugins.chmod;
         starship = pkgs.yaziPlugins.starship;
-        gvfs = pkgs.fetchFromGitHub {
-          owner = "boydaihungst";
-          repo = "gvfs.yazi";
-          rev = "f07b496922c25c89c62305a292c6a53ccb4670cd";
-          hash = "sha256-s+fNoH5wuhk43qxPplYECSX/aWFG2UWEHkow32xsacM=";
-        };
+        # gvfs = pkgs.fetchFromGitHub {
+        #   owner = "boydaihungst";
+        #   repo = "gvfs.yazi";
+        #   rev = "f07b496922c25c89c62305a292c6a53ccb4670cd";
+        #   hash = "sha256-s+fNoH5wuhk43qxPplYECSX/aWFG2UWEHkow32xsacM=";
+        # };
       };
 
       enableBashIntegration = true;
