@@ -8,8 +8,8 @@
     ./hardware-configuration.nix
     ./disk-configuration.nix
     flake.nixosModules.hardware.rtx-4070-ti-super
-    flake.nixosModules.default
-    flake.nixosModules.desktops.hyprland
+    # flake.nixosModules.default
+    # flake.nixosModules.desktops.hyprland
     ./homelab.nix
   ];
 
