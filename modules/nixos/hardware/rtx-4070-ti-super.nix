@@ -66,7 +66,7 @@ in {
 
   environment.systemPackages = with pkgs; [
     nvitop
-    docker-nvidia-smi # test nvidia in docker container
+    # docker-nvidia-smi # test nvidia in docker container
   ];
 
   # nvidia-smi included in monitoring
