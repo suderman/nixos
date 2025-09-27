@@ -8,7 +8,7 @@
   ([fit](https://github.com/suderman/nixos/tree/main/hosts/fit))
 - `100.115.119.94` 2013 Intel NUC - NixOS
   ([hub](https://github.com/suderman/nixos/tree/main/hosts/hub))
-- `100.110.44.15` 2024 FormD T1 Desktop - NixOS
+- `100.67.76.42` 2024 FormD T1 Desktop - NixOS
   ([kit](https://github.com/suderman/nixos/tree/main/hosts/kit))
 - `100.118.135.148` 2018 Thinkpad T480s - NixOS
   25.05([wit](https://github.com/suderman/nixos/tree/main/hosts/wit))
