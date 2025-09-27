@@ -1,9 +1,9 @@
 {config, ...}: {
   xdg.userDirs = with config.home; {
-    documents = "${storageDirectory}/docs"; # XDG_DOCUMENTS_DIR
+    documents = "${storageDirectory}/documents"; # XDG_DOCUMENTS_DIR
     music = "${storageDirectory}/music"; # XDG_MUSIC_DIR
-    pictures = "${storageDirectory}/pics"; # XDG_PICTURES_DIR
-    videos = "${storageDirectory}/vids"; # XDG_VIDEOS_DIR
+    pictures = "${storageDirectory}/pictures"; # XDG_PICTURES_DIR
+    videos = "${storageDirectory}/movies"; # XDG_VIDEOS_DIR
     publicShare = "${storageDirectory}/action"; # XDG_PUBLICSHARE_DIR
     extraConfig = {
       XDG_AUDIO_DIR = "${storageDirectory}/podcasts";
