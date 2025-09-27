@@ -27,6 +27,7 @@
   programs.rofi.hiddenSinks = ["alsa_output.pci-0000_01_00.1.hdmi-stereo"];
 
   # Programs
+  programs.davinci-resolve.enable = true;
   programs.sparrow.enable = true;
   programs.zwift.enable = true;
 

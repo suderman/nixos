@@ -2,22 +2,20 @@
   config,
   lib,
   pkgs,
-  flake,
   ...
 }: let
   cfg = config.programs.davinci-resolve;
-  inherit (flake.lib) mkScript;
   inherit (lib) mkIf;
 
   # Convert all h264 mp4 files in directory to av1_nvenc pcm audio to edit in Davinci Resolve
-  davinci-resolve-import = mkScript {
+  davinci-resolve-import = pkgs.self.mkScript {
     inputs = [pkgs.ffmpeg];
     name = "davinci-resolve-import";
     text = ./davinci-resolve-import.sh;
   };
 
   # Convert output video from Davinci Resolve to x264 mp4 with aac audio
-  davinci-resolve-export = mkScript {
+  davinci-resolve-export = pkgs.self.mkScript {
     inputs = [pkgs.ffmpeg];
     name = "davinci-resolve-export";
     text = ./davinci-resolve-export.sh;
