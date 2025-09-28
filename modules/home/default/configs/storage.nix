@@ -20,6 +20,66 @@ in {
     default = "${config.home.homeDirectory}/storage";
   };
 
+  options.home.desktopDirectory = mkOption {
+    type = types.str;
+    default = "Desktop";
+  };
+
+  options.home.downloadDirectory = mkOption {
+    type = types.str;
+    default = "Downloads";
+  };
+
+  options.home.documentsDirectory = mkOption {
+    type = types.str;
+    default = "Documents";
+  };
+
+  options.home.musicDirectory = mkOption {
+    type = types.str;
+    default = "Music";
+  };
+
+  options.home.picturesDirectory = mkOption {
+    type = types.str;
+    default = "Pictures";
+  };
+
+  options.home.publicShareDirectory = mkOption {
+    type = types.str;
+    default = "Public";
+  };
+
+  options.home.templatesDirectory = mkOption {
+    type = types.str;
+    default = "Templates";
+  };
+
+  options.home.videosDirectory = mkOption {
+    type = types.str;
+    default = "Videos";
+  };
+
+  options.home.developmentDirectory = mkOption {
+    type = types.str;
+    default = "Developement";
+  };
+
+  options.home.gamesDirectory = mkOption {
+    type = types.str;
+    default = "Games";
+  };
+
+  options.home.notesDirectory = mkOption {
+    type = types.str;
+    default = "Notes";
+  };
+
+  options.home.projectsDirectory = mkOption {
+    type = types.str;
+    default = "Projects";
+  };
+
   config = {
     # xdg-user-dirs are better supported with this
     home.packages = [pkgs.xdg-user-dirs];
@@ -33,29 +93,40 @@ in {
       stateHome = "${homeDirectory}/.local/state"; # XDG_STATE_HOME
 
       # Default XDG user directories
-      userDirs = {
-        enable = mkDefault true;
-        download = mkDefault scratchDirectory; # XDG_DOWNLOAD_DIR
-        desktop = mkDefault storageDirectory; # XDG_DESKTOP_DIR
-        documents = mkDefault "${storageDirectory}/Documents"; # XDG_DOCUMENTS_DIR
-        music = mkDefault "${storageDirectory}/Music"; # XDG_MUSIC_DIR
-        pictures = mkDefault "${storageDirectory}/Pictures"; # XDG_PICTURES_DIR
-        publicShare = mkDefault "${storageDirectory}/Share"; # XDG_PUBLICSHARE_DIR
-        templates = mkDefault "${storageDirectory}/Templates"; # XDG_TEMPLATES_DIR
-        videos = mkDefault "${storageDirectory}/Movies"; # XDG_VIDEOS_DIR
+      userDirs.enable = mkDefault true;
+      userDirs.extraConfig = {
+        # Standard user dirs
+        XDG_DESKTOP_DIR = mkDefault "${homeDirectory}/${desktopDirectory}";
+        XDG_DOWNLOAD_DIR = mkDefault "${homeDirectory}/${downloadDirectory}";
+        XDG_DOCUMENTS_DIR = mkDefault "${homeDirectory}/${documentsDirectory}";
+        XDG_MUSIC_DIR = mkDefault "${homeDirectory}/${musicDirectory}";
+        XDG_PICTURES_DIR = mkDefault "${homeDirectory}/${picturesDirectory}";
+        XDG_PUBLICSHARE_DIR = mkDefault "${homeDirectory}/${publicShareDirectory}";
+        XDG_TEMPLATES_DIR = mkDefault "${homeDirectory}/${templatesDirectory}";
+        XDG_VIDEOS_DIR = mkDefault "${homeDirectory}/${videosDirectory}";
 
-        # Custom XDG user directories
-        extraConfig = {
-          XDG_DEVELOPMENT_DIR = mkDefault "${storageDirectory}/Development";
-          XDG_GAMES_DIR = mkDefault "${storageDirectory}/Games";
-          XDG_NOTES_DIR = mkDefault "${storageDirectory}/Notes";
-          XDG_AUDIO_DIR = mkDefault "${storageDirectory}/Audio";
-          XDG_BOOKS_DIR = mkDefault "${storageDirectory}/Books";
-          XDG_PROJECTS_DIR = mkDefault "${storageDirectory}/Projects";
-          XDG_LIBRARY_DIR = mkDefault "${storageDirectory}/Library";
-          XDG_RECORDS_DIR = mkDefault "${storageDirectory}/Records";
-        };
+        # Custom user dirs
+        XDG_DEVELOPMENT_DIR = mkDefault "${homeDirectory}/${developmentDirectory}";
+        XDG_GAMES_DIR = mkDefault "${homeDirectory}/${gamesDirectory}";
+        XDG_NOTES_DIR = mkDefault "${homeDirectory}/${notesDirectory}";
+        XDG_PROJECTS_DIR = mkDefault "${homeDirectory}/${projectsDirectory}";
       };
     };
+
+    persist.scratch.directories = [
+      config.home.desktopDirectory
+      config.home.downloadDirectory
+    ];
+
+    persist.storage.directories = [
+      config.home.developmentDirectory
+      config.home.documentsDirectory
+      config.home.gamesDirectory
+      config.home.musicDirectory
+      config.home.notesDirectory
+      config.home.picturesDirectory
+      config.home.projectsDirectory
+      config.home.videosDirectory
+    ];
   };
 }
