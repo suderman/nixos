@@ -1,7 +1,7 @@
 {flake, ...}: {
   imports = [
     flake.homeModules.default
-    # flake.homeModules.users.ness
+    flake.homeModules.users.ness
     flake.homeModules.desktops.gnome
   ];
 }

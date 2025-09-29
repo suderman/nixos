@@ -119,6 +119,13 @@ The `home` option was extended in
 with the following options:
 
 ```nix
+# Rename and create custom XDG user directories (optionally persisted)
+config.home.directories.XDG_NAME_DIR = {
+  path = "Name"; # relative to user home directory
+  type = "storage"; # set to "storage", "scratch" or null
+  enable = true;
+};
+
 # Lookup uid from flake.users.<name>.uid
 config.home.uid = 1000;
 

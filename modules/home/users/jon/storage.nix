@@ -2,7 +2,7 @@
   home.directories = {
     # Standard user directories
     XDG_DESKTOP_DIR = {
-      path = "desktop";
+      path = "action";
       persist = "scratch";
       enable = true;
     };
