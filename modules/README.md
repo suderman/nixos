@@ -122,7 +122,7 @@ with the following options:
 # Rename and create custom XDG user directories (optionally persisted)
 config.home.directories.XDG_NAME_DIR = {
   path = "Name"; # relative to user home directory
-  type = "storage"; # set to "storage", "scratch" or null
+  persist = "storage"; # set to "storage", "scratch" or null
   enable = true;
 };
 
