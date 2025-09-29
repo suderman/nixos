@@ -119,12 +119,6 @@ The `home` option was extended in
 with the following options:
 
 ```nix
-# Path to home scratch directory
-config.home.scratchDirectory = "/home/jon/scratch";
-
-# Path to home storage directory
-config.home.storageDirectory = "/home/jon/storage";
-
 # Lookup uid from flake.users.<name>.uid
 config.home.uid = 1000;
 

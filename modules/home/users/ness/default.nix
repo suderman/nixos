@@ -1,1 +1,1 @@
-{flake, ...}: {}
+{flake, ...}: {imports = flake.lib.ls ./.;}

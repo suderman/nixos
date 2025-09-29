@@ -56,35 +56,35 @@ in {
 
       theme.icon.append_dirs = with config.xdg.userDirs; [
         {
-          name = baseNameOf desktop; # XDG_DESKTOP_DIR
+          name = baseNameOf (extraConfig.XDG_DESKTOP_DIR or "Desktop");
           text = "";
         }
         {
-          name = baseNameOf download; # XDG_DOWNLOAD_DIR
+          name = baseNameOf (extraConfig.XDG_DOWNLOAD_DIR or "Downloads");
           text = "";
         }
         {
-          name = baseNameOf music; # XDG_MUSIC_DIR
+          name = baseNameOf (extraConfig.XDG_MUSIC_DIR or "Music");
           text = "";
         }
         {
-          name = baseNameOf pictures; # XDG_PICTURES_DIR
+          name = baseNameOf (extraConfig.XDG_PICTURES_DIR or "Pictures");
           text = "";
         }
         {
-          name = baseNameOf documents; # XDG_DOCUMENTS_DIR
+          name = baseNameOf (extraConfig.XDG_DOCUMENTS_DIR or "Documents");
           text = "󰷏";
         }
         {
-          name = baseNameOf publicShare; # XDG_PUBLICSHARE_DIR
+          name = baseNameOf (extraConfig.XDG_PUBLICSHARE_DIR or "Public");
           text = "";
         }
         {
-          name = baseNameOf videos; # XDG_VIDEOS_DIR
+          name = baseNameOf (extraConfig.XDG_VIDEOS_DIR or "Videos");
           text = "";
         }
         {
-          name = baseNameOf extraConfig.XDG_DEVELOPMENT_DIR;
+          name = baseNameOf (extraConfig.XDG_DEVELOPMENT_DIR or "Development");
           text = "";
         }
       ];

@@ -91,7 +91,7 @@ in {
       users =
         mapAttrs (_: user: {
           directories = unique ([
-              "scratch"
+              ".scratch"
             ]
             ++ user.persist.scratch.directories);
           files = unique user.persist.scratch.files;
@@ -118,7 +118,7 @@ in {
       users =
         mapAttrs (_: user: {
           directories = unique ([
-              "storage"
+              ".storage"
               ".ssh"
             ]
             ++ user.persist.storage.directories);
@@ -132,16 +132,19 @@ in {
     };
 
     fileSystems = let
-      # Add extra mount option for this directory in each user
-      trashMountOption = dir:
-        genAttrs
-        (map (user: "/home/${user}/${dir}") (attrNames users))
-        (_: {options = ["x-gvfs-trash"];});
+      # List of all non-hidden user dirs
+      userDirs = type:
+        map (x: x.dirPath)
+        (builtins.filter (d: builtins.substring 0 1 d.directory != "." && d.home != null)
+          config.environment.persistence."${config.persist."${type}".path}".directories);
     in
       mkMerge [
         # Support trash in these bind mounts
-        (trashMountOption (baseNameOf config.persist.storage.path))
-        (trashMountOption (baseNameOf config.persist.scratch.path))
+        (
+          genAttrs
+          ((userDirs "scratch") ++ (userDirs "storage"))
+          (_: {options = ["x-gvfs-trash"];})
+        )
 
         # Persistent volumes must be marked with neededForBoot
         {"${config.persist.path}".neededForBoot = true;}

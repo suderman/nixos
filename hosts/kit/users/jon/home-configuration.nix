@@ -45,6 +45,6 @@
   services.garmin = {
     enable = false;
     deviceId = "091e_4cda_0000cb7d522d";
-    dataDir = "${config.home.storageDirectory}/fenix";
+    dataDir = "${config.home.homeDirectory}/fenix";
   };
 }

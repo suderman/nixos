@@ -4,129 +4,121 @@
   pkgs,
   ...
 }: let
-  inherit (lib) mkDefault mkOption types;
+  inherit (lib) filterAttrs mapAttrs mapAttrsToList mkDefault mkOption types;
+
+  # List of enabled user directories
+  directories = filterAttrs (_name: directory: directory.enable) config.home.directories;
 in {
-  # Convenience option for home scratch directory (persists without snapshots)
-  options.home.scratchDirectory = mkOption {
-    description = "Path to home scratch directory";
-    type = types.str;
-    default = "${config.home.homeDirectory}/scratch";
-  };
-
-  # Convenience option for home storage directory (persists with snapshots)
-  options.home.storageDirectory = mkOption {
-    description = "Path to home storage directory";
-    type = types.str;
-    default = "${config.home.homeDirectory}/storage";
-  };
-
-  options.home.desktopDirectory = mkOption {
-    type = types.str;
-    default = "Desktop";
-  };
-
-  options.home.downloadDirectory = mkOption {
-    type = types.str;
-    default = "Downloads";
-  };
-
-  options.home.documentsDirectory = mkOption {
-    type = types.str;
-    default = "Documents";
-  };
-
-  options.home.musicDirectory = mkOption {
-    type = types.str;
-    default = "Music";
-  };
-
-  options.home.picturesDirectory = mkOption {
-    type = types.str;
-    default = "Pictures";
-  };
-
-  options.home.publicShareDirectory = mkOption {
-    type = types.str;
-    default = "Public";
-  };
-
-  options.home.templatesDirectory = mkOption {
-    type = types.str;
-    default = "Templates";
-  };
-
-  options.home.videosDirectory = mkOption {
-    type = types.str;
-    default = "Videos";
-  };
-
-  options.home.developmentDirectory = mkOption {
-    type = types.str;
-    default = "Developement";
-  };
-
-  options.home.gamesDirectory = mkOption {
-    type = types.str;
-    default = "Games";
-  };
-
-  options.home.notesDirectory = mkOption {
-    type = types.str;
-    default = "Notes";
-  };
-
-  options.home.projectsDirectory = mkOption {
-    type = types.str;
-    default = "Projects";
+  options.home.directories = mkOption {
+    type = types.attrsOf (types.submodule {
+      options = {
+        path = mkOption {
+          type = types.str;
+          description = "The path of the directory relative to home";
+          example = "Downloads";
+        };
+        persist = mkOption {
+          type = types.nullOr (types.enum ["scratch" "storage"]);
+          default = null;
+          description = ''
+            Persistence strategy for this directory:
+            - "scratch": persist reboots without snapshots or backups
+            - "storage": persist reboots with snapshots and backups
+            - null: cleared on reboot
+          '';
+        };
+        enable = mkOption {
+          type = types.bool;
+          default = false;
+          description = "Whether to create this directory";
+        };
+      };
+    });
+    default = {};
   };
 
   config = {
-    # xdg-user-dirs are better supported with this
-    home.packages = [pkgs.xdg-user-dirs];
+    home = {
+      # xdg-user-dirs are better supported with this
+      packages = [pkgs.xdg-user-dirs];
 
-    # XDG base directories
-    xdg = with config.home; {
-      enable = true;
-      cacheHome = "${homeDirectory}/.cache"; # XDG_CACHE_HOME
-      configHome = "${homeDirectory}/.config"; # XDG_CONFIG_HOME
-      dataHome = "${homeDirectory}/.local/share"; # XDG_DATA_HOME
-      stateHome = "${homeDirectory}/.local/state"; # XDG_STATE_HOME
+      # Make programs use XDG directories whenever supported
+      preferXdgDirectories = mkDefault true;
 
-      # Default XDG user directories
-      userDirs.enable = mkDefault true;
-      userDirs.extraConfig = {
-        # Standard user dirs
-        XDG_DESKTOP_DIR = mkDefault "${homeDirectory}/${desktopDirectory}";
-        XDG_DOWNLOAD_DIR = mkDefault "${homeDirectory}/${downloadDirectory}";
-        XDG_DOCUMENTS_DIR = mkDefault "${homeDirectory}/${documentsDirectory}";
-        XDG_MUSIC_DIR = mkDefault "${homeDirectory}/${musicDirectory}";
-        XDG_PICTURES_DIR = mkDefault "${homeDirectory}/${picturesDirectory}";
-        XDG_PUBLICSHARE_DIR = mkDefault "${homeDirectory}/${publicShareDirectory}";
-        XDG_TEMPLATES_DIR = mkDefault "${homeDirectory}/${templatesDirectory}";
-        XDG_VIDEOS_DIR = mkDefault "${homeDirectory}/${videosDirectory}";
-
-        # Custom user dirs
-        XDG_DEVELOPMENT_DIR = mkDefault "${homeDirectory}/${developmentDirectory}";
-        XDG_GAMES_DIR = mkDefault "${homeDirectory}/${gamesDirectory}";
-        XDG_NOTES_DIR = mkDefault "${homeDirectory}/${notesDirectory}";
-        XDG_PROJECTS_DIR = mkDefault "${homeDirectory}/${projectsDirectory}";
+      # Standard user directories
+      directories = {
+        XDG_DESKTOP_DIR = {
+          path = mkDefault "Desktop";
+          persist = mkDefault null;
+          enable = mkDefault true;
+        };
+        XDG_DOWNLOAD_DIR = {
+          path = mkDefault "Downloads";
+          persist = mkDefault null;
+          enable = mkDefault true;
+        };
+        XDG_DOCUMENTS_DIR = {
+          path = mkDefault "Documents";
+          persist = mkDefault null;
+          enable = mkDefault true;
+        };
+        XDG_MUSIC_DIR = {
+          path = mkDefault "Music";
+          persist = mkDefault null;
+          enable = mkDefault true;
+        };
+        XDG_PICTURES_DIR = {
+          path = mkDefault "Pictures";
+          persist = mkDefault null;
+          enable = mkDefault true;
+        };
+        XDG_PUBLICSHARE_DIR = {
+          path = mkDefault "Public";
+          persist = mkDefault null;
+          enable = mkDefault true;
+        };
+        XDG_TEMPLATES_DIR = {
+          path = mkDefault "Templates";
+          persist = mkDefault null;
+          enable = mkDefault true;
+        };
+        XDG_VIDEOS_DIR = {
+          path = mkDefault "Videos";
+          persist = mkDefault null;
+          enable = mkDefault true;
+        };
       };
     };
 
-    persist.scratch.directories = [
-      config.home.desktopDirectory
-      config.home.downloadDirectory
-    ];
+    # XDG base directories
+    xdg = {
+      enable = true;
+      cacheHome = "${config.home.homeDirectory}/.cache"; # XDG_CACHE_HOME
+      configHome = "${config.home.homeDirectory}/.config"; # XDG_CONFIG_HOME
+      dataHome = "${config.home.homeDirectory}/.local/share"; # XDG_DATA_HOME
+      stateHome = "${config.home.homeDirectory}/.local/state"; # XDG_STATE_HOME
 
-    persist.storage.directories = [
-      config.home.developmentDirectory
-      config.home.documentsDirectory
-      config.home.gamesDirectory
-      config.home.musicDirectory
-      config.home.notesDirectory
-      config.home.picturesDirectory
-      config.home.projectsDirectory
-      config.home.videosDirectory
-    ];
+      # Default XDG user directories
+      userDirs = rec {
+        enable = mkDefault true;
+        createDirectories = mkDefault true;
+        extraConfig = mapAttrs (_: d: "${config.home.homeDirectory}/${d.path}") directories;
+        # Ensure these align with extraConfig
+        desktop = extraConfig.XDG_DESKTOP_DIR or null;
+        documents = extraConfig.XDG_DOCUMENTS_DIR or null;
+        download = extraConfig.XDG_DOWNLOAD_DIR or null;
+        music = extraConfig.XDG_MUSIC_DIR or null;
+        pictures = extraConfig.XDG_PICTURES_DIR or null;
+        templates = extraConfig.XDG_TEMPLATES_DIR or null;
+        publicShare = extraConfig.XDG_PUBLICSHARE_DIR or null;
+        videos = extraConfig.XDG_VIDEOS_DIR or null;
+      };
+    };
+
+    # Add persisted user directories to list
+    persist = {
+      scratch.directories = mapAttrsToList (_: d: d.path) (filterAttrs (_: d: d.persist == "scratch") directories);
+      storage.directories = mapAttrsToList (_: d: d.path) (filterAttrs (_: d: d.persist == "storage") directories);
+    };
   };
 }
