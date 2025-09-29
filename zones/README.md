@@ -28,12 +28,12 @@ internal services during each deploy.
 ### Installation Instructions for each Operation System
 
 If a `caPort` is provided to a server's
-[Traefik module](https://github.com/suderman/nixos/blob/main/modules/traefik/ca.nix),
+[Traefik module](https://github.com/suderman/nixos/tree/main/modules/nixos/default/options/traefik),
 the [ca.crt](https://github.com/suderman/nixos/raw/main/networks/ca.crt) file
 can be downloaded on that port.
 
 For example, my
-[hub](https://github.com/suderman/nixos/tree/main/configurations/hub)
+[hub](ttps://github.com/suderman/nixos/tree/main/hosts/hub)
 configuration on my home network has a IP of `10.1.0.4` and has `caPort` set to
 `1234`:
 
