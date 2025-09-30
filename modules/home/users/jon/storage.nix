@@ -2,18 +2,18 @@
   home.directories = {
     # Standard user directories
     XDG_DESKTOP_DIR = {
-      path = "action";
-      persist = "scratch";
-      enable = true;
-    };
-    XDG_DOWNLOAD_DIR = {
-      path = "downloads";
-      persist = "scratch";
+      path = "desktop";
+      persist = "storage";
       enable = true;
     };
     XDG_DOCUMENTS_DIR = {
       path = "documents";
       persist = "storage";
+      enable = true;
+    };
+    XDG_DOWNLOAD_DIR = {
+      path = "downloads";
+      persist = "scratch";
       enable = true;
     };
     XDG_MUSIC_DIR = {
@@ -37,11 +37,6 @@
     XDG_TEMPLATES_DIR.enable = false;
 
     # Custom user directories
-    XDG_DEVELOPMENT_DIR = {
-      path = "src";
-      persist = "storage";
-      enable = true;
-    };
     XDG_GAMES_DIR = {
       path = "games";
       persist = "storage";
@@ -52,8 +47,8 @@
       persist = "storage";
       enable = true;
     };
-    XDG_PROJECTS_DIR = {
-      path = "projects";
+    XDG_SOURCE_DIR = {
+      path = "src";
       persist = "storage";
       enable = true;
     };
@@ -61,7 +56,7 @@
 
   # Code cloned here, auto-whitelist for direnv
   programs.direnv.config.whitelist.prefix = [
-    config.xdg.userDirs.extraConfig.XDG_DEVELOPMENT_DIR
+    config.xdg.userDirs.extraConfig.XDG_SOURCE_DIR
   ];
 
   persist.storage.directories = [];

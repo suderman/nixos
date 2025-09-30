@@ -84,7 +84,7 @@ in {
           text = "";
         }
         {
-          name = baseNameOf (extraConfig.XDG_DEVELOPMENT_DIR or "Development");
+          name = baseNameOf (extraConfig.XDG_SOURCE_DIR or "Source");
           text = "";
         }
       ];
