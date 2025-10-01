@@ -37,6 +37,7 @@ in {
     mpv.enable = true; # media player
     rofi.enable = true; # launcher
     yazi.enable = true; # file manager tui
+    zathura.enable = true; # pdf
     zwift.enable = true; # fitness
   };
 
