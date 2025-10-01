@@ -43,20 +43,22 @@ in {
         image_quality = 90;
       };
 
-      settings.opener.pdf = [
-        {
-          run = ''zathura "$@"'';
-          desc = "View PDF in Zathura";
-          block = false;
-          orphan = true;
-          for = "unix";
-        }
-      ];
-
       settings.open.rules = [
         {
           name = "*.pdf";
           use = "pdf";
+        }
+        {
+          name = "*.png|*.jpg|*.jpeg|*.gif|*.bmp|*.webp|*.svg|*.tiff|*.ico";
+          use = "image";
+        }
+        {
+          name = "*.mp4|*.mkv|*.webm|*.avi|*.flv|*.mov|*.mpeg";
+          use = "video";
+        }
+        {
+          name = "*.mp3|*.flac|*.wav|*.ogg|*.aac|*.opus";
+          use = "audio";
         }
       ];
 

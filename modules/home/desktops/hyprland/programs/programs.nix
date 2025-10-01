@@ -23,22 +23,9 @@
       ];
   };
 in {
-  xdg.mime.enable = true;
-  xdg.mimeApps = {
-    enable = true;
-  };
-
   # Check modules directory for extra configuration
   programs = {
-    bluebubbles.enable = true; # ios chat
-    chromium.enable = true; # web browser
-    firefox.enable = true; # alt browser
-    kitty.enable = true; # term
-    mpv.enable = true; # media player
     rofi.enable = true; # launcher
-    yazi.enable = true; # file manager tui
-    zathura.enable = true; # pdf
-    zwift.enable = true; # fitness
   };
 
   # Add these to my path
@@ -46,34 +33,18 @@ in {
     bounce # defined above
     swww # wallpaper
     brightnessctl
-    wl-clipboard # copying and pasting
     hyprpicker # color picker
     hyprcursor
     # wf-recorder # screen recording - broken?
     grim # taking screenshots
     slurp # selecting a region to screenshot
-    xorg.xeyes # confirm xwayland
 
     font-awesome # icon font
     jetbrains-mono # mono font
-
-    tdesktop # family chat
-    slack # work chat
-
-    neovide # text editor
-    lapce # text editor
-    libreoffice # documents & spreadsheets
 
     nemo-with-extensions # file manager gui
     junction # browser chooser
 
     # quickemu # virtual machines
-    qalculate-gtk # calculator
-    newsflash # rss reader
-    tauon # mp3 player (and jellyfin client)
-
-    pulseaudio # pactl
-    pavucontrol # sound control gui
-    ncpamixer # sound control tui
   ];
 }

@@ -1,5 +1,6 @@
-# -- custom module --
 # services.immich.enable = true;
+# I wrote this custom module long before the official nixos module was
+# published and plan to migrate soon now that 2.0 stable release is out.
 {
   config,
   lib,
@@ -8,7 +9,7 @@
   ...
 }: let
   # https://github.com/immich-app/immich/releases
-  version = "1.143.1";
+  version = "2.0.0";
 
   cfg = config.services.immich;
 

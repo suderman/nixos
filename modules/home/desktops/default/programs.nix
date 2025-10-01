@@ -3,37 +3,21 @@
   pkgs,
   ...
 }: {
+  # manage ~/.config/mimeapps.list.
+  xdg.mimeApps.enable = true;
+  xdg.mime.enable = true;
+
   programs = {
-    chromium.enable = true;
-    onepassword.enable = true;
+    kitty.enable = true; # terminal
+    chromium.enable = true; # browser
+    firefox.enable = true; # alt browser
 
-    # services on hub
+    # Home Automation
     home-assistant = {
+      enable = true;
       url = lib.mkDefault "https://hass.hub";
-      enable = lib.mkDefault true;
     };
-    isy.enable = lib.mkDefault true;
-    # services on lux
-    jellyfin = {
-      url = lib.mkDefault "https://jellyfin.lux";
-      enable = lib.mkDefault true;
-    };
-    # immich = {
-    #   url = lib.mkDefault "https://immich.lux";
-    #   enable = lib.mkDefault true;
-    # };
-    # lunasea = {
-    #   url = lib.mkDefault "https://lunasea.lux";
-    #   enable = lib.mkDefault true;
-    # };
-
-    # Work webapps
-    gmail.enable = lib.mkDefault true;
-    google-calendar.enable = lib.mkDefault true;
-    google-meet.enable = lib.mkDefault true;
-    google-analytics.enable = lib.mkDefault true;
-    harvest.enable = lib.mkDefault true;
-    asana.enable = lib.mkDefault true;
+    isy.enable = true;
   };
 
   # TODO: remove or convert to modules
@@ -43,18 +27,8 @@
     "com.github.treagod.spectator"
   ];
 
-  # manage ~/.config/mimeapps.list.
-  xdg.mimeApps.enable = true;
-
   home.packages = with pkgs; [
-    asunder # cd ripper
     gnome-disk-utility # format and partition gui
-    junction # browser chooser
-    loupe # png/jpg viewer
-    pavucontrol # audio control panel
     xorg.xeyes # test for x11
-    lapce # text editor
-    libreoffice # office suite (writing, spreadsheets, etc)
-    newsflash # rss reader
   ];
 }
