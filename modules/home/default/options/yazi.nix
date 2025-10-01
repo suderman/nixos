@@ -43,6 +43,23 @@ in {
         image_quality = 90;
       };
 
+      settings.opener.pdf = [
+        {
+          run = ''zathura "$@"'';
+          desc = "View PDF in Zathura";
+          block = false;
+          orphan = true;
+          for = "unix";
+        }
+      ];
+
+      settings.open.rules = [
+        {
+          name = "*.pdf";
+          use = "pdf";
+        }
+      ];
+
       keymap.mgr.prepend_keymap = [
         {
           on = "M";

@@ -43,6 +43,9 @@
     "com.github.treagod.spectator"
   ];
 
+  # manage ~/.config/mimeapps.list.
+  xdg.mimeApps.enable = true;
+
   home.packages = with pkgs; [
     asunder # cd ripper
     gnome-disk-utility # format and partition gui

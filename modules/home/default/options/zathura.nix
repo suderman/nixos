@@ -8,15 +8,21 @@
   inherit (lib) mkIf;
 in {
   config = mkIf cfg.enable {
-    programs.yazi = {
-      options = {};
+    programs.zathura = {
+      options = {
+        database = "sqlite";
+      };
       mappings = {
-        "" = "navigate next";
         D = "toggle_page_mode";
-        "[fullscreen] " = "zoom in";
       };
     };
+
     # Persist history, bookmarks, last page position
     persist.storage.directories = [".local/share/zathura"];
+
+    # Make default application for PDF files
+    xdg.mimeApps.defaultApplications = {
+      "application/pdf" = ["org.pwmt.zathura.desktop"];
+    };
   };
 }
