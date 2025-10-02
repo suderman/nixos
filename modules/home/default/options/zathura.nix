@@ -14,6 +14,34 @@ in {
         database = "sqlite";
       };
       mappings = {
+        f = "navigate next";
+        "<Space>" = "navigate next";
+        "]" = "navigate next";
+        "<Right>" = "navigate next";
+
+        b = "navigate previous";
+        "<S-Space>" = "navigate previous";
+        "[" = "navigate previous";
+        "<Left>" = "navigate previous";
+
+        h = "scroll left";
+        j = "scroll down";
+        k = "scroll up";
+        l = "scroll right";
+
+        "-" = "zoom out";
+        "_" = "zoom out";
+        "<Up>" = "zoom out";
+        "=" = "zoom in";
+        "+" = "zoom in";
+        "<Down>" = "zoom in";
+        "0" = "zoom default";
+
+        r = "rotate rotate-cw";
+        R = "rotate rotate-ccw";
+
+        i = "toggle_status_bar";
+        o = "file_chooser";
         D = "toggle_page_mode";
       };
     };

@@ -7,6 +7,21 @@
   cfg = config.programs.yazi;
   inherit (builtins) baseNameOf;
   inherit (lib) mkIf;
+
+  dir = with config.xdg.userDirs; rec {
+    home = config.home.homeDirectory;
+    desktop = extraConfig.XDG_DOWNLOAD_DIR or "${home}/Desktop";
+    documents = extraConfig.XDG_DOCUMENTS_DIR or "${home}/Documents";
+    download = extraConfig.XDG_DOWNLOAD_DIR or "${home}/Downloads";
+    games = extraConfig.XDG_GAMES_DIR or "${home}/Games";
+    music = extraConfig.XDG_MUSIC_DIR or "${home}/Music";
+    notes = extraConfig.XDG_NOTES_DIR or "${home}/Notes";
+    pictures = extraConfig.XDG_PICTURES_DIR or "${home}/Pictures";
+    publicShare = extraConfig.XDG_PUBLICSHARE_DIR or "${home}/Public";
+    source = extraConfig.XDG_SOURCE_DIR or "${home}/Source";
+    templates = extraConfig.XDG_TEMPLATES_DIR or "${home}/Templates";
+    videos = extraConfig.XDG_VIDEOS_DIR or "${home}/Videos";
+  };
 in {
   config = mkIf cfg.enable {
     programs.yazi = {
@@ -64,47 +79,119 @@ in {
 
       keymap.mgr.prepend_keymap = [
         {
+          on = "?"; # display keymaps
+          run = "help";
+        }
+        {
           on = "M";
           run = "plugin mount";
         }
         {
-          on = ["d"];
+          on = "d"; # [d]elete into trash
           run = "remove --force";
+        }
+        {
+          on = "i"; # [i]nfo
+          run = "spot";
+        }
+        {
+          on = ["g" "h"]; # gh -> [h]ome
+          run = "cd ${dir.home}";
+        }
+        {
+          on = ["g" "j"]; # gj -> downloads (j for down)
+          run = "cd ${dir.download}";
+        }
+        {
+          on = ["g" "k"]; # gk -> des[k]top
+          run = "cd ${dir.desktop}";
+        }
+        {
+          on = ["g" "l"]; # gl -> documents (l for library)
+          run = "cd ${dir.documents}";
+        }
+        {
+          on = ["g" "i"]; # gi -> p[i]ctures
+          run = "cd ${dir.pictures}";
+        }
+        {
+          on = ["g" "o"]; # go -> vide[o]s
+          run = "cd ${dir.videos}";
+        }
+        {
+          on = ["g" "m"]; # gm -> [m]usic
+          run = "cd ${dir.music}";
+        }
+        {
+          on = ["g" "p"]; # gp -> games (p for play)
+          run = "cd ${dir.games}";
+        }
+        {
+          on = ["g" "t"]; # gt -> source (t for gi[t])
+          run = "cd ${dir.source}";
+        }
+        {
+          on = ["g" "n"]; # gn -> [n]otes
+          run = "cd ${dir.notes}";
+        }
+        {
+          on = ["g" "c"]; # gc -> nix [c]onfig
+          run = "cd /etc/nixos";
+        }
+        {
+          on = ["g" "s" "t"]; # gst -> storage
+          run = "cd /mnt/main/storage";
+        }
+        {
+          on = ["g" "s" "c"]; # gst -> scratch
+          run = "cd /mnt/main/scratch";
         }
       ];
 
-      theme.icon.append_dirs = with config.xdg.userDirs; [
+      theme.icon.append_dirs = [
         {
-          name = baseNameOf (extraConfig.XDG_DESKTOP_DIR or "Desktop");
+          name = baseNameOf dir.desktop;
           text = "";
         }
         {
-          name = baseNameOf (extraConfig.XDG_DOWNLOAD_DIR or "Downloads");
+          name = baseNameOf dir.download;
           text = "";
         }
         {
-          name = baseNameOf (extraConfig.XDG_MUSIC_DIR or "Music");
+          name = baseNameOf dir.music;
           text = "";
         }
         {
-          name = baseNameOf (extraConfig.XDG_PICTURES_DIR or "Pictures");
+          name = baseNameOf dir.pictures;
           text = "";
         }
         {
-          name = baseNameOf (extraConfig.XDG_DOCUMENTS_DIR or "Documents");
-          text = "󰷏";
+          name = baseNameOf dir.documents;
+          text = "";
         }
         {
-          name = baseNameOf (extraConfig.XDG_PUBLICSHARE_DIR or "Public");
+          name = baseNameOf dir.publicShare;
           text = "";
         }
         {
-          name = baseNameOf (extraConfig.XDG_VIDEOS_DIR or "Videos");
+          name = baseNameOf dir.notes;
+          text = "";
+        }
+        {
+          name = baseNameOf dir.videos;
           text = "";
         }
         {
-          name = baseNameOf (extraConfig.XDG_SOURCE_DIR or "Source");
+          name = baseNameOf dir.games;
+          text = "";
+        }
+        {
+          name = baseNameOf dir.source;
           text = "";
+        }
+        {
+          name = "nixos";
+          text = "";
         }
       ];
 

@@ -53,8 +53,8 @@ in {
     # Do the same in Yazi
     programs.yazi.settings.opener.video = [
       {
-        run = ''mpv "$@"'';
-        desc = "Play in imv";
+        run = ''mpv --force-window=yes --autofit=800x600 --no-border "$@"'';
+        desc = "Play in mpv";
         block = false;
         orphan = true;
         for = "unix";
@@ -62,8 +62,8 @@ in {
     ];
     programs.yazi.settings.opener.audio = [
       {
-        run = ''mpv "$@"'';
-        desc = "Play in imv";
+        run = ''mpv --force-window=yes --autofit=800x600 --no-border "$@"'';
+        desc = "Play in mpv";
         block = false;
         orphan = true;
         for = "unix";
