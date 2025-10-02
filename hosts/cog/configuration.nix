@@ -7,7 +7,7 @@
   imports = [
     ./hardware-configuration.nix
     ./disk-configuration.nix
-    flake.inputs.hardware.nixosModules.framework-11th-gen-intel
+    flake.nixosModules.hardware.framework-11th-gen-intel
     flake.nixosModules.default
     flake.nixosModules.desktops.hyprland
   ];
@@ -21,9 +21,6 @@
 
   # Mobile computing
   networking.domain = "tail";
-
-  # Use freshest kernel
-  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Good graphics
   hardware.graphics = {
@@ -40,9 +37,6 @@
     "/mnt/main" = ["ssh://fit/mnt/pool/backups/${config.networking.hostName}"];
   };
 
-  # Laptop-specific
-  services.fwupd.enable = true; # sudo fwupdmgr update
-
   # Power management
   services.power-profiles-daemon.enable = false;
   services.tlp.enable = true;
@@ -56,13 +50,6 @@
     lidSwitch = "suspend";
     lidSwitchExternalPower = "suspend";
     lidSwitchDocked = "ignore";
-  };
-
-  # Keyboard control
-  services.keyd = {
-    enable = true;
-    quirks = true;
-    keyboard = config.services.keyd.internalKeyboards.framework;
   };
 
   # Experiments
