@@ -7,6 +7,7 @@
 }: let
   cfg = config.programs.imv;
   inherit (lib) mkIf;
+  class = "imv";
 in {
   config = mkIf cfg.enable {
     programs.imv = {
@@ -69,6 +70,11 @@ in {
           "<Up>" = "prev";
         };
       };
+    };
+
+    # Treat as media windows by hyprland
+    wayland.windowManager.hyprland.settings = {
+      windowrule = ["tag +media, class:(${class})"];
     };
 
     # Make default application for images

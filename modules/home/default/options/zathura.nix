@@ -6,6 +6,7 @@
 }: let
   cfg = config.programs.zathura;
   inherit (lib) mkIf;
+  class = "org.pwmt.zathura";
 in {
   config = mkIf cfg.enable {
     programs.zathura = {
@@ -19,6 +20,11 @@ in {
 
     # Persist history, bookmarks, last page position
     persist.storage.directories = [".local/share/zathura"];
+
+    # Treat as media windows by hyprland
+    wayland.windowManager.hyprland.settings = {
+      windowrule = ["tag +media, class:(${class})"];
+    };
 
     # Make default application for PDFs, PDFs, XPS
     xdg.mimeApps.defaultApplications = {

@@ -1,6 +1,6 @@
 {...}: {
   wayland.windowManager.hyprland.settings = {
-    windowrulev2 = [
+    windowrule = [
       # forbid windows from maximizing/fullscreening themselves
       "suppressevent maximize, class:.*"
       "suppressevent fullscreen, class:.*"
@@ -29,6 +29,8 @@
       "pin, tag:dialog"
       "noborder, tag:dialog"
       "plugin:hyprbars:nobar, tag:dialog"
+
+      "float, tag:media"
 
       # assign windows to workspaces
       # "workspace 1 silent, class:[Ff]irefox"

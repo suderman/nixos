@@ -6,6 +6,7 @@
 }: let
   cfg = config.programs.mpv;
   inherit (lib) mkIf mkDefault;
+  class = "mpv";
 in {
   config = mkIf cfg.enable {
     programs.mpv = {
@@ -21,6 +22,11 @@ in {
         l = "seek 10";
         "Ctrl+l" = "ab-loop";
       };
+    };
+
+    # Treat as media windows by hyprland
+    wayland.windowManager.hyprland.settings = {
+      windowrule = ["tag +media, class:(${class})"];
     };
 
     # Make default application for videos

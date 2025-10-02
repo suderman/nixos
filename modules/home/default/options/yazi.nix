@@ -49,16 +49,16 @@ in {
           use = "pdf";
         }
         {
-          name = "*.png|*.jpg|*.jpeg|*.gif|*.bmp|*.webp|*.svg|*.tiff|*.ico";
-          use = "image";
-        }
-        {
-          name = "*.mp4|*.mkv|*.webm|*.avi|*.flv|*.mov|*.mpeg";
+          mime = "video/*";
           use = "video";
         }
         {
-          name = "*.mp3|*.flac|*.wav|*.ogg|*.aac|*.opus";
+          mime = "audio/*";
           use = "audio";
+        }
+        {
+          mime = "image/*";
+          use = "image";
         }
       ];
 
