@@ -83,8 +83,20 @@ in {
           run = "help";
         }
         {
+          on = "<Space>";
+          run = "toggle";
+        }
+        {
           on = "M";
           run = "plugin mount";
+        }
+        {
+          on = "z";
+          run = "plugin zoxide";
+        }
+        {
+          on = "Z";
+          run = "plugin fzf";
         }
         {
           on = "d"; # [d]elete into trash
@@ -95,43 +107,43 @@ in {
           run = "spot";
         }
         {
-          on = ["g" "h"];
+          on = ["g" "h" "h"];
           run = "cd ${dir.home}";
         }
         {
-          on = ["g" "d" "l"];
+          on = ["g" "h" "j"];
           run = "cd ${dir.download}";
         }
         {
-          on = ["g" "d" "e"];
+          on = ["g" "h" "k"];
           run = "cd ${dir.desktop}";
         }
         {
-          on = ["g" "d" "o"];
+          on = ["g" "h" "o"];
           run = "cd ${dir.documents}";
         }
         {
-          on = ["g" "d" "p"];
+          on = ["g" "h" "i"];
           run = "cd ${dir.pictures}";
         }
         {
-          on = ["g" "d" "v"];
+          on = ["g" "h" "v"];
           run = "cd ${dir.videos}";
         }
         {
-          on = ["g" "d" "m"];
+          on = ["g" "h" "m"];
           run = "cd ${dir.music}";
         }
         {
-          on = ["g" "d" "g"];
+          on = ["g" "h" "g"];
           run = "cd ${dir.games}";
         }
         {
-          on = ["g" "d" "s"];
+          on = ["g" "h" "s"];
           run = "cd ${dir.source}";
         }
         {
-          on = ["g" "d" "n"];
+          on = ["g" "h" "n"];
           run = "cd ${dir.notes}";
         }
         {

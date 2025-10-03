@@ -7,6 +7,7 @@
 }: let
   cfg = config.programs.imv;
   inherit (lib) mkIf;
+  inherit (config.services.keyd.lib) mkClass;
   class = "imv";
 in {
   config = mkIf cfg.enable {
@@ -19,17 +20,18 @@ in {
           background = "checks";
         };
         binds = {
-          # Navigation
           f = "next";
           "<Shift+B>" = "next";
           "<space>" = "next";
           "<bracketright>" = "next";
           "<right>" = "prev";
+
           b = "prev";
           "<Shift+F>" = "prev";
           "<Shift+space>" = "prev";
           "<bracketleft>" = "prev";
           "<left>" = "prev";
+
           gg = "goto 0";
           G = "goto -1";
 
@@ -71,6 +73,12 @@ in {
           "<Shift+T>" = "slideshow -1"; # decrease delay by 1 second
         };
       };
+    };
+
+    # keyboard shortcuts
+    services.keyd.windows."${mkClass class}" = {
+      "tab" = "f"; # next
+      "shift.tab" = "b"; # previous
     };
 
     # Treat as media windows by hyprland

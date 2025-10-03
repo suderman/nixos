@@ -6,6 +6,7 @@
 }: let
   cfg = config.programs.zathura;
   inherit (lib) mkIf;
+  inherit (config.services.keyd.lib) mkClass;
   class = "org.pwmt.zathura";
 in {
   config = mkIf cfg.enable {
@@ -46,6 +47,12 @@ in {
         o = "file_chooser";
         D = "toggle_page_mode";
       };
+    };
+
+    services.keyd.windows."${mkClass class}" = {
+      "tab" = "f"; # next
+      "shift.tab" = "b"; # previous
+      "backslash" = "a";
     };
 
     # Persist history, bookmarks, last page position

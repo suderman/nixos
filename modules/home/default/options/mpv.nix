@@ -22,6 +22,8 @@ in {
         l = "seek 10";
         f = "playlist-next";
         b = "playlist-prev";
+        "Tab" = "playlist-next";
+        "Shift+Tab" = "playlist-prev";
         "Ctrl+l" = "ab-loop";
       };
     };
