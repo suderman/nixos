@@ -10,7 +10,7 @@
 
   dir = with config.xdg.userDirs; rec {
     home = config.home.homeDirectory;
-    desktop = extraConfig.XDG_DOWNLOAD_DIR or "${home}/Desktop";
+    desktop = extraConfig.XDG_DESKTOP_DIR or "${home}/Desktop";
     documents = extraConfig.XDG_DOCUMENTS_DIR or "${home}/Documents";
     download = extraConfig.XDG_DOWNLOAD_DIR or "${home}/Downloads";
     games = extraConfig.XDG_GAMES_DIR or "${home}/Games";
@@ -99,52 +99,74 @@ in {
           run = "plugin fzf";
         }
         {
-          on = "d"; # [d]elete into trash
+          on = ["d" "d"];
           run = "remove --force";
+          desc = "delete into trash";
         }
         {
-          on = "i"; # [i]nfo
+          on = ["d" "r"];
+          run = "remove --permanently";
+          desc = "delete for realz";
+        }
+        {
+          on = "i";
           run = "spot";
+          desc = "info";
         }
         {
           on = ["g" "h" "h"];
           run = "cd ${dir.home}";
+          desc = "go home";
         }
         {
           on = ["g" "h" "j"];
           run = "cd ${dir.download}";
+          desc = "go downloads";
         }
         {
           on = ["g" "h" "k"];
           run = "cd ${dir.desktop}";
+          desc = "go desktop";
         }
         {
-          on = ["g" "h" "o"];
+          on = ["g" "h" "b"];
           run = "cd ${dir.documents}";
+          desc = "go documents";
         }
         {
           on = ["g" "h" "i"];
           run = "cd ${dir.pictures}";
+          desc = "go pictures";
         }
         {
           on = ["g" "h" "v"];
           run = "cd ${dir.videos}";
+          desc = "go videos";
         }
         {
           on = ["g" "h" "m"];
           run = "cd ${dir.music}";
+          desc = "go music";
         }
         {
           on = ["g" "h" "g"];
           run = "cd ${dir.games}";
+          desc = "go games";
         }
         {
           on = ["g" "h" "s"];
           run = "cd ${dir.source}";
+          desc = "go source";
         }
         {
           on = ["g" "h" "n"];
           run = "cd ${dir.notes}";
+          desc = "go notes";
+        }
+        {
+          on = ["g" "m"];
+          run = "plugin mount";
+          desc = "go mounts";
         }
         {
           on = ["g" "c"];
