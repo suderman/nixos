@@ -95,47 +95,47 @@ in {
           run = "spot";
         }
         {
-          on = ["g" "h"]; # gh -> [h]ome
+          on = ["g" "h"];
           run = "cd ${dir.home}";
         }
         {
-          on = ["g" "j"]; # gj -> downloads (j for down)
+          on = ["g" "d" "l"];
           run = "cd ${dir.download}";
         }
         {
-          on = ["g" "k"]; # gk -> des[k]top
+          on = ["g" "d" "e"];
           run = "cd ${dir.desktop}";
         }
         {
-          on = ["g" "l"]; # gl -> documents (l for library)
+          on = ["g" "d" "o"];
           run = "cd ${dir.documents}";
         }
         {
-          on = ["g" "i"]; # gi -> p[i]ctures
+          on = ["g" "d" "p"];
           run = "cd ${dir.pictures}";
         }
         {
-          on = ["g" "o"]; # go -> vide[o]s
+          on = ["g" "d" "v"];
           run = "cd ${dir.videos}";
         }
         {
-          on = ["g" "m"]; # gm -> [m]usic
+          on = ["g" "d" "m"];
           run = "cd ${dir.music}";
         }
         {
-          on = ["g" "p"]; # gp -> games (p for play)
+          on = ["g" "d" "g"];
           run = "cd ${dir.games}";
         }
         {
-          on = ["g" "t"]; # gt -> source (t for gi[t])
+          on = ["g" "d" "s"];
           run = "cd ${dir.source}";
         }
         {
-          on = ["g" "n"]; # gn -> [n]otes
+          on = ["g" "d" "n"];
           run = "cd ${dir.notes}";
         }
         {
-          on = ["g" "c"]; # gc -> nix [c]onfig
+          on = ["g" "c"];
           run = "cd /etc/nixos";
         }
         {

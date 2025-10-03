@@ -15,11 +15,13 @@ in {
       };
       mappings = {
         f = "navigate next";
+        B = "navigate next";
         "<Space>" = "navigate next";
         "]" = "navigate next";
         "<Right>" = "navigate next";
 
         b = "navigate previous";
+        F = "navigate previous";
         "<S-Space>" = "navigate previous";
         "[" = "navigate previous";
         "<Left>" = "navigate previous";

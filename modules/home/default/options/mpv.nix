@@ -20,6 +20,8 @@ in {
         j = "add volume -2";
         k = "add volume 2";
         l = "seek 10";
+        f = "playlist-next";
+        b = "playlist-prev";
         "Ctrl+l" = "ab-loop";
       };
     };

@@ -21,11 +21,13 @@ in {
         binds = {
           # Navigation
           f = "next";
+          "<Shift+B>" = "next";
           "<space>" = "next";
           "<bracketright>" = "next";
           "<right>" = "prev";
           b = "prev";
-          "<Shift+Space>" = "prev";
+          "<Shift+F>" = "prev";
+          "<Shift+space>" = "prev";
           "<bracketleft>" = "prev";
           "<left>" = "prev";
           gg = "goto 0";
