@@ -21,14 +21,15 @@
 
       # make pop-up file dialogs floating, centred, and pinned
       "tag +dialog, title:(Progress|Save File|Save As)"
-      # "tag +dialog, title:(Open|Progress|Save File|Save As)"
       "tag +dialog, class:(xdg-desktop-portal-gtk)"
       "tag +dialog, class:(re.sonny.Junction)"
+
       "float, tag:dialog"
       "center, tag:dialog"
       "pin, tag:dialog"
       "noborder, tag:dialog"
       "plugin:hyprbars:nobar, tag:dialog"
+      "size 1280 768, tag:dialog"
 
       "float, tag:media"
       "size 1280 720, tag:media"

@@ -31,6 +31,7 @@ in {
     # Tag export windows as floating dialogs
     wayland.windowManager.hyprland.settings.windowrule = [
       "tag +dialog, class:(file-png|file-jpeg)"
+      "tag +dialog, class:gimp, title:(Open.*|Export.*|Save.*|Preferences.*|Configure.*|Module.*)"
     ];
 
     # Persist configuration in storage
