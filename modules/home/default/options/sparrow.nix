@@ -59,7 +59,7 @@ in {
 
     # no blur on context menus (runs in xwayland)
     wayland.windowManager.hyprland.settings = {
-      windowrulev2 = [
+      windowrule = [
         "noblur,class:^${class}$,title:^()$"
       ];
     };

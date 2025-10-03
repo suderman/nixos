@@ -34,7 +34,7 @@ in {
       };
 
       # Hide bars when floating windows are unfocussed
-      windowrulev2 = [
+      windowrule = [
         "plugin:hyprbars:nobar, floating:0" # disable hyprbars for tiling windows
         "plugin:hyprbars:nobar, floating:1, focus:0 " # disable hyprbars for unfocussed floating windows
       ];

@@ -31,35 +31,12 @@
       "plugin:hyprbars:nobar, tag:dialog"
 
       "float, tag:media"
+      "size 1280 720, tag:media"
 
       # assign windows to workspaces
       # "workspace 1 silent, class:[Ff]irefox"
       # "workspace 0 silent, class:[Ss]team"
       # "workspace 1, class:[Ff]irefox"
-
-      # Tag steam and games
-      "tag +steam, class:[Ss]team"
-      "tag +steam, class:^steam_app_(.*)$"
-      "tag +steam, class:^(.*).bin.x86$"
-      "tag +steam, class:^(TurokEx)$"
-
-      # Steam and games fullscreen on workspace 10
-      "workspace 9, tag:steam"
-      # "fullscreen, tag:steam"
-      "rounding 0, tag:steam"
-      "noborder, tag:steam"
-
-      # # Steam and games fullscreen on workspace 10
-      # "workspace 10, class:[Ss]team"
-      # "fullscreen, class:[Ss]team"
-      # "workspace 10, class:^steam_app_(.*)$"
-      # "fullscreen, class:^steam_app_(.*)$"
-
-      # throw sharing indicators away
-      # "workspace special silent, title:^(Firefox — Sharing Indicator)$"
-      # "workspace special silent, title:^(.*is sharing (your screen|a window)\.)$"
-
-      "float, class:^(org.telegram.desktop|telegramdesktop)$, title:^(Media viewer)$"
     ];
   };
 }

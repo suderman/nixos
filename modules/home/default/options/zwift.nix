@@ -25,7 +25,7 @@ in {
 
     # Window rules
     wayland.windowManager.hyprland.settings = {
-      windowrulev2 = [
+      windowrule = [
         "tile,class:(${class})" # don't float
       ];
     };

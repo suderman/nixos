@@ -15,6 +15,18 @@ in {
     # Persist data directory Steam uses
     persist.scratch.directories = [dataDir];
 
+    wayland.windowManager.hyprland.settings.windowrule = [
+      # Tag steam and games in hyprland
+      "tag +steam, class:[Ss]team"
+      "tag +steam, class:^steam_app_(.*)$"
+      "tag +steam, class:^(.*).bin.x86$"
+      "tag +steam, class:^(TurokEx)$"
+      # Steam and games fullscreen on workspace 9
+      "workspace 9, tag:steam"
+      "rounding 0, tag:steam"
+      "noborder, tag:steam"
+    ];
+
     # Timer to run backup script daily
     systemd.user.timers.steam-backup = {
       Unit.Description = "Run Steam backup daily";

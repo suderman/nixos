@@ -11,7 +11,8 @@
       "super, return, exec, kitty"
 
       # File manager
-      "super, e, exec, nautilus"
+      "super, e, exec, kitty yazi"
+      "super+alt, e, exec, nautilus"
 
       # Password manager
       "super+control, period, exec, 1password"

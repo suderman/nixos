@@ -28,9 +28,10 @@ in {
 
     services.keyd.windows."${mkClass class}" = {};
 
-    wayland.windowManager.hyprland.settings = {
-      windowrulev2 = [];
-    };
+    # Tag export windows as floating dialogs
+    wayland.windowManager.hyprland.settings.windowrule = [
+      "tag +dialog, class:(file-png|file-jpeg)"
+    ];
 
     # Persist configuration in storage
     persist.storage.directories = [".config/GIMP" ".local/share/GIMP"];

@@ -22,9 +22,9 @@ in {
     # keyboard shortcuts
     services.keyd.windows."${mkClass class}" = {};
 
-    wayland.windowManager.hyprland.settings = {
-      windowrule = [];
-    };
+    wayland.windowManager.hyprland.settings.windowrule = [
+      "float, class:^(${class}|telegramdesktop)$, title:^(Media viewer)$"
+    ];
 
     # Persist reboots, skip backups
     persist.scratch.directories = [".local/share/TelegramDesktop/tdata"];
