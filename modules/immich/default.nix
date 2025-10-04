@@ -8,7 +8,7 @@
   ...
 }: let
   # https://github.com/immich-app/immich/releases
-  version = "1.143.1";
+  version = "2.0.1";
 
   cfg = config.services.immich;
 
