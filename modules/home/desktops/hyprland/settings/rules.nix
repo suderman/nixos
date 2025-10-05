@@ -1,13 +1,6 @@
 {...}: {
   wayland.windowManager.hyprland.settings = {
     windowrule = [
-      # forbid windows from maximizing/fullscreening themselves
-      "suppressevent maximize, class:.*"
-      "suppressevent fullscreen, class:.*"
-
-      # idle inhibit while fullscreen (games, videos, etc)
-      "idleinhibit fullscreen, class:.*"
-
       # Picture-in-Picture for any windows tagged pip
       "float, tag:pip"
       "pin, tag:pip"
@@ -38,6 +31,17 @@
       # "workspace 1 silent, class:[Ff]irefox"
       # "workspace 0 silent, class:[Ss]team"
       # "workspace 1, class:[Ff]irefox"
+
+      # Games fullscreen on workspace 9
+      "workspace 9, tag:game"
+      "fullscreen, tag:game"
+
+      # forbid windows from maximizing/fullscreening themselves
+      # "suppressevent maximize, class:.*"
+      # "suppressevent fullscreen, class:.*"
+
+      # idle inhibit while fullscreen (games, videos, etc)
+      "idleinhibit fullscreen, class:.*"
     ];
   };
 }

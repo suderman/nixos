@@ -8,23 +8,20 @@
 }: let
   cfg = config.programs.steam;
   inherit (lib) mkIf options;
-  dataDir = ".local/share/Steam"; # steam expects this path
+  dataDir = ".local/share/Steam"; # primary data & configuration
+  runDir = ".steam"; # must persist for big picture and gpu settings
 in {
   options.programs.steam.enable = options.mkEnableOption "steam";
   config = mkIf cfg.enable {
-    # Persist data directory Steam uses
-    persist.scratch.directories = [dataDir];
+    # Persist data directories Steam uses
+    persist.scratch.directories = [dataDir runDir];
 
     wayland.windowManager.hyprland.settings.windowrule = [
       # Tag steam and games in hyprland
-      "tag +steam, class:[Ss]team"
-      "tag +steam, class:^steam_app_(.*)$"
-      "tag +steam, class:^(.*).bin.x86$"
-      "tag +steam, class:^(TurokEx)$"
-      # Steam and games fullscreen on workspace 9
-      "workspace 9, tag:steam"
-      "rounding 0, tag:steam"
-      "noborder, tag:steam"
+      "tag +game, class:[Ss]team"
+      "tag +game, class:^steam_app_(.*)$"
+      "tag +game, class:^(.*).bin.x86$"
+      "tag +game, class:^(.*)x86_64$"
     ];
 
     # Timer to run backup script daily
