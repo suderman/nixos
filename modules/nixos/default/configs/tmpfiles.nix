@@ -28,6 +28,10 @@
       else str
     else head m;
 
+  # Escape backslashes, newlines and tabs for f+ rules
+  toText = str:
+    trim (builtins.replaceStrings ["\\" "\n" "\t"] ["\\\\" "\\n" "\\t"] (toString str));
+
   # Include tmpfiles rules found in home-manager users
   userRulesFor = kind:
     flatten (mapAttrsToList (
@@ -130,7 +134,7 @@ in {
               (
                 if text != "-"
                 then ''
-                  f+ ${toString target} ${toMode mode} ${toString user} ${toString group} - "${toString text}"
+                  f+ ${toString target} ${toMode mode} ${toString user} ${toString group} - ${toText text}
                 ''
                 else ''
                   f ${toString target} ${toMode mode} ${toString user} ${toString group} -
