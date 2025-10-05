@@ -173,6 +173,11 @@ in {
           run = "cd /etc/nixos";
         }
         {
+          on = ["g" "d"];
+          run = ''shell 'ripdrag "$@" -x 2>/dev/null &' --confirm'';
+          desc = "ripdrag";
+        }
+        {
           on = ["g" "s" "t"]; # gst -> storage
           run = "cd /mnt/main/storage";
         }
