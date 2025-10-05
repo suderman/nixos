@@ -36,5 +36,19 @@ in {
 
     # Persist configuration in storage
     persist.storage.directories = [".config/GIMP" ".local/share/GIMP"];
+
+    xdg.mimeApps.defaultApplications = {
+    };
+
+    # Do the same in Yazi
+    programs.yazi.settings.opener.edit-image = [
+      {
+        run = ''gimp "$@"'';
+        desc = "Edit in GIMP";
+        block = false;
+        orphan = true;
+        for = "unix";
+      }
+    ];
   };
 }

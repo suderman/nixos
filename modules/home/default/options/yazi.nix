@@ -58,6 +58,15 @@ in {
         image_quality = 90;
       };
 
+      settings.opener.default = [
+        {
+          run = ''xdg-open "$@"'';
+          block = false;
+          orphan = true;
+          for = "unix";
+        }
+      ];
+
       settings.open.rules = [
         {
           name = "*.pdf";
@@ -73,7 +82,11 @@ in {
         }
         {
           mime = "image/*";
-          use = "image";
+          use = ["image" "edit-image"];
+        }
+        {
+          name = "*";
+          use = "default";
         }
       ];
 
