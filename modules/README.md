@@ -141,6 +141,7 @@ with the following options:
 config.home.directories.XDG_NAME_DIR = {
   path = "Name"; # relative to user home directory
   persist = "storage"; # set to "storage", "scratch" or null
+  sync = true; # add folder to syncthing
   enable = true;
 };
 
