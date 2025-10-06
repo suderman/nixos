@@ -56,19 +56,30 @@ and
 modules. Examples:
 
 ```nix
+# nixos
 config.tmpfiles.directories = [
   "/etc/ensure-this-dir-exists"
   {
     target = "/etc/my-copied-dir"; 
     source = "/mnt/example/original-dir";
-    user = "jon"; 
-    group = "users"; 
+    user = "someuser"; 
+    group = "somegroup"; 
     mode = 775; 
   }
 ];
 
+# home-manager (relative to home dir, assumes user/group)
+config.tmpfiles.directories = [
+  ".mydir"
+  {
+    target = ".local/share/example-dir"; 
+    source = "/mnt/example/original-dir";
+    mode = 700; 
+  }
+];
+
+# nixos
 config.tmpfiles.files = [
-  "/etc/ensure-this-file-exists"
   {
     target = "/etc/my-copied-file.txt"; 
     source = "/mnt/example/original-file.txt";
@@ -85,9 +96,16 @@ config.tmpfiles.files = [
   }
 ];
 
+# home-manager
+config.tmpfiles.files = [
+  ".config/example-file.yaml"
+];
+
+
+# nixos / home-manager
 config.tmpfiles.symlinks = [
   {
-    target = "/etc/my-symlink.txt"; 
+    target = "/tmp/my-symlink.txt"; 
     source = "/mnt/example/my-real-file.txt";
   }
 ];
@@ -126,11 +144,18 @@ config.home.directories.XDG_NAME_DIR = {
   enable = true;
 };
 
+# List of paths to move to writeable ~/.local/store to ease tinkering with configurations
+config.home.localStorePath = [
+  ".config/hypr/hyprland.conf"
+  ".config/waybar/config"
+  ".config/waybar/style.css"
+];
+
 # Lookup uid from flake.users.<name>.uid
 config.home.uid = 1000;
 
-# Calculate offet added to ports (uid - 1000)
-config.home.offset = 0;
+# Calculated offet added to ports (uid - 1000)
+config.home.portOffset = 0;
 ```
 
 ### `config.services.btrbk`

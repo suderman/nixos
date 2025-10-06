@@ -219,4 +219,9 @@ in {
 
     style = readFile ./style.css;
   };
+
+  home.localStorePath = [
+    ".config/waybar/config"
+    ".config/waybar/style.css"
+  ];
 }

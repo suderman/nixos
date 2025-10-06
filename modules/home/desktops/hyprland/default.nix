@@ -73,5 +73,13 @@ in {
     # Persist extra config
     persist.storage.directories = [".config/hypr/extra"];
     tmpfiles.files = [".config/hypr/extra/hyprland.conf"];
+
+    # Use a real file for the hyprland config to ease real-time tinkering
+    home.localStorePath = [".config/hypr/hyprland.conf"];
+
+    # Temporarily pause autoreload during activation
+    home.activation.localStoreHyprland = lib.hm.dag.entryBefore ["linkGeneration"] ''
+      echo "misc:disable_autoreload=true" >> "${config.home.homeDirectory}/.config/hypr/hyprland.conf";
+    '';
   };
 }

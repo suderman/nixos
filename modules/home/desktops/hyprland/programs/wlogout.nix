@@ -113,4 +113,9 @@ in {
 
     '';
   };
+
+  # home.localStorePath = [
+  #   ".config/wlogout/layout"
+  #   ".config/wlogout/style.css"
+  # ];
 }
