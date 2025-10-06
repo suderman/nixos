@@ -27,6 +27,11 @@ in {
             - null: cleared on reboot
           '';
         };
+        sync = mkOption {
+          type = types.bool;
+          default = false;
+          description = "Whether to sync this directory with Syncthing";
+        };
         enable = mkOption {
           type = types.bool;
           default = false;
@@ -50,41 +55,49 @@ in {
         XDG_DESKTOP_DIR = {
           path = mkDefault "Desktop";
           persist = mkDefault null;
+          sync = mkDefault true;
           enable = mkDefault true;
         };
         XDG_DOWNLOAD_DIR = {
           path = mkDefault "Downloads";
           persist = mkDefault null;
+          sync = mkDefault false;
           enable = mkDefault true;
         };
         XDG_DOCUMENTS_DIR = {
           path = mkDefault "Documents";
           persist = mkDefault null;
+          sync = mkDefault true;
           enable = mkDefault true;
         };
         XDG_MUSIC_DIR = {
           path = mkDefault "Music";
           persist = mkDefault null;
+          sync = mkDefault true;
           enable = mkDefault true;
         };
         XDG_PICTURES_DIR = {
           path = mkDefault "Pictures";
           persist = mkDefault null;
+          sync = mkDefault true;
           enable = mkDefault true;
         };
         XDG_PUBLICSHARE_DIR = {
           path = mkDefault "Public";
           persist = mkDefault null;
+          sync = mkDefault false;
           enable = mkDefault true;
         };
         XDG_TEMPLATES_DIR = {
           path = mkDefault "Templates";
           persist = mkDefault null;
+          sync = mkDefault false;
           enable = mkDefault true;
         };
         XDG_VIDEOS_DIR = {
           path = mkDefault "Videos";
           persist = mkDefault null;
+          sync = mkDefault true;
           enable = mkDefault true;
         };
       };
