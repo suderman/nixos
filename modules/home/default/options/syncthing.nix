@@ -5,7 +5,7 @@
   ...
 }: let
   cfg = config.services.syncthing;
-  inherit (config.home) offset;
+  inherit (config.home) portOffset;
   inherit (lib) mkIf;
 
   syncPort = 22000; # tcp/udp
@@ -14,7 +14,7 @@ in {
   config = mkIf cfg.enable {
     services.syncthing = {
       tray.enable = false;
-      extraOptions = ["--gui-address=http://0.0.0.0:${toString (webguiPort + offset)}"];
+      extraOptions = ["--gui-address=http://0.0.0.0:${toString (webguiPort + portOffset)}"];
     };
 
     persist.storage.directories = [".local/state/syncthing"];
@@ -36,8 +36,8 @@ in {
             syncthing cli config options raw-listen-addresses 0 delete
             syncthing cli config options raw-listen-addresses 0 delete
             syncthing cli config options raw-listen-addresses 0 delete
-            syncthing cli config options raw-listen-addresses add "tcp://0.0.0.0:${toString (syncPort + offset)}"
-            syncthing cli config options raw-listen-addresses add "quic://0.0.0.0:${toString (syncPort + offset)}"
+            syncthing cli config options raw-listen-addresses add "tcp://0.0.0.0:${toString (syncPort + portOffset)}"
+            syncthing cli config options raw-listen-addresses add "quic://0.0.0.0:${toString (syncPort + portOffset)}"
             syncthing cli config options raw-listen-addresses add "dynamic+https://relays.syncthing.net/endpoint"
           '';
       };

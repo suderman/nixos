@@ -15,13 +15,13 @@
 in {
   networking.firewall = let
     # [ 0 1 2 ... ]
-    offsets = map (user: user.home.offset) users;
+    portOffsets = map (user: user.home.portOffset) users;
 
     # [ 22000 22001 22002 ... ]
-    syncPorts = map (offset: syncPort + offset) offsets;
+    syncPorts = map (portOffset: syncPort + portOffset) portOffsets;
 
     # [ 8384 8385 8386 ... ]
-    webguiPorts = map (offset: webguiPort + offset) offsets;
+    webguiPorts = map (portOffset: webguiPort + portOffset) portOffsets;
     # Open firewall for user syncthing service
   in {
     allowedTCPPorts = syncPorts ++ webguiPorts;
@@ -32,7 +32,7 @@ in {
   services.traefik.proxy = listToAttrs (map (user:
     with user.home; {
       name = "syncthing-${username}";
-      value = "http://${hostName}:${toString (webguiPort + offset)}";
+      value = "http://${hostName}:${toString (webguiPort + portOffset)}";
     })
   users);
 }

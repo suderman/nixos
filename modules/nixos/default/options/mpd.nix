@@ -20,13 +20,13 @@ in {
         users = filterAttrs (_: user: (user.services.mpd.enable == true)) config.home-manager.users;
 
         # [ 0 1 2 ... ]
-        offsets = map (user: user.home.offset) (attrValues users);
+        portOffsets = map (user: user.home.portOffset) (attrValues users);
 
         # [ 6600 6601 6602 ... ]
-        mdpPorts = map (offset: mdpPort + offset) offsets;
+        mdpPorts = map (offset: mdpPort + offset) portOffsets;
 
         # [ 8600 8601 8602 ... ]
-        httpPorts = map (offset: httpPort + offset) offsets;
+        httpPorts = map (offset: httpPort + offset) portOffsets;
         # # [ 1704 1705 1706 ... ]
         # snapPorts = map (offset: snapPort + offset) offsets;
         # ctrlPorts = map (offset: snapPort + 1 + offset) offsets;

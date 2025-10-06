@@ -5,7 +5,7 @@
   ...
 }: let
   cfg = config.services.mpd;
-  inherit (config.home) offset;
+  inherit (config.home) portOffset;
   inherit (lib) mkIf;
 in {
   config = mkIf cfg.enable {
@@ -70,7 +70,7 @@ in {
         titles_visibility = "yes";
 
         # visualizer
-        visualizer_data_source = "/tmp/mpd${toString offset}.fifo";
+        visualizer_data_source = "/tmp/mpd${toString portOffset}.fifo";
         visualizer_output_name = "mpd_visualizer";
         visualizer_fps = 60;
         visualizer_in_stereo = "yes";
