@@ -6,8 +6,7 @@
   ...
 }: let
   cfg = config.programs.hyprland;
-  inherit (builtins) toString;
-  inherit (lib) getExe mkOption types;
+  inherit (lib) getExe mkOption;
 in {
   imports = [flake.nixosModules.desktops.default];
 
@@ -18,51 +17,20 @@ in {
   };
 
   config = {
-    # Login screen
-    services.greetd = let
-      command = getExe pkgs.hyprland;
-    in {
-      enable = false;
-      settings =
-        {
-          terminal.vt = 1;
-          default_session = {
-            user = "greeter";
-            command = toString [
-              "${getExe pkgs.greetd.tuigreet}"
-              "--greeting 'Welcome to NixOS!'"
-              "--remember-user-session" # remember last selected session for each user
-              "--time" # display the current date and time
-              "--cmd ${command}"
-            ];
-          };
-        }
-        // (
-          if cfg.autologin == null
-          then {}
-          else {
-            initial_session = {
-              user = cfg.autologin;
-              inherit command;
-            };
-          }
-        );
+    # Greeter
+    services.displayManager.ly = {
+      enable = true;
+      settings = {
+        clear_password = true;
+        vi_mode = true;
+        animation = "matrix";
+        bigclock = true;
+      };
     };
+    persist.scratch.files = ["/etc/ly/save.ini"];
 
-    # Extend systemd service
-    systemd.services.greetd.serviceConfig = {
-      Type = "idle";
-      StandardInput = "tty";
-      StandardOutput = "tty";
-
-      # Without this errors will spam on screen
-      StandardError = "journal";
-
-      # Without these bootlogs will spam on screen
-      TTYReset = true;
-      TTYVHangup = true;
-      TTYVTDisallocate = true;
-    };
+    # The one and only
+    programs.hyprland.enable = true;
 
     # Enable screen brightness control
     programs.light.enable = true;
@@ -75,10 +43,6 @@ in {
       pulse.enable = true;
       wireplumber.enable = true;
     };
-
-    # # Mount, trash, and other functionalities
-    # services.gvfs.enable = true;
-    # services.udisks2.enable = true;
 
     # Quick Look
     services.gnome.sushi.enable = true;
