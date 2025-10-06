@@ -10,7 +10,7 @@
 in {
   config = mkIf cfg.enable {
     programs.ripgrep = {
-      package = pkgs.ripgrep-all;
+      package = pkgs.ripgrep;
       arguments = [
         "--max-columns=150"
         "--max-columns-preview"

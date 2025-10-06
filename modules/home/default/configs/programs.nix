@@ -13,6 +13,7 @@
     # pkgs.calcure # calendar viewer
     # pkgs.distrobox pkgs.distrobox-tui
     pkgs.imagemagick # animate compare composite conjure convert display identify import magick magick-script mogrify montage stream
+    pkgs.isd # systemctl tui
     pkgs.killall # kill by process name
     pkgs.lame # mp3 codec
     pkgs.lazydocker # docker tui
@@ -24,6 +25,7 @@
     pkgs.ncdu # recover available disk space
     pkgs.parted # manage disks
     pkgs.rclone # sync webdav and other remote stores
+    pkgs.wget # download the internet
     pkgs.sysz # systemctl tui
   ];
 
@@ -41,7 +43,8 @@
   programs.micro.enable = lib.mkDefault true; # easy text editor
   programs.neovim.enable = lib.mkDefault false; # using nvf instead
   programs.nnn.enable = lib.mkDefault true;
-  programs.ripgrep.enable = lib.mkDefault true;
+  programs.ripgrep.enable = lib.mkDefault true; # rg
+  programs.ripgrep-all.enable = lib.mkDefault true; # rga
   programs.tealdeer.enable = lib.mkDefault true;
   programs.tmux.enable = lib.mkDefault true;
   programs.yazi.enable = lib.mkDefault true; # browse muh filez

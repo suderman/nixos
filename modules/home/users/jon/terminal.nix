@@ -1,14 +1,8 @@
-{
-  pkgs,
-  perSystem,
-  ...
-}: let
-  inherit (perSystem.self) mkScript;
-in {
+{pkgs, ...}: {
   home.packages = with pkgs; [
     yo # example script
-    perSystem.self.fetchgithub # fetch hash from repo
-    perSystem.self.shizuku # connect android to pc and run
+    self.fetchgithub # fetch hash from repo
+    self.shizuku # connect android to pc and run
   ];
 
   # Aliases
@@ -30,8 +24,5 @@ in {
 
     # Bashly CLI
     bashly = "docker run --rm -it --user $(id -u):$(id -g) --volume \"$PWD:/app\" dannyben/bashly";
-
-    # manage systemd units
-    isd = "nix run github:isd-project/isd";
   };
 }
