@@ -40,6 +40,8 @@ in {
       authorizedKeysFiles = lib.mkForce ["/etc/ssh/authorized_keys.d/%u"];
     };
 
+    pam.services.login.sshAgentAuth = true;
+
     # Add CA certificate to system's trusted root store
     pki.certificateFiles = [ca];
   };
