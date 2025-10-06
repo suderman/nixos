@@ -12,6 +12,7 @@
         pkgs.nix-search-cli
         pkgs.fzf
       ];
+      env.NIXPKGS_ALLOW_UNFREE = "1";
       text = ''
         if [[ -z "''${1-}" ]]; then
           nix-search
@@ -19,7 +20,7 @@
           nix-search -m 100 "$1" |
             fzf --preview 'nix-search -dm 1 {}' |
             cut -d' ' -f1 |
-            xargs -r -I{} nix profile install github:NixOS/nixpkgs/nixpkgs-unstable#{}
+            xargs -r -I{} nix profile install --impure github:NixOS/nixpkgs/nixpkgs-unstable#{}
         fi
       '';
     })
