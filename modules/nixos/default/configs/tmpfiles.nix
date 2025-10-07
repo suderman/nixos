@@ -5,73 +5,54 @@
   ...
 }: let
   cfg = config.tmpfiles;
-  inherit (builtins) isAttrs isString head match stringLength;
-  inherit (lib) flatten mkOption types mapAttrsToList unique;
-  users = config.home-manager.users or {};
-
-  # Convert 3-digit mode (ie: 775) to 4-digit mode (ie: 0775) by padding a zero
-  toMode = mode: let
-    mode' = toString mode;
-  in
-    if stringLength mode' == 3
-    then "0${mode'}"
-    else mode';
-
-  # Trim whitespace from beginning and end of string
-  trim = str: let
-    m = match "[[:space:]]*(.*[^[:space:]])[[:space:]]*" str;
-  in
-    if m == null
-    then
-      if str == "" || match "[[:space:]]*" str != null
-      then ""
-      else str
-    else head m;
-
-  # Escape backslashes, newlines and tabs for f+ rules
-  toText = str:
-    trim (builtins.replaceStrings ["\\" "\n" "\t"] ["\\\\" "\\n" "\\t"] (toString str));
-
-  # Include tmpfiles rules found in home-manager users
-  userRulesFor = kind:
-    flatten (mapAttrsToList (
-        _: user: let
-          inherit (user.home) homeDirectory username;
-          toRule = x: let
-            rule =
-              if isAttrs x
-              then x
-              else {};
-            target =
-              if isAttrs x
-              then "${homeDirectory}/${toString (x.target or "target")}"
-              else "${homeDirectory}/${toString x}";
-          in
-            rule
-            // {
-              inherit target;
-              user = username;
-              group = "users";
-            };
-        in
-          map toRule (user.tmpfiles.${kind} or [])
-      )
-      users);
-
-  userDirectories = userRulesFor "directories";
-  userFiles = userRulesFor "files";
-  userSymlinks = userRulesFor "symlinks";
+  inherit (lib) mkOption types unique;
+  inherit (config.tmpfiles.lib) toMode toText trim;
 in {
   # Add "tmpfiles" options
-  options.tmpfiles = let
-    option = mkOption {
+  options.tmpfiles = {
+    lib = mkOption {
+      type = types.anything;
+      readOnly = true;
+      default = {
+        # Convert 3-digit mode (ie: 775) to 4-digit mode (ie: 0775) by padding a zero
+        toMode = mode: let
+          mode' = toString mode;
+        in
+          if builtins.stringLength mode' == 3
+          then "0${mode'}"
+          else mode';
+
+        # Trim whitespace from beginning and end of string
+        trim = str: let
+          m = builtins.match "[[:space:]]*(.*[^[:space:]])[[:space:]]*" str;
+        in
+          if m == null
+          then
+            if str == "" || builtins.match "[[:space:]]*" str != null
+            then ""
+            else str
+          else builtins.head m;
+
+        # Escape backslashes, newlines and tabs for f+ rules
+        toText = str:
+          trim (builtins.replaceStrings ["\\" "\n" "\t"] ["\\\\" "\\n" "\\t"] (toString str));
+      };
+    };
+
+    directories = mkOption {
       type = with types; listOf (either str attrs);
       default = [];
     };
-  in {
-    directories = option;
-    files = option;
-    symlinks = option;
+
+    files = mkOption {
+      type = with types; listOf (either str attrs);
+      default = [];
+    };
+
+    symlinks = mkOption {
+      type = with types; listOf (either str attrs);
+      default = [];
+    };
   };
 
   # Add these paths to list found in systemd.tmpfiles.rules
@@ -83,7 +64,7 @@ in {
       # C+ /etc/foo-default 0775 me users - /etc/default
       map (x: let
         directory =
-          if isString x
+          if builtins.isString x
           then {target = x;}
           else x;
         rulesFor = {
@@ -104,7 +85,7 @@ in {
             ''
           );
       in
-        rulesFor directory) (unique (cfg.directories ++ userDirectories))
+        rulesFor directory) (unique cfg.directories)
     )
     ++ (
       # tmpfiles.files { target = "/etc/foobar"; mode = "0775"; user = "jon"; group = "users"; text = "Hello world!"; }];
@@ -113,7 +94,7 @@ in {
       # C+ /etc/foo-resolv /etc/foo-resolv 0775 jon users - /etc/resolv.conf
       map (x: let
         file =
-          if isString x
+          if builtins.isString x
           then {target = x;}
           else x;
         rulesFor = {
@@ -142,14 +123,14 @@ in {
               )
           );
       in
-        rulesFor file) (unique (cfg.files ++ userFiles))
+        rulesFor file) (unique cfg.files)
     )
     ++ (
       # tmpfiles.symlinks [{ target = "/etc/foobarlink"; source = "/etc/foobar"; }];
       # L+ /etc/foobar - - - - /etc/foobarlink
       map (x: let
         symlink =
-          if isString x
+          if builtins.isString x
           then {target = x;}
           else x;
         rulesFor = {
@@ -161,6 +142,6 @@ in {
             L+ ${toString target} - - - - ${toString source}
           '';
       in
-        rulesFor symlink) (unique (cfg.symlinks ++ userSymlinks))
+        rulesFor symlink) (unique cfg.symlinks)
     );
 }
