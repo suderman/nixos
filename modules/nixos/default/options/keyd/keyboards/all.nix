@@ -64,8 +64,10 @@
     # Media keys
     a = "volumedown";
     s = "volumeup";
-    d = "mute";
-    # f = "micmute";
+    d = "mute"; # f = "micmute";
+    f = "nextsong"; # forward
+    r = "previoussong"; # rewind
+    m = "media";
     space = "playpause";
 
     # Both volume keys together trigger media key
