@@ -26,6 +26,7 @@ in {
   # Check modules directory for extra configuration
   programs = {
     rofi.enable = true; # launcher
+    bluetuith.enable = true; # bluetooth tui
   };
 
   services = {
