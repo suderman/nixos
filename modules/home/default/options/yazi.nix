@@ -82,7 +82,7 @@ in {
         }
         {
           mime = "image/*";
-          use = ["image" "edit-image"];
+          use = ["image" "edit-image" "wallpaper"];
         }
         {
           name = "*";

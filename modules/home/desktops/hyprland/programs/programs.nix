@@ -28,10 +28,13 @@ in {
     rofi.enable = true; # launcher
   };
 
+  services = {
+    swww.enable = true; # wallpaper
+  };
+
   # Add these to my path
   home.packages = with pkgs; [
     bounce # defined above
-    swww # wallpaper
     brightnessctl
     hyprpicker # color picker
     hyprcursor

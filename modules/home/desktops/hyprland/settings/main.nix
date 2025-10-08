@@ -4,20 +4,14 @@
   perSystem,
   ...
 }: let
-  inherit (lib) concatStringsSep mkIf;
-  inherit (perSystem.self) mkScript;
-
-  init = mkScript {
-    path = with pkgs; [coreutils swww];
-    text = concatStringsSep "\n" [
+  init = perSystem.self.mkScript {
+    path = with pkgs; [coreutils];
+    text = lib.concatStringsSep "\n" [
       # Temporary symlink
       "ln -sf $XDG_RUNTIME_DIR/hypr /tmp/hypr"
 
       # Ensure portals and other systemd user services are running
       "bounce"
-
-      # Wallpaper
-      "swww-daemon"
     ];
   };
 in {
@@ -68,9 +62,7 @@ in {
     gesture = [
       "3, horizontal, workspace"
       "3, vertical, special, special"
-      # "3, vertical, dispatcher, togglespecialworkspace"
     ];
-    # gestures.workspace_swipe = true;
 
     misc = {
       mouse_move_enables_dpms = true;
