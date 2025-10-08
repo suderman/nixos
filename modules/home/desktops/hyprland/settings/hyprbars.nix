@@ -65,6 +65,9 @@ in {
 
         # toggle special workspace
         "super, escape, togglespecialworkspace"
+
+        # Toggle group lock with super+alt click
+        "super+alt, mouse:272, exec, hypr-togglegrouporlockornavigate right"
       ];
 
       bindsn = [
