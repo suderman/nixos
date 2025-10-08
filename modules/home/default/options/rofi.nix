@@ -26,12 +26,15 @@ in {
       blezz = "rofi-toggle -show blezz -auto-select -matching normal -theme-str 'window {width: 50%;}'";
       sinks = "rofi-toggle -show sinks -cycle -theme-str 'window {width: 50%;}'";
     in {
-      bindr = ["super, Super_L, exec, ${combi}"];
+      bindr = [
+        "super, Super_L, exec, ${combi}" # Left Super is app launcher/switcher
+        "super, Super_R, exec, ${blezz}" # Right Super is blezz
+      ];
+
       bind = [
         ", XF86AudioMedia, exec, ${sinks}"
         "super, space, exec, ${combi}"
         "super+alt, space, exec, ${blezz}"
-        # "super, slash, exec, ${blezz}"
       ];
       bindsn = [
         "super_l, a&s, exec, ${sinks}"
@@ -41,7 +44,6 @@ in {
 
     services.keyd.layers = {
       rofi = {
-        "super.space" = "down";
         "super.tab" = "down";
         "super.grave" = "up";
         "super.j" = "down";
@@ -61,7 +63,7 @@ in {
     };
 
     programs.rofi = {
-      package = pkgs.rofi-wayland;
+      package = pkgs.unstable.rofi;
       # plugins = with pkgs; [ rofi-calc rofi-emoji rofimoji rofi-blezz ];
       plugins = with pkgs; [rofi-calc rofi-emoji-wayland rofimoji rofi-blezz];
       cycle = false;
@@ -100,13 +102,9 @@ in {
         display-drun = "";
         display-run = "run";
 
-        # kb-accept-entry = [ "space" "!Super+Super_L" ];
-        # kb-cancel = [ "Super_L" "Escape" "Control+g" "Control+bracketleft" ];
         kb-accept-entry = ["space" "Return"];
         kb-mode-next = ["Alt_L" "Shift+Right" "Control+Tab"];
         kb-mode-previous = ["Shift+Alt_L" "Shift+Left" "Control+ISO_Left_Tab"];
-        # kb-row-down = [ "Shift_R" "Down" "Control+n" "Super+j" ];
-        # kb-row-up = [ "Shift_L" "Up" "Control+p" "Super+k" ];
         me-select-entry = "MousePrimary";
         me-accept-entry = "!MousePrimary";
 

@@ -1,20 +1,11 @@
 #!/usr/bin/env bash
-btn="$(hypr-button $@)"
+action="${1-toggle}"
 
 # count number in group
 grouped_windows_count="$(hyprctl activewindow -j | jq '.grouped | length')"
 
-# toggle group lock
-if [[ "$btn" == "right" ]]; then
-
-  if ((grouped_windows_count > 1)); then
-    hyprctl dispatch lockactivegroup toggle
-  else
-    hyprctl dispatch togglegroup
-  fi
-
 # prev window in group
-elif [[ "$btn" == "middle" ]]; then
+if [[ "$action" == "prev" ]]; then
   if ((grouped_windows_count > 1)); then
     hyprctl dispatch lockactivegroup lock
     hyprctl dispatch changegroupactive b
@@ -23,10 +14,18 @@ elif [[ "$btn" == "middle" ]]; then
   fi
 
 # next window in group
-else
+elif [[ "$action" == "next" ]]; then
   if ((grouped_windows_count > 1)); then
     hyprctl dispatch lockactivegroup lock
     hyprctl dispatch changegroupactive f
+  else
+    hyprctl dispatch togglegroup
+  fi
+
+# toggle group lock
+else
+  if ((grouped_windows_count > 1)); then
+    hyprctl dispatch lockactivegroup toggle
   else
     hyprctl dispatch togglegroup
   fi

@@ -6,7 +6,7 @@
       "pin, tag:pip"
       "keepaspectratio, tag:pip"
       "noborder, tag:pip"
-      "plugin:hyprbars:nobar, tag:pip"
+      # "plugin:hyprbars:nobar, tag:pip"
       "size 480 270, tag:pip"
       "minsize 240 135, tag:pip"
       "maxsize 960 540, tag:pip"
@@ -21,7 +21,7 @@
       "center, tag:dialog"
       "pin, tag:dialog"
       "noborder, tag:dialog"
-      "plugin:hyprbars:nobar, tag:dialog"
+      # "plugin:hyprbars:nobar, tag:dialog"
       "size 1280 768, tag:dialog"
 
       "float, tag:media"

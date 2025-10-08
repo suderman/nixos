@@ -13,30 +13,34 @@ in {
 
     settings = {
       "plugin:hyprbars" = {
-        bar_height = 30;
+        bar_blur = true;
+        bar_button_padding = 4;
+        bar_color = "rgba(21,21,33,0.85)";
+        "col.text" = "rgba(183,189,248,0.9)";
+        bar_height = 20;
         bar_padding = 10;
-        bar_button_padding = 5;
-        bar_color = "rgba(151521d9)";
-
         bar_part_of_window = false;
         bar_precedence_over_border = false;
+        bar_text_font = "monospace";
+        bar_text_size = "10";
         bar_title_enabled = true;
+        icon_on_hover = true;
 
         # https://gist.github.com/lopspower/03fb1cc0ac9f32ef38f4
         hyprbars-button = let
-          button = icon: size: command: "rgba(15152100), ${toString size}, ${icon}, ${command}";
+          button = icon: size: command: "rgba(00000000), ${toString size}, ${icon}, ${command}";
         in [
-          (button "" 21 "hyprctl dispatch exec hypr-togglegrouporkill") # kill
-          (button "󰽤" 18 "hyprctl dispatch exec hypr-togglegrouporlockornavigate") # group
-          (button "󰔷" 19 "hyprctl dispatch exec hypr-togglefullscreenorspecial") # max/min
-          (button "" 18 "hyprctl dispatch exec hypr-togglefloatingorsplit") # window
+          (button "" 20 "hyprctl dispatch exec hypr-togglegrouporkill") # kill
+          (button "󰽤" 17 "hyprctl dispatch exec hypr-togglegrouporlockornavigate") # group
+          (button "󰔷" 18 "hyprctl dispatch exec hypr-togglefullscreenorspecial") # max/min
+          (button "" 17 "hyprctl dispatch exec hypr-togglefloatingorsplit") # window
         ];
       };
 
       # Hide bars when floating windows are unfocussed
       windowrule = [
-        "plugin:hyprbars:nobar, floating:0" # disable hyprbars for tiling windows
-        "plugin:hyprbars:nobar, floating:1, focus:0 " # disable hyprbars for unfocussed floating windows
+        # "plugin:hyprbars:nobar, floating:0" # disable hyprbars for tiling windows
+        # "plugin:hyprbars:nobar, floating:1, focus:0 " # disable hyprbars for unfocussed floating windows
       ];
 
       bind = [
@@ -49,12 +53,14 @@ in {
         "super+alt, slash, exec, hypr-togglefloatingorsplit right" # toggle pin/split
 
         # Prev window in group with super+comma [<]
-        "super, comma, changegroupactive, b"
-        "super, comma, lockactivegroup, lock"
+        # "super, comma, changegroupactive, b"
+        # "super, comma, lockactivegroup, lock"
+        "super, comma, exec, hypr-togglegrouporlockornavigate prev"
 
         # Next window in group with super+period [>]
-        "super, period, changegroupactive, f"
-        "super, period, lockactivegroup, lock"
+        # "super, period, changegroupactive, f"
+        # "super, period, lockactivegroup, lock"
+        "super, period, exec, hypr-togglegrouporlockornavigate next"
 
         # Fullscreen toggle
         "super, f, exec, hypr-togglefullscreenorspecial left" # fullscreen 1 (focus)
@@ -67,13 +73,18 @@ in {
         "super, escape, togglespecialworkspace"
 
         # Toggle group lock with super+alt click
-        "super+alt, mouse:272, exec, hypr-togglegrouporlockornavigate right"
+        "super+alt, mouse:272, exec, hypr-togglegrouporlockornavigate"
+
+        "super, y, exec, hypr-toggletitlebars"
       ];
+
+      # Toggle group lock with long press Escape
+      bindo = [", Escape, exec, hypr-togglegrouporlockornavigate"];
 
       bindsn = [
         # Toggle group lock with super+comma+period ([<>] same-time)
-        "super_l, comma&period, exec, hypr-togglegrouporlockornavigate right"
-        "super_r, comma&period, exec, hypr-togglegrouporlockornavigate right"
+        "super_l, comma&period, exec, hypr-togglegrouporlockornavigate"
+        "super_r, comma&period, exec, hypr-togglegrouporlockornavigate"
       ];
     };
   };
