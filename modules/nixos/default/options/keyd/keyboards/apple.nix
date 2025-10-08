@@ -16,11 +16,15 @@
         # [Control] [Alt] [Super] [Space] [Super] [Alt]
         tab = "overloadt2(nav, tab, 200)";
         capslock = "layer(control)";
+        leftshift = "layer(shift)";
         leftcontrol = "layer(control)";
         leftalt = "layer(alt)";
         leftmeta = "layer(super)";
-        rightmeta = "layer(super)";
-        rightalt = "layer(alt)";
+
+        # Allow right modifers to be unique keys
+        rightmeta = "rightmeta";
+        rightalt = "rightalt";
+        rightshift = "rightshift";
 
         # Both volume keys together trigger media key
         "volumedown+volumeup" = "media";

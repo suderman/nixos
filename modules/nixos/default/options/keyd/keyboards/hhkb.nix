@@ -18,9 +18,11 @@
         leftshift = "layer(shift)";
         leftalt = "layer(alt)";
         leftmeta = "layer(super)";
-        rightmeta = "layer(super)";
-        rightalt = "layer(alt)";
-        rightshift = "layer(shift)";
+
+        # Allow right modifers to be unique keys
+        rightmeta = "rightmeta";
+        rightalt = "rightalt";
+        rightshift = "rightshift";
 
         # Fn keypad as media keys
         # [+] next song

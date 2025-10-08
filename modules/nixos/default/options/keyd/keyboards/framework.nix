@@ -19,9 +19,11 @@
         leftcontrol = "layer(control)";
         leftmeta = "layer(alt)";
         leftalt = "layer(super)";
-        rightalt = "layer(super)";
-        rightcontrol = "layer(alt)";
-        rightshift = "layer(shift)";
+
+        # Allow right modifers to be unique keys
+        rightalt = "rightmeta";
+        rightcontrol = "rightalt";
+        rightshift = "rightshift";
 
         # Both volume keys together trigger media key
         "volumedown+volumeup" = "media";

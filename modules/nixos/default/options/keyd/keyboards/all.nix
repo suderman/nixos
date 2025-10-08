@@ -31,16 +31,12 @@
     l = "right";
     j = "down";
     h = "left";
-    # u = "pageup";
-    # d = "pagedown";
     w = "C-right";
     b = "C-left";
 
     # emacs keys
     q = "home"; # normally a
     e = "end";
-    # b = "left";
-    # f = "right";
     p = "pageup";
     n = "pagedown";
 
