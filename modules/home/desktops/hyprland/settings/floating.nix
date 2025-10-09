@@ -6,6 +6,17 @@
 
       # Set window to floating, or pin if already floating
       "super, p, exec, hypr-floatorpin"
+
+      # Resize active window to various presets
+      "super+shift, 1, exec, hypr-resizefloating 10"
+      "super+shift, 2, exec, hypr-resizefloating 20"
+      "super+shift, 3, exec, hypr-resizefloating 30"
+      "super+shift, 4, exec, hypr-resizefloating 40"
+      "super+shift, 5, exec, hypr-resizefloating 50"
+      "super+shift, 6, exec, hypr-resizefloating 60"
+      "super+shift, 7, exec, hypr-resizefloating 70"
+      "super+shift, 8, exec, hypr-resizefloating 80"
+      "super+shift, 9, exec, hypr-resizefloating 90"
     ];
 
     bindo = [

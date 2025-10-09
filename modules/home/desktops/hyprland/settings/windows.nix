@@ -51,29 +51,6 @@
       "super, tab, exec, hypr-supertab"
       "super+alt, tab, exec, hypr-supertab next"
       "super+shift, tab, exec, hypr-supertab prev"
-
-      # Resize active window to various presets
-      "super+shift, 1, resizeactive, exact 10% 10%"
-      "super+shift, 1, centerwindow, 1"
-      "super+shift, 2, resizeactive, exact 20% 20%"
-      "super+shift, 2, centerwindow, 1"
-      "super+shift, 3, resizeactive, exact 30% 30%"
-      "super+shift, 3, centerwindow, 1"
-      "super+shift, 4, resizeactive, exact 40% 40%"
-      "super+shift, 4, centerwindow, 1"
-      "super+shift, 5, resizeactive, exact 50% 50%"
-      "super+shift, 5, centerwindow, 1"
-      "super+shift, 6, resizeactive, exact 60% 60%"
-      "super+shift, 6, centerwindow, 1"
-      "super+shift, 7, resizeactive, exact 70% 70%"
-      "super+shift, 7, centerwindow, 1"
-      "super+shift, 8, resizeactive, exact 80% 80%"
-      "super+shift, 8, centerwindow, 1"
-      "super+shift, 9, resizeactive, exact 90% 90%"
-      "super+shift, 9, centerwindow, 1"
-
-      "super+shift, 0, centerwindow, 1"
-      "super+shift, O, resizeactive, exact 600 400"
     ];
   };
 }
