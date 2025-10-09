@@ -21,10 +21,13 @@
       "super+shift, l, resizeactive, 80 0"
     ];
 
-    # when toggling float/tile, hold down key to pin/pseudo it too
-    bindo = ["super, o, exec, hypr-togglepinorpseudo"];
+    # Run script again if o key held down
+    bindo = ["super, o, exec, hypr-tileorpseudo"];
 
     bind = [
+      # Set window tiled, or pseudo if already tiled
+      "super, o, exec, hypr-tileorpseudo"
+
       # Move focus to a window with super [hjkl]
       "super, h, movefocus, l"
       "super, j, movefocus, d"
@@ -38,14 +41,11 @@
       "super, i, exec, hypr-togglesplitorcycle"
       "super+shift, i, exec, hypr-togglesplitorcycle reverse"
 
-      # Toggle pin (floating) or pseudo (tiled)
-      "super, p, exec, hypr-togglepinorpseudo"
+      # Focus urgent windows
+      "super, u, focusurgentorlast"
 
       # Back-and-forth with super \
       "super, backslash, focuscurrentorlast"
-
-      # Focus urgent windows
-      "super, u, focusurgentorlast"
 
       # Navigation windows with super tab
       "super, tab, exec, hypr-supertab"

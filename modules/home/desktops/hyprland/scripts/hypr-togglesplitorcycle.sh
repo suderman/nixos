@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 dir="${1:-forward}" # forward or reverse
-if [[ "$(hyprctl activewindow -j | jq -r .floating)" == "true" ]]; then
+is_floating="$(hyprctl activewindow -j | jq -r .floating)"
+
+# If tiled, toggle the split
+if [[ "$is_floating" != "true" ]]; then
+  hyprctl dispatch togglesplit
+
+# Else, cycle the floating window's position around the screen
+else
 
   # Get the cache directory and active window name
   cache_dir="$XDG_RUNTIME_DIR/hypr/cyclefloating"
@@ -51,7 +58,4 @@ if [[ "$(hyprctl activewindow -j | jq -r .floating)" == "true" ]]; then
   # Save the next position to file
   echo "$next_pos" >$cache_dir/$window_address
 
-# If tiled, toggle the split
-else
-  hyprctl dispatch togglesplit
 fi
