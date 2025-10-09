@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 dir="${1:-forward}" # forward or reverse
+addr="$(hyprctl activewindow -j | jq -r .address)"
 is_floating="$(hyprctl activewindow -j | jq -r .floating)"
 
-# If tiled, toggle the split
+# If tiled, set floating
 if [[ "$is_floating" != "true" ]]; then
-  hyprctl dispatch togglesplit
+  hyprctl --batch "dispatch setfloating address:$addr ; dispatch focuswindow address:$addr"
+  hyprctl --batch "dispatch resizeactive exact 50% 50% ; dispatch centerwindow 1"
 
 # Else, cycle the floating window's position around the screen
 else

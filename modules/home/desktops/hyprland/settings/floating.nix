@@ -22,6 +22,8 @@
     bindo = [
       # Run script again if p key held down
       "super, o, exec, hypr-floatorpin"
+      "super+alt, o, exec, hypr-floatorcycle"
+      "super+alt+shift, o, exec, hypr-floatorcycle reverse"
 
       # Toggle floating on these launcher keybinds if held down
       "super, return, exec, hypr-floatorpin"
@@ -36,8 +38,8 @@
 
     binde = [
       # Cycle floating window's position around screen
-      "super+alt, o, exec, hypr-togglesplitorcycle"
-      "super+alt+shift, o, exec, hypr-togglesplitorcycle reverse"
+      "super+alt, o, exec, hypr-floatorcycle"
+      "super+alt+shift, o, exec, hypr-floatorcycle reverse"
     ];
 
     windowrule = [

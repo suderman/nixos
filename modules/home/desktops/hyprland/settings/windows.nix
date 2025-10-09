@@ -34,6 +34,9 @@
       # Set window tiled, or swapsplit if already tiled
       "super+alt, i, exec, hypr-tileorsplit swap"
 
+      # Focus tiled windows in workspace
+      "super+shift, i, cyclenext, tiled"
+
       # Move focus to a window with super [hjkl]
       "super, h, movefocus, l"
       "super, j, movefocus, d"
