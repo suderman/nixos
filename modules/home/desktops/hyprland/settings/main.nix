@@ -54,7 +54,7 @@ in {
     dwindle = {
       preserve_split = true;
       smart_split = false;
-      pseudotile = true;
+      pseudotile = false;
       special_scale_factor = 0.9;
       split_width_multiplier = 1.35;
       single_window_aspect_ratio = "4 3"; # constrain width of single windows

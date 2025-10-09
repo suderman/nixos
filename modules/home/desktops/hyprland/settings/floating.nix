@@ -2,10 +2,10 @@
   wayland.windowManager.hyprland.settings = {
     bind = [
       # Focus floating windows in workspace
-      "super+shift, p, cyclenext, floating"
+      "super+shift, o, cyclenext, floating"
 
       # Set window to floating, or pin if already floating
-      "super, p, exec, hypr-floatorpin"
+      "super, o, exec, hypr-floatorpin"
 
       # Resize active window to various presets
       "super+shift, 1, exec, hypr-resizefloating 10"
@@ -21,7 +21,7 @@
 
     bindo = [
       # Run script again if p key held down
-      "super, p, exec, hypr-floatorpin"
+      "super, o, exec, hypr-floatorpin"
 
       # Toggle floating on these launcher keybinds if held down
       "super, return, exec, hypr-floatorpin"
@@ -32,6 +32,12 @@
       "super+alt, y, exec, hypr-floatorpin"
       "super+alt, e, exec, hypr-floatorpin"
       "super+alt, b, exec, hypr-floatorpin"
+    ];
+
+    binde = [
+      # Cycle floating window's position around screen
+      "super+alt, o, exec, hypr-togglesplitorcycle"
+      "super+alt+shift, o, exec, hypr-togglesplitorcycle reverse"
     ];
 
     windowrule = [

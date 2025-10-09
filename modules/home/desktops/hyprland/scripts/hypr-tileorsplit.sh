@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
+toggle_or_swap="${1:-toggle}" # toggle/swap
 addr="$(hyprctl activewindow -j | jq -r .address)"
 is_floating="$(hyprctl activewindow -j | jq -r .floating)"
-is_pseudo="$(hyprctl activewindow -j | jq -r .pseudo)"
 
-# If already tiled, toggle pseudo
+# If already tiled, togglesplit or swapsplit
 if [[ "$is_floating" != "true" ]]; then
-  hyprctl dispatch pseudo
+  hyprctl dispatch "${toggle_or_swap}split"
 
-# Else, set tiled and reset pseudo
+# Else, set tiled
 else
   hyprctl --batch "dispatch settiled address:$addr ; dispatch focuswindow address:$addr"
-  [[ "$is_pseudo" == "true" ]] && hyprctl dispatch pseudo
 fi

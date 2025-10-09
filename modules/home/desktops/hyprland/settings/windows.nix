@@ -22,11 +22,17 @@
     ];
 
     # Run script again if o key held down
-    bindo = ["super, o, exec, hypr-tileorpseudo"];
+    bindo = [
+      "super, i, exec, hypr-tileorsplit toggle"
+      "super+alt, i, exec, hypr-tileorsplit swap"
+    ];
 
     bind = [
-      # Set window tiled, or pseudo if already tiled
-      "super, o, exec, hypr-tileorpseudo"
+      # Set window tiled, or togglesplit if already tiled
+      "super, i, exec, hypr-tileorsplit toggle"
+
+      # Set window tiled, or swapsplit if already tiled
+      "super+alt, i, exec, hypr-tileorsplit swap"
 
       # Move focus to a window with super [hjkl]
       "super, h, movefocus, l"
@@ -36,10 +42,6 @@
 
       # Kill the active window
       "super, w, killactive,"
-
-      # Cycle floating window's position around screen (floating) or split (tiled)
-      "super, i, exec, hypr-togglesplitorcycle"
-      "super+shift, i, exec, hypr-togglesplitorcycle reverse"
 
       # Focus urgent windows
       "super, u, focusurgentorlast"
