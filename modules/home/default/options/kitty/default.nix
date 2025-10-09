@@ -84,11 +84,11 @@ in {
         "super.]" = "C-S-right"; # next tab
         "super.n" = "C-S-n"; # new window
         "super.r" = "C-r"; # reload
-        "super.c" = "C-insert"; # copy
-        "super.p" = "S-insert"; # paste
+        # "super.c" = "C-insert"; # copy
+        # "super.p" = "S-insert"; # paste
         "super.equal" = "C-S-equal";
         "super.minus" = "C-S-minus";
-        "super.o" = "macro(C-S-h slash)"; # search scrollback
+        "super.g" = "macro(C-S-h slash)"; # grep scrollback
       };
     };
 

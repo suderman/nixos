@@ -65,6 +65,14 @@ in {
       extraConfig = ''
         source = ~/.config/hypr/extra/hyprland.conf
       '';
+
+      # importantPrefixes = [
+      #   "$"
+      #   "bezier"
+      #   "name"
+      #   "source"
+      #   "bindo"
+      # ];
     };
 
     # Enable user service for keyd to watch window focus changes

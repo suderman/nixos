@@ -51,4 +51,7 @@ if [[ "$(hyprctl activewindow -j | jq -r .floating)" == "true" ]]; then
   # Save the next position to file
   echo "$next_pos" >$cache_dir/$window_address
 
+# If tiled, toggle the split
+else
+  hyprctl dispatch togglesplit
 fi

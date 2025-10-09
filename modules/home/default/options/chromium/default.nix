@@ -68,7 +68,6 @@ in {
       "super.t" = "C-t"; # new tab
       "super.n" = "C-n"; # new window
       "super.r" = "C-r"; # reload
-      "super.o" = "C-l"; # location bar
     };
 
     # tag Chromium and Picture-in-Picture windows

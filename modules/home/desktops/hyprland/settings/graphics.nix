@@ -10,11 +10,9 @@ in {
       gaps_in = "10, 10, 5, 10";
       gaps_out = "10, 20, 20, 20";
       gaps_workspaces = 20;
-      # border_size = 3;
-      border_size = 0;
+      border_size = 0; # 3
       "col.active_border" = mkDefault "rgba(89b4facc) rgba(cba6f7cc) 270deg";
       "col.inactive_border" = mkDefault "rgba(11111b66) rgba(b4befe66) 270deg";
-      # extend_border_grab_area = 20; # gaps between windows can be used for resizing
       extend_border_grab_area = 40; # gaps between windows can be used for resizing
     };
 

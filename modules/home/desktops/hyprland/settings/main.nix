@@ -57,6 +57,7 @@ in {
       pseudotile = true;
       special_scale_factor = 0.9;
       split_width_multiplier = 1.35;
+      single_window_aspect_ratio = "4 3"; # constrain width of single windows
     };
 
     gesture = [
@@ -74,8 +75,11 @@ in {
       new_window_takes_over_fullscreen = 2; # unfullscreen when opening new window
     };
 
-    binds = {
-      workspace_back_and_forth = true;
-    };
+    "binds:workspace_back_and_forth" = true;
+
+    bind = [
+      # Exit hyprland
+      "super+shift, q, exit,"
+    ];
   };
 }
