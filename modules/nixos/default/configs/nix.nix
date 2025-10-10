@@ -76,4 +76,7 @@ in {
     ];
     allowReboot = true;
   };
+
+  # Failing to build manual right now
+  documentation.nixos.enable = false;
 }
