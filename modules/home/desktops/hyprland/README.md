@@ -26,13 +26,13 @@ remap it on other keyboards.
 
 ## Workspaces
 
-| Key                 | Key                    | Function                                      |
-| ------------------- | ---------------------- | --------------------------------------------- |
-| `Super` `← →`       | `Super` `mouse_scroll` | Navigate workspaces                           |
-| `Super` `1-9`       |                        | Jump to workspace                             |
-| `Super` `Esc`       |                        | Toggle special workspace                      |
-| `Super+Shift` `Esc` |                        | Send window to special workspace              |
-| `Super` `M`         |                        | Minimize/maximize window in special workspace |
+| Key                   | Key                    | Function                                      |
+| --------------------- | ---------------------- | --------------------------------------------- |
+| `Super` `← →`         | `Super` `mouse_scroll` | Navigate workspaces                           |
+| `Super` `1-9`         |                        | Jump to workspace                             |
+| `Super` `Esc`         |                        | Toggle special workspace                      |
+| `Super` `Shift` `Esc` |                        | Send window to special workspace              |
+| `Super` `M`           |                        | Minimize/maximize window in special workspace |
 
 ### Windows
 
