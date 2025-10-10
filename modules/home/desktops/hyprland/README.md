@@ -1,25 +1,28 @@
 # Hyprland
 
-This is my trusty desktop of choice.
+This is my trusty desktop of choice! 💻
 
 ## Keyboard Bindings
 
 These are largely assigned within
 [Hyprland](https://wiki.hypr.land/Configuring/Binds) but with a few handled by
-[keyd](https://github.com/rvaiya/keyd).
+[keyd](https://github.com/rvaiya/keyd). I prefer an Apple-style keyboard layout
+with the `Super` key directly next to the `Space` bar. My
+[HHKB](https://happyhackingkb.com) keyboard supports this layout and keyd can
+remap it on other keyboards.
 
 ## Launchers
 
-| Key               | Function                            |
-| ----------------- | ----------------------------------- |
-| `Super`           | Launcher and window switcher        |
-| `Super` `Return`  | Launch terminal (hold to float)     |
-| `Super` `B`       | Launch browser (hold to float)      |
-| `Super` `Alt` `B` | Launch alt browser (hold to float)  |
-| `Super` `E`       | Launch editor (hold to float)       |
-| `Super` `Alt` `E` | Launch alt editor (hold to float)   |
-| `Super` `Y`       | Launch file manager (hold to float) |
-| `Super` `Alt` `Y` | Launch alt editor (hold to float)   |
+| Key               | Function                              |
+| ----------------- | ------------------------------------- |
+| `Super`           | Launcher and window switcher          |
+| `Super` `Return`  | Launch terminal _(hold to float)_     |
+| `Super` `B`       | Launch browser _(hold to float)_      |
+| `Super` `Alt` `B` | Launch alt browser _(hold to float)_  |
+| `Super` `E`       | Launch editor _(hold to float)_       |
+| `Super` `Alt` `E` | Launch alt editor _(hold to float)_   |
+| `Super` `Y`       | Launch file manager _(hold to float)_ |
+| `Super` `Alt` `Y` | Launch alt editor _(hold to float)_   |
 
 ## Workspaces
 
@@ -42,7 +45,7 @@ These are largely assigned within
 | `Super` `Shift` `1-9`  |                       | Resize floating window % and centre |
 | `Super` `Alt` `1-9`    |                       | Move window to new workspace        |
 | `Super` `Q`            |                       | Kill window                         |
-| `Super` `F`            |                       | Fullscreen (hold for max)           |
+| `Super` `F`            |                       | Fullscreen _(hold for max)_         |
 | `Super` `U`            |                       | Focus urgent window                 |
 | `Super` `I`            |                       | Tile window or toggle split         |
 | `Super` `Alt` `I`      |                       | Tile window or swap split           |
@@ -63,26 +66,26 @@ These are largely assigned within
 
 ### Media
 
-| Key                 | Alt Key               | Function                          |
-| ------------------- | --------------------- | --------------------------------- |
-| `VolumeDown`        | `Tab` `A`             | Lower volume                      |
-| `VolumeUp`          | `Tab` `S`             | Raise volume                      |
-| `Mute`              | `Tab` `D`             | Mute volume                       |
-| `Media`             | `Tab` `M`             | Audio device chooser              |
-| `Shift` `Media`     | `Tab` `Shift` `M`     | Bluetooth device chooser          |
-| `PlayPause`         | `Tab` `Space`         | Play or pause active player       |
-| `Alt` `PlayPause`   | `Tab` `Alt` `Space`   | Play or pause all players         |
-| `Shift` `PlayPause` | `Tab` `Shift` `Space` | Change active player              |
-| `PreviousSong`      | `Tab` `R`             | Rewind (hold for previous song)   |
-| `NextSong`          | `Tab` `F`             | Fast forward (hold for next song) |
+| Key                 | Alt Key               | Function                            |
+| ------------------- | --------------------- | ----------------------------------- |
+| `VolumeDown`        | `Tab` `A`             | Lower volume                        |
+| `VolumeUp`          | `Tab` `S`             | Raise volume                        |
+| `Mute`              | `Tab` `D`             | Mute volume                         |
+| `Media`             | `Tab` `M`             | Audio device chooser                |
+| `Shift` `Media`     | `Tab` `Shift` `M`     | Bluetooth device chooser            |
+| `PlayPause`         | `Tab` `Space`         | Play or pause active player         |
+| `Alt` `PlayPause`   | `Tab` `Alt` `Space`   | Play or pause all players           |
+| `Shift` `PlayPause` | `Tab` `Shift` `Space` | Change active player                |
+| `PreviousSong`      | `Tab` `R`             | Rewind _(hold for previous song)_   |
+| `NextSong`          | `Tab` `F`             | Fast forward _(hold for next song)_ |
 
 ### Screenshots
 
-| Key             | Alt Key           | Function                                          |
-| --------------- | ----------------- | ------------------------------------------------- |
-| `Print`         | `Tab` `I`         | Screen to clipboard (hold for interactive region) |
-| `Shift` `Print` | `Tab` `Shift` `I` | Screen to file (hold for interactive screen)      |
-| `Alt` `Print`   | `Tab` `Alt` `I`   | Color picker                                      |
+| Key             | Alt Key           | Function                                            |
+| --------------- | ----------------- | --------------------------------------------------- |
+| `Print`         | `Tab` `I`         | Screen to clipboard _(hold for interactive region)_ |
+| `Shift` `Print` | `Tab` `Shift` `I` | Screen to file _(hold for interactive screen)_      |
+| `Alt` `Print`   | `Tab` `Alt` `I`   | Color picker                                        |
 
 ### Applications (where available)
 
