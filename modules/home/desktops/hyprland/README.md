@@ -13,16 +13,16 @@ remap it on other keyboards.
 
 ## Launchers
 
-| Key               | Function                              |
-| ----------------- | ------------------------------------- |
-| `Super`           | Launcher and window switcher          |
-| `Super` `Return`  | Launch terminal _(hold to float)_     |
-| `Super` `B`       | Launch browser _(hold to float)_      |
-| `Super` `Alt` `B` | Launch alt browser _(hold to float)_  |
-| `Super` `E`       | Launch editor _(hold to float)_       |
-| `Super` `Alt` `E` | Launch alt editor _(hold to float)_   |
-| `Super` `Y`       | Launch file manager _(hold to float)_ |
-| `Super` `Alt` `Y` | Launch alt editor _(hold to float)_   |
+| Key               | Function                                  |
+| ----------------- | ----------------------------------------- |
+| `Super`           | Launcher and window switcher              |
+| `Super` `Return`  | Launch terminal _(hold to float)_         |
+| `Super` `B`       | Launch web browser _(hold to float)_      |
+| `Super` `Alt` `B` | Launch alt web browser _(hold to float)_  |
+| `Super` `E`       | Launch text editor _(hold to float)_      |
+| `Super` `Alt` `E` | Launch alt text editor _(hold to float)_  |
+| `Super` `Y`       | Launch file manager _(hold to float)_     |
+| `Super` `Alt` `Y` | Launch alt file manager _(hold to float)_ |
 
 ## Workspaces
 
