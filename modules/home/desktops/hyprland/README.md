@@ -99,9 +99,6 @@ remap it on other keyboards.
 | `Super` `A`  | Select all       |
 | `Super` `Z`  | Undo             |
 | `J+K`        | Escape           |
-| `Alt` `A`    | Volume Down      |
-| `Alt` `S`    | Volume Up        |
-| `Alt` `D`    | Mute             |
 
 ### Text Editing
 
