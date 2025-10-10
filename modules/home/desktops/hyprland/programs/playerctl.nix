@@ -74,13 +74,23 @@ in {
       # shift+playpause change active player
       "shift, XF86AudioPlay, exec, ${shiftPlayer}"
 
-      # attempt seek, fallback on skip
+      # Attempt rewind, fallback on previous track (same for shift volup)
       ", XF86AudioPrev,  exec, ${rewindOrPrevious}"
-      ", XF86AudioNext,  exec, ${fastForwardOrNext}"
+      "shift, XF86AudioLowerVolume, exec, ${rewindOrPrevious}"
 
-      # always skip tracks with alt
-      "alt, XF86AudioPrev,  exec, playerctl previous"
-      "alt, XF86AudioNext,  exec, playerctl next"
+      # Attempt to fast forward, fall on next track (same for shift voldown)
+      ", XF86AudioNext,  exec, ${fastForwardOrNext}"
+      "shift, XF86AudioRaiseVolume, exec, ${fastForwardOrNext}"
+    ];
+
+    bindlo = [
+      # Hold key to skip to previous track
+      ", XF86AudioPrev,  exec, playerctl previous"
+      "shift, XF86AudioLowerVolume, exec, playerctl previous"
+
+      # Hold key to skip to next track
+      ", XF86AudioNext,  exec, playerctl next"
+      "shift, XF86AudioRaiseVolume, exec, playerctl next"
     ];
   };
 }
