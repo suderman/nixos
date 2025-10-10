@@ -7,7 +7,7 @@ This is my trusty desktop of choice! 💻
 These are largely assigned within
 [Hyprland](https://wiki.hypr.land/Configuring/Binds) but with a few handled by
 [keyd](https://github.com/rvaiya/keyd). I prefer an Apple-style keyboard layout
-with the `Super` key directly next to the `Space` bar. My
+with the `Super` key directly next to `Space`. My
 [HHKB](https://happyhackingkb.com) keyboard supports this layout and keyd can
 remap it on other keyboards.
 
@@ -102,29 +102,29 @@ remap it on other keyboards.
 
 ### Text Editing
 
-| Key         | Alt Key          | Function                |
-| ----------- | ---------------- | ----------------------- |
-| `Super` `X` | `Shift` `Delete` | Cut                     |
-| `Super` `C` | `Ctrl` `Insert`  | Copy                    |
-| `Super` `V` | `Shift` `Insert` | Paste                   |
-| `←`         | `Tab` `H`        | Cursor left             |
-| `↓`         | `Tab` `J`        | Cursor down             |
-| `↑`         | `Tab` `K`        | Cursor up               |
-| `→`         | `Tab` `L`        | Cursor right            |
-| `Ctrl` `→`  | `Tab` `W`        | Cursor to next word     |
-| `Ctrl` `←`  | `Tab` `B`        | Cursor to previous word |
-| `Home`      | `Tab` `Q`        | Cursor start of line    |
-| `End`       | `Tab` `E`        | Cursor end of line      |
-| `PageUp`    | `Tab` `P`        | Cursor up one page      |
-| `PageDown`  | `Tab` `N`        | Cursor down one page    |
+| Key              | Alt Key     | Function              |
+| ---------------- | ----------- | --------------------- |
+| `Shift` `Delete` | `Super` `X` | Cut                   |
+| `Ctrl` `Insert`  | `Super` `C` | Copy                  |
+| `Shift` `Insert` | `Super` `V` | Paste                 |
+| `←`              | `Tab` `H`   | Cursor left           |
+| `↓`              | `Tab` `J`   | Cursor down           |
+| `↑`              | `Tab` `K`   | Cursor up             |
+| `→`              | `Tab` `L`   | Cursor right          |
+| `Ctrl` `←`       | `Tab` `B`   | Cursor back a word    |
+| `Ctrl` `→`       | `Tab` `W`   | Cursor forward a word |
+| `Home`           | `Tab` `Q`   | Cursor start of line  |
+| `End`            | `Tab` `E`   | Cursor end of line    |
+| `PageUp`         | `Tab` `P`   | Cursor up one page    |
+| `PageDown`       | `Tab` `N`   | Cursor down one page  |
 
 ### Other
 
-| Key                 | Alt Key              | Function                        |
-| ------------------- | -------------------- | ------------------------------- |
-| `Esc`               |                      | Dismiss notification            |
-| `Super` `Alt` `U`   |                      | Undo dismissal of notifications |
-| `Super` `Shift` `Q` |                      | Quit Hyprland                   |
-| `NumLock`           |                      | Sleep display                   |
-| `Power`             |                      | Show poweroff menu              |
-| `Tab` `1-9`         | `Ctrl` `Alt` `F1-F9` | Jump to TTY                     |
+| Key                  | Alt Key     | Function                        |
+| -------------------- | ----------- | ------------------------------- |
+| `Esc`                |             | Dismiss notification            |
+| `Super` `Alt` `U`    |             | Undo dismissal of notifications |
+| `Super` `Shift` `Q`  |             | Quit Hyprland                   |
+| `NumLock`            |             | Sleep display                   |
+| `Power`              |             | Show poweroff menu              |
+| `Ctrl` `Alt` `F1-F9` | `Tab` `1-9` | Jump to TTY                     |
