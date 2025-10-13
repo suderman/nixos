@@ -16,17 +16,14 @@
     gawk
     gnugrep
     gnused
+    hyprpicker
     jq
+    libnotify
     socat
     wl-clipboard
-
-    grim
-    hyprpicker
-    slurp
-    swappy
-    unstable.satty
   ];
 in {
+  programs.satty.enable = true; # satty-screenshot
   home.packages =
     map (name: (
       perSystem.self.mkScript {
