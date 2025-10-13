@@ -2,12 +2,12 @@
 {
   lib,
   pkgs,
-  perSystem,
+  flake,
   ...
 }: let
   # Ensure portals and other systemd user services are running
   # https://wiki.hyprland.org/Useful-Utilities/xdg-desktop-portal-hyprland/
-  bounce = perSystem.self.mkScript {
+  bounce = pkgs.self.mkScript {
     path = [pkgs.systemd];
     name = "bounce";
     text = let

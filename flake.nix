@@ -66,11 +66,6 @@
     # <https://github.com/gmodena/nix-flatpak>
     nix-flatpak.url = "github:gmodena/nix-flatpak";
 
-    # Quickshell
-    # <https://quickshell.outfoxxed.me>
-    quickshell.url = "github:quickshell-mirror/quickshell?ref=v0.2.0";
-    quickshell.inputs.nixpkgs.follows = "nixpkgs";
-
     # Neovim flake
     # <https://github.com/suderman/neovim>
     neovim.url = "github:suderman/neovim";

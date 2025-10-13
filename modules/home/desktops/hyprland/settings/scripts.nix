@@ -1,5 +1,4 @@
 {
-  config,
   lib,
   pkgs,
   perSystem,
@@ -13,25 +12,19 @@
     );
 
   path = with pkgs; [
-    bluez
-    config.programs.rofi.finalPackage
     coreutils
     gawk
-    gettext
     gnugrep
     gnused
-    grim
-    hyprland
-    hyprpicker
     jq
-    keyd
-    libnotify
-    procps
-    pulseaudio
-    slurp
     socat
-    swappy
     wl-clipboard
+
+    grim
+    hyprpicker
+    slurp
+    swappy
+    unstable.satty
   ];
 in {
   home.packages =

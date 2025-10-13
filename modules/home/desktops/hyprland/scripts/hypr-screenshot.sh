@@ -1,48 +1,26 @@
 #!/usr/bin/env bash
-flag="${1-rc}"
-dir="${XDG_PICTURES_DIR-~/Pictures}/Screenshots"
+action="${1-screen}"
 
-# r: region
-# s: screen
-# c: clipboard
-# f: file
-# i: interactive
-# p: pixel
+# Screenshot
+if [[ "$action" == "screen" ]]; then
 
-# Region to clipboard
-if [[ $flag == rc ]]; then
-  grim -g "$(slurp -b '#000000b0' -c '#00000000')" - | wl-copy
-  notify-send 'Copied to Clipboard' Screenshot
+  # Focused display
+  output="$(hyprctl monitors | awk '/Monitor/{mon=$2} /focused: yes/{print mon}')"
 
-# Region to file
-elif [[ $flag == rf ]]; then
-  mkdir -p "$dir"
-  filename="$dir/$(date +%Y-%m-%d_%H-%M-%S).png"
-  grim -g "$(slurp -b '#000000b0' -c '#00000000')" "$filename"
-  notify-send 'Screenshot Taken' "$filename"
+  # Save location
+  dir="${XDG_PICTURES_DIR-~/Pictures}/Screenshots"
+  file="$dir/satty-$(date '+%Y%m%d-%H:%M:%S').png"
 
-# Region to interactive
-elif [[ $flag == ri ]]; then
-  grim -g "$(slurp -b '#000000b0' -c '#00000000')" - | tee >(wl-copy) | swappy -f -
-
-# Screen to clipboard
-elif [[ $flag == sc ]]; then
-  grim - | wl-copy
-  notify-send 'Copied to Clipboard' Screenshot
-
-# Screen to file
-elif [[ $flag == sf ]]; then
-  mkdir -p "$dir"
-  filename="$dir/$(date +%Y-%m-%d_%H-%M-%S).png"
-  grim "$filename"
-  notify-send 'Screenshot Taken' "$filename"
-
-# Screen to interactive
-elif [[ $flag == si ]]; then
-  grim - | swappy -f -
+  # Send entire screen to satty for cropping and notation
+  grim -o "$output" -t ppm -c - |
+    satty --filename - \
+      --fullscreen \
+      --copy-command "wl-copy" \
+      --output-filename "$file" |
+    pngquant --quality=65-80 --speed 1 --strip input.png -o output.png
 
 # Colour to clipboard
-elif [[ $flag == p ]]; then
+elif [[ "$action" == "color" ]]; then
   color="$(hyprpicker -a)"
   wl-copy "$color"
   notify-send 'Copied to Clipboard' "$color"
