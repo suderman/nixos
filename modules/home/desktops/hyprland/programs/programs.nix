@@ -2,7 +2,6 @@
 {
   lib,
   pkgs,
-  flake,
   ...
 }: let
   # Ensure portals and other systemd user services are running
@@ -37,6 +36,7 @@ in {
   # Add these to my path
   home.packages = with pkgs; [
     bounce # defined above
+    self.printscreen
     brightnessctl
     hyprpicker # color picker
     hyprcursor

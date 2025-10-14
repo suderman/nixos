@@ -1,8 +1,10 @@
 {...}: {
   wayland.windowManager.hyprland.settings = {
     bind = [
-      ", print, exec, satty-screenshot"
-      "alt, print, exec, hyprpicker -a && notify-send $(wl-paste)"
+      ", print, exec, printscreen image"
+      "alt, print, exec, printscreen video"
+      "shift, print, exec, printscreen video"
+      "ctrl, print, exec, printscreen color"
     ];
   };
 }

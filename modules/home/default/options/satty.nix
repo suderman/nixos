@@ -9,36 +9,6 @@
   inherit (lib) mkEnableOption mkOption types;
   inherit (config.networking) hostName;
   pictures = config.xdg.userDirs.extraConfig.XDG_PICTURES_DIR or "${config.home.homeDirectory}/Pictures";
-
-  screenshot = pkgs.self.mkScript {
-    name = "satty-screenshot";
-    path = with pkgs; [cfg.package coreutils gawk grim libnotify pngquant wl-clipboard];
-    text =
-      # bash
-      ''
-        # Save location
-        output="${pictures}/Screenshots/${hostName}-$(date '+%Y%m%d-%H%M%S').png"
-        mkdir -p $(dirname $output)
-
-        # Focused display when using hyprland
-        display=""
-        if command -v hyprctl &>/dev/null; then
-          display="-o $(hyprctl monitors | awk '/Monitor/{mon=$2} /focused: yes/{print mon}')"
-        fi
-
-        # Capture display, pipe to satty for cropping/annotations, pipe to pngquant for optimization
-        grim $display -t ppm -c - |
-          satty --filename - --output-filename - |
-          pngquant --quality=65-80 --speed=1 --strip --output "$output" -
-
-        # Also copy saved file to clipboard
-        wl-copy<"$output"
-
-        # Notification when done
-        notify-send 'Screenshot' "$output" \
-          -i "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/16x16/devices/camera.svg"
-      '';
-  };
 in {
   options.programs.satty = {
     enable = mkEnableOption "satty";
@@ -55,9 +25,6 @@ in {
   config = lib.mkIf cfg.enable {
     home.packages = [
       cfg.package
-      screenshot
-      pkgs.grim
-      pkgs.slurp
       pkgs.wl-clipboard
     ];
 

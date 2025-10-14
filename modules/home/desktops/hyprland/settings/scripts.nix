@@ -23,7 +23,6 @@
     wl-clipboard
   ];
 in {
-  programs.satty.enable = true; # satty-screenshot
   home.packages =
     map (name: (
       perSystem.self.mkScript {
