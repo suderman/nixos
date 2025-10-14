@@ -19,6 +19,7 @@
         (restart "xdg-desktop-portal-gtk")
         (restart "xdg-desktop-portal")
         (restart "hyprland-ready.target")
+        (restart "waybar")
       ];
   };
 in {
@@ -26,7 +27,7 @@ in {
   programs = {
     bluetuith.enable = true; # bluetooth tui
     rofi.enable = true; # launcher
-    satty.enable = true; # screenshots
+    printscreen.enable = true; # screenshots
   };
 
   services = {
@@ -36,13 +37,8 @@ in {
   # Add these to my path
   home.packages = with pkgs; [
     bounce # defined above
-    self.printscreen
     brightnessctl
-    hyprpicker # color picker
     hyprcursor
-    # wf-recorder # screen recording - broken?
-    grim # taking screenshots
-    slurp # selecting a region to screenshot
 
     font-awesome # icon font
     jetbrains-mono # mono font

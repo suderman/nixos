@@ -47,4 +47,14 @@
     deviceId = "091e_4cda_0000cb7d522d";
     dataDir = "${config.home.homeDirectory}/fenix";
   };
+
+  # Record screen with nvidia's AVI encoder
+  programs.printscreen = {
+    codec = "av1_nvenc";
+    params = {
+      preset = "p7";
+      rc = "constqp";
+      qp = 28;
+    };
+  };
 }

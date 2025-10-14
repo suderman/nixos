@@ -32,4 +32,14 @@
   # User services
   services.mpd.enable = true;
   services.syncthing.enable = true;
+
+  # Record screen with CPU-based AV1 encoder
+  programs.printscreen = {
+    framerate = 20;
+    codec = "libsvtav1";
+    params = {
+      preset = 5;
+      crf = 45;
+    };
+  };
 }
