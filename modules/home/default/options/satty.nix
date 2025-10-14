@@ -9,6 +9,7 @@
   inherit (lib) mkEnableOption mkOption types;
   inherit (config.networking) hostName;
   pictures = config.xdg.userDirs.extraConfig.XDG_PICTURES_DIR or "${config.home.homeDirectory}/Pictures";
+  class = "com.gabm.satty";
 in {
   options.programs.satty = {
     enable = mkEnableOption "satty";
@@ -74,6 +75,12 @@ in {
         "#ff1493"
         "#ffd700"
         "#008000"
+      ];
+    };
+
+    wayland.windowManager.hyprland.settings = {
+      windowrule = [
+        "fullscreen, class:${class}"
       ];
     };
   };

@@ -87,9 +87,9 @@ perSystem.self.mkScript {
         output="''${XDG_VIDEOS_DIR-$HOME/Videos}/Screencasts/$(filename).mp4"
         mkdir -p $(dirname $output)
 
-        # Intel iGPU suppports VAAPI
-        local codec="av1_vaapi"
-        local params="-p qp=28"
+        # AV1 encoder
+        local codec="libsvtav1"
+        local params="-p preset=5 -p crf=45 -r 20"
 
         # NVIDIA RTX 40-series+ supports av1_nvenc
         if is_nvidia; then

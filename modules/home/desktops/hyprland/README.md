@@ -81,11 +81,11 @@ remap it on other keyboards.
 
 ### Screenshots
 
-| Key             | Alt Key           | Function                                            |
-| --------------- | ----------------- | --------------------------------------------------- |
-| `Print`         | `Tab` `I`         | Screen to clipboard _(hold for interactive region)_ |
-| `Shift` `Print` | `Tab` `Shift` `I` | Screen to file _(hold for interactive screen)_      |
-| `Alt` `Print`   | `Tab` `Alt` `I`   | Color picker                                        |
+| Key             | Alt Key           | Function                                              |
+| --------------- | ----------------- | ----------------------------------------------------- |
+| `Print`         | `Tab` `I`         | Capture image from screen                             |
+| `Alt` `Print`   | `Tab` `Alt` `I`   | Capture video from screen (press again to toggle off) |
+| `Shift` `Print` | `Tab` `Shift` `I` | Color picker                                          |
 
 ### Applications (where available)
 
