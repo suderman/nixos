@@ -48,7 +48,7 @@
     dataDir = "${config.home.homeDirectory}/fenix";
   };
 
-  # Record screen with nvidia's AVI encoder
+  # Record screen with nvidia's AV1 encoder
   programs.printscreen = {
     codec = "av1_nvenc";
     params = {

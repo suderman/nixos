@@ -20,7 +20,7 @@
     ];
 
     bindo = [
-      # Run script again if p key held down
+      # Run script again if o key held down
       "super, o, exec, hypr-floatorpin"
       "super+alt, o, exec, hypr-floatorcycle"
       "super+alt+shift, o, exec, hypr-floatorcycle reverse"
