@@ -39,10 +39,15 @@
   in
     lib.mkAfter "${perSystem.self.mkScript {inherit path text;}}";
 
-  # Exclude auto-generated ssh ed25519 from this list
   services.openssh.hostKeys = [
     {
-      path = "${config.persist.storage.path}/etc/ssh/ssh_host_rsa_key"; # automatically generated
+      # ed25519 derived from hex
+      path = "${config.persist.storage.path}/etc/ssh/ssh_host_ed25519_key";
+      type = "ed25519";
+    }
+    {
+      # rsa automatically generated
+      path = "${config.persist.storage.path}/etc/ssh/ssh_host_rsa_key";
       type = "rsa";
       bits = 4096;
     }
