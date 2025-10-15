@@ -37,24 +37,25 @@ remap it on other keyboards.
 
 ### Windows
 
-| Key                    | Alt Key               | Function                            |
-| ---------------------- | --------------------- | ----------------------------------- |
-| `Super` `Tab`          |                       | Navigate window history             |
-| `Super` `HJKL`         |                       | Focus window                        |
-| `Super` `Alt` `HJKL`   | `Super` `mouse_left`  | Move window within workspace        |
-| `Super` `Shift` `HJKL` | `Super` `mouse_right` | Resize window                       |
-| `Super` `Shift` `1-9`  |                       | Resize floating window % and centre |
-| `Super` `Alt` `1-9`    |                       | Move window to new workspace        |
-| `Super` `Q`            |                       | Kill window                         |
-| `Super` `F`            |                       | Fullscreen _(hold for max)_         |
-| `Super` `U`            |                       | Focus urgent window                 |
-| `Super` `I`            |                       | Tile window or toggle split         |
-| `Super` `Alt` `I`      |                       | Tile window or swap split           |
-| `Super` `Shift` `I`    |                       | Focus tiled windows                 |
-| `Super` `O`            |                       | Float window or pin window          |
-| `Super` `Alt` `O`      |                       | Float window or cycle position      |
-| `Super` `Shift` `O`    |                       | Focus floating windows              |
-| `Esc`                  |                       | Hold to toggle titlebars            |
+| Key                    | Alt Key               | Function                                  |
+| ---------------------- | --------------------- | ----------------------------------------- |
+| `Super` `Tab`          |                       | Navigate window history (or window marks) |
+| `Super` `HJKL`         |                       | Focus window                              |
+| `Super` `Alt` `HJKL`   | `Super` `mouse_left`  | Move window within workspace              |
+| `Super` `Shift` `HJKL` | `Super` `mouse_right` | Resize window                             |
+| `Super` `Shift` `1-9`  |                       | Resize floating window % and centre       |
+| `Super` `Alt` `1-9`    |                       | Move window to new workspace              |
+| `Super` `Q`            |                       | Kill window                               |
+| `Super` `F`            |                       | Fullscreen _(hold for max)_               |
+| `Super` `U`            |                       | Focus urgent window                       |
+| `Super` `I`            |                       | Tile window or toggle split               |
+| `Super` `Alt` `I`      |                       | Tile window or swap split                 |
+| `Super` `Shift` `I`    |                       | Focus tiled windows                       |
+| `Super` `O`            |                       | Float window or pin window                |
+| `Super` `Alt` `O`      |                       | Float window or cycle position            |
+| `Super` `Shift` `O`    |                       | Focus floating windows                    |
+| `Super` `M`            |                       | Toggle window marks (hold to clear all)   |
+| `Esc`                  |                       | Hold to toggle titlebars                  |
 
 ### Groups
 
