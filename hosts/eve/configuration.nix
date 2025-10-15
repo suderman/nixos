@@ -26,7 +26,10 @@
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Snapshots and backups
-  services.btrbk.volumes."/mnt/main" = [];
+  services.btrbk.volumes = {
+    "/mnt/main" = [];
+    "/mnt/pool" = [];
+  };
 
   # Serve CA cert on http://10.2.0.2:1234
   services.traefik.caPort = 1234;
