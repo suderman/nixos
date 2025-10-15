@@ -33,7 +33,6 @@ remap it on other keyboards.
 | `Super` `Esc`         |                        | Toggle special workspace                            |
 | `Super` `Shift` `Esc` |                        | Send window to special workspace                    |
 | `Super` `P`           |                        | Toggle visibility of floating windows per workspace |
-| `Super` `M`           |                        | Minimize/maximize window in special workspace       |
 
 ### Windows
 
