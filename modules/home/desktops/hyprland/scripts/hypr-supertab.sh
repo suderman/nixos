@@ -4,15 +4,10 @@
 stack="$XDG_RUNTIME_DIR/supertab"
 touch $stack
 
-# Optional list of marked windows
-marks="$XDG_RUNTIME_DIR/supertab-marks"
-touch $marks
-
-prune_stack() {
-  if grep -q '[^[:space:]]' $marks 2>/dev/null; then
-    awk 'NR==FNR { m[$1]; next } ($1 in m)' $marks $stack >$stack.tmp
-    mv $stack.tmp $stack
-  fi
+# Get all window addresses or windows tagged with "mark"
+get_windows() {
+  [[ "${1-}" == "mark" ]] && local mark='| select(.tags | index("mark"))'
+  hyprctl clients -j | jq -r "sort_by(.focusHistoryID) | .[] ${mark-} | .address"
 }
 
 # Move the first line to the bottom of the stack
@@ -27,28 +22,47 @@ last_to_first() {
   mv $stack.tmp $stack
 }
 
-# Navigate the stack, but if no args rebuild with the current list sorted by MRU
-if [[ "${1-}" == "next" ]]; then
-  prune_stack
-  first_to_last
-elif [[ "${1-}" == "prev" ]]; then
-  prune_stack
-  last_to_first
-else
-  hyprctl clients -j | jq -r 'sort_by(.focusHistoryID) | .[] | .address' >$stack
-  prune_stack
-  first_to_last
-fi
-
-# # If no marks, grab the address at the top of the stack
-# if ! grep -q '[^[:space:]]' "$marks" 2>/dev/null; then
-#   addr="$(awk 'NR==1{print $1}' "$stack")"
-#
-# # Else, grab the first address that has a match in marks
-# else
-#   addr="$(awk 'NR==FNR { m[$1]; next } ($1 in m) { print $1; exit }' "$marks" "$stack")"
-# fi
-
 # Grab the address at the top of the stack and focus
-addr="$(awk 'NR==1{print $1}' $stack)"
-hyprctl dispatch focuswindow address:$addr
+focus_window() {
+  addr="$(awk 'NR==1{print $1}' $stack)"
+  hyprctl dispatch focuswindow address:$addr
+}
+
+# Clear all marks
+if [[ "${1-}" == "clear" ]]; then
+  cmds=""
+  while read -r addr; do
+    cmds="$cmds; dispatch tagwindow mark address:$addr"
+  done < <(get_windows mark)
+  hyprctl --batch "$cmds"
+  notify-send -t 1000 "Clear all marks"
+
+# Toggle individual marks
+elif [[ "${1-}" == "mark" ]]; then
+  hyprctl dispatch tagwindow mark
+
+# Focus next window in stack
+elif [[ "${1-}" == "next" ]]; then
+  first_to_last
+  focus_window
+
+# Focus previous window in stack
+elif [[ "${1-}" == "prev" ]]; then
+  last_to_first
+  focus_window
+
+# If no args rebuild with the current list sorted by MRU, then focus first in stack
+else
+  # Try to get all marked windows
+  windows="$(get_windows mark)"
+
+  # If there are none, fall back on all windows
+  if [[ -z "$windows" ]]; then
+    windows="$(get_windows)"
+  fi
+
+  # Write to file and focus first in stack
+  echo "$windows" >$stack
+  first_to_last
+  focus_window
+fi

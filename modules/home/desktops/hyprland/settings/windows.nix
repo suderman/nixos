@@ -51,11 +51,6 @@
 
       # Back-and-forth with super \
       "super, backslash, focuscurrentorlast"
-
-      # Navigation windows with super tab
-      "super, tab, exec, hypr-supertab"
-      "super+alt, tab, exec, hypr-supertab next"
-      "super+shift, tab, exec, hypr-supertab prev"
     ];
   };
 }

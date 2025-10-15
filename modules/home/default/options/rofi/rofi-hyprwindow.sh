@@ -21,7 +21,7 @@ APPDIRS="$(cat $CACHE/appdirs)"
 echo -en "\0prompt\x1f\n"
 
 # Ensure hyprctl command exists
-if command -v hyprctl; then
+if command -v hyprctl &>/dev/null; then
 
   # List all open windows if no arguments provided
   if [ -z "${1-}" ]; then

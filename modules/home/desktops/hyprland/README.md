@@ -39,6 +39,7 @@ remap it on other keyboards.
 | Key                    | Alt Key               | Function                                  |
 | ---------------------- | --------------------- | ----------------------------------------- |
 | `Super` `Tab`          |                       | Navigate window history (or window marks) |
+| `Super` `M`            |                       | Toggle window marks (hold to clear all)   |
 | `Super` `HJKL`         |                       | Focus window                              |
 | `Super` `Alt` `HJKL`   | `Super` `mouse_left`  | Move window within workspace              |
 | `Super` `Shift` `HJKL` | `Super` `mouse_right` | Resize window                             |
@@ -53,7 +54,6 @@ remap it on other keyboards.
 | `Super` `O`            |                       | Float window or pin window                |
 | `Super` `Alt` `O`      |                       | Float window or cycle position            |
 | `Super` `Shift` `O`    |                       | Focus floating windows                    |
-| `Super` `M`            |                       | Toggle window marks (hold to clear all)   |
 | `Esc`                  |                       | Hold to toggle titlebars                  |
 
 ### Groups
