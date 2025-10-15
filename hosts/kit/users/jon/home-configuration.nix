@@ -51,10 +51,11 @@
   # Record screen with nvidia's AV1 encoder
   programs.printscreen = {
     codec = "av1_nvenc";
+    framerate = 20;
     params = {
-      preset = "p7";
-      rc = "constqp";
-      qp = 28;
+      preset = 8;
+      cq = 32;
+      rc = "vbr";
     };
   };
 }
