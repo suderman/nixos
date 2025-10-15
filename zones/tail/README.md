@@ -2,7 +2,7 @@
 
 - `100.99.91.44` 2021 Framework Laptop - NixOS
   ([cog](https://github.com/suderman/nixos/tree/main/hosts/cog))
-- `100.111.105.128` 2009 Mac Pro - NixOS
+- `100.69.75.29` 2009 Mac Pro - NixOS
   ([eve](https://github.com/suderman/nixos/tree/main/hosts/eve))
 - `100.122.127.88` 2009 Mac Pro - NixOS
   ([fit](https://github.com/suderman/nixos/tree/main/hosts/fit))
@@ -33,6 +33,6 @@
 | ------------------ | ------------------------------------- |
 | Override local DNS | `Yes`                                 |
 | Global nameservers | `100.115.119.94` _(hub)_              |
-| Global nameservers | ~~`100.111.105.128` _(eve)_~~         |
+| Global nameservers | `100.69.75.29` _(eve)_                |
 
 </details>
