@@ -31,6 +31,9 @@
         mkdir -p ${storage}/etc/ssh
         echo "${hostPubkey}" >${storage}/etc/ssh/ssh_host_ed25519_key.pub
         chmod 644 ${storage}/etc/ssh/ssh_host_ed25519_key.pub
+        # Ensure private ssh host key (even if an empty file) exists too
+        touch ${storage}/etc/ssh/ssh_host_ed25519_key
+        chmod 600 ${storage}/etc/ssh/ssh_host_ed25519_key
         # Derive machine id from decrypted hex (if agenix decrypting)
         echo 00000000000000000000000000000000 >/etc/machine-id
         [[ -f ${hex} ]] && derive hex ${hostName} 32 <${hex} >/etc/machine-id
