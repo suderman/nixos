@@ -20,6 +20,15 @@ Among others, this flake depends on the following fantastic
 This is a work-in-progress as I migrate from
 [legacy branch](https://github.com/suderman/nixos/tree/legacy).
 
+## Sections
+
+- [NixOS host configurations](https://github.com/suderman/nixos/tree/main/hosts)
+- [NixOS & Home Manager modules](https://github.com/suderman/nixos/tree/main/modules)
+- [NixOS & Home Manager secrets](https://github.com/suderman/nixos/tree/main/secrets)
+- [NixOS user configurations](https://github.com/suderman/nixos/tree/main/users)
+- [Networking](https://github.com/suderman/nixos/tree/main/zones)
+- [Hyprland desktop configuration](https://github.com/suderman/nixos/tree/main/modules/home/desktops/hyprland)
+
 ## Resources
 
 - [NixOS Packages](https://search.nixos.org/packages)

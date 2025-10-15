@@ -1,4 +1,4 @@
-# NixOS Secrets
+# NixOS & Home Manager secrets
 
 Sensitive files are age-encrypted using
 [agenix](https://github.com/ryantm/agenix) (extended by
