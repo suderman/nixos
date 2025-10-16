@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Cache found names/icons
-CACHE="$XDG_RUNTIME_DIR/hyprwindow"
+CACHE="$XDG_RUNTIME_DIR/hyprland"
 mkdir -p $CACHE
 
 # Overrides for misnamed classes
@@ -17,7 +17,7 @@ if [[ ! -e "$CACHE/appdirs" ]]; then
 fi
 APPDIRS="$(cat $CACHE/appdirs)"
 
-# Clear display prompt (don't show "hyprwindow")
+# Clear display prompt (don't show "hyprland")
 echo -en "\0prompt\x1f\n"
 
 # Ensure hyprctl command exists

@@ -74,7 +74,7 @@
             pngquant --quality=65-80 --speed=1 --strip --output "$output" -
 
           # Also copy saved file to clipboard
-          wl-copy<"$output"
+          wl-copy --type image/png <"$output"
 
           # Notification when done
           notify-send 'Screenshot' "$output" -i "${dir.icons}/camera.svg"
