@@ -24,21 +24,19 @@
     b = "M-left";
   };
 
-  # Nav (Vim & Emacs style navigation)
+  # Nav (text navigation and media keys)
   nav = {
-    # vi keys
+    # navigation
     k = "up";
     l = "right";
     j = "down";
     h = "left";
     w = "C-right";
     b = "C-left";
-
-    # emacs keys
-    q = "home"; # normally a
-    e = "end";
-    p = "pageup";
-    n = "pagedown";
+    p = "pageup"; # previous up
+    n = "pagedown"; # next down
+    comma = "home"; # < start of line
+    dot = "end"; # > end of line
 
     # hhkb arrow keys
     leftbrace = "up"; # [
@@ -46,24 +44,19 @@
     slash = "down"; # /
     semicolon = "left"; # ;
 
-    # Cut/Copy/Paste clipboard
-    x = "S-delete";
-    c = "C-insert";
-    v = "S-insert";
-
     # Printscreen (screenshot)
     i = "sysrq";
 
-    # Escape
-    dot = "esc"; # .
-
     # Media keys
-    a = "volumedown";
-    s = "volumeup";
-    d = "mute"; # f = "micmute";
-    f = "nextsong"; # forward
-    r = "previoussong"; # rewind
-    m = "media";
+    a = "volumedown"; # [a]djust down...
+    s = "volumeup"; # [s]ound up!
+    d = "mute"; # [d]on't play sound
+    f = "nextsong"; # [f]orward
+    r = "previoussong"; # [r]ewind
+    z = "brightnessdown"; # [z]zz sleepy
+    x = "brightnessup"; # need e[x]tra light
+    c = "micmute"; # mi[c] mute
+    v = "media"; # [v]olume source
     space = "playpause";
 
     # Both volume keys together trigger media key
