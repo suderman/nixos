@@ -67,18 +67,23 @@ remap it on other keyboards.
 
 ### Media
 
-| Key                 | Alt Key               | Function                            |
-| ------------------- | --------------------- | ----------------------------------- |
-| `VolumeDown`        | `Tab` `A`             | Lower volume                        |
-| `VolumeUp`          | `Tab` `S`             | Raise volume                        |
-| `Mute`              | `Tab` `D`             | Mute volume                         |
-| `Media`             | `Tab` `M`             | Audio device chooser                |
-| `Shift` `Media`     | `Tab` `Shift` `M`     | Bluetooth device chooser            |
-| `PlayPause`         | `Tab` `Space`         | Play or pause active player         |
-| `Alt` `PlayPause`   | `Tab` `Alt` `Space`   | Play or pause all players           |
-| `Shift` `PlayPause` | `Tab` `Shift` `Space` | Change active player                |
-| `PreviousSong`      | `Tab` `R`             | Rewind _(hold for previous song)_   |
-| `NextSong`          | `Tab` `F`             | Fast forward _(hold for next song)_ |
+| Key                      | Alt Key               | Function                            |
+| ------------------------ | --------------------- | ----------------------------------- |
+| `VolumeDown`             | `Tab` `A`             | Lower volume                        |
+| `VolumeUp`               | `Tab` `S`             | Raise volume                        |
+| `Mute`                   | `Tab` `D`             | Mute volume                         |
+| `MicMute`                | `Tab` `C`             | Mute microphone                     |
+| `Media`                  | `Tab` `V`             | Audio device chooser                |
+| `Shift` `Media`          | `Tab` `Shift` `V`     | Bluetooth device chooser            |
+| `PlayPause`              | `Tab` `Space`         | Play or pause active player         |
+| `Alt` `PlayPause`        | `Tab` `Alt` `Space`   | Play or pause all players           |
+| `Shift` `PlayPause`      | `Tab` `Shift` `Space` | Change active player                |
+| `PreviousSong`           | `Tab` `R`             | Rewind _(hold for previous song)_   |
+| `NextSong`               | `Tab` `F`             | Fast forward _(hold for next song)_ |
+| `BrightnessDown`         | `Tab` `Z`             | Lower brightness                    |
+| `BrightnessUp`           | `Tab` `X`             | Raise brightness                    |
+| `Shift` `BrightnessDown` | `Tab` `Shift` `Z`     | Start blue light filter             |
+| `Shift` `BrightnessUp`   | `Tab` `Shift` `X`     | Stop blue light filter              |
 
 ### Screenshots
 
@@ -114,8 +119,8 @@ remap it on other keyboards.
 | `→`              | `Tab` `L`   | Cursor right          |
 | `Ctrl` `←`       | `Tab` `B`   | Cursor back a word    |
 | `Ctrl` `→`       | `Tab` `W`   | Cursor forward a word |
-| `Home`           | `Tab` `Q`   | Cursor start of line  |
-| `End`            | `Tab` `E`   | Cursor end of line    |
+| `Home`           | `Tab` `,`   | Cursor start of line  |
+| `End`            | `Tab` `.`   | Cursor end of line    |
 | `PageUp`         | `Tab` `P`   | Cursor up one page    |
 | `PageDown`       | `Tab` `N`   | Cursor down one page  |
 

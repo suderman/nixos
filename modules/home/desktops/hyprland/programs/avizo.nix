@@ -29,8 +29,12 @@ in {
   wayland.windowManager.hyprland.settings = {
     binde = [
       # Screen brightness
-      ", XF86MonBrightnessUp, exec, lightctl up"
-      ", XF86MonBrightnessDown, exec, lightctl down"
+      ", XF86MonBrightnessUp, exec, hypr-brightness up"
+      ", XF86MonBrightnessDown, exec, hypr-brightness down"
+
+      # Screen color filter
+      "shift, XF86MonBrightnessUp, exec, hyprctl hyprsunset identity" # disable blue light filter
+      "shift, XF86MonBrightnessDown, exec, hyprctl hyprsunset temperature 2500" # filter blue light
 
       # Volume control
       ", XF86AudioRaiseVolume, exec, volumectl -pbu up"

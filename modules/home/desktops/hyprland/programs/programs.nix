@@ -32,6 +32,17 @@ in {
 
   services = {
     swww.enable = true; # wallpaper
+    hyprsunset = {
+      enable = true; # darken screen
+      transitions = {
+        sunrise.calendar = "*-*-* 06:00:00";
+        sunset.calendar = "*-*-* 20:00:00";
+        sunset.requests = [
+          ["temperature 3500"]
+          ["gamma 0.8"]
+        ];
+      };
+    };
   };
 
   # Add these to my path
