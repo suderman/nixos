@@ -13,10 +13,10 @@ in {
         # Quick access to escape key
         "j+k" = "esc";
 
-        # Media keys
-        "alt.a" = "volumedown";
-        "alt.s" = "volumeup";
-        "alt.d" = "mute";
+        # # Media keys
+        # "alt.a" = "volumedown";
+        # "alt.s" = "volumeup";
+        # "alt.d" = "mute";
         # "alt.space" = "playpause";
       };
     };

@@ -1,9 +1,13 @@
 # Programs and packages required by my Hyprland
 {
+  config,
   lib,
   pkgs,
   ...
 }: let
+  cfg = config.wayland.windowManager.hyprland;
+  inherit (lib) mkForce;
+
   # Ensure portals and other systemd user services are running
   # https://wiki.hyprland.org/Useful-Utilities/xdg-desktop-portal-hyprland/
   bounce = pkgs.self.mkScript {
@@ -19,7 +23,7 @@
         (restart "xdg-desktop-portal-gtk")
         (restart "xdg-desktop-portal")
         (restart "hyprland-ready.target")
-        (restart "waybar")
+        # (restart "swww")
       ];
   };
 in {
@@ -30,19 +34,14 @@ in {
     printscreen.enable = true; # screenshots
   };
 
+  systemd.user.services.swww = {
+    Install.WantedBy = mkForce [cfg.systemd.target];
+    Unit.PartOf = mkForce [cfg.systemd.target];
+    Unit.After = mkForce [cfg.systemd.target];
+  };
+
   services = {
     swww.enable = true; # wallpaper
-    hyprsunset = {
-      enable = true; # darken screen
-      transitions = {
-        sunrise.calendar = "*-*-* 06:00:00";
-        sunset.calendar = "*-*-* 20:00:00";
-        sunset.requests = [
-          ["temperature 3500"]
-          ["gamma 0.8"]
-        ];
-      };
-    };
   };
 
   # Add these to my path
