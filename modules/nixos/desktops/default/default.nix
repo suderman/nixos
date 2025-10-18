@@ -1,1 +1,4 @@
-{flake, ...}: {imports = flake.lib.ls ./.;}
+{...}: {
+  imports = [./configs ./options];
+  desktop = true;
+}
