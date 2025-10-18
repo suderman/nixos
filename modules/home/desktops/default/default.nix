@@ -1,4 +1,4 @@
 {...}: {
   imports = [./configs ./options];
-  desktop = true;
+  desktop.enable = true;
 }

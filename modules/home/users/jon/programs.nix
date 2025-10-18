@@ -1,11 +1,7 @@
-{
-  config,
-  lib,
-  ...
-}: {
-  config = lib.mkIf config.desktop {
-    # Personal browser extensions
-    programs.chromium.externalExtensions = {
+{config, ...}: {
+  # Personal browser extensions
+  programs = config.desktop {
+    chromium.externalExtensions = {
       inherit
         (config.programs.chromium.registry)
         auto-tab-discard-suspend
@@ -21,6 +17,6 @@
     };
 
     # Pixel Buds Pro
-    programs.rofi.extraSinks = ["bluez_output.AC_3E_B1_9F_43_35.1"];
+    rofi.extraSinks = ["bluez_output.AC_3E_B1_9F_43_35.1"];
   };
 }
