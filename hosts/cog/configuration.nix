@@ -9,7 +9,7 @@
     ./disk-configuration.nix
     flake.nixosModules.hardware.framework-11th-gen-intel
     flake.nixosModules.default
-    flake.nixosModules.desktops.hyprland
+    flake.nixosModules.desktop.hyprland
   ];
 
   # Boot with good ol' grub

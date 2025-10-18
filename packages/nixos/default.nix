@@ -21,7 +21,7 @@ perSystem.self.mkScript {
     pkgs.netcat
     pkgs.openssh
     pkgs.passh
-    # pkgs.qemu (install separately on desktops)
+    # pkgs.qemu (install separately on desktop)
   ];
 
   # Path to template files

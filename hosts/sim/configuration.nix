@@ -8,8 +8,8 @@
     ./disk-configuration.nix
     flake.nixosModules.hardware.vm
     flake.nixosModules.default
-    flake.nixosModules.desktops.hyprland
-    # flake.nixosModules.desktops.homelab
+    flake.nixosModules.desktop.hyprland
+    # flake.nixosModules.desktop.homelab
   ];
 
   config = {

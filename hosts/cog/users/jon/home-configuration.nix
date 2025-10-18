@@ -5,8 +5,8 @@
 }: {
   imports = [
     flake.homeModules.default
+    flake.homeModules.desktop.hyprland
     flake.homeModules.users.jon
-    flake.homeModules.desktops.hyprland
   ];
 
   # Hyprland embedded display (laptop)

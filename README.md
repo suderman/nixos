@@ -27,7 +27,7 @@ This is a work-in-progress as I migrate from
 - [NixOS & Home Manager secrets](https://github.com/suderman/nixos/tree/main/secrets)
 - [NixOS user configurations](https://github.com/suderman/nixos/tree/main/users)
 - [Networking](https://github.com/suderman/nixos/tree/main/zones)
-- [Hyprland desktop configuration](https://github.com/suderman/nixos/tree/main/modules/home/desktops/hyprland)
+- [Hyprland desktop configuration](https://github.com/suderman/nixos/tree/main/modules/home/desktop/hyprland)
 
 ## Resources
 

@@ -8,7 +8,7 @@
   cfg = config.programs.hyprland;
   inherit (lib) getExe mkOption;
 in {
-  imports = [flake.nixosModules.desktops.default];
+  imports = [flake.nixosModules.desktop.default];
 
   # Set this to a username to automatically login at boot
   options.programs.hyprland.autologin = mkOption {

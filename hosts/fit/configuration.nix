@@ -4,7 +4,7 @@
     ./disk-configuration.nix
     flake.nixosModules.hardware.radeon-rx-580
     flake.nixosModules.default
-    flake.nixosModules.desktops.hyprland
+    flake.nixosModules.desktop.hyprland
   ];
 
   # Boot with newfangled systemd-boot

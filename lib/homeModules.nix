@@ -4,6 +4,6 @@
     (inputs.nixpkgs.lib.mapAttrs (_name: {path, ...}: path));
 in {
   default = ../modules/home/default;
-  desktops = pathAttrs ../modules/home/desktops;
+  desktop = pathAttrs ../modules/home/desktop;
   users = pathAttrs ../modules/home/users;
 }

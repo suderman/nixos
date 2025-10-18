@@ -8,7 +8,7 @@
     ./disk-configuration.nix
     flake.inputs.hardware.nixosModules.lenovo-thinkpad-t480s
     flake.nixosModules.default
-    flake.nixosModules.desktops.gnome
+    flake.nixosModules.desktop.gnome
   ];
 
   # Boot with newfangled systemd-boot
