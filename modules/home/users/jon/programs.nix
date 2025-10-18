@@ -15,8 +15,8 @@
         ublock-origin
         ;
     };
-
-    # Pixel Buds Pro
-    rofi.extraSinks = ["bluez_output.AC_3E_B1_9F_43_35.1"];
   };
+
+  # Pixel Buds Pro
+  sound.extraSinks = ["bluez_output.AC_3E_B1_9F_43_35.1"];
 }

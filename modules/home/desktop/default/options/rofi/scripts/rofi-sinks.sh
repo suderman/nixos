@@ -4,8 +4,8 @@ echo -en "\0prompt\x1f\n"
 # Prep dirs/files
 dir=$XDG_RUNTIME_DIR/sinks
 mkdir -p $dir
-echo "$(cat ~/.config/rofi/extra.sinks)" >$dir/extra
-cat ~/.config/rofi/hidden.sinks >$dir/hidden
+echo "$(cat ~/.config/pulse/extra-sinks)" >$dir/extra
+cat ~/.config/pulse/hidden-sinks >$dir/hidden
 
 # Create a rofi-formatted option for a provided sink that appears nice
 named_sink() {
