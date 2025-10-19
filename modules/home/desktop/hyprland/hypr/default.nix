@@ -1,10 +1,10 @@
 {
   lib,
   pkgs,
-  perSystem,
+  flake,
   ...
 }: let
-  init = perSystem.self.mkScript {
+  init = pkgs.self.mkScript {
     path = with pkgs; [coreutils];
     text = lib.concatStringsSep "\n" [
       # Temporary symlink
@@ -15,6 +15,8 @@
     ];
   };
 in {
+  imports = flake.lib.ls ./.;
+
   wayland.windowManager.hyprland.settings = {
     # default display
     monitor = [", preferred, 0x0, 1"];

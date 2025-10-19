@@ -1,6 +1,6 @@
+# programs.fuzzel.enable = true
 {lib, ...}: {
   programs.fuzzel = {
-    enable = true;
     settings = {
       main = {
         fuzzy = "yes";

@@ -8,11 +8,8 @@
 }: let
   cfg = config.wayland.windowManager.hyprland;
   inherit (lib) mkIf mkMerge mkOption removeSuffix types;
-  inherit (flake.lib) ls;
 in {
-  imports =
-    [flake.homeModules.desktop.default]
-    ++ ls ./settings ++ ls ./programs;
+  imports = [flake.homeModules.desktop.default] ++ flake.lib.ls ./.;
 
   options.wayland.windowManager.hyprland = {
     enablePlugins = lib.options.mkEnableOption "enablePlugins";

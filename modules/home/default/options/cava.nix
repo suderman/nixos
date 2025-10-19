@@ -1,7 +1,6 @@
-# Audio visualizer
+# programs.cava.enable = true;
 {config, ...}: {
   programs.cava = {
-    enable = true;
     settings = {
       input = {
         method = "pulse";

@@ -30,6 +30,7 @@ in {
   # Check modules directory for extra configuration
   programs = {
     bluetuith.enable = true; # bluetooth tui
+    cava.enable = true; # audio visualizer
     rofi.enable = true; # launcher
     printscreen.enable = true; # screenshots
   };
