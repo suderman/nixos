@@ -48,16 +48,16 @@ in {
       # modules layout
       modules-left = [
         "custom/launcher"
-        # "hyprland/workspaces"
-        "custom/expo"
-        "custom/special"
-        "custom/groupies"
+        "hyprland/workspaces"
+        # "custom/expo"
+        # "custom/special"
+        # "custom/groupies"
         # "wlr/taskbar"
       ];
       # modules-center = [ "hyprland/window" ];
       modules-center = [
-        # "clock"
-        "hyprland/workspaces"
+        "clock"
+        # "hyprland/workspaces"
       ];
       modules-right = [
         "pulseaudio"
@@ -68,7 +68,7 @@ in {
         "cpu"
         "tray"
         "battery"
-        "clock"
+        # "clock"
         "custom/power"
       ];
 
@@ -108,8 +108,10 @@ in {
       };
 
       clock = {
-        format = " {:%I:%M %p}";
-        format-alt = " {:%a %b %d, %G}";
+        # format = " {:%I:%M %p}";
+        # format-alt = " {:%a %b %d, %G}";
+        format = "{:L%A %H:%M}";
+        format-alt = "{:L%d %B W%V %Y}";
         tooltip-format = "<big>{:%B %Y}</big>\n<tt><small>{calendar}</small></tt>";
         interval = 60;
         align = 0;
@@ -131,8 +133,8 @@ in {
           default = ["" ""];
         };
         scroll-step = 1;
-        on-click = "rofi-toggle -show sinks -cycle -theme-str 'window {width: 50%;}'";
-        on-click-right = "${term} ncpamixer";
+        on-click = "rofi-toggle -show sinks:rofi-sinks -cycle -theme-str 'window {width: 50%;}'";
+        on-click-right = "${term} --class=wiremix wiremix";
         on-click-middle = "pavucontrol";
         ignored-sinks = [];
       };
@@ -198,19 +200,28 @@ in {
         spacing = 6;
       };
 
+      # battery = {
+      #   interval = 60;
+      #   format = "{icon}";
+      #   format-charging = " ";
+      #   format-icons = ["󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹"];
+      #   format-plugged = "󰚦 ";
+      #   states = {
+      #     warning = 30;
+      #     critical = 15;
+      #   };
+      #   tooltip = true;
+      # };
       battery = {
-        interval = 60;
-        format = "{icon}";
-        format-charging = " ";
-        format-icons = ["󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹"];
-        format-plugged = "󰚦 ";
-        states = {
-          warning = 30;
-          critical = 15;
+        format = "{capacity}% {icon}";
+        format-discharging = "{icon}";
+        format-charging = "{icon}";
+        format-plugged = "";
+        format-icons = {
+          charging = ["󰢜" "󰂆" "󰂇" "󰂈" "󰢝" "󰂉" "󰢞" "󰂊" "󰂋" "󰂅"];
+          default = ["󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹"];
         };
-        tooltip = true;
       };
-
       "custom/power" = {
         on-click = "powerkey";
         format = " ";

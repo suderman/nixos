@@ -183,5 +183,6 @@
   font-size: 16px;
   min-height: 0;
   /* font-family: "Iosevka Nerd Font", "Material Design Icons Desktop", sans-serif; */
-  font-family: sans-serif;
+  /* font-family: sans-serif; */
+  font-family: "CaskaydiaMono Nerd Font";
 }

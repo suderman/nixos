@@ -51,6 +51,7 @@ in {
     brightnessctl
     hyprcursor
 
+    unstable.wiremix # sound control
     font-awesome # icon font
     jetbrains-mono # mono font
 
