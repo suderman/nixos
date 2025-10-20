@@ -69,4 +69,30 @@
 
   # Garmin fenix 6 pro
   hardware.garmin.deviceId = "091e:4cda";
+
+  # Printer/scanner
+  services.printing = {
+    enable = true;
+    browsing = true;
+    drivers = [pkgs.hplipWithPlugin];
+  };
+
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+    openFirewall = true;
+  };
+
+  hardware.sane = {
+    enable = true;
+    extraBackends = [pkgs.hplipWithPlugin];
+  };
+
+  environment.systemPackages = with pkgs; [
+    hplipWithPlugin
+    system-config-printer
+    sane-backends
+    sane-frontends
+    simple-scan
+  ];
 }
