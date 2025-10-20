@@ -7,32 +7,20 @@
   ...
 }: let
   cfg = config.wayland.windowManager.hyprland;
-  inherit (lib) mkIf mkMerge mkOption removeSuffix types;
 in {
-  imports = [flake.homeModules.desktop.default] ++ flake.lib.ls ./.;
+  imports =
+    [flake.homeModules.desktop.default]
+    ++ flake.lib.ls ./.;
 
   options.wayland.windowManager.hyprland = {
-    enablePlugins = lib.options.mkEnableOption "enablePlugins";
-    systemd.target = mkOption {
-      type = types.str;
+    enablePlugins = lib.mkEnableOption "enablePlugins";
+    systemd.target = lib.mkOption {
+      type = lib.types.str;
       default = "hyprland-ready.target";
     };
   };
 
   config = {
-    # I'll never remember the H
-    home.shellAliases = {
-      hyprland = "Hyprland";
-    };
-
-    home.packages = with pkgs; [nerd-fonts.symbols-only];
-
-    # Add target that is enabled by exec-once at the top of the configuration
-    systemd.user.targets."${removeSuffix ".target" cfg.systemd.target}".Unit = {
-      Description = "Hyprland compositor session after dbus-update-activation-environment";
-      Requires = ["hyprland-session.target"];
-    };
-
     # Automatically enable home-manager module if nixos module is enabled
     wayland.windowManager.hyprland = {
       enable = true;
@@ -52,42 +40,14 @@ in {
           "systemctl --user start ${cfg.systemd.target}"
         ];
       };
-
-      # plugins = with pkgs.hyprlandPlugins;
-      # plugins = with perSystem.unstable.hyprlandPlugins;
-      #   mkIf cfg.enablePlugins [
-      #     hypr-dynamic-cursors
-      #   ];
-
-      extraConfig = ''
-        source = ~/.config/hypr/extra/hyprland.conf
-      '';
-
-      # importantPrefixes = [
-      #   "$"
-      #   "bezier"
-      #   "name"
-      #   "source"
-      #   "bindo"
-      # ];
     };
 
-    # Enable user service for keyd to watch window focus changes
-    services.keyd.enable = true;
+    home.shellAliases.hyprland = "Hyprland"; # I'll never remember the H
 
-    # Persist extra config
-    persist.storage.directories = [".config/hypr/extra"];
-    tmpfiles.files = [".config/hypr/extra/hyprland.conf"];
-
-    # Use a real file for the hyprland config to ease real-time tinkering
-    home.localStorePath = [".config/hypr/hyprland.conf"];
-
-    # Temporarily pause autoreload during activation
-    home.activation.localStoreHyprland = lib.hm.dag.entryBefore ["linkGeneration"] ''
-      conf="${config.home.homeDirectory}/.config/hypr/hyprland.conf"
-      if [ -L "$conf" ]; then
-        echo "misc:disable_autoreload=true" >> "$conf" 2>/dev/null || true
-      fi
-    '';
+    # Add target that is enabled by exec-once at the top of the configuration
+    systemd.user.targets."${lib.removeSuffix ".target" cfg.systemd.target}".Unit = {
+      Description = "Hyprland compositor session after dbus-update-activation-environment";
+      Requires = ["hyprland-session.target"];
+    };
   };
 }

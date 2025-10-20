@@ -1,4 +1,4 @@
 {...}: {
-  # App Store
-  services.flatpak.enable = true;
+  services.flatpak.enable = true; # app Store
+  services.keyd.enable = true; # # watch window focus changes
 }
