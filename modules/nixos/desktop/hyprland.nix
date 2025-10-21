@@ -22,7 +22,7 @@ in {
       enable = true;
       settings = {
         clear_password = true;
-        vi_mode = true;
+        vi_mode = false;
         animation = "matrix";
         bigclock = true;
       };
@@ -34,6 +34,9 @@ in {
 
     # Enable screen brightness control
     programs.light.enable = true;
+
+    # https://github.com/ArtsyMacaw/wlogout/issues/61
+    programs.gdk-pixbuf.modulePackages = [pkgs.librsvg];
 
     # Enable audio
     services.pipewire = {
@@ -52,9 +55,6 @@ in {
 
     environment.systemPackages = with pkgs; [
       alsa-utils # provides amixer/alsamixer/...
-      mpd # for playing system sounds
-      mpc-cli # command-line mpd client
-      ncmpcpp # a mpd client with a UI
       networkmanagerapplet # provide GUI app: nm-connection-editor
       wl-clipboard
       vulkan-tools
@@ -71,13 +71,10 @@ in {
     services.gnome.gnome-keyring.enable = true;
     programs.seahorse.enable = true; # gui to manage keyring
 
-    # https://aylur.github.io/ags-docs/config/utils/#authentication
-    security.pam.services.ags = {};
-
-    # https://home-manager-options.extranix.com/?query=hyprlock&release=release-24.11
+    # https://home-manager-options.extranix.com/?query=hyprlock&release=release-25.05
     security.pam.services.hyprlock = {};
 
-    # https://home-manager-options.extranix.com/?query=swaylock&release=release-24.11
+    # https://home-manager-options.extranix.com/?query=swaylock&release=release-25.05
     security.pam.services.swaylock = {};
   };
 }
