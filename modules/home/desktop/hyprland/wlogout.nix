@@ -1,29 +1,28 @@
 # powerkey
 {
   config,
-  lib,
   pkgs,
   ...
 }: let
-  swaylock = "${config.programs.swaylock.package}/bin/swaylock";
-
-  # Wrapper script for formatting and prevent multiple instances
-  powerkey = pkgs.self.mkScript {
-    name = "powerkey";
-    path = with pkgs; [procps wlogout];
-    text = ''
-      if ! $(pidof -q wlogout >/dev/null); then
-        wlogout -b 2 -m 300 -L 500 -R 500
-      fi
-    '';
-  };
 in {
-  # Add wrapper to path
-  home.packages = [powerkey];
+  # Wrapper script for formatting and prevent multiple instances
+  home.packages = [
+    (
+      pkgs.self.mkScript {
+        name = "powerkey";
+        path = with pkgs; [procps wlogout];
+        text = ''
+          if ! $(pidof -q wlogout >/dev/null); then
+            wlogout -b 2 -m 300 -L 500 -R 500
+          fi
+        '';
+      }
+    )
+  ];
 
   # Run wlogout via powerkey button press
   wayland.windowManager.hyprland.settings = {
-    bind = [", XF86PowerOff, exec, ${lib.getExe powerkey}"];
+    bind = [", XF86PowerOff, exec, powerkey"];
   };
 
   # Configure grid of 4 buttons
@@ -33,8 +32,7 @@ in {
     layout = [
       {
         label = "lock";
-        # action = "${hyprlock} --immediate";
-        action = "${swaylock}";
+        action = "${config.services.hypridle.lock}";
         text = "lock";
         keybind = "l";
       }
