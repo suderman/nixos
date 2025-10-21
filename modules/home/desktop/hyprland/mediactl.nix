@@ -173,10 +173,6 @@ in {
       ", XF86MonBrightnessUp, exec, mediactl light"
       ", XF86MonBrightnessDown, exec, mediactl dark"
 
-      # Screen color filter
-      "shift, XF86MonBrightnessUp, exec, mediactl sunset"
-      "shift, XF86MonBrightnessDown, exec, mediactl sunset"
-
       # Volume control
       ", XF86AudioRaiseVolume, exec, mediactl up"
       ", XF86AudioLowerVolume, exec, mediactl down"
@@ -185,7 +181,12 @@ in {
     bind = [
       # Mute toggle
       ", XF86AudioMute, exec, mediactl mute"
-      ", XF86AudioMicMute, exec, mediactl mic"
+      # ", XF86AudioMicMute, exec, mediactl mic"
+
+      # Screen color filter
+      "shift, XF86MonBrightnessUp, exec, mediactl sunset"
+      "shift, XF86MonBrightnessDown, exec, mediactl sunset"
+      ", XF86AudioMicMute, exec, mediactl sunset"
     ];
 
     bindl = [
