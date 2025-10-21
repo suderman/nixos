@@ -3,16 +3,12 @@
   config,
   lib,
   pkgs,
-  perSystem,
   ...
 }: let
-  hyprctl = "${pkgs.hyprland}/bin/hyprctl";
-  hyprlock = "${pkgs.hyprlock}/bin/hyprlock";
   swaylock = "${config.programs.swaylock.package}/bin/swaylock";
-  systemctl = "${pkgs.systemd}/bin/systemctl";
 
   # Wrapper script for formatting and prevent multiple instances
-  powerkey = perSystem.self.mkScript {
+  powerkey = pkgs.self.mkScript {
     name = "powerkey";
     path = with pkgs; [procps wlogout];
     text = ''
@@ -34,7 +30,7 @@ in {
   programs.wlogout = {
     enable = true;
 
-    layout = with pkgs; [
+    layout = [
       {
         label = "lock";
         # action = "${hyprlock} --immediate";
@@ -44,19 +40,19 @@ in {
       }
       {
         label = "reboot";
-        action = "${systemctl} reboot";
+        action = "systemctl reboot";
         text = "reboot";
         keybind = "r";
       }
       {
         label = "logout";
-        action = "${hyprctl} dispatch exit 0";
+        action = "hyprctl dispatch exit 0";
         text = "logout";
         keybind = "q";
       }
       {
         label = "shutdown";
-        action = "${systemctl} poweroff";
+        action = "systemctl poweroff";
         text = "shutdown";
         keybind = "s";
       }
@@ -183,8 +179,8 @@ in {
     '';
   };
 
-  # home.localStorePath = [
-  #   ".config/wlogout/layout"
-  #   ".config/wlogout/style.css"
-  # ];
+  home.localStorePath = [
+    ".config/wlogout/layout"
+    ".config/wlogout/style.css"
+  ];
 }

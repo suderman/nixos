@@ -1,9 +1,6 @@
-{config, ...}: let
-  cfg = config.wayland.windowManager.hyprland;
-in {
+{config, ...}: {
   services.keyd = {
     enable = true;
-    # systemdTarget = cfg.systemd.target;
     systemdTarget = config.wayland.systemd.target;
     windows = {
       "*" = {

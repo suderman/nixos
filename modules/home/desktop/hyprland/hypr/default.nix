@@ -1,24 +1,15 @@
 {
   config,
   lib,
-  pkgs,
   flake,
   ...
-}: let
-  cfg = config.wayland.windowManager.hyprland;
-in {
+}: {
   imports = flake.lib.ls ./.;
 
-  wayland.windowManager.hyprland = {
-    plugins = with pkgs.unstable.hyprlandPlugins;
-      lib.mkIf cfg.enablePlugins [
-        hypr-dynamic-cursors
-      ];
-
-    extraConfig = ''
-      source = ~/.config/hypr/extra/hyprland.conf
-    '';
-  };
+  # Source extra config at the end
+  wayland.windowManager.hyprland.extraConfig = ''
+    source = ~/.config/hypr/extra/hyprland.conf
+  '';
 
   # Persist extra config
   persist.storage.directories = [".config/hypr/extra"];

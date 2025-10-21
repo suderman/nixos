@@ -11,7 +11,7 @@ with the `Super` key directly next to `Space`. My
 [HHKB](https://happyhackingkb.com) keyboard supports this layout and keyd can
 remap it on other keyboards.
 
-## Launchers
+### Launchers
 
 | Key               | Function                                  |
 | ----------------- | ----------------------------------------- |
@@ -24,7 +24,7 @@ remap it on other keyboards.
 | `Super` `Y`       | Launch file manager _(hold to float)_     |
 | `Super` `Alt` `Y` | Launch alt file manager _(hold to float)_ |
 
-## Workspaces
+### Workspaces
 
 | Key                   | Key                    | Function                                            |
 | --------------------- | ---------------------- | --------------------------------------------------- |

@@ -1,12 +1,4 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: let
-  cfg = config.wayland.windowManager.hyprland;
-  inherit (lib) mkForce;
-
+{pkgs, ...}: let
   mediactl = pkgs.self.mkScript {
     name = "mediactl";
     path = with pkgs; [
@@ -163,12 +155,6 @@ in {
     };
   };
 
-  # systemd.user.services.avizo = {
-  #   Install.WantedBy = mkForce [cfg.systemd.target];
-  #   Unit.PartOf = mkForce [cfg.systemd.target];
-  #   Unit.After = mkForce [cfg.systemd.target];
-  # };
-
   services.hyprsunset = {
     enable = true; # hyprctl hyprsunset
     transitions = {
@@ -180,12 +166,6 @@ in {
       ];
     };
   };
-
-  # systemd.user.services.hyprsunset = {
-  #   Install.WantedBy = mkForce [cfg.systemd.target];
-  #   Unit.PartOf = mkForce [cfg.systemd.target];
-  #   Unit.After = mkForce [cfg.systemd.target];
-  # };
 
   wayland.windowManager.hyprland.settings = {
     binde = [

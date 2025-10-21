@@ -1,26 +1,18 @@
-{
-  config,
-  lib,
-  ...
-}: let
-  cfg = config.services.mako;
-  inherit (lib) getExe' mkIf mkDefault;
-in {
+{lib, ...}: {
   services.mako = {
     enable = true;
-
     settings = {
       default-timeout = 6000;
-      progress-color = mkDefault "over #414559";
+      progress-color = lib.mkDefault "over #414559";
       border-radius = 7;
-      border-color = mkDefault "#8caaee";
+      border-color = lib.mkDefault "#8caaee";
       border-size = 2;
       padding = "15";
       width = 600;
       height = 300;
-      text-color = mkDefault "#c6d0f5";
-      background-color = mkDefault "#303446";
-      font = mkDefault "JetBrainsMono 11";
+      text-color = lib.mkDefault "#c6d0f5";
+      background-color = lib.mkDefault "#303446";
+      font = lib.mkDefault "JetBrainsMono 11";
       anchor = "bottom-left";
       # "[urgency=normal]" = {
       #   border-color = "#ef9f76";
@@ -49,10 +41,8 @@ in {
     # invisible=1
   };
 
-  wayland.windowManager.hyprland.settings = let
-    makoctl = getExe' config.services.mako.package "makoctl";
-  in {
-    bindn = [", escape, exec, ${makoctl} dismiss"];
-    bind = ["super+alt, u, exec, ${makoctl} restore"];
+  wayland.windowManager.hyprland.settings = {
+    bindn = [", escape, exec, makoctl dismiss"];
+    bind = ["super+alt, u, exec, makoctl restore"];
   };
 }

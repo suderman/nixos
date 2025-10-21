@@ -123,7 +123,11 @@
   };
 in {
   options.programs.printscreen = {
-    enable = mkEnableOption "printscreen";
+    enable = mkOption {
+      type = types.bool;
+      default = true;
+      example = false;
+    };
     codec = mkOption {
       type = types.str;
       default = "";

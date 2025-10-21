@@ -2,9 +2,7 @@
   config,
   pkgs,
   ...
-}: let
-  cfg = config.wayland.windowManager.hyprland;
-in {
+}: {
   home.packages = with pkgs; [
     kanshi
     wdisplays
@@ -12,7 +10,6 @@ in {
 
   services.kanshi = {
     enable = true;
-    # systemdTarget = cfg.systemd.target;
     settings = [
       {
         profile = {

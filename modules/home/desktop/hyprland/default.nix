@@ -1,54 +1,47 @@
-# osConfig.programs.hyprland.enable = true;
 {
-  config,
   lib,
   pkgs,
   flake,
   ...
-}: let
-  cfg = config.wayland.windowManager.hyprland;
-in {
+}: {
   imports =
     [flake.homeModules.desktop.default]
     ++ flake.lib.ls ./.;
 
   options.wayland.windowManager.hyprland = {
     enablePlugins = lib.mkEnableOption "enablePlugins";
-    # systemd.target = lib.mkOption {
-    #   type = lib.types.str;
-    #   default = "hyprland-ready.target";
-    # };
   };
 
   config = {
-    # Automatically enable home-manager module if nixos module is enabled
-    wayland.windowManager.hyprland = {
-      enable = true;
-      package = pkgs.unstable.hyprland;
-
-      systemd = {
+    wayland = {
+      windowManager.hyprland = {
         enable = true;
-        # enableXdgAutostart = true;
-        # variables = [
-        #   "DISPLAY"
-        #   "HYPRLAND_INSTANCE_SIGNATURE"
-        #   "WAYLAND_DISPLAY"
-        #   "XDG_CURRENT_DESKTOP"
-        # ];
-        # extraCommands = [
-        #   "systemctl --user stop ${cfg.systemd.target}"
-        #   "systemctl --user start ${cfg.systemd.target}"
-        # ];
+        package = pkgs.unstable.hyprland;
+        systemd.enable = true;
       };
+      systemd.target = "hyprland-session.target";
     };
-    wayland.systemd.target = "hyprland-session.target";
 
     home.shellAliases.hyprland = "Hyprland"; # I'll never remember the H
 
-    # # Add target that is enabled by exec-once at the top of the configuration
-    # systemd.user.targets."${lib.removeSuffix ".target" cfg.systemd.target}".Unit = {
-    #   Description = "Hyprland compositor session after dbus-update-activation-environment";
-    #   Requires = ["hyprland-session.target"];
-    # };
+    # Ensure portals and other systemd user services are running
+    # https://wiki.hypr.land/Hypr-Ecosystem/xdg-desktop-portal-hyprland/
+    home.packages = [
+      (
+        pkgs.self.mkScript {
+          path = [pkgs.systemd];
+          name = "bounce";
+          text = let
+            restart = name: "sleep 1 && systemctl --user stop ${name} && systemctl --user start ${name}";
+          in
+            lib.concatStringsSep "\n" [
+              (restart "xdg-desktop-portal-hyprland")
+              (restart "xdg-desktop-portal-gtk")
+              (restart "xdg-desktop-portal")
+              (restart "hyprland-session.target")
+            ];
+        }
+      )
+    ];
   };
 }
