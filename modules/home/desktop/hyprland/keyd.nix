@@ -3,7 +3,8 @@
 in {
   services.keyd = {
     enable = true;
-    systemdTarget = cfg.systemd.target;
+    # systemdTarget = cfg.systemd.target;
+    systemdTarget = config.wayland.systemd.target;
     windows = {
       "*" = {
         # Map meta a/z to ctrl a/z

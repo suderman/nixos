@@ -22,7 +22,8 @@
         (restart "xdg-desktop-portal-hyprland")
         (restart "xdg-desktop-portal-gtk")
         (restart "xdg-desktop-portal")
-        (restart "hyprland-ready.target")
+        (restart "hyprland-session.target")
+        # (restart "hyprland-ready.target")
         # (restart "swww")
       ];
   };
@@ -35,11 +36,11 @@ in {
     printscreen.enable = true; # screenshots
   };
 
-  systemd.user.services.swww = {
-    Install.WantedBy = mkForce [cfg.systemd.target];
-    Unit.PartOf = mkForce [cfg.systemd.target];
-    Unit.After = mkForce [cfg.systemd.target];
-  };
+  # systemd.user.services.swww = {
+  #   Install.WantedBy = mkForce [cfg.systemd.target];
+  #   Unit.PartOf = mkForce [cfg.systemd.target];
+  #   Unit.After = mkForce [cfg.systemd.target];
+  # };
 
   services = {
     swww.enable = true; # wallpaper

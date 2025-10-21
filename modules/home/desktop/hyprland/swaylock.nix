@@ -63,11 +63,11 @@ in {
     };
   };
 
-  systemd.user.services.hypridle = {
-    Install.WantedBy = mkForce [cfg.systemd.target];
-    Unit.PartOf = mkForce [cfg.systemd.target];
-    Unit.After = mkForce [cfg.systemd.target];
-  };
+  # systemd.user.services.hypridle = {
+  #   Install.WantedBy = mkForce [cfg.systemd.target];
+  #   Unit.PartOf = mkForce [cfg.systemd.target];
+  #   Unit.After = mkForce [cfg.systemd.target];
+  # };
 
   # Keyboard shortcut to turn off screen immediately with numlock
   wayland.windowManager.hyprland.settings = {

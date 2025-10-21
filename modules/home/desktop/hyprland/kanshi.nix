@@ -12,7 +12,7 @@ in {
 
   services.kanshi = {
     enable = true;
-    systemdTarget = cfg.systemd.target;
+    # systemdTarget = cfg.systemd.target;
     settings = [
       {
         profile = {

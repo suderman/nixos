@@ -9,13 +9,13 @@
   inherit (lib) getExe mkIf mkForce;
   term = getExe pkgs.kitty;
 in {
-  systemd.user.services.waybar = {
-    Install.WantedBy = mkForce [cfg.systemd.target];
-    Unit = {
-      PartOf = mkForce [cfg.systemd.target];
-      After = mkForce [cfg.systemd.target];
-    };
-  };
+  # systemd.user.services.waybar = {
+  #   Install.WantedBy = mkForce [cfg.systemd.target];
+  #   Unit = {
+  #     PartOf = mkForce [cfg.systemd.target];
+  #     After = mkForce [cfg.systemd.target];
+  #   };
+  # };
 
   programs.waybar = {
     enable = true;
@@ -23,7 +23,7 @@ in {
 
     systemd = {
       enable = true;
-      inherit (cfg.systemd) target;
+      # inherit (cfg.systemd) target;
     };
 
     settings.bar = {
