@@ -75,4 +75,7 @@
       ];
     };
   };
+
+  # Use a real file for the hyprlock config to ease real-time tinkering
+  home.localStorePath = [".config/hypr/hyprlock.conf"];
 }
