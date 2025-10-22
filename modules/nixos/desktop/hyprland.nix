@@ -1,17 +1,13 @@
 {
-  config,
   lib,
   pkgs,
   flake,
   ...
-}: let
-  cfg = config.programs.hyprland;
-  inherit (lib) getExe mkOption;
-in {
+}: {
   imports = [flake.nixosModules.desktop.default];
 
   # Set this to a username to automatically login at boot
-  options.programs.hyprland.autologin = mkOption {
+  options.programs.hyprland.autologin = lib.mkOption {
     type = with lib.types; nullOr str;
     default = null;
   };
