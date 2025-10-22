@@ -5,13 +5,13 @@
       "super, return, exec, kitty"
 
       # File manager
-      "super, y, exec, kitty yazi"
+      "super, y, exec, kitty --class Yazi yazi"
 
       # Alt file manager
       "super+alt, y, exec, nautilus --new-window"
 
       # Text editor
-      "super, e, exec, kitty nvf"
+      "super, e, exec, kitty -class Neovim nvf"
 
       # Alt text editor
       "super+alt, e, exec, neovide --neovim-bin nvf"

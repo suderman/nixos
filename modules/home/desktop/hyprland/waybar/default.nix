@@ -1,30 +1,12 @@
 {
-  config,
   lib,
   pkgs,
   ...
-}: let
-  cfg = config.wayland.windowManager.hyprland;
-  inherit (builtins) readFile;
-  inherit (lib) getExe mkIf mkForce;
-  term = getExe pkgs.kitty;
-in {
-  # systemd.user.services.waybar = {
-  #   Install.WantedBy = mkForce [cfg.systemd.target];
-  #   Unit = {
-  #     PartOf = mkForce [cfg.systemd.target];
-  #     After = mkForce [cfg.systemd.target];
-  #   };
-  # };
-
+}: {
   programs.waybar = {
     enable = true;
-    package = pkgs.waybar; # need >= 0.9.22
-
-    systemd = {
-      enable = true;
-      # inherit (cfg.systemd) target;
-    };
+    package = pkgs.waybar;
+    systemd.enable = true;
 
     settings.bar = {
       layer = "top";
@@ -108,10 +90,10 @@ in {
       };
 
       clock = {
-        # format = " {:%I:%M %p}";
-        # format-alt = " {:%a %b %d, %G}";
-        format = "{:L%A %H:%M}";
-        format-alt = "{:L%d %B W%V %Y}";
+        format = " {:%I:%M %p}";
+        format-alt = " {:%a %b %d, %G}";
+        # format = "{:L%A %H:%M}";
+        # format-alt = "{:L%d %B W%V %Y}";
         tooltip-format = "<big>{:%B %Y}</big>\n<tt><small>{calendar}</small></tt>";
         interval = 60;
         align = 0;
@@ -133,14 +115,14 @@ in {
           default = ["" ""];
         };
         scroll-step = 1;
-        on-click = "rofi-toggle -show sinks:rofi-sinks -cycle -theme-str 'window {width: 50%;}'";
-        on-click-right = "${term} --class=wiremix wiremix";
+        on-click = "sinks";
+        on-click-right = "kitty --class=wiremix wiremix";
         on-click-middle = "pavucontrol";
         ignored-sinks = [];
       };
 
       "custom/bluetooth" = {
-        on-click = "${term} bluetuith";
+        on-click = "kitty --class Bluetuith bluetuith";
         format = "󰂯";
       };
 
@@ -154,7 +136,7 @@ in {
 
       network = {
         interval = 1;
-        on-click = "${getExe pkgs.networkmanager_dmenu}";
+        on-click = "${lib.getExe pkgs.networkmanager_dmenu}";
         format-disconnected = "󰤮 ";
         format-wifi = "󰤨 ";
         format-ethernet = "󰈀 {essid}";
@@ -170,7 +152,7 @@ in {
       cpu = {
         # format = " {load} / {usage}%";
         format = " {usage}%";
-        on-click = "${term} btop";
+        on-click = "kitty --class Btop btop";
       };
 
       temperature = {
@@ -228,7 +210,7 @@ in {
       };
     };
 
-    style = readFile ./style.css;
+    style = builtins.readFile ./style.css;
   };
 
   home.localStorePath = [

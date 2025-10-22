@@ -44,4 +44,7 @@
       "super.x" = "escape";
     };
   };
+
+  # Use a real file for the rofi config to ease real-time tinkering
+  home.localStorePath = [".config/rofi/config.rasi"];
 }

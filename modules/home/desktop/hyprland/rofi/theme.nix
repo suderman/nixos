@@ -101,4 +101,7 @@ in {
       y-offset = l "-25%";
     };
   };
+
+  # Use a real file for the rofi theme to ease real-time tinkering
+  home.localStorePath = [".local/share/rofi/themes/custom.rasi"];
 }
