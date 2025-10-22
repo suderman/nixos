@@ -5,7 +5,7 @@
   ...
 }: let
   cfg = config.programs.printscreen;
-  inherit (lib) mkEnableOption mkOption types;
+  inherit (lib) mkOption types;
   inherit (config.networking) hostName;
   dir = with config.xdg.userDirs; rec {
     home = config.home.homeDirectory;
@@ -83,21 +83,37 @@
         printscreen_video() {
 
           # Toggle capture off (if recording)
-          if [ -n "$(pgrep wf-recorder)" ]; then
+          if [[ "$(printscreen_status)" == "video" ]]; then
             pkill --signal SIGINT wf-recorder
+            while pgrep wf-recorder >/dev/null; do sleep 0.1; done
             wl-copy<${dir.cache}/recorder
             rm -f ${dir.cache}/recorder
             notify-send 'Ended capture' "$(wl-paste)"  -i "${dir.icons}/camera.svg"
-            exit 0
+            pkill -RTMIN+8 waybar # toggle indicator
+
+          # Toggle capture on
+          else
+
+            # Save location
+            output="${dir.screencasts}/${hostName}-$(date '+%Y%m%d-%H%M%S').mp4"
+            mkdir -p $(dirname $output)
+            echo "$output">${dir.cache}/recorder
+
+            # Record screen
+            coords="$(slurp)"
+            if [[ -n "$coords" ]]; then
+              wf-recorder --geometry "$coords" ${wf.framerate} ${wf.codec} ${wf.params} -a -f "$output" &
+              pkill -RTMIN+8 waybar # toggle indicator
+            fi
           fi
+        }
 
-          # Save location
-          output="${dir.screencasts}/${hostName}-$(date '+%Y%m%d-%H%M%S').mp4"
-          mkdir -p $(dirname $output)
-          echo "$output">${dir.cache}/recorder
-
-          # Record screen
-          wf-recorder --geometry "$(slurp)" ${wf.framerate} ${wf.codec} ${wf.params} -a -f "$output"
+        printscreen_status() {
+          if [ -n "$(pgrep wf-recorder)" ]; then
+            echo "video"
+          else
+            echo ""
+          fi
         }
 
         case "''${1-}" in
@@ -110,12 +126,16 @@
           video | v)
             printscreen_video
             ;;
+          status | s)
+            printscreen_status
+            ;;
           help | *)
             echo "Usage: printscreen ACTION"
             echo
             echo "  color"
             echo "  image"
             echo "  video"
+            echo "  status"
             echo "  help"
             ;;
         esac

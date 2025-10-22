@@ -39,6 +39,7 @@
       # modules-center = [ "hyprland/window" ];
       modules-center = [
         "clock"
+        "custom/screencast"
         # "hyprland/workspaces"
       ];
       modules-right = [
@@ -61,8 +62,6 @@
       };
 
       "custom/expo" = {
-        # format = "★";
-        # format = "⚃";
         format = "󱗼";
         on-click = "sleep 0.2 && exec hyprctl dispatch hyprexpo:expo toggle";
       };
@@ -71,6 +70,23 @@
       "custom/special" = {
         format = "󰔷";
         on-click = "exec hyprctl dispatch togglespecialworkspace";
+      };
+
+      "custom/screencast" = {
+        on-click = "printscreen video";
+        signal = 8;
+        return-type = "json";
+        exec = pkgs.self.mkScript {
+          text =
+            # bash
+            ''
+              if [[ "$(printscreen status)" == "video" ]]; then
+                echo '{"text": " 󰻂 ", "tooltip": "Stop recording", "class": "active"}'
+              else
+                echo '{"text": ""}'
+              fi
+            '';
+        };
       };
 
       "custom/groupies" = {

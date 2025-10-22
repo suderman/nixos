@@ -27,6 +27,7 @@
     Main:
     dir(p, Programs, window-new-symbolic)
     dir(m, Media, audio-headphones)
+    dir(i, Capture, camera)
     dir(t, Toggle, applications-system)
     act(r, run, rofi -show run)
 
@@ -36,16 +37,20 @@
     act(f, Firefox, firefox)
 
     Media:
-    actReload(a, Volume Down, volumectl -pb down, audio-volume-low)
-    actReload(s, Volume Up, volumectl -pbu up, audio-volume-high)
-    actReload(d, Mute, volumectl -a toggle-mute, audio-volume-muted)
-    actReload(c, Mute Microphone, volumectl -am toggle-mute, audio-input-microphone)
-    actReload(p, Play/Pause, playerctl play-pause, media-playback-start)
-    actReload(f, Forward Play, playerctl next, media-skip-forward)
-    actReload(r, Reverse Play, playerctl previous, media-skip-backward)
-    actReload(z, Brightness Down, lightctl down, video-display)
-    actReload(x, Brightness Up, lightctl up, video-display)
-    act(m, Mixer, kitty ncpamixer, preferences-desktop-sound)
+    actReload(a, Volume Down, mediactl down, audio-volume-low)
+    actReload(s, Volume Up, mediactl up, audio-volume-high)
+    actReload(d, Mute, mediactl mute, audio-volume-muted)
+    actReload(p, Play/Pause, mediactl play, media-playback-start)
+    actReload(f, Forward Play, mediactl forward, media-skip-forward)
+    actReload(r, Reverse Play, mediactl reverse, media-skip-backward)
+    actReload(z, Brightness Down, mediactl dark, video-display)
+    actReload(x, Brightness Up, mediactl light, video-display)
+    actReload(c, Sunset toggle, mediactl sunset, weather-clear)
+    act(m, Mixer, kitty --class Wiremix wiremix, preferences-desktop-sound)
+
+    Capture:
+    act(i, Screenshot, bash -c "sleep 0.25 && printscreen image", camera)
+    act(v, Screencast toggle, printscreen video, video)
 
     Toggle:
     actReload(t, Title Bars, hypr-toggletitlebars, preferences-desktop)
@@ -53,6 +58,23 @@
 
   # Use a real file for blezz to ease real-time tinkering
   home.localStorePath = [".config/rofi/blezz"];
+
+  # Main = {
+  #   r = {
+  #     name = "Run";
+  #     command = "rofi -show run";
+  #   };
+  #   m = {
+  #     name = "Mute";
+  #     icon = "audio-volume-muted";
+  #     command = "volumectl mute";
+  #     reload = true;
+  #   };
+  #   a = {
+  #     name = "Applications";
+  #     icon = "window-new-symbolic";
+  #   };
+  # };
 
   # cfg = {
   #   Main = {
