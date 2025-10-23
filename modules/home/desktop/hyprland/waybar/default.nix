@@ -25,7 +25,13 @@
     style = builtins.readFile ./style.css;
   };
 
+  # We'll write our own CSS
   stylix.targets.waybar.addCss = false;
+
+  # Pretty animations in hyprland
+  wayland.windowManager.hyprland.settings.animations.layerrule = [
+    "animation slide, waybar"
+  ];
 
   home.localStorePath = [
     ".config/waybar/config"

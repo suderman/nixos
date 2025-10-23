@@ -27,8 +27,12 @@
     })
   ];
 
-  # Keybind to change it up
-  wayland.windowManager.hyprland.settings.bind = ["super+alt, p, exec, wallpaper"];
+  wayland.windowManager.hyprland.settings = {
+    # Keybind to change it up
+    bind = ["super+alt, p, exec, wallpaper"];
+    # Pretty animations in hyprland
+    animations.layerrule = ["animation fade, swww-daemon"];
+  };
 
   # Select specific wallpaper in Yazi
   programs.yazi.settings.opener.wallpaper = [

@@ -121,13 +121,8 @@ in {
     # animation slide/popin/fade
     layerrule = [
       "animation slide, notifications"
-      "animation slide, waybar"
-      "animation fade, swww-daemon"
-      "animation fade, wofi"
-      "animation slide, menu"
-      "dimaround, menu"
-      "animation fade, rofi"
-      "dimaround, rofi"
+      # "animation slide, menu"
+      # "dimaround, menu"
     ];
   };
 }
