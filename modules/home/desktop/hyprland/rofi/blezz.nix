@@ -22,7 +22,7 @@ in {
 
   programs.rofi = {
     plugins = [pkgs.unstable.rofi-blezz];
-    extraConfig.modes = ["blezz"];
+    mode.slot6 = "blezz";
     args = [
       "-blezz-config ~/.config/rofi/blezz"
       "-blezz-directory Main"

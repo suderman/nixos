@@ -6,15 +6,16 @@
   cfg = config.programs.rofi;
 in {
   programs.rofi = {
-    extraConfig = {
-      modes = ["combi" "hyprland:rofi-hyprland" "run"];
-      combi-modes = ["hyprland" "drun" "run"];
-    };
+    mode.slot1 = "combi";
+    extraConfig.combi-modes = ["hyprland:rofi-hyprland" "drun" "run" "ssh"];
     rasiConfig = [
-      ''combi { display-name: ""; }''
-      ''hyprland { display-name: ""; }''
-      ''drun { display-name: "󰌧"; }''
-      ''run { display-name: ""; }''
+      ''
+        combi { display-name: ""; }
+        hyprland { display-name: ""; }
+        drun { display-name: "󰌧"; }
+        run { display-name: ""; }
+        ssh { display-name: ""; }
+      ''
     ];
   };
 

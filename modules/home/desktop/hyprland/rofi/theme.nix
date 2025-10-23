@@ -100,7 +100,7 @@ in {
         background-color = l "@bg0";
         border-radius = 8;
         position = l "north";
-        width = l "65%";
+        width = l "50%";
         y-offset = l "-25%";
       };
     };

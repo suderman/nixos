@@ -9,12 +9,16 @@ in {
   home.packages = [
     (pkgs.self.mkScript {
       name = "clips";
-      text = "rofi-toggle -show clips:rofi-cliphist -show-icons ${toString cfg.args}";
+      text = toString [
+        "rofi-toggle"
+        "-show clips"
+        "${toString cfg.args}"
+      ];
     })
   ];
 
   programs.rofi = {
-    extraConfig.modes = ["clips:rofi-cliphist"];
+    mode.slot3 = "clips:rofi-cliphist";
     rasiConfig = [''clips { display-name: ""; }''];
   };
 

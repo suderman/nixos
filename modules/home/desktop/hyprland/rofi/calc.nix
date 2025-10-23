@@ -16,7 +16,6 @@ in {
         "-no-show-match"
         "-no-sort"
         "-no-history"
-        # "-calc-command \"echo -n '{result}' | wl-copy\""
         "-theme-str 'window {width: 25%;}'"
         "${toString cfg.args}"
       ];
@@ -25,7 +24,7 @@ in {
 
   programs.rofi = {
     plugins = [pkgs.unstable.rofi-calc];
-    extraConfig.modes = ["calc"];
+    # mode.slot4 = "calc";
     args = ["-calc-command \"echo -n '{result}' | wl-copy\""];
     rasiConfig = [''calc { display-name: ""; }''];
   };

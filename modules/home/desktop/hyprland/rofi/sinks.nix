@@ -9,12 +9,16 @@ in {
   home.packages = [
     (pkgs.self.mkScript {
       name = "sinks";
-      text = "rofi-toggle -show sinks -cycle -theme-str 'window {width: 50%;}' ${toString cfg.args}";
+      text = toString [
+        "rofi-toggle"
+        "-show sinks"
+        "${toString cfg.args}"
+      ];
     })
   ];
 
   programs.rofi = {
-    extraConfig.modes = ["sinks:rofi-sinks"];
+    mode.slot5 = "sinks:rofi-sinks";
     rasiConfig = [''sinks { display-name: "󰕾"; }''];
   };
 
