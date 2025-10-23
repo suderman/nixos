@@ -1,13 +1,22 @@
 # clips
-{pkgs, ...}: {
+{
+  config,
+  pkgs,
+  ...
+}: let
+  cfg = config.programs.rofi;
+in {
   home.packages = [
     (pkgs.self.mkScript {
       name = "clips";
-      text = "rofi-toggle -show clips:rofi-cliphist -show-icons";
+      text = "rofi-toggle -show clips:rofi-cliphist -show-icons ${toString cfg.args}";
     })
   ];
 
-  programs.rofi.extraConfig.modes = ["clips:rofi-cliphist"];
+  programs.rofi = {
+    extraConfig.modes = ["clips:rofi-cliphist"];
+    rasiConfig = [''clips { display-name: ""; }''];
+  };
 
   wayland.windowManager.hyprland.settings.bind = [
     "super+alt, v, exec, clips"

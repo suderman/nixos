@@ -1,5 +1,11 @@
 # calc
-{pkgs, ...}: {
+{
+  config,
+  pkgs,
+  ...
+}: let
+  cfg = config.programs.rofi;
+in {
   home.packages = [
     (pkgs.self.mkScript {
       name = "calc";
@@ -10,8 +16,9 @@
         "-no-show-match"
         "-no-sort"
         "-no-history"
-        "-calc-command \"echo -n '{result}' | wl-copy\""
+        # "-calc-command \"echo -n '{result}' | wl-copy\""
         "-theme-str 'window {width: 25%;}'"
+        "${toString cfg.args}"
       ];
     })
   ];
@@ -19,6 +26,8 @@
   programs.rofi = {
     plugins = [pkgs.unstable.rofi-calc];
     extraConfig.modes = ["calc"];
+    args = ["-calc-command \"echo -n '{result}' | wl-copy\""];
+    rasiConfig = [''calc { display-name: ""; }''];
   };
 
   wayland.windowManager.hyprland.settings.bind = [

@@ -1,17 +1,28 @@
-{pkgs, ...}: {
+{
+  config,
+  pkgs,
+  ...
+}: let
+  cfg = config.programs.rofi;
+in {
   programs.rofi = {
-    plugins = [pkgs.unstable.rofi-emoji];
     extraConfig = {
-      modes = ["combi" "hyprland:rofi-hyprland" "emoji"];
-      combi-modes = ["hyprland" "drun" "ssh"];
+      modes = ["combi" "hyprland:rofi-hyprland" "run"];
+      combi-modes = ["hyprland" "drun" "run"];
     };
+    rasiConfig = [
+      ''combi { display-name: ""; }''
+      ''hyprland { display-name: ""; }''
+      ''drun { display-name: "󰌧"; }''
+      ''run { display-name: ""; }''
+    ];
   };
 
   # launcher
   home.packages = [
     (pkgs.self.mkScript {
       name = "launcher";
-      text = "rofi-toggle -show combi";
+      text = "rofi-toggle -show combi ${toString cfg.args}";
     })
   ];
 

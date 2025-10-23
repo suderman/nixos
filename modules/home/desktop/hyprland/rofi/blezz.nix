@@ -1,21 +1,34 @@
 # blezz
-{pkgs, ...}: {
+{
+  config,
+  pkgs,
+  ...
+}: let
+  cfg = config.programs.rofi;
+in {
   home.packages = [
     (pkgs.self.mkScript {
       name = "blezz";
       text = toString [
         "rofi-toggle"
         "-show blezz"
-        "-blezz-config ~/.config/rofi/blezz"
-        "-blezz-directory Main"
         "-auto-select"
         "-matching normal"
         "-theme-str 'window {width: 30%;}'"
+        "${toString cfg.args}"
       ];
     })
   ];
 
-  programs.rofi.plugins = [pkgs.unstable.rofi-blezz];
+  programs.rofi = {
+    plugins = [pkgs.unstable.rofi-blezz];
+    extraConfig.modes = ["blezz"];
+    args = [
+      "-blezz-config ~/.config/rofi/blezz"
+      "-blezz-directory Main"
+    ];
+    rasiConfig = [''blezz { display-name: ""; }''];
+  };
 
   # Right Super is blezz
   wayland.windowManager.hyprland.settings = {
