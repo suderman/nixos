@@ -6,11 +6,15 @@
 }: let
   l = v: lib.mkDefault (config.lib.formats.rasi.mkLiteral v);
 in {
-  home.packages = [pkgs.papirus-icon-theme];
+  home.packages = [
+    pkgs.candy-icons
+    pkgs.papirus-icon-theme
+  ];
 
   programs.rofi = {
+    extraConfig.icon-theme = "candy-icons";
+    # extraConfig.icon-theme = "Papirus";
     font = lib.mkDefault "JetBrainsMono 14";
-    extraConfig.icon-theme = "Papirus";
     theme = {
       "*" = {
         bg0 = l "#252034E6";

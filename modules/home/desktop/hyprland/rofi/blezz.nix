@@ -39,15 +39,22 @@ in {
   xdg.configFile."rofi/blezz".text = ''
     Main:
     dir(p, Programs, window-new-symbolic)
+    dir(w, Window, window-new-symbolic)
     dir(m, Media, audio-headphones)
     dir(i, Capture, camera)
     dir(t, Toggle, applications-system)
     act(r, run, rofi -show run)
 
     Programs:
-    act(k, Kitty, kitty)
-    act(c, Chromium, chromium-browser)
-    act(f, Firefox, firefox)
+    act(k, Kitty ⌘⏎, kitty)
+    act(c, Chromium ⌘B, chromium-browser)
+    act(f, Firefox ⌘⌥B, firefox)
+
+    Window:
+    dir(f, Focus window)
+    dir(r, Resize window)
+    dir(m, Move window)
+    act(q, Quit window, hyprctl dispatch killactive)
 
     Media:
     actReload(a, Volume Down, mediactl down, audio-volume-low)
