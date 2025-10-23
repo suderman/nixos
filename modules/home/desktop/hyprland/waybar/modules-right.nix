@@ -5,17 +5,17 @@
 }: {
   programs.waybar.settings.bar = {
     modules-right = [
+      "group/tray"
       "pulseaudio"
       "group/hardware"
-      "group/tray"
       "idle_inhibitor"
       "battery"
       "custom/power"
     ];
 
     pulseaudio = {
-      format = "{volume}% {icon}";
-      format-bluetooth = "{volume}% {icon}";
+      format = "{icon} {volume}%";
+      format-bluetooth = "{icon} {volume}%";
       format-muted = "";
       format-icons = {
         headphone = "";
@@ -45,14 +45,15 @@
     "group/hardware" = {
       orientation = "inherit";
       drawer = {
-        transition-duration = 500;
+        transition-duration = 600;
         children-class = "not-power";
         transition-left-to-right = false;
+        click-to-reveal = true;
       };
       modules = [
+        "temperature"
         "cpu"
         "memory"
-        "temperature"
         "custom/bluetooth"
         "network"
       ];

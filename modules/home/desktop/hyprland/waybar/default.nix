@@ -25,6 +25,8 @@
     style = builtins.readFile ./style.css;
   };
 
+  stylix.targets.waybar.addCss = false;
+
   home.localStorePath = [
     ".config/waybar/config"
     ".config/waybar/style.css"

@@ -17,7 +17,6 @@
       format = "{icon}";
       format-icons = {
         default = "";
-        active = "󱓻";
         "1" = "1";
         "2" = "2";
         "3" = "3";

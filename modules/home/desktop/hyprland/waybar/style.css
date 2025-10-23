@@ -10,8 +10,12 @@
   font-size: 16px;
   min-height: 0;
 }
+window#waybar,
+tooltip {
+  background: alpha(@base00, 0.9);
+}
 
-#custom-launcher {
+.modules-left #custom-launcher {
   color: #ffffff;
   margin: 0px;
   padding: 5px 8px 5px 10px;
@@ -19,48 +23,48 @@
   transition: all 0.3s;
 }
 
-#custom-launcher:hover {
+.modules-left #custom-launcher:hover {
   background: rgba(21, 21, 33, 0.8);
 }
 
-#workspaces {
-  margin: 4px 10px;
-  border-radius: 5px;
+.modules-left #workspaces {
+  padding: 4px 10px;
 }
 
-#workspaces button {
-  font-size: 18px;
-  /* background-color: transparent; */
-  /* color: #b7bdf8; */
-  transition: all 0.1s ease;
-  margin: 0;
+.modules-left #workspaces button,
+.modules-left #workspaces button:hover,
+.modules-left #workspaces button.active,
+.modules-left #workspaces button.active:hover {
   padding: 5px 7px;
-  border-radius: 0;
-  /* background: rgba(21, 21, 33, 0.3); */
-  transition: padding 0.6s;
+  transition: all 0.3s ease;
 }
 
-#workspaces button.active {
-  /* background-color: rgba(183, 189, 248, 0.6); */
-  /* color: rgba(21, 21, 33, 1); */
-  /* padding: 5px 15px; */
+.modules-left #workspaces button:first-child {
+  border-radius: 10px 0 0 10px;
+}
+.modules-left #workspaces button:last-child {
+  border-radius: 0 10px 10px 0;
+}
+.modules-left #workspaces button:first-child:last-child {
+  border-radius: 10px;
 }
 
-#workspaces button:hover {
-  box-shadow: inherit;
-  text-shadow: inherit;
-  border-color: transparent;
-  /* background: rgba(21, 21, 33, 0.6); */
+.modules-left #workspaces button.active,
+.modules-left #workspaces button.active:hover {
+  background-color: @base02;
 }
 
-#workspaces button.active:hover {
-  /* background-color: rgba(183, 189, 248, 0.6); */
+.modules-left #workspaces button:hover {
+  background: alpha(@base02, 0.5);
+}
+
+.modules-center #custom-screencast.active {
+  color: @base08;
 }
 
 #window {
   font-size: 20px;
 }
-
 #custom-power {
   color: #d05759;
   margin: 0;
@@ -89,7 +93,7 @@
 
 #pulseaudio {
   margin: 0;
-  padding: 5px 20px 5px 10px;
+  padding: 5px 10px;
 }
 
 #idle_inhibitor {
@@ -115,10 +119,4 @@
 
 #custom-tray {
   margin-right: 10px;
-}
-
-.modules-left #workspaces button,
-.modules-left #workspaces button.focused,
-.modules-left #workspaces button.active {
-  border-bottom: 0px;
 }
