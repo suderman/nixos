@@ -2,7 +2,7 @@
   # Named disk devices
   # lsblk -o ID-LINK,NAME,FSTYPE,LABEL,SIZE,FSUSE%,MOUNTPOINTS --tree=ID-LINK
   dev = {
-    ssd1 = "REPLACE_WITH_SYSTEM_DISK_ID"; # system disk
+    ssd1 = "nvme-eui.002538ba11509168"; # system disk
   };
 
   # Create named disk attr if name found in disks list OR if disks is empty list
@@ -50,7 +50,7 @@ in {
     # disko disk-configuration.nix -m destroy,format,mount --arg disks '["ssd1"]'
     disk "ssd1" {
       # bios boot
-      grub = {
+      bios = {
         size = "1M";
         type = "EF02";
         priority = 1;
