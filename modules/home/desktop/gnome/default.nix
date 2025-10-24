@@ -66,45 +66,13 @@ in {
   # };
 
   config = {
-    programs.gnome-shell = {
-      enable = true;
-    };
-
-    # # Install all missing packages and extentions
-    # home.packages = let
-    #   inherit (lib) unique filter isString subtractLists;
-    #   allPkgs = unique (cfg.packages ++ cfg.dock ++ cfg.gnome-extensions);
-    #   userPkgs = filter (pkg: ! isString pkg) allPkgs;
-    #   systemPkgs = osConfig.environment.systemPackages;
-    #   # systemPkgs = [];
-    # in
-    #   subtractLists systemPkgs userPkgs;
-    #
-    # # Install all missing flatpak packages
-    # services.flatpak.packages = let
-    #   inherit (lib) unique filter isString subtractLists;
-    #   allPkgs = unique (cfg.packages ++ cfg.dock ++ cfg.gnome-extensions);
-    #   userPkgs = filter (pkg: isString pkg) allPkgs;
-    #   systemPkgs = osConfig.services.flatpak.all;
-    #   # systemPkgs = [];
-    # in
-    #   subtractLists systemPkgs userPkgs;
+    programs.gnome-shell.enable = true;
 
     # Configure dconf
-    dconf.settings = let
-      inherit (builtins) head tail toString;
-      # inherit (this.lib) appIds;
-    in {
+    dconf.settings = {
       "org/gnome/shell" = {
         disable-user-extensions = false;
-        # enabled-extensions = appIds cfg.gnome-extensions;
-        # favorite-apps = appIds cfg.dock;
       };
-
-      # "org/gnome/desktop/background" = {
-      #   picture-uri = "file://" + toString( head cfg.wallpapers );
-      #   picture-uri-dark = "file://" + toString( tail cfg.wallpapers );
-      # };
 
       # Enable fractional scaling
       "org/gnome/mutter" = {
@@ -140,22 +108,6 @@ in {
         sleep-inactive-ac-type = "nothing"; # when ac: idle means do nothing (just let screensaver lock occur)
         sleep-inactive-ac-timeout = "0"; # when ac: don't idle at all
       };
-
-      # # Keyboard Shortcuts
-      # "org/gnome/desktop/wm/keybindings" = {
-      #   activate-window-menu = "@as []";
-      #   toggle-message-tray = "@as []";
-      #   close = "['<Super>q', '<Alt>F4']";
-      #   minimize = "['<Super>comma']";
-      #   toggle-maximized = "['<Super>m']";
-      #   move-to-center = "['<Super>o']";
-      # };
-
-      # "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
-      #   name = "kitty super";
-      #   command = "kitty";
-      #   binding = "<Super>Return";
-      # };
     };
 
     persist.storage.directories = [
