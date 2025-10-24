@@ -11,17 +11,17 @@ in {
     plugins = [pkgs.unstable.hyprlandPlugins.hyprbars];
 
     settings = {
-      "plugin:hyprbars" = {
+      "plugin:hyprbars" = with config.lib.stylix.colors; {
         bar_blur = true;
         bar_button_padding = 4;
-        bar_color = "rgba(21,21,33,0.85)";
-        "col.text" = "rgba(183,189,248,0.9)";
-        bar_height = 20;
+        bar_color = "rgba(${base00-rgb-r},${base00-rgb-g},${base00-rgb-b},0.8)";
+        "col.text" = "rgba(${base05-rgb-r},${base05-rgb-g},${base05-rgb-b},0.8)";
+        bar_height = 25;
         bar_padding = 10;
         bar_part_of_window = false;
         bar_precedence_over_border = false;
-        bar_text_font = "monospace";
-        bar_text_size = "10";
+        bar_text_font = "sanserif";
+        bar_text_size = 11;
         bar_title_enabled = true;
         icon_on_hover = true;
 

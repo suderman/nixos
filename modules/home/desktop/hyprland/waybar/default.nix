@@ -7,6 +7,7 @@
       layer = "top";
       position = "top"; # or bottom
       exclusive = true;
+      height = 30;
       persistent_workspaces = {
         "1" = [];
         "2" = [];
@@ -24,14 +25,13 @@
     style = builtins.readFile ./style.css;
   };
 
-  # We'll write our own CSS
-  stylix.targets.waybar.addCss = false;
-  stylix.targets.waybar.font = "sansSerif";
+  stylix.targets.waybar.addCss = false; # we'll write our own CSS
+  stylix.targets.waybar.font = "sansSerif"; # not monospace
 
-  # Pretty animations in hyprland
-  wayland.windowManager.hyprland.settings.animations.layerrule = [
-    "animation slide, waybar"
-  ];
+  wayland.windowManager.hyprland.settings = {
+    animations.layerrule = ["animation slide, waybar"]; # slick animations
+    layerrule = ["blur,waybar"]; # blur the bar
+  };
 
   home.localStorePath = [
     ".config/waybar/config"

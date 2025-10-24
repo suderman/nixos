@@ -6,10 +6,9 @@
     ];
 
     clock = {
-      format = " {:%I:%M %p}";
-      format-alt = " {:%a %b %d, %G}";
-      # format = "{:L%A %H:%M}";
-      # format-alt = "{:L%d %B W%V %Y}";
+      format = "{:%b %d %I:%M %p}";
+      format-alt = "{:%A %d %B W%V %Y}";
+      # format-alt = " {:%a %b %d, %G}";
       interval = 60;
       align = 0;
       rotate = 0;

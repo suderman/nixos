@@ -7,113 +7,122 @@
 */
 
 * {
-  font-size: 16px;
-  min-height: 0;
+  margin: 0;
+  padding: 0;
+  color: @base05;
+  background: transparent;
+  transition: all 0.3s ease;
 }
-window#waybar,
+
+window#waybar {
+  background: alpha(@base00, 0.8);
+  border-radius: 10px 10px 0 0;
+  box-shadow: 0px -10px #000000;
+}
+
 tooltip {
-  background: alpha(@base00, 0.9);
+  background: @base01;
 }
 
 .modules-left #custom-launcher {
-  color: #ffffff;
-  margin: 0px;
-  padding: 5px 8px 5px 10px;
-  font-size: 18px;
-  transition: all 0.3s;
-}
-
-.modules-left #custom-launcher:hover {
-  background: rgba(21, 21, 33, 0.8);
+  padding-left: 10px;
+  padding-right: 8px;
+  color: @base07;
 }
 
 .modules-left #workspaces {
-  padding: 5px 10px;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
-.modules-left #workspaces button,
-.modules-left #workspaces button:hover,
-.modules-left #workspaces button.active,
-.modules-left #workspaces button.active:hover {
-  padding: 0 7px;
-  transition: all 0.3s ease;
+.modules-left #workspaces button {
+  padding-left: 5px;
+  padding-right: 5px;
+  border-radius: 0;
 }
 
 .modules-left #workspaces button:first-child {
   border-radius: 10px 0 0 10px;
 }
+
 .modules-left #workspaces button:last-child {
   border-radius: 0 10px 10px 0;
 }
+
 .modules-left #workspaces button:first-child:last-child {
   border-radius: 10px;
 }
 
 .modules-left #workspaces button.active,
 .modules-left #workspaces button.active:hover {
-  background-color: @base02;
+  background: @base02;
 }
 
 .modules-left #workspaces button:hover {
   background: alpha(@base02, 0.5);
 }
 
+.modules-center #clock {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
 .modules-center #custom-screencast.active {
   color: @base08;
 }
 
-#custom-power {
-  color: #d05759;
-  margin: 0;
-  padding: 0 10px 0 20px;
+.modules-right #custom-tray {
+  padding-right: 10px;
 }
 
-#clock {
-  margin: 0;
-  padding: 0 5px;
+.modules-right #tray {
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
-#tray {
-  margin: 0;
-  padding: 0 10px;
+.modules-right #pulseaudio {
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
-#temperature {
-  margin: 0;
-  padding: 0 10px;
+.modules-right #temperature {
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
-#cpu {
-  margin: 0;
-  padding: 0 10px;
+.modules-right #cpu {
+  padding-left: 5px;
+  padding-right: 5px;
 }
 
-#pulseaudio {
-  margin: 0;
-  padding: 0 10px;
+.modules-right #memory {
+  padding-left: 5px;
+  padding-right: 5px;
 }
 
-#idle_inhibitor {
-  margin: 0;
-  padding: 0 10px;
+.modules-right #custom-bluetooth {
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
-#custom-bluetooth {
-  margin: 0;
-  padding: 0 6px;
+.modules-right #network {
+  padding-left: 5px;
+  padding-right: 5px;
 }
 
-#network {
-  margin: 0;
-  padding: 0 10px;
+.modules-right #battery {
+  padding-left: 10px;
+  padding-right: 10px;
+  color: @base0B;
 }
 
-#battery {
-  color: #5fbf70;
-  margin: 0;
-  padding: 0 10px;
+.modules-right #idle_inhibitor {
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
-#custom-tray {
-  margin-right: 10px;
+.modules-right #custom-power {
+  padding-left: 20px;
+  padding-right: 10px;
+  color: @base09;
 }
