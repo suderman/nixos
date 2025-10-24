@@ -158,12 +158,10 @@ in {
       # };
     };
 
-    persist.directories = [
+    persist.storage.directories = [
       ".config/dconf"
-      ".config/gnome-session"
       ".config/gnome-shell"
       ".local/share/gnome-shell"
-      ".local/share/gnome-session"
       ".local/share/icons"
       ".local/share/fonts"
       ".local/share/themes"
@@ -171,6 +169,10 @@ in {
       ".config/gtk-3.0"
       ".config/gtk-4.0"
     ];
-    # tmpfiles.files = [ ".config/hypr/extra/hyprland.conf" ];
+
+    persist.scratch.directories = [
+      ".config/gnome-session"
+      ".local/share/gnome-session"
+    ];
   };
 }

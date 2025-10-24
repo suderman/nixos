@@ -35,10 +35,8 @@
   # Enable sound.
   services.pipewire.enable = true;
 
-  persist.directories = [
-    "/var/lib/AccountsService"
-    "/var/lib/gdm"
-  ];
+  persist.storage.directories = ["/var/lib/AccountsService"];
+  persist.scratch.directories = ["/var/lib/gdm"];
 
   # # Gnome has a hard-coded screenshots directory # Watch that directory for screenshots, move contents to new directory and delete old
   # # https://discourse.gnome.org/t/feature-request-change-screenshot-directory/14001/9
