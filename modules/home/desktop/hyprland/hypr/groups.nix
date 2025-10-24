@@ -1,5 +1,48 @@
-{...}: {
+{
+  config,
+  lib,
+  ...
+}: {
   wayland.windowManager.hyprland.settings = {
+    group = {
+      merge_groups_on_drag = true;
+      groupbar = with config.lib.stylix.colors; {
+        enabled = true;
+        font_size = 14; # looks like hyprbar's 11
+        font_family = "sanserif";
+        gradients = true;
+        keep_upper_gap = false;
+        height = 20;
+        gradient_rounding = 20;
+        gradient_rounding_power = "4.0";
+        gradient_round_only_edges = false;
+        rounding = 15;
+        rounding_power = "4.0";
+        round_only_edges = false;
+        gaps_in = 10;
+        gaps_out = 5;
+        render_titles = true;
+        indicator_height = 0; # 15
+        indicator_gap = 0;
+
+        # group background
+        "col.locked_active" = lib.mkForce "rgba(${base00-rgb-r},${base00-rgb-g},${base00-rgb-b},0.8)"; #b
+        "col.locked_inactive" = lib.mkForce "rgba(${base00-rgb-r},${base00-rgb-g},${base00-rgb-b},0.6)"; #b
+
+        # group foreground
+        text_color_locked_active = lib.mkForce "rgba(${base05-rgb-r},${base05-rgb-g},${base05-rgb-b},0.8)"; #a
+        text_color_locked_inactive = lib.mkForce "rgba(${base05-rgb-r},${base05-rgb-g},${base05-rgb-b},0.8)"; #a
+
+        # unlocked group background
+        "col.active" = lib.mkForce "rgba(${base05-rgb-r},${base05-rgb-g},${base05-rgb-b},0.8)"; #a-light
+        "col.inactive" = lib.mkForce "rgba(${base05-rgb-r},${base05-rgb-g},${base05-rgb-b},0.8)"; #a-light
+
+        # unlocked group foreground
+        text_color = lib.mkForce "rgba(${base00-rgb-r},${base00-rgb-g},${base00-rgb-b},0.8)"; #b
+        text_color_inactive = lib.mkForce "rgba(${base00-rgb-r},${base00-rgb-g},${base00-rgb-b},0.8)"; #b
+      };
+    };
+
     bind = [
       # Disperse group (if exists) else kill window
       "super, q, exec, hypr-togglegrouporkill"

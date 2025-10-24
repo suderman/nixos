@@ -67,6 +67,10 @@ tooltip {
   padding-right: 5px;
 }
 
+.modules-center #custom-hidden.active {
+  color: @base0D;
+}
+
 .modules-center #custom-screencast.active {
   color: @base08;
 }

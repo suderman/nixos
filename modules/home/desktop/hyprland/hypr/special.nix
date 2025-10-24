@@ -1,8 +1,8 @@
 {...}: {
   wayland.windowManager.hyprland.settings = {
     bind = [
-      # Super+p to toggle presence of floating windows on each workspace
-      "super, p, exec, hypr-togglefloatingspecial"
+      # Super+p to toggle visibility of floating windows on each workspace
+      "super, p, exec, hypr-togglefloatinghidden"
 
       # Toggle special workspace
       "super, escape, togglespecialworkspace"

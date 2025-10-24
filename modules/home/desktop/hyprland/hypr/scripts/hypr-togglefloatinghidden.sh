@@ -16,8 +16,8 @@ floats() {
 hyprctl keyword animations:enabled 0
 cmds=""
 
-# Any floats in the special workspace?
-special_floats="$(floats "special:s$workspace")"
+# Any floats in the hidden workspace?
+special_floats="$(floats "special:hidden$workspace")"
 if [[ -n "$special_floats" ]]; then
 
   # Loop all floating windows
@@ -34,9 +34,9 @@ else
   # Loop all floating windows on regular workspace
   for float in $(floats "$workspace"); do
 
-    # Focus each window and move to special workspace
+    # Focus each window and move to hidden workspace
     cmds="$cmds; dispatch focuswindow address:$float"
-    cmds="$cmds; dispatch movetoworkspacesilent special:s$workspace"
+    cmds="$cmds; dispatch movetoworkspacesilent special:hidden$workspace"
 
   done
 

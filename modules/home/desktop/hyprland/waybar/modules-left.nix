@@ -1,13 +1,15 @@
-{...}: {
+{pkgs, ...}: {
   programs.waybar.settings.bar = {
     modules-left = [
       "custom/launcher"
       "hyprland/workspaces"
     ];
+
     "custom/launcher" = {
       on-click = "launcher";
       format = "";
     };
+
     "hyprland/workspaces" = {
       on-click = "activate";
       all-outputs = false;

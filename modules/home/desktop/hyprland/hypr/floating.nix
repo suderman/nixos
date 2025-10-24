@@ -4,8 +4,8 @@
       # Focus floating windows in workspace
       "super+shift, o, cyclenext, floating"
 
-      # Set window to floating, or pin if already floating
-      "super, o, exec, hypr-floatorpin"
+      # Set window to floating (and also resize if was tiled)
+      "super, o, exec, hypr-float"
 
       # Resize active window to various presets
       "super+shift, 1, exec, hypr-resizefloating 10"
@@ -20,8 +20,10 @@
     ];
 
     bindo = [
+      # If o key held down, pin floating window
+      "super, o, pin"
+
       # Run script again if o key held down
-      "super, o, exec, hypr-floatorpin"
       "super+alt, o, exec, hypr-floatorcycle"
       "super+alt+shift, o, exec, hypr-floatorcycle reverse"
 

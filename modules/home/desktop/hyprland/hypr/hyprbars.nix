@@ -31,7 +31,7 @@ in {
         in [
           (button "" 20 "hyprctl dispatch exec hypr-togglegrouporkill") # kill
           (button "󰽤" 17 "hyprctl dispatch exec hypr-togglegrouporlock") # group
-          (button "󰔷" 18 "hyprctl dispatch exec hypr-togglespecial") # special
+          # (button "󰔷" 18 "hyprctl dispatch exec hypr-togglespecial") # special
           (button "" 17 "hyprctl dispatch exec hypr-togglefloating") # window
         ];
 

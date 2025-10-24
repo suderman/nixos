@@ -1,52 +1,13 @@
-{lib, ...}: let
-  inherit (lib) mkDefault mkForce;
-in {
+{lib, ...}: {
   wayland.windowManager.hyprland.settings = {
-    # env = [
-    #   "XCURSO_SIZE,84"
-    # ];
-
     general = {
       gaps_in = "10, 10, 5, 10";
       gaps_out = "10, 20, 20, 20";
       gaps_workspaces = 20;
       border_size = 0; # 3
-      "col.active_border" = mkDefault "rgba(89b4facc) rgba(cba6f7cc) 270deg";
-      "col.inactive_border" = mkDefault "rgba(11111b66) rgba(b4befe66) 270deg";
+      "col.active_border" = lib.mkDefault "rgba(89b4facc) rgba(cba6f7cc) 270deg";
+      "col.inactive_border" = lib.mkDefault "rgba(11111b66) rgba(b4befe66) 270deg";
       extend_border_grab_area = 40; # gaps between windows can be used for resizing
-    };
-
-    group = {
-      merge_groups_on_drag = true;
-      groupbar = {
-        enabled = true;
-        font_size = 14;
-        font_family = "monospace";
-        font_weight_active = "bold";
-        font_weight_inactive = "bold";
-        gradients = true;
-        keep_upper_gap = false;
-        height = 20;
-        gradient_rounding = 20;
-        gradient_rounding_power = "4.0";
-        gradient_round_only_edges = false;
-        rounding = 10;
-        rounding_power = "4.0";
-        round_only_edges = false;
-        gaps_in = 10;
-        gaps_out = 5;
-        render_titles = true;
-        indicator_height = 0; # 15
-        indicator_gap = 0;
-        "col.active" = mkForce "rgba(183,189,248,0.6)";
-        "col.inactive" = mkForce "rgba(183,189,248,0.6)";
-        "col.locked_active" = mkForce "rgba(21,21,33,0.85)";
-        "col.locked_inactive" = mkForce "rgba(21,21,33,0.6)";
-        text_color = mkForce "rgba(21,21,33,0.85)";
-        text_color_inactive = mkForce "rgba(21,21,33,0.85)";
-        text_color_locked_active = mkForce "rgba(183,189,248,0.9)";
-        text_color_locked_inactive = mkForce "rgba(183,189,248,0.9)";
-      };
     };
 
     misc = {
@@ -64,7 +25,7 @@ in {
         range = 20;
         render_power = 3;
         offset = "0, 3";
-        color = mkDefault "rgba(00000080)";
+        color = lib.mkDefault "rgba(00000080)";
       };
 
       dim_inactive = false;
