@@ -6,7 +6,6 @@
     settings.bar = {
       layer = "top";
       position = "top"; # or bottom
-      height = 39;
       exclusive = true;
       persistent_workspaces = {
         "1" = [];
@@ -27,6 +26,7 @@
 
   # We'll write our own CSS
   stylix.targets.waybar.addCss = false;
+  stylix.targets.waybar.font = "sansSerif";
 
   # Pretty animations in hyprland
   wayland.windowManager.hyprland.settings.animations.layerrule = [

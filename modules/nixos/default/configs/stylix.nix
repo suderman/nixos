@@ -18,9 +18,9 @@ in {
     autoEnable = mkDefault cfg.enable;
     polarity = mkDefault "either"; # dark light either
 
-    image = mkDefault (pixel "base0A");
-    # base16Scheme = mkDefault "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
-    base16Scheme = mkDefault "${pkgs.base16-schemes}/share/themes/tokyo-city-dark.yaml";
+    image = mkDefault (pixel "base00");
+    base16Scheme = mkDefault "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
+    # base16Scheme = mkDefault "${pkgs.base16-schemes}/share/themes/tokyo-city-dark.yaml";
 
     opacity = {
       applications = mkDefault 1.0;
