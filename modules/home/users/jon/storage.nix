@@ -2,37 +2,37 @@
   home.directories = {
     # Standard user directories
     XDG_DESKTOP_DIR = {
-      path = "desktop";
+      path = "Desktop";
       persist = "storage";
       sync = true;
       enable = true;
     };
     XDG_DOCUMENTS_DIR = {
-      path = "documents";
+      path = "Documents";
       persist = "storage";
       sync = true;
       enable = true;
     };
     XDG_DOWNLOAD_DIR = {
-      path = "downloads";
+      path = "Downloads";
       persist = "scratch";
       sync = false;
       enable = true;
     };
     XDG_MUSIC_DIR = {
-      path = "music";
+      path = "Music";
       persist = "storage";
       sync = true;
       enable = true;
     };
     XDG_PICTURES_DIR = {
-      path = "pictures";
+      path = "Pictures";
       persist = "storage";
       sync = true;
       enable = true;
     };
     XDG_VIDEOS_DIR = {
-      path = "movies";
+      path = "Movies";
       persist = "storage";
       sync = true;
       enable = true;
@@ -44,13 +44,13 @@
 
     # Custom user directories
     XDG_GAMES_DIR = {
-      path = "games";
+      path = "Games";
       persist = "storage";
       sync = true;
       enable = true;
     };
     XDG_NOTES_DIR = {
-      path = "notes";
+      path = "Notes";
       persist = "storage";
       sync = true;
       enable = true;
