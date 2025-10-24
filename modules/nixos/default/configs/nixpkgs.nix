@@ -7,4 +7,9 @@
     allowUnfree = true;
     nvidia.acceptLicense = true;
   };
+
+  # Temporary workaround
+  nixpkgs.config.permittedInsecurePackages = [
+    "mbedtls-2.28.10"
+  ];
 }
