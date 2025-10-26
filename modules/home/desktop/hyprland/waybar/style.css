@@ -66,14 +66,6 @@ tooltip {
   color: @base0B;
 }
 
-.modules-left #custom-fullscreen.active {
-  color: @base0B;
-}
-
-.modules-left #custom-hidden.active {
-  color: @base0D;
-}
-
 .modules-center #clock {
   padding-left: 5px;
   padding-right: 5px;
