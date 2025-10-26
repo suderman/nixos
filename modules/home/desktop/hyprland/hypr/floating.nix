@@ -26,16 +26,6 @@
       # Run script again if o key held down
       "super+alt, o, exec, hypr-floatorcycle"
       "super+alt+shift, o, exec, hypr-floatorcycle reverse"
-
-      # Toggle floating on these launcher keybinds if held down
-      "super, return, exec, hypr-floatorpin"
-      "super, y, exec, hypr-floatorpin"
-      "super, e, exec, hypr-floatorpin"
-      "super, b, exec, hypr-floatorpin"
-      "super+alt, return, exec, hypr-floatorpin"
-      "super+alt, y, exec, hypr-floatorpin"
-      "super+alt, e, exec, hypr-floatorpin"
-      "super+alt, b, exec, hypr-floatorpin"
     ];
 
     binde = [

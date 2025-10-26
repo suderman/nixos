@@ -62,6 +62,10 @@ tooltip {
   background: alpha(@base02, 0.5);
 }
 
+.modules-left #custom-windows.active {
+  color: @base0B;
+}
+
 .modules-left #custom-fullscreen.active {
   color: @base0B;
 }

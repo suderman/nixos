@@ -27,5 +27,17 @@
       # Password manager
       "super+control, period, exec, 1password"
     ];
+
+    # Toggle floating on these launcher keybinds if held down
+    bindo = [
+      "super, return, exec, hypr-float"
+      "super, y, exec, hypr-float"
+      "super, e, exec, hypr-float"
+      "super, b, exec, hypr-float"
+      "super+alt, return, exec, hypr-float"
+      "super+alt, y, exec, hypr-float"
+      "super+alt, e, exec, hypr-float"
+      "super+alt, b, exec, hypr-float"
+    ];
   };
 }
