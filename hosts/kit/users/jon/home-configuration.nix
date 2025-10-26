@@ -48,6 +48,9 @@
     dataDir = "${config.home.homeDirectory}/fenix";
   };
 
+  # Email, calendars, contacts
+  accounts.enable = true;
+
   # Record screen with nvidia's AV1 encoder
   programs.printscreen = {
     codec = "av1_nvenc";

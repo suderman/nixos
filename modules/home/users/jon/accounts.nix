@@ -2,28 +2,22 @@
   config,
   lib,
   pkgs,
-  flake,
   ...
-}: let
-  cfg = config.accounts;
-  inherit (lib) mkForce mkIf;
-  inherit (flake.lib) mkScript;
-in {
-  config = mkIf cfg.enable {
+}: {
+  config = lib.mkIf config.accounts.enable {
     # Passwords for accounts
-    age.secrets = let
-      inherit (config.home) username;
-    in {
-      fastmail.file = config.secrets.files."password-${username}-fastmail";
-      icloud.file = config.secrets.files."password-${username}-icloud";
-      gmail.file = config.secrets.files."password-${username}-gmail";
-    };
+    age.secrets.fastmail.rekeyFile = ./password-fastmail.age;
+    age.secrets.gmail.rekeyFile = ./password-gmail.age;
+    age.secrets.icloud.rekeyFile = ./password-icloud.age;
+
+    # Email addresses I've used
+    age.secrets.addresses.rekeyFile = ./addresses.age;
 
     # Configure email/calendar/contacts accounts
     # https://home-manager-options.extranix.com/?query=accounts.&release=master
     accounts = let
       # Get account password: pass fastmail|icloud|gmail
-      pass = mkScript {
+      pass = pkgs.self.mkScript {
         text = ''
           case "$@" in
             fastmail) cat ${config.age.secrets.fastmail.path};;
@@ -36,10 +30,10 @@ in {
       # This way, I only need to configure the below calendars to talk to Fastmail
       # to sync with my computers.
     in {
-      # Calendars are stored at ~/Calendars
+      # Calendars are stored at ~/.local/share/calendars
       calendar = {
-        basePath = ".";
-        accounts."Calendars" = {
+        basePath = ".local/share/calendars";
+        accounts."fastmail" = {
           primary = true;
           primaryCollection = "Personal";
           remote = {
@@ -74,10 +68,10 @@ in {
         };
       };
 
-      # Contacts are stored at ~/Contacts
+      # Contacts are stored at ~/.local/share/contacts
       contact = {
-        basePath = ".";
-        accounts."Contacts" = {
+        basePath = ".local/share/contacts";
+        accounts."fastmail" = {
           remote = {
             userName = "suderman@fastmail.com";
             passwordCommand = ["bash" "${pass}" "fastmail"];
@@ -101,10 +95,10 @@ in {
       };
 
       # Email is stored at ~/Mail
-      email.maildirBasePath = "Mail";
+      email.maildirBasePath = ".local/share/mail";
 
       # Personal email
-      email.accounts."Personal" = rec {
+      email.accounts."fastmail" = rec {
         userName = "suderman@fastmail.com";
         passwordCommand = ["bash" "${pass}" "fastmail"];
         flavor = "fastmail.com";
@@ -138,7 +132,7 @@ in {
       };
 
       # Work email
-      email.accounts."Work" = rec {
+      email.accounts."nonfiction" = rec {
         userName = "jon@nonfiction.ca";
         passwordCommand = ["bash" "${pass}" "gmail"];
         flavor = "gmail.com";
@@ -194,10 +188,10 @@ in {
     programs.qcal.enable = true;
     programs.khal = {
       enable = true;
-      package = pkgs.stable.khal; # https://github.com/NixOS/nixpkgs/pull/380358
+      package = pkgs.khal; # https://github.com/NixOS/nixpkgs/pull/380358
       settings = {
         default = {
-          default_calendar = "Personal";
+          default_calendar = "fastmail";
           # default_event_alarm = "15m";
           default_event_duration = "30m";
           highlight_event_days = true;
@@ -233,12 +227,12 @@ in {
 
     # Address book
     programs.khard.enable = true;
-    xdg.configFile."khard/khard.conf".text = mkForce ''
+    xdg.configFile."khard/khard.conf".text = lib.mkForce ''
       [addressbooks]
       [[personal]]
-      path = ${config.home.homeDirectory}/Contacts/Personal/
+      path = ${config.home.homeDirectory}/.local/share/contacts/fastmail/Personal/
       [[shared]]
-      path = ${config.home.homeDirectory}/Contacts/Shared/
+      path = ${config.home.homeDirectory}/.local/share/contacts/fastmail/Shared/
 
       [general]
       default_action=list
