@@ -62,13 +62,17 @@ tooltip {
   background: alpha(@base02, 0.5);
 }
 
+.modules-left #custom-fullscreen.active {
+  color: @base0B;
+}
+
+.modules-left #custom-hidden.active {
+  color: @base0D;
+}
+
 .modules-center #clock {
   padding-left: 5px;
   padding-right: 5px;
-}
-
-.modules-center #custom-hidden.active {
-  color: @base0D;
 }
 
 .modules-center #custom-screencast.active {
@@ -104,7 +108,7 @@ tooltip {
   padding-right: 5px;
 }
 
-.modules-right #custom-bluetooth {
+.modules-right #bluetooth {
   padding-left: 10px;
   padding-right: 10px;
 }

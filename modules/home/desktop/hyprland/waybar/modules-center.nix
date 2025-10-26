@@ -6,7 +6,6 @@
   programs.waybar.settings.bar = {
     modules-center = [
       "clock"
-      "custom/hidden"
       "custom/screencast"
     ];
 
@@ -31,33 +30,6 @@
           weekdays = "<span color='#f2e1d1'><b>{}</b></span>";
           today = "<span color='#ff8994'><b><u>{}</u></b></span>";
         };
-      };
-    };
-
-    # Counter for hidden floating windows per workspace
-    "custom/hidden" = {
-      on-click = "exec hypr-togglefloatinghidden";
-      return-type = "json";
-      exec = pkgs.self.mkScript {
-        path = with pkgs; [coreutils jq socat];
-        text =
-          # bash
-          ''
-            handle() {
-              case $1 in
-              activewindowv2\>\>*)
-                ws="special:hidden$(hyprctl activeworkspace -j | jq -r '.id')" # get hidden ws name from current ws
-                count=$(hyprctl clients -j | jq "[.[] | select(.workspace.name == \"$ws\")] | length") # count hidden windows
-                if (( count > 0 )); then
-                  echo "{\"text\": \"  \", \"tooltip\": \"$count hidden windows\", \"class\": \"active\"}"
-                else
-                  echo '{"text": ""}'
-                fi
-                ;;
-              esac
-            }
-            socat -U - UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock | while read -r line; do handle "$line"; done
-          '';
       };
     };
 
