@@ -78,6 +78,21 @@ in {
           key = "V";
           map = ["index" "pager"];
         }
+        {
+          action = "display-message";
+          key = "<return>";
+          map = ["index" "pager"];
+        }
+        {
+          action = "display-message";
+          key = "<enter>";
+          map = ["index" "pager"];
+        }
+        {
+          action = "exit";
+          key = "<return>";
+          map = ["pager"];
+        }
       ];
       extraConfig =
         ''
