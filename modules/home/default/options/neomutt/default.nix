@@ -21,6 +21,7 @@ in {
         text_flowed = "yes";
         reverse_name = "yes";
         query_command = ''"khard email --parsable '%s'"'';
+        wait_key = "no";
       };
       binds = [
         {
@@ -40,7 +41,12 @@ in {
         }
       ];
       macros = let
-        qutebrowserpipe = "cat /dev/stdin > /tmp/muttmail.html && ${pkgs.qutebrowser}/bin/qutebrowser /tmp/muttmail.html";
+        qutebrowserpipe = toString [
+          "cat /dev/stdin >/tmp/mutt.html"
+          "&&"
+          "${pkgs.qutebrowser}/bin/qutebrowser /tmp/mutt.html"
+          ">/dev/null 2>&1"
+        ];
       in [
         {
           action = "<sidebar-next><sidebar-open>";
@@ -80,7 +86,7 @@ in {
         + builtins.readFile ./colors.muttrc;
     };
 
-    # If there is a secret named emails-USERNAME, format that as a line of alternates for this user
+    # If there is a secret named addresses, format that as a line of alternates for this user
     home.activation.neomutt = let
       dir = "$HOME/.config/neomutt";
       awk = getExe pkgs.gawk;
@@ -94,6 +100,8 @@ in {
     home.shellAliases = {
       mutt = "neomutt";
     };
+
+    home.localStorePath = [".config/neomutt/neomuttrc"];
 
     xdg.desktopEntries = {
       "neomutt" = {
