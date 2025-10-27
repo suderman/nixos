@@ -79,17 +79,12 @@ in {
           map = ["index" "pager"];
         }
         {
-          action = "display-message";
+          action = "<display-message>";
           key = "<return>";
-          map = ["index" "pager"];
+          map = ["index"];
         }
         {
-          action = "display-message";
-          key = "<enter>";
-          map = ["index" "pager"];
-        }
-        {
-          action = "exit";
+          action = "<exit>";
           key = "<return>";
           map = ["pager"];
         }
