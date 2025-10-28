@@ -59,7 +59,8 @@ in {
       git = "${pkgs.git}/bin/git";
     in
       mkIf (config.home.localStorePath != []) {
-        localStoreRemove = lib.hm.dag.entryBefore ["linkGeneration"] ''rm -rf "${store}"'';
+        # localStoreRemove = lib.hm.dag.entryBefore ["linkGeneration"] ''rm -rf "${store}"'';
+        localStoreRemove = lib.hm.dag.entryBefore ["checkLinkTargets"] ''rm -rf "${store}"'';
         localStore =
           lib.hm.dag.entryAfter ["linkGeneration"]
           # bash

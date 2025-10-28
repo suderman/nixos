@@ -1,15 +1,4 @@
-{
-  lib,
-  pkgs,
-  ...
-}: let
-  init = pkgs.self.mkScript {
-    path = with pkgs; [coreutils];
-    text = lib.concatStringsSep "\n" [
-      "bounce" # Ensure portals and other systemd user services are running
-    ];
-  };
-in {
+{...}: {
   wayland.windowManager.hyprland.settings = {
     # default display
     monitor = [", preferred, 0x0, 1"];
@@ -18,7 +7,9 @@ in {
     xwayland.force_zero_scaling = true;
 
     # Execute at launch
-    exec-once = ["${init}"];
+    exec-once = [
+      "chromium --no-startup-window &" # pre-spawn browser process
+    ];
 
     input = {
       kb_layout = "us";

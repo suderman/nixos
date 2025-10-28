@@ -42,4 +42,7 @@
       crf = 45;
     };
   };
+
+  # Email, calendars, contacts
+  accounts.enable = true;
 }

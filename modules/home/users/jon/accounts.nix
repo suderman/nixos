@@ -201,7 +201,7 @@ in {
       package = pkgs.khal; # https://github.com/NixOS/nixpkgs/pull/380358
       settings = {
         default = {
-          default_calendar = "fastmail";
+          default_calendar = "calendars";
           # default_event_alarm = "15m";
           default_event_duration = "30m";
           highlight_event_days = true;
