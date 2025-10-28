@@ -3,8 +3,29 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  # Persist this directory
+  dataDir = ".local/share/accounts";
+
+  # Get account password: pass fastmail|icloud|gmail
+  pass = pkgs.self.mkScript {
+    text = ''
+      case "$@" in
+        fastmail) cat ${config.age.secrets.fastmail.path};;
+        icloud) cat ${config.age.secrets.icloud.path};;
+        gmail) cat ${config.age.secrets.gmail.path};;
+      esac
+    '';
+  };
+  # yes | vdirsyncer discover
+  # vdirsyncer sync
+  # vdirsyncer discover calendar_calendars
+  # vdirsyncer discover contacts_contacts
+in {
   config = lib.mkIf config.accounts.enable {
+    # Persist account data
+    persist.storage.directories = [dataDir];
+
     # Passwords for accounts
     age.secrets.fastmail.rekeyFile = ./password-fastmail.age;
     age.secrets.gmail.rekeyFile = ./password-gmail.age;
@@ -15,25 +36,14 @@
 
     # Configure email/calendar/contacts accounts
     # https://home-manager-options.extranix.com/?query=accounts.&release=master
-    accounts = let
-      # Get account password: pass fastmail|icloud|gmail
-      pass = pkgs.self.mkScript {
-        text = ''
-          case "$@" in
-            fastmail) cat ${config.age.secrets.fastmail.path};;
-            icloud) cat ${config.age.secrets.icloud.path};;
-            gmail) cat ${config.age.secrets.gmail.path};;
-          esac
-        '';
-      };
-      # I've configured Fastmail to syncronize shared calendars from iCloud & Gmail.
-      # This way, I only need to configure the below calendars to talk to Fastmail
-      # to sync with my computers.
-    in {
-      # Calendars are stored at ~/.local/share/calendars
+    # I've configured Fastmail to syncronize shared calendars from iCloud & Gmail.
+    # This way, I only need to configure the below calendars to talk to Fastmail
+    # to sync with my computers.
+    accounts = {
+      # Calendars are stored at ~/.local/share/accounts/calendars
       calendar = {
-        basePath = ".local/share/calendars";
-        accounts."fastmail" = {
+        basePath = dataDir;
+        accounts."calendars" = {
           primary = true;
           primaryCollection = "Personal";
           remote = {
@@ -68,10 +78,10 @@
         };
       };
 
-      # Contacts are stored at ~/.local/share/contacts
+      # Contacts are stored at ~/.local/share/accounts/contacts
       contact = {
-        basePath = ".local/share/contacts";
-        accounts."fastmail" = {
+        basePath = dataDir;
+        accounts."contacts" = {
           remote = {
             userName = "suderman@fastmail.com";
             passwordCommand = ["bash" "${pass}" "fastmail"];
@@ -94,11 +104,11 @@
         };
       };
 
-      # Email is stored at ~/Mail
-      email.maildirBasePath = ".local/share/mail";
+      # Email is stored at ~/.local/share/accounts/mail
+      email.maildirBasePath = "${dataDir}/mail";
 
       # Personal email
-      email.accounts."fastmail" = rec {
+      email.accounts."suderman" = rec {
         userName = "suderman@fastmail.com";
         passwordCommand = ["bash" "${pass}" "fastmail"];
         flavor = "fastmail.com";
@@ -227,24 +237,27 @@
 
     # Address book
     programs.khard.enable = true;
-    xdg.configFile."khard/khard.conf".text = lib.mkForce ''
-      [addressbooks]
-      [[personal]]
-      path = ${config.home.homeDirectory}/.local/share/contacts/fastmail/Personal/
-      [[shared]]
-      path = ${config.home.homeDirectory}/.local/share/contacts/fastmail/Shared/
+    xdg.configFile."khard/khard.conf".text = let
+      path = "${config.home.homeDirectory}/${dataDir}/contacts";
+    in
+      lib.mkForce ''
+        [addressbooks]
+        [[personal]]
+        path = ${path}/Personal/
+        [[shared]]
+        path = ${path}/Shared/
 
-      [general]
-      default_action=list
-      editor=nvim, -i, NONE
+        [general]
+        default_action=list
+        editor=nvim, -i, NONE
 
-      [contact table]
-      display=formatted_name
-      preferred_email_address_type=pref, work, home
-      preferred_phone_number_type=pref, cell, home
+        [contact table]
+        display=formatted_name
+        preferred_email_address_type=pref, work, home
+        preferred_phone_number_type=pref, cell, home
 
-      [vcard]
-      private_objects=Jabber, Skype, Twitter
-    '';
+        [vcard]
+        private_objects=Jabber, Skype, Twitter
+      '';
   };
 }
