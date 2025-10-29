@@ -8,8 +8,8 @@
 }: let
   cfg = config.programs.chromium;
   inherit (lib) mkIf mkOption types;
-  inherit (config.services.keyd.lib) mkClass;
-  inherit (config.programs.chromium.lib) switches;
+  inherit (config.lib.keyd) mkClass;
+  inherit (config.lib.chromium) switches;
 
   # home-manager module expects this default directory
   dataDir = ".config/chromium";

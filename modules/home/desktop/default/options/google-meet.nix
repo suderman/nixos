@@ -7,7 +7,10 @@
 }: let
   cfg = config.programs.google-meet;
   inherit (lib) mkIf mkOption options types;
-  inherit (config.programs.chromium.lib) mkClass mkWebApp;
+  class = config.lib.chromium.mkClass {
+    inherit (cfg) url profile;
+    keydify = true;
+  };
 in {
   options.programs.google-meet = {
     enable = options.mkEnableOption "google-meet";
@@ -22,13 +25,11 @@ in {
   };
 
   config = mkIf cfg.enable {
-    services.keyd.windows = {
-      "${mkClass cfg.url}" = {
-        "super.[" = "A-left"; # back
-        "super.]" = "A-right"; # forward
-      };
+    services.keyd.windows."${class}" = {
+      "super.[" = "A-left"; # back
+      "super.]" = "A-right"; # forward
     };
-    xdg.desktopEntries = mkWebApp {
+    xdg.desktopEntries = config.lib.chromium.mkWebApp {
       name = "Google Meet";
       inherit (cfg) url profile;
       icon =

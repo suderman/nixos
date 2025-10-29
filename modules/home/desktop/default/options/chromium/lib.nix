@@ -69,20 +69,23 @@
   #    with keydify: https://example.com --> chrome-example-com-default
   mkClass = arg: let
     inherit (builtins) isString;
-    inherit (lib) removePrefix removeSuffix replaceStrings;
-    toKeydClass = config.services.keyd.lib.mkClass;
+    inherit (lib) hasPrefix removePrefix removeSuffix replaceStrings;
+    toKeydClass = config.lib.keyd.mkClass;
     toClass = {
       url,
       profile ? null,
       keydify ? false,
     }: let
-      removeProtocols = url: removePrefix "http://" (removePrefix "https://" url);
-      removeSlashes = url: replaceStrings ["/"] ["."] (removeSuffix "/" url);
+      removeProtocols = url: removePrefix "file://" (removePrefix "http://" (removePrefix "https://" url));
+      removeSlashes = url: replaceStrings ["/"] ["_"] (removeSuffix "/" url);
       suffix =
         if isString profile
         then "-Profile.${profile}"
         else "-Default";
-      class = "chrome-${removeSlashes (removeProtocols url)}__${suffix}";
+      class =
+        if hasPrefix "file://" url
+        then "chrome-_${removeSlashes (removeProtocols url)}${suffix}"
+        else "chrome-${removeSlashes (removeProtocols url)}__${suffix}";
     in
       if keydify == true
       then (toKeydClass class)
@@ -127,9 +130,7 @@
     };
   };
 in {
-  options.programs.chromium.lib = mkOption {
-    type = types.anything;
-    default = {inherit mkClass mkWebApp switches;};
-    readOnly = true;
+  lib.chromium = {
+    inherit mkClass mkWebApp switches;
   };
 }

@@ -8,7 +8,7 @@
 }: let
   cfg = config.programs.gimp;
   inherit (lib) mkIf;
-  inherit (config.services.keyd.lib) mkClass;
+  inherit (config.lib.keyd) mkClass;
 
   # Window class name
   class = "gimp-3.0";

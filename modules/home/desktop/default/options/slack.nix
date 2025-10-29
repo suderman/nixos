@@ -7,7 +7,7 @@
 }: let
   cfg = config.programs.slack;
   inherit (lib) mkIf;
-  inherit (config.services.keyd.lib) mkClass;
+  inherit (config.lib.keyd) mkClass;
 
   # Window class name
   class = "slack";

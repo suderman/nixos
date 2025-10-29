@@ -6,7 +6,7 @@
   ...
 }: let
   cfg = config.programs.neomutt;
-  inherit (lib) getExe hasAttr mkIf;
+  inherit (lib) getExe mkIf;
 in {
   config = mkIf cfg.enable {
     programs.neomutt = {
@@ -56,20 +56,7 @@ in {
         }
       ];
 
-      macros = let
-        qutebrowserpipe = toString [
-          "cat /dev/stdin >/tmp/mutt.html"
-          "&&"
-          "${pkgs.qutebrowser}/bin/qutebrowser /tmp/mutt.html"
-          ">/dev/null 2>&1"
-        ];
-        browserpipe = toString [
-          "cat /dev/stdin >/tmp/mutt.html"
-          "&&"
-          "chromium --app=\"file:///tmp/mutt.html\""
-          ">/dev/null 2>&1"
-        ];
-      in [
+      macros = [
         {
           action = "<sidebar-next><sidebar-open>";
           key = "J";
@@ -85,29 +72,9 @@ in {
           key = "A";
           map = ["index" "pager"];
         }
-        # {
-        #   action = "<pipe-entry>${browserpipe}<enter><exit>";
-        #   key = "V";
-        #   map = ["attach"];
-        # }
         {
           action = "<pipe-message>${pkgs.urlscan}/bin/urlscan<enter><exit>";
           key = "F";
-          map = ["pager"];
-        }
-        {
-          action = "<view-attachments><search>html<enter><pipe-entry>${browserpipe}<enter><exit>";
-          key = "V";
-          map = ["index" "pager"];
-        }
-        {
-          action = "<display-message>";
-          key = "<return>";
-          map = ["index"];
-        }
-        {
-          action = "<exit>";
-          key = "<return>";
           map = ["pager"];
         }
       ];
@@ -134,28 +101,5 @@ in {
     };
 
     home.localStorePath = [".config/neomutt/neomuttrc"];
-
-    xdg.desktopEntries = {
-      "neomutt" = {
-        name = "NeoMutt";
-        genericName = "Email Client";
-        icon = "mutt";
-        terminal = true;
-        categories = ["Network" "Email" "ConsoleOnly"];
-        type = "Application";
-        mimeType = ["x-scheme-handler/mailto"];
-      };
-    };
-
-    xdg.mimeApps.defaultApplications = {
-      "x-scheme-handler/mailto" = "neomutt.desktop";
-    };
-
-    wayland.windowManager.hyprland.settings.windowrule = let
-      class = "chrome-__tmp_mutt.html-Default";
-    in [
-      "float, class:${class}"
-      "size 650 850, class:${class}"
-    ];
   };
 }

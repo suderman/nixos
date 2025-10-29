@@ -7,7 +7,10 @@
 }: let
   cfg = config.programs.gmail;
   inherit (lib) mkIf mkOption options types;
-  inherit (config.programs.chromium.lib) mkClass mkWebApp;
+  class = config.lib.chromium.mkClass {
+    inherit (cfg) url profile;
+    keydify = true;
+  };
 in {
   options.programs.gmail = {
     enable = options.mkEnableOption "gmail";
@@ -22,13 +25,11 @@ in {
   };
 
   config = mkIf cfg.enable {
-    services.keyd.windows = {
-      "${mkClass cfg.url}" = {
-        "super.[" = "A-left"; # back
-        "super.]" = "A-right"; # forward
-      };
+    services.keyd.windows."${class}" = {
+      "super.[" = "A-left"; # back
+      "super.]" = "A-right"; # forward
     };
-    xdg.desktopEntries = mkWebApp {
+    xdg.desktopEntries = config.lib.chromium.mkWebApp {
       inherit (cfg) url profile;
       name = "Gmail";
       icon =

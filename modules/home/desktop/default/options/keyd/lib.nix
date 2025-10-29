@@ -4,7 +4,7 @@
   ...
 }: let
   cfg = config.services.keyd;
-  inherit (lib) mkOption removePrefix removeSuffix replaceStrings toLower types;
+  inherit (lib) removePrefix removeSuffix replaceStrings toLower;
 
   # Create window class name from hyprland string to what keyd-application-mapper makes:
   # 427 def normalize_class(s):
@@ -19,9 +19,7 @@
   in
     toLower strTrimmed;
 in {
-  options.services.keyd.lib = mkOption {
-    type = types.anything;
-    readOnly = true;
-    default = {inherit mkClass;};
+  lib.keyd = {
+    inherit mkClass;
   };
 }

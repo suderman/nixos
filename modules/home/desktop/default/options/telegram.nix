@@ -7,7 +7,7 @@
 }: let
   cfg = config.programs.telegram;
   inherit (lib) mkIf;
-  inherit (config.services.keyd.lib) mkClass;
+  inherit (config.lib.keyd) mkClass;
 
   # Window class name
   class = "org.telegram.desktop";

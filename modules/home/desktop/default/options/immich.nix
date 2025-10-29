@@ -7,7 +7,10 @@
 }: let
   cfg = config.programs.immich;
   inherit (lib) mkIf mkOption options types;
-  inherit (config.programs.chromium.lib) mkClass mkWebApp;
+  class = config.lib.chromium.mkClass {
+    inherit (cfg) url profile;
+    keydify = true;
+  };
 in {
   options.programs.immich = {
     enable = options.mkEnableOption "immich";
@@ -15,13 +18,15 @@ in {
       type = types.str;
       default = "http://immich";
     };
+    profile = mkOption {
+      type = with lib.types; nullOr str;
+      default = null;
+    };
   };
 
   config = mkIf cfg.enable {
     # Keyboard shortcuts
-    services.keyd.windows = {
-      "${mkClass cfg.url}" = {};
-    };
+    services.keyd.windows."${class}" = {};
 
     # cli upload tools
     home.packages = with pkgs; [
@@ -30,7 +35,7 @@ in {
     ];
 
     # Web App
-    xdg.desktopEntries = mkWebApp {
+    xdg.desktopEntries = config.lib.chromium.mkWebApp {
       name = "Immich";
       inherit (cfg) url;
       icon =

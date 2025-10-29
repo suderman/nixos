@@ -7,7 +7,10 @@
 }: let
   cfg = config.programs.home-assistant;
   inherit (lib) mkIf mkOption options types;
-  inherit (config.programs.chromium.lib) mkClass mkWebApp;
+  class = config.lib.chromium.mkClass {
+    inherit (cfg) url profile;
+    keydify = true;
+  };
 in {
   options.programs.home-assistant = {
     enable = options.mkEnableOption "home-assistant";
@@ -15,16 +18,18 @@ in {
       type = types.str;
       default = "http://hass";
     };
+    profile = mkOption {
+      type = with lib.types; nullOr str;
+      default = null;
+    };
   };
 
   config = mkIf cfg.enable {
     # Keyboard shortcuts
-    services.keyd.windows = {
-      "${mkClass cfg.url}" = {};
-    };
+    services.keyd.windows."${class}" = {};
 
     # Web App
-    xdg.desktopEntries = mkWebApp {
+    xdg.desktopEntries = config.lib.chromium.mkWebApp {
       name = "Home Assistant";
       inherit (cfg) url;
       icon =

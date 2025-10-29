@@ -9,7 +9,7 @@
   cfg = config.programs.firefox;
   inherit (lib) mkIf;
   inherit (flake.lib) ls;
-  inherit (config.services.keyd.lib) mkClass;
+  inherit (config.lib.keyd) mkClass;
 
   # Window class name
   class = "firefox";

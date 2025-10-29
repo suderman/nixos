@@ -7,7 +7,7 @@
 }: let
   cfg = config.programs.imv;
   inherit (lib) mkIf;
-  inherit (config.services.keyd.lib) mkClass;
+  inherit (config.lib.keyd) mkClass;
   class = "imv";
 in {
   config = mkIf cfg.enable {

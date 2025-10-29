@@ -8,7 +8,10 @@
 }: let
   cfg = config.programs.jellyfin;
   inherit (lib) mkIf mkOption options types;
-  inherit (config.programs.chromium.lib) mkClass mkWebApp;
+  class = config.lib.chromium.mkClass {
+    inherit (cfg) url profile;
+    keydify = true;
+  };
 in {
   options.programs.jellyfin = {
     enable = options.mkEnableOption "jellyfin";
@@ -16,11 +19,15 @@ in {
       type = types.str;
       default = "http://jellyfin";
     };
+    profile = mkOption {
+      type = with lib.types; nullOr str;
+      default = null;
+    };
   };
 
   config = mkIf cfg.enable {
     # Web App
-    xdg.desktopEntries = mkWebApp {
+    xdg.desktopEntries = config.lib.chromium.mkWebApp {
       name = "Jellyfin";
       inherit (cfg) url;
       icon = pkgs.writeText "jellyfin.svg" ''
@@ -39,11 +46,9 @@ in {
     };
 
     # Keyboard shortcuts
-    services.keyd.windows = {
-      "${mkClass cfg.url}" = {
-        "super.[" = "A-left"; # back
-        "super.]" = "A-right"; # forward
-      };
+    services.keyd.windows."${class}" = {
+      "super.[" = "A-left"; # back
+      "super.]" = "A-right"; # forward
     };
   };
 }

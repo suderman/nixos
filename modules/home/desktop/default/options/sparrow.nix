@@ -8,7 +8,7 @@
 }: let
   cfg = config.programs.sparrow;
   inherit (lib) mkIf mkOption types getExe;
-  inherit (config.services.keyd.lib) mkClass;
+  inherit (config.lib.keyd) mkClass;
   dataDir = ".config/sparrow";
 
   # Window class name

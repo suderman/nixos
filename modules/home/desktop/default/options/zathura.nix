@@ -6,7 +6,7 @@
 }: let
   cfg = config.programs.zathura;
   inherit (lib) mkIf;
-  inherit (config.services.keyd.lib) mkClass;
+  inherit (config.lib.keyd) mkClass;
   class = "org.pwmt.zathura";
 in {
   config = mkIf cfg.enable {

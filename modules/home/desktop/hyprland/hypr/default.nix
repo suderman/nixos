@@ -19,7 +19,7 @@
   home.localStorePath = [".config/hypr/hyprland.conf"];
 
   # Temporarily pause autoreload during activation
-  home.activation.localStoreHyprland = lib.hm.dag.entryBefore ["linkGeneration"] ''
+  home.activation.localStoreHyprland = lib.hm.dag.entryBefore ["checkLinkTargets"] ''
     conf="${config.home.homeDirectory}/.config/hypr/hyprland.conf"
     if [ -L "$conf" ]; then
       echo "misc:disable_autoreload=true" >> "$conf" 2>/dev/null || true

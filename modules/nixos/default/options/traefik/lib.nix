@@ -385,4 +385,7 @@ in {
     readOnly = true;
     default = {inherit mkHostName mkHostNames mkService mkMiddleware mkRouter mkLabels mkAlias;};
   };
+  config.lib.traefik = {
+    inherit mkHostName mkHostNames mkService mkMiddleware mkRouter mkLabels mkAlias;
+  };
 }
