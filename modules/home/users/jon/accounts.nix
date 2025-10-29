@@ -158,7 +158,7 @@ in {
           showSignature = "append";
           text = ''
             ${realName}
-            https://nonfiction.ca
+            https://www.nonfiction.ca
           '';
         };
         mbsync = {
@@ -168,7 +168,7 @@ in {
         };
         neomutt = {
           enable = true;
-          extraMailboxes = ["Archive" "Drafts" "Sent" "Trash"];
+          extraMailboxes = ["[Gmail]/All Mail" "[Gmail]/Drafts" "[Gmail]/Important"];
         };
         notmuch.enable = true;
         msmtp.enable = true;
