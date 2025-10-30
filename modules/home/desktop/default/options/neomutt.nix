@@ -62,12 +62,12 @@ in {
     programs.neomutt.macros = [
       {
         action = "<view-attachments><search>html<enter><pipe-entry>${pager.pipe}<enter><exit>";
-        key = "V";
+        key = "p";
         map = ["index" "pager"];
       }
       {
         action = "<pipe-entry>${pager.pipe}<enter><exit>";
-        key = "V";
+        key = "p";
         map = ["attach"];
       }
     ];
@@ -90,7 +90,7 @@ in {
     wayland.windowManager.hyprland.settings.windowrule = [
       "float, class:${pager.class}"
       "size 800 900, class:${pager.class}"
-      "animation popin, class:${pager.class}"
+      "animation gnomed, class:${pager.class}"
     ];
 
     services.keyd.windows."${config.lib.keyd.mkClass pager.class}" = {

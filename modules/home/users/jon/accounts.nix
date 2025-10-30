@@ -115,12 +115,6 @@ in {
         primary = true;
         realName = "Jon Suderman";
         address = "jon@suderman.net";
-        folders = {
-          inbox = "Inbox";
-          drafts = "Drafts";
-          sent = "Sent";
-          trash = "Trash";
-        };
         signature = {
           showSignature = "append";
           text = ''
@@ -128,14 +122,29 @@ in {
             https://suderman.net
           '';
         };
+        neomutt = {
+          enable = true;
+          mailboxName = "=== suderman ===";
+          extraMailboxes = [
+            "Inbox"
+            "Archive"
+            "Spam"
+            "Trash"
+            "Drafts"
+            "Sent"
+          ];
+        };
         mbsync = {
           enable = true;
           create = "maildir";
           expunge = "both";
         };
-        neomutt = {
+        imapnotify = {
           enable = true;
-          extraMailboxes = ["Archive" "Drafts" "Sent" "Trash"];
+          boxes = ["Inbox"];
+          onNotifyPost = ''
+            ${pkgs.libnotify}/bin/notify-send "New mail arrived."
+          '';
         };
         notmuch.enable = true;
         msmtp.enable = true;
@@ -148,12 +157,6 @@ in {
         flavor = "gmail.com";
         realName = "Jon Suderman";
         address = "jon@nonfiction.ca";
-        folders = {
-          inbox = "Inbox";
-          drafts = "Drafts";
-          sent = "Sent";
-          trash = "Trash";
-        };
         signature = {
           showSignature = "append";
           text = ''
@@ -161,14 +164,68 @@ in {
             https://www.nonfiction.ca
           '';
         };
+        neomutt = {
+          enable = true;
+          mailboxName = "=== nonfiction ===";
+          extraMailboxes = [
+            "Inbox"
+            "Archive"
+            "Spam"
+            "Trash"
+            "Drafts"
+            "Sent"
+          ];
+          extraConfig = "set copy = no"; # Gmail already stores a copy
+        };
         mbsync = {
           enable = true;
           create = "maildir";
           expunge = "both";
+          groups.nonfiction.channels = {
+            Inbox = {
+              farPattern = "INBOX";
+              nearPattern = "Inbox";
+              extraConfig.Create = "Near";
+              extraConfig.Expunge = "Both";
+            };
+            Archive = {
+              farPattern = "Archived Mail"; # must create this label in Gmail
+              nearPattern = "Archive";
+              extraConfig.Create = "Both";
+              extraConfig.Expunge = "Both";
+            };
+            Junk = {
+              farPattern = "[Gmail]/Spam";
+              nearPattern = "Spam";
+              extraConfig.Create = "Near";
+              extraConfig.Expunge = "Both";
+            };
+            Trash = {
+              farPattern = "[Gmail]/Trash";
+              nearPattern = "Trash";
+              extraConfig.Create = "Near";
+              extraConfig.Expunge = "Both";
+            };
+            Drafts = {
+              farPattern = "[Gmail]/Drafts";
+              nearPattern = "Drafts";
+              extraConfig.Create = "Near";
+              extraConfig.Expunge = "Both";
+            };
+            Sent = {
+              farPattern = "[Gmail]/Sent Mail";
+              nearPattern = "Sent";
+              extraConfig.Create = "Near";
+              extraConfig.Expunge = "Both";
+            };
+          };
         };
-        neomutt = {
+        imapnotify = {
           enable = true;
-          extraMailboxes = ["[Gmail]/All Mail" "[Gmail]/Drafts" "[Gmail]/Important"];
+          boxes = ["Inbox"];
+          onNotifyPost = ''
+            ${pkgs.libnotify}/bin/notify-send "New mail arrived."
+          '';
         };
         notmuch.enable = true;
         msmtp.enable = true;
@@ -259,5 +316,12 @@ in {
         [vcard]
         private_objects=Jabber, Skype, Twitter
       '';
+
+    # Ensure 'createMaildir' runs after 'linkGeneration'
+    home.activation.createMaildir = lib.mkForce (lib.hm.dag.entryAfter ["linkGeneration"] ''
+      run mkdir -m700 -p $VERBOSE_ARG ${
+        lib.concatStringsSep " " (lib.mapAttrsToList (_: v: v.maildir.absPath) config.accounts.email.accounts)
+      }
+    '');
   };
 }
