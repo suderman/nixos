@@ -22,6 +22,7 @@ in {
         reverse_name = "yes";
         query_command = ''"khard email --parsable '%s'"'';
         wait_key = "no";
+        mailcap_path = "${config.home.homeDirectory}/.config/neomutt/mailcap";
       };
       binds = [
         {
@@ -127,6 +128,44 @@ in {
         color sidebar_new       color10 default   # Mailboxes with new mail are Green
       '';
     };
+
+    home.file.".config/neomutt/mailcap".text = let
+      convert-to-md = "${pkgs.writeShellScriptBin "print_html2md.sh"
+        ''
+          ${pkgs.python3Packages.html2text}/bin/html2text "$1" | ${pkgs.glow}/bin/glow -
+        ''}/bin/print_html2md.sh";
+
+      importcal-bin = "${pkgs.writeShellScriptBin "print_and_import_cal.sh"
+        ''
+          if [[ -f $1 ]]; then
+            resp=$(echo -e "yes\nno" | rofi -i -only-match -dmenu -p "Would you like to add the event:" -mesg "`khal printics -f "{title} - {start-long} → {end-long} - {location}" $1 | tail -n +2`")
+
+            if [[ "$resp" == "yes" ]]; then
+              calendar=$(echo "`khal printcalendars`" | rofi -i -only-match -dmenu -p "Save to:")
+              if [ -z "$calendar" ]; then
+                exit;
+              fi
+              khal import -a "$calendar" --batch $1 && \
+              dunstify "Calendar" "Event added to $calendar";
+            fi
+          fi
+        ''}/bin/print_and_import_cal.sh";
+      zathura-bin = "${pkgs.zathura}/bin/zathura";
+      icat = "${pkgs.writeShellScriptBin "icat.sh"
+        ''
+          kitty +kitten icat "$1"
+          read -n 1 -s -r -p "Press any key to continue"
+        ''}/bin/icat.sh";
+    in
+      # image/*; ${pkgs.kitty}/bin/kitty +kitten icat '%s'; copiousoutput
+      ''
+        text/html; ${convert-to-md} '%s'; copiousoutput
+        image/*; ${icat} %s
+        application/pdf; ${zathura-bin} '%s'; test=test -n "$DISPLAY"
+        application/x-pdf; ${zathura-bin} '%s'; test=test -n "$DISPLAY"
+        application/ics; ${importcal-bin} '%s'; test=test -n "$DISPLAY"
+        text/calendar; ${importcal-bin} '%s'; test=test -n "$DISPLAY"
+      '';
 
     # If there is a secret named addresses, format that as a line of alternates for this user
     home.activation.neomutt = let
