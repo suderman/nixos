@@ -12,24 +12,54 @@ in {
     programs.neomutt = {
       vimKeys = true;
       checkStatsInterval = 60;
+      unmailboxes = false;
       sidebar = {
         enable = true;
         width = 30;
       };
       settings = {
+        # sidebar_visible = "no";
+        abort_key = "<Esc>";
         mark_old = "no";
         text_flowed = "yes";
         reverse_name = "yes";
         query_command = ''"khard email --parsable '%s'"'';
         wait_key = "no";
+        folder = config.accounts.email.maildirBasePath;
         mailcap_path = "${config.home.homeDirectory}/.config/neomutt/mailcap";
 
+        edit_headers = "yes"; # show headers when composing
+        fast_reply = "yes"; # skip to compose when replying
+        forward_format = ''"Fwd: %s"''; # format of subject when forwarding
+        help = "no";
+
+        menu_context = "50";
+        pager_context = "7"; # still figuring out this one
+        pager_index_lines = "7"; # number of line's in pager's mini index
+        pager_read_delay = "1"; # cound 1 second before marking as read
+        pager_stop = "yes"; # prevent page-down from skipping to the next message
+        markers = "no"; # supress + marker at beginning of wrapped lines
+        tilde = "yes"; # pad pager lines at bottom of screen with ~
+
+        status_chars = " *%A";
+        status_format = ''"[ Folder: %f ] [%r%m messages%?n? (%n new)?%?d? (%d to delete)?%?t? (%t tagged)? ]%>─%?p?( %p postponed )?"'';
+        date_format = ''"%d.%m.%Y %H:%M"'';
+        sort = "threads";
+        sort_aux = "reverse-last-date-received";
         use_threads = "threads";
-        sort = "reverse-last-date-received"; # Primary: newest thread activity on top
-        sort_aux = "date"; # Secondary: oldest-first within threads
+        reply_regexp = ''"^(([Rr][Ee]?(\[[0-9]+\])?: *)?(\[[^]]+\] *)?)*"'';
+        quote_regexp = ''"^( {0,4}[>|:#%]| {0,4}[a-z0-9]+[>|]+)+"'';
+        send_charset = "utf-8:iso-8859-1:us-ascii";
+        charset = "utf-8";
 
         mime_forward = "no";
         forward_attachments = "yes";
+
+        menu_scroll = "yes"; # scroll menues by 1 line instead of whole page
+
+        # The format for the pager status line.
+        # default: " -%Z- %C/%m: %-20.20n   %s%*  -- (%P) "
+        pager_format = "\" %C - %[%H:%M] %.20v, %s%* %?H? [%H] ?\"";
       };
 
       binds = [
@@ -40,7 +70,7 @@ in {
         }
         {
           map = ["index" "pager"];
-          key = "L";
+          key = "R";
           action = "group-reply";
         }
         {
@@ -49,98 +79,180 @@ in {
           action = "toggle-new";
         }
         {
-          map = ["index"];
-          key = "l";
-          action = "display-message";
-        }
-        {
-          map = ["attach"];
-          key = "l";
-          action = "view-attach";
-        }
-        {
-          map = ["pager" "attach"];
-          key = "h";
-          action = "exit";
+          map = ["pager"];
+          key = "n";
+          action = "next-thread";
         }
         {
           map = ["pager"];
-          key = "l";
-          action = "view-attachments";
+          key = "p";
+          action = "previous-thread";
         }
+        # View the raw contents of a message.
         {
-          map = ["index"];
-          key = "h";
-          action = "noop";
+          action = "view-raw-message";
+          key = "Z";
+          map = [
+            "index"
+            "pager"
+          ];
         }
       ];
 
       macros = [
         {
           action = "<sidebar-next><sidebar-open>";
-          key = "J";
+          key = "]";
           map = ["index" "pager"];
         }
         {
           action = "<sidebar-prev><sidebar-open>";
-          key = "K";
+          key = "[";
           map = ["index" "pager"];
         }
         {
           action = ":set confirmappend=no\\n<save-message>+Archive<enter>:set confirmappend=yes\\n";
-          key = "A";
+          key = "e";
           map = ["index" "pager"];
         }
         {
           action = "<pipe-message>${pkgs.urlscan}/bin/urlscan<enter><exit>";
-          key = "F";
+          key = "U";
           map = ["pager"];
         }
       ];
       extraConfig = ''
         source alternates
-        auto_view = text/html image/*
+        source 1-index
 
-        color normal      default default         # Text is "Text"
-        color index       color2 default ~N       # New Messages are Green
-        color index       color1 default ~F       # Flagged messages are Red
-        color index       color13 default ~T      # Tagged Messages are Red
-        color index       color1 default ~D       # Messages to delete are Red
-        color attachment  color5 default          # Attachments are Pink
-        color signature   color8 default          # Signatures are Surface 2
-        color search      color4 default          # Highlighted results are Blue
+        auto_view = text/html text/plain text/calendar image/*
+        unalternative_order text/enriched text/plain text
+        alternative_order text/calendar application/ics
+        alternative_order text/html text/markdown
+        alternative_order text/enriched text/plain text
 
-        color indicator   default color8          # currently highlighted message Surface 2=Background Text=Foreground
-        color error       color1 default          # error messages are Red
-        color status      color15 default         # status line "Subtext 0"
-        color tree        color15 default         # thread tree arrows Subtext 0
-        color tilde       color15 default         # blank line padding Subtext 0
+        # Only show the basic mail headers.
+        ignore *
+        unignore From To Cc Bcc Date Subject
 
-        color hdrdefault  color13 default         # default headers Pink
-        color header      color13 default "^From:"
-        color header      color13 default "^Subject:"
+        # Show headers in the following order.
+        unhdr_order *
+        hdr_order From: To: Cc: Bcc: Date: Subject:
 
-        color quoted      color15 default         # Subtext 0
-        color quoted1     color7 default          # Subtext 1
-        color quoted2     color8 default          # Surface 2
-        color quoted3     color0 default          # Surface 1
-        color quoted4     color0 default
-        color quoted5     color0 default
 
-        color body color2 default [\-\.+_a-zA-Z0-9]+@[\-\.a-zA-Z0-9]+               # email addresses Green
-        color body color2 default (https?|ftp)://[\-\.,/%~_:?&=\#a-zA-Z0-9]+        # URLs Green
-        color body color4 default (^|[[:space:]])\\*[^[:space:]]+\\*([[:space:]]|$) # *bold* text Blue
-        color body color4 default (^|[[:space:]])_[^[:space:]]+_([[:space:]]|$)     # _underlined_ text Blue
-        color body color4 default (^|[[:space:]])/[^[:space:]]+/([[:space:]]|$)     # /italic/ text Blue
+        # ----------------------------------------------
+        # Header colors:
+        color header blue default ".*"
+        color header brightmagenta default "^(From)"
+        color header brightcyan default "^(Subject)"
+        color header brightwhite default "^(CC|BCC)"
 
-        color sidebar_flagged   color1 default    # Mailboxes with flagged mails are Red
-        color sidebar_new       color10 default   # Mailboxes with new mail are Green
+        mono bold bold
+        mono underline underline
+        mono indicator reverse
+        mono error bold
+        color normal default default
+        color indicator brightblack cyan
+        color sidebar_highlight brightblack cyan
+        color sidebar_indicator brightblack cyan
+        color sidebar_divider brightblack black
+        color sidebar_flagged red black
+        color sidebar_new cyan black
+        color normal brightyellow default
+        color error red default
+        color tilde black default
+        color message cyan default
+        color markers red white
+        color attachment white default
+        color search brightmagenta default
+        color status brightyellow black
+        color hdrdefault brightgreen default
+        color quoted green default
+        color quoted1 blue default
+        color quoted2 cyan default
+        color quoted3 yellow default
+        color quoted4 red default
+        color quoted5 brightred default
+        color signature brightgreen default
+        color bold black default
+        color underline black default
+        color normal default default
+
+        color body brightred default "[\-\.+_a-zA-Z0-9]+@[\-\.a-zA-Z0-9]+" # Email addresses
+        color body brightblue default "(https?|ftp)://[\-\.,/%~_:?&=\#a-zA-Z0-9]+" # URL
+        color body green default "\`[^\`]*\`" # Green text between ` and `
+        color body brightblue default "^# \.*" # Headings as bold blue
+        color body brightcyan default "^## \.*" # Subheadings as bold cyan
+        color body brightgreen default "^### \.*" # Subsubheadings as bold green
+        color body yellow default "^(\t| )*(-|\\*) \.*" # List items as yellow
+        color body brightcyan default "[;:][-o][)/(|]" # emoticons
+        color body brightcyan default "[;:][)(|]" # emoticons
+        color body brightcyan default "[ ][*][^*]*[*][ ]?" # more emoticon?
+        color body brightcyan default "[ ]?[*][^*]*[*][ ]" # more emoticon?
+        color body red default "(BAD signature)"
+        color body cyan default "(Good signature)"
+        color body brightblack default "^gpg: Good signature .*"
+        color body brightyellow default "^gpg: "
+        color body brightyellow red "^gpg: BAD signature from.*"
+        mono body bold "^gpg: Good signature"
+        mono body bold "^gpg: BAD signature from.*"
+        color body red default "([a-z][a-z0-9+-]*://(((([a-z0-9_.!~*'();:&=+$,-]|%[0-9a-f][0-9a-f])*@)?((([a-z0-9]([a-z0-9-]*[a-z0-9])?)\\.)*([a-z]([a-z0-9-]*[a-z0-9])?)\\.?|[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)(:[0-9]+)?)|([a-z0-9_.!~*'()$,;:@&=+-]|%[0-9a-f][0-9a-f])+)(/([a-z0-9_.!~*'():@&=+$,-]|%[0-9a-f][0-9a-f])*(;([a-z0-9_.!~*'():@&=+$,-]|%[0-9a-f][0-9a-f])*)*(/([a-z0-9_.!~*'():@&=+$,-]|%[0-9a-f][0-9a-f])*(;([a-z0-9_.!~*'():@&=+$,-]|%[0-9a-f][0-9a-f])*)*)*)?(\\?([a-z0-9_.!~*'();/?:@&=+$,-]|%[0-9a-f][0-9a-f])*)?(#([a-z0-9_.!~*'();/?:@&=+$,-]|%[0-9a-f][0-9a-f])*)?|(www|ftp)\\.(([a-z0-9]([a-z0-9-]*[a-z0-9])?)\\.)*([a-z]([a-z0-9-]*[a-z0-9])?)\\.?(:[0-9]+)?(/([-a-z0-9_.!~*'():@&=+$,]|%[0-9a-f][0-9a-f])*(;([-a-z0-9_.!~*'():@&=+$,]|%[0-9a-f][0-9a-f])*)*(/([-a-z0-9_.!~*'():@&=+$,]|%[0-9a-f][0-9a-f])*(;([-a-z0-9_.!~*'():@&=+$,]|%[0-9a-f][0-9a-f])*)*)*)?(\\?([-a-z0-9_.!~*'();/?:@&=+$,]|%[0-9a-f][0-9a-f])*)?(#([-a-z0-9_.!~*'();/?:@&=+$,]|%[0-9a-f][0-9a-f])*)?)[^].,:;!)? \t\r\n<>\"]"
+
+        # Default index colors:
+        color index yellow default '.*'
+        color index_author red default '.*'
+        color index_number blue default
+        color index_subject cyan default '.*'
+
+        # For new mail:
+        color index brightyellow black "~N"
+        color index_author brightred black "~N"
+        color index_subject brightcyan black "~N"
+
+        color progress black cyan
+        # ----------------------------------------------
+
+        # -- base16 colors --
+        # color0  black
+        # color8  black-light
+
+        # color1  red
+        # color9  red
+
+        # color2  green
+        # color10 green
+
+        # color3  yellow
+        # color11 yellow
+
+        # color4  blue
+        # color12 blue
+
+        # color5  purple
+        # color13 purple
+
+        # color6  cyan
+        # color14 cyan
+
+        # color7  white
+        # color15 white-dark
+
+        # -- extended base16 --
+        # color15 orange
+        # color17 pink
+        # color18 grey-dark
+        # color19 grey-mid
+        # color20 grey-light
+        # color21 peach
       '';
     };
 
+    # Abort key set to Esc, so let's make this as snappy as vim
+    home.sessionVariables.ESCDELAY = 25;
+
     home.packages = [
       (pkgs.self.mkScript {
-        name = "html2md";
+        name = "markdown";
         path = [pkgs.python3Packages.html2text pkgs.glow];
         text = ''html2text "''${1-}" | glow -'';
       })
@@ -175,14 +287,95 @@ in {
           '';
       })
       pkgs.zathura
+      pkgs.mutt-ics
+      pkgs.w3m
     ];
+
+    home.file.".config/neomutt/0-sidebar".text =
+      # sh
+      ''
+        unbind index h
+        unbind index j
+        unbind index k
+        unbind index l
+
+        bind index h sidebar-prev
+        bind index j sidebar-next
+        bind index k sidebar-prev
+        macro index l "<sidebar-open>:source ~/.config/neomutt/1-index\n" "Index"
+        color sidebar_divider brightwhite default
+      '';
+
+    home.file.".config/neomutt/1-index".text =
+      # sh
+      ''
+        unbind index h
+        unbind index j
+        unbind index k
+        unbind index l
+
+        macro index h ":set sidebar_visible=yes\n:source ~/.config/neomutt/0-sidebar\n" "Sidebar"
+        bind index j "next-entry"
+        bind index k "previous-entry"
+        macro index l "<display-message>:source ~/.config/neomutt/2-pager\n" "Pager"
+        color sidebar_divider brightblack black
+      '';
+
+    home.file.".config/neomutt/2-pager".text =
+      # sh
+      ''
+        unbind pager h
+        unbind pager j
+        unbind pager k
+        unbind pager l
+
+        macro pager h "<exit>:source ~/.config/neomutt/1-index\n" "Index"
+        bind pager j "next-line"
+        bind pager k "previous-line"
+        macro pager l "<view-attachments>:source ~/.config/neomutt/3-attach\n" "Attach"
+      '';
+
+    home.file.".config/neomutt/3-attach".text =
+      # sh
+      ''
+        unbind attach h
+        unbind attach j
+        unbind attach k
+        unbind attach l
+
+        macro attach h "<exit>:source ~/.config/neomutt/2-pager\n" "Pager"
+        bind attach j "next-line"
+        bind attach k "previous-line"
+        macro attach l "<view-attach>:source ~/.config/neomutt/4-pager\n" "Attach Pager"
+      '';
+
+    home.file.".config/neomutt/4-pager".text =
+      # sh
+      ''
+        unbind pager h
+        unbind pager j
+        unbind pager k
+        unbind pager l
+
+        macro pager h "<exit>:source ~/.config/neomutt/3-attach\n" "Attach"
+        bind pager j "next-line"
+        bind pager k "previous-line"
+        bind pager l "next-line"
+      '';
 
     home.file.".config/neomutt/mailcap".text =
       # image/*; ${pkgs.kitty}/bin/kitty +kitten icat '%s'; copiousoutput
       # text/html; html2md '%s'; copiousoutput
       # text/html; html2glow '%s'; needsterminal
+      # text/html; markdown %s; copiousoutput
+      # text/plain; markdown %s; copiousoutput
+      # text/markdown; markdown %s; copiousoutput
       ''
-        text/html; html2md %s; copiousoutput
+        text/plain; markdown %s; copiousoutput
+        text/markdown; markdown %s; copiousoutput
+        text/html; w3m -I %{charset} -T text/html; copiousoutput; nametemplate=%s.html
+        text/calendar; mutt-ics; copiousoutput
+        application/ics; mutt-ics; copiousoutput
         image/*; icat %s
         application/pdf; zathura '%s'; test=test -n "$DISPLAY"
         application/x-pdf; zathura '%s'; test=test -n "$DISPLAY"
@@ -207,6 +400,11 @@ in {
 
     home.localStorePath = [
       ".config/neomutt/neomuttrc"
+      ".config/neomutt/0-sidebar"
+      ".config/neomutt/1-index"
+      ".config/neomutt/2-pager"
+      ".config/neomutt/3-attach"
+      ".config/neomutt/4-pager"
       ".config/neomutt/mailcap"
     ];
   };

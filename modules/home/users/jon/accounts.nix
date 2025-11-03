@@ -133,6 +133,7 @@ in {
             "Drafts"
             "Sent"
           ];
+          extraConfig = "set sort=reverse-last-date-received";
         };
         mbsync = {
           enable = true;
@@ -175,7 +176,10 @@ in {
             "Drafts"
             "Sent"
           ];
-          extraConfig = "set copy = no"; # Gmail already stores a copy
+          extraConfig = ''
+            set sort=reverse-last-date-received
+            set copy = no
+          '';
         };
         mbsync = {
           enable = true;
