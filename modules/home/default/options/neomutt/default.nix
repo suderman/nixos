@@ -68,10 +68,12 @@ in {
 
           # Colors and status line format
           source style
-          source formats
+
+          # Search mode off (n/p navigates entries instead of search results)
+          source search-0
 
           # hjkl navigation, initialize with message index
-          source 1-index
+          source hjkl-1
 
           # Configure how message is viewed in pager
           auto_view = text/html text/plain text/calendar image/*

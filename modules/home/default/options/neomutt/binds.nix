@@ -38,21 +38,18 @@
         bind browser,pager,index N search-opposite
         bind pager,index dT delete-thread
         bind pager,index dt delete-subthread
-        bind pager,index gt next-thread
-        bind pager,index gT previous-thread
+        bind pager,index gh next-thread
+        bind pager,index gH previous-thread
         bind index za collapse-thread
         bind index zA collapse-all # Missing :folddisable/
 
         # -----
 
-        # Search with / and browse results with C-n C-p
-        bind index,pager,attach,browser / search
-        bind index,pager,attach,browser \Cn search-next
-        bind index,pager,attach,browser \Cp search-opposite
-
-        # Navigate entries with n and p
-        bind index,pager,attach,browser n next-entry
-        bind index,pager,attach,browser p previous-entry
+        # Arrow keys mirror vim's hjkl keys
+        macro index,pager,attach,browser <Left> ":push h\n"
+        macro index,pager,attach,browser <Down> ":push j\n"
+        macro index,pager,attach,browser <Up> ":push k\n"
+        macro index,pager,attach,browser <Right> ":push l\n"
 
         # Toggle sidebar with B
         bind index,pager B sidebar-toggle-visible
@@ -76,19 +73,38 @@
         bind browser j next-entry
         bind browser k previous-entry
         bind browser l select-entry
-        # bind browser d "detach-file"
 
-        # Archive message with e
-        macro index,pager e ":set confirmappend=no\\n<save-message>+Archive<enter>:set confirmappend=yes\\n";
+        # Archive/unarchive email with e
+        folder-hook . \
+          'macro index,pager e ":set confirmappend=no\n<save-message>+Archive\n<sync-mailbox>:set confirmappend=yes\n" "Archive email"'
+        folder-hook Archive \
+          'macro index,pager e ":set confirmappend=no\n<save-message>+Inbox\n<sync-mailbox>:set confirmappend=yes\n" "Unarchive email"'
+
+        # Delete/undelete email with dd
+        folder-hook . \
+          'macro index,pager dd ":set confirmappend=no\n<save-message>+Trash\n<sync-mailbox>:set confirmappend=yes\n" "Delete email"'
+        folder-hook Trash \
+          'macro index,pager dd ":set confirmappend=no\n<save-message>+Inbox\n<sync-mailbox>:set confirmappend=yes\n" "Undelete email"'
+
+        # Delete/undelete spam with dm
+        folder-hook . \
+          'macro index,pager dm ":set confirmappend=no\n<save-message>+Spam\n<sync-mailbox>:set confirmappend=yes\n" "Delete spam"'
+        folder-hook Spam \
+          'macro index,pager dm ":set confirmappend=no\n<save-message>+Inbox\n<sync-mailbox>:set confirmappend=yes\n" "Not spam"'
+
+        # Jump to mailbox with gi ga gd gs gm gt
+        macro index,pager gi "<change-folder>+Inbox\n" "Go to Inbox"
+        macro index,pager ga "<change-folder>+Archive\n" "Go to Archive"
+        macro index,pager gd "<change-folder>+Drafts\n" "Go to Drafts"
+        macro index,pager gs "<change-folder>+Sent\n" "Go to Sent"
+        macro index,pager gm "<change-folder>+Spam\n" "Go to Spam"
+        macro index,pager gt "<change-folder>+Trash\n" "Go to Trash"
 
         # View URLs in message with K
         macro pager K "<pipe-message>${pkgs.urlscan}/bin/urlscan<enter><exit>";
 
         # Write changes to mailbox with w
         bind index w "sync-mailbox"
-
-        bind pager <Up> previous-line   # scroll up
-        bind pager <Down> next-line     # scroll down
       '';
 
     localStorePath = [".config/neomutt/binds"];
