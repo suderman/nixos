@@ -36,11 +36,12 @@ in {
 
         menu_context = "50";
         pager_context = "7"; # still figuring out this one
-        pager_index_lines = "7"; # number of line's in pager's mini index
-        pager_read_delay = "1"; # cound 1 second before marking as read
+        pager_index_lines = "7"; # number of lines in pager's mini index
+        pager_read_delay = "0"; # number of seconds before marking as read
         pager_stop = "yes"; # prevent page-down from skipping to the next message
         markers = "no"; # supress + marker at beginning of wrapped lines
         tilde = "yes"; # pad pager lines at bottom of screen with ~
+        resolve = "no"; # don't advance to the next line after toggling a message
 
         sort = "threads";
         sort_aux = "reverse-last-date-received";
@@ -56,65 +57,6 @@ in {
         menu_scroll = "yes"; # scroll menues by 1 line instead of whole page
       };
 
-      # binds = [
-      #   {
-      #     map = ["index" "pager"];
-      #     key = "\\\\";
-      #     action = "sidebar-toggle-visible";
-      #   }
-      #   {
-      #     map = ["index" "pager"];
-      #     key = "R";
-      #     action = "group-reply";
-      #   }
-      #   {
-      #     map = ["index"];
-      #     key = "B";
-      #     action = "toggle-new";
-      #   }
-      #   {
-      #     map = ["pager"];
-      #     key = "n";
-      #     action = "next-thread";
-      #   }
-      #   {
-      #     map = ["pager"];
-      #     key = "p";
-      #     action = "previous-thread";
-      #   }
-      #   # View the raw contents of a message.
-      #   {
-      #     action = "view-raw-message";
-      #     key = "Z";
-      #     map = [
-      #       "index"
-      #       "pager"
-      #     ];
-      #   }
-      # ];
-      #
-      # macros = [
-      #   {
-      #     action = "<sidebar-next><sidebar-open>";
-      #     key = "]";
-      #     map = ["index" "pager"];
-      #   }
-      #   {
-      #     action = "<sidebar-prev><sidebar-open>";
-      #     key = "[";
-      #     map = ["index" "pager"];
-      #   }
-      #   {
-      #     action = ":set confirmappend=no\\n<save-message>+Archive<enter>:set confirmappend=yes\\n";
-      #     key = "e";
-      #     map = ["index" "pager"];
-      #   }
-      #   {
-      #     action = "<pipe-message>${pkgs.urlscan}/bin/urlscan<enter><exit>";
-      #     key = "U";
-      #     map = ["pager"];
-      #   }
-      # ];
       extraConfig =
         # sh
         ''

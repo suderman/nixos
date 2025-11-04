@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: {
   home = lib.mkIf config.programs.neomutt.enable {
@@ -44,19 +45,46 @@
 
         # -----
 
-        bind browser h "exit"
-        bind browser j "next-entry"
-        bind browser k "previous-entry"
-        bind browser l "select-entry"
+        # Search with / and browse results with C-n C-p
+        bind index,pager,attach,browser / search
+        bind index,pager,attach,browser \Cn search-next
+        bind index,pager,attach,browser \Cp search-opposite
+
+        # Navigate entries with n and p
+        bind index,pager,attach,browser n next-entry
+        bind index,pager,attach,browser p previous-entry
+
+        # Toggle sidebar with B
+        bind index,pager B sidebar-toggle-visible
+
+        # Toggle unread with U
+        bind index U toggle-new
+
+        # Tag (multi-select) with Spacebar
+        bind pager,index <Space> tag-entry
+
+        # Delete with D
+        bind pager,index D delete-message
+
+        # Replay-all with a
+        bind index,pager a group-reply
+
+        # View raw message with Z
+        bind index,pager Z view-raw-message
+
+        bind browser h exit
+        bind browser j next-entry
+        bind browser k previous-entry
+        bind browser l select-entry
         # bind browser d "detach-file"
 
-        macro index dd "<delete-message><previous-entry>" "Delete message"
-        macro index <Space> "<tag-message><previous-entry>" "Tag message"
-        macro index F "<flag-message><previous-entry>" "Flag message"
+        # Archive message with e
+        macro index,pager e ":set confirmappend=no\\n<save-message>+Archive<enter>:set confirmappend=yes\\n";
 
-        bind index D "delete-message"
-        bind index N "toggle-new"
-        # bind index F "flag-message"
+        # View URLs in message with K
+        macro pager K "<pipe-message>${pkgs.urlscan}/bin/urlscan<enter><exit>";
+
+        # Write changes to mailbox with w
         bind index w "sync-mailbox"
 
         bind pager <Up> previous-line   # scroll up
