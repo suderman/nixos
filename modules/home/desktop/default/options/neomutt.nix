@@ -62,12 +62,12 @@ in {
     programs.neomutt.macros = [
       {
         action = "<view-attachments><search>html<enter><pipe-entry>${pager.pipe}<enter><exit>";
-        key = "<space>";
+        key = "<Return>";
         map = ["index" "pager"];
       }
       {
         action = "<pipe-entry>${pager.pipe}<enter><exit>";
-        key = "<space>";
+        key = "<Return>";
         map = ["attach"];
       }
     ];

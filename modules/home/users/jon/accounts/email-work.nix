@@ -1,0 +1,92 @@
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
+  # Work email
+  config = lib.mkIf config.accounts.enable {
+    accounts.email.accounts."nonfiction" = rec {
+      userName = "jon@nonfiction.ca";
+      passwordCommand = ["cat" config.age.secrets.gmail.path];
+      flavor = "gmail.com";
+      realName = "Jon Suderman";
+      address = "jon@nonfiction.ca";
+      signature = {
+        showSignature = "append";
+        text = ''
+          ${realName}
+          https://www.nonfiction.ca
+        '';
+      };
+      neomutt = {
+        enable = true;
+        mailboxName = " nonfiction";
+        extraMailboxes = [
+          "Inbox"
+          "Archive"
+          "Spam"
+          "Trash"
+          "Drafts"
+          "Sent"
+        ];
+        extraConfig = ''
+          set sort=reverse-last-date-received
+          set copy = no
+        '';
+      };
+      mbsync = {
+        enable = true;
+        create = "maildir";
+        expunge = "both";
+        groups.nonfiction.channels = {
+          Inbox = {
+            farPattern = "INBOX";
+            nearPattern = "Inbox";
+            extraConfig.Create = "Near";
+            extraConfig.Expunge = "Both";
+          };
+          Archive = {
+            farPattern = "Archived Mail"; # must create this label in Gmail
+            nearPattern = "Archive";
+            extraConfig.Create = "Both";
+            extraConfig.Expunge = "Both";
+          };
+          Junk = {
+            farPattern = "[Gmail]/Spam";
+            nearPattern = "Spam";
+            extraConfig.Create = "Near";
+            extraConfig.Expunge = "Both";
+          };
+          Trash = {
+            farPattern = "[Gmail]/Trash";
+            nearPattern = "Trash";
+            extraConfig.Create = "Near";
+            extraConfig.Expunge = "Both";
+          };
+          Drafts = {
+            farPattern = "[Gmail]/Drafts";
+            nearPattern = "Drafts";
+            extraConfig.Create = "Near";
+            extraConfig.Expunge = "Both";
+          };
+          Sent = {
+            farPattern = "[Gmail]/Sent Mail";
+            nearPattern = "Sent";
+            extraConfig.Create = "Near";
+            extraConfig.Expunge = "Both";
+          };
+        };
+      };
+      imapnotify = {
+        enable = true;
+        boxes = ["Inbox"];
+        onNotifyPost = ''
+          ${pkgs.libnotify}/bin/notify-send "New mail arrived."
+        '';
+      };
+      notmuch.enable = true;
+      msmtp.enable = true;
+    };
+  };
+}
