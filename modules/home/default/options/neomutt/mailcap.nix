@@ -3,15 +3,11 @@
   lib,
   pkgs,
   ...
-}: {
-  home = lib.mkIf config.programs.neomutt.enable {
-    # image/*; ${pkgs.kitty}/bin/kitty +kitten icat '%s'; copiousoutput
-    # text/html; html2md '%s'; copiousoutput
-    # text/html; html2glow '%s'; needsterminal
-    # text/html; markdown %s; copiousoutput
-    # text/plain; markdown %s; copiousoutput
-    # text/markdown; markdown %s; copiousoutput
-    file.".config/neomutt/mailcap".text =
+}: let
+  mailcap = ".config/neomutt/mailcap";
+in {
+  config = lib.mkIf config.programs.neomutt.enable {
+    home.file."${mailcap}".text =
       # sh
       ''
         text/plain; markdown %s; copiousoutput
@@ -25,10 +21,10 @@
         application/ics; importcal '%s'; test=test -n "$DISPLAY"
         text/calendar; importcal '%s'; test=test -n "$DISPLAY"
       '';
+    home.localStorePath = [mailcap];
+    programs.neomutt.settings.mailcap_path = "~/${mailcap}";
 
-    localStorePath = [".config/neomutt/mailcap"];
-
-    packages = [
+    home.packages = [
       (pkgs.self.mkScript {
         name = "markdown";
         path = [pkgs.python3Packages.html2text pkgs.glow];

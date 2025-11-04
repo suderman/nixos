@@ -105,6 +105,16 @@
 
         # Write changes to mailbox with w
         bind index w "sync-mailbox"
+
+        set query_command="${pkgs.notmuch-addrlookup}/bin/notmuch-addrlookup --mutt '%s'"
+
+        # Search using notmuch with S
+        macro index S \
+          "<enter-command>set my_old_pipe_decode=\$pipe_decode my_old_wait_key=\$wait_key nopipe_decode nowait_key<enter>\
+          <shell-escape>${pkgs.notmuch-mutt}/bin/notmuch-mutt -r --prompt search<enter>\
+          <change-folder-readonly>`echo ''${XDG_CACHE_HOME:-$HOME/.cache}/notmuch/mutt/results`<enter>\
+          <enter-command>set pipe_decode=\$my_old_pipe_decode wait_key=\$my_old_wait_key<enter>" \
+                "notmuch: search mail"
       '';
 
     localStorePath = [".config/neomutt/binds"];

@@ -25,10 +25,9 @@ in {
         mark_old = "no";
         text_flowed = "yes";
         reverse_name = "yes";
-        query_command = ''"khard email --parsable '%s'"'';
+        # query_command = ''"khard email --parsable '%s'"'';
         wait_key = "no";
         folder = config.accounts.email.maildirBasePath;
-        mailcap_path = "${config.home.homeDirectory}/.config/neomutt/mailcap";
 
         edit_headers = "yes"; # show headers when composing
         fast_reply = "yes"; # skip to compose when replying
@@ -60,6 +59,11 @@ in {
       extraConfig =
         # sh
         ''
+          # Speed things up
+          set header_cache_backend = lmdb
+          set header_cache_compress_method = zstd
+          set header_cache_compress_level = 10
+
           # Source email alternates from secrets
           source alternates
 
@@ -99,11 +103,14 @@ in {
     home.activation.neomutt = let
       dir = "$HOME/.config/neomutt";
       awk = lib.getExe pkgs.gawk;
+      inherit (config.age.secrets.addresses) path;
     in
-      lib.hm.dag.entryAfter ["writeBoundary"] ''
+      lib.hm.dag.entryAfter ["writeBoundary"]
+      # bash
+      ''
         $DRY_RUN_CMD mkdir -p ${dir}
         $DRY_RUN_CMD touch ${dir}/alternates
-        $DRY_RUN_CMD echo "alternates \"$(${awk} '{printf "%s%s", (NR==1 ? "" : "|"), $0} END {print ""}' ${config.age.secrets.addresses.path})\"" > ${dir}/alternates
+        $DRY_RUN_CMD echo "alternates \"$(${awk} '{printf "%s%s", (NR==1 ? "" : "|"), $0} END {print ""}' ${path})\"" > ${dir}/alternates
       '';
 
     home.shellAliases.mutt = "neomutt";
