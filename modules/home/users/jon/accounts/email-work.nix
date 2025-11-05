@@ -36,7 +36,7 @@
         '';
       };
       mbsync = {
-        enable = true;
+        enable = false; # temporarily disable
         create = "maildir";
         expunge = "both";
         groups.nonfiction.channels = {
