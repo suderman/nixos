@@ -76,21 +76,21 @@
 
         # Archive/unarchive email with e
         folder-hook . \
-          'macro index,pager e ":set confirmappend=no\n<save-message>+Archive\n<sync-mailbox>:set confirmappend=yes\n" "Archive email"'
+          'macro index,pager e ":set confirmappend=no\n<save-message>+Archive\n:set confirmappend=yes\n" "Archive email"'
         folder-hook Archive \
-          'macro index,pager e ":set confirmappend=no\n<save-message>+Inbox\n<sync-mailbox>:set confirmappend=yes\n" "Unarchive email"'
+          'macro index,pager e ":set confirmappend=no\n<save-message>+Inbox\n:set confirmappend=yes\n" "Unarchive email"'
 
         # Delete/undelete email with dd
         folder-hook . \
-          'macro index,pager dd ":set confirmappend=no\n<save-message>+Trash\n<sync-mailbox>:set confirmappend=yes\n" "Delete email"'
+          bind index,pager dd delete-message
         folder-hook Trash \
-          'macro index,pager dd ":set confirmappend=no\n<save-message>+Inbox\n<sync-mailbox>:set confirmappend=yes\n" "Undelete email"'
+          'macro index,pager dd ":set confirmappend=no\n<save-message>+Inbox\n:set confirmappend=yes\n" "Undelete email"'
 
         # Delete/undelete spam with dm
         folder-hook . \
-          'macro index,pager dm ":set confirmappend=no\n<save-message>+Spam\n<sync-mailbox>:set confirmappend=yes\n" "Delete spam"'
+          'macro index,pager dm ":set confirmappend=no\n<save-message>+Spam\n:set confirmappend=yes\n" "Delete spam"'
         folder-hook Spam \
-          'macro index,pager dm ":set confirmappend=no\n<save-message>+Inbox\n<sync-mailbox>:set confirmappend=yes\n" "Not spam"'
+          'macro index,pager dm ":set confirmappend=no\n<save-message>+Inbox\n:set confirmappend=yes\n" "Not spam"'
 
         # Jump to mailbox with gi ga gd gs gm gt
         macro index,pager gi "<change-folder>+Inbox\n" "Go to Inbox"
