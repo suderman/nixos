@@ -73,9 +73,6 @@ in {
           # Colors and status line format
           source style
 
-          # Search mode off (n/p navigates entries instead of search results)
-          source search-0
-
           # hjkl navigation, initialize with message index
           source hjkl-1
 

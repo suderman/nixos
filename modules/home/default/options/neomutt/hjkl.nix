@@ -28,6 +28,9 @@ in {
 
         # Open mailbox, restore control to index
         macro index l "<sidebar-open>${source 1}" "Index"
+
+        # Reset search
+        source ~/.config/neomutt/search-0
       '';
 
     file."${hjkl 1}".text =
@@ -50,6 +53,9 @@ in {
 
         # Open current email in pager
         macro index l "<display-message>${source 2}" "Pager"
+
+        # Reset search
+        source ~/.config/neomutt/search-0
       '';
 
     file."${hjkl 2}".text =
@@ -69,6 +75,9 @@ in {
 
         # Open email's attachments
         macro pager l "<view-attachments>${source 3}" "Attach"
+
+        # Reset search
+        source ~/.config/neomutt/search-0
       '';
 
     file."${hjkl 3}".text =
@@ -88,6 +97,9 @@ in {
 
         # Open attachment in pager
         macro attach l "<view-attach>${source 4}" "Attach Pager"
+
+        # Reset search
+        source ~/.config/neomutt/search-0
       '';
 
     file."${hjkl 4}".text =
@@ -107,6 +119,9 @@ in {
 
         # Furthest forward in navigation
         bind pager l "next-line"
+
+        # Reset search
+        source ~/.config/neomutt/search-0
       '';
 
     localStorePath = [

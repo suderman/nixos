@@ -33,7 +33,7 @@ in {
         bind index,pager,attach,browser p search-opposite
 
         # Cancel search mode with <Space>
-        macro index,pager,attach,browser / "${source 0}:echo '󰈉 Search OFF'\n" "Cancel search"
+        macro index,pager,attach,browser / "${source 0}" "Cancel search"
       '';
 
     localStorePath = [

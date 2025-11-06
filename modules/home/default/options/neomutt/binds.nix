@@ -28,16 +28,16 @@
         bind index \Ce next-line
         bind index \Cy previous-line
 
-        bind pager,index d noop
-        bind pager,index dd delete-message
+        # bind pager,index d noop
+        # bind pager,index dd delete-message
 
         # Mail & Reply
         bind index \Cm list-reply # Doesn't work currently
 
         # Threads
         bind browser,pager,index N search-opposite
-        bind pager,index dT delete-thread
-        bind pager,index dt delete-subthread
+        # bind pager,index dT delete-thread
+        # bind pager,index dt delete-subthread
         bind pager,index gh next-thread
         bind pager,index gH previous-thread
         bind index za collapse-thread
@@ -58,10 +58,10 @@
         bind index U toggle-new
 
         # Tag (multi-select) with Spacebar
-        bind pager,index <Space> tag-entry
+        bind pager,index <Space> tag-thread
 
-        # Delete with D
-        bind pager,index D delete-message
+        # # Delete with D
+        # bind pager,index D delete-message
 
         # Replay-all with a
         bind index,pager a group-reply
@@ -80,24 +80,24 @@
         folder-hook Archive \
           'macro index,pager e ":set confirmappend=no\n<save-message>+Inbox\n:set confirmappend=yes\n" "Unarchive email"'
 
-        # Delete/undelete email with dd
+        # Delete/undelete email with d
         folder-hook . \
-          bind index,pager dd delete-message
+          bind index,pager d delete-message
         folder-hook Trash \
-          'macro index,pager dd ":set confirmappend=no\n<save-message>+Inbox\n:set confirmappend=yes\n" "Undelete email"'
+          'macro index,pager d ":set confirmappend=no\n<save-message>+Inbox\n:set confirmappend=yes\n" "Undelete email"'
 
         # Delete/undelete spam with dm
         folder-hook . \
-          'macro index,pager dm ":set confirmappend=no\n<save-message>+Spam\n:set confirmappend=yes\n" "Delete spam"'
+          'macro index,pager D ":set confirmappend=no\n<save-message>+Spam\n:set confirmappend=yes\n" "Delete spam"'
         folder-hook Spam \
-          'macro index,pager dm ":set confirmappend=no\n<save-message>+Inbox\n:set confirmappend=yes\n" "Not spam"'
+          'macro index,pager D ":set confirmappend=no\n<save-message>+Inbox\n:set confirmappend=yes\n" "Not spam"'
 
         # Jump to mailbox with gi ga gd gs gm gt
         macro index,pager gi "<change-folder>+Inbox\n" "Go to Inbox"
         macro index,pager ga "<change-folder>+Archive\n" "Go to Archive"
         macro index,pager gd "<change-folder>+Drafts\n" "Go to Drafts"
         macro index,pager gs "<change-folder>+Sent\n" "Go to Sent"
-        macro index,pager gm "<change-folder>+Spam\n" "Go to Spam"
+        macro index,pager gS "<change-folder>+Spam\n" "Go to Spam"
         macro index,pager gt "<change-folder>+Trash\n" "Go to Trash"
 
         # View URLs in message with K
@@ -115,6 +115,15 @@
           <change-folder-readonly>`echo ''${XDG_CACHE_HOME:-$HOME/.cache}/notmuch/mutt/results`<enter>\
           <enter-command>set pipe_decode=\$my_old_pipe_decode wait_key=\$my_old_wait_key<enter>" \
                 "notmuch: search mail"
+
+        # Select all (tag) with Ctrl-a
+        macro index \Ca "<tag-pattern>.<enter>" "Select all"
+
+        # Limit tagged with I
+        macro index I "<limit>~T<enter><untag-pattern>.<enter>" "Limit tagged"
+
+        # Limit pattern with i
+        bind index i limit
       '';
 
     localStorePath = [".config/neomutt/binds"];

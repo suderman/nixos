@@ -126,20 +126,27 @@
 
         color progress black cyan
 
-        # -- Formats --
-        set forward_format = "Fwd: %s"
-
+        #     󰀄 01:11  . Mary                · Today's email
+        #     󰀄 Wed 05 . Alice               · Earlier this week
+        #    󰀄 Oct 27 . Bob                 · RE: Last month's thread
+        #     󰀄 Dec 14/24  . Larry           · Last year's email
         set date_format = "%d.%m.%Y %H:%M"
+        set index_format=" %zs %zc %zt %<[y?%<[m?%<[d?%[%H:%M ]&%[%a %d]>&%[%b %d]>&%[%b %d/%y ]> . %-28.28L  %?M?(%1M)&  ? %?X?&·? %s"
 
-        set index_format=" %zs %zc %zt %{!%d %b} . %-28.28L  %?M?(%1M)&  ? %?X?&·? %s"
-
+        # =Inbox    󰻩 440  󰇮 9     4                                                           11
         set pager_format=" %n %zc  %T %s%*  %{!%d %b · %H:%M} %?X?  %X ? %P  "
 
+        # Alex    󰀒 [immich-app/immich] Release v2.2.0                        30 Oct · 11:04  6% 
         set status_format = " %f%?r? %r?  󰻩 %m %?n? 󰇮 %n ?  %?d?  %d ?%?t?  %t ?%?F?  %F? %> %?p?   %p ?"
 
+        #      Archive/                                                                            0K
         set folder_format = "   %t%N %f %> %-5.5s"
 
+        # I  └─><no description>                                     [text/html, quoted, utf-8]  66K
         set attach_format = " %u%D%t%I  %T%d %> [%.7m/%.10M, %.6e%<C?, %C>]  %-5.5s "
+
+        # Prefix subject with Fwd:
+        set forward_format = "Fwd: %s"
 
         # not me, me, me and others, carbon copied, from me, mailing list
         set to_chars="󰀒󰀄󰀎󰗦"
