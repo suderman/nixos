@@ -14,7 +14,7 @@ in {
     programs.neomutt = {
       vimKeys = false;
       checkStatsInterval = 60;
-      unmailboxes = false;
+      # unmailboxes = false;
       sidebar = {
         enable = true;
         width = 30;
@@ -29,6 +29,9 @@ in {
         wait_key = "no";
         folder = config.accounts.email.maildirBasePath;
 
+        editor = ''"$EDITOR -c 'nnoremap q :wq<CR>'"'';
+        postpone = "ask-no";
+
         edit_headers = "yes"; # show headers when composing
         fast_reply = "yes"; # skip to compose when replying
         help = "no";
@@ -41,6 +44,8 @@ in {
         markers = "no"; # supress + marker at beginning of wrapped lines
         tilde = "yes"; # pad pager lines at bottom of screen with ~
         resolve = "no"; # don't advance to the next line after toggling a message
+
+        browser_sort = "unsorted"; # sort mailboxes by ordered added in config, not alphabetical
 
         sort = "threads";
         sort_aux = "reverse-last-date-received";

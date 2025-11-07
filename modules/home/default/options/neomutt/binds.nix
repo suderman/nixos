@@ -63,8 +63,28 @@
         # # Delete with D
         # bind pager,index D delete-message
 
-        # Replay-all with a
-        bind index,pager a group-reply
+        # [c] is prefix for compose mail
+        bind pager c noop
+        macro index,pager,attach c "echo '[c]ompose, [r]eply, reply-[a]ll, [f]orward, [d]raft'"
+
+        # [c] is prefix for compose mail
+        bind index,pager c noop
+
+        # Compose new email
+        bind index,pager cm mail
+        bind index,pager cc mail
+
+        # Compose reply to email
+        bind index,pager cr reply
+
+        # Compose reply-all to email
+        bind index,pager ca group-reply
+
+        # Compose forward of email
+        bind index,pager cf forward-message
+
+        # Compose draft of email
+        bind index,pager cd recall-message
 
         # View raw message with Z
         bind index,pager Z view-raw-message
@@ -73,6 +93,7 @@
         bind browser j next-entry
         bind browser k previous-entry
         bind browser l select-entry
+        bind browser K exit
 
         # Archive/unarchive email with e
         folder-hook . \
@@ -100,8 +121,11 @@
         macro index,pager gS "<change-folder>+Spam\n" "Go to Spam"
         macro index,pager gt "<change-folder>+Trash\n" "Go to Trash"
 
-        # View URLs in message with K
-        macro pager K "<pipe-message>${pkgs.urlscan}/bin/urlscan<enter><exit>";
+        # List mailboxes with K
+        macro index,pager K "<change-folder>?" "List mailboxes"
+
+        # View URLs in message with L
+        macro index,pager L "<pipe-message>${pkgs.urlscan}/bin/urlscan<enter><exit>";
 
         # Write changes to mailbox with w
         bind index w "sync-mailbox"
@@ -119,11 +143,11 @@
         # Select all (tag) with Ctrl-a
         macro index \Ca "<tag-pattern>.<enter>" "Select all"
 
-        # Limit tagged with I
-        macro index I "<limit>~T<enter><untag-pattern>.<enter>" "Limit tagged"
+        # Limit tagged with F (Filter)
+        macro index F "<limit>~T<enter><untag-pattern>.<enter>" "Limit tagged"
 
-        # Limit pattern with i
-        bind index i limit
+        # Limit pattern with f (filter)
+        bind index f limit
       '';
 
     localStorePath = [".config/neomutt/binds"];

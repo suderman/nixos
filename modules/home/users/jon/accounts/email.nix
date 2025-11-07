@@ -12,7 +12,10 @@
     persist.storage.directories = [".local/share/mail"];
 
     # Email reader
-    programs.neomutt.enable = true;
+    programs.neomutt = {
+      enable = true;
+      unmailboxes = true;
+    };
 
     # IMAP sync
     programs.mbsync.enable = true;

@@ -142,6 +142,9 @@
         #      Archive/                                                                            0K
         set folder_format = "   %t%N %f %> %-5.5s"
 
+        # 󰶈 suderman/                                                                           113857
+        set mailbox_folder_format = "%i %* %m"
+
         # I  └─><no description>                                     [text/html, quoted, utf-8]  66K
         set attach_format = " %u%D%t%I  %T%d %> [%.7m/%.10M, %.6e%<C?, %C>]  %-5.5s "
 
