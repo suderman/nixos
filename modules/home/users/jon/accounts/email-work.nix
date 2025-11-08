@@ -45,7 +45,7 @@
         '';
       };
       mbsync = {
-        enable = true;
+        enable = false;
         create = "maildir";
         expunge = "both";
         extraConfig.channel.MaxSize = "25m";
@@ -89,7 +89,7 @@
         };
       };
       imapnotify = {
-        enable = true;
+        enable = false;
         boxes = ["INBOX"];
         onNotify = "mbsync nonfiction";
         onNotifyPost = ''

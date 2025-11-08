@@ -21,7 +21,7 @@
     # IMAP sync
     programs.mbsync.enable = true;
     services.mbsync = {
-      enable = true;
+      enable = false;
       # Before syncing, ensure expected mail folders exist
       preExec = let
         folders = lib.concatStringsSep " " (

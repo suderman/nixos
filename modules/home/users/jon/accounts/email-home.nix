@@ -89,7 +89,7 @@
         };
       };
       imapnotify = {
-        enable = true;
+        enable = false;
         boxes = ["INBOX"];
         onNotify = "mbsync suderman";
         onNotifyPost = ''
