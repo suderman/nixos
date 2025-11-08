@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: {
   config = lib.mkIf config.accounts.enable {
@@ -14,27 +15,31 @@
     # Email reader
     programs.neomutt = {
       enable = true;
-      unmailboxes = true;
+      unmailboxes = true; # we'll manually add named-mailboxes for each account
     };
 
     # IMAP sync
     programs.mbsync.enable = true;
-    services.mbsync.enable = true;
-
-    # SMTP client
-    programs.msmtp.enable = true; # neomutt will send via msmtp by default if enable
-
-    # Email indexer
-    programs.notmuch = {
+    services.mbsync = {
       enable = true;
-      # hooks.preNew = "mbsync --all";
+      # Before syncing, ensure expected mail folders exist
+      preExec = let
+        folders = lib.concatStringsSep " " (
+          lib.mapAttrsToList (_: v: v.maildir.absPath) config.accounts.email.accounts
+        );
+      in
+        toString (pkgs.self.mkScript "mkdir -m700 -p ${folders}");
+      # After syncing, update notmuch database
+      postExec = toString (pkgs.self.mkScript "notmuch new");
     };
 
-    # Ensure 'createMaildir' runs after 'linkGeneration'
-    home.activation.createMaildir = lib.mkForce (lib.hm.dag.entryAfter ["linkGeneration"] ''
-      run mkdir -m700 -p $VERBOSE_ARG ${
-        lib.concatStringsSep " " (lib.mapAttrsToList (_: v: v.maildir.absPath) config.accounts.email.accounts)
-      }
-    '');
+    # IMAP watch
+    services.imapnotify.enable = true;
+
+    # SMTP client
+    programs.msmtp.enable = true; # neomutt will send via msmtp by default if enabled
+
+    # Email indexer
+    programs.notmuch.enable = true;
   };
 }

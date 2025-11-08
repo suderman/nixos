@@ -4,19 +4,20 @@
   pkgs,
   ...
 }: {
-  # Work email
+  # Personal email
   config = lib.mkIf config.accounts.enable {
-    accounts.email.accounts."nonfiction" = rec {
-      userName = "jon@nonfiction.ca";
-      passwordCommand = toString (pkgs.self.mkScript "cat ${config.age.secrets.gmail.path}");
-      flavor = "gmail.com";
+    accounts.email.accounts."suderman" = rec {
+      userName = "suderman@fastmail.com";
+      passwordCommand = toString (pkgs.self.mkScript "cat ${config.age.secrets.fastmail.path}");
+      flavor = "fastmail.com";
+      primary = true;
       realName = "Jon Suderman";
-      address = "jon@nonfiction.ca";
+      address = "jon@suderman.net";
       signature = {
         showSignature = "append";
         text = ''
           ${realName}
-          https://www.nonfiction.ca
+          https://suderman.net
         '';
       };
       neomutt = {
@@ -26,14 +27,14 @@
           home = folder: lib.concatStringsSep "/" [maildirBasePath "suderman" folder];
           work = folder: lib.concatStringsSep "/" [maildirBasePath "nonfiction" folder];
         in ''
-          named-mailboxes "󰶈  suderman" ${home "Archive"}
+          named-mailboxes "󰶍  suderman" ${home "Archive"}
           named-mailboxes "   Inbox" ${home "Inbox"}
           named-mailboxes "   Drafts" ${home "Drafts"}
           named-mailboxes "   Sent" ${home "Sent"}
           named-mailboxes "   Junk" ${home "Junk"}
           named-mailboxes "   Trash" ${home "Trash"}
 
-          named-mailboxes "󰶍  nonfiction" ${work "Archive"}
+          named-mailboxes "󰶈  nonfiction" ${work "Archive"}
           named-mailboxes "   Inbox" ${work "Inbox"}
           named-mailboxes "   Drafts" ${work "Drafts"}
           named-mailboxes "   Sent" ${work "Sent"}
@@ -41,15 +42,14 @@
           named-mailboxes "   Trash" ${work "Trash"}
 
           set sort=reverse-last-date-received
-          set copy=no
+          set copy=yes
         '';
       };
       mbsync = {
         enable = true;
         create = "maildir";
         expunge = "both";
-        extraConfig.channel.MaxSize = "25m";
-        groups.nonfiction.channels = {
+        groups.suderman.channels = {
           Inbox = {
             farPattern = "INBOX";
             nearPattern = "Inbox";
@@ -57,31 +57,31 @@
             extraConfig.Expunge = "Both";
           };
           Archive = {
-            farPattern = "[Gmail]/All Mail";
+            farPattern = "Archive";
             nearPattern = "Archive";
             extraConfig.Create = "Near";
             extraConfig.Expunge = "Both";
           };
           Junk = {
-            farPattern = "[Gmail]/Spam";
+            farPattern = "Spam";
             nearPattern = "Junk";
             extraConfig.Create = "Near";
             extraConfig.Expunge = "Both";
           };
           Trash = {
-            farPattern = "[Gmail]/Trash";
+            farPattern = "Trash";
             nearPattern = "Trash";
             extraConfig.Create = "Near";
             extraConfig.Expunge = "Both";
           };
           Drafts = {
-            farPattern = "[Gmail]/Drafts";
+            farPattern = "Drafts";
             nearPattern = "Drafts";
             extraConfig.Create = "Near";
             extraConfig.Expunge = "Both";
           };
           Sent = {
-            farPattern = "[Gmail]/Sent Mail";
+            farPattern = "Sent";
             nearPattern = "Sent";
             extraConfig.Create = "Near";
             extraConfig.Expunge = "Both";
@@ -91,7 +91,7 @@
       imapnotify = {
         enable = true;
         boxes = ["INBOX"];
-        onNotify = "mbsync nonfiction";
+        onNotify = "mbsync suderman";
         onNotifyPost = ''
           ${pkgs.libnotify}/bin/notify-send "New mail arrived."
         '';
