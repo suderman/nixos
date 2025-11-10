@@ -37,7 +37,7 @@
     windowrule = [
       # Pinned windows have a border and hide decorations when inactive
       "bordersize 2, pinned:1"
-      "decorate 0, pinned:1 focus:0"
+      "decorate 0, pinned:1, focus:0"
 
       # Picture-in-Picture for any windows tagged "pip"
       # ("tag +pip" rules are found elsewhere)
