@@ -18,6 +18,9 @@
       unmailboxes = true; # we'll manually add named-mailboxes for each account
     };
 
+    # IMAP sync
+    programs.mbsync.enable = true;
+
     # IMAP watch
     services.imapnotify.enable = true;
 
