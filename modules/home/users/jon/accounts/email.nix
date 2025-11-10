@@ -18,21 +18,6 @@
       unmailboxes = true; # we'll manually add named-mailboxes for each account
     };
 
-    # IMAP sync
-    programs.mbsync.enable = true;
-    services.mbsync = {
-      enable = false;
-      # Before syncing, ensure expected mail folders exist
-      preExec = let
-        folders = lib.concatStringsSep " " (
-          lib.mapAttrsToList (_: v: v.maildir.absPath) config.accounts.email.accounts
-        );
-      in
-        toString (pkgs.self.mkScript "mkdir -m700 -p ${folders}");
-      # After syncing, update notmuch database
-      postExec = toString (pkgs.self.mkScript "notmuch new");
-    };
-
     # IMAP watch
     services.imapnotify.enable = true;
 

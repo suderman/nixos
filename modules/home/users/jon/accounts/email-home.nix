@@ -3,10 +3,13 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  account = "suderman";
+  unit = "email-${account}";
+in {
   # Personal email
   config = lib.mkIf config.accounts.enable {
-    accounts.email.accounts."suderman" = rec {
+    accounts.email.accounts.${account} = rec {
       userName = "suderman@fastmail.com";
       passwordCommand = toString (pkgs.self.mkScript "cat ${config.age.secrets.fastmail.path}");
       flavor = "fastmail.com";
@@ -49,7 +52,7 @@
         enable = true;
         create = "maildir";
         expunge = "both";
-        groups.suderman.channels = {
+        groups.${account}.channels = {
           Inbox = {
             farPattern = "INBOX";
             nearPattern = "Inbox";
@@ -89,18 +92,39 @@
         };
       };
       imapnotify = {
-        enable = false;
+        enable = true;
         boxes = ["INBOX"];
-        onNotify = "mbsync suderman";
-        onNotifyPost = ''
-          ${pkgs.libnotify}/bin/notify-send "New mail arrived."
-        '';
+        onNotify = "${pkgs.systemd}/bin/systemctl --user start ${unit}";
+        onNotifyPost = "${pkgs.libnotify}/bin/notify-send '[${account}] New Mail'";
       };
       notmuch = {
         enable = true;
         neomutt.virtualMailboxes = [];
       };
       msmtp.enable = true;
+    };
+
+    # Service and timer to syncronize with IMAP server every 15 minutes
+    systemd.user = {
+      services.${unit} = {
+        Unit.Description = "email synchronization for ${account}";
+        Service.Type = "oneshot";
+        Service.ExecStart = pkgs.self.mkScript {
+          path = [pkgs.util-linux pkgs.isync pkgs.notmuch]; # sync & index mail
+          text = ''
+            mkdir -m700 -p ${config.accounts.email.maildirBasePath}/${account}
+            flock -n /run/user/${toString config.home.uid}/${unit}.lock sh -c '
+              mbsync -V ${account} && notmuch new --verbose
+            '
+          '';
+        };
+      };
+      timers.${unit} = {
+        Unit.Description = "email synchronization for ${account}";
+        Timer.OnCalendar = "*:0/15"; # every 15 minutes
+        Timer.Unit = "${unit}.service";
+        Install.WantedBy = ["timers.target"];
+      };
     };
   };
 }
