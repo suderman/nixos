@@ -25,7 +25,7 @@ in {
       neomutt = {
         enable = true;
         extraConfig = ''
-          ${config.lib.accounts.mailboxes neomutt.enable}
+          ${config.lib.accounts.mailboxes account neomutt.enable}
           set copy=no
         '';
       };

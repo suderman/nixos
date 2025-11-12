@@ -19,7 +19,7 @@
     };
 
     # Shared mailbox listing (both accounts) visible in sidebar
-    lib.accounts.mailboxes = enable:
+    lib.accounts.mailboxes = account: enable:
       if enable
       then let
         inherit (config.accounts.email) maildirBasePath;
@@ -44,6 +44,9 @@
 
         # Sort emails
         set sort=reverse-last-date-received
+
+        # Sync mailbox with period
+        macro pager,index . "<sync-mailbox><shell-escape>systemctl --user start ${config.lib.accounts.unit account} & disown\n"
       ''
       else "";
 
