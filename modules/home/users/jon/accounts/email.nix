@@ -133,6 +133,13 @@
     programs.msmtp.enable = true; # neomutt will send via msmtp by default if enabled
 
     # Email indexer
-    programs.notmuch.enable = true;
+    programs.notmuch = {
+      enable = true;
+      new.ignore = [
+        ".uidvalidity"
+        ".mbsyncstate"
+        ".sync-if-1"
+      ];
+    };
   };
 }
