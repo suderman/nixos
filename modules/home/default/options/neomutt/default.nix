@@ -30,7 +30,6 @@ in {
         folder = config.accounts.email.maildirBasePath;
 
         editor = ''"$EDITOR -c 'nnoremap q :wq<CR>'"'';
-        postpone = "ask-no";
 
         edit_headers = "yes"; # show headers when composing
         fast_reply = "yes"; # skip to compose when replying

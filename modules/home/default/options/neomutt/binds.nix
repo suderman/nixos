@@ -57,34 +57,24 @@
         # Toggle unread with U
         bind index U toggle-new
 
-        # Tag (multi-select) with Spacebar
-        bind pager,index <Space> tag-thread
-
-        # # Delete with D
-        # bind pager,index D delete-message
-
-        # [c] is prefix for compose mail
-        bind pager c noop
-        macro index,pager,attach c "echo '[c]ompose, [r]eply, reply-[a]ll, [f]orward, [d]raft'"
-
-        # [c] is prefix for compose mail
-        bind index,pager c noop
+        # Sync mailbox with Spacebar
+        bind pager,index <Space> sync-mailbox
 
         # Compose new email
-        bind index,pager cm mail
-        bind index,pager cc mail
-
-        # Compose reply to email
-        bind index,pager cr reply
-
-        # Compose reply-all to email
-        bind index,pager ca group-reply
-
-        # Compose forward of email
-        bind index,pager cf forward-message
+        bind index,pager m mail
 
         # Compose draft of email
-        bind index,pager cd recall-message
+        bind index,pager M recall-message
+        set recall=no # don't ask to resume draft when composing mail
+
+        # Compose reply to email
+        bind index,pager r reply
+
+        # Compose reply-all to email
+        bind index,pager R group-reply
+
+        # Compose forward of email
+        bind index,pager F forward-message
 
         # View raw message with Z
         bind index,pager Z view-raw-message
@@ -127,9 +117,6 @@
         # View URLs in message with L
         macro index,pager L "<pipe-message>${pkgs.urlscan}/bin/urlscan<enter><exit>";
 
-        # Write changes to mailbox with w
-        bind index w "sync-mailbox"
-
         set query_command="${pkgs.notmuch-addrlookup}/bin/notmuch-addrlookup --mutt '%s'"
 
         # Search using notmuch with S
@@ -144,7 +131,7 @@
         macro index \Ca "<tag-pattern>.<enter>" "Select all"
 
         # Limit tagged with F (Filter)
-        macro index F "<limit>~T<enter><untag-pattern>.<enter>" "Limit tagged"
+        # macro index F "<limit>~T<enter><untag-pattern>.<enter>" "Limit tagged"
 
         # Limit pattern with f (filter)
         bind index f limit
