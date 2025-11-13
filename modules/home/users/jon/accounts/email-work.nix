@@ -31,7 +31,7 @@ in {
       };
 
       mbsync = {
-        enable = false; # enable when ready
+        enable = true; # enable when ready
         extraConfig.channel.MaxSize = "25m";
         groups.${account}.channels = {
           Inbox = {
