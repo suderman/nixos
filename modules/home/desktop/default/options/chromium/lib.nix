@@ -62,6 +62,7 @@
     "--no-default-browser-check"
     "--ozone-platform=wayland"
     "--remove-referrers" # (browser privacy feature)
+    "--password-store=basic" # persist website sessions
   ];
 
   # Create window class name from URL used by Chromium Web Apps
