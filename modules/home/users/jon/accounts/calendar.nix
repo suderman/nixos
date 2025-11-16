@@ -3,15 +3,17 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  account = "calendars";
+in {
   # I've configured Fastmail to syncronize shared calendars from iCloud & Gmail.
   # This way, I only need to configure the below calendars to talk to Fastmail
   # to sync with my computers.
   config = lib.mkIf config.accounts.enable {
     # Calendars are stored at ~/.local/share/calendars
-    persist.storage.directories = [".local/share/calendars"];
+    persist.storage.directories = [".local/share/${account}"];
     accounts.calendar.basePath = ".local/share";
-    accounts.calendar.accounts."calendars" = {
+    accounts.calendar.accounts.${account} = {
       primary = true;
       primaryCollection = "Personal";
       remote = {
@@ -49,13 +51,23 @@
     programs.vdirsyncer.enable = true;
     services.vdirsyncer.enable = true;
 
+    # Put this calendar account on vdirsyncer's radar
+    systemd.user.services.vdirsyncer.Service.ExecStart = lib.mkBefore [
+      (
+        pkgs.self.mkScript {
+          path = [pkgs.coreutils pkgs.vdirsyncer];
+          text = "yes | vdirsyncer discover calendar_${account} || true";
+        }
+      )
+    ];
+
     programs.qcal.enable = true;
     programs.khal = {
       enable = true;
       package = pkgs.khal; # https://github.com/NixOS/nixpkgs/pull/380358
       settings = {
         default = {
-          default_calendar = "calendars";
+          default_calendar = account;
           # default_event_alarm = "15m";
           default_event_duration = "30m";
           highlight_event_days = true;
