@@ -1,17 +1,25 @@
 {pkgs, ...}: {
   home.packages = [
     # Search nixpkgs on the command line
-    # nix-search <searchterm>
+    # nix-search package
     pkgs.nix-search-cli
 
     # Search nixpkgs on the command line and and temporarily install (until reboot)
-    # pkgs <searchterm>
+    # pkgs package
+    #
+    # Remove installed package from history and profile
+    # pkgs -package
+    #
+    # List packages in profile and history
+    # pkgs
     (pkgs.self.mkScript {
       name = "pkgs";
       path = [
-        pkgs.nix-search-cli
         pkgs.fzf
+        pkgs.gnused
+        pkgs.gum
         pkgs.jq
+        pkgs.nix-search-cli
       ];
       env.NIXPKGS_ALLOW_UNFREE = "1";
       text =
@@ -27,20 +35,22 @@
           if [[ -z "''${1-}" ]]; then
             nix profile list --json | jq -r '.elements | keys[]' >$current
             if [[ -s "$current" ]]; then
-              echo "Currently installed:"
-              cat $current
-            else
-              echo "Nothing currently installed."
+              gum style --foreground=29 <$current
             fi
             if [[ -n "$(comm -23 <(sort $history) <(sort $current))" ]]; then
-              echo
-              echo "Previously installed:"
-              comm -23 <(sort $history) <(sort $current)
+              comm -23 <(sort $history) <(sort $current) | gum style --foreground=124
             fi
 
-          # With search term, list matching packages and install selection to profile
+          # If argument starts with -hyphen, uninstall that -package from profile
+          elif [[ "''${1-}" == -* ]]; then
+            pkg="''${1##-}" # strip -hyphen from argument
+            sed -i "/^$pkg$/d" $history # remove from history
+            nix profile remove "$pkg" # uninstall from profile
+
+          # With any other argument, list matching packages and install selection to profile
           else
-            nix-search -m 100 "$1" |
+            pkg="$1"
+            nix-search -m 100 "$pkg" |
               fzf --preview 'nix-search -dm 1 {}' |
               cut -d' ' -f1 |
               xargs -r -I{} nix profile install --impure github:NixOS/nixpkgs/nixpkgs-unstable#{}
