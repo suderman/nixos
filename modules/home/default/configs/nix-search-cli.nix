@@ -44,7 +44,10 @@
           # If argument starts with -hyphen, uninstall that -package from profile
           elif [[ "''${1-}" == -* ]]; then
             pkg="''${1##-}" # strip -hyphen from argument
-            sed -i "/^$pkg$/d" $history # remove from history
+            tmp=$(mktemp) # remove from history
+            sed "/^$pkg$/d" "$history" >$tmp
+            cat $tmp >$history
+            rm $tmp
             nix profile remove "$pkg" # uninstall from profile
 
           # With any other argument, list matching packages and install selection to profile
