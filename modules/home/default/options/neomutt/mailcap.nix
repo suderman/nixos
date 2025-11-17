@@ -32,7 +32,7 @@ in {
       })
       (pkgs.self.mkScript {
         name = "icat";
-        path = [pkgs.kitty pkgs.coreutils];
+        path = [pkgs.kitty];
         text =
           # bash
           ''
@@ -42,7 +42,7 @@ in {
       })
       (pkgs.self.mkScript {
         name = "importcal";
-        path = [pkgs.coreutils pkgs.unstable.rofi pkgs.khal pkgs.dunst];
+        path = [pkgs.unstable.rofi pkgs.khal pkgs.dunst];
         text =
           # bash
           ''

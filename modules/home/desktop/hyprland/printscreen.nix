@@ -17,7 +17,6 @@
 
   printscreen = pkgs.self.mkScript {
     path = with pkgs; [
-      coreutils
       ffmpeg
       gawk # awk
       grim # capture image

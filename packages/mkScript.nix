@@ -2,7 +2,7 @@
 {pkgs, ...}: let
   inherit (builtins) isAttrs isPath isString readFile;
   inherit (pkgs) lib runtimeShell writeTextFile;
-  inherit (lib) concatLines makeBinPath mapAttrsToList optionalString;
+  inherit (lib) concatLines makeBinPath mapAttrsToList unique;
 
   fromPath = text: fromAttrs {inherit text;};
   fromString = text: fromAttrs {inherit text;};
@@ -10,7 +10,7 @@
   fromAttrs = {
     name ? "script",
     text ? "",
-    path ? [pkgs.coreutils],
+    path ? [],
     env ? {},
     ...
   }:
@@ -22,14 +22,15 @@
         then ""
         else "/bin/${name}";
 
-      text =
+      text = let
+        # coreutils is always included in path
+        path' = unique ([pkgs.coreutils] ++ path);
+      in
         # bash
         ''
           #!${runtimeShell}
-        ''
-        + optionalString (path != []) ''
           set -euo pipefail
-          export PATH="${makeBinPath path}:''${PATH-}"
+          export PATH="${makeBinPath path'}:''${PATH-}"
 
         ''
         + concatLines (mapAttrsToList (n: v: "export ${n}=\"${v}\"") env)

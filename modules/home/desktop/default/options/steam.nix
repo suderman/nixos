@@ -40,7 +40,7 @@ in {
       Service = {
         Type = "oneshot";
         ExecStart = perSystem.self.mkScript {
-          path = [pkgs.coreutils pkgs.rsync];
+          path = [pkgs.rsync];
           env = {
             SCRATCH = "${config.persist.scratch.path}/${dataDir}";
             STORAGE = "${config.persist.storage.path}/${dataDir}";

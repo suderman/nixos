@@ -14,7 +14,6 @@
 
   path = with pkgs; [
     bluez # bluetoothctl
-    coreutils
     cliphist # clipboard
     gawk # awk
     gettext # envsubst

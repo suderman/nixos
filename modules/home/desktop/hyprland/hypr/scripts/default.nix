@@ -12,7 +12,6 @@
     );
 
   path = with pkgs; [
-    coreutils
     gawk
     gnugrep
     gnused

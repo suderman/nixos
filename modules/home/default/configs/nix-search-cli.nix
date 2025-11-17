@@ -8,7 +8,6 @@
     (perSystem.self.mkScript {
       name = "pkg";
       path = [
-        pkgs.coreutils
         pkgs.nix-search-cli
         pkgs.fzf
       ];

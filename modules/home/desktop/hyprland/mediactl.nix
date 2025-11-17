@@ -2,7 +2,6 @@
   mediactl = pkgs.self.mkScript {
     name = "mediactl";
     path = with pkgs; [
-      coreutils
       brightnessctl
       gnugrep
       libnotify

@@ -40,7 +40,7 @@
       on-click = "exec hypr-togglefullscreenorhidden";
       return-type = "json";
       exec = pkgs.self.mkScript {
-        path = with pkgs; [coreutils jq socat];
+        path = with pkgs; [jq socat];
         text =
           # bash
           ''

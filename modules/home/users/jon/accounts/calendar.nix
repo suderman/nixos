@@ -55,7 +55,7 @@ in {
     systemd.user.services.vdirsyncer.Service.ExecStart = lib.mkBefore [
       (
         pkgs.self.mkScript {
-          path = [pkgs.coreutils pkgs.vdirsyncer];
+          path = [pkgs.vdirsyncer];
           text = "yes | vdirsyncer discover calendar_${account} || true";
         }
       )
