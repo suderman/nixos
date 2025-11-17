@@ -29,6 +29,9 @@ main() {
   generate | gen | g)
     nixos_generate "$@"
     ;;
+  deploy | d)
+    nixos_deploy "$@"
+    ;;
   detect | t)
     nixos_detect "$@"
     ;;
@@ -241,6 +244,23 @@ nixos_generate() {
   # Ensure secrets are rekeyed for all hosts
   gum_info "Rekeying secrets..."
   agenix rekey -a
+}
+
+# ---------------------------------------------------------------------
+# DEPLOY
+# ---------------------------------------------------------------------
+nixos_deploy() {
+
+  host=$(dirs hosts | grep -v iso | gum choose --header "Choose host:")
+  operation=$(gum choose --header "Choose operation:" switch boot test build repl)
+  if [[ "$host" == "$(hostname)" ]]; then
+    gum_show sudo nixos-rebuild --flake .#"$host" "$operation"
+    sudo nixos-rebuild --flake .#"$host" "$operation"
+  else
+    gum_show nixos-rebuild --target-host "$host" --flake .#"$host" "$operation"
+    sudo nixos-rebuild --target-host "$host" --flake .#"$host" "$operation"
+  fi
+
 }
 
 # ---------------------------------------------------------------------
