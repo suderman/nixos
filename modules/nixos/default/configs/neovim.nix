@@ -1,15 +1,27 @@
 {pkgs, ...}: {
   environment = {
-    systemPackages = [pkgs.nvf];
-    sessionVariables.EDITOR = "nvf";
+    systemPackages = [
+      # Personal neovim configuration
+      # https://github.com/NotAShelf/nvf
+      pkgs.nvf
+
+      # Also create wrapper for nvf with expected name nvim
+      (pkgs.self.mkScript {
+        name = "nvim";
+        text = ''exec ${pkgs.nvf}/bin/nvf "$@"'';
+      })
+    ];
+
+    sessionVariables.EDITOR = "nvim";
+
     shellAliases = {
-      v = "${pkgs.nvf}/bin/nvf";
-      vi = "${pkgs.nvf}/bin/nvf";
-      vim = "${pkgs.nvf}/bin/nvf";
-      vimdiff = "${pkgs.nvf}/bin/nvf -d";
-      diff = "${pkgs.nvf}/bin/nvf -d";
-      nvim = "${pkgs.neovim}/bin/nvim"; # access to classic neovim
-      vim9 = "${pkgs.vim}/bin/vim"; # access to classic vim
+      v = "nvim";
+      vi = "nvim";
+      vim = "nvim";
+      vimdiff = "nvim -d";
+      diff = "nvim -d";
+      nvim_ = "${pkgs.neovim}/bin/nvim"; # access to classic neovim
+      vim_ = "${pkgs.vim}/bin/vim"; # access to classic vim
     };
   };
 }

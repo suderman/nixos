@@ -11,10 +11,10 @@
       "super+alt, y, exec, nautilus --new-window"
 
       # Text editor
-      "super, e, exec, kitty --class Neovim nvf"
+      "super, e, exec, kitty --class Neovim nvim"
 
       # Alt text editor
-      "super+alt, e, exec, neovide --neovim-bin nvf"
+      "super+alt, e, exec, neovide --neovim-bin nvim"
 
       # Browser
       "super, b, exec, chromium-browser"
