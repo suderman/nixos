@@ -38,6 +38,9 @@ main() {
   iso | i)
     nixos_iso "$@"
     ;;
+  rollback | r)
+    nixos_rollback "$@"
+    ;;
   sim | s)
     nixos_sim "$@"
     ;;
@@ -56,7 +59,7 @@ nixos_help() {
 Usage: nixos [COMMAND]
 
   deploy            Deploy a NixOS host configuration
-  repl              Start the NixOS REPL
+  rollback          Rollback this host to a previous generation
   add               Add a NixOS host or user
   generate          Generate missing files
   detect            Detect system devices to generate configuration   
@@ -251,14 +254,14 @@ nixos_generate() {
 # ---------------------------------------------------------------------
 nixos_deploy() {
 
-  host=$(dirs hosts | grep -v iso | gum choose --header "Choose host:")
+  host=$(dirs hosts | grep -v iso | gum choose --header "Choose host:" --selected "$(hostname)")
   operation=$(gum choose --header "Choose operation:" switch boot test build repl)
   if [[ "$host" == "$(hostname)" ]]; then
-    gum_show sudo nixos-rebuild --flake .#"$host" "$operation"
+    gum_show "sudo nixos-rebuild --flake .#$host $operation"
     sudo nixos-rebuild --flake .#"$host" "$operation"
   else
-    gum_show nixos-rebuild --target-host "$host" --flake .#"$host" "$operation"
-    sudo nixos-rebuild --target-host "$host" --flake .#"$host" "$operation"
+    gum_show "nixos-rebuild --target-host $host --use-remote-sudo --flake .#$host $operation"
+    nixos-rebuild --target-host "$host" --use-remote-sudo --flake .#"$host" "$operation"
   fi
 
 }
@@ -387,6 +390,30 @@ nixos_iso_flash() {
   sudo dd if="$iso_path" of="$device" bs=4M status=progress oflag=sync
 
   gum_info "Done. ISO flashed to $device."
+}
+
+# ---------------------------------------------------------------------
+# ROLLBACK
+# ---------------------------------------------------------------------
+nixos_rollback() {
+
+  line="$(sudo nix-env --list-generations -p /nix/var/nix/profiles/system |
+    sort -r | gum choose --header "Choose previous generation:")"
+
+  # Do nothing if the selected generation is the current generation
+  if [[ "$line" != *"(current)"* ]]; then
+    id=$(echo "$line" | awk '{print $1}') # extract the id
+
+    # Show the commands
+    gum_show "sudo nix-env --list-generations -p /nix/var/nix/profiles/system"
+    gum_show "sudo nix-env --switch-generation $id -p /nix/var/nix/profiles/system"
+    gum_show "sudo /nix/var/nix/profiles/system/bin/switch-to-configuration switch"
+
+    # Switch to the selected generation
+    sudo nix-env --switch-generation "$id" -p /nix/var/nix/profiles/system
+    sudo /nix/var/nix/profiles/system/bin/switch-to-configuration switch
+  fi
+
 }
 
 # ---------------------------------------------------------------------

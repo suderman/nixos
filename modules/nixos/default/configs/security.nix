@@ -12,8 +12,9 @@ in {
     # Does sudo need a password?
     sudo.wheelNeedsPassword = true;
 
-    # If so, how long before asking again?
+    # First line solves remote deploys asking sudo password more than once
     sudo.extraConfig = mkAfter ''
+      Defaults timestamp_type=global
       Defaults timestamp_timeout=60
       Defaults lecture=never
     '';
