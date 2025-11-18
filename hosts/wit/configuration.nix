@@ -11,11 +11,11 @@
     flake.nixosModules.desktop.gnome
   ];
 
-  # Boot with newfangled systemd-boot
+  # Boot with good ol' grub
   boot.loader = {
-    systemd-boot.enable = true;
-    systemd-boot.consoleMode = "max";
-    efi.canTouchEfiVariables = true;
+    grub.enable = true;
+    grub.efiSupport = true;
+    grub.efiInstallAsRemovable = true;
   };
 
   # Mobile computing
