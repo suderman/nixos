@@ -1,4 +1,8 @@
-{flake, ...}: {
+{
+  config,
+  flake,
+  ...
+}: {
   imports = [
     ./hardware-configuration.nix
     ./disk-configuration.nix
@@ -20,7 +24,7 @@
 
   # Snapshots and backups
   services.btrbk.volumes = {
-    "/mnt/main" = [];
+    "/mnt/main" = ["ssh://eve/mnt/pool/backups/${config.networking.hostName}"];
   };
 
   # Serve CA cert on http://10.2.0.2:1234

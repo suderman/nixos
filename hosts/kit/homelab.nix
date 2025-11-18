@@ -1,6 +1,7 @@
 {
   lib,
   pkgs,
+  flake,
   ...
 }: {
   # Experiments
@@ -67,4 +68,19 @@
   # };
 
   # services.silverbullet.enable = true;
+
+  services.home-assistant = {
+    enable = false;
+    name = "hass";
+    ip = flake.networking.zones.tail.kit;
+  };
+
+  # LAN controller
+  services.unifi = {
+    enable = false;
+    gateway = flake.networking.zones.home.logos;
+  };
+
+  services.prometheus.enable = false;
+  services.grafana.enable = false;
 }

@@ -118,6 +118,8 @@ in {
       (dir // {target = "${cfg.dataDir}/zwave";})
     ];
 
+    persist.storage.directories = [cfg.dataDir];
+
     # Postgres database configuration
     # This "hass" postgres user isn't actually being used to access the database.
     # Since the docker is running the container as root, the "root" postgres user

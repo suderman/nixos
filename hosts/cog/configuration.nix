@@ -53,10 +53,10 @@
   };
 
   # Experiments
-  services.gitea.enable = true;
-  services.grafana.enable = true;
+  services.gitea.enable = false;
+  services.grafana.enable = false;
   services.home-assistant = {
-    enable = true;
+    enable = false;
     name = "hass";
     ip = flake.networking.zones.tail.cog;
   };

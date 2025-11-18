@@ -32,7 +32,7 @@
 |                    | https://login.tailscale.com/admin/dns |
 | ------------------ | ------------------------------------- |
 | Override local DNS | `Yes`                                 |
-| Global nameservers | `100.115.119.94` _(hub)_              |
+| Global nameservers | `100.97.117.105` _(hub)_              |
 | Global nameservers | `100.69.75.29` _(eve)_                |
 
 </details>
