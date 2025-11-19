@@ -94,6 +94,14 @@ in {
     # Point default btrbk.conf to backup config
     environment.etc."btrbk.conf".source = "/etc/btrbk/backups.conf";
 
+    # Create backups directories per host
+    system.activationScripts.backups.text = let
+      inherit (builtins) attrNames concatStringsSep;
+      disks = attrNames config.services.btrbk.volumes;
+      hosts = "{" + (concatStringsSep "," (attrNames flake.nixosConfigurations)) + "}";
+    in
+      concatStringsSep "\n" (map (dir: "mkdir -p ${dir}/backups/${hosts}") disks);
+
     # Write btrbk ssh keys to /etc/btrbk
     system.activationScripts.users.text = let
       inherit (perSystem.self) mkScript;
