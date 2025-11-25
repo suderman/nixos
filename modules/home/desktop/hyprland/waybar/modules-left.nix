@@ -4,8 +4,6 @@
       "custom/launcher"
       "hyprland/workspaces"
       "custom/windows"
-      "custom/fullscreen"
-      "custom/hidden"
     ];
 
     "custom/launcher" = {
@@ -47,7 +45,7 @@
             handle() {
               case $1 in
               activewindowv2\>\>*|fullscreen\>\>*)
-                if [[ "$(hyprctl activewindow -j | jq '.fullscreen')" != "0" ]]; then # check for fullscreen mode above all
+                if [[ "$(hyprctl activewindow -j | jq '.fullscreen')" == "1" ]]; then # check for fullscreen mode above all
                   echo '{"text": "  ", "tooltip": "Fullscreen mode", "class": "active"}'
                 else
                   ws="special:hidden$(hyprctl activeworkspace -j | jq -r '.id')" # get hidden ws name from current ws
