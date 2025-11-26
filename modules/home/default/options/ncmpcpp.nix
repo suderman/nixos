@@ -1,10 +1,11 @@
+# programs.ncmpcpp.enable = true;
 {
   config,
   lib,
   pkgs,
   ...
 }: let
-  cfg = config.services.mpd;
+  cfg = config.programs.ncmpcpp;
   inherit (config.home) portOffset;
   inherit (lib) mkIf;
 in {
@@ -15,8 +16,6 @@ in {
     };
 
     programs.ncmpcpp = {
-      enable = true;
-
       package = pkgs.ncmpcpp.override {
         visualizerSupport = true;
         clockSupport = true;

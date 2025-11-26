@@ -35,8 +35,12 @@
   programs.steam.enable = true;
   programs.dolphin-emu.enable = true;
 
-  # User services
+  # Music
   services.mpd.enable = true;
+  programs.ncmpcpp.enable = true;
+  programs.rmpc.enable = true;
+
+  # User services
   services.syncthing.enable = true;
   services.withings-sync = {
     enable = true;

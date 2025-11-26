@@ -8,7 +8,7 @@
 }: let
   cfg = config.services.mpd;
   inherit (config.home) portOffset;
-  inherit (lib) mkIf mkDefault mkOption mkShellScript types;
+  inherit (lib) mkIf mkDefault mkOption types;
   mpdPort = 6600; # default port for mpd
   httpPort = 8600; # default port for http streaming
   snapPort = 1704; # default port for snapcast server stream
@@ -25,8 +25,11 @@ in {
   config = mkIf cfg.enable {
     services.mpd = {
       musicDirectory = mkDefault config.xdg.userDirs.music;
-      network.listenAddress = "any";
-      network.port = mpdPort + portOffset; # 6600 (or 6601, 6602, etc)
+      network = {
+        listenAddress = "any";
+        port = mpdPort + portOffset; # 6600 (or 6601, 6602, etc)
+        startWhenNeeded = true; # /run/user/1000/mpd/socket
+      };
       dbFile =
         if cfg.proxy == ""
         then "${cfg.dataDir}/tag_cache"
