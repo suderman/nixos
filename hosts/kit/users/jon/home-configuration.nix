@@ -36,9 +36,10 @@
   programs.dolphin-emu.enable = true;
 
   # Music
-  services.mpd.enable = true;
-  programs.ncmpcpp.enable = true;
-  programs.rmpc.enable = true;
+  services.mpd.enable = true; # music daemon
+  programs.ncmpcpp.enable = true; # old client
+  programs.rmpc.enable = true; # new client
+  programs.projectm.enable = true; # visualizer
 
   # User services
   services.syncthing.enable = true;
