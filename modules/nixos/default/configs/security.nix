@@ -82,7 +82,7 @@ in {
       publicKey = readFile (flake + /hosts/${hostName}/ssh_host_ed25519_key.pub);
       extraHostNames = ["${hostName}.${domainName}"];
     });
-    startAgent = true;
+    # startAgent = true;
   };
 
   # Custom CA private key

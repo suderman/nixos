@@ -7,7 +7,7 @@ perSystem.self.mkScript {
   # add URL streams to mpd using yt-dlp
   # https://github.com/suderman/mpd-url
   name = "mpd-url";
-  path = with pkgs; [curl gawk jq mpc-cli netcat-gnu yt-dlp];
+  path = with pkgs; [curl gawk jq mpc netcat-gnu yt-dlp];
   text = let
     repo = pkgs.fetchFromGitHub {
       owner = "suderman";

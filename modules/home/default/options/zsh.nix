@@ -57,7 +57,7 @@ in {
       autosuggestion.enable = true;
 
       # Custom location for history and more
-      dotDir = ".config/zsh";
+      dotDir = "${config.xdg.configHome}/zsh";
       history.path = "${config.xdg.dataHome}/zsh/zsh_history";
     };
 

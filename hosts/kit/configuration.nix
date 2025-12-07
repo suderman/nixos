@@ -27,9 +27,9 @@
   services.tailscale.deleteRoute = "10.1.0.0/16";
 
   # Allow powerkey to be intercepted, but still poweroff for longpress
-  services.logind = {
-    powerKey = "ignore";
-    powerKeyLongPress = "poweroff";
+  services.logind.settings.Login = {
+    HandlePowerKey = "ignore";
+    HandlePowerKeyLongPress = "poweroff";
   };
 
   # Snapshots and backups

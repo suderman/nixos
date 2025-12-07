@@ -45,8 +45,10 @@
 
   # Allow powerkey to be intercepted, but still poweroff for longpress
   services.logind = {
-    powerKey = "ignore";
-    powerKeyLongPress = "poweroff";
+    settings.Login = {
+      HandlePowerKey = "ignore";
+      HandlePowerKeyLongPress = "poweroff";
+    };
     lidSwitch = "suspend";
     lidSwitchExternalPower = "suspend";
     lidSwitchDocked = "ignore";

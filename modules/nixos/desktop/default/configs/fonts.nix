@@ -19,7 +19,7 @@
     source-sans-pro
 
     # emoji & symbols
-    noto-fonts-emoji
+    noto-fonts-color-emoji
     openmoji-black
     openmoji-color
     # symbola

@@ -17,7 +17,7 @@ in {
   };
 
   config = mkIf cfg.enable {
-    home.packages = [pkgs.tdesktop];
+    home.packages = [pkgs.telegram-desktop];
 
     # keyboard shortcuts
     services.keyd.windows."${mkClass class}" = {};

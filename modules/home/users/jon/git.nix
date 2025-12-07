@@ -1,7 +1,7 @@
 {config, ...}: {
   programs.git = {
     enable = true;
-    extraConfig.user = {
+    settings.user = {
       name = "Jon Suderman";
       email = "jon@suderman.net";
     };

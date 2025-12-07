@@ -98,7 +98,7 @@ in {
     services.mpris-proxy.enable = true;
 
     home.packages = with pkgs; [
-      mpc-cli
+      mpc
       mpd-notification
       rsgain # rsgain easy /media/music
     ];

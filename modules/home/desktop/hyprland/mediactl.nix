@@ -6,7 +6,7 @@
       gnugrep
       libnotify
       mako
-      mpc-cli
+      mpc
       playerctl
     ];
     text =
@@ -156,12 +156,17 @@ in {
 
   services.hyprsunset = {
     enable = true; # hyprctl hyprsunset
-    transitions = {
-      sunrise.calendar = "*-*-* 06:00:00";
-      sunset.calendar = "*-*-* 20:00:00";
-      sunset.requests = [
-        ["temperature 3500"]
-        ["gamma 0.8"]
+    settings = {
+      profile = [
+        {
+          time = "7:00";
+          identity = true;
+        }
+        {
+          time = "20:00";
+          temperature = 3500;
+          gamma = 0.8;
+        }
       ];
     };
   };

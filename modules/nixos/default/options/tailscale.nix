@@ -50,10 +50,7 @@ in {
         fi
       '';
     };
-
-    systemd.extraConfig = ''
-      DefaultTimeoutStopSec=30s
-    '';
+    systemd.settings.Manager.DefaultTimeoutStopSec = "30s";
 
     # Persist data between reboots
     persist.storage.directories = ["/var/lib/tailscale"];

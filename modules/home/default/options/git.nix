@@ -10,7 +10,7 @@ in {
   config = mkIf cfg.enable {
     programs.git = {
       ignores = ["*~" "*.swp"];
-      extraConfig = {
+      settings = {
         core = {
           autocrlf = "input";
           quotepath = "false";

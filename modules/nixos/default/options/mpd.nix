@@ -38,11 +38,12 @@ in {
   services.snapserver = {
     enable = false;
     openFirewall = true;
-    http = {
-      enable = true;
-      listenAddress = "0.0.0.0";
-      docRoot = "${pkgs.snapcast}/share/snapserver/snapweb/";
+    settings.http = {
+      enabled = true;
+      bind_to_address = "0.0.0.0";
+      doc_root = "${pkgs.snapcast}/share/snapserver/snapweb/";
     };
+    settings.stream.codec = "flac";
 
     # streams.mpd = {
     #   type = "pipe";
@@ -51,15 +52,15 @@ in {
     #   codec = "pcm";
     # };
 
-    codec = "flac";
-    streams.mpd = {
-      type = "pipe";
-      location = "/run/snapserver/pipe";
-      query = {
-        codec = "pcm";
-        sampleformat = "44100:16:2";
-      };
-    };
+    # settings.stream.source # new
+    # streams.mpd = {
+    #   type = "pipe";
+    #   location = "/run/snapserver/pipe";
+    #   query = {
+    #     codec = "pcm";
+    #     sampleformat = "44100:16:2";
+    #   };
+    # };
 
     # streams.mpd = {
     #   type = "pipe";

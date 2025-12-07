@@ -8,6 +8,7 @@
   cfg = config.programs.bluetuith;
   inherit (lib) mkIf options;
 in {
+  disabledModules = ["programs/bluetuith.nix"];
   options.programs.bluetuith.enable = options.mkEnableOption "bluetuith";
   config = mkIf cfg.enable {
     home.packages = [pkgs.bluetuith];
