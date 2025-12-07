@@ -28,7 +28,7 @@
     enable32Bit = true;
     extraPackages = [
       pkgs.mesa
-      pkgs.vaapiVdpau
+      pkgs.libva-vdpau-driver
     ];
   };
 
@@ -48,10 +48,10 @@
     settings.Login = {
       HandlePowerKey = "ignore";
       HandlePowerKeyLongPress = "poweroff";
+      HandleLidSwitch = "suspend";
+      HandleLidSwitchDocked = "ignore";
+      HandleLidSwitchExternalPower = "suspend";
     };
-    lidSwitch = "suspend";
-    lidSwitchExternalPower = "suspend";
-    lidSwitchDocked = "ignore";
   };
 
   # Experiments

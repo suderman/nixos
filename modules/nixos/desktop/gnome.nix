@@ -7,11 +7,11 @@
 
   services = {
     libinput.enable = true; # enable touchpad support
-    xserver = {
+    xserver.enable = true;
+    desktopManager.gnome.enable = true;
+    displayManager.gdm = {
       enable = true;
-      desktopManager.gnome.enable = true;
-      displayManager.gdm.enable = true;
-      displayManager.gdm.autoSuspend = true;
+      autoSuspend = true;
     };
     geoclue2.enable = true;
     gnome.games.enable = true;
