@@ -18,5 +18,8 @@
   };
 
   # Pixel Buds Pro
-  sound.extraSinks = ["bluez_output.AC_3E_B1_9F_43_35.1"];
+  sound.extraSinks = [
+    "bluez_output.AC_3E_B1_9F_43_35.1"
+    "bluez_output.10_D9_A2_4C_BB_F7.1"
+  ];
 }
