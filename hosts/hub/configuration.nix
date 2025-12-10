@@ -37,6 +37,9 @@
   services.prometheus.enable = true;
   services.grafana.enable = true;
 
+  # Notification server
+  services.ntfy-sh.enable = true;
+
   # LAN controller
   services.unifi = {
     enable = true;
