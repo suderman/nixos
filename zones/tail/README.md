@@ -13,6 +13,7 @@
 - `100.118.135.148` 2018 Thinkpad T480s - NixOS
   25.05([wit](https://github.com/suderman/nixos/tree/main/hosts/wit))
 - `100.93.245.77` 2020 MacBook Air - macOS
+- `100.115.101.44` Pixel 10 Pro - GrapheneOS
 
 ## VPN Configuration
 
