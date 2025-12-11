@@ -43,7 +43,7 @@ in {
     # Ensure privileges for all database users and admins
     systemd.services.postgresql.postStart = let
       inherit (lib) concatLines flatten mapAttrsToList;
-      psql = lib.getExe config.services.postgresql.package;
+      psql = "${config.services.postgresql.package}/bin/psql";
 
       sql = unique (flatten (
         mapAttrsToList (database: admins: (
