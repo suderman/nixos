@@ -260,8 +260,8 @@ nixos_deploy() {
     gum_show "sudo nixos-rebuild --flake .#$host $operation"
     sudo nixos-rebuild --flake .#"$host" "$operation"
   else
-    gum_show "nixos-rebuild --target-host $host --use-remote-sudo --flake .#$host $operation"
-    nixos-rebuild --target-host "$host" --use-remote-sudo --flake .#"$host" "$operation"
+    gum_show "nixos-rebuild --target-host $host --sudo --ask-sudo-password --flake .#$host $operation"
+    nixos-rebuild --target-host "$host" --sudo --ask-sudo-password --flake .#"$host" "$operation"
   fi
 
 }
