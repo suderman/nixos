@@ -71,4 +71,6 @@ in {
     ];
     allowReboot = true;
   };
+
+  documentation.nixos.enable = false;
 }
