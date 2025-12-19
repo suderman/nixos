@@ -119,6 +119,7 @@
           "aspnetcore-runtime-6.0.36"
           "dotnet-sdk-wrapped-6.0.428"
           "dotnet-sdk-6.0.428"
+          "broadcom-sta-6.30.223.271-59-6.12.62"
         ];
 
         # Modify pkgs with this, scripts, packages, nur and unstable
