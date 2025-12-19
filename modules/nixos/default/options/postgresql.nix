@@ -43,16 +43,18 @@ in {
     # Ensure privileges for all database users and admins
     systemd.services.postgresql.postStart = let
       inherit (lib) concatLines flatten mapAttrsToList;
+      psql = "${config.services.postgresql.package}/bin/psql";
+
       sql = unique (flatten (
         mapAttrsToList (database: admins: (
           [
             # Grant all priveleges for this database to the database user
-            "$PSQL -d \"${database}\" -tAc 'GRANT ALL PRIVILEGES ON SCHEMA public TO \"${database}\";'"
+            "${psql} -d \"${database}\" -tAc 'GRANT ALL PRIVILEGES ON SCHEMA public TO \"${database}\";'"
           ]
           ++ (map (
               admin:
               # Grant all priveleges for this database to each admin user
-              "$PSQL -d \"${database}\" -tAc 'GRANT ALL PRIVILEGES ON SCHEMA public TO \"${admin}\";'"
+              "${psql} -d \"${database}\" -tAc 'GRANT ALL PRIVILEGES ON SCHEMA public TO \"${admin}\";'"
             )
             admins)
         ))

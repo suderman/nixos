@@ -63,4 +63,6 @@
   #     Unit = "media-symlink.service";
   #   };
   # };
+
+  services.ntfy-sh.enable = true;
 }
