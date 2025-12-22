@@ -14,12 +14,19 @@ in {
   config = mkIf cfg.enable {
     services.syncthing = {
       tray.enable = false;
-
-      # v2 available in unstable
       package = pkgs.unstable.syncthing;
 
-      # We'll manually manage devices
-      overrideDevices = false;
+      # Automatically connect devices
+      settings.devices = let
+        devices = {
+          kit.id = "ARS5AY4-HVAKVHE-5IIYPX5-DZORQBR-UHYYQIQ-ON7JMUI-2PPI5IS-EW3IKAZ";
+          cog.id = "PPAG274-GPYIMXP-5CY62WF-B4QNQCP-5KWIT3Y-RG6OCJG-PRQDBP3-HW5VBQY";
+          phone.id = "U3OH2WI-YRTLO2A-UNNTEPG-QSGAAQH-VNEEQJK-A6TTVHP-KM7KX7L-Q3M5KQV";
+        };
+      in
+        builtins.mapAttrs
+        (_: device: device // {autoAcceptFolders = true;})
+        (builtins.removeAttrs devices [config.networking.hostName]);
 
       # Automatically include XDG folders marked enabled for sync
       settings.folders =
