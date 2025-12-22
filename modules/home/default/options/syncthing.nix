@@ -10,7 +10,16 @@
 
   syncPort = 22000; # tcp/udp
   webguiPort = 8384; # tcp
+
+  # All peer device ids (skipping this system)
+  # { cog = "PPAG274-GPYIMXP-5CY62WF-B4QNQCP-5KWIT3Y-RG6OCJG-PRQDBP3-HW5VBQY"; }
+  deviceIds = builtins.removeAttrs cfg.deviceIds [config.networking.hostName];
 in {
+  options.services.syncthing.deviceIds = lib.mkOption {
+    type = lib.types.attrsOf lib.types.str;
+    default = {};
+  };
+
   config = mkIf cfg.enable {
     services.syncthing = {
       tray.enable = false;
@@ -21,21 +30,20 @@ in {
       overrideFolders = false;
 
       # Automatically connect these devices
-      settings.devices = let
-        devices = {
-          kit.id = "ARS5AY4-HVAKVHE-5IIYPX5-DZORQBR-UHYYQIQ-ON7JMUI-2PPI5IS-EW3IKAZ";
-          cog.id = "PPAG274-GPYIMXP-5CY62WF-B4QNQCP-5KWIT3Y-RG6OCJG-PRQDBP3-HW5VBQY";
-          phone.id = "U3OH2WI-YRTLO2A-UNNTEPG-QSGAAQH-VNEEQJK-A6TTVHP-KM7KX7L-Q3M5KQV";
-        };
-      in
-        builtins.mapAttrs
-        (_: device: device // {autoAcceptFolders = true;})
-        (builtins.removeAttrs devices [config.networking.hostName]);
+      settings.devices =
+        builtins.mapAttrs (_: id: {
+          inherit id;
+          autoAcceptFolders = true;
+        })
+        deviceIds;
 
       # Automatically include XDG folders marked enabled for sync
       settings.folders =
         mapAttrs
-        (_: folder: {path = "~/${folder.path}";})
+        (_: folder: {
+          path = "~/${folder.path}";
+          devices = builtins.attrNames deviceIds;
+        })
         (filterAttrs (_: d: (d.enable && d.sync)) config.home.directories);
 
       # Unique listen ports per user on host
