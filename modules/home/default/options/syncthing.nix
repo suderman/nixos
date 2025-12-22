@@ -16,7 +16,11 @@ in {
       tray.enable = false;
       package = pkgs.unstable.syncthing;
 
-      # Automatically connect devices
+      # Allow devices & folders to be managed via webui
+      overrideDevices = false;
+      overrideFolders = false;
+
+      # Automatically connect these devices
       settings.devices = let
         devices = {
           kit.id = "ARS5AY4-HVAKVHE-5IIYPX5-DZORQBR-UHYYQIQ-ON7JMUI-2PPI5IS-EW3IKAZ";
