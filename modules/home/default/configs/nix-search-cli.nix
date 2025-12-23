@@ -56,7 +56,7 @@
             nix-search -m 100 "$pkg" |
               fzf --preview 'nix-search -dm 1 {}' |
               cut -d' ' -f1 |
-              xargs -r -I{} nix profile install --impure github:NixOS/nixpkgs/nixpkgs-unstable#{}
+              xargs -r -I{} nix profile add --impure github:NixOS/nixpkgs/nixpkgs-unstable#{}
 
             # Add package to history
             nix profile list --json | jq -r '.elements | keys[]' >>$history
