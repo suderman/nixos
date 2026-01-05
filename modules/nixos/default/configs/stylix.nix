@@ -29,6 +29,22 @@ in {
       popups = mkDefault 1.0;
     };
 
+    iconTheme = {
+      enable = true;
+
+      # package = pkgs.reversal-icon-theme;
+      # light = "Reversal";
+      # dark = "Reversal";
+
+      # package = pkgs.papirus-icon-theme;
+      # light = "Papirus-Light";
+      # dark = "Papirus-Dark";
+
+      package = pkgs.qogir-icon-theme;
+      light = "Qogir-Light";
+      dark = "Qogir-Dark";
+    };
+
     # cursor = mkDefault {
     #   name = "macOS";
     #   package = pkgs.apple-cursor;

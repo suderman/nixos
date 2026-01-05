@@ -12,9 +12,6 @@ in {
   ];
 
   programs.rofi = {
-    extraConfig.icon-theme = "candy-icons";
-    # extraConfig.icon-theme = "Papirus";
-    font = lib.mkDefault "JetBrainsMono 14";
     theme = {
       "*" = {
         bg0 = l "#252034E6";
@@ -70,7 +67,7 @@ in {
 
       icon-search = {
         expand = false;
-        filename = "search";
+        filename = "searching";
         size = l "28px";
         vertical-align = l "0.5";
       };
