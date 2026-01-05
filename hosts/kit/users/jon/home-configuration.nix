@@ -34,6 +34,7 @@
   # Gaming
   programs.steam.enable = true;
   programs.dolphin-emu.enable = true;
+  programs.citron.enable = true;
 
   # Music
   services.mpd.enable = true; # music daemon

@@ -5,7 +5,7 @@
   pkgs,
   ...
 }: let
-  cfg = config.programs.steam;
+  cfg = config.programs.dolphin-emu;
   inherit (lib) mkIf options;
 in {
   options.programs.dolphin-emu.enable = options.mkEnableOption "dolphin-emu";
