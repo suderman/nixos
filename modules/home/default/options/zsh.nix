@@ -30,10 +30,10 @@ in {
         switch = "echo nixos-rebuild switch --flake /etc/nixos#$(hostname) && sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)";
       };
 
-      oh-my-zsh = {
-        enable = lib.mkDefault true;
-        theme = "af-magic"; # "robbyrussell" "cypher"
-      };
+      # oh-my-zsh = {
+      #   enable = lib.mkDefault true;
+      #   theme = "af-magic"; # "robbyrussell" "cypher"
+      # };
 
       initContent = ''
         # Extract mp4 video from *.MP.jpg
