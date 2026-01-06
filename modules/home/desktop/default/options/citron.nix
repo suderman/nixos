@@ -7,7 +7,26 @@
 }: let
   cfg = config.programs.citron;
   inherit (lib) mkIf options;
-  binPath = "${config.xdg.userDirs.extraConfig.XDG_GAMES_DIR}/ns/citron.AppImage";
+
+  # https://git.citron-emu.org/Citron/Emulator/releases
+  package = pkgs.stdenv.mkDerivation {
+    pname = "citron-appimage";
+    version = "0.12.25";
+
+    # curl -L -O <url>
+    # nix hash file <filename>
+    src = pkgs.fetchurl {
+      url = "https://git.citron-emu.org/Citron/Emulator/releases/download/0.12.25/citron_stable-01c042048-linux-x86_64_v3.AppImage";
+      sha256 = "G0yX6ZP6f9nDY41VS8k/UVduoTsZLFrAduA5mOD3OmY=";
+    };
+
+    unpackPhase = "true";
+    installPhase = ''
+      mkdir -p $out/bin
+      echo $src > $out/path
+    '';
+    meta.description = "Citron Nintendo Switch emulator (AppImage)";
+  };
 in {
   options.programs.citron.enable = options.mkEnableOption "citron";
   config = mkIf cfg.enable {
@@ -21,9 +40,21 @@ in {
     home.packages = [
       (
         pkgs.self.mkApplication {
-          name = "citron";
-          text = "${binPath}";
+          name = "org.citron_emu.citron";
+          text =
+            # bash
+            ''
+              # AppImage must be copied from nix store to chmod executable
+              if [[ ! -e ~/.cache/citron/citron.AppImage ]]; then
+                path="$(cat ${package}/path)"
+                install -Dm755 $path ~/.cache/citron/citron.AppImage
+              fi
+              # Execute this copy of the program
+              ~/.cache/citron/citron.AppImage "$@"
+            '';
           desktopName = "Citron";
+          comment = "Citron Nintendo Switch emulator";
+          categories = ["Game"];
           icon = pkgs.writeText "citron.svg" ''
             <svg xmlns="http://www.w3.org/2000/svg" width="2500" height="2427" viewBox="0 0 540.2 524.4">
               <style>.st0{fill:#e1131f}.st1{fill:#fff}</style>

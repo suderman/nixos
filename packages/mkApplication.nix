@@ -13,13 +13,15 @@ in
     icon ? null,
     pname ? name,
     version ? "1.0",
+    categories ? [],
+    comment ? "",
     ...
   }: let
-    script = perSystem.self.mkScript (removeAttrs args ["desktopName" "icon" "pname" "version"]);
+    script = perSystem.self.mkScript (removeAttrs args ["desktopName" "icon" "pname" "version" "categories" "comment"]);
     desktopItem =
       (removeAttrs args ["text" "path" "env" "pname" "version"])
       // {
-        inherit name desktopName;
+        inherit name desktopName comment categories;
         exec = "${script}/bin/${pname}";
         icon =
           if isPath icon
