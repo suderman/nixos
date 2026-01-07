@@ -18,12 +18,12 @@ in {
       add_newline = false;
       line_break.disabled = true;
       directory = {
-        format = "[ $path]($style) ";
-        style = "cyan ";
+        format = "[$path]($style) ";
+        style = "cyan";
         truncate_to_repo = true;
       };
       character = {
-        success_symbol = "[❯](purple)";
+        success_symbol = "[❯](cyan)";
         error_symbol = "[❯](red)";
         vimcmd_symbol = "[❮](green)";
       };
