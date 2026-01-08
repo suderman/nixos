@@ -10,18 +10,18 @@ in
   args @ {
     name ? "application",
     desktopName ? name,
+    genericName ? name,
+    categories ? [],
     icon ? null,
     pname ? name,
     version ? "1.0",
-    categories ? [],
-    comment ? "",
     ...
   }: let
-    script = perSystem.self.mkScript (removeAttrs args ["desktopName" "icon" "pname" "version" "categories" "comment"]);
+    script = perSystem.self.mkScript (removeAttrs args ["desktopName" "genericName" "icon" "pname" "version" "categories"]);
     desktopItem =
       (removeAttrs args ["text" "path" "env" "pname" "version"])
       // {
-        inherit name desktopName comment categories;
+        inherit name desktopName genericName categories;
         exec = "${script}/bin/${pname}";
         icon =
           if isPath icon

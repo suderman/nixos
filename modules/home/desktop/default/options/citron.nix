@@ -44,16 +44,20 @@ in {
           text =
             # bash
             ''
+              # Extract name of binary
+              path="$(cat ${package}/path)"
+              binary="/run/user/${toString config.home.uid}/citron/$(basename $path)"
+
               # AppImage must be copied from nix store to chmod executable
-              if [[ ! -e ~/.cache/citron/citron.AppImage ]]; then
-                path="$(cat ${package}/path)"
-                install -Dm755 $path ~/.cache/citron/citron.AppImage
+              if [[ ! -e $binary ]]; then
+                install -Dm755 $path $binary
               fi
+
               # Execute this copy of the program
-              ~/.cache/citron/citron.AppImage "$@"
+              $binary "$@"
             '';
           desktopName = "Citron";
-          comment = "Citron Nintendo Switch emulator";
+          genericName = "Nintendo Switch emulator";
           categories = ["Game"];
           icon = pkgs.writeText "citron.svg" ''
             <svg xmlns="http://www.w3.org/2000/svg" width="2500" height="2427" viewBox="0 0 540.2 524.4">
