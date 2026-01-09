@@ -29,6 +29,7 @@
   programs.dolphin-emu.enable = true;
   programs.citron.enable = true;
   programs.zwift.enable = true; # fitness
+  programs.opencode.enable = true;
 
   # User services
   services.mpd.enable = true;

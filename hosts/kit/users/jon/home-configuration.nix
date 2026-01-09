@@ -30,6 +30,7 @@
   programs.davinci-resolve.enable = true;
   programs.sparrow.enable = true;
   programs.zwift.enable = true;
+  programs.opencode.enable = true;
 
   # Gaming
   programs.steam.enable = true;
