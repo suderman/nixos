@@ -20,7 +20,7 @@ in {
         autoupdate = false;
         provider = {
           openrouter.options.apiKey = "{file:${config.age.secrets.openrouter.path}}";
-          zen.options.apiKey = "{file:${config.age.secrets.zen.path}}";
+          opencode.options.apiKey = "{file:${config.age.secrets.zen.path}}";
         };
       };
       commands.changelog = ''
