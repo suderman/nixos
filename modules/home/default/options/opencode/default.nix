@@ -2,7 +2,7 @@
 {
   config,
   lib,
-  pkgs,
+  perSystem,
   ...
 }: let
   cfg = config.programs.opencode;
@@ -14,7 +14,7 @@ in {
       zen.rekeyFile = ./zen.age;
     };
     programs.opencode = {
-      package = pkgs.unstable.opencode;
+      package = perSystem.llm-agents.opencode;
       settings = {
         autoshare = false;
         autoupdate = false;

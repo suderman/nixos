@@ -6,7 +6,6 @@
 }: {
   # List packages installed in user profile
   home.packages = [
-    perSystem.nix-ai-tools.crush # ai coding agent
     perSystem.self.ipaddr # where you at?
     perSystem.self.sv # wrapper for systemctl/journalctl
     pkgs._1password-cli # op

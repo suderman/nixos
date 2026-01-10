@@ -71,8 +71,8 @@
     neovim.url = "github:suderman/neovim";
 
     # AI coding agents
-    # <https://github.com/numtide/nix-ai-tools>
-    nix-ai-tools.url = "github:numtide/nix-ai-tools";
+    # <https://github.com/numtide/llm-agents.nix>
+    llm-agents.url = "github:numtide/llm-agents.nix";
   };
 
   outputs = inputs: {
@@ -101,6 +101,7 @@
       "suderman.cachix.org-1:8lYeb2gOOVDPbUn1THnL5J3/L4tFWU30/uVPk7sCGmI="
       "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
       "numtide.cachix.org-1:2ps1kLBUWjxIneOy1Ik6cQjb41X0iXVXeHigGmycPPE="
+      "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
     ];
