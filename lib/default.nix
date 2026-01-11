@@ -93,16 +93,4 @@ in rec {
       else "${salt}@";
   in
     prefix + "bip85-hex32-index${toString flake.derivationIndex}";
-
-  # Extract URL from cache public key
-  cacheUrl = index: pubKey: let
-    name = lib.pipe pubKey [
-      (x: lib.split ":" x)
-      (x: builtins.elemAt x 0)
-      (x: lib.split "-" x)
-      (x: lib.flatten x)
-      (x: lib.take (builtins.length x - 1) x)
-      (x: lib.concatStringsSep "-" x)
-    ];
-  in "https://${name}?priority=${toString index}";
 }

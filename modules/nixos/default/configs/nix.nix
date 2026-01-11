@@ -4,8 +4,8 @@
   flake,
   ...
 }: let
+  inherit (builtins) attrNames attrValues;
   inherit (lib) mapAttrs imap1;
-  inherit (flake.lib) ls cacheUrl;
 in {
   # Nix Settings
   nix.settings = {
@@ -31,14 +31,14 @@ in {
     builders-use-substitutes = true;
 
     # Binary caches
-    substituters = imap1 (index: key: cacheUrl index key) flake.caches;
-    trusted-public-keys = flake.caches;
+    substituters = imap1 (i: url: "${url}?priority=${toString i}") (attrNames flake.caches);
+    trusted-public-keys = attrValues flake.caches;
   };
 
   nix.sshServe = {
     enable = true;
     keys = let
-      userKeys = ls {
+      userKeys = flake.lib.ls {
         path = flake + /users;
         dirsWith = ["id_ed25519.pub"];
       };
