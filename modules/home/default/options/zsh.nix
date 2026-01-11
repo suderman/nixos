@@ -26,6 +26,20 @@ in {
         size = 10000;
       };
 
+      plugins = [
+        {
+          name = "zsh-vi-mode";
+          src = "${pkgs.zsh-vi-mode}/share/zsh-vi-mode";
+        }
+      ];
+      # auto-pair compatibility
+      #
+      # https://github.com/jeffreytse/zsh-vi-mode/issues/185#issuecomment-1476720559
+      sessionVariables = {
+        ZVM_INIT_MODE = "sourcing";
+        AUTOPAIR_INIT_INHIBIT = "1";
+      };
+
       shellAliases = {
         switch = "echo nixos-rebuild switch --flake /etc/nixos#$(hostname) && sudo nixos-rebuild switch --flake /etc/nixos#$(hostname)";
       };
