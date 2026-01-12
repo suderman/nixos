@@ -23,6 +23,6 @@
 
   # Snapshots and backups
   services.btrbk.volumes = {
-    "/mnt/main" = ["ssh://fit/mnt/pool/backups/${config.networking.hostName}"];
+    "/mnt/main" = ["ssh://pow/mnt/pool/backups/${config.networking.hostName}"];
   };
 }

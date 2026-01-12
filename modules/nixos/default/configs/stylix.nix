@@ -7,7 +7,7 @@
   ...
 }: let
   cfg = config.stylix;
-  inherit (lib) mkDefault mkIf;
+  inherit (lib) mkDefault;
   inherit (config.lib.stylix) pixel;
 in {
   # Import stylix module
@@ -40,19 +40,16 @@ in {
       # light = "Papirus-Light";
       # dark = "Papirus-Dark";
 
-      package = pkgs.qogir-icon-theme;
-      light = "Qogir-Light";
-      dark = "Qogir-Dark";
+      package = mkDefault pkgs.qogir-icon-theme;
+      light = mkDefault "Qogir-Light";
+      dark = mkDefault "Qogir-Dark";
     };
 
-    # cursor = mkDefault {
-    #   name = "macOS";
-    #   package = pkgs.apple-cursor;
-    #   size = 36;
-    # };
-    cursor = mkDefault {
-      name = "Banana";
-      package = pkgs.banana-cursor;
+    cursor = {
+      # name = "macOS";
+      # package = pkgs.apple-cursor;
+      name = mkDefault "Banana";
+      package = mkDefault pkgs.banana-cursor;
       size = mkDefault 36;
     };
 

@@ -5,7 +5,7 @@
 - `100.69.75.29` 2009 Mac Pro - NixOS
   ([eve](https://github.com/suderman/nixos/tree/main/hosts/eve))
 - `100.122.127.88` 2009 Mac Pro - NixOS
-  ([fit](https://github.com/suderman/nixos/tree/main/hosts/fit))
+  ([pow](https://github.com/suderman/nixos/tree/main/hosts/pow))
 - `100.115.119.94` 2013 Intel NUC - NixOS
   ([hub](https://github.com/suderman/nixos/tree/main/hosts/hub))
 - `100.67.76.42` 2024 FormD T1 Desktop - NixOS

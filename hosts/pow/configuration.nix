@@ -20,6 +20,11 @@
   # Remove undesired route
   services.tailscale.deleteRoute = "10.1.0.0/16";
 
+  # CVE-2019-9501: heap buffer overflow
+  nixpkgs.config.permittedInsecurePackages = [
+    "broadcom-sta-6.30.223.271-59-6.12.63"
+  ];
+
   # Bigger banana
   stylix.cursor.size = 46;
 

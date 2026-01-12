@@ -168,8 +168,8 @@ with a new `volumes` option that declares which mounts get snapshots (subvolume
 
 ```nix
 services.btrbk.volumes = with config.networking; {
-  "/mnt/main" = ["ssh://fit/mnt/pool/backups/${hostName}" "ssh://eve/mnt/pool/backups/${hostName}"];
-  "/mnt/data" = ["ssh://fit/mnt/pool/backups/${hostName}"];
+  "/mnt/main" = ["ssh://pow/mnt/pool/backups/${hostName}" "ssh://eve/mnt/pool/backups/${hostName}"];
+  "/mnt/data" = ["ssh://pow/mnt/pool/backups/${hostName}"];
   "/mnt/game" = []; # no backups, just local snapshots
 };
 ```

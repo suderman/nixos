@@ -14,11 +14,44 @@ Among others, this flake depends on the following fantastic
 - [impermanence](https://github.com/nix-community/impermanence)
 - [disko](https://github.com/nix-community/disko)
 - [home-manager](https://github.com/nix-community/home-manager)
+- [stylix](https://github.com/danth/stylix)
+- [nix-index-database](https://github.com/Mic92/nix-index-database)
+- [nix-flatpak](https://github.com/gmodena/nix-flatpak)
+- [nix-hardware](https://github.com/NixOS/nixos-hardware)
+- [NUR](https://github.com/nix-community/NUR)
 
-## Note
+## Getting Started
 
-This is a work-in-progress as I migrate from
-[legacy branch](https://github.com/suderman/nixos/tree/legacy).
+Enter the development environment:
+
+```sh
+nix develop
+```
+
+Common commands available in the devshell:
+
+- `nixos` - Deploy hosts and generate files
+- `agenix` - Manage secrets and identity
+- `browse` - Browse flake structure
+
+Add a new host or user:
+
+```sh
+nixos add host
+nixos add user
+```
+
+Generate missing files (keys, certificates):
+
+```sh
+nixos generate
+```
+
+Deploy configuration to a host:
+
+```sh
+nixos deploy
+```
 
 ## Sections
 
@@ -27,6 +60,7 @@ This is a work-in-progress as I migrate from
 - [NixOS & Home Manager secrets](https://github.com/suderman/nixos/tree/main/secrets)
 - [NixOS user configurations](https://github.com/suderman/nixos/tree/main/users)
 - [Networking](https://github.com/suderman/nixos/tree/main/zones)
+- [Custom packages](https://github.com/suderman/nixos/tree/main/packages)
 - [Hyprland desktop configuration](https://github.com/suderman/nixos/tree/main/modules/home/desktop/hyprland)
 
 ## Resources

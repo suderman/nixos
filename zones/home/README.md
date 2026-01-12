@@ -10,7 +10,7 @@
 - `10.1.0.6` 2024 FormD T1 Desktop - NixOS
   ([kit](https://github.com/suderman/nixos/tree/main/hosts/kit))
 - `10.1.0.7` 2009 Mac Pro - NixOS
-  ([fit](https://github.com/suderman/nixos/tree/main/hosts/fit))
+  ([pow](https://github.com/suderman/nixos/tree/main/hosts/pow))
 - `10.1.0.8` Universal Devices - ISY-944i
 - `10.1.0.9` 2020 MacBook Air - macOS
 

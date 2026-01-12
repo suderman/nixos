@@ -24,9 +24,9 @@
 
   # Snapshots and backups
   services.btrbk.volumes = {
-    "/mnt/main" = ["ssh://fit/mnt/pool/backups/${config.networking.hostName}"];
-    "/mnt/data" = ["ssh://fit/mnt/pool/backups/${config.networking.hostName}"];
-    "/mnt/pool" = ["ssh://fit/mnt/pool/backups/${config.networking.hostName}"];
+    "/mnt/main" = ["ssh://pow/mnt/pool/backups/${config.networking.hostName}"];
+    "/mnt/data" = ["ssh://pow/mnt/pool/backups/${config.networking.hostName}"];
+    "/mnt/pool" = ["ssh://pow/mnt/pool/backups/${config.networking.hostName}"];
   };
 
   # Send everything to backblaze

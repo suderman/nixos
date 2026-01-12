@@ -8,7 +8,7 @@
   # Hyprland on AMD desktop
   wayland.windowManager.hyprland = {
     settings.exec-once = ["freetube" "zwift"];
-    enablePlugins = false; # set false if plugins barf errors
+    enablePlugins = true; # set false if plugins barf errors
   };
 
   programs.zwift.enable = true; # fitness

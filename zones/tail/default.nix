@@ -2,7 +2,7 @@
   # VPN: Tailscale <https://login.tailscale.com/admin/machines>
   cog = "100.99.91.44";
   eve = "100.69.75.29";
-  fit = "100.122.127.88";
+  pow = "100.122.127.88";
   hub = "100.97.117.105";
   kit = "100.67.76.42";
   lux = "100.90.63.125";
