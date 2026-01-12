@@ -148,7 +148,7 @@ in {
     # Immich expects its postgres user to be a "superuser"
     # ...not ideal, but getting tired of fighting against this...
     systemd.services.postgresql.postStart = mkAfter ''
-      $PSQL -tAc 'ALTER USER immich WITH SUPERUSER;'
+      ${config.services.postgresql.package}/bin/psql -tAc 'ALTER USER immich WITH SUPERUSER;'
     '';
 
     # Init service
