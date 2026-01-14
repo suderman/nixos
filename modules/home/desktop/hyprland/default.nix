@@ -22,8 +22,6 @@
       systemd.target = "hyprland-session.target";
     };
 
-    home.shellAliases.hyprland = "Hyprland"; # I'll never remember the H
-
     # Ensure portals and other systemd user services are running
     # https://wiki.hypr.land/Hypr-Ecosystem/xdg-desktop-portal-hyprland/
     home.packages = [

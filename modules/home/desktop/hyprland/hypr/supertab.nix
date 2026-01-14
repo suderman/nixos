@@ -16,7 +16,6 @@
     ];
 
     windowrule = [
-      # "bordersize 1, tag:mark"
       "border_size 1, match:tag mark"
     ];
   };

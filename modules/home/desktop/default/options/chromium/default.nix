@@ -73,8 +73,6 @@ in {
     # tag Chromium and Picture-in-Picture windows
     wayland.windowManager.hyprland.settings = {
       windowrule = [
-        # "tag +web, class:(${class})"
-        # "tag +pip, title:^(Picture in picture)$"
         "tag +web, match:class (${class})"
         "tag +pip, match:title ^(Picture-in-Picture)$"
       ];

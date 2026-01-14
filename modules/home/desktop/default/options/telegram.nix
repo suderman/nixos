@@ -23,7 +23,6 @@ in {
     services.keyd.windows."${mkClass class}" = {};
 
     wayland.windowManager.hyprland.settings.windowrule = [
-      # "float, class:^(${class}|telegramdesktop)$, title:^(Media viewer)$"
       "float on, match:class ^(${class}|telegramdesktop)$, match:title ^(Media viewer)$"
     ];
 

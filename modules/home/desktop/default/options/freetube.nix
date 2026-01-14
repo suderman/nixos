@@ -27,7 +27,6 @@ in {
     # tag Freetube windows
     wayland.windowManager.hyprland.settings = {
       windowrule = [
-        # "tag +yt, class:[Ff]reetube"
         "tag +yt, match:class [Ff]reetube"
       ];
     };

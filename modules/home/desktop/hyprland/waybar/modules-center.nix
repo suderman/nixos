@@ -40,8 +40,6 @@
 
   # mini-calendar and top center of screen
   wayland.windowManager.hyprland.settings.windowrule = [
-    # "move 45.8% 30,class:gsimplecal"
-    # "opacity 0.8,class:gsimplecal"
-    "move ((monitor_w*0.45799999999999996)) (30), opacity 0.8, match:class gsimplecal"
+    "move ((monitor_w*0.458)) (30), opacity 0.8, match:class gsimplecal"
   ];
 }
