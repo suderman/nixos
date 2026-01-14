@@ -81,7 +81,8 @@
 
     # animation slide/popin/fade
     layerrule = [
-      "animation slide, notifications"
+      # "animation slide, notifications"
+      "animation slide, match:namespace notifications"
       # "animation slide, menu"
       # "dimaround, menu"
     ];

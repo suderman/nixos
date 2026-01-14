@@ -16,12 +16,16 @@ in {
     # Persist data directories Steam uses
     persist.scratch.directories = [dataDir runDir];
 
+    # Tag steam and games in hyprland
     wayland.windowManager.hyprland.settings.windowrule = [
-      # Tag steam and games in hyprland
-      "tag +game, class:[Ss]team"
-      "tag +game, class:^steam_app_(.*)$"
-      "tag +game, class:^(.*).bin.x86$"
-      "tag +game, class:^(.*)x86_64$"
+      # "tag +game, class:[Ss]team"
+      # "tag +game, class:^steam_app_(.*)$"
+      # "tag +game, class:^(.*).bin.x86$"
+      # "tag +game, class:^(.*)x86_64$"
+      "tag +game, match:class [Ss]team"
+      "tag +game, match:class ^steam_app_(.*)$"
+      "tag +game, match:class ^(.*).bin.x86$"
+      "tag +game, match:class ^(.*)x86_64$"
     ];
 
     # Timer to run backup script daily

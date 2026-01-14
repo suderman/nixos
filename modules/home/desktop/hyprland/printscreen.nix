@@ -178,8 +178,9 @@ in {
         "ctrl, print, exec, printscreen color"
       ];
       windowrule = [
-        "fullscreen, class:com.gabm.satty"
-        "float, class:com.gabm.satty"
+        # "fullscreen, class:com.gabm.satty"
+        # "float, class:com.gabm.satty"
+        "fullscreen on, float on, match:class com.gabm.satty"
       ];
     };
 

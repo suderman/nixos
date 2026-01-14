@@ -58,7 +58,7 @@
       swallow_regex = "^(Alacritty|kitty|footclient)$";
       swallow_exception_regex = "wev|^(*.Yazi.*)$|^(*.mpv.*)$|^(*.imv.*)$|^(*.nvim.*)$";
       focus_on_activate = false;
-      new_window_takes_over_fullscreen = 2; # unfullscreen when opening new window
+      on_focus_under_fullscreen = 2; # unfullscreen when opening new window
     };
 
     "binds:workspace_back_and_forth" = true;

@@ -88,8 +88,9 @@ in {
 
     # Pretty animations in hyprland
     wayland.windowManager.hyprland.settings.animations.layerrule = [
-      "animation fade, rofi"
-      "dimaround, rofi"
+      # "animation fade, rofi"
+      # "dimaround, rofi"
+      "animation fade, dim_around on, match:namespace rofi"
     ];
   };
 }

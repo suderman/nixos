@@ -88,9 +88,10 @@ in {
     };
 
     wayland.windowManager.hyprland.settings.windowrule = [
-      "float, class:${pager.class}"
-      "size 800 900, class:${pager.class}"
-      "animation gnomed, class:${pager.class}"
+      # "float, class:${pager.class}"
+      # "size 800 900, class:${pager.class}"
+      # "animation gnomed, class:${pager.class}"
+      "float on, size 800 900, animation gnomed, match:class ${pager.class}"
     ];
 
     services.keyd.windows."${config.lib.keyd.mkClass pager.class}" = {

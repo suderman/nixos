@@ -29,8 +29,10 @@
   stylix.targets.waybar.font = "sansSerif"; # not monospace
 
   wayland.windowManager.hyprland.settings = {
-    animations.layerrule = ["animation slide, waybar"]; # slick animations
-    layerrule = ["blur,waybar"]; # blur the bar
+    # animations.layerrule = ["animation slide, waybar"]; # slick animations
+    animations.layerrule = ["animation slide, blur on, match:namespace waybar"]; # slick animations
+    # layerrule = ["blur,waybar"]; # blur the bar
+    layerrule = ["blur on, match:namespace waybar"]; # blur the bar
   };
 
   home.localStorePath = [

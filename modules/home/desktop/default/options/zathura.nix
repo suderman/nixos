@@ -60,7 +60,8 @@ in {
 
     # Treat as media windows by hyprland
     wayland.windowManager.hyprland.settings = {
-      windowrule = ["tag +media, class:(${class})"];
+      # windowrule = ["tag +media, class:(${class})"];
+      windowrule = ["tag +media, match:class (${class})"];
     };
 
     # Make default application for PDFs, PDFs, XPS

@@ -43,15 +43,17 @@
       # "workspace 1, class:[Ff]irefox"
 
       # Games fullscreen on workspace 9
-      "workspace 9, tag:game"
-      "fullscreen, tag:game"
+      # "workspace 9, tag:game"
+      # "fullscreen, tag:game"
+      "workspace 9, fullscreen on, match:tag game"
 
       # forbid windows from maximizing/fullscreening themselves
       # "suppressevent maximize, class:.*"
       # "suppressevent fullscreen, class:.*"
 
       # idle inhibit while fullscreen (games, videos, etc)
-      "idleinhibit fullscreen, class:.*"
+      # "idleinhibit fullscreen, class:.*"
+      "idle_inhibit fullscreen, match:class .*"
     ];
   };
 }

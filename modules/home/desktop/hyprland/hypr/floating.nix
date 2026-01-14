@@ -36,34 +36,42 @@
 
     windowrule = [
       # Pinned windows have a border and hide decorations when inactive
-      "bordersize 2, pinned:1"
-      "decorate 0, pinned:1, focus:0"
+      # "bordersize 2, pinned:1"
+      # "decorate 0, pinned:1, focus:0"
+      "border_size 2, match:pin 1"
+      "decorate 0, match:pin 1, match:focus 0"
 
       # Picture-in-Picture for any windows tagged "pip"
       # ("tag +pip" rules are found elsewhere)
-      "float, tag:pip"
-      "pin, tag:pip"
-      "keepaspectratio, tag:pip"
-      "size 480 270, tag:pip"
-      "minsize 240 135, tag:pip"
-      "maxsize 960 540, tag:pip"
-      "move 100%-490 100%-280, tag:pip"
+      # "float, tag:pip"
+      # "pin, tag:pip"
+      # "keepaspectratio, tag:pip"
+      # "size 480 270, tag:pip"
+      # "minsize 240 135, tag:pip"
+      # "maxsize 960 540, tag:pip"
+      # "move 100%-490 100%-280, tag:pip"
+      "float on, pin on, keep_aspect_ratio on, size 480 270, min_size 240 135, max_size 960 540, move ((monitor_w*1)-490) ((monitor_h*1)-280), match:tag pip"
 
       # Dialog rules for any windows tagged "dialog"
-      "float, tag:dialog"
-      "center, tag:dialog"
-      "noborder, tag:dialog"
-      "size 1280 768, tag:dialog"
+      # "float, tag:dialog"
+      # "center, tag:dialog"
+      # "noborder, tag:dialog"
+      # "size 1280 768, tag:dialog"
+      "float on, center on, border_size 0, size 1280 768, match:tag dialog"
 
       # Aways tag these windows as "dialog"
-      "tag +dialog, title:(Progress|Save File|Save As)"
-      "tag +dialog, class:(xdg-desktop-portal-gtk)"
-      "tag +dialog, class:(re.sonny.Junction)"
+      # "tag +dialog, title:(Progress|Save File|Save As)"
+      "tag +dialog, match:title (Progress|Save File|Save As)"
+      # "tag +dialog, class:(xdg-desktop-portal-gtk)"
+      "tag +dialog, match:class (xdg-desktop-portal-gtk)"
+      # "tag +dialog, class:(re.sonny.Junction)"
+      "tag +dialog, match:class (re.sonny.Junction)"
 
       # Picture, video, audio overlay for any windows tagged "media"
       # ("tag +pip" rules are found elsewhere)
-      "float, tag:media"
-      "size 1280 720, tag:media"
+      # "float, tag:media"
+      # "size 1280 720, tag:media"
+      "float on, size 1280 720, match:tag media"
     ];
   };
 }
