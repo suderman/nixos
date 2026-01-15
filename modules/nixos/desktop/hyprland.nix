@@ -21,6 +21,7 @@
         vi_mode = false;
         animation = "matrix";
         bigclock = true;
+        session_log = null;
       };
     };
     persist.scratch.files = ["/etc/ly/save.ini"];
