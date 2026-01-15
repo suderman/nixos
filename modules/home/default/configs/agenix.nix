@@ -4,4 +4,10 @@
     flake.inputs.agenix-rekey.homeManagerModules.default
     (flake + /secrets)
   ];
+
+  systemd.user.services.agenix = {
+    Unit = {
+      After = ["ssh-agent.service" "gcr-ssh-agent.service"];
+    };
+  };
 }
