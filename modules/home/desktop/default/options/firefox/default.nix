@@ -7,17 +7,15 @@
   ...
 }: let
   cfg = config.programs.firefox;
-  inherit (lib) mkIf;
-  inherit (flake.lib) ls;
   inherit (config.lib.keyd) mkClass;
 
   # Window class name
   class = "firefox";
 in {
   # Extra addons not found in nur
-  imports = ls ./.;
+  imports = flake.lib.ls ./.;
 
-  config = mkIf cfg.enable {
+  config = lib.mkIf cfg.enable {
     programs.firefox = {
       profiles.default = {
         settings = {
@@ -52,28 +50,28 @@ in {
           rsshub-radar
           scroll_anywhere
           sponsorblock
-          stylus
+          # stylus
           ublock-origin
           cfg.extraAddons.easy-container-shortcuts
         ];
 
         search = {
-          default = "Whoogle";
-          force = true;
-          engines."Whoogle" = let
-            whoogle = "g.sol";
-          in {
-            urls = [{template = "https://${whoogle}/search?q={searchTerms}";}];
-            icon = "https://${whoogle}/static/img/favicon/apple-icon-144x144.png";
-            updateInterval = 24 * 60 * 60 * 1000; # every day
-            definedAliases = ["@wh"];
-            method = "POST";
-          };
-          engines."Nix Code" = {
-            urls = [{template = "https://github.com/search?type=code&q=lang%3Anix+{searchTerms}";}];
-            icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
-            definedAliases = ["@nix"];
-          };
+          # default = "Whoogle";
+          # force = true;
+          # engines."Whoogle" = let
+          #   whoogle = "g.sol";
+          # in {
+          #   urls = [{template = "https://${whoogle}/search?q={searchTerms}";}];
+          #   icon = "https://${whoogle}/static/img/favicon/apple-icon-144x144.png";
+          #   updateInterval = 24 * 60 * 60 * 1000; # every day
+          #   definedAliases = ["@wh"];
+          #   method = "POST";
+          # };
+          # engines."Nix Code" = {
+          #   urls = [{template = "https://github.com/search?type=code&q=lang%3Anix+{searchTerms}";}];
+          #   icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+          #   definedAliases = ["@nix"];
+          # };
         };
       };
     };
