@@ -2,7 +2,7 @@
   imports = [
     flake.homeModules.default
     # flake.homeModules.desktop.hyprland
-    flake.homeModules.users.jon
+    # flake.homeModules.users.jon
   ];
 
   # # Hyprland on AMD desktop
