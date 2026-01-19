@@ -28,4 +28,4 @@ Also, 4 drive bays are handy for home backups!
 
 ## Install Notes
 
-This ancient beast has no concept of selecting a startup disk at boot. The RX 580 won't display anything during boot and even with a supported Mac GPU, the startup manager won't display my Nixos volumes as a selectable choice. To force it to boot from a USB drive, there must be no bootable interal drives installed. This means any SSD must be pre-wiped (or at least its boot partition sabotaged) when attempting to boot from a USB ISO.
+This ancient beast has no concept of selecting a startup disk at boot. The RX 580 won't display anything during boot and even with a supported Mac GPU, the startup manager won't display my NixOS volumes as a selectable choice. To force it to boot from a USB drive, there must be no bootable interal drives installed. This means any destination SSD must be pre-wiped (or at least its boot partition sabotaged) when attempting to boot from a USB ISO.
