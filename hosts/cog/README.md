@@ -11,8 +11,8 @@
       <li>2TB WD_BLACK SN710 NVMe <a target="_blank" href="https://www.bestbuy.ca/en-ca/product/wdblack-sn7100-2tb-nvme-pci-e-internal-solid-state-drive-wdbelg0020bbk-wrsn/18917387">↗️</a></li>
       <li>16GB Crucial DDR4-3200 memory (x2) <a target="_blank" href="https://www.amazon.ca/dp/B08C4X9VR5?th=1">↗️</a></li>
       <li>ASUS PB278Q 27" QHD display <a target="_blank" href="https://www.asus.com/us/displays-desktops/monitors/business/pb278q/">↗️</a></li>
-      <li>Happy Hacking Keyboard Professional 2, white <a target="_blank" href="https://hhkeyboard.us/hhkb/pro-classic/sku/cg01000-296401">↗️</a></li>
-      <li>Logitech G600 mouse <a target="_blank" href="https://www.logitechg.com/en-ca/products/gaming-mice/g600-mmo-gaming-mouse.910-002864.html">↗️</a></li>
+      <li>Happy Hacking Keyboard Professional 2, white <a target="_blank" href="https://hhkeyboard.us/hhkb/pro-classic/white-stamped">↗️</a></li>
+      <li>Logitech G600 mouse <a target="_blank" href="https://www.amazon.ca/Logitech-910-003879-Laser-Gaming-Mouse/dp/B00EE99KMM">↗️</a></li>
     </ul>
   </td>
   </tr>
