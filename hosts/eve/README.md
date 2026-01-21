@@ -1,10 +1,11 @@
+# eve 🌒
+
 <table>
   <tr>
     <td>
       <img alt="eve" width="200" src="https://suderman.github.io/assets/nixos/hosts/eve.png" />
     </td>
     <td>
-      <h1>eve 🌒</h1>
       <ul>
         <li>2009 Mac Pro 4,1 (flashed to 5,1)</li>
         <li>Intel Xeon W3540 (8) @ 3.06 GHz</li>

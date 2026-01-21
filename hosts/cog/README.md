@@ -1,14 +1,11 @@
 # cog ⚙
 
-Framework laptop
-
 <table>
   <tr>
     <td>
       <img alt="cog" width="200" src="https://suderman.github.io/assets/nixos/hosts/cog.png" />
     </td>
   <td>
-    <h1>cog ⚙</h1>
     <ul>
       <li><a href="https://guides.frame.work/Guide/Framework+Laptop+13+(11th+Gen+and+12th+Gen+Intel+Core)+DIY+Edition+Quick+Start+Guide/57">Framework Laptop 13 (i7-1165G7)</a></li>
       <li><a href="https://www.bestbuy.ca/en-ca/product/wdblack-sn7100-2tb-nvme-pci-e-internal-solid-state-drive-wdbelg0020bbk-wrsn/18917387">2TB WD_BLACK SN710 NVMe</a></li>

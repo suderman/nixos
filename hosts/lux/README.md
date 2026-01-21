@@ -1,10 +1,11 @@
+# lux 🎬
+
 <table>
   <tr>
     <td>
       <img alt="lux" width="200" src="https://suderman.github.io/assets/nixos/hosts/lux.png" />
     </td>
   <td>
-    <h1>lux 🎬</h1>
     <ul>
       <li><a href="https://www.intel.com/content/www/us/en/products/sku/89187/intel-nuc-kit-nuc6i7kyk/specifications.html">Intel NUC NUC6i7KYK (i7-1165G7)</a></li>
       <li><a href="https://www.amazon.ca/dp/B08C4X9VR5?th=1">16GB Crucial DDR4-3200 memory (x2)</a></li>

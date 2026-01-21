@@ -1,10 +1,11 @@
+# iso 💿
+
 <table>
   <tr>
     <td>
       <img alt="iso" width="200" src="https://suderman.github.io/assets/nixos/hosts/iso.png" />
     </td>
     <td>
-      <h1>iso 💿</h1>
       <p>Custom NixOS installer</p>
     </td>
   </tr>

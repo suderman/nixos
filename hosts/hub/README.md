@@ -1,10 +1,11 @@
+# hub 🏚️
+
 <table>
   <tr>
     <td>
       <img alt="hub" width="200" src="https://suderman.github.io/assets/nixos/hosts/hub.png" />
     </td>
   <td>
-    <h1>hub 🏚️</h1>
     <ul>
       <li><a href="https://www.intel.com/content/www/us/en/products/sku/76978/intel-nuc-kit-d34010wyk/specifications.html">Intel NUC D34010WYK1 (i3-4010U)</a></li>
       <li>4GB DDR3-1600 SODIMM (F3-1600C9-4GRSL) memory (x2)</li>

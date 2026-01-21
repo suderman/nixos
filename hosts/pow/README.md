@@ -1,10 +1,11 @@
+# pow 👟
+
 <table>
   <tr>
     <td>
       <img alt="pow" width="200" src="https://suderman.github.io/assets/nixos/hosts/pow.png" />
     </td>
     <td>
-      <h1>pow 👟</h1>
       <ul>
         <li>2009 Mac Pro 4,1 (flashed to 5,1)</li>
         <li>Two 2.93GHz Quad-Core Intel Xeon</li>
