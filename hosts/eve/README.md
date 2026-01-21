@@ -7,12 +7,12 @@
     </td>
     <td>
       <ul>
-        <li>2009 Mac Pro 4,1 (flashed to 5,1)</li>
-        <li>Intel Xeon W3540 (8) @ 3.06 GHz</li>
+        <li>2009 Mac Pro 4,1 (flashed to 5,1) <a target="_blank" href="https://support.apple.com/en-ca/112590">↗️</a></li>
+        <li>Intel Xeon W3540 @ 3.06GHz</li>
         <li>NVIDIA GeForce GTX 645 1GB GPU</li>
         <li>2GB DDR3-1066 ECC Registered DIMM memory (x4)</li>
         <li>500GB WDS500G2B0A 2.5" SSD storage</li>
-        <li>12TB Seagate Exos X14 3.5" HDD storage (x2)</li>
+        <li>12TB Seagate Exos X14 3.5" HDD storage (x2) <a target="_blank" href="https://www.amazon.ca/dp/B07YYKKJVZ">↗️</a></li>
       </ul>
     </td>
   </tr>

@@ -7,13 +7,13 @@
     </td>
     <td>
       <ul>
-        <li>2009 Mac Pro 4,1 (flashed to 5,1)</li>
-        <li>Two 2.93GHz Quad-Core Intel Xeon</li>
-        <li>AMD Sapphire NITRO+ RX 580 8GB GPU</li>
+        <li>2009 Mac Pro 4,1 (flashed to 5,1) <a target="_blank" href="https://support.apple.com/en-ca/112590">↗️</a></li>
+        <li>Intel Xeon X5570 @ 3.06GHz x2</li>
+        <li>AMD Sapphire NITRO+ RX 580 8GB GPU <a target="_blank" href="https://www.amazon.ca/dp/B071QX74F9">↗️</a></li>
         <li>8GB DDR3-1066 ECC Registered DIMM memory (x4)</li>
         <li>2GB DDR3-1066 ECC Registered DIMM memory (x4)</li>
-        <li>1TB Crucial MX500 3D NAND 2.5" SSD storage</li>
-        <li>12TB Seagate IronWolf 3.5" HDD storage (x2)</li>
+        <li>1TB Crucial MX500 3D NAND 2.5" SSD storage <a target="_blank" href="https://www.amazon.ca/dp/B078211KBB?th=1">↗️</a></li>
+        <li>12TB Seagate IronWolf 3.5" HDD storage (x2) <a target="_blank" href="https://www.amazon.ca/dp/B084ZTSMWF?th=1">↗️</a></li>
       </ul>
     </td>
   </tr>

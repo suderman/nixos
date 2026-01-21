@@ -7,12 +7,12 @@
     </td>
   <td>
     <ul>
-      <li><a href="https://www.intel.com/content/www/us/en/products/sku/89187/intel-nuc-kit-nuc6i7kyk/specifications.html">Intel NUC NUC6i7KYK (i7-1165G7)</a></li>
-      <li><a href="https://www.amazon.ca/dp/B08C4X9VR5?th=1">16GB Crucial DDR4-3200 memory (x2)</a></li>
-      <li><a href="https://www.newegg.ca/western-digital-1tb-black-sn850-nvme/p/N82E16820250161?Item=N82E16820250161">1TB WD_Black SN850 NVMe storage</a></li>
-      <li><a href="https://www.amazon.ca/dp/B09FRRWVWX?th=1">4TB Crucial MX500 2.5" SSD storage</a></li>
-      <li><a href="https://www.newegg.ca/qnap-tr-004-us-4-bay-micro-processor-with-hardware-raid-processor-diskless-system/p/N82E16822099058?Item=N82E16822099058">QNAP TR-004-US 4-Bay USB DAS</a></li>
-      <li><a href="https://www.newegg.ca/red-plus-wd101efbx-10tb/p/1B4-005X-001D5?Item=1B4-005X-001D5">10TB WD Red Plus 3.5" HDD storage (x4)</a></li>
+      <li>Intel NUC NUC6i7KYK (i7-1165G7) <a target="_blank" href="https://www.intel.com/content/www/us/en/products/sku/89187/intel-nuc-kit-nuc6i7kyk/specifications.html">↗️</a></li>
+      <li>16GB Crucial DDR4-3200 memory (x2) <a target="_blank" href="https://www.amazon.ca/dp/B08C4X9VR5?th=1">↗️</a></li>
+      <li>1TB WD_Black SN850 NVMe storage <a target="_blank" href="https://www.newegg.ca/western-digital-1tb-black-sn850-nvme/p/N82E16820250161?Item=N82E16820250161">↗️</a></li>
+      <li>4TB Crucial MX500 2.5" SSD storage <a target="_blank" href="https://www.amazon.ca/dp/B09FRRWVWX?th=1">↗️</a></li>
+      <li>QNAP TR-004-US 4-Bay USB DAS <a target="_blank" href="https://www.newegg.ca/qnap-tr-004-us-4-bay-micro-processor-with-hardware-raid-processor-diskless-system/p/N82E16822099058?Item=N82E16822099058">↗️</a></li>
+      <li>10TB WD Red Plus 3.5" HDD storage (x4) <a target="_blank" href="https://www.newegg.ca/red-plus-wd101efbx-10tb/p/1B4-005X-001D5?Item=1B4-005X-001D5">↗️</a></li>
     </ul>
   </td>
   </tr>
