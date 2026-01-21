@@ -34,7 +34,10 @@
 
   # Snapshots and backups
   services.btrbk.volumes = with config.networking; {
-    "/mnt/main" = ["ssh://pow/mnt/pool/backups/${hostName}" "ssh://eve/mnt/pool/backups/${hostName}"];
+    "/mnt/main" = [
+      "ssh://pow/mnt/pool/backups/${hostName}"
+      "ssh://eve/mnt/pool/backups/${hostName}"
+    ];
     "/mnt/data" = ["ssh://pow/mnt/pool/backups/${hostName}"];
     "/mnt/game" = [];
   };

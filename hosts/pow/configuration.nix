@@ -1,4 +1,8 @@
-{flake, ...}: {
+{
+  config,
+  flake,
+  ...
+}: {
   imports = [
     ./hardware-configuration.nix
     ./disk-configuration.nix
@@ -31,7 +35,7 @@
 
   # Snapshots and backups
   services.btrbk.volumes = {
-    "/mnt/main" = [];
+    "/mnt/main" = ["ssh://pow/eve/pool/backups/${config.networking.hostName}"];
     "/mnt/pool" = [];
   };
 }

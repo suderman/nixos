@@ -1,4 +1,5 @@
 {
+  config,
   pkgs,
   flake,
   ...
@@ -27,7 +28,7 @@
 
   # Snapshots and backups
   services.btrbk.volumes = {
-    "/mnt/main" = [];
+    "/mnt/main" = ["ssh://pow/mnt/pool/backups/${config.networking.hostName}"];
     "/mnt/pool" = [];
   };
 
