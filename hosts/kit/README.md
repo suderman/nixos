@@ -1,10 +1,11 @@
+# kit 🎮
+
 <table>
   <tr>
     <td>
       <img alt="kit" width="200" src="https://suderman.github.io/assets/nixos/hosts/kit.png" />
     </td>
     <td>
-      <h1>kit 🎮</h1>
       <ul>
           <li><a href="https://formdt1.com/">FormD T1 v2.1 ITX case</a></li>
           <li><a href="https://pg.asrock.com/mb/Intel/Z790%20PG-ITXTB4/index.asp">ASRock Z790 PG-ITX/TB4 motherboard</a></li>
