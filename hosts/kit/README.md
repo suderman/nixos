@@ -24,9 +24,7 @@
   </tr>
 </table>
 
-Hyprland custom build sitting on my home office desk. Custom build sitting on my
-home office desk. Great for coding, video editing, AI experiements and gaming.
+Custom build sitting on my home office desk. Great for coding, video editing, AI experiements and gaming.
 Powered by [Hyprland](https://hypr.land/)!
 
-Thankfully I purchased & assembled this rig before storage and memory prices
-went insane.
+Thankfully I purchased & assembled this rig before storage and memory prices went insane.
