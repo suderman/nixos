@@ -52,7 +52,8 @@
     name = "hass";
     ip = flake.networking.zones.home.hub;
     zigbee = "/dev/serial/by-id/usb-Nabu_Casa_SkyConnect_v1.0_28b77f55258dec11915068e883c5466d-if00-port0";
-    zwave = "/dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_3e535b346625ed11904d6ac2f9a97352-if00-port0";
+    zwave = "/dev/serial/by-id/usb-Nabu_Casa_ZWA-2_80B54EE1C718-if00";
+    # zwave = "/dev/serial/by-id/usb-Silicon_Labs_CP2102N_USB_to_UART_Bridge_Controller_3e535b346625ed11904d6ac2f9a97352-if00-port0";
     isy = flake.networking.zones.home.isy;
   };
 

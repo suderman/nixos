@@ -6,6 +6,7 @@
 }: let
   cfg = config.services.ntfy-sh;
   inherit (lib) mkIf mkOption types;
+  port = 2586;
 in {
   options.services.ntfy-sh = {
     name = mkOption {
@@ -16,12 +17,13 @@ in {
 
   config = mkIf cfg.enable {
     # Open firewall
-    networking.firewall.allowedTCPPorts = [2586];
+    networking.firewall.allowedTCPPorts = [port];
 
     # Use reverse proxy
     services.ntfy-sh.settings = {
       base-url = "https://${cfg.name}.${config.networking.hostName}";
       behind-proxy = true;
+      listen-http = "0.0.0.0:${toString port}";
     };
 
     # Create reverse proxy
