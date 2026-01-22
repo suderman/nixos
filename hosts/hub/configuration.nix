@@ -24,7 +24,10 @@
 
   # Snapshots and backups
   services.btrbk.volumes = {
-    "/mnt/main" = ["ssh://eve/mnt/pool/backups/${config.networking.hostName}"];
+    "/mnt/main" = [
+      "ssh://pow/mnt/pool/backups/${config.networking.hostName}"
+      "ssh://eve/mnt/pool/backups/${config.networking.hostName}"
+    ];
   };
 
   # Serve CA cert on http://10.2.0.2:1234
