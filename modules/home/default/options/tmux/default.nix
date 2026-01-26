@@ -8,7 +8,9 @@
     # keyMode = "vi";
     # newSession = true;
     # # shortcut = "a";
-    # terminal = "screen-256color";
+    terminal = "tmux-256color";
+
+    escapeTime = 10;
     # resizeAmount = 10;
     # historyLimit = 10000;
     plugins = with pkgs.tmuxPlugins; [
