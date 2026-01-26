@@ -91,7 +91,12 @@
     extraBackends = [pkgs.hplipWithPlugin];
   };
 
+  services.usbmuxd.enable = true;
+
   environment.systemPackages = with pkgs; [
+    libimobiledevice
+    ifuse
+
     hplipWithPlugin
     system-config-printer
     sane-backends

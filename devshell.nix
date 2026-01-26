@@ -38,12 +38,25 @@ perSystem.devshell.mkShell {
       help = "Browse flake";
       command = "nix-inspect --path .";
     }
+    {
+      category = "development";
+      name = "cachix-push";
+      help = "Push devshell to binary cache";
+      command =
+        # bash
+        ''
+          sys=$(nix eval --raw --impure --expr builtins.currentSystem)
+          out=$(nix build --no-link --print-out-paths ".#devShells.''${sys}.default")
+          nix path-info -r "$out" | cachix push suderman
+        '';
+    }
   ];
 
   # Base list of packages for devshell, plus extra
   packages = [
     pkgs.age
     pkgs.alejandra
+    pkgs.cachix
     pkgs.git
     pkgs.nix-inspect
     pkgs.openssl

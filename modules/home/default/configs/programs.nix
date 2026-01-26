@@ -30,6 +30,7 @@
 
   programs.bat.enable = lib.mkDefault true;
   programs.btop.enable = lib.mkDefault true;
+  programs.cachix.enable = lib.mkDefault true;
   programs.direnv.enable = lib.mkDefault true;
   programs.fastfetch.enable = lib.mkDefault true;
   programs.fish.enable = lib.mkDefault true; # shell
