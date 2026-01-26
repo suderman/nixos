@@ -13,6 +13,7 @@ in {
       openrouter.rekeyFile = ./openrouter.age;
       zen.rekeyFile = ./zen.age;
     };
+    persist.storage.directories = [".local/share/opencode"];
     programs.opencode = {
       package = perSystem.llm-agents.opencode;
       settings = {
