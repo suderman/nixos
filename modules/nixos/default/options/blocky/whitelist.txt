@@ -1,3 +1,4 @@
+*.amazon.ca
 analytics.google.com
 *.godaddysites.com
 *.4chan.org
