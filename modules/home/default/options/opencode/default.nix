@@ -25,8 +25,6 @@ in {
       smithery.rekeyFile = ./smithery.age; # exa mpc
     };
 
-    persist.storage.directories = [".local/share/opencode"];
-
     programs.opencode = {
       enableMcpIntegration = true;
       rules = ./AGENTS.md;
@@ -44,22 +42,20 @@ in {
         };
 
         keybinds = {
-          model_list = "ctrl+m";
+          model_list = "ctrl+j";
           session_list = "ctrl+k";
           input_newline = "shift+return,alt+return";
           editor_open = "ctrl+o,<leader>e";
         };
 
         model = env "OPENCODE_MODEL";
-        agent.general.model = env "OPENCODE_SUBAGENT_MODEL";
-        agent.explore.model = env "OPENCODE_SUBAGENT_MODEL";
-
-        agent.web-research = {
+        agent.general = {
           mode = "subagent";
           model = env "OPENCODE_SUBAGENT_MODEL";
-          prompt = file ./web-research.md;
-          tools."*" = false;
-          tools.webfetch = true;
+        };
+        agent.explore = {
+          mode = "subagent";
+          model = env "OPENCODE_SUBAGENT_MODEL";
         };
         permission.bash = {
           "curl" = "allow";
@@ -82,18 +78,15 @@ in {
           url = "https://mcp.context7.com/mcp";
         };
       };
-      commands.changelog = ''
-        # Update Changelog Command
-
-        Update CHANGELOG.md with a new entry for the specified version.
-        Usage: /changelog [version] [change-type] [message]
-      '';
-      commands.commit = ''
-        # Commit Command
-
-        Create a git commit with proper message formatting.
-        Usage: /commit [message]
-      '';
     };
+
+    xdg.configFile = {
+      "opencode/agents".source = ./agents;
+      "opencode/commands".source = ./commands;
+      "opencode/skills".source = ./skills;
+      "opencode/tools".source = ./tools;
+    };
+
+    persist.storage.directories = [".local/share/opencode"];
   };
 }

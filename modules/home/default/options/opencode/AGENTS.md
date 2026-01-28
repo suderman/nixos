@@ -1,95 +1,128 @@
+# Agent Rules and Engineering Conventions
+
 ## Purpose
 
 This document defines baseline conventions and expectations for all agents
-contributing to any project. Treat this as a living document -- expect things to
-change with time. Use this doc as a starting point, but do not treat it as the
-single source of truth.
+contributing to any project. Treat it as a living document. Use it as a starting
+point, not a single source of truth.
 
-## General guidelines
+---
 
-- **Complexity is your arch-nemesis**. Write clear, maintainable, and minimal
-  code. Avoid unnecessary abstractions. You’re writing code for humans first,
-  computers second.
-- Saying no (to a feature or abstraction or rewrite) is OK.
-- Sometimes you have no choice but to say OK because otherwise it halts all
-  progress.
-- **Easier to ask for permission than to repair the damage**. Unless you are
-  explicitly given permission, always ask before committing to something.
-- **Always favor being explicit over implicit**.
-- **Follow the principle of least surprise** -- your code should behave in a way
-  that most users will expect it to behave, and therefore not astonish or
-  surprise users.
-- Default to idempotent operations and stateless design when possible.
-- **Avoid premature optimization**.
-- Always program defensively (more under #security-considerations).
-- **Treat warnings and errors as bugs to fix, not noise to ignore.**
-- Always use `context7` tools when you need code generation, setup or
-  configuration steps, or documentation. Automatically use the Context7 MCP
-  tools to resolve the `libraryId` and get library docs without me having to
-  explicitly ask.
-- If you are unsure how to do something, use `gh_grep` to search code examples
-  from GitHub.
+## Core principles
 
-## Writing good commit messages
+- **Complexity is the primary enemy.** Prefer simple, clear, and maintainable
+  solutions over clever or abstract ones.
+- Write code for humans first, machines second.
+- Saying no to unnecessary features, abstractions, or rewrites is encouraged.
+- If progress would otherwise stall, proceed with the smallest reversible
+  change.
+- Prefer explicit behavior over implicit assumptions.
+- Follow the principle of least surprise: code should behave as most users
+  expect.
+- Prefer idempotent and stateless designs when they do not significantly
+  increase complexity.
+- Avoid premature optimization.
+- Program defensively.
+- Treat warnings and errors as bugs, not noise.
 
-Follow the
-[Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#specification)
-spec when writing commit messages, unless a project defines its own guidelines.
+---
 
-Additionally:
+## Decision and permission model
 
-- Description should be concise and in the imperative mood (e.g. “add”, not
-  “adds” or “added”).
-- Only use lowercase for the commit summary.
-- No period at the end of the commit summary.
-- The commit summary should not exceed 75 characters (if at all possible).
-- You can write a longer commit body in addition to the
-- Always use smart quotes
+- If uncertainty materially affects architecture, security, data integrity, or
+  public APIs, ask for clarification.
+- Otherwise, proceed with the smallest safe and reversible change.
+- Prefer incremental changes over large refactors unless explicitly requested.
+
+---
+
+## Agent-specific behavior
+
+- Prefer minimal diffs over broad rewrites.
+- Do not refactor unrelated code unless explicitly requested.
+- Preserve existing project conventions unless explicitly instructed to change
+  them.
+- When multiple solutions exist, choose the simplest viable one.
+- Explain reasoning briefly before making non-trivial changes.
+- Avoid introducing new dependencies unless clearly justified.
+
+---
+
+## Tool usage
+
+- Prefer Context7 when working with unfamiliar libraries, APIs, frameworks, or
+  unclear documentation.
+- Use Context7 to resolve `libraryId` and retrieve authoritative documentation
+  when needed.
+- Use `gh_grep` when official documentation is insufficient, ambiguous, or
+  incomplete.
+- Do not fetch external documentation unnecessarily when the solution is already
+  clear from context.
+
+---
+
+## Commit message conventions
+
+Follow the Conventional Commits specification unless a project defines its own
+rules.
+
+Additional guidelines:
+
+- Use the imperative mood (e.g. “add”, not “adds” or “added”).
+- Use lowercase in the commit summary.
+- Do not end the summary with a period.
+- Keep the summary concise and ideally under 72 characters.
+- Use plain ASCII characters in commit messages.
+- Use a commit body when context, rationale, or consequences are non-obvious.
 
 ### Examples
 
 #### Commit message with no body
 
 ```
-docs: correct spelling of CHANGELOG
+docs: correct spelling of changelog
 ```
 
 #### Commit message with scope
 
 ```
-feat(lang): add Polish language
+feat(lang): add polish language
 ```
 
-#### Commit message with multi-paragraph body and multiple footers
+#### Commit message with body and footers
 
 ```
-fix: prevent racing of requests
+fix: prevent request race conditions
 
-Introduce a request id and a reference to latest request. Dismiss
-incoming responses other than from latest request.
+Introduce request ids and track the latest request. Ignore responses
+from outdated requests.
 
-Remove timeouts which were used to mitigate the racing issue but are
-obsolete now.
+Remove timeouts that previously masked the issue.
 
 Reviewed-by: Z
 Refs: #123
 ```
 
+---
+
 ## Security considerations
 
-- **Never** log sensitive data (credentials, PII, secrets).
-- Do **not** install any new dependencies if the task can be achieved using
-  existing libraries (standard lib or existing dependencies).
-- You must assume that your code might be misused actively to reveal bugs, and
-  that bugs could be exploited maliciously.
-- If data is to be checked for correctness, verify that it is correct, not that
-  it is incorrect.
-- Use assertions if the programming language (or runtime) supports them.
-- **All data is important until proven otherwise** -- all data must be verified
-  as garbage before being destroyed.
-- **All data is tainted until proven otherwise** -- all data must be handled in
-  a way that does not expose the rest of the runtime environment without
-  verifying integrity.
-- **All code is insecure until proven otherwise** -- never assume your code is
-  secure as bugs or undefined behavior may expose the project or system to
-  attacks such as common SQL injection attacks.
+- Never log sensitive data (credentials, secrets, PII).
+- Avoid adding new dependencies when existing libraries or the standard library
+  are sufficient.
+- Assume external input may be malicious until validated.
+- Validate data for correctness, not merely absence of errors.
+- Use assertions when supported by the language or runtime.
+- Treat external data as tainted until verified.
+- Do not destroy or mutate data unless it has been explicitly verified as safe
+  to discard.
+- Do not assume code is secure without explicit reasoning or review.
+
+---
+
+## Engineering bias
+
+- Prefer clarity over cleverness.
+- Prefer local reasoning over global abstractions.
+- Prefer reversible changes over irreversible ones.
+- Prefer boring solutions over novel ones unless novelty is explicitly required.
