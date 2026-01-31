@@ -242,14 +242,14 @@ in {
         upstreams = {
           init.strategy = "fast";
           groups.default = [
-            "https://dns.quad9.net/dns-query"
+            "https://dns10.quad9.net/dns-query"
             "https://one.one.one.one/dns-query"
           ];
         };
         bootstrapDns = [
           {
-            upstream = "https://dns.quad9.net/dns-query";
-            ips = ["9.9.9.9" "149.112.112.112"];
+            upstream = "https://dns10.quad9.net/dns-query";
+            ips = ["9.9.9.10" "149.112.112.10"];
           }
         ];
         connectIPVersion = "v4";
