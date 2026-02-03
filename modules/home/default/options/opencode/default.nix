@@ -84,9 +84,12 @@ in {
       "opencode/agents".source = ./agents;
       "opencode/commands".source = ./commands;
       "opencode/skills".source = ./skills;
-      "opencode/tools".source = ./tools;
+      # "opencode/tools".source = ./tools;
     };
 
-    persist.storage.directories = [".local/share/opencode"];
+    persist.scratch.directories = [
+      ".local/share/opencode"
+      ".local/state/opencode"
+    ];
   };
 }
