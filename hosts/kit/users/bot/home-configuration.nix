@@ -23,6 +23,8 @@
     enablePlugins = true; # set false if plugins barf errors
   };
 
+  programs.openclaw.enable = true;
+
   # Music
   services.mpd.enable = true; # music daemon
   programs.ncmpcpp.enable = true; # old client

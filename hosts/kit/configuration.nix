@@ -93,6 +93,8 @@
 
   services.usbmuxd.enable = true;
 
+  services.traefik.proxy."bot" = 18789;
+
   environment.systemPackages = with pkgs; [
     libimobiledevice
     ifuse

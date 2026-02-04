@@ -31,6 +31,7 @@
   programs.sparrow.enable = true;
   programs.zwift.enable = true;
   programs.opencode.enable = true;
+  programs.openclaw.enable = true;
 
   # Gaming
   programs.steam.enable = true;
