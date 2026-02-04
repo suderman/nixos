@@ -1,4 +1,5 @@
 *.amazon.ca
+*.tally.so
 analytics.google.com
 *.godaddysites.com
 *.4chan.org
