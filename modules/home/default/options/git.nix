@@ -18,7 +18,7 @@ in {
         init.defaultBranch = "main";
         push.default = "current";
         pull.rebase = "false";
-        credential.helper = "store";
+        # credential.helper = "store";
         color.ui = "auto";
         mergetool.keepBackup = "false";
         alias = {
