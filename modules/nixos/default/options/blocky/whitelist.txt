@@ -1,5 +1,6 @@
 *.amazon.ca
 *.tally.so
+*.fresha.com
 analytics.google.com
 *.godaddysites.com
 *.4chan.org
