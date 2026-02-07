@@ -26,6 +26,28 @@
     pkgs.rclone # sync webdav and other remote stores
     pkgs.wget # download the internet
     pkgs.sysz # systemctl tui
+    pkgs.jq # JSON processor
+    pkgs.yq-go # YAML processor
+
+    # dev ergonomics
+    pkgs.just
+    pkgs.entr
+
+    # JavaScript
+    pkgs.nodejs # node npm npx
+    pkgs.pnpm # pnpm pnpx
+    pkgs.bun # bun bunx
+
+    # Python
+    pkgs.python3 # python python-config pydoc idle
+    pkgs.pipx # pipx
+
+    # PHP
+    pkgs.php # php php-fpm pecl phar pear peardev
+    pkgs.phpPackages.composer # composer compile
+
+    # Ruby
+    pkgs.ruby # ruby ri bundle bunlder erb gem irb rake rdoc
   ];
 
   programs.bat.enable = lib.mkDefault true;
@@ -33,9 +55,10 @@
   programs.cachix.enable = lib.mkDefault true;
   programs.direnv.enable = lib.mkDefault true;
   programs.fastfetch.enable = lib.mkDefault true;
-  programs.fish.enable = lib.mkDefault true; # shell
+  programs.fish.enable = lib.mkDefault false; # shell
   programs.fzf.enable = lib.mkDefault true;
   programs.git.enable = lib.mkDefault true;
+  programs.gh.enable = lib.mkDefault true;
   programs.lazygit.enable = lib.mkDefault true;
   programs.less.enable = lib.mkDefault true;
   programs.lesspipe.enable = lib.mkDefault true;

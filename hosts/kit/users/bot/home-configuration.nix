@@ -25,14 +25,6 @@
 
   programs.openclaw.enable = true;
 
-  # Music
-  services.mpd.enable = true; # music daemon
-  programs.ncmpcpp.enable = true; # old client
-  programs.rmpc.enable = true; # new client
-
-  # User services
-  services.syncthing.enable = true;
-
   # Email, calendars, contacts
   accounts.enable = true;
 

@@ -8,6 +8,9 @@
   cfg = config.programs.rmpc;
   inherit (lib) mkIf;
 
+  # Python runtime just for yt-dlp extras (mutagen). Keep it OUT of symlinkJoin paths.
+  pyYt = pkgs.python3.withPackages (ps: [ps.mutagen]);
+
   # Wrapped instance of latest rmpc with dependencies for adding youtube urls
   # https://rmpc.mierak.dev/release-0-10-0/guides/youtube
   rmpc-wrapped = pkgs.symlinkJoin {
@@ -16,11 +19,11 @@
       pkgs.unstable.rmpc # main program
       pkgs.yt-dlp # rmpc addyt https://www.youtube.com/watch?v=...
       pkgs.ffmpeg # dependencies for yt-dlp
-      (pkgs.python3.withPackages (ps: [ps.mutagen]))
     ];
     buildInputs = [pkgs.makeWrapper];
     postBuild = ''
-      wrapProgram $out/bin/rmpc
+      wrapProgram $out/bin/rmpc \
+        --prefix PATH : ${lib.makeBinPath [pkgs.yt-dlp pkgs.ffmpeg pyYt]}
     '';
   };
 in {
