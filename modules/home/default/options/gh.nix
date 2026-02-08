@@ -6,19 +6,6 @@
   ...
 }: let
   cfg = config.programs.gh;
-  inherit (lib) mkIf;
-
-  # Create environment variable GH_TOKEN from encrypted token (if set)
-  token =
-    if cfg.token == null
-    then ""
-    else
-      # sh
-      ''
-        if [[ -f ${config.age.secrets.gh-token.path} ]]; then
-          export GH_TOKEN=$(cat ${config.age.secrets.gh-token.path})
-        fi
-      '';
 in {
   # Custom option for age-encrypted Github token
   options.programs.gh.token = lib.mkOption {
@@ -27,7 +14,7 @@ in {
   };
 
   # Include gh extensions if enabled
-  config = mkIf cfg.enable {
+  config = lib.mkIf cfg.enable {
     programs.gh.extensions = with pkgs; [
       gh-f
       gh-notify
@@ -39,12 +26,22 @@ in {
     # Also enable the dash TUI
     programs.gh-dash.enable = true;
 
-    # Populate the GH_TOKEN into shell environment (if set)
-    programs.bash.profileExtra = lib.mkAfter token;
-    programs.zsh.envExtra = lib.mkAfter token;
-    age.secrets =
-      if cfg.token == null
-      then {}
-      else {gh-token.rekeyFile = cfg.token;};
+    age.secrets = lib.mkIf (cfg.token != null) {
+      gh-token.rekeyFile = cfg.token;
+    };
+
+    home.activation.githubToken =
+      lib.mkIf (cfg.token != null)
+      (lib.hm.dag.entryAfter ["writeBoundary"]
+        # bash
+        ''
+          install -d -m 700 "${config.xdg.configHome}/gh"
+          cat >"${config.xdg.configHome}/gh/hosts.yml" <<EOF
+          github.com:
+              oauth_token: $(cat ${config.age.secrets.gh-token.path})
+              git_protocol: https
+          EOF
+          chmod 600 "${config.xdg.configHome}/gh/hosts.yml"
+        '');
   };
 }
