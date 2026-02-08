@@ -32,22 +32,6 @@
     # dev ergonomics
     pkgs.just
     pkgs.entr
-
-    # JavaScript
-    pkgs.nodejs # node npm npx
-    pkgs.pnpm # pnpm pnpx
-    pkgs.bun # bun bunx
-
-    # Python
-    pkgs.python3 # python python-config pydoc idle
-    pkgs.pipx # pipx
-
-    # PHP
-    pkgs.php # php php-fpm pecl phar pear peardev
-    pkgs.phpPackages.composer # composer compile
-
-    # Ruby
-    pkgs.ruby # ruby ri bundle bunlder erb gem irb rake rdoc
   ];
 
   programs.bat.enable = lib.mkDefault true;
