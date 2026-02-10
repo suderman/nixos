@@ -93,7 +93,11 @@
 
   services.usbmuxd.enable = true;
 
-  services.traefik.proxy."bot" = 18789;
+  services.openclaw = {
+    enable = true;
+    username = "bot";
+  };
+  # services.traefik.proxy."bot" = 18789;
 
   environment.systemPackages = with pkgs; [
     libimobiledevice
