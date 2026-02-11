@@ -23,7 +23,7 @@
     enablePlugins = true; # set false if plugins barf errors
   };
 
-  # programs.openclaw.enable = true;
+  services.openclaw.enable = true;
 
   # Email, calendars, contacts
   accounts.enable = true;

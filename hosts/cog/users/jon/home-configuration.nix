@@ -34,6 +34,7 @@
   # User services
   services.mpd.enable = true;
   services.syncthing.enable = true;
+  services.openclaw.enable = true;
 
   # Record screen with CPU-based AV1 encoder
   programs.printscreen = {

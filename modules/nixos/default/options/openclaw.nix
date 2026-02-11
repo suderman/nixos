@@ -1,42 +1,40 @@
-# services.openclaw.enable = true;
 {
   config,
   lib,
   perSystem,
+  flake,
   ...
 }: let
-  cfg = config.services.openclaw;
-  user = config.home-manager.users."${cfg.username}" or null;
-  runDir = "/run/openclaw";
-in {
-  options.services.openclaw = {
-    enable = lib.mkEnableOption "openclaw";
-    package = lib.mkOption {
-      type = lib.types.package;
-      default = perSystem.llm-agents.openclaw;
-    };
-    username = lib.mkOption {
-      type = lib.types.str;
-      default = "";
-      example = "bot";
-      description = "Name of user on this host to run the OpenClaw gateway";
-    };
-    port = lib.mkOption {
-      type = lib.types.port;
-      default = 11000 + user.home.portOffset;
-      example = 11000;
-      description = "Port number to run the OpenClaw gateway";
-    };
-    dataDir = lib.mkOption {
-      type = lib.types.str;
-      default = ".openclaw";
-    };
+  inherit (flake.lib) anyUser filterUsers;
+
+  # True if at least one user has enabled programs.openclaw
+  enableToken = anyUser config (u: u.programs.openclaw.enable);
+
+  # True if at least one user has enabled services.openclaw
+  enableProxy = anyUser config (u: u.services.openclaw.enable);
+
+  cfg = let
+    programUsers =
+      if enableToken
+      then (filterUsers config (user: user.programs.openclaw.enable))
+      else [{}];
+    programUser = builtins.head programUsers;
+    serviceUsers =
+      if enableProxy
+      then (filterUsers config (user: user.services.openclaw.enable))
+      else [{}];
+    serviceUser = builtins.head serviceUsers;
+  in {
+    host = programUser.programs.openclaw.host or null;
+    name = serviceUser.services.openclaw.name or null;
+    port = serviceUser.services.openclaw.port or null;
+    # inherit (programUser.programs.openclaw) host; # seed for gateway token
+    # inherit (serviceUser.services.openclaw) name port;
   };
-
-  config = lib.mkIf (cfg.enable && user != null) {
-    services.traefik.proxy."${cfg.username}" = cfg.port;
-
-    system.activationScripts.openclawGatewayToken.text = let
+in {
+  # Derive the gateway token to /run/openclaw/token
+  config.system = lib.mkIf enableToken {
+    activationScripts.openclawGatewayToken.text = let
       inherit (perSystem.self) mkScript;
       hex = config.age.secrets.hex.path;
       text =
@@ -45,90 +43,17 @@ in {
           if [[ -f ${hex} ]]; then
             install -d -m 775 /run/openclaw
             cat ${hex} |
-            derive hex ${cfg.username} >/run/openclaw/gateway
-            chown -R ${cfg.username}:users /run/openclaw
+            derive hex ${cfg.host} >/run/openclaw/gateway
+            chown -R :users /run/openclaw
           fi
         '';
       path = [perSystem.self.derive];
     in
       lib.mkAfter "${mkScript {inherit text path;}}";
+  };
 
-    # home-manager.users."${cfg.username}" = {
-    #
-    # persist.storage.directories = [cfg.dataDir];
-    #
-    # systemd.user.services.openclaw-env = {
-    #   Unit = {
-    #     Description = "OpenClaw Prepare Gateway Environment";
-    #     After = ["network-online.target"];
-    #     Wants = ["network-online.target"];
-    #   };
-    #   Service = {
-    #     Type = "oneshot";
-    #
-    #     ExecStart = perSystem.self.mkScript {
-    #       text =
-    #         # bash
-    #         ''
-    #           cat >/run/openclaw/gateway.env <<EOF
-    #           OPENCLAW_GATEWAY_TOKEN=$(cat /run/openclaw/gateway)
-    #           EOF
-    #         '';
-    #     };
-    #
-    #     Restart = "on-failure";
-    #     RestartSec = 2;
-    #   };
-    #   Install.WantedBy = ["default.target"];
-    # };
-    #
-    # systemd.user.services.openclaw-gateway = {
-    #   Unit = {
-    #     Description = "OpenClaw Gateway";
-    #     After = ["network-online.target" "openclaw-env"];
-    #     Wants = ["network-online.target" "openclaw-env"];
-    #   };
-    #
-    #   Service = {
-    #     Type = "simple";
-    #
-    #     EnvironmentFile = "${runDir}/gateway.env";
-    #     Environment = [
-    #       "OPENCLAW_STATE_DIR=${user.home.homeDirectory}/${cfg.dataDir}"
-    #       "OPENCLAW_GATEWAY_PORT=${toString cfg.port}"
-    #     ];
-    #
-    #     ExecStart = "${cfg.package}/bin/openclaw gateway";
-    #
-    #     Restart = "on-failure";
-    #     RestartSec = 2;
-    #
-    #     # Hardening
-    #     NoNewPrivileges = true;
-    #     PrivateTmp = true;
-    #     ProtectSystem = "strict";
-    #     ProtectHome = false;
-    #     ProtectKernelTunables = true;
-    #     ProtectKernelModules = true;
-    #     ProtectControlGroups = true;
-    #     LockPersonality = true;
-    #     MemoryDenyWriteExecute = false;
-    #   };
-    #
-    #   Install.WantedBy = ["default.target"];
-    # };
-    #
-    # programs = {
-    #   openclaw = {
-    #     enable = true;
-    #     host = "${cfg.username}.${config.networking.hostName}";
-    #     port = 443;
-    #     package = cfg.package;
-    #   };
-    #
-    #   javascript.enable = true;
-    #   python.enable = true;
-    # };
-    # };
+  # Create the traefik proxy if one user has enabled the openclaw service
+  config.services = lib.mkIf enableProxy {
+    traefik.proxy."${cfg.name}" = cfg.port;
   };
 }
