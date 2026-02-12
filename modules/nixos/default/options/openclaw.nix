@@ -12,7 +12,7 @@
   gatewayUsers = flake.lib.filterUsers config (user: user.services.openclaw.enable);
 in {
   # Derive the gateway token to runDir
-  system.activationScripts.openclawGatewayToken.text = let
+  system.activationScripts.users.text = let
     inherit (perSystem.self) mkScript;
     hex = config.age.secrets.hex.path;
     perUser = user: let
@@ -21,6 +21,7 @@ in {
     in
       # bash
       ''
+        # Derive the OpenClaw gateway token into each user's rundir
         if [[ -f ${hex} ]]; then
           install -dm775 -o ${username} -g users ${runDir}
           cat ${hex} |
