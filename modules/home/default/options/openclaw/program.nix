@@ -6,6 +6,7 @@
   ...
 }: let
   cfg = config.programs.openclaw;
+  inherit (config.lib.openclaw) port runDir;
 in {
   options.programs.openclaw = {
     enable = lib.mkEnableOption "openclaw";
@@ -23,53 +24,54 @@ in {
     # automatically set
     port = lib.mkOption {
       type = lib.types.port;
-      default = 443;
+      default = port;
       description = "Port the OpenClaw gateway is listening to";
-    };
-    # automatically set
-    seed = lib.mkOption {
-      type = lib.types.str;
-      default =
-        if cfg.host != "127.0.0.1"
-        then cfg.host
-        else config.services.openclaw.host;
     };
   };
   config = lib.mkIf cfg.enable {
-    home.packages = [cfg.package];
+    # Create wrapper for openclaw with env variables set
+    home.packages = [
+      (perSystem.self.mkScript {
+        name = "openclaw";
+        text =
+          # bash
+          ''
+            # Default gateway host (only if unset)
+            if [[ -z "''${OPENCLAW_GATEWAY_HOST+x}" ]]; then
+              export OPENCLAW_GATEWAY_HOST="${cfg.host}"
+            fi
 
-    programs = let
-      runDir = "/run/user/${toString config.home.uid}/openclaw";
-      openclawEnv =
-        # sh
-        ''
-          export OPENCLAW_GATEWAY_HOST=${cfg.host}
-          export OPENCLAW_GATEWAY_PORT=${toString cfg.port}
-          if [[ -f ${runDir}/gateway ]]; then
-            export OPENCLAW_GATEWAY_TOKEN=$(cat ${runDir}/gateway)
-          fi
-        '';
-    in {
-      # OpenClaw CLI with host/port/token set
-      bash.profileExtra = lib.mkAfter openclawEnv;
-      zsh.envExtra = lib.mkAfter openclawEnv;
+            # Default gateway port (only if unset)
+            if [[ -z "''${OPENCLAW_GATEWAY_PORT+x}" ]]; then
+              export OPENCLAW_GATEWAY_PORT="${toString cfg.port}"
+            fi
 
-      # OpenClaw completions
-      zsh.initContent =
-        lib.mkAfter
-        # sh
-        ''
-          # OpenClaw completions (generate once, async)
-          _openclaw_comp="$ZDOTDIR/openclaw"
+            # Default gateway token from file (only if unset, and file exists)
+            if [[ -z "''${OPENCLAW_GATEWAY_TOKEN+x}" && -f "${runDir}/gateway" ]]; then
+              export OPENCLAW_GATEWAY_TOKEN="$(cat "${runDir}/gateway")"
+            fi
 
-          if [[ -r "$_openclaw_comp" ]]; then
-            source "$_openclaw_comp"
-          else
-            {
-              openclaw completion --shell zsh >| "$_openclaw_comp" 2>/dev/null
-            } &!
-          fi
-        '';
-    };
+            exec "${cfg.package}/bin/openclaw" "$@"
+          '';
+      })
+    ];
+
+    # OpenClaw completions
+    programs.zsh.initContent =
+      lib.mkAfter
+      # sh
+      ''
+        # OpenClaw completions (generate once, async)
+        _openclaw_comp="$ZDOTDIR/openclaw"
+
+        if [[ -r "$_openclaw_comp" ]]; then
+          source "$_openclaw_comp"
+        else
+          {
+            openclaw completion --shell zsh >| "$_openclaw_comp" 2>/dev/null
+          } &!
+        fi
+      '';
   };
+  # };
 }

@@ -2,11 +2,12 @@
 {
   config,
   lib,
+  pkgs,
   perSystem,
   ...
 }: let
   cfg = config.services.openclaw;
-  runDir = "/run/user/${toString config.home.uid}/openclaw";
+  inherit (config.lib.openclaw) port runDir;
 in {
   options.services.openclaw = {
     enable = lib.mkEnableOption "openclaw";
@@ -24,18 +25,17 @@ in {
       default = "openclaw-${config.home.username}";
       example = "openclaw-jon";
     };
-    # automatically generated
+    # automatically derived
     port = lib.mkOption {
       type = lib.types.port;
-      default = 11000 + config.home.portOffset;
+      default = port;
       example = 11000;
       description = "Port number to run the OpenClaw gateway";
     };
-    # automatically generated
+    # automatically derived
     host = lib.mkOption {
       type = lib.types.str;
-      # default = "${cfg.name}.${config.networking.hostName}";
-      default = "${cfg.name}.cog"; # FIXME
+      default = "${cfg.name}.${config.networking.hostName}";
       example = "openclaw-jon.cog";
       description = "Host running the OpenClaw gateway";
     };
@@ -51,66 +51,99 @@ in {
       port = lib.mkForce cfg.port;
     };
 
-    systemd.user.services.openclaw-env = {
-      Unit = {
-        Description = "OpenClaw Prepare Gateway Environment";
-        After = ["network-online.target"];
-        Wants = ["network-online.target"];
-      };
-      Service = {
-        Type = "oneshot";
+    # Setup systemd services to configure and run the OpenClaw gateway
+    systemd.user.services = let
+      Environment = [
+        "OPENCLAW_HOME=${config.home.homeDirectory}"
+        "OPENCLAW_STATE_DIR=${config.home.homeDirectory}/${cfg.dataDir}"
+        "OPENCLAW_CONFIG_PATH=${config.home.homeDirectory}/${cfg.dataDir}/openclaw.json"
+      ];
+    in {
+      openclaw-setup = {
+        Unit = {
+          Description = "OpenClaw Gateway Setup";
+          After = ["network-online.target"];
+          Wants = ["network-online.target"];
+        };
+        Service = {
+          inherit Environment;
+          Type = "oneshot";
 
-        ExecStart = perSystem.self.mkScript {
-          text =
-            # bash
-            ''
-              cat >${runDir}/gateway.env <<EOF
-              OPENCLAW_STATE_DIR=${config.home.homeDirectory}/${cfg.dataDir}
-              OPENCLAW_GATEWAY_PORT=${toString cfg.port}
-              OPENCLAW_GATEWAY_BIND=127.0.0.1
-              OPENCLAW_GATEWAY_TRUSTEDPROXIES=127.0.0.1,${config.networking.address}
-              OPENCLAW_GATEWAY_CONTROLUI_ALLOWEDORIGINS=https://${cfg.host}
-              OPENCLAW_GATEWAY_TOKEN=$(cat ${runDir}/gateway)
-              EOF
-            '';
+          ExecStart = perSystem.self.mkScript {
+            text =
+              # bash
+              ''
+                # Generate gateway override for openclaw.json
+                cat >${runDir}/gateway.json <<EOF
+                {
+                  "gateway": {
+                    "port": ${toString cfg.port},
+                    "mode": "local",
+                    "bind": "loopback",
+                    "auth": { "mode": "token", "token": "$(tr -d '\n' <${runDir}/gateway)" },
+                    "trustedProxies": ["127.0.0.1", "${config.networking.address}"],
+                    "controlUi": { "allowedOrigins": ["https://${cfg.host}"] }
+                  }
+                }
+                EOF
+              ''
+              +
+              # bash
+              ''
+                # Ensure ~/.openclaw is setup
+                install -dm700 $OPENCLAW_STATE_DIR
+                openclaw setup
+
+                # Merge the override into OpenClaw's config json
+                if [[ -f $OPENCLAW_CONFIG_PATH ]]; then
+                  tmp="$(mktemp)"
+                  {
+                    echo "/* OpenClaw Gateway URLs:"
+                    echo "http://localhost:${toString cfg.port}?token=$(tr -d '\n' <${runDir}/gateway)"
+                    echo "https://${cfg.host}?token=$(tr -d '\n' <${runDir}/gateway)"
+                    echo "*/"
+                    jq '.gateway = input.gateway' "$OPENCLAW_CONFIG_PATH" "${runDir}/gateway.json"
+                  } >"$tmp"
+                  mv "$tmp" "$OPENCLAW_CONFIG_PATH"
+                fi
+              '';
+            path = [cfg.package pkgs.jq];
+          };
+
+          Restart = "on-failure";
+          RestartSec = 2;
+        };
+        Install.WantedBy = ["default.target"];
+      };
+
+      openclaw-gateway = {
+        Unit = {
+          Description = "OpenClaw Gateway";
+          After = ["network-online.target" "openclaw-setup"];
+          Wants = ["network-online.target" "openclaw-setup"];
         };
 
-        Restart = "on-failure";
-        RestartSec = 2;
+        Service = {
+          inherit Environment;
+          Type = "simple";
+          ExecStart = "${cfg.package}/bin/openclaw gateway";
+          Restart = "on-failure";
+          RestartSec = 2;
+
+          # Hardening
+          NoNewPrivileges = true;
+          PrivateTmp = true;
+          ProtectSystem = "strict";
+          ProtectHome = false;
+          ProtectKernelTunables = true;
+          ProtectKernelModules = true;
+          ProtectControlGroups = true;
+          LockPersonality = true;
+          MemoryDenyWriteExecute = false;
+        };
+
+        Install.WantedBy = ["default.target"];
       };
-      Install.WantedBy = ["default.target"];
     };
-
-    systemd.user.services.openclaw-gateway = {
-      Unit = {
-        Description = "OpenClaw Gateway";
-        After = ["network-online.target" "openclaw-env"];
-        Wants = ["network-online.target" "openclaw-env"];
-      };
-
-      Service = {
-        Type = "simple";
-        EnvironmentFile = "${runDir}/gateway.env";
-        ExecStart = "${cfg.package}/bin/openclaw gateway";
-        Restart = "on-failure";
-        RestartSec = 2;
-
-        # Hardening
-        NoNewPrivileges = true;
-        PrivateTmp = true;
-        ProtectSystem = "strict";
-        ProtectHome = false;
-        ProtectKernelTunables = true;
-        ProtectKernelModules = true;
-        ProtectControlGroups = true;
-        LockPersonality = true;
-        MemoryDenyWriteExecute = false;
-      };
-
-      Install.WantedBy = ["default.target"];
-    };
-
-    programs.javascript.enable = true;
-    programs.python.enable = true;
   };
 }

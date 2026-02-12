@@ -16,17 +16,15 @@ in {
     inherit (perSystem.self) mkScript;
     hex = config.age.secrets.hex.path;
     perUser = user: let
-      inherit (user.home) username uid;
-      inherit (user.programs.openclaw) seed;
-      runDir = "/run/user/${toString uid}/openclaw";
+      inherit (user.home) username;
+      inherit (user.lib.openclaw) runDir seed;
     in
       # bash
       ''
         if [[ -f ${hex} ]]; then
-          install -d -m 775 ${runDir}
+          install -dm775 -o ${username} -g users ${runDir}
           cat ${hex} |
           derive hex ${seed} >${runDir}/gateway
-          chown -R ${username}:users /run/openclaw
         fi
       '';
     text = lib.concatMapStrings perUser users;
@@ -34,8 +32,7 @@ in {
   in
     lib.mkAfter "${mkScript {inherit text path;}}";
 
-  # Create the reproxy for each user with enabled the openclaw service
-  # Enable reverse proxy { "openclaw-jon" = "http://cog:11000"; }
+  # Enable reverse proxy for each user { "openclaw-jon" = "http://127.0.0.1:11000"; }
   services.traefik.proxy = lib.listToAttrs (map (user:
     with user.services.openclaw; {
       inherit name;
