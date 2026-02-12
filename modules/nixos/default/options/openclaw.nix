@@ -5,55 +5,41 @@
   flake,
   ...
 }: let
-  inherit (flake.lib) anyUser filterUsers;
+  # find all home-manager users with openclaw program enabled
+  users = flake.lib.filterUsers config (user: user.programs.openclaw.enable);
 
-  # True if at least one user has enabled programs.openclaw
-  enableToken = anyUser config (u: u.programs.openclaw.enable);
-
-  # True if at least one user has enabled services.openclaw
-  enableProxy = anyUser config (u: u.services.openclaw.enable);
-
-  cfg = let
-    programUsers =
-      if enableToken
-      then (filterUsers config (user: user.programs.openclaw.enable))
-      else [{}];
-    programUser = builtins.head programUsers;
-    serviceUsers =
-      if enableProxy
-      then (filterUsers config (user: user.services.openclaw.enable))
-      else [{}];
-    serviceUser = builtins.head serviceUsers;
-  in {
-    host = programUser.programs.openclaw.host or null;
-    name = serviceUser.services.openclaw.name or null;
-    port = serviceUser.services.openclaw.port or null;
-    # inherit (programUser.programs.openclaw) host; # seed for gateway token
-    # inherit (serviceUser.services.openclaw) name port;
-  };
+  # find all home-manager users with openclaw service enabled
+  gatewayUsers = flake.lib.filterUsers config (user: user.services.openclaw.enable);
 in {
-  # Derive the gateway token to /run/openclaw/token
-  config.system = lib.mkIf enableToken {
-    activationScripts.openclawGatewayToken.text = let
-      inherit (perSystem.self) mkScript;
-      hex = config.age.secrets.hex.path;
-      text =
-        # bash
-        ''
-          if [[ -f ${hex} ]]; then
-            install -d -m 775 /run/openclaw
-            cat ${hex} |
-            derive hex ${cfg.host} >/run/openclaw/gateway
-            chown -R :users /run/openclaw
-          fi
-        '';
-      path = [perSystem.self.derive];
+  # Derive the gateway token to runDir
+  system.activationScripts.openclawGatewayToken.text = let
+    inherit (perSystem.self) mkScript;
+    hex = config.age.secrets.hex.path;
+    perUser = user: let
+      inherit (user.home) username uid;
+      inherit (user.programs.openclaw) seed;
+      runDir = "/run/user/${toString uid}/openclaw";
     in
-      lib.mkAfter "${mkScript {inherit text path;}}";
-  };
+      # bash
+      ''
+        if [[ -f ${hex} ]]; then
+          install -d -m 775 ${runDir}
+          cat ${hex} |
+          derive hex ${seed} >${runDir}/gateway
+          chown -R ${username}:users /run/openclaw
+        fi
+      '';
+    text = lib.concatMapStrings perUser users;
+    path = [perSystem.self.derive];
+  in
+    lib.mkAfter "${mkScript {inherit text path;}}";
 
-  # Create the traefik proxy if one user has enabled the openclaw service
-  config.services = lib.mkIf enableProxy {
-    traefik.proxy."${cfg.name}" = cfg.port;
-  };
+  # Create the reproxy for each user with enabled the openclaw service
+  # Enable reverse proxy { "openclaw-jon" = "http://cog:11000"; }
+  services.traefik.proxy = lib.listToAttrs (map (user:
+    with user.services.openclaw; {
+      inherit name;
+      value = "http://127.0.0.1:${toString port}";
+    })
+  gatewayUsers);
 }

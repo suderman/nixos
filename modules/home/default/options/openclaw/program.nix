@@ -6,17 +6,6 @@
   ...
 }: let
   cfg = config.programs.openclaw;
-  inherit (lib) mkIf mkAfter;
-
-  openclawEnv =
-    # sh
-    ''
-      export OPENCLAW_GATEWAY_HOST=${cfg.host}
-      export OPENCLAW_GATEWAY_PORT=${toString cfg.port}
-      if [[ -f /run/openclaw/gateway ]]; then
-        export OPENCLAW_GATEWAY_TOKEN=$(cat /run/openclaw/gateway)
-      fi
-    '';
 in {
   options.programs.openclaw = {
     enable = lib.mkEnableOption "openclaw";
@@ -24,27 +13,50 @@ in {
       type = lib.types.package;
       default = perSystem.llm-agents.openclaw;
     };
+    # set this if using openclaw program without service
     host = lib.mkOption {
       type = lib.types.str;
       default = "127.0.0.1";
       example = "bot.kit";
       description = "Host running the OpenClaw gateway";
     };
+    # automatically set
     port = lib.mkOption {
       type = lib.types.port;
-      default = 18789;
+      default = 443;
       description = "Port the OpenClaw gateway is listening to";
     };
+    # automatically set
+    seed = lib.mkOption {
+      type = lib.types.str;
+      default =
+        if cfg.host != "127.0.0.1"
+        then cfg.host
+        else config.services.openclaw.host;
+    };
   };
-  config = mkIf cfg.enable {
+  config = lib.mkIf cfg.enable {
     home.packages = [cfg.package];
 
-    programs = {
+    programs = let
+      runDir = "/run/user/${toString config.home.uid}/openclaw";
+      openclawEnv =
+        # sh
+        ''
+          export OPENCLAW_GATEWAY_HOST=${cfg.host}
+          export OPENCLAW_GATEWAY_PORT=${toString cfg.port}
+          if [[ -f ${runDir}/gateway ]]; then
+            export OPENCLAW_GATEWAY_TOKEN=$(cat ${runDir}/gateway)
+          fi
+        '';
+    in {
+      # OpenClaw CLI with host/port/token set
       bash.profileExtra = lib.mkAfter openclawEnv;
       zsh.envExtra = lib.mkAfter openclawEnv;
 
+      # OpenClaw completions
       zsh.initContent =
-        mkAfter
+        lib.mkAfter
         # sh
         ''
           # OpenClaw completions (generate once, async)
