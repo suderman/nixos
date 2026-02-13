@@ -31,7 +31,12 @@
   programs.sparrow.enable = true;
   programs.zwift.enable = true;
   programs.opencode.enable = true;
-  programs.openclaw.enable = true;
+
+  # Remote control for my friendly robot
+  programs.openclaw = {
+    enable = true;
+    host = "openclaw-bot.kit";
+  };
 
   # Gaming
   programs.steam.enable = true;

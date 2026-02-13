@@ -34,7 +34,12 @@
   # User services
   services.mpd.enable = true;
   services.syncthing.enable = true;
-  services.openclaw.enable = true; # testing
+
+  # Remote control for my friendly robot
+  programs.openclaw = {
+    enable = true;
+    host = "openclaw-bot.kit";
+  };
 
   # Record screen with CPU-based AV1 encoder
   programs.printscreen = {

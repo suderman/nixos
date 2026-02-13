@@ -21,17 +21,21 @@ in {
     in
       # bash
       ''
-        # Derive the OpenClaw gateway token into each user's rundir
         if [[ -f ${hex} ]]; then
-          install -dm775 -o ${username} -g users ${runDir}
-          cat ${hex} |
-          derive hex ${seed} >${runDir}/gateway
+          token="$(mktemp)"
+          derive hex ${seed} <${hex} >$token
+          install -dm700 -o ${username} -g users ${runDir}
+          install -m600 -o ${username} -g users $token ${runDir}/gateway
+          rm -f $token
         fi
       '';
     text = lib.concatMapStrings perUser users;
     path = [perSystem.self.derive];
   in
-    lib.mkAfter "${mkScript {inherit text path;}}";
+    lib.mkAfter ''
+      # Derive the OpenClaw gateway token into each user's run directory
+      ${mkScript {inherit text path;}}
+    '';
 
   # Enable reverse proxy for each user { "openclaw-jon" = "http://127.0.0.1:11000"; }
   services.traefik.proxy = lib.listToAttrs (map (user:

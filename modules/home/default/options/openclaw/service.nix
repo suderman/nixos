@@ -60,11 +60,7 @@ in {
       ];
     in {
       openclaw-setup = {
-        Unit = {
-          Description = "OpenClaw Gateway Setup";
-          After = ["network-online.target"];
-          Wants = ["network-online.target"];
-        };
+        Unit.Description = "OpenClaw Gateway Setup";
         Service = {
           inherit Environment;
           Type = "oneshot";
@@ -74,7 +70,7 @@ in {
               # bash
               ''
                 # Generate gateway override for openclaw.json
-                cat >${runDir}/gateway.json <<EOF
+                cat >${runDir}/openclaw-gateway.json <<EOF
                 {
                   "gateway": {
                     "port": ${toString cfg.port},
@@ -86,6 +82,7 @@ in {
                   }
                 }
                 EOF
+                chmod 600 ${runDir}/openclaw-gateway.json
               ''
               +
               # bash
@@ -96,18 +93,26 @@ in {
 
                 # Merge the override into OpenClaw's config json
                 if [[ -f $OPENCLAW_CONFIG_PATH ]]; then
-                  tmp="$(mktemp)"
+
+                  # Base json (comments removed)
+                  json_repair $OPENCLAW_CONFIG_PATH >${runDir}/openclaw-base.json
+                  chmod 600 ${runDir}/openclaw-base.json
+
+                  # Merged json (mixing gateway into base)
                   {
                     echo "/* OpenClaw Gateway URLs:"
                     echo "http://localhost:${toString cfg.port}?token=$(tr -d '\n' <${runDir}/gateway)"
                     echo "https://${cfg.host}?token=$(tr -d '\n' <${runDir}/gateway)"
                     echo "*/"
-                    jq '.gateway = input.gateway' "$OPENCLAW_CONFIG_PATH" "${runDir}/gateway.json"
-                  } >"$tmp"
-                  mv "$tmp" "$OPENCLAW_CONFIG_PATH"
+                    jq '.gateway = input.gateway' ${runDir}/openclaw-base.json ${runDir}/openclaw-gateway.json
+                  } >${runDir}/openclaw.json
+                  chmod 600 ${runDir}/openclaw.json
+
+                  # Replace original config with merged
+                  mv ${runDir}/openclaw.json "$OPENCLAW_CONFIG_PATH"
                 fi
               '';
-            path = [cfg.package pkgs.jq];
+            path = [cfg.package pkgs.jq pkgs.json-repair];
           };
 
           Restart = "on-failure";
@@ -119,8 +124,8 @@ in {
       openclaw-gateway = {
         Unit = {
           Description = "OpenClaw Gateway";
-          After = ["network-online.target" "openclaw-setup"];
-          Wants = ["network-online.target" "openclaw-setup"];
+          After = ["network-online.target" "openclaw-setup.service"];
+          Requires = ["openclaw-setup.service"];
         };
 
         Service = {

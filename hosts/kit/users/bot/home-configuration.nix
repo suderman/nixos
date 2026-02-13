@@ -23,7 +23,13 @@
     enablePlugins = true; # set false if plugins barf errors
   };
 
+  # Enable OpenClaw gateway!
   services.openclaw.enable = true;
+
+  # Enable scripting/programming languages
+  programs.javascript.enable = true;
+  programs.python.enable = true;
+  programs.go.enable = true;
 
   # Email, calendars, contacts
   accounts.enable = true;

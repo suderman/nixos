@@ -10,7 +10,7 @@
   # openclaw devices reject <requestId>
   config.lib.openclaw = {
     # The gateway token is written to the user's run directory
-    runDir = "/run/user/${toString config.home.uid}/openclaw";
+    runDir = "/run/openclaw/${toString config.home.uid}";
 
     # Seed is used to derive gateway token and we use the openclaw host
     # First try to use the program's host, unless it's set to 127.0.0.1
