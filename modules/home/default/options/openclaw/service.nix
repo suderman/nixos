@@ -39,16 +39,26 @@ in {
       example = "openclaw-jon.cog";
       description = "Host running the OpenClaw gateway";
     };
+    apiKeys = lib.mkOption {
+      type = with lib.types; nullOr path;
+      default = null;
+      description = "Path to multi-line .env file with API_KEY=123";
+    };
   };
   config = lib.mkIf cfg.enable {
     persist.storage.directories = [cfg.dataDir];
 
     # When the service is enabled, also enable the program and configure it for localhost
     programs.openclaw = {
-      enable = true;
-      package = cfg.package;
+      enable = lib.mkForce true;
+      package = lib.mkForce cfg.package;
+      dataDir = lib.mkForce cfg.dataDir;
       host = lib.mkForce "127.0.0.1";
       port = lib.mkForce cfg.port;
+    };
+
+    age.secrets = lib.mkIf (cfg.apiKeys != null) {
+      openclaw-env.rekeyFile = cfg.apiKeys;
     };
 
     # Setup systemd services to configure and run the OpenClaw gateway
@@ -62,8 +72,8 @@ in {
       openclaw-setup = {
         Unit.Description = "OpenClaw Gateway Setup";
         Service = {
-          inherit Environment;
           Type = "oneshot";
+          inherit Environment;
 
           ExecStart = perSystem.self.mkScript {
             text =
@@ -129,8 +139,12 @@ in {
         };
 
         Service = {
-          inherit Environment;
           Type = "simple";
+          inherit Environment;
+          EnvironmentFile =
+            if cfg.apiKeys != null
+            then config.age.secrets.openclaw-env.path
+            else false;
           ExecStart = "${cfg.package}/bin/openclaw gateway";
           Restart = "on-failure";
           RestartSec = 2;

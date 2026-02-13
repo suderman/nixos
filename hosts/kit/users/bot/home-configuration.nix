@@ -24,7 +24,10 @@
   };
 
   # Enable OpenClaw gateway!
-  services.openclaw.enable = true;
+  services.openclaw = {
+    enable = true;
+    apiKeys = ./openclaw-env.age;
+  };
 
   # Enable scripting/programming languages
   programs.javascript.enable = true;

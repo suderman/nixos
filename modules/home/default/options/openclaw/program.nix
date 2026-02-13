@@ -14,6 +14,10 @@ in {
       type = lib.types.package;
       default = perSystem.llm-agents.openclaw;
     };
+    dataDir = lib.mkOption {
+      type = lib.types.str;
+      default = ".openclaw";
+    };
     # set this if using openclaw program without service
     host = lib.mkOption {
       type = lib.types.str;
@@ -29,6 +33,8 @@ in {
     };
   };
   config = lib.mkIf cfg.enable {
+    persist.storage.directories = [cfg.dataDir];
+
     # Create wrapper for openclaw with env variables set
     home.packages = [
       (perSystem.self.mkScript {
