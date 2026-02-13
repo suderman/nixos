@@ -9,7 +9,7 @@
   ...
 }: let
   # https://github.com/immich-app/immich/releases
-  version = "2.4.1";
+  version = "2.5.6";
 
   cfg = config.services.immich;
 
