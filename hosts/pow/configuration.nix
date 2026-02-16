@@ -29,6 +29,7 @@
     "broadcom-sta-6.30.223.271-59-6.12.63"
     "broadcom-sta-6.30.223.271-59-6.12.65"
     "broadcom-sta-6.30.223.271-59-6.12.67"
+    "broadcom-sta-6.30.223.271-59-6.12.69"
   ];
 
   # Bigger banana
