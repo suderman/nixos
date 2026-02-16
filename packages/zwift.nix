@@ -51,6 +51,8 @@ perSystem.self.mkApplication {
         --security-opt label=disable \
         --device=$DEVICE \
         -e NVIDIA_DRIVER_CAPABILITIES=all \
+        -e CONTAINER_TOOL=docker \
+        -e WINE_EXPERIMENTAL_WAYLAND=0 \
         -e DISPLAY=:0 \
         -e PULSE_SERVER=/run/user/$ZWIFT_UID/pulse/native \
         -e DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$ZWIFT_UID/bus \
