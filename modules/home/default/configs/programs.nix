@@ -26,6 +26,7 @@
     pkgs.rclone # sync webdav and other remote stores
     pkgs.wget # download the internet
     pkgs.sysz # systemctl tui
+    pkgs.trash-cli # alternative to rm
     pkgs.jq # JSON processor
     pkgs.yq-go # YAML processor
 
