@@ -134,8 +134,8 @@ in {
       openclaw-gateway = {
         Unit = {
           Description = "OpenClaw Gateway";
-          After = ["openclaw-setup.service"];
-          Requires = ["openclaw-setup.service"];
+          After = ["openclaw-setup.service" "agenix.service"];
+          Requires = ["openclaw-setup.service" "agenix.service"];
         };
 
         Service = {
@@ -161,17 +161,6 @@ in {
           MemoryDenyWriteExecute = false;
         };
 
-        Install.WantedBy = ["default.target"];
-      };
-
-      # Ensure the service starts at boot, as systemd doesn't notice these units early enough
-      openclaw-autostart = {
-        Unit = {Description = "Start OpenClaw after reload";};
-        Service = {
-          Type = "oneshot";
-          ExecStart = "${pkgs.systemd}/bin/systemctl --user daemon-reload";
-          ExecStartPost = "${pkgs.systemd}/bin/systemctl --user start openclaw-gateway.service";
-        };
         Install.WantedBy = ["default.target"];
       };
     };

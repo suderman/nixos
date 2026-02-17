@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   perSystem,
   flake,
   ...
@@ -44,4 +45,23 @@ in {
       value = "http://127.0.0.1:${toString port}";
     })
   gatewayUsers);
+
+  # # Ensure user gateway service is started after home-manager activation
+  # systemd.services = lib.listToAttrs (map (user:
+  #   with user.home; {
+  #     name = "openclaw-gateway-start-${username}";
+  #     value = {
+  #       description = "Start ${username} services after home-manager activation";
+  #       wantedBy = ["multi-user.target"];
+  #       after = ["hm-activate-${username}.service" "user@${toString uid}.service"];
+  #       requires = ["user@${toString uid}.service"];
+  #       serviceConfig = {
+  #         Type = "oneshot";
+  #         RemainAfterExit = true;
+  #         ExecStart = "${pkgs.systemd}/bin/systemctl --user -M ${username}@ daemon-reload";
+  #         ExecStartPost = "-${pkgs.systemd}/bin/systemctl --user -M ${username}@ start openclaw-gateway.service";
+  #       };
+  #     };
+  #   })
+  # gatewayUsers);
 }
