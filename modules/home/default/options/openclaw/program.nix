@@ -35,32 +35,40 @@ in {
   config = lib.mkIf cfg.enable {
     persist.storage.directories = [cfg.dataDir];
 
-    # Create wrapper for openclaw with env variables set
-    home.packages = [
-      (perSystem.self.mkScript {
-        name = "openclaw";
-        text =
-          # bash
-          ''
-            # Default gateway host (only if unset)
-            if [[ -z "''${OPENCLAW_GATEWAY_HOST+x}" ]]; then
-              export OPENCLAW_GATEWAY_HOST="${cfg.host}"
-            fi
+    # Configure OpenClaw CLI for remote (if host isn't 127.0.0.1)
+    systemd.user.services.openclaw-onboard = {
+      Unit = {
+        Description = "OpenClaw Gateway Setup";
+        After = ["agenix.service"];
+        Requires = ["agenix.service"];
+      };
+      Service = {
+        Type = "oneshot";
+        Environment = [
+          "OPENCLAW_HOME=${config.home.homeDirectory}"
+          "OPENCLAW_STATE_DIR=${config.home.homeDirectory}/${cfg.dataDir}"
+          "OPENCLAW_CONFIG_PATH=${config.home.homeDirectory}/${cfg.dataDir}/openclaw.json"
+        ];
+        ExecStart = perSystem.self.mkScript {
+          text =
+            # bash
+            ''
+              if [[ "${cfg.host}" != "127.0.0.1" ]]; then
+                openclaw onboard \
+                  --non-interactive --accept-risk \
+                  --mode remote \
+                  --remote-token $(tr -d '\n' <${runDir}/gateway) \
+                  --remote-url=wss://${cfg.host}:${toString cfg.port}
+              fi
+            '';
+          path = [cfg.package];
+        };
+      };
+      Install.WantedBy = ["default.target"];
+    };
 
-            # Default gateway port (only if unset)
-            if [[ -z "''${OPENCLAW_GATEWAY_PORT+x}" ]]; then
-              export OPENCLAW_GATEWAY_PORT="${toString cfg.port}"
-            fi
-
-            # Default gateway token from file (only if unset, and file exists)
-            if [[ -z "''${OPENCLAW_GATEWAY_TOKEN+x}" && -f "${runDir}/gateway" ]]; then
-              export OPENCLAW_GATEWAY_TOKEN="$(cat "${runDir}/gateway")"
-            fi
-
-            exec "${cfg.package}/bin/openclaw" "$@"
-          '';
-      })
-    ];
+    # Add OpenClaw CLI to path
+    home.packages = [cfg.package];
 
     # OpenClaw completions
     programs.zsh.initContent =
