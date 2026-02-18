@@ -61,6 +61,9 @@
     dataDir = "${config.home.homeDirectory}/fenix";
   };
 
+  # User web server
+  services.caddy.enable = true;
+
   # Email, calendars, contacts
   accounts.enable = true;
 

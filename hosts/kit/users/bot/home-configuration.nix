@@ -34,6 +34,9 @@
     ".config/clawhub"
   ];
 
+  # User web server
+  services.caddy.enable = true;
+
   # Enable scripting/programming languages
   programs.javascript.enable = true;
   programs.python.enable = true;
