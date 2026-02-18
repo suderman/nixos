@@ -190,17 +190,41 @@ in {
           services =
             (
               mapAttrs mkService cfg.proxy
-              # Avoid a config error ensuring at least one service defined
             )
+            # // (lib.listToAttrs (map (user: let
+            #     inherit (user.home) username;
+            #     port = toString (21000 + user.home.portOffset);
+            #   in {
+            #     name = "user-${username}";
+            #     value.loadBalancer.servers = [
+            #       {
+            #         url = "http://127.0.0.1:${port}";
+            #       }
+            #     ];
+            #   })
+            #   (builtins.attrValues config.home-manager.users)))
+            # Avoid a config error ensuring at least one service defined
             // {"noop" = {};};
 
           # Generate traefik routers from configuration proxy
           routers =
             (
               mapAttrs mkRouter cfg.proxy
-              # Make available the traefik dashboard
             )
+            # // (lib.listToAttrs (map (user: let
+            #     inherit (user.home) username;
+            #   in {
+            #     name = "user-${username}";
+            #     value = {
+            #       entrypoints = "websecure";
+            #       tls = true;
+            #       rule = "HostRegexp(`^[^.]+\\.${username}\\.${cfg.hostName}$`)";
+            #       service = "user-${username}";
+            #     };
+            #   })
+            #   (builtins.attrValues config.home-manager.users)))
             // {
+              # Make available the traefik dashboard
               traefik = {
                 entrypoints = "websecure";
                 tls = {};

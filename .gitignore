@@ -4,6 +4,7 @@
 .crush
 .data
 .direnv
+.Trash*
 *.qcow2
 *.img
 /secrets/id_age

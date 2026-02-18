@@ -29,6 +29,11 @@
     apiKeys = ./openclaw-env.age;
   };
 
+  # Persist login for clawhub
+  persist.storage.directories = [
+    ".config/clawhub"
+  ];
+
   # Enable scripting/programming languages
   programs.javascript.enable = true;
   programs.python.enable = true;
