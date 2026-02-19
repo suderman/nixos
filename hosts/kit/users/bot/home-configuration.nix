@@ -7,6 +7,7 @@
     flake.homeModules.default
     flake.homeModules.desktop.hyprland
     flake.homeModules.users.bot
+    ./supervisor.nix
   ];
 
   # Hyprland on nvidia desktop
@@ -36,6 +37,9 @@
 
   # User web server
   services.caddy.enable = true;
+
+  # Manage bot's experminetal services
+  services.botSupervisor.enable = true;
 
   # Enable scripting/programming languages
   programs.javascript.enable = true;
