@@ -84,7 +84,7 @@ in {
         "PATH=${paths}:$PATH"
       ];
     in {
-      oc-setup = {
+      openclaw-setup = {
         Unit.Description = "OpenClaw Gateway Setup";
         Service = {
           Type = "oneshot";
@@ -149,8 +149,8 @@ in {
       openclaw-gateway = {
         Unit = {
           Description = "OpenClaw Gateway";
-          After = ["network-online.target" "oc-setup.service" "agenix.service"];
-          Requires = ["oc-setup.service" "agenix.service"];
+          After = ["network-online.target" "openclaw-setup.service" "agenix.service"];
+          Requires = ["openclaw-setup.service" "agenix.service"];
           Wants = ["network-online.target"];
         };
 
