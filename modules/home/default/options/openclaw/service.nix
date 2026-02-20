@@ -63,13 +63,28 @@ in {
 
     # Setup systemd services to configure and run the OpenClaw gateway
     systemd.user.services = let
-      Environment = [
+      Environment = let
+        paths = builtins.concatStringsSep ":" [
+          "${config.xdg.dataHome}/gem/bin"
+          "${config.xdg.dataHome}/pipx/bin"
+          "${config.xdg.dataHome}/composer/vendor/bin"
+          "${config.xdg.dataHome}/luarocks/bin"
+          "${config.xdg.dataHome}/npm/bin"
+          "${config.xdg.dataHome}/pnpm"
+          "${config.xdg.dataHome}/bun/bin"
+          "${config.home.homeDirectory}/.local/bin"
+          "${config.home.homeDirectory}/.nix-profile/bin"
+          "/etc/profiles/per-user/bot/bin"
+          "/run/current-system/sw/bin"
+        ];
+      in [
         "OPENCLAW_HOME=${config.home.homeDirectory}"
         "OPENCLAW_STATE_DIR=${config.home.homeDirectory}/${cfg.dataDir}"
         "OPENCLAW_CONFIG_PATH=${config.home.homeDirectory}/${cfg.dataDir}/openclaw.json"
+        "PATH=${paths}:$PATH"
       ];
     in {
-      openclaw-setup = {
+      oc-setup = {
         Unit.Description = "OpenClaw Gateway Setup";
         Service = {
           Type = "oneshot";
@@ -134,8 +149,9 @@ in {
       openclaw-gateway = {
         Unit = {
           Description = "OpenClaw Gateway";
-          After = ["openclaw-setup.service" "agenix.service"];
-          Requires = ["openclaw-setup.service" "agenix.service"];
+          After = ["network-online.target" "oc-setup.service" "agenix.service"];
+          Requires = ["oc-setup.service" "agenix.service"];
+          Wants = ["network-online.target"];
         };
 
         Service = {
@@ -147,7 +163,7 @@ in {
             else false;
           ExecStart = "${cfg.package}/bin/openclaw gateway";
           Restart = "on-failure";
-          RestartSec = 2;
+          RestartSec = 5;
 
           # Hardening
           NoNewPrivileges = true;

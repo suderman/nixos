@@ -36,7 +36,7 @@ in {
     persist.storage.directories = [cfg.dataDir];
 
     # Configure OpenClaw CLI for remote (if host isn't 127.0.0.1)
-    systemd.user.services.openclaw-onboard = {
+    systemd.user.services.oc-onboard = {
       Unit = {
         Description = "OpenClaw Gateway Setup";
         After = ["agenix.service"];
