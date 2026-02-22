@@ -61,6 +61,28 @@ in {
       openclaw-env.rekeyFile = cfg.apiKeys;
     };
 
+    systemd.user.sessionVariables.PATH = let
+      extra = [
+        "${config.xdg.dataHome}/gem/bin"
+        "${config.xdg.dataHome}/pipx/bin"
+        "${config.xdg.dataHome}/composer/vendor/bin"
+        "${config.xdg.dataHome}/luarocks/bin"
+        "${config.xdg.dataHome}/npm/bin"
+        "${config.xdg.dataHome}/pnpm"
+        "${config.xdg.dataHome}/bun/bin"
+        "${config.home.homeDirectory}/.local/bin"
+      ];
+
+      nix = [
+        "${config.home.profileDirectory}/bin"
+        "/etc/profiles/per-user/%u/bin"
+        "/run/current-system/sw/bin"
+      ];
+
+      base = ["/usr/bin" "/bin"];
+    in
+      lib.concatStringsSep ":" (extra ++ nix ++ base);
+
     # Setup systemd services to configure and run the OpenClaw gateway
     systemd.user.services = let
       Environment = let
@@ -83,12 +105,16 @@ in {
         "OPENCLAW_CONFIG_PATH=${config.home.homeDirectory}/${cfg.dataDir}/openclaw.json"
         "PATH=${paths}:$PATH"
       ];
+      EnvironmentFile =
+        if cfg.apiKeys != null
+        then config.age.secrets.openclaw-env.path
+        else false;
     in {
       openclaw-setup = {
         Unit.Description = "OpenClaw Gateway Setup";
         Service = {
           Type = "oneshot";
-          inherit Environment;
+          inherit Environment EnvironmentFile;
 
           ExecStart = perSystem.self.mkScript {
             text =
@@ -101,20 +127,28 @@ in {
                     "port": ${toString cfg.port},
                     "mode": "local",
                     "bind": "loopback",
-                    "auth": { "mode": "token", "token": "$(tr -d '\n' <${runDir}/gateway)" },
+                    "auth": { "mode": "token", "token": "\''${OPENCLAW_GATEWAY_TOKEN}" },
                     "trustedProxies": ["127.0.0.1", "${config.networking.address}"],
                     "controlUi": { "allowedOrigins": ["https://${cfg.host}"] }
                   }
                 }
                 EOF
                 chmod 600 ${runDir}/openclaw-gateway.json
+
+                # Generate dotenv with gateway token
+                cat >${runDir}/openclaw.env <<EOF
+                OPENCLAW_GATEWAY_TOKEN="$(tr -d '\n' <${runDir}/gateway)"
+                EOF
+                chmod 600 ${runDir}/openclaw.env
               ''
               +
               # bash
               ''
                 # Ensure ~/.openclaw is setup
                 install -dm700 $OPENCLAW_STATE_DIR
+                cp -fp ${runDir}/openclaw.env $OPENCLAW_STATE_DIR/.env
                 openclaw setup
+
 
                 # Merge the override into OpenClaw's config json
                 if [[ -f $OPENCLAW_CONFIG_PATH ]]; then
@@ -126,8 +160,8 @@ in {
                   # Merged json (mixing gateway into base)
                   {
                     echo "/* OpenClaw Gateway URLs:"
-                    echo "http://localhost:${toString cfg.port}?token=$(tr -d '\n' <${runDir}/gateway)"
-                    echo "https://${cfg.host}?token=$(tr -d '\n' <${runDir}/gateway)"
+                    echo "http://localhost:${toString cfg.port}?token="
+                    echo "https://${cfg.host}?token="
                     echo "*/"
                     jq '.gateway = input.gateway' ${runDir}/openclaw-base.json ${runDir}/openclaw-gateway.json
                   } >${runDir}/openclaw.json
@@ -156,11 +190,7 @@ in {
 
         Service = {
           Type = "simple";
-          inherit Environment;
-          EnvironmentFile =
-            if cfg.apiKeys != null
-            then config.age.secrets.openclaw-env.path
-            else false;
+          inherit Environment EnvironmentFile;
           ExecStart = "${cfg.package}/bin/openclaw gateway";
           Restart = "on-failure";
           RestartSec = 5;

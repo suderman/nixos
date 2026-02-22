@@ -57,7 +57,7 @@ in {
                 openclaw onboard \
                   --non-interactive --accept-risk \
                   --mode remote \
-                  --remote-token $(tr -d '\n' <${runDir}/gateway) \
+                  --remote-token  $(tr -d '\n' <${runDir}/gateway) \
                   --remote-url=wss://${cfg.host}:${toString cfg.port}
               fi
             '';
