@@ -61,50 +61,26 @@ in {
       openclaw-env.rekeyFile = cfg.apiKeys;
     };
 
-    systemd.user.sessionVariables.PATH = let
-      extra = [
-        "${config.xdg.dataHome}/gem/bin"
-        "${config.xdg.dataHome}/pipx/bin"
-        "${config.xdg.dataHome}/composer/vendor/bin"
-        "${config.xdg.dataHome}/luarocks/bin"
-        "${config.xdg.dataHome}/npm/bin"
-        "${config.xdg.dataHome}/pnpm"
-        "${config.xdg.dataHome}/bun/bin"
-        "${config.home.homeDirectory}/.local/bin"
-      ];
-
-      nix = [
-        "${config.home.profileDirectory}/bin"
-        "/etc/profiles/per-user/%u/bin"
-        "/run/current-system/sw/bin"
-      ];
-
-      base = ["/usr/bin" "/bin"];
-    in
-      lib.concatStringsSep ":" (extra ++ nix ++ base);
-
     # Setup systemd services to configure and run the OpenClaw gateway
     systemd.user.services = let
-      Environment = let
-        paths = builtins.concatStringsSep ":" [
-          "${config.xdg.dataHome}/gem/bin"
-          "${config.xdg.dataHome}/pipx/bin"
-          "${config.xdg.dataHome}/composer/vendor/bin"
-          "${config.xdg.dataHome}/luarocks/bin"
-          "${config.xdg.dataHome}/npm/bin"
-          "${config.xdg.dataHome}/pnpm"
-          "${config.xdg.dataHome}/bun/bin"
-          "${config.home.homeDirectory}/.local/bin"
-          "${config.home.homeDirectory}/.nix-profile/bin"
-          "/etc/profiles/per-user/bot/bin"
+      path =
+        config.home.sessionPath
+        ++ [
+          "${config.home.profileDirectory}/bin"
           "/run/current-system/sw/bin"
+          "/usr/bin"
+          "/bin"
         ];
-      in [
-        "OPENCLAW_HOME=${config.home.homeDirectory}"
-        "OPENCLAW_STATE_DIR=${config.home.homeDirectory}/${cfg.dataDir}"
-        "OPENCLAW_CONFIG_PATH=${config.home.homeDirectory}/${cfg.dataDir}/openclaw.json"
-        "PATH=${paths}:$PATH"
-      ];
+
+      Environment =
+        lib.mapAttrsToList (k: v: "${k}=${toString v}") config.home.sessionVariables
+        ++ [
+          "PATH=${lib.concatStringsSep ":" path}"
+          "OPENCLAW_HOME=${config.home.homeDirectory}"
+          "OPENCLAW_STATE_DIR=${config.home.homeDirectory}/${cfg.dataDir}"
+          "OPENCLAW_CONFIG_PATH=${config.home.homeDirectory}/${cfg.dataDir}/openclaw.json"
+        ];
+
       EnvironmentFile =
         if cfg.apiKeys != null
         then config.age.secrets.openclaw-env.path
@@ -137,10 +113,20 @@ in {
 
                 # Generate dotenv with gateway token
                 cat >${runDir}/openclaw.env <<EOF
-                OPENCLAW_GATEWAY_TOKEN="$(tr -d '\n' <${runDir}/gateway)"
+                # OpenClaw Gateway URLs:
+                # http://localhost:${toString cfg.port}?token=$(tr -d '\n' <${runDir}/gateway)
+                # https://${cfg.host}?token=$(tr -d '\n' <${runDir}/gateway)
+                OPENCLAW_GATEWAY_TOKEN=$(tr -d '\n' <${runDir}/gateway)
                 EOF
                 chmod 600 ${runDir}/openclaw.env
               ''
+              + (
+                if cfg.apiKeys != null
+                then ''
+                  cat ${config.age.secrets.openclaw-env.path} >>${runDir}/openclaw.env
+                ''
+                else ""
+              )
               +
               # bash
               ''
@@ -148,7 +134,6 @@ in {
                 install -dm700 $OPENCLAW_STATE_DIR
                 cp -fp ${runDir}/openclaw.env $OPENCLAW_STATE_DIR/.env
                 openclaw setup
-
 
                 # Merge the override into OpenClaw's config json
                 if [[ -f $OPENCLAW_CONFIG_PATH ]]; then
@@ -159,10 +144,6 @@ in {
 
                   # Merged json (mixing gateway into base)
                   {
-                    echo "/* OpenClaw Gateway URLs:"
-                    echo "http://localhost:${toString cfg.port}?token="
-                    echo "https://${cfg.host}?token="
-                    echo "*/"
                     jq '.gateway = input.gateway' ${runDir}/openclaw-base.json ${runDir}/openclaw-gateway.json
                   } >${runDir}/openclaw.json
                   chmod 600 ${runDir}/openclaw.json
