@@ -31,7 +31,7 @@ in {
     # cli upload tools
     home.packages = with pkgs; [
       immich-cli
-      immich-go
+      # immich-go
     ];
 
     # Web App
