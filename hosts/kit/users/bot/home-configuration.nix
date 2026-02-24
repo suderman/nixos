@@ -46,6 +46,8 @@
   programs.python.enable = true;
   programs.go.enable = true;
 
+  services.syncthing.enable = true;
+
   # Email, calendars, contacts
   accounts.enable = true;
 

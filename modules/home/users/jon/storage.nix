@@ -31,6 +31,12 @@
       sync = true;
       enable = true;
     };
+    XDG_PUBLICSHARE_DIR = {
+      path = "Public";
+      persist = "storage";
+      sync = true;
+      enable = true;
+    };
     XDG_VIDEOS_DIR = {
       path = "Movies";
       persist = "storage";
@@ -39,7 +45,6 @@
     };
 
     # Standard user directories (disabled)
-    XDG_PUBLICSHARE_DIR.enable = false;
     XDG_TEMPLATES_DIR.enable = false;
 
     # Custom user directories
@@ -49,16 +54,16 @@
       sync = true;
       enable = true;
     };
-    XDG_NOTES_DIR = {
-      path = "Notes";
-      persist = "storage";
-      sync = true;
-      enable = true;
-    };
     XDG_SOURCE_DIR = {
       path = "src";
       persist = "storage";
       sync = false;
+      enable = true;
+    };
+    XDG_WORKSPACE_DIR = {
+      path = "Workspace";
+      persist = "storage";
+      sync = true;
       enable = true;
     };
   };

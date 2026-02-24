@@ -70,7 +70,10 @@
 
   services.immich.enable = false;
 
-  services.forgejo.enable = true;
+  services.forgejo = {
+    enable = true;
+    name = "git";
+  };
 
   # Garmin fenix 6 pro
   hardware.garmin.deviceId = "091e:4cda";

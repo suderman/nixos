@@ -7,11 +7,10 @@
       sync = false;
       enable = true;
     };
-
     XDG_PUBLICSHARE_DIR = {
       path = "public";
       persist = "storage";
-      sync = false;
+      sync = true;
       enable = true;
     };
 
@@ -24,21 +23,18 @@
     XDG_TEMPLATES_DIR.enable = false;
 
     # Custom user directories
-    XDG_AGENTS_DIR = {
-      path = "agents";
-      persist = "storage";
-      sync = false;
-      enable = true;
-    };
     XDG_SOURCE_DIR = {
       path = "src";
       persist = "storage";
       sync = false;
       enable = true;
     };
-
-    # Custom user directories (disabled)
-    XDG_NOTES_DIR.enable = false;
+    XDG_WORKSPACE_DIR = {
+      path = "workspace";
+      persist = "storage";
+      sync = true;
+      enable = true;
+    };
   };
 
   # Code cloned here, auto-whitelist for direnv

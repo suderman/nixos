@@ -90,7 +90,7 @@ in {
     xdg.configFile."syncthing/stignore".text =
       # c
       ''
-        // OS-generated files
+        // OS-generated files (safe to delete / ignore)
         (?d).DS_Store
         (?d).AppleDouble
         (?d).apdisk
@@ -100,11 +100,14 @@ in {
         (?d).Trashes
         (?d).fseventsd
         (?d).TemporaryItems
+        (?d).DocumentRevisions-V100
         (?d).directory
         (?d).nfs*
         (?d)lost+found
         (?d).local/share/Trash
         (?d).Trash-*
+        (?d).trash
+        (?d).Trash
         (?d)desktop.ini
         (?d)Thumbs.db
         (?d)Thumbs.db:encryptable
@@ -114,14 +117,29 @@ in {
         *.lnk
         (?d)@eaDir
 
-        // App-generated files
+        // Syncthing-local housekeeping (don’t sync between devices)
+        (?d).stversions
+        (?d).stversions/*
+
+        // App / editor-generated junk
         .dropbox
         .dropbox.attr
         *.part
         *.crdownload
         ~$*
-        .idea/
-        .vscode/
+        .idea
+        .vscode
+
+        // Version control metadata (don’t sync repos)
+        .git
+        .gitmodules
+        .gitattributes
+        .hg
+        .svn
+        .bzr
+        .pijul
+        .jj
+        .fossil-settings
 
         // Temp and backup
         *.tmp
