@@ -140,6 +140,7 @@ in {
         .pijul
         .jj
         .fossil-settings
+        node_modules
 
         // Temp and backup
         *.tmp
