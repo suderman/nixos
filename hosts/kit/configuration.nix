@@ -70,6 +70,8 @@
 
   services.immich.enable = false;
 
+  services.forgejo.enable = true;
+
   # Garmin fenix 6 pro
   hardware.garmin.deviceId = "091e:4cda";
 

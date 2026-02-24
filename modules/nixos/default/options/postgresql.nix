@@ -7,7 +7,8 @@
 }: let
   cfg = config.services.postgresql;
   admins = config.users.groups.wheel.members ++ ["root"];
-  databases = genAttrs (unique config.services.postgresql.ensureDatabases) (database: admins);
+  databases = genAttrs (unique config.services.postgresql.ensureDatabases) (_database: admins);
+  # databases = genAttrs admins (_database: admins);
   inherit (config.services.prometheus) exporters;
   inherit (lib) genAttrs mkIf mkOrder unique;
 in {
