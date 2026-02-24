@@ -15,7 +15,10 @@ in {
 
     # Persist application state and let Obsidian manage it
     persist.scratch.directories = [".config/obsidian"];
-    xdg.configFile."obsidian".enable = false;
+    xdg.configFile = {
+      "obsidian".enable = false;
+      "obsidian/obsidian.json".enable = false;
+    };
 
     # Tag windows for hyprland
     wayland.windowManager.hyprland.settings = {
