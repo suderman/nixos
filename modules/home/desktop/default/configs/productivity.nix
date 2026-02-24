@@ -11,6 +11,7 @@
     google-analytics.enable = lib.mkDefault true;
     harvest.enable = lib.mkDefault true;
     asana.enable = lib.mkDefault true;
+    obsidian.enable = lib.mkDefault true;
   };
 
   home.packages = with pkgs; [
