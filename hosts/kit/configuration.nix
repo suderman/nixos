@@ -52,11 +52,11 @@
 
   # Enable ollama server
   services.ollama = {
-    enable = true;
+    enable = false;
     host = "0.0.0.0";
     openFirewall = true; # allow network access
     acceleration = "cuda";
-    package = pkgs.ollama-cuda; # gpu power
+    package = pkgs.unstable.ollama-cuda; # gpu power
     models = "/data/models/ollama"; # model storage on separate disk
   };
 

@@ -1,6 +1,7 @@
 {
   lib,
   pkgs,
+  perSystem,
   flake,
   ...
 }: {
@@ -14,35 +15,36 @@
 
   config = {
     # Greeter
-    services.displayManager.ly =
-      # let
-      # hyprland-starter = pkgs.writeScript "hyprland-starter" ''
-      #   export XDG_SESSION_TYPE=wayland
-      #   export XDG_CURRENT_DESKTOP=Hyprland
-      #   export XDG_SESSION_DESKTOP=Hyprland
-      #   export QT_QPA_PLATFORM=wayland
-      #   export SDL_VIDEODRIVER=wayland
-      #   export MOZ_ENABLE_WAYLAND=1
-      #
-      #   exec start-hyprland
-      # '';
-      # in
-      {
-        enable = true;
-        settings = {
-          clear_password = true;
-          vi_mode = false;
-          animation = "matrix";
-          bigclock = true;
-          session_log = null;
-          login_cmd = "start-hyprland";
-          logout_cm = "clear && reset && chvt 1";
-        };
+    services.displayManager.ly = {
+      enable = true;
+      settings = {
+        clear_password = true;
+        vi_mode = false;
+        animation = "matrix";
+        bigclock = true;
+        session_log = null;
+        login_cmd = "start-hyprland";
+        logout_cm = "clear && reset && chvt 1";
       };
+    };
     persist.scratch.files = ["/etc/ly/save.ini"];
 
     # The one and only
-    programs.hyprland.enable = true;
+    programs.hyprland = {
+      enable = true;
+      package = perSystem.hyprland.default;
+      portalPackage = perSystem.hyprland.xdg-desktop-portal-hyprland;
+    };
+
+    # Adjust this if system graphics drivers aren't compatible with hyprland's
+    hardware.graphics = let
+      hyprpkgs = flake.inputs.hyprland.inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system};
+    in {
+      enable = true;
+      # package = hyprpkgs.mesa;
+      enable32Bit = true;
+      # package32 = hyprpkgs.pkgsi686Linux.mesa;
+    };
 
     # Enable screen brightness control
     programs.light.enable = true;

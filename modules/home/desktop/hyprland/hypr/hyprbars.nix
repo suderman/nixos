@@ -1,14 +1,14 @@
 {
   config,
   lib,
-  pkgs,
+  perSystem,
   ...
 }: let
   cfg = config.wayland.windowManager.hyprland;
   inherit (lib) mkIf;
 in {
   wayland.windowManager.hyprland = mkIf cfg.enablePlugins {
-    plugins = [pkgs.unstable.hyprlandPlugins.hyprbars];
+    plugins = [perSystem.hyprland-plugins.hyprbars];
 
     settings = {
       "plugin:hyprbars" = with config.lib.stylix.colors; {

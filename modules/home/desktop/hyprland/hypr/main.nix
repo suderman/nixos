@@ -37,13 +37,25 @@
       };
     };
 
+    layout = {
+      single_window_aspect_ratio = "4 3"; # constrain width of single windows
+    };
+
     dwindle = {
       preserve_split = true;
       smart_split = false;
       pseudotile = false;
       special_scale_factor = 0.9;
       split_width_multiplier = 1.35;
-      single_window_aspect_ratio = "4 3"; # constrain width of single windows
+    };
+
+    scrolling = {
+      fullscreen_on_one_column = true;
+      column_width = 0.99; # 0.5;
+      focus_fit_method = 1; # 0 = center, 1 = fit
+      follow_focus = false; # true;
+      follow_min_visible = 0.4;
+      direction = "down"; # right
     };
 
     gesture = [

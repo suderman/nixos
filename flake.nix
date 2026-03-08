@@ -66,6 +66,16 @@
     # <https://github.com/gmodena/nix-flatpak>
     nix-flatpak.url = "github:gmodena/nix-flatpak";
 
+    # Hyprland
+    # <https://wiki.hypr.land/Nix/>
+    hyprland.url = "github:hyprwm/Hyprland/v0.54.1";
+    # <https://github.com/hyprwm/hyprland-plugins>
+    hyprland-plugins.url = "github:hyprwm/hyprland-plugins";
+    hyprland-plugins.inputs.hyprland.follows = "hyprland";
+    # <https://github.com/VirtCode/hypr-dynamic-cursors>
+    hypr-dynamic-cursors.url = "github:VirtCode/hypr-dynamic-cursors";
+    hypr-dynamic-cursors.inputs.hyprland.follows = "hyprland";
+
     # Neovim flake
     # <https://github.com/suderman/neovim>
     neovim.url = "github:suderman/neovim";

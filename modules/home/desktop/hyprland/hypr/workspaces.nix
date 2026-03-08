@@ -8,6 +8,8 @@
       # Also navigate workspaces with super semicolon/apostrophone (hhkb arrows)
       "super, semicolon, workspace, e-1"
       "super, apostrophe, workspace, e+1"
+      # "super, semicolon, layoutmsg, move -col"
+      # "super, apostrophe, layoutmsg, move +col"
 
       # Scroll through existing workspaces with super + scroll
       "super, mouse_down, workspace, e+1"
@@ -37,6 +39,8 @@
     ];
 
     windowrule = [
+      # "workspace 8, layout scrolling"
+
       # Games fullscreen on workspace 9
       "workspace 9, fullscreen on, match:tag game"
 

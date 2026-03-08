@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  perSystem,
   ...
 }: let
   cfg = config.wayland.windowManager.hyprland;
@@ -9,6 +10,7 @@ in {
   wayland.windowManager.hyprland = {
     # plugins = mkIf cfg.enablePlugins [pkgs.hyprlandPlugins.hyprexpo];
     # plugins = mkIf cfg.enablePlugins [pkgs.unstable.hyprlandPlugins.hyprexpo];
+    # plugins = mkIf cfg.enablePlugins [perSystem.hyprland-plugins.hyprexpo];
 
     # settings = {
     #   "plugin:hyprexpo" = {

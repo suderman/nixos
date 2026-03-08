@@ -1,6 +1,7 @@
 {
   lib,
   pkgs,
+  perSystem,
   flake,
   ...
 }: {
@@ -16,7 +17,8 @@
     wayland = {
       windowManager.hyprland = {
         enable = true;
-        package = pkgs.unstable.hyprland;
+        package = null;
+        portalPackage = null;
         systemd.enable = true;
       };
       systemd.target = "hyprland-session.target";
