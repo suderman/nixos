@@ -58,6 +58,7 @@ perSystem.self.mkApplication {
         -e DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$ZWIFT_UID/bus \
         -e ZWIFT_UID \
         -e ZWIFT_GID \
+        -v $DATA_DIR:/home/user/.wine/drive_c/users/user/AppData/Local/Zwift \
         -v $DATA_DIR:/home/user/.wine/drive_c/users/user/Documents/Zwift \
         -v /run/user/$ZWIFT_UID/pulse:/run/user/$ZWIFT_UID/pulse \
         -v /run/user/$ZWIFT_UID/bus:/run/user/$ZWIFT_UID/bus \
