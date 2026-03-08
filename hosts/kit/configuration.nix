@@ -52,7 +52,7 @@
 
   # Enable ollama server
   services.ollama = {
-    enable = false;
+    enable = true;
     host = "0.0.0.0";
     openFirewall = true; # allow network access
     acceleration = "cuda";
