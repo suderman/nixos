@@ -14,6 +14,10 @@
       "super+alt, k, exec, hypr-movewindoworgrouporactive u 0 -40"
       "super+alt, l, exec, hypr-movewindoworgrouporactive r 40 0"
 
+      # Move entire column with super+alt+shift [hl] (scrolling layout)
+      "super+alt+shift, h, layoutmsg, swapcol l"
+      "super+alt+shift, l, layoutmsg, swapcol r"
+
       # Resize a window with super+shift [hjkl] (hold to repeat)
       "super+shift, h, resizeactive, -80 0"
       "super+shift, j, resizeactive, 0 80"
@@ -29,16 +33,16 @@
 
     # Run script again if o key held down
     bindo = [
-      "super, i, exec, hypr-tileorsplit toggle"
-      "super+alt, i, exec, hypr-tileorsplit swap"
+      "super, i, exec, hypr-tileorsplitorpromote toggle"
+      "super+alt, i, exec, hypr-tileorsplitorpromote swap"
     ];
 
     bind = [
       # Set window tiled, or togglesplit if already tiled
-      "super, i, exec, hypr-tileorsplit toggle"
+      "super, i, exec, hypr-tileorsplitorpromote toggle"
 
       # Set window tiled, or swapsplit if already tiled
-      "super+alt, i, exec, hypr-tileorsplit swap"
+      "super+alt, i, exec, hypr-tileorsplitorpromote swap"
 
       # Focus tiled windows in workspace
       "super+shift, i, cyclenext, tiled"
