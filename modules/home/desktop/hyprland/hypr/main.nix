@@ -52,8 +52,8 @@
     scrolling = {
       fullscreen_on_one_column = true;
       column_width = 0.40; # 0.5;
-      focus_fit_method = 0; # 0 = center, 1 = fit
-      follow_focus = false; # true;
+      focus_fit_method = 1; # 0 = center, 1 = fit
+      follow_focus = true; # true;
       follow_min_visible = 0.4;
       direction = "right"; # down
     };

@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-layout="$(hyprctl getoption general:layout -j | jq -r .str)"
+id="$(hyprctl -j activeworkspace | jq -r .id)"
+layout="$(hyprctl -j activeworkspace | jq -r .tiledLayout)"
+
 if [[ "$layout" == "dwindle" ]]; then
-  hyprctl keyword general:layout scrolling
+  hyprctl keyword workspace $id, layout:scrolling
 elif [[ "$layout" == "scrolling" ]]; then
-  hyprctl keyword general:layout master
+  hyprctl keyword workspace $id, layout:master
 # elif [[ "$layout" == "master" ]]; then
-#   hyprctl keyword general:layout monocle
+#   hyprctl keyword workspace $id, layout:monocle
 else
-  hyprctl keyword general:layout dwindle
+  hyprctl keyword workspace $id, layout:dwindle
 fi
