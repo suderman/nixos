@@ -36,6 +36,8 @@
       "super+alt, 7, movetoworkspace, 7"
       "super+alt, 8, movetoworkspace, 8"
       "super+alt, 9, movetoworkspace, 9"
+
+      "super, p, exec, hypr-cyclelayout"
     ];
 
     windowrule = [

@@ -19,6 +19,12 @@
       "super+shift, j, resizeactive, 0 80"
       "super+shift, k, resizeactive, 0 -80"
       "super+shift, l, resizeactive, 80 0"
+
+      # Move focus to a window with super [hjkl]
+      "super, h, movefocus, l"
+      "super, j, movefocus, d"
+      "super, k, movefocus, u"
+      "super, l, movefocus, r"
     ];
 
     # Run script again if o key held down
@@ -36,12 +42,13 @@
 
       # Focus tiled windows in workspace
       "super+shift, i, cyclenext, tiled"
+      # "super+shift, i, layoutmsg, cyclenext, tiled"
 
-      # Move focus to a window with super [hjkl]
-      "super, h, movefocus, l"
-      "super, j, movefocus, d"
-      "super, k, movefocus, u"
-      "super, l, movefocus, r"
+      # # Move focus to a window with super [hjkl]
+      # "super, h, movefocus, l"
+      # "super, j, movefocus, d"
+      # "super, k, movefocus, u"
+      # "super, l, movefocus, r"
 
       # Kill the active window
       "super, w, killactive,"

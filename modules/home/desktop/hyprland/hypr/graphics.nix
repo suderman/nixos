@@ -73,7 +73,8 @@
         # "fade, 1, 3, smoothIn"
         "fade, 1, 1, smoothIn"
         "fadeDim, 1, 3, smoothIn"
-        "workspaces, 1, 3, default"
+        # "workspaces, 1, 3, default"
+        "workspaces, 1, 3, default, slidevert"
         "specialWorkspace, 1, 3, overshot, slidefadevert -50%"
         "layers, 1, 0.1, default, fade"
       ];

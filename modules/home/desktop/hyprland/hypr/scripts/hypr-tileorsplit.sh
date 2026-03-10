@@ -5,7 +5,7 @@ is_floating="$(hyprctl activewindow -j | jq -r .floating)"
 
 # If already tiled, togglesplit or swapsplit
 if [[ "$is_floating" != "true" ]]; then
-  hyprctl dispatch "${toggle_or_swap}split"
+  hyprctl dispatch layoutmsg "${toggle_or_swap}split"
 
 # Else, set tiled
 else
