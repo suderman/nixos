@@ -26,13 +26,16 @@ remap it on other keyboards.
 
 ### Workspaces
 
-| Key                   | Key                    | Function                                            |
-| --------------------- | ---------------------- | --------------------------------------------------- |
-| `Super` `← →`         | `Super` `mouse_scroll` | Navigate workspaces                                 |
-| `Super` `1-9`         |                        | Jump to workspace                                   |
-| `Super` `Esc`         |                        | Toggle special workspace                            |
-| `Super` `Shift` `Esc` |                        | Send window to special workspace                    |
-| `Super` `P`           |                        | Toggle visibility of floating windows per workspace |
+| Key                   | Key                    | Function                           |
+| --------------------- | ---------------------- | ---------------------------------- |
+| `Super` `← →`         | `Super` `mouse_scroll` | Navigate workspaces                |
+| `Super` `1-9`         |                        | Jump to workspace                  |
+| `Super` `Esc`         |                        | Toggle special workspace           |
+| `Super` `Shift` `Esc` |                        | Send window to special workspace   |
+| `Super` `N`           |                        | Cycle next window in workspace     |
+| `Super` `P`           |                        | Cycle previous window in workspace |
+| `Super` `Alt` `N`     |                        | Cycle next layout in workspace     |
+| `Super` `Alt` `P`     |                        | Cycle previous layout in workspace |
 
 ### Windows
 
@@ -52,7 +55,7 @@ remap it on other keyboards.
 | `Super` `Alt` `I`      |                       | Tile window or swap split                 |
 | `Super` `Shift` `I`    |                       | Focus tiled windows                       |
 | `Super` `O`            |                       | Float window or pin window                |
-| `Super` `Alt` `O`      |                       | Float window or cycle position            |
+| `Super` `Alt` `O`      |                       | Toggle visibility of floating windows     |
 | `Super` `Shift` `O`    |                       | Focus floating windows                    |
 | `Esc`                  |                       | Hold to toggle titlebars                  |
 
@@ -100,7 +103,6 @@ remap it on other keyboards.
 | `Super` `W`  | Close tab        |
 | `Super` `R`  | Reload or rename |
 | `Super` `T`  | New tab          |
-| `Super` `N`  | New window       |
 | `Super` `[]` | Navigate tabs    |
 | `Super` `A`  | Select all       |
 | `Super` `Z`  | Undo             |
@@ -126,11 +128,12 @@ remap it on other keyboards.
 
 ### Other
 
-| Key                  | Alt Key     | Function                        |
-| -------------------- | ----------- | ------------------------------- |
-| `Esc`                |             | Dismiss notification            |
-| `Super` `Alt` `U`    |             | Undo dismissal of notifications |
-| `Super` `Shift` `Q`  |             | Quit Hyprland                   |
-| `NumLock`            |             | Sleep display                   |
-| `Power`              |             | Show poweroff menu              |
-| `Ctrl` `Alt` `F1-F9` | `Tab` `1-9` | Jump to TTY                     |
+| Key                       | Alt Key     | Function                        |
+| ------------------------- | ----------- | ------------------------------- |
+| `Esc`                     |             | Dismiss notification            |
+| `Super` `Alt` `U`         |             | Undo dismissal of notifications |
+| `Super` `Shift` `Alt` `P` |             | Random wallpaper                |
+| `Super` `Alt`             |             | Sleep display                   |
+| `NumLock`                 |             | Sleep display                   |
+| `Power`                   |             | Show poweroff menu              |
+| `Ctrl` `Alt` `F1-F9`      | `Tab` `1-9` | Jump to TTY                     |

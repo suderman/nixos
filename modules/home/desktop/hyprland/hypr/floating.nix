@@ -7,6 +7,9 @@
       # Set window to floating (and also resize if was tiled)
       "super, o, exec, hypr-float"
 
+      # Toggle visibility of floating windows on each workspace
+      "super+alt, o, exec, hypr-togglefullscreenorhidden"
+
       # Resize active window to various presets
       "super+shift, 1, exec, hypr-resizefloating 10"
       "super+shift, 2, exec, hypr-resizefloating 20"
@@ -23,16 +26,16 @@
       # If o key held down, pin floating window
       "super, o, pin"
 
-      # Run script again if o key held down
-      "super+alt, o, exec, hypr-floatorcycle"
-      "super+alt+shift, o, exec, hypr-floatorcycle reverse"
+      # # Run script again if o key held down
+      # "super+alt, o, exec, hypr-floatorcycle"
+      # "super+alt+shift, o, exec, hypr-floatorcycle reverse"
     ];
 
-    binde = [
-      # Cycle floating window's position around screen
-      "super+alt, o, exec, hypr-floatorcycle"
-      "super+alt+shift, o, exec, hypr-floatorcycle reverse"
-    ];
+    # binde = [
+    #   # Cycle floating window's position around screen
+    #   "super+alt, o, exec, hypr-floatorcycle"
+    #   "super+alt+shift, o, exec, hypr-floatorcycle reverse"
+    # ];
 
     windowrule = [
       # Pinned windows have a border and hide decorations when inactive

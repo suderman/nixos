@@ -32,7 +32,7 @@ else
 
       # Focus each window and move to regular workspace
       cmds="$cmds; dispatch focuswindow address:$float"
-      cmds="$cmds; dispatch movetoworkspacesilent $workspace"
+      cmds="$cmds; dispatch movetoworkspace $workspace"
 
     done
 

@@ -2,7 +2,7 @@
   wayland.windowManager.hyprland.settings = {
     bind = [
       # Super+Shift+p to toggle visibility of floating windows on each workspace
-      "super+shift, p, exec, hypr-togglefullscreenorhidden"
+      # "super+shift, p, exec, hypr-togglefullscreenorhidden"
 
       # Toggle special workspace
       "super, escape, togglespecialworkspace"
