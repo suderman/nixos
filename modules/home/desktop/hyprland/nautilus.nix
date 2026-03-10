@@ -15,7 +15,7 @@
       "alt.k" = "A-up";
       "alt.l" = "A-left";
       "super.t" = "C-t"; # new tab
-      "super.n" = "C-n"; # new window
+      # "super.n" = "C-n"; # new window
       "super.w" = "C-w"; # close tab
       "super+shift.n" = "C-S-n"; # new folder
       "super.[" = "C-pageup"; # prev tab

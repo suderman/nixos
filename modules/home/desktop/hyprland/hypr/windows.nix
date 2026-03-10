@@ -42,13 +42,6 @@
 
       # Focus tiled windows in workspace
       "super+shift, i, cyclenext, tiled"
-      # "super+shift, i, layoutmsg, cyclenext, tiled"
-
-      # # Move focus to a window with super [hjkl]
-      # "super, h, movefocus, l"
-      # "super, j, movefocus, d"
-      # "super, k, movefocus, u"
-      # "super, l, movefocus, r"
 
       # Kill the active window
       "super, w, killactive,"

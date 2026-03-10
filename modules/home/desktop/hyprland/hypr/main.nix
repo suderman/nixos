@@ -58,6 +58,13 @@
       direction = "right"; # down
     };
 
+    master = {
+      orientation = "left"; # left right top bottom center
+      mfact = 0.75; # 0.55
+      new_status = "master";
+      new_on_top = true;
+    };
+
     gesture = [
       "3, horizontal, workspace"
       "3, vertical, special, special"

@@ -67,7 +67,7 @@ in {
         "super.w" = "C-S-q"; # close tab
         "super.[" = "C-S-left"; # prev tab
         "super.]" = "C-S-right"; # next tab
-        "super.n" = "C-S-n"; # new window
+        # "super.n" = "C-S-n"; # new window
         "super.r" = "C-r"; # reload
         # "super.c" = "C-insert"; # copy
         # "super.p" = "S-insert"; # paste

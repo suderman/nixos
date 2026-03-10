@@ -83,7 +83,7 @@ in {
       "super.w" = "C-w"; # close tab
       "super.[" = "C-pageup"; # prev tab
       "super.]" = "C-pagedown"; # next tab
-      "super.n" = "C-n"; # new window
+      # "super.n" = "C-n"; # new window
       "super.r" = "C-r"; # reload
     };
 

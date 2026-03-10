@@ -8,8 +8,6 @@
       # Also navigate workspaces with super semicolon/apostrophone (hhkb arrows)
       "super, semicolon, workspace, e-1"
       "super, apostrophe, workspace, e+1"
-      # "super, semicolon, layoutmsg, move -col"
-      # "super, apostrophe, layoutmsg, move +col"
 
       # Scroll through existing workspaces with super + scroll
       "super, mouse_down, workspace, e+1"
@@ -37,12 +35,20 @@
       "super+alt, 8, movetoworkspace, 8"
       "super+alt, 9, movetoworkspace, 9"
 
-      "super, p, exec, hypr-cyclelayout"
+      # Cycle through layouts with super+alt n
+      # dwindle > master > scrolling > monocle
+      "super+alt, n, exec, hypr-cyclelayout next"
+      # Reverse the cycle with super+alt p
+      "super+alt, p, exec, hypr-cyclelayout prev"
+    ];
+
+    # Cycle through windows with with super n/p
+    binde = [
+      "super, n, exec, hypr-nextprev next"
+      "super, p, exec, hypr-nextprev prev"
     ];
 
     windowrule = [
-      # "workspace 8, layout scrolling"
-
       # Games fullscreen on workspace 9
       "workspace 9, fullscreen on, match:tag game"
 
