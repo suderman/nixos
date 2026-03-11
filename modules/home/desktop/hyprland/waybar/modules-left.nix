@@ -15,6 +15,9 @@
 
     "hyprland/workspaces" = {
       on-click = "activate";
+      on-scroll-up = "exec hypr-workspace prev";
+      on-scroll-down = "exec hypr-workspace next";
+
       all-outputs = false;
       disable-scroll = true;
       active-only = false;
@@ -38,6 +41,8 @@
     "custom/layout" = {
       on-click = "exec hypr-cyclelayout next";
       on-click-right = "exec hypr-cyclelayout prev";
+      on-scroll-up = "exec hyprctl -- dispatch layoutmsg move -col";
+      on-scroll-down = "exec hyprctl -- dispatch layoutmsg move +col";
       signal = 8;
       return-type = "json";
       exec = pkgs.self.mkScript {

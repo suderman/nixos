@@ -2,16 +2,25 @@
   wayland.windowManager.hyprland.settings = {
     bind = [
       # Navigate workspaces with super left/right
-      "super, left, workspace, e-1" # cyclenext, prev
-      "super, right, workspace, e+1" # cyclenext
+      "super, left, exec, hypr-workspace prev"
+      "super, right, exec, hypr-workspace next"
+      # "super, left, workspace, e-1" # cyclenext, prev
+      # "super, right, workspace, e+1" # cyclenext
 
       # Also navigate workspaces with super semicolon/apostrophone (hhkb arrows)
-      "super, semicolon, workspace, e-1"
-      "super, apostrophe, workspace, e+1"
+      "super, semicolon, exec, hypr-workspace prev"
+      "super, apostrophe, exec, hypr-workspace next"
+      # "super, semicolon, workspace, e-1"
+      # "super, apostrophe, workspace, e+1"
 
       # Scroll through existing workspaces with super + scroll
-      "super, mouse_down, workspace, e+1"
-      "super, mouse_up, workspace, e-1"
+      "super, mouse_down, exec, hypr-workspace prev"
+      "super, mouse_up, exec, hypr-workspace next"
+      # "super, mouse_down, workspace, e+1"
+      # "super, mouse_up, workspace, e-1"
+
+      "super+alt, mouse_down, layoutmsg, move -col"
+      "super+alt, mouse_up, layoutmsg, move +col"
 
       # Switch workspaces with super [1-9]
       "super, 1, workspace, 1"
