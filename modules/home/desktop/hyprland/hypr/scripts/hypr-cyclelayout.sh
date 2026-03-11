@@ -32,3 +32,5 @@ else
   fi
 
 fi
+
+pkill -RTMIN+8 waybar # refresh indicator

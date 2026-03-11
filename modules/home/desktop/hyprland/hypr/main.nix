@@ -1,4 +1,4 @@
-{...}: {
+{pkgs, ...}: {
   wayland.windowManager.hyprland.settings = {
     # default display
     monitor = [", preferred, 0x0, 1"];
@@ -6,9 +6,32 @@
     # Let xwayland be tiny, not blurry
     xwayland.force_zero_scaling = true;
 
-    # Execute at launch
-    exec-once = [
-      "chromium --no-startup-window &" # pre-spawn browser process
+    # Run once at start
+    exec-once = let
+      waybarwatcher = pkgs.self.mkScript {
+        path = [pkgs.socat pkgs.procps];
+        text =
+          # bash
+          ''
+            handle() {
+              case $1 in
+              workspacev2\>\>*)
+                pkill -RTMIN+8 waybar
+                ;;
+              esac
+            }
+            socat -U - UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock | while read -r line; do handle "$line"; done
+          '';
+      };
+    in ["${waybarwatcher}"];
+
+    # Run at start and every reload
+    exec = [
+      # Send refresh signal to waybar for initial display
+      "pkill -RTMIN+8 waybar"
+
+      # Pre-spawn browser process
+      "chromium --no-startup-window"
     ];
 
     input = {
@@ -27,7 +50,6 @@
     };
 
     general = {
-      layout = "dwindle";
       resize_on_border = true;
       snap = {
         enabled = true;
@@ -37,37 +59,9 @@
       };
     };
 
-    layout = {
-      single_window_aspect_ratio = "4 3"; # constrain width of single windows
-    };
-
-    dwindle = {
-      preserve_split = true;
-      smart_split = false;
-      pseudotile = false;
-      special_scale_factor = 0.9;
-      split_width_multiplier = 1.35;
-    };
-
-    scrolling = {
-      fullscreen_on_one_column = true;
-      column_width = 0.40; # 0.5;
-      focus_fit_method = 1; # 0 = center, 1 = fit
-      follow_focus = true; # true;
-      follow_min_visible = 0.4;
-      direction = "right"; # down
-    };
-
-    master = {
-      orientation = "left"; # left right top bottom center
-      mfact = 0.75; # 0.55
-      new_status = "master";
-      new_on_top = true;
-    };
-
     gesture = [
-      "3, horizontal, workspace"
-      "3, vertical, special, special"
+      "3, vertical, workspace"
+      # "3, vertical, special, special"
     ];
 
     misc = {

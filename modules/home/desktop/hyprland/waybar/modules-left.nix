@@ -3,6 +3,7 @@
     modules-left = [
       "custom/launcher"
       "hyprland/workspaces"
+      "custom/layout"
       "custom/windows"
     ];
 
@@ -30,6 +31,31 @@
         "7" = "7";
         "8" = "8";
         "9" = "9";
+      };
+    };
+
+    # Indicator for current workspace layout
+    "custom/layout" = {
+      on-click = "exec hypr-cyclelayout next";
+      on-click-right = "exec hypr-cyclelayout prev";
+      signal = 8;
+      return-type = "json";
+      exec = pkgs.self.mkScript {
+        path = with pkgs; [jq socat];
+        text =
+          # bash
+          ''
+            layout="$(hyprctl -j activeworkspace | jq -r .tiledLayout)"
+            icon="󰕴 " # dwindle
+            if [[ "$layout" == "master" ]]; then
+              icon="󰜩 "
+            elif [[ "$layout" == "scrolling" ]]; then
+              icon="󰕭 "
+            elif [[ "$layout" == "monocle" ]]; then
+              icon="󰹞 "
+            fi
+            echo '{"text": " '$icon'", "tooltip": "'$layout'", "class": "active"}'
+          '';
       };
     };
 
