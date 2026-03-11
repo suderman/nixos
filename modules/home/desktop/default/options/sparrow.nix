@@ -22,7 +22,7 @@ in {
     };
     package = mkOption {
       type = types.package;
-      default = pkgs.sparrow;
+      default = pkgs.unstable.sparrow;
     };
   };
 
