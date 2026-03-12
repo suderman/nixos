@@ -74,7 +74,7 @@
       on_focus_under_fullscreen = 2; # unfullscreen when opening new window
     };
 
-    "binds:workspace_back_and_forth" = true;
+    "binds:workspace_back_and_forth" = false;
 
     bind = [
       # Exit hyprland

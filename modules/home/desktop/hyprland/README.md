@@ -29,13 +29,15 @@ remap it on other keyboards.
 | Key                   | Key                    | Function                           |
 | --------------------- | ---------------------- | ---------------------------------- |
 | `Super` `← →`         | `Super` `mouse_scroll` | Navigate workspaces                |
+| `Super` `Alt` `N`     |                        | Cycle next workspace               |
+| `Super` `Alt` `P`     |                        | Cycle previous workspace           |
 | `Super` `1-9`         |                        | Jump to workspace                  |
 | `Super` `Esc`         |                        | Toggle special workspace           |
 | `Super` `Shift` `Esc` |                        | Send window to special workspace   |
 | `Super` `N`           |                        | Cycle next window in workspace     |
 | `Super` `P`           |                        | Cycle previous window in workspace |
-| `Super` `Alt` `N`     |                        | Cycle next layout in workspace     |
-| `Super` `Alt` `P`     |                        | Cycle previous layout in workspace |
+| `Super` `/`           |                        | Cycle next layout in workspace     |
+| `Super` `Alt` `/`     |                        | Cycle previous layout in workspace |
 
 ### Windows
 
@@ -61,12 +63,11 @@ remap it on other keyboards.
 
 ### Groups
 
-| Key                | Alt Key                    | Function                       |
-| ------------------ | -------------------------- | ------------------------------ |
-| `Super` `/`        | `Super` `Alt` `mouse_left` | Toggle window group or lock    |
-| `Super` `<>`       |                            | Navigate window group tabs     |
-| `Super` `Alt` `<>` |                            | Reorder windows inside a group |
-| `Super` `Q`        |                            | Disperse windows out of group  |
+| Key                | Alt Key                    | Function                                    |
+| ------------------ | -------------------------- | ------------------------------------------- |
+| `Super` `<>`       | `Super` `Alt` `mouse_left` | Navigate window group tabs (hold to toggle) |
+| `Super` `Alt` `<>` |                            | Reorder windows inside a group              |
+| `Super` `Q`        |                            | Disperse windows out of group               |
 
 ### Media
 
