@@ -32,8 +32,13 @@
   programs.opencode.enable = true;
 
   # User services
-  services.mpd.enable = true;
   services.syncthing.enable = true;
+
+  # Music
+  services.mpd.enable = true;
+  programs.ncmpcpp.enable = true; # old client
+  programs.rmpc.enable = true; # new client
+  programs.projectm.enable = true; # visualizer
 
   # Remote control for my friendly robot
   programs.openclaw = {
