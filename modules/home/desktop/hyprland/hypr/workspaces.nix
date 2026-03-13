@@ -47,13 +47,10 @@
       "super+alt, p, exec, hypr-workspace prev"
       "super+alt, n, exec, hypr-workspace next"
 
-      # Cycle through layouts with super+alt n
-      # dwindle > master > scrolling > monocle
-      # "super+alt, n, exec, hypr-cyclelayout next"
-      "super, slash, exec, hypr-cyclelayout next"
-      # Reverse the cycle with super+alt p
-      # "super+alt, p, exec, hypr-cyclelayout prev"
-      "super+alt, slash, exec, hypr-cyclelayout prev"
+      # Cycle through layouts with super+slash
+      "super, slash, exec, hypr-layout next"
+      # Reverse the cycle with super+alt slash
+      "super+alt, slash, exec, hypr-layout prev"
     ];
 
     # Cycle through windows with with super n/p

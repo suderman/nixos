@@ -24,45 +24,54 @@ tooltip {
   background: @base01;
 }
 
-.modules-left #custom-launcher {
+#custom-launcher {
   padding-left: 10px;
   padding-right: 8px;
   color: @base07;
 }
 
-.modules-left #workspaces {
-  padding-left: 10px;
-  padding-right: 10px;
+#workspaces {
+  border-left: 1px solid alpha(@base05, 0.2);
+  padding: 0 0 0 10px;
+  margin: 0 0 0 10px;
 }
 
-.modules-left #workspaces button {
-  padding-left: 5px;
-  padding-right: 5px;
-  border-radius: 0;
+#workspaces button {
+  padding: 0;
 }
 
-.modules-left #workspaces button:first-child {
-  border-radius: 10px 0 0 10px;
+#workspaces .workspace-label {
+  font-size: 20px;
 }
 
-.modules-left #workspaces button:last-child {
-  border-radius: 0 10px 10px 0;
+#workspaces .active .workspace-label {
+  color: @base0E;
 }
 
-.modules-left #workspaces button:first-child:last-child {
-  border-radius: 10px;
+#workspaces button:hover .workspace-label {
+  color: alpha(@base0E, 0.5);
 }
 
-.modules-left #workspaces button.active,
-.modules-left #workspaces button.active:hover {
-  background: @base02;
+#layouts {
+  border: 1px solid alpha(@base05, 0.2);
+  border-width: 0 1px 0 1px;
+  padding: 0 5px 0 15px;
+  margin: 0 5px 0 0px;
 }
 
-.modules-left #workspaces button:hover {
-  background: alpha(@base02, 0.5);
+#layouts .text-button {
+  font-size: 22px;
 }
 
-.modules-left #custom-windows.active {
+#layouts .text-button:hover {
+  color: alpha(@base0E, 0.5);
+}
+
+#layouts .active {
+  color: @base0E;
+}
+
+#custom-windows.active {
   color: @base0B;
 }
 
