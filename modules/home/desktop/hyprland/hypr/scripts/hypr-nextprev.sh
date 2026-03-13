@@ -6,10 +6,10 @@ if [[ "$layout" == "master" ]]; then
 
   if [[ "$next_or_prev" == "prev" ]]; then
     hyprctl dispatch layoutmsg rollprev
-    hyprctl dispatch layoutmsg focusmaster
+    hyprctl dispatch layoutmsg focusmaster master
   else
     hyprctl dispatch layoutmsg rollnext
-    hyprctl dispatch layoutmsg focusmaster
+    hyprctl dispatch layoutmsg focusmaster master
   fi
 
 elif [[ "$layout" == "scrolling" ]]; then

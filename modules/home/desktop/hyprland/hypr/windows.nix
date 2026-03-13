@@ -33,19 +33,23 @@
 
     # Run script again if o key held down
     bindo = [
-      "super, i, exec, hypr-tileorsplitorpromote toggle"
-      "super+alt, i, exec, hypr-tileorsplitorpromote swap"
+      "super, i, exec, hypr-tile"
+      "super+alt, i, exec, hypr-tile alt"
     ];
 
     bind = [
       # Set window tiled, or togglesplit if already tiled
-      "super, i, exec, hypr-tileorsplitorpromote toggle"
+      "super, i, exec, hypr-tile"
 
       # Set window tiled, or swapsplit if already tiled
-      "super+alt, i, exec, hypr-tileorsplitorpromote swap"
+      "super+alt, i, exec, hypr-tile alt"
 
       # Focus tiled windows in workspace
       "super+shift, i, cyclenext, tiled"
+
+      # Master layout add/remove master window
+      "super+alt, m, layoutmsg, addmaster"
+      "super+alt+shift, m, layoutmsg, removemaster"
 
       # Kill the active window
       "super, w, killactive,"
