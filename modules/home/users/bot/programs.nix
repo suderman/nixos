@@ -11,5 +11,15 @@
         ublock-origin
         ;
     };
+    go.enable = true;
+  };
+
+  # All the tools!
+  toolchains = {
+    javascript.enable = true;
+    lua.enable = true;
+    php.enable = true;
+    python.enable = true;
+    ruby.enable = true;
   };
 }

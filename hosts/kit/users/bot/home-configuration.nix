@@ -25,7 +25,7 @@
   };
 
   # Enable OpenClaw gateway!
-  services.openclaw = {
+  services.openclaw = with config.xdg.userDirs.extraConfig; {
     enable = true;
     apiKeys = ./openclaw-env.age;
   };
@@ -40,11 +40,6 @@
 
   # Manage bot's experminetal services
   services.botSupervisor.enable = true;
-
-  # Enable scripting/programming languages
-  programs.javascript.enable = true;
-  programs.python.enable = true;
-  programs.go.enable = true;
 
   services.syncthing.enable = true;
 

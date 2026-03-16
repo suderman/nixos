@@ -4,10 +4,10 @@
   pkgs,
   ...
 }: let
-  cfg = config.programs.php;
+  cfg = config.toolchains.php;
   composerDir = ".local/share/composer";
 in {
-  options.programs.php.enable = lib.mkEnableOption "php";
+  options.toolchains.php.enable = lib.mkEnableOption "php";
 
   config = lib.mkIf cfg.enable {
     persist.scratch.directories = [composerDir];
@@ -24,5 +24,8 @@ in {
       pkgs.php # php php-fpm pecl phar pear peardev
       pkgs.phpPackages.composer # composer compile
     ];
+
+    # allow for native tooling too
+    toolchains.native.enable = true;
   };
 }

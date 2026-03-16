@@ -4,10 +4,10 @@
   pkgs,
   ...
 }: let
-  cfg = config.programs.ruby;
+  cfg = config.toolchains.ruby;
   gemDir = ".local/share/gem";
 in {
-  options.programs.ruby.enable = lib.mkEnableOption "ruby";
+  options.toolchains.ruby.enable = lib.mkEnableOption "ruby";
 
   config = lib.mkIf cfg.enable {
     persist.scratch.directories = [gemDir];
@@ -24,5 +24,8 @@ in {
     home.packages = [
       pkgs.ruby # ruby ri bundle bunlder erb gem irb rake rdoc
     ];
+
+    # allow for native tooling too
+    toolchains.native.enable = true;
   };
 }

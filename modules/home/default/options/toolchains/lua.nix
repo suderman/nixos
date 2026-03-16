@@ -4,10 +4,10 @@
   pkgs,
   ...
 }: let
-  cfg = config.programs.lua;
+  cfg = config.toolchains.lua;
   luarocksDir = ".local/share/luarocks";
 in {
-  options.programs.lua.enable = lib.mkEnableOption "lua";
+  options.toolchains.lua.enable = lib.mkEnableOption "lua";
 
   config = lib.mkIf cfg.enable {
     persist.scratch.directories = [luarocksDir];
@@ -23,10 +23,10 @@ in {
     home.packages = [
       pkgs.lua # lua luac
       pkgs.luaPackages.luarocks # luarocks luarocks-admin
-      pkgs.gcc
-      pkgs.gnumake
-      pkgs.pkg-config
     ];
+
+    # allow for native tooling too
+    toolchains.native.enable = true;
 
     # default config for user-local installs
     home.file."${luarocksDir}/config.lua".text = ''

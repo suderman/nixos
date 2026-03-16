@@ -4,10 +4,10 @@
   pkgs,
   ...
 }: let
-  cfg = config.programs.python;
+  cfg = config.toolchains.python;
   pipxDir = ".local/share/pipx";
 in {
-  options.programs.python.enable = lib.mkEnableOption "python";
+  options.toolchains.python.enable = lib.mkEnableOption "python";
 
   config = lib.mkIf cfg.enable {
     persist.scratch.directories = [pipxDir];
@@ -25,5 +25,8 @@ in {
       pkgs.python3 # python python-config pydoc idle
       pkgs.pipx # pipx
     ];
+
+    # allow for native tooling too
+    toolchains.native.enable = true;
   };
 }
