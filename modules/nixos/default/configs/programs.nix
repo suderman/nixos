@@ -34,7 +34,4 @@
     tmux.enable = lib.mkDefault true;
     zsh.enable = lib.mkDefault true;
   };
-
-  # Compatiabilty layer for programs installed outside of nixpkgs
-  programs.nix-ld.enable = true;
 }

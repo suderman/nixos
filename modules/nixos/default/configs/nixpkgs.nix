@@ -10,4 +10,7 @@
 
   # Temporary workarounds
   nixpkgs.config.permittedInsecurePackages = [];
+
+  # Compatiabilty layer for programs installed outside of nixpkgs
+  programs.nix-ld.enable = true;
 }

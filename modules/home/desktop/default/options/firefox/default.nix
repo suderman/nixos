@@ -41,7 +41,7 @@ in {
           alby
           auto-tab-discard
           don-t-fuck-with-paste
-          faststream
+          # faststream
           gsconnect
           i-dont-care-about-cookies
           onepassword-password-manager
