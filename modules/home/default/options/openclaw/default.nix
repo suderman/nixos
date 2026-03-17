@@ -27,5 +27,26 @@
       if config.programs.openclaw.host == "127.0.0.1"
       then 11000 + config.home.portOffset
       else 443;
+
+    path =
+      # Additions to my path including ~/bin, ~/.local/bin and various toolchains
+      config.home.sessionPath
+      # Useless path additions but included anyway so OpenClaw won't complain
+      ++ [
+        "${config.home.homeDirectory}/.npm-global/bin"
+        "${config.home.homeDirectory}/.volta/bin"
+        "${config.home.homeDirectory}/.asdf/shims"
+        "${config.home.homeDirectory}/.bun/bin"
+        "${config.home.homeDirectory}/.nvm/current/bin"
+        "${config.home.homeDirectory}/.fnm/current/bin"
+        "/usr/local/bin"
+      ]
+      # Primary paths used by NixOS
+      ++ [
+        "${config.home.profileDirectory}/bin"
+        "/run/current-system/sw/bin"
+        "/usr/bin"
+        "/bin"
+      ];
   };
 }

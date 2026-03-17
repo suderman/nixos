@@ -25,7 +25,7 @@
   };
 
   # Enable OpenClaw gateway!
-  services.openclaw = with config.xdg.userDirs.extraConfig; {
+  services.openclaw = {
     enable = true;
     apiKeys = ./openclaw-env.age;
   };

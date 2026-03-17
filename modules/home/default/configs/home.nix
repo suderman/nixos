@@ -44,8 +44,12 @@ in {
   # User Configuration
   # ---------------------------------------------------------------------------
   config = {
-    # Add support for ~/.local/bin
-    home.sessionPath = ["$HOME/.local/bin"];
+    # Add prioritized support for ~/bin, ~/.local/bin, /etc/profiles/per-user/*/bin
+    home.sessionPath = lib.mkBefore [
+      "${config.home.homeDirectory}/bin"
+      "${config.home.homeDirectory}/.local/bin"
+      "${config.home.profileDirectory}/bin"
+    ];
 
     # Additional env variables
     home.sessionVariables = {

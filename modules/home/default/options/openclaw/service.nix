@@ -2,19 +2,13 @@
 {
   config,
   lib,
-  pkgs,
-  perSystem,
   ...
 }: let
   cfg = config.services.openclaw;
-  inherit (config.lib.openclaw) port runDir;
+  inherit (config.lib.openclaw) path port runDir;
 in {
   options.services.openclaw = {
     enable = lib.mkEnableOption "openclaw";
-    package = lib.mkOption {
-      type = lib.types.package;
-      default = perSystem.llm-agents.openclaw;
-    };
     dataDir = lib.mkOption {
       type = lib.types.str;
       default = ".openclaw";
@@ -40,7 +34,7 @@ in {
       description = "Host running the OpenClaw gateway";
     };
     apiKeys = lib.mkOption {
-      type = with lib.types; nullOr path;
+      type = lib.types.nullOr lib.types.path;
       default = null;
       description = "Path to multi-line .env file with API_KEY=123";
     };
@@ -51,7 +45,6 @@ in {
     # When the service is enabled, also enable the program and configure it for localhost
     programs.openclaw = {
       enable = lib.mkForce true;
-      package = lib.mkForce cfg.package;
       dataDir = lib.mkForce cfg.dataDir;
       host = lib.mkForce "127.0.0.1";
       port = lib.mkForce cfg.port;
@@ -63,22 +56,19 @@ in {
 
     # Setup systemd services to configure and run the OpenClaw gateway
     systemd.user.services = let
-      path =
-        config.home.sessionPath
-        ++ [
-          "${config.home.profileDirectory}/bin"
-          "/run/current-system/sw/bin"
-          "/usr/bin"
-          "/bin"
-        ];
-
       Environment =
-        lib.mapAttrsToList (k: v: "${k}=${toString v}") config.home.sessionVariables
-        ++ [
+        # lib.mapAttrsToList (k: v: "${k}=\"${toString v}\"") config.home.sessionVariables
+        # ++ [
+        [
           "PATH=${lib.concatStringsSep ":" path}"
           "OPENCLAW_HOME=${config.home.homeDirectory}"
           "OPENCLAW_STATE_DIR=${config.home.homeDirectory}/${cfg.dataDir}"
           "OPENCLAW_CONFIG_PATH=${config.home.homeDirectory}/${cfg.dataDir}/openclaw.json"
+          "OPENCLAW_GATEWAY_PORT=${toString cfg.port}"
+          "OPENCLAW_SYSTEMD_UNIT=openclaw-gateway.service"
+          "OPENCLAW_SERVICE_MARKER=openclaw"
+          "OPENCLAW_SERVICE_KIND=gateway"
+          "OPENCLAW_SERVICE_VERSION=npm"
         ];
 
       EnvironmentFile =
@@ -86,95 +76,25 @@ in {
         then config.age.secrets.openclaw-env.path
         else false;
     in {
-      openclaw-setup = {
-        Unit.Description = "OpenClaw Gateway Setup";
-        Service = {
-          Type = "oneshot";
-          inherit Environment EnvironmentFile;
-
-          ExecStart = perSystem.self.mkScript {
-            text =
-              # bash
-              ''
-                # Generate gateway override for openclaw.json
-                cat >${runDir}/openclaw-gateway.json <<EOF
-                {
-                  "gateway": {
-                    "port": ${toString cfg.port},
-                    "mode": "local",
-                    "bind": "loopback",
-                    "auth": { "mode": "token", "token": "\''${OPENCLAW_GATEWAY_TOKEN}" },
-                    "trustedProxies": ["127.0.0.1", "${config.networking.address}"],
-                    "controlUi": { "allowedOrigins": ["https://${cfg.host}"] }
-                  }
-                }
-                EOF
-                chmod 600 ${runDir}/openclaw-gateway.json
-
-                # Generate dotenv with gateway token
-                cat >${runDir}/openclaw.env <<EOF
-                # OpenClaw Gateway URLs:
-                # http://localhost:${toString cfg.port}?token=$(tr -d '\n' <${runDir}/gateway)
-                # https://${cfg.host}?token=$(tr -d '\n' <${runDir}/gateway)
-                OPENCLAW_GATEWAY_TOKEN=$(tr -d '\n' <${runDir}/gateway)
-                EOF
-                chmod 600 ${runDir}/openclaw.env
-              ''
-              + (
-                if cfg.apiKeys != null
-                then ''
-                  cat ${config.age.secrets.openclaw-env.path} >>${runDir}/openclaw.env
-                ''
-                else ""
-              )
-              +
-              # bash
-              ''
-                # Ensure ~/.openclaw is setup
-                install -dm700 $OPENCLAW_STATE_DIR
-                cp -fp ${runDir}/openclaw.env $OPENCLAW_STATE_DIR/.env
-                openclaw setup
-
-                # Merge the override into OpenClaw's config json
-                if [[ -f $OPENCLAW_CONFIG_PATH ]]; then
-
-                  # Base json (comments removed)
-                  json_repair $OPENCLAW_CONFIG_PATH >${runDir}/openclaw-base.json
-                  chmod 600 ${runDir}/openclaw-base.json
-
-                  # Merged json (mixing gateway into base)
-                  {
-                    jq '.gateway = input.gateway' ${runDir}/openclaw-base.json ${runDir}/openclaw-gateway.json
-                  } >${runDir}/openclaw.json
-                  chmod 600 ${runDir}/openclaw.json
-
-                  # Replace original config with merged
-                  mv ${runDir}/openclaw.json "$OPENCLAW_CONFIG_PATH"
-                fi
-              '';
-            path = [cfg.package pkgs.jq pkgs.json-repair];
-          };
-
-          Restart = "on-failure";
-          RestartSec = 2;
-        };
-        Install.WantedBy = ["default.target"];
-      };
-
       openclaw-gateway = {
         Unit = {
-          Description = "OpenClaw Gateway";
-          After = ["network-online.target" "openclaw-setup.service" "agenix.service"];
-          Requires = ["openclaw-setup.service" "agenix.service"];
+          Description = "OpenClaw Gateway (via home-manager)";
+          After = ["network-online.target" "agenix.service"];
+          Requires = ["agenix.service"];
           Wants = ["network-online.target"];
         };
 
         Service = {
           Type = "simple";
           inherit Environment EnvironmentFile;
-          ExecStart = "${cfg.package}/bin/openclaw gateway";
-          Restart = "on-failure";
+          # openclaw is preinstalled via npm
+          ExecStart = "${config.home.profileDirectory}/bin/openclaw gateway";
+          Restart = "always";
           RestartSec = 5;
+          TimeoutStopSec = 30;
+          TimeoutStartSec = 30;
+          SuccessExitStatus = "0 143";
+          KillMode = "control-group";
 
           # Hardening
           NoNewPrivileges = true;
