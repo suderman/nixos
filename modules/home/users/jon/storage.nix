@@ -48,8 +48,26 @@
     XDG_TEMPLATES_DIR.enable = false;
 
     # Custom user directories
+    XDG_BIN_DIR = {
+      path = "bin";
+      persist = "storage";
+      sync = true;
+      enable = true;
+    };
+    XDG_ORG_DIR = {
+      path = "org";
+      persist = "storage";
+      sync = true;
+      enable = true;
+    };
+    XDG_NOTES_DIR = {
+      path = "notes";
+      persist = "storage";
+      sync = true;
+      enable = true;
+    };
     XDG_GAMES_DIR = {
-      path = "Games";
+      path = "games";
       persist = "storage";
       sync = true;
       enable = true;
@@ -61,7 +79,7 @@
       enable = true;
     };
     XDG_WORKSPACE_DIR = {
-      path = "Workspace";
+      path = "workspace";
       persist = "storage";
       sync = true;
       enable = true;
