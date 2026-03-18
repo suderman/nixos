@@ -26,7 +26,7 @@
 
   # Enable OpenClaw gateway!
   services.openclaw = {
-    enable = false;
+    enable = true;
     apiKeys = ./openclaw-env.age;
   };
 
