@@ -4,7 +4,7 @@
   lib,
   ...
 }: let
-  cfg = config.services.openclaw;
+  srv = config.services.openclaw;
   inherit (config.lib.openclaw) path port;
 in {
   options.services.openclaw = {
@@ -29,7 +29,7 @@ in {
     # automatically derived
     host = lib.mkOption {
       type = lib.types.str;
-      default = "${cfg.name}.${config.networking.hostName}";
+      default = "${srv.name}.${config.networking.hostName}";
       example = "openclaw-jon.cog";
       description = "Host running the OpenClaw gateway";
     };
@@ -39,34 +39,34 @@ in {
       description = "Path to multi-line .env file with API_KEY=123";
     };
   };
-  config = lib.mkIf cfg.enable {
-    persist.storage.directories = [cfg.dataDir];
+  config = lib.mkIf srv.enable {
+    persist.storage.directories = [srv.dataDir];
 
     # When the service is enabled, also enable the program and configure it for localhost
     programs.openclaw = {
       enable = lib.mkForce true;
-      dataDir = lib.mkForce cfg.dataDir;
+      dataDir = lib.mkForce srv.dataDir;
       host = lib.mkForce "127.0.0.1";
-      port = lib.mkForce cfg.port;
+      port = lib.mkForce srv.port;
     };
 
-    age.secrets = lib.mkIf (cfg.apiKeys != null) {
-      openclaw-env.rekeyFile = cfg.apiKeys;
+    age.secrets = lib.mkIf (srv.apiKeys != null) {
+      openclaw-env.rekeyFile = srv.apiKeys;
     };
 
     # Setup systemd services to configure and run the OpenClaw gateway
     systemd.user.services = let
       EnvironmentFile =
-        if cfg.apiKeys != null
+        if srv.apiKeys != null
         then config.age.secrets.openclaw-env.path
         else false;
 
       Environment = [
         "PATH=${lib.concatStringsSep ":" path}"
         "OPENCLAW_HOME=${config.home.homeDirectory}"
-        "OPENCLAW_STATE_DIR=${config.home.homeDirectory}/${cfg.dataDir}"
-        "OPENCLAW_CONFIG_PATH=${config.home.homeDirectory}/${cfg.dataDir}/openclaw.json"
-        "OPENCLAW_GATEWAY_PORT=${toString cfg.port}"
+        "OPENCLAW_STATE_DIR=${config.home.homeDirectory}/${srv.dataDir}"
+        "OPENCLAW_CONFIG_PATH=${config.home.homeDirectory}/${srv.dataDir}/openclaw.json"
+        "OPENCLAW_GATEWAY_PORT=${toString srv.port}"
         "OPENCLAW_SYSTEMD_UNIT=openclaw-gateway.service"
         "OPENCLAW_SERVICE_MARKER=openclaw"
         "OPENCLAW_SERVICE_KIND=gateway"

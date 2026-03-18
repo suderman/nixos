@@ -6,11 +6,12 @@
   ...
 }: let
   cfg = config.programs.openclaw;
+  srv = config.services.openclaw;
   inherit (config.lib.openclaw) path port runDir;
   inherit (config.lib.file) mkOutOfStoreSymlink;
 
   openclaw-env =
-    if config.services.openclaw.apiKeys != null
+    if srv.apiKeys != null
     then ''
       cat ${config.age.secrets.openclaw-env.path} >>${runDir}/openclaw.env
     ''
@@ -57,12 +58,12 @@
             {
               echo '{'
               echo '  "gateway": {'
-              echo '    "port": ${toString cfg.port},'
+              echo '    "port": ${toString srv.port},'
               echo '    "mode": "local",'
               echo '    "bind": "loopback",'
-              echo '    "auth": { "mode": "token", "token": "\''${OPENCLAW_GATEWAY_TOKEN}" },'
+              echo '    "auth": { "mode": "token", "token": "''${OPENCLAW_GATEWAY_TOKEN}" },'
               echo '    "trustedProxies": ["127.0.0.1", "${config.networking.address}"],'
-              echo '    "controlUi": { "allowedOrigins": ["https://${cfg.host}"] }'
+              echo '    "controlUi": { "allowedOrigins": ["https://${srv.host}"] }'
               echo '  }'
               echo '}'
             }>${runDir}/openclaw-gateway.json
@@ -71,8 +72,8 @@
             # Generate dotenv with gateway token
             {
               echo "# OpenClaw Gateway URLs"
-              echo "# http://localhost:${toString cfg.port}?token=$(tr -d '\n' <${runDir}/gateway)"
-              echo "# https://${cfg.host}?token=$(tr -d '\n' <${runDir}/gateway)"
+              echo "# http://localhost:${toString srv.port}?token=$(tr -d '\n' <${runDir}/gateway)"
+              echo "# https://${srv.host}?token=$(tr -d '\n' <${runDir}/gateway)"
               echo "OPENCLAW_GATEWAY_TOKEN=$(tr -d '\n' <${runDir}/gateway)"
             }>${runDir}/openclaw.env
             chmod 600 ${runDir}/openclaw.env
