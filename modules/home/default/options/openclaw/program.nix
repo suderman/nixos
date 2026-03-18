@@ -56,13 +56,14 @@
             # Generate gateway override for openclaw.json
             {
               echo '{'
-              echo '"gateway": {'
-              echo '  "port": ${toString cfg.port},'
-              echo '  "mode": "local",'
-              echo '  "bind": "loopback",'
-              echo '  "auth": { "mode": "token", "token": "\''${OPENCLAW_GATEWAY_TOKEN}" },'
-              echo '  "trustedProxies": ["127.0.0.1", "${config.networking.address}"],'
-              echo '  "controlUi": { "allowedOrigins": ["https://${cfg.host}"] }'
+              echo '  "gateway": {'
+              echo '    "port": ${toString cfg.port},'
+              echo '    "mode": "local",'
+              echo '    "bind": "loopback",'
+              echo '    "auth": { "mode": "token", "token": "\''${OPENCLAW_GATEWAY_TOKEN}" },'
+              echo '    "trustedProxies": ["127.0.0.1", "${config.networking.address}"],'
+              echo '    "controlUi": { "allowedOrigins": ["https://${cfg.host}"] }'
+              echo '  }'
               echo '}'
             }>${runDir}/openclaw-gateway.json
             chmod 600 ${runDir}/openclaw-gateway.json
@@ -83,24 +84,26 @@
 
             # Merge the override into OpenClaw's config json
             openclaw setup
-            if [[ -f $OPENCLAW_CONFIG_PATH ]]; then
+            [[ -f $OPENCLAW_CONFIG_PATH ]] || return 1
 
-              # Base json (comments removed)
-              json_repair $OPENCLAW_CONFIG_PATH >${runDir}/openclaw-base.json
-              chmod 600 ${runDir}/openclaw-base.json
+            # Base json (comments removed)
+            json_repair $OPENCLAW_CONFIG_PATH >${runDir}/openclaw-base.json
+            chmod 600 ${runDir}/openclaw-base.json
 
-              # Merged json (mixing gateway into base)
-              {
-                jq '.gateway = input.gateway' ${runDir}/openclaw-base.json ${runDir}/openclaw-gateway.json
-              } >${runDir}/openclaw.json
-              chmod 600 ${runDir}/openclaw.json
+            # Merged json (mixing gateway into base)
+            {
+              jq '.gateway = input.gateway' ${runDir}/openclaw-base.json ${runDir}/openclaw-gateway.json
+            } >${runDir}/openclaw.json
+            chmod 600 ${runDir}/openclaw.json
 
-              # Replace original config with merged
-              mv ${runDir}/openclaw.json "$OPENCLAW_CONFIG_PATH"
+            # Replace original config with merged
+            mv ${runDir}/openclaw.json "$OPENCLAW_CONFIG_PATH"
 
-            fi
           fi
         }
+
+        # OpenClaw completions
+        $OPENCLAW_BIN completion --shell zsh >| "$OPENCLAW_STATE_DIR/completion.zsh" 2>/dev/null
 
         # If argument is "init", run the above script
         if [[ "''${@-}" == "init" ]]; then
@@ -148,10 +151,7 @@ in {
     # Install OpenClaw from npm and run with nodejs
     toolchains.javascript.enable = true;
 
-    # Add openclaw wrapper to path
-    home.packages = [cfg.package];
-
-    # Bump up openclaw wrapper to higher priority in the user's path
+    # Add openclaw wrapper to user path (higher priority than npm)
     home.file.".local/bin/openclaw".source = "${cfg.package}/bin/openclaw";
 
     # Make OpenClaw stop trying to add completions when I already have them
@@ -159,21 +159,15 @@ in {
       mkOutOfStoreSymlink "${config.programs.zsh.dotDir}/.zshrc";
 
     # OpenClaw completions
-    programs.zsh.initContent =
+    programs.zsh.initContent = let
+      openclawCompletion = "${config.home.homeDirectory}/${cfg.dataDir}/completion.zsh";
+    in
       lib.mkAfter
-      # sh
+      # bash
       ''
-        # OpenClaw completions (generate once, async)
-        _openclaw_comp="$ZDOTDIR/openclaw"
-
-        if [[ -r "$_openclaw_comp" ]]; then
-          source "$_openclaw_comp"
-        else
-          {
-            openclaw completion --shell zsh >| "$_openclaw_comp" 2>/dev/null
-          } &!
+        if [[ -f ${openclawCompletion} ]]; then
+          source "${openclawCompletion}"
         fi
       '';
   };
-  # };
 }
