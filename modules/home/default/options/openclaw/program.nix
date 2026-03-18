@@ -7,6 +7,7 @@
 }: let
   cfg = config.programs.openclaw;
   inherit (config.lib.openclaw) path port runDir;
+  inherit (config.lib.file) mkOutOfStoreSymlink;
 
   openclaw-env =
     if config.services.openclaw.apiKeys != null
@@ -119,6 +120,10 @@
 in {
   options.programs.openclaw = {
     enable = lib.mkEnableOption "openclaw";
+    package = lib.mkOption {
+      type = lib.types.package;
+      default = openclaw-init;
+    };
     dataDir = lib.mkOption {
       type = lib.types.str;
       default = ".openclaw";
@@ -143,39 +148,15 @@ in {
     # Install OpenClaw from npm and run with nodejs
     toolchains.javascript.enable = true;
 
-    home.packages = [openclaw-init];
+    # Add openclaw wrapper to path
+    home.packages = [cfg.package];
 
-    # Configure OpenClaw CLI for remote (if host isn't 127.0.0.1)
-    # systemd.user.services.openclaw-onboard = {
-    #   Unit = {
-    #     Description = "OpenClaw Gateway Setup";
-    #     After = ["agenix.service"];
-    #     Requires = ["agenix.service"];
-    #   };
-    #   Service = {
-    #     Type = "oneshot";
-    #     Environment = [
-    #       "OPENCLAW_HOME=${config.home.homeDirectory}"
-    #       "OPENCLAW_STATE_DIR=${config.home.homeDirectory}/${cfg.dataDir}"
-    #       "OPENCLAW_CONFIG_PATH=${config.home.homeDirectory}/${cfg.dataDir}/openclaw.json"
-    #     ];
-    #     ExecStart = perSystem.self.mkScript {
-    #       text =
-    #         # bash
-    #         ''
-    #           if [[ "${cfg.host}" != "127.0.0.1" ]]; then
-    #             openclaw onboard \
-    #               --non-interactive --accept-risk \
-    #               --mode remote \
-    #               --remote-token  $(tr -d '\n' <${runDir}/gateway) \
-    #               --remote-url=wss://${cfg.host}:${toString cfg.port}
-    #           fi
-    #         '';
-    #       path = [cfg.package];
-    #     };
-    #   };
-    #   Install.WantedBy = ["default.target"];
-    # };
+    # Bump up openclaw wrapper to higher priority in the user's path
+    home.file.".local/bin/openclaw".source = "${cfg.package}/bin/openclaw";
+
+    # Make OpenClaw stop trying to add completions when I already have them
+    home.file.".zshrc".source =
+      mkOutOfStoreSymlink "${config.programs.zsh.dotDir}/.zshrc";
 
     # OpenClaw completions
     programs.zsh.initContent =

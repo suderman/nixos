@@ -5,7 +5,7 @@
   ...
 }: let
   cfg = config.services.openclaw;
-  inherit (config.lib.openclaw) path port runDir;
+  inherit (config.lib.openclaw) path port;
 in {
   options.services.openclaw = {
     enable = lib.mkEnableOption "openclaw";
@@ -56,25 +56,22 @@ in {
 
     # Setup systemd services to configure and run the OpenClaw gateway
     systemd.user.services = let
-      Environment =
-        # lib.mapAttrsToList (k: v: "${k}=\"${toString v}\"") config.home.sessionVariables
-        # ++ [
-        [
-          "PATH=${lib.concatStringsSep ":" path}"
-          "OPENCLAW_HOME=${config.home.homeDirectory}"
-          "OPENCLAW_STATE_DIR=${config.home.homeDirectory}/${cfg.dataDir}"
-          "OPENCLAW_CONFIG_PATH=${config.home.homeDirectory}/${cfg.dataDir}/openclaw.json"
-          "OPENCLAW_GATEWAY_PORT=${toString cfg.port}"
-          "OPENCLAW_SYSTEMD_UNIT=openclaw-gateway.service"
-          "OPENCLAW_SERVICE_MARKER=openclaw"
-          "OPENCLAW_SERVICE_KIND=gateway"
-          "OPENCLAW_SERVICE_VERSION=npm"
-        ];
-
       EnvironmentFile =
         if cfg.apiKeys != null
         then config.age.secrets.openclaw-env.path
         else false;
+
+      Environment = [
+        "PATH=${lib.concatStringsSep ":" path}"
+        "OPENCLAW_HOME=${config.home.homeDirectory}"
+        "OPENCLAW_STATE_DIR=${config.home.homeDirectory}/${cfg.dataDir}"
+        "OPENCLAW_CONFIG_PATH=${config.home.homeDirectory}/${cfg.dataDir}/openclaw.json"
+        "OPENCLAW_GATEWAY_PORT=${toString cfg.port}"
+        "OPENCLAW_SYSTEMD_UNIT=openclaw-gateway.service"
+        "OPENCLAW_SERVICE_MARKER=openclaw"
+        "OPENCLAW_SERVICE_KIND=gateway"
+        "OPENCLAW_SERVICE_VERSION=npm"
+      ];
     in {
       openclaw-gateway = {
         Unit = {
@@ -87,8 +84,7 @@ in {
         Service = {
           Type = "simple";
           inherit Environment EnvironmentFile;
-          # openclaw is preinstalled via npm
-          ExecStart = "${config.home.profileDirectory}/bin/openclaw gateway";
+          ExecStart = "${config.programs.openclaw.package}/bin/openclaw gateway";
           Restart = "always";
           RestartSec = 5;
           TimeoutStopSec = 30;
