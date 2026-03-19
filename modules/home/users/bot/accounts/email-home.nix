@@ -10,7 +10,7 @@ in {
   config = lib.mkIf config.accounts.enable {
     accounts.email.accounts.${account} = rec {
       userName = "suderman@fastmail.com";
-      passwordCommand = toString (pkgs.self.mkScript "cat ${config.age.secrets.fastmail.path}");
+      passwordCommand = toString (pkgs.self.mkScript "cat ${config.age.secrets.fastmail-imap.path}");
       flavor = "fastmail.com";
       primary = true;
       realName = "Jon Suderman";
