@@ -42,7 +42,6 @@ in {
         enable = true;
         type = "discover"; # calendar, birthdays, discover
       };
-      qcal.enable = true; # trying out
     };
 
     # DAV sync
@@ -59,35 +58,9 @@ in {
       )
     ];
 
-    programs.qcal.enable = true;
     programs.khal = {
       enable = true;
-      package = pkgs.khal; # https://github.com/NixOS/nixpkgs/pull/380358
-      settings = {
-        default = {
-          default_calendar = account;
-          default_event_duration = "30m";
-          highlight_event_days = true;
-          show_all_days = true; # show days without events too
-          timedelta = "7d"; # show 1 week into the future
-        };
-        keybindings = {
-          external_edit = "e";
-          export = "w";
-          save = "meta w,<0>";
-          view = "enter, ";
-        };
-        highlight_days = {
-          method = "fg";
-          multiple = "#0000FF";
-          multiple_on_overflow = true;
-        };
-        view = {
-          dynamic_days = false;
-          event_view_always_visible = true;
-          frame = "color";
-        };
-      };
+      settings.default.default_calendar = account;
     };
   };
 }
