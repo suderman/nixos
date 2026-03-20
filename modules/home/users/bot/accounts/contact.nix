@@ -29,7 +29,10 @@ in {
         ];
         conflictResolution = "remote wins";
       };
-      khard.enable = true;
+      khard = {
+        enable = true;
+        addressbooks = ["Personal" "Shared"];
+      };
     };
 
     # DAV sync
@@ -46,29 +49,7 @@ in {
       )
     ];
 
-    # Address book
+    # Address book CLI
     programs.khard.enable = true;
-    xdg.configFile."khard/khard.conf".text = let
-      path = "${config.home.homeDirectory}/.local/share/${account}";
-    in
-      lib.mkForce ''
-        [addressbooks]
-        [[personal]]
-        path = ${path}/Personal/
-        [[shared]]
-        path = ${path}/Shared/
-
-        [general]
-        default_action=list
-        editor=nvim, -i, NONE
-
-        [contact table]
-        display=formatted_name
-        preferred_email_address_type=pref, work, home
-        preferred_phone_number_type=pref, cell, home
-
-        [vcard]
-        private_objects=Jabber, Skype, Twitter
-      '';
   };
 }

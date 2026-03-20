@@ -9,21 +9,23 @@
   inherit (lib) mkIf;
 
   # Wrapper to redirect warnings to log file, default command is interactive
-  package = pkgs.unstable.khal;
   khal-wrapper = pkgs.self.mkScript {
     name = "khal";
     text =
       # bash
       ''
         mkdir -p "${config.xdg.stateHome}/khal"
-        [[ "$#" -eq 0 ]] && set -- interactive
-        exec ${package}/bin/khal -v WARNING -l "${config.xdg.stateHome}/khal/khal.log" "$@"
+        [[ "$#" -eq 0 ]] && set -- list
+        exec ${cfg.package}/bin/khal -v WARNING -l "${config.xdg.stateHome}/khal/khal.log" "$@"
       '';
   };
 in {
   config = mkIf cfg.enable {
+    # Let the khal wrapper take priority over actual package
+    home.file.".local/bin/khal".source = "${khal-wrapper}/bin/khal";
+
     programs.khal = {
-      package = khal-wrapper;
+      package = pkgs.unstable.khal;
       settings = {
         default = {
           # default_event_alarm = "15m";
@@ -48,14 +50,14 @@ in {
           event_view_always_visible = true;
           frame = "color";
         };
-        # palette = {
-        #   header = "'white', 'dark green', default, '#DDDDDD', '#2E7D32'";
-        #   "line header" = "'white', 'dark green', default, '#DDDDDD', '#2E7D32'";
-        #   footer = "'white', 'black', bold, '#DDDDDD', '#43A047'";
-        #   edit = "'white', 'black', default, '#DDDDDD', '#333333'";
-        #   "edit focus" = "'white', 'light green', 'bold'";
-        #   button = "'black', 'red'";
-        # };
+        palette = {
+          #   header = "'white', 'dark green', default, '#DDDDDD', '#2E7D32'";
+          #   "line header" = "'white', 'dark green', default, '#DDDDDD', '#2E7D32'";
+          #   footer = "'white', 'black', bold, '#DDDDDD', '#43A047'";
+          #   edit = "'white', 'black', default, '#DDDDDD', '#333333'";
+          #   "edit focus" = "'white', 'light green', 'bold'";
+          #   button = "'black', 'red'";
+        };
       };
     };
 
@@ -63,7 +65,7 @@ in {
     systemd.user.services.vdirsyncer.Service.ExecStartPost = [
       (
         pkgs.self.mkScript {
-          path = [cfg.package];
+          path = [khal-wrapper];
           text = "khal list >/dev/null || true";
         }
       )
