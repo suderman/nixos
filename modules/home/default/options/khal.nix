@@ -28,11 +28,11 @@ in {
       package = pkgs.unstable.khal;
       settings = {
         default = {
-          # default_event_alarm = "15m";
+          default_event_alarm = "15m";
           default_event_duration = "30m";
           highlight_event_days = true;
           show_all_days = true; # show days without events too
-          timedelta = "7d"; # show 1 week into the future
+          timedelta = "14d"; # show 2 weeks into the future
         };
         keybindings = {
           external_edit = "e";
@@ -48,7 +48,12 @@ in {
         view = {
           dynamic_days = false;
           event_view_always_visible = true;
+          blank_line_before_day = true;
           frame = "color";
+          theme = "dark";
+          agenda_day_format = "\"{bold}{name}, {date-long}{reset}\"";
+          agenda_event_format = "{calendar-color}{cancelled}{start-end-time-style} {title}{repeat-symbol}{alarm-symbol} {location}{reset}";
+          event_format = "{calendar-color}{cancelled}{start-end-time-style} {title}{repeat-symbol}{alarm-symbol} {location}{reset}";
         };
         palette = {
           #   header = "'white', 'dark green', default, '#DDDDDD', '#2E7D32'";
