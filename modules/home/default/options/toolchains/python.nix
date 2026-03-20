@@ -17,6 +17,7 @@ in {
       PIPX_HOME = "${config.home.homeDirectory}/${pipxDir}";
       PIPX_BIN_DIR = "${PIPX_HOME}/bin";
       UV_TOOL_BIN_DIR = "${config.home.homeDirectory}/${uvDir}/bin";
+      UV_LINK_MODE = "copy"; # stop warnings caused by impermancnce bind mounts
     };
 
     home.sessionPath = [
