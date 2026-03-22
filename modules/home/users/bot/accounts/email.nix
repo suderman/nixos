@@ -45,12 +45,13 @@
                 [[ -e $dir/.sync-if-1 ]] || echo 0 >$dir/.sync-if-1
 
                 # Only proceed to sync if value of .sync-if-1 equals 1
-                if [[ "$(cat $dir/.sync-if-1)" == "1" ]]; then
-
-                  # Wrap mbsync command in flock into ensure only one instance runs
-                  flock -n /run/user/${toString config.home.uid}/${name}.lock sh -c '
-                    mbsync -V ${account} && notmuch new --verbose
-                  '
+                if [[ "$(cat "$dir/.sync-if-1")" == "1" ]]; then
+                  exec 9>"/run/user/${toString config.home.uid}/${name}.lock"
+                  # Block mbsync command with flock into ensure only one instance runs
+                  if flock -n 9; then
+                    mbsync -V "${account}"
+                    notmuch new --verbose
+                  fi
                 fi
               '';
           };
