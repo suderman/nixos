@@ -111,7 +111,7 @@
           openclaw_init
 
         # Else, if the config or binary is missing, run the above script first
-        elif [[ ! -f $OPENCLAW_CONFIG_PATH ]] || [[ ! -f $OPENCLAW_BIN ]]; then
+        elif [[ ! -e $OPENCLAW_CONFIG_PATH ]] || [[ ! -e $OPENCLAW_BIN ]]; then
           openclaw_init
           $OPENCLAW_BIN "$@"
 
