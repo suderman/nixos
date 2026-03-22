@@ -18,7 +18,7 @@ in {
       primaryCollection = "Personal";
       remote = {
         userName = "suderman@fastmail.com";
-        passwordCommand = ["cat" config.age.secrets.fastmail.path];
+        passwordCommand = ["/run/current-system/sw/bin/cat" config.age.secrets.fastmail.path];
         url = "https://caldav.fastmail.com/";
         type = "caldav";
       };

@@ -13,7 +13,7 @@ in {
     accounts.contact.accounts.${account} = {
       remote = {
         userName = "suderman@fastmail.com";
-        passwordCommand = ["cat" config.age.secrets.fastmail.path];
+        passwordCommand = ["/run/current-system/sw/bin/cat" config.age.secrets.fastmail.path];
         url = "https://carddav.fastmail.com/";
         type = "carddav";
       };
