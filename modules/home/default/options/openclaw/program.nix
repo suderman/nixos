@@ -155,6 +155,9 @@ in {
     # Add openclaw wrapper to user path (higher priority than npm)
     home.file.".local/bin/openclaw".source = "${cfg.package}/bin/openclaw";
 
+    # Lazy typing
+    home.shellAliases.claw = "openclaw";
+
     # Make OpenClaw stop trying to add completions when I already have them
     home.file.".zshrc".source =
       mkOutOfStoreSymlink "${config.programs.zsh.dotDir}/.zshrc";

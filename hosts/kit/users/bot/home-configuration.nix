@@ -30,10 +30,7 @@
     apiKeys = ./openclaw-env.age;
   };
 
-  # Persist login for clawhub
-  persist.storage.directories = [
-    ".config/clawhub"
-  ];
+  programs.opencode.enable = true;
 
   # User web server
   services.caddy.enable = true;
