@@ -93,6 +93,7 @@ in {
         "${srcDir}/.local/share/contacts/Personal"
         "${srcDir}/.local/share/contacts/Shared"
         "${srcDir}/.local/share/calendars/Family"
+        "${srcDir}/.local/share/calendars/Garbage"
         "${srcDir}/.local/share/calendars/Personal"
         "${srcDir}/.local/share/calendars/Wife"
         "${srcDir}/.local/share/calendars/Work"
