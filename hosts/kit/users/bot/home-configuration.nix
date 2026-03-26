@@ -24,23 +24,21 @@
     enablePlugins = true; # set false if plugins barf errors
   };
 
+  programs.opencode.enable = true;
+
   # Enable OpenClaw gateway!
   services.openclaw = {
     enable = true;
     apiKeys = ./openclaw-env.age;
   };
 
-  programs.opencode.enable = true;
-
   # User web server
   services.caddy.enable = true;
 
   # Manage bot's experminetal services
-  services.botSupervisor.enable = true;
+  services.botSupervisor.enable = false;
 
-  services.syncthing.enable = true;
-
-  # Email, calendars, contacts
+  # Email, calendars, contacts (no sync, bind mount from jon)
   accounts.enable = true;
 
   # Record screen with nvidia's AV1 encoder

@@ -4,13 +4,11 @@
     XDG_DOWNLOAD_DIR = {
       path = "downloads";
       persist = "scratch";
-      sync = false;
       enable = true;
     };
     XDG_PUBLICSHARE_DIR = {
       path = "public";
       persist = "storage";
-      sync = true;
       enable = true;
     };
 
@@ -26,31 +24,25 @@
     XDG_BIN_DIR = {
       path = "bin";
       persist = "storage";
-      sync = false;
       enable = true;
     };
     XDG_ORG_DIR = {
       path = "org";
-      persist = "storage";
-      sync = true;
       enable = true;
     };
     XDG_NOTES_DIR = {
       path = "notes";
       persist = "storage";
-      sync = true;
       enable = true;
     };
     XDG_SOURCE_DIR = {
       path = "src";
       persist = "storage";
-      sync = false;
       enable = true;
     };
     XDG_WORKSPACE_DIR = {
       path = "workspace";
       persist = "storage";
-      sync = false;
       enable = true;
     };
   };
