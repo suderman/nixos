@@ -101,19 +101,35 @@
             mv ${runDir}/openclaw.json "$OPENCLAW_CONFIG_PATH"
 
           fi
+
+          # OpenClaw completions
+          $OPENCLAW_BIN completion --shell zsh >| "$OPENCLAW_STATE_DIR/completion.zsh" 2>/dev/null
         }
 
-        # OpenClaw completions
-        $OPENCLAW_BIN completion --shell zsh >| "$OPENCLAW_STATE_DIR/completion.zsh" 2>/dev/null
-
         # If argument is "init", run the above script
-        if [[ "''${@-}" == "init" ]]; then
+        if [[ "''${1-}" == "init" ]]; then
           openclaw_init
 
         # Else, if the config or binary is missing, run the above script first
         elif [[ ! -e $OPENCLAW_CONFIG_PATH ]] || [[ ! -e $OPENCLAW_BIN ]]; then
           openclaw_init
           $OPENCLAW_BIN "$@"
+
+        # Intercept gateway commands and use systemd instead
+        elif [[ "''${1-} ''${2-}" == "gateway install" ]]; then
+          echo "noop: systemd managed by home-manager"
+
+        elif [[ "''${1-} ''${2-}" == "gateway uninstall" ]]; then
+          echo "noop: systemd managed by home-manager"
+
+        elif [[ "''${1-} ''${2-}" == "gateway start" ]]; then
+          systemctl --user start openclaw-gateway.service
+
+        elif [[ "''${1-} ''${2-}" == "gateway stop" ]]; then
+          systemctl --user stop openclaw-gateway.service
+
+        elif [[ "''${1-} ''${2-}" == "gateway restart" ]]; then
+          systemctl --user restart openclaw-gateway.service
 
         # Otherwise, just passthrough to openclaw
         else

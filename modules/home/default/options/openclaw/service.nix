@@ -71,6 +71,7 @@ in {
         "OPENCLAW_SERVICE_MARKER=openclaw"
         "OPENCLAW_SERVICE_KIND=gateway"
         "OPENCLAW_SERVICE_VERSION=npm"
+        "OPENCLAW_NO_RESPAWN=1"
       ];
     in {
       openclaw-gateway = {
