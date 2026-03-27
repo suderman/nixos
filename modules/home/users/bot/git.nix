@@ -2,9 +2,12 @@
   config = {
     programs.git = {
       enable = true;
-      settings.user = {
-        name = "suderbot";
-        email = "jon@suderbot.net";
+      settings = {
+        safe.directory = "*";
+        user = {
+          name = "suderbot";
+          email = "jon@suderbot.net";
+        };
       };
     };
     programs.gh = {

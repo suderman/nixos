@@ -76,11 +76,7 @@ in {
       Type = "oneshot";
       User = "root";
       ExecStart = pkgs.writeShellScript "fix-cal-perms" ''
-        find ${srcDir}/.local/share/calendars \
-             ${srcDir}/.local/share/contacts \
-          -type f \( -name "*.ics" -o -name "*.vcf" \) \
-          ! -perm -g+rw \
-          -exec chmod g+rw {} +
+        chmod -R g+rw ${srcDir}/.local/share/calendars ${srcDir}/.local/share/contacts
       '';
     };
   };
