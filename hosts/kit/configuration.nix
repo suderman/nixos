@@ -10,7 +10,7 @@
     flake.nixosModules.hardware.rtx-4070-ti-super
     flake.nixosModules.default
     flake.nixosModules.desktop.hyprland
-    ./bind-mounts.nix
+    # ./bind-mounts.nix
     ./homelab.nix
   ];
 
@@ -41,6 +41,14 @@
     ];
     "/mnt/data" = ["ssh://pow/mnt/pool/backups/${hostName}"];
     "/mnt/game" = [];
+  };
+
+  # Bind jon's ~/org to bot's ~/org
+  fileSystems."/home/bot/org" = {
+    device = "/mnt/main/storage/home/jon/org";
+    fsType = "none";
+    options = ["bind"];
+    depends = ["/mnt/main/storage"];
   };
 
   # Screen sharing

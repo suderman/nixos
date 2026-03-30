@@ -80,10 +80,10 @@
               ''
                 # Ensure account directory exists
                 dir=${config.accounts.email.maildirBasePath}/${account}
-                mkdir -m700 -p $dir
+                mkdir -m700 -p "$dir"
 
                 # Ensure .sync-if-1 exists (default to value of 0)
-                [[ -e $dir/.sync-if-1 ]] || echo 0 >$dir/.sync-if-1
+                [[ -e "$dir/.sync-if-1" ]] || echo 0 >"$dir/.sync-if-1"
 
                 # Only proceed to sync if value of .sync-if-1 equals 1
                 if [[ "$(cat "$dir/.sync-if-1")" == "1" ]]; then
@@ -139,11 +139,33 @@
     # Email indexer
     programs.notmuch = {
       enable = true;
-      new.ignore = [
-        ".uidvalidity"
-        ".mbsyncstate"
-        ".sync-if-1"
-      ];
+
+      new = {
+        ignore = [
+          ".uidvalidity"
+          ".mbsyncstate"
+          ".sync-if-1"
+        ];
+
+        # Do not blindly tag every new message as inbox.
+        # post-new will add inbox only for messages in local Inbox.
+        tags = ["unread"];
+      };
+    };
+
+    home.file.".local/share/mail/.notmuch/hooks/post-new" = {
+      executable = true;
+      text = ''
+        #!${pkgs.bash}/bin/bash
+        set -euo pipefail
+
+        # Remove inbox everywhere, then re-add it only for actual Inbox mail.
+        ${pkgs.notmuch}/bin/notmuch tag -inbox '*'
+        ${pkgs.notmuch}/bin/notmuch tag +inbox folder:Inbox
+
+        # Mark local Junk as spam and ensure it is never inbox.
+        ${pkgs.notmuch}/bin/notmuch tag +spam -inbox folder:Junk
+      '';
     };
   };
 }
