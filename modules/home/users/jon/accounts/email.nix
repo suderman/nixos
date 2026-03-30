@@ -159,12 +159,9 @@
         #!${pkgs.bash}/bin/bash
         set -euo pipefail
 
-        # Remove inbox everywhere, then re-add it only for actual Inbox mail.
         ${pkgs.notmuch}/bin/notmuch tag -inbox '*'
-        ${pkgs.notmuch}/bin/notmuch tag +inbox folder:Inbox
-
-        # Mark local Junk as spam and ensure it is never inbox.
-        ${pkgs.notmuch}/bin/notmuch tag +spam -inbox folder:Junk
+        ${pkgs.notmuch}/bin/notmuch tag +inbox 'folder:suderman/Inbox or folder:nonfiction/Inbox'
+        ${pkgs.notmuch}/bin/notmuch tag +spam -inbox 'folder:suderman/Junk or folder:nonfiction/Junk'
       '';
     };
   };
