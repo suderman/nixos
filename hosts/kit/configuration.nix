@@ -10,7 +10,6 @@
     flake.nixosModules.hardware.rtx-4070-ti-super
     flake.nixosModules.default
     flake.nixosModules.desktop.hyprland
-    # ./bind-mounts.nix
     ./homelab.nix
   ];
 

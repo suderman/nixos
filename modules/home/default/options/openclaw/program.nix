@@ -110,8 +110,8 @@
         if [[ "''${1-}" == "init" ]]; then
           openclaw_init
 
-        # Else, if the config or binary is missing, run the above script first
-        elif [[ ! -e $OPENCLAW_CONFIG_PATH ]] || [[ ! -e $OPENCLAW_BIN ]]; then
+        # Else, if the config or binary or dotenv is missing, run the above script first
+        elif [[ ! -e $OPENCLAW_CONFIG_PATH ]] || [[ ! -e $OPENCLAW_BIN ]] || [[ ! -e ${runDir}/openclaw.env ]]; then
           openclaw_init
           $OPENCLAW_BIN "$@"
 
