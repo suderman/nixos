@@ -68,12 +68,12 @@
 
     # Hyprland
     # <https://wiki.hypr.land/Nix/>
-    hyprland.url = "github:hyprwm/Hyprland/v0.54.2";
+    hyprland.url = "github:hyprwm/Hyprland/v0.54.3";
     # <https://github.com/hyprwm/hyprland-plugins>
     hyprland-plugins.url = "github:hyprwm/hyprland-plugins";
     hyprland-plugins.inputs.hyprland.follows = "hyprland";
     # <https://github.com/VirtCode/hypr-dynamic-cursors>
-    hypr-dynamic-cursors.url = "github:VirtCode/hypr-dynamic-cursors";
+    hypr-dynamic-cursors.url = "github:VirtCode/hypr-dynamic-cursors/57e14edd0ae265b01828e466e287e96eb1e84dd3";
     hypr-dynamic-cursors.inputs.hyprland.follows = "hyprland";
 
     # Neovim flake

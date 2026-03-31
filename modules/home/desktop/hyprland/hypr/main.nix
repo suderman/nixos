@@ -51,6 +51,7 @@
 
     general = {
       resize_on_border = true;
+      extend_border_grab_area = 15; # gaps between windows can be used for resizing
       snap = {
         enabled = true;
         window_gap = 10;
