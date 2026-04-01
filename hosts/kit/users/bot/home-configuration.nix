@@ -29,6 +29,7 @@
   # Enable OpenClaw gateway!
   services.openclaw = {
     enable = true;
+    host = "claw.suderman.org";
     apiKeys = ./openclaw-env.age;
   };
 
