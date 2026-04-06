@@ -20,6 +20,7 @@
         ;
     };
     go.enable = true;
+    opencode.apiKeys = ./apikeys-env.age;
   };
 
   # Pixel Buds Pro

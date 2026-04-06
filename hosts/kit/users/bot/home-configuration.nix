@@ -24,7 +24,7 @@
     enablePlugins = true; # set false if plugins barf errors
   };
 
-  programs.opencode.enable = true;
+  # programs.opencode.enable = true;
 
   # Enable OpenClaw gateway!
   services.openclaw = {
