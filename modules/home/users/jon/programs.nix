@@ -43,7 +43,7 @@
     desktopEntries =
       (config.lib.chromium.mkWebApp {
         name = "OpenCode";
-        url = "https://opencode-jon.kit";
+        url = "https://code.suderman.org";
         icon =
           pkgs.writeText "icon.svg"
           # html
@@ -53,7 +53,7 @@
       })
       // (config.lib.chromium.mkWebApp {
         name = "OpenClaw";
-        url = "https://openclaw-bot.kit";
+        url = "https://claw.suderman.org";
         icon =
           pkgs.writeText "icon.svg"
           # html
