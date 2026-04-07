@@ -21,6 +21,7 @@
         # Export environment variables
         set -a
         [[ -f "$OPENCODE_DIR/.env" ]] && . "$OPENCODE_DIR/.env"
+        [[ -f "$OPENCODE_DIR/.env.local" ]] && . "$OPENCODE_DIR/.env.local"
         set +a
 
         # Initizalize OpenCode: install via npm
@@ -143,10 +144,12 @@ in {
           OPENCODE_ENABLE_EXA=1
 
           # Aliases to current model names
-          MINIMAX_MODEL="minimax/MiniMax-M2.7"
+          MINIMAX_MODEL="minimax-coding-plan/MiniMax-M2.7"
           OPENAI_MODEL="openai/gpt-5.4"
           ANTHROPIC_MODEL="opencode/claude-opus-4-6"
           GOOGLE_MODEL="openrouter/google/gemini-3-pro-preview"
+
+          # API keys
         '';
 
       # Encrypted API keys
