@@ -6,31 +6,7 @@
   ...
 }: let
   cfg = config.programs.opencode;
-
-  # Base env variables for OpenCode
-  baseEnv =
-    pkgs.writeText "base.env"
-    # sh
-    ''
-      # Path to OpenCode binary managed by npm
-      OPENCODE_BIN="''${OPENCODE_BIN:-${config.home.sessionVariables.NPM_CONFIG_PREFIX}/bin/opencode}"
-      OPENCODE_DIR="''${OPENCODE_DIR:-${config.home.homeDirectory}/${cfg.dataDir}}"
-
-      # Enable native Exa-backed web search in OpenCode
-      OPENCODE_ENABLE_EXA=1
-
-      # Aliases to current model names
-      MINIMAX_MODEL="minimax/MiniMax-M2.7"
-      OPENAI_MODEL="openai/gpt-5.4"
-      ANTHROPIC_MODEL="opencode/claude-opus-4-6"
-      GOOGLE_MODEL="openrouter/google/gemini-3-pro-preview"
-    '';
-
-  # Encrypted API keys
-  keysEnv =
-    if cfg.apiKeys != null
-    then "${config.age.secrets.opencode-env.path}"
-    else "/dev/null";
+  cfgDir = ".config/opencode";
 
   opencode-init = pkgs.self.mkScript {
     name = "opencode";
@@ -38,10 +14,12 @@
     text =
       # bash
       ''
+        # Path to OpenCode binary managed by npm
+        OPENCODE_BIN="''${OPENCODE_BIN:-${config.home.sessionVariables.NPM_CONFIG_PREFIX}/bin/opencode}"
+        OPENCODE_DIR="''${OPENCODE_DIR:-${config.home.homeDirectory}/${cfgDir}}"
+
         # Export environment variables
         set -a
-        [[ -f "${baseEnv}" ]] && . "${baseEnv}"
-        [[ -f "${keysEnv}" ]] && . "${keysEnv}"
         [[ -f "$OPENCODE_DIR/.env" ]] && . "$OPENCODE_DIR/.env"
         set +a
 
@@ -106,10 +84,6 @@ in {
       type = lib.types.package;
       default = opencode-init;
     };
-    dataDir = lib.mkOption {
-      type = lib.types.str;
-      default = ".config/opencode";
-    };
     name = lib.mkOption {
       type = lib.types.str;
       default = "opencode-${config.home.username}";
@@ -137,7 +111,7 @@ in {
     toolchains.javascript.enable = true;
 
     # Persist the config, data and state directories
-    persist.storage.directories = [cfg.dataDir];
+    persist.storage.directories = [cfgDir];
     persist.scratch.directories = [
       ".local/share/opencode"
       ".local/state/opencode"
@@ -147,6 +121,7 @@ in {
     home.shellAliases = rec {
       oc = "opencode";
       occ = "${oc} --continue";
+      ocr = "${oc} run --attach http://127.0.0.1:${toString cfg.port}";
     };
 
     # Add opencode wrapper to user path (higher priority than npm)
@@ -156,6 +131,39 @@ in {
     age.secrets = lib.mkIf (cfg.apiKeys != null) {
       opencode-env.rekeyFile = cfg.apiKeys;
     };
+
+    # Place .env in ~/.config/opencode
+    home.activation.opencode = let
+      # Base env variables for OpenCode
+      baseEnv =
+        pkgs.writeText "base.env"
+        # sh
+        ''
+          # Enable native Exa-backed web search in OpenCode
+          OPENCODE_ENABLE_EXA=1
+
+          # Aliases to current model names
+          MINIMAX_MODEL="minimax/MiniMax-M2.7"
+          OPENAI_MODEL="openai/gpt-5.4"
+          ANTHROPIC_MODEL="opencode/claude-opus-4-6"
+          GOOGLE_MODEL="openrouter/google/gemini-3-pro-preview"
+        '';
+
+      # Encrypted API keys
+      keysEnv =
+        if cfg.apiKeys != null
+        then "${config.age.secrets.opencode-env.path}"
+        else "/dev/null";
+    in
+      lib.hm.dag.entryAfter ["writeBoundary"]
+      # bash
+      ''
+        mkdir -p ${cfgDir}
+        DOTENV=${cfgDir}/.env
+        cat ${baseEnv} >$DOTENV
+        [[ -f "${keysEnv}" ]] && cat "${keysEnv}" >>$DOTENV
+        chmod 600 $DOTENV
+      '';
 
     # User service for OpenCode backend and web
     systemd.user.services.opencode = {
