@@ -30,7 +30,6 @@
   services.openclaw = {
     enable = true;
     host = "claw.suderman.org";
-    apiKeys = ./openclaw-env.age;
   };
 
   # User web server
