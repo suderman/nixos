@@ -76,6 +76,9 @@
     name = "git";
   };
 
+  # ChatGPT/Codex account load balancer for OpenCode.
+  services.codex-lb.enable = true;
+
   # Garmin fenix 6 pro
   hardware.garmin.deviceId = "091e:4cda";
 

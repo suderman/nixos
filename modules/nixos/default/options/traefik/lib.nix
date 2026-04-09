@@ -323,6 +323,7 @@
           "--label=traefik.enable=true"
           "--label=traefik.http.routers.${name'}.entrypoints=websecure"
           "--label=traefik.http.routers.${name'}.rule=${rule'}"
+          "--label=traefik.http.routers.${name'}.service=${name'}"
         ]
         ++ tls' ++ middlewares' ++ port' ++ scheme';
     in
