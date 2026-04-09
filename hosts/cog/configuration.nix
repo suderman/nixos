@@ -70,6 +70,11 @@
   services.whoogle.enable = false;
   services.tiddlywiki.enable = true;
 
+  services.mysql = {
+    enable = true;
+    package = pkgs.mariadb;
+  };
+
   # Garmin fenix 6 pro
   hardware.garmin.deviceId = "091e:4cda";
 }

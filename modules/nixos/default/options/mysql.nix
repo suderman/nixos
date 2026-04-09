@@ -14,7 +14,7 @@ in {
       user = "mysql";
       group = "mysql";
 
-      package = pkgs.mysql80;
+      package = lib.mkDefault pkgs.mysql80;
       ensureUsers =
         map (
           name: {
