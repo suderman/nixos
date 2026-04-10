@@ -143,16 +143,14 @@ in {
           # Enable native Exa-backed web search in OpenCode
           OPENCODE_ENABLE_EXA=1
 
-          # Aliases to current model names
-          MINIMAX_MODEL="minimax-coding-plan/MiniMax-M2.7"
-          OPENAI_MODEL="openai/gpt-5.4"
-          ANTHROPIC_MODEL="opencode/claude-opus-4-6"
-          GOOGLE_MODEL="openrouter/google/gemini-3-pro-preview"
-
           # API keys
         '';
 
       # Encrypted API keys
+      # MINIMAX_API_KEY=
+      # OPENCODE_API_KEY=
+      # OPENROUTER_API_KEY=
+      # CONTEXT7_API_KEY=
       keysEnv =
         if cfg.apiKeys != null
         then "${config.age.secrets.opencode-env.path}"
@@ -190,7 +188,10 @@ in {
               "/usr/bin"
               "/bin"
             ];
-        in ["PATH=${lib.concatStringsSep ":" path}"];
+        in [
+          "PATH=${lib.concatStringsSep ":" path}"
+          "XDG_CACHE_HOME=%h/.cache/opencode-serve" # give the service a separate cache
+        ];
         ExecStart = toString [
           "${cfg.package}/bin/opencode serve"
           "--port ${toString cfg.port}"
