@@ -122,7 +122,7 @@ in {
     home.shellAliases = rec {
       oc = "opencode";
       occ = "${oc} --continue";
-      ocr = "${oc} run --attach http://127.0.0.1:${toString cfg.port}";
+      ocr = "${oc} run";
     };
 
     # Add opencode wrapper to user path (higher priority than npm)
