@@ -19,8 +19,6 @@
       (builtins.attrNames cfg.unpackedExtensions)
     );
 
-    remoteDebuggingPort = 9222 + config.home.portOffset;
-
     # Enable these features in chromium
     features = concatStringsSep "," [
       "DevToolsPrivacyUI"
@@ -65,7 +63,7 @@
     "--ozone-platform=wayland"
     "--remove-referrers" # (browser privacy feature)
     "--password-store=basic" # persist website sessions
-    "--remote-debugging-port=${toString remoteDebuggingPort}"
+    "--remote-debugging-port=${toString cfg.remoteDebuggingPort}"
   ];
 
   # Create window class name from URL used by Chromium Web Apps

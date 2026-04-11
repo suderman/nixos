@@ -10,6 +10,7 @@
   inherit (lib) mkIf mkOption types;
   inherit (config.lib.keyd) mkClass;
   inherit (config.lib.chromium) switches;
+  inherit (perSystem.self) mkScript;
 
   # home-manager module expects this default directory
   dataDir = ".config/chromium";
@@ -45,6 +46,12 @@ in {
     unpackedExtensions = mkOption {
       type = types.anything;
       default = {inherit (cfg.registry) chromium-web-store;};
+    };
+
+    # chrome-devtools-mcp
+    remoteDebuggingPort = mkOption {
+      type = types.port;
+      default = 9222 + config.home.portOffset;
     };
   };
 
@@ -89,7 +96,6 @@ in {
 
     # Populate ~/.config/chromium/External Extensions
     systemd.user = let
-      inherit (perSystem.self) mkScript;
       extNames = builtins.attrNames (cfg.externalExtensions // cfg.unpackedExtensions);
       crxDir = osConfig.programs.chromium.dataDir;
       extDir = "${cfg.dataDir}/External Extensions";
@@ -153,5 +159,39 @@ in {
         Install.WantedBy = ["default.target"];
       };
     };
+
+    # chrome-devtools-mcp wrapper with flock
+    home.packages = let
+      port = toString cfg.remoteDebuggingPort;
+    in [
+      (mkScript {
+        name = "chrome-devtools-${port}";
+        path = with pkgs; [procps util-linux nodejs];
+        text =
+          # bash
+          ''
+            lock="''${XDG_RUNTIME_DIR:-$HOME/.local/state}/chrome-devtools-mcp-${port}.lock"
+            mkdir -p "$(dirname "$lock")"
+
+            exec 9>"$lock"
+            if ! flock -n -E 200 9; then
+              rc=$?
+              if [ "$rc" -eq 200 ]; then
+                echo "chrome-devtools-mcp on :${port} is already in use" >&2
+                exit 1
+              fi
+              exit "$rc"
+            fi
+
+            while IFS= read -r pid; do
+              [ -n "$pid" ] || continue
+              [ "$pid" = "$$" ] && continue
+              kill "$pid" 2>/dev/null || true
+            done < <(pgrep -f "chrome-devtools-mcp.*127\\.0\\.0\\.1:${port}" || true)
+
+            exec npx -y chrome-devtools-mcp@latest --browser-url=http://127.0.0.1:${port}
+          '';
+      })
+    ];
   };
 }
