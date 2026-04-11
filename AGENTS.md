@@ -1,91 +1,45 @@
-# Agent Instructions for NixOS Configuration
+# /etc/nixos agent notes
 
-This repository contains NixOS system configurations managed as a Flake, using `blueprint` for structure and `devshell` for development tooling.
+- Work from `nix develop`. Repo-specific tools (`nixos`, `agenix`, `derive`, `sshed`, `browse`, `alejandra`) come from the devshell.
+- `nixos` and `agenix` here are wrapper scripts from `packages/`, not stock CLIs. Many subcommands are interactive (`gum`) and some auto-stage files in git; avoid them for unattended automation unless you want that behavior.
 
-## 1. Environment & Workflow
+## Read before changing repo structure
 
-### Development Shell
-Always operate within `nix develop`.
-- **Enter:** `nix develop`
-- **Tools:** `nixos`, `agenix`, `alejandra` are available.
+- Module placement and import conventions: `modules/MODULE-PATTERNS.md`
+- Networking, DNS, CA, Traefik, and Tailscale model: `modules/NETWORKING-PATTERNS.md`
+- `users/` is NixOS users/service identities, not Home Manager users: `users/README.md`
+- Deterministic secret/key recovery and agenix workflow: `secrets/README.md`
 
-### Core Commands
-Use the custom `nixos` wrapper script for most operations.
+## High-impact commands
 
-- **Deploy:** `nixos deploy` (Interactive `nixos-rebuild` wrapper)
-- **Add Resource:**
-  - `nixos add host` - scaffolds `hosts/<name>`
-  - `nixos add user` - scaffolds `users/<name>`
-- **Generate:** `nixos generate` (SSH keys, age identities, rekeys secrets)
-  - May prompt for password if `/tmp/id_age` is missing (runs `agenix unlock`)
-- **Simulation:**
-  - `nixos sim up` - Start QEMU VM
-  - `nixos sim rebuild` - Rebuild running VM
-  - `nixos sim ssh` - SSH into VM
+- Format: `nix fmt` (or `alejandra .` inside the devshell).
+- Eval one host without building: `nix eval .#nixosConfigurations.<host>.config.system.build.toplevel.outPath`
+- Build one host: `nix build .#nixosConfigurations.<host>.config.system.build.toplevel`
+- Full repo check: `nix flake check`
+- Build installer ISO: `nix build .#nixosConfigurations.iso.config.system.build.isoImage`
+- Non-interactive deploy equivalent: `nixos-rebuild --flake .#<host> [switch|boot|test|build|repl]`
 
-### Build & Test
-- **Check:** `nix flake check`
-- **Build:** `nix build .#nixosConfigurations.<host>.config.system.build.toplevel`
-- **ISO:** `nixos iso build`
-- **Format:** `alejandra .`
+## Generated / secret-backed workflows
 
-## 2. Code Style & Structure
+- `nixos generate` is broad: it unlocks `secrets/id_age.age` into `/tmp/id_age`, rewrites host/user public keys under `hosts/*` and `users/*`, ensures `zones/ca.{crt,age}` exists, and runs `agenix rekey -a`.
+- `nixos add host|user` scaffolds files, stages them in git, then runs `nixos generate`.
+- Edit secrets with `agenix edit <path>.age`. After changing recipients or adding/removing secrets, run `agenix rekey -a` (or `nixos generate`). Never commit plaintext secrets.
 
-### File Structure (Blueprint)
-This repo follows the `numtide/blueprint` convention:
-- `hosts/`: Per-machine configurations.
-- `modules/`: Reusable NixOS/Home Manager modules.
-  - `nixos/`: System-level modules.
-  - `home/`: User-level (home-manager) modules.
-- `users/`: Potential system users (`config.users.users.<name>`). Not all are available on all hosts; availability determined by host's `home-manager.users` and module includes.
-- `packages/`: Custom packages.
-- `secrets/`: Encrypted secrets (Agenix).
-- `zones/`: Networking/DNS configurations.
+## Repo structure that matters
 
-### Module Organization
-- `default/`: Imported in every host/home.
-- `desktop/`: Imported in any graphical environment.
-- `hardware/` (nixos only): Custom hardware modules for specific hosts.
-- `users/` (home only): Per-user home configs shared across hosts.
+- This flake uses `blueprint`: directories map directly to flake outputs.
+- `hosts/<name>/configuration.nix` defines `nixosConfigurations.<name>`.
+- Shared system modules live in `modules/nixos/`; shared Home Manager modules live in `modules/home/`.
+- Per-host Home Manager configs live in either `hosts/<host>/users/<user>.nix` or `hosts/<host>/users/<user>/home-configuration.nix`.
+- `users/<name>/` holds NixOS user/service identity data plus generated public keys and encrypted passwords.
+- `zones/*/default.nix` is the source of truth for IP data; the zone READMEs are router/admin runbooks.
 
-### Optional vs Non-Optional Configs
-Inside `default/` and `desktop/` subfolders:
-- `configs/`: Non-optional configuration applied as-is.
-- `options/`: Optional configuration; each file requires `enable = true`.
+## Repo-specific module conventions
 
-### Nix Style
-- **Formatter:** Strict adherence to `alejandra`. Run `nix fmt` after changes.
-- **Patterns:** Prefer pure functions. Use `lib.mkIf`, `lib.mkMerge`.
-- **Imports:** Use relative paths for local imports.
-- **Comments:** Comment complex logic, especially for hardware quirks.
+- `modules/nixos/default/default.nix` imports `./configs`, `./options`, and `./overlays`; `modules/home/default/default.nix` imports `./configs` and `./options`.
+- Before inventing new helpers, check `modules/README.md`: this repo already extends modules with `persist`, `tmpfiles`, extra `networking.*`, and Home Manager `home.uid` / `home.portOffset`.
+- New opt-in programs/services usually belong in `modules/{home,nixos}/default/options/`; desktop-only modules belong under `modules/{home,nixos}/desktop/`.
 
-### Secrets (Agenix)
-- **Never** commit plain text secrets.
-- **Storage:** `secrets/` or within `users/`/`hosts/` as `.age` files.
-- **Edit:** `agenix -e <path/to/secret.age>`
-- **Rekey:** `agenix rekey` (handled by `nixos generate`).
+## Simulation / installer work
 
-## 3. Creating New Configurations
-
-### New Host
-1. Run `nixos add host`.
-2. Edit `hosts/<name>/configuration.nix`.
-3. Configure `hardware-configuration.nix` (`nixos detect hardware`).
-4. Configure `disk-configuration.nix` (Disko).
-
-### New User
-1. Run `nixos add user`.
-2. Edit `users/<name>/default.nix`.
-3. Add to host's `home-manager.users` and/or system users.
-
-## 4. Verification Checklist
-Before submitting changes:
-1. [ ] Run `nix fmt`
-2. [ ] Run `nix flake check`
-3. [ ] If adding a package: `nix build .#<package-name>`
-4. [ ] If modifying a host: `nix eval .#nixosConfigurations.<host>.config.system.build.toplevel.outPath`
-
-## 5. Tools Reference
-- **Nix:** `nix repl`, `nix inspect` (via `browse` command)
-- **Shell:** `gum` for interactivity
-- **Version Control:** Standard `git`
+- `nixos sim up|rebuild|ssh` is the VM workflow for installer/disko experiments. It creates `hosts/sim/disk{1..4}.img` and derives `hosts/sim/ssh_host_ed25519_key` locally.
