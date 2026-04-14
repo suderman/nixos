@@ -9,7 +9,7 @@
   ...
 }: let
   # https://github.com/immich-app/immich/releases
-  version = "2.5.6";
+  version = "2.7.5";
 
   cfg = config.services.immich;
 
@@ -40,7 +40,7 @@ in {
 
     name = mkOption {
       type = types.str;
-      default = "immich";
+      default = "immich-server";
     };
 
     alias = mkOption {
