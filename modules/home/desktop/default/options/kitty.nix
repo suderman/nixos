@@ -37,6 +37,8 @@ in {
       active_tab_font_style = "bold";
       inactive_tab_font_style = "normal";
       tab_activity_symbol = "";
+
+      allow_remote_control = "yes";
     };
 
     programs.kitty.environment = {

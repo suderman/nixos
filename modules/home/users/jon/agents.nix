@@ -6,6 +6,9 @@
   # Preload OpenCode with my API keys
   programs.opencode.apiKeys = ./apikeys-env.age;
 
+  # Preload mmx-cli with my API keys
+  programs.mmx-cli.apiKeys = ./apikeys-env.age;
+
   # Self-hosted webapps running from my kit desktop
   xdg = config.desktop {
     desktopEntries =

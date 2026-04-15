@@ -30,6 +30,7 @@
   programs.citron.enable = true;
   programs.zwift.enable = true; # fitness
   programs.opencode.enable = true;
+  programs.mmx-cli.enable = true;
 
   # User services
   services.syncthing.enable = true;

@@ -31,6 +31,7 @@
   programs.sparrow.enable = true;
   programs.zwift.enable = true;
   programs.opencode.enable = true;
+  programs.mmx-cli.enable = true;
 
   # Remote control for my friendly robot
   programs.openclaw = {
