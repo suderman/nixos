@@ -14,7 +14,7 @@ in {
     package = pkgs.starship;
     settings = {
       format = "$directory$git_branch$git_metrics$nix_shell$package$character";
-      right_format = "$username$hostname";
+      # right_format = "$username$hostname";
       add_newline = false;
       line_break.disabled = true;
       directory = {
