@@ -8,7 +8,39 @@
 }: let
   cfg = config.services.hermes;
   cfgDir = ".hermes";
-  telegramPythonPath = pkgs.python3.pkgs.makePythonPath [pkgs.python3.pkgs.python-telegram-bot];
+  basePackage = perSystem.llm-agents.hermes-agent;
+  hermesWebDist = pkgs.buildNpmPackage {
+    pname = "hermes-agent-web-dist";
+    version = basePackage.version;
+    src = basePackage.src;
+    sourceRoot = "source/web";
+    npmDepsHash = "sha256-Y0pOzdFG8BLjfvCLmsvqYpjxFjAQabXp1i7X9W/cCU4=";
+    postPatch = ''
+      substituteInPlace vite.config.ts \
+        --replace-fail 'outDir: "../hermes_cli/web_dist"' 'outDir: "dist"'
+    '';
+
+    installPhase = ''
+      runHook preInstall
+      mkdir -p "$out"
+      cp -r dist "$out/web_dist"
+      runHook postInstall
+    '';
+  };
+  defaultPackage = basePackage.overrideAttrs (old: {
+    postInstall =
+      (old.postInstall or "")
+      + ''
+        hermes_cli_dir="$(echo "$out"/lib/python*/site-packages/hermes_cli)"
+        rm -rf "$hermes_cli_dir/web_dist"
+        cp -r ${hermesWebDist}/web_dist "$hermes_cli_dir/web_dist"
+      '';
+  });
+  hermesPythonPath = pkgs.python3.pkgs.makePythonPath [
+    pkgs.python3.pkgs.python-telegram-bot
+    pkgs.python3.pkgs.fastapi
+    pkgs.python3.pkgs.uvicorn
+  ];
   hermes = pkgs.self.mkScript {
     name = "hermes";
     text =
@@ -29,7 +61,7 @@
         set +a
 
         export HERMES_HOME
-        export PYTHONPATH="${telegramPythonPath}:''${PYTHONPATH:-}"
+        export PYTHONPATH="${hermesPythonPath}:''${PYTHONPATH:-}"
         exec "$HERMES_BIN" "$@"
       '';
   };
@@ -53,7 +85,7 @@ in {
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = perSystem.llm-agents.hermes-agent;
+      default = defaultPackage;
       description = "The hermes-agent package to use";
     };
 
@@ -164,6 +196,52 @@ in {
         KillMode = "control-group";
 
         # Hardening
+        NoNewPrivileges = true;
+        PrivateTmp = true;
+        ProtectSystem = "strict";
+        ProtectHome = false;
+        ProtectKernelTunables = true;
+        ProtectKernelModules = true;
+        ProtectControlGroups = true;
+        LockPersonality = true;
+        MemoryDenyWriteExecute = false;
+      };
+
+      Install.WantedBy = ["default.target"];
+    };
+
+    systemd.user.services.hermes-dashboard = {
+      Unit = {
+        Description = "Hermes Agent Dashboard";
+        After = ["network-online.target" "agenix.service" "hermes-gateway.service"];
+        Requires = ["agenix.service"];
+        Wants = ["network-online.target" "hermes-gateway.service"];
+      };
+
+      Service = {
+        Type = "simple";
+        Environment = let
+          path =
+            config.home.sessionPath
+            ++ [
+              "${config.home.profileDirectory}/bin"
+              "/run/current-system/sw/bin"
+              "/usr/bin"
+              "/bin"
+            ];
+        in [
+          "PATH=${lib.concatStringsSep ":" path}"
+          "HERMES_HOME=${config.home.homeDirectory}/${cfgDir}"
+          "GATEWAY_HEALTH_URL=http://127.0.0.1:${toString cfg.apiPort}/health/detailed"
+        ];
+        ExecStart = "${hermes}/bin/hermes dashboard --host 127.0.0.1 --port ${toString cfg.dashboardPort} --no-open";
+        Restart = "always";
+        RestartSec = 5;
+        TimeoutStopSec = 30;
+        TimeoutStartSec = 30;
+        SuccessExitStatus = "0 143";
+        KillMode = "control-group";
+
         NoNewPrivileges = true;
         PrivateTmp = true;
         ProtectSystem = "strict";

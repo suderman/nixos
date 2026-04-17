@@ -38,11 +38,11 @@ in {
       ${mkScript {inherit text path;}}
     '';
 
-  # Enable reverse proxy for each user: hermes-jon -> http://127.0.0.1:8642
+  # Enable reverse proxy for each user dashboard: hermes-jon -> http://127.0.0.1:9119
   services.traefik.proxy = lib.listToAttrs (map (user:
     with user.services.hermes; {
       name = "hermes-${user.home.username}";
-      value = "http://127.0.0.1:${toString apiPort}";
+      value = "http://127.0.0.1:${toString dashboardPort}";
     })
   users);
 }
