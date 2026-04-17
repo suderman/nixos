@@ -1,5 +1,6 @@
 {
   config,
+  perSystem,
   flake,
   ...
 }: {
@@ -32,6 +33,7 @@
   programs.zwift.enable = true;
   programs.opencode.enable = true;
   programs.mmx-cli.enable = true;
+  services.hermes.enable = true;
 
   # Remote control for my friendly robot
   programs.openclaw = {

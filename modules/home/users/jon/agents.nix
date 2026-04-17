@@ -9,6 +9,8 @@
   # Preload mmx-cli with my API keys
   programs.mmx-cli.apiKeys = ./apikeys-env.age;
 
+  services.hermes.apiKeys = ./apikeys-env.age;
+
   # Self-hosted webapps running from my kit desktop
   xdg = config.desktop {
     desktopEntries =
