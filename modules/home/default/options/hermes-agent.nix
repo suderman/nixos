@@ -6,7 +6,7 @@
   perSystem,
   ...
 }: let
-  cfg = config.services.hermes;
+  cfg = config.services.hermes-agent;
   cfgDir = ".hermes";
   hermesWrapper = pkgs.self.mkScript {
     name = "hermes";
@@ -31,7 +31,7 @@
       '';
   };
 in {
-  options.services.hermes = {
+  options.services.hermes-agent = {
     enable = lib.mkEnableOption "hermes-agent";
 
     name = lib.mkOption {

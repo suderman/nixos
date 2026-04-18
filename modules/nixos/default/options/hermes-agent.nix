@@ -7,7 +7,7 @@
   ...
 }: let
   # Find all home-manager users with hermes service enabled
-  users = flake.lib.filterUsers config (user: user.services.hermes.enable);
+  users = flake.lib.filterUsers config (user: user.services.hermes-agent.enable);
 in {
   # Derive API server key for each user into /run/hermes/{uid}/api_key
   system.activationScripts.hermes-api-key = let
@@ -15,7 +15,7 @@ in {
     hex = config.age.secrets.hex.path;
     perUser = user: let
       inherit (user.home) username uid;
-      seed = user.services.hermes.host;
+      seed = user.services.hermes-agent.host;
       keyFile = "/run/hermes/${toString uid}/key.env";
     in
       # bash
@@ -40,7 +40,7 @@ in {
 
   # Enable reverse proxy for each user dashboard: hermes-jon -> http://127.0.0.1:9119
   services.traefik.proxy = lib.listToAttrs (map (user:
-    with user.services.hermes; {
+    with user.services.hermes-agent; {
       name = "hermes-${user.home.username}";
       value = "http://127.0.0.1:${toString dashboardPort}";
     })
