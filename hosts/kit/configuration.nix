@@ -62,12 +62,14 @@
   };
 
   # https://chat.kit/
-  services.open-webui = {
-    enable = false;
-    package = pkgs.open-webui; # https://github.com/NixOS/nixpkgs/issues/380636
-    port = 11111; # default is 8080
-  };
+  # services.open-webui = {
+  #   enable = false;
+  #   package = pkgs.open-webui; # https://github.com/NixOS/nixpkgs/issues/380636
+  #   port = 11111; # default is 8080
+  # };
   # services.traefik.proxy."chat" = config.services.open-webui.port;
+
+  services.open-webui.enable = true;
 
   services.immich.enable = false;
 

@@ -16,10 +16,29 @@ this repo were created with the following commands:
 
 ```bash
 openssl genrsa -out ca.key 4096
-openssl req -new -x509 -nodes -extensions v3_ca -days 25568 -subj "/CN=Suderman CA" -key ca.key -out ca.crt
+cat >ca.conf <<'EOF'
+[ req ]
+distinguished_name = req_distinguished_name
+x509_extensions = v3_ca
+prompt = no
+
+[ req_distinguished_name ]
+CN = Suderman CA
+
+[ v3_ca ]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:true
+keyUsage = critical, keyCertSign, cRLSign
+EOF
+
+openssl req -new -x509 -nodes -config ca.conf -extensions v3_ca -days 25568 -key ca.key -out ca.crt
 age -e -r $(derive public </tmp/id_age) <ca.key >ca.age
-rm ca.key
+rm ca.key ca.conf
 ```
+
+The explicit OpenSSL config matters here: some stricter TLS clients reject a CA
+certificate that does not declare certificate-signing usage.
 
 The CA won't expire in my lifetime, so installing it on each device is a
 one-time chore. Traefik uses this CA to generate brand new certificates used for

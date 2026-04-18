@@ -219,15 +219,34 @@ nixos_generate() {
   else
     gum_info "Generating Certificate Authority..."
 
-    # Generate CA key and save to variable
+    # Generate CA key and explicit OpenSSL config. We do not rely on the
+    # ambient OpenSSL config here because strict TLS clients require the CA
+    # certificate itself to declare certificate-signing usage explicitly.
     ca_key=$(mktemp)
     openssl genrsa -out "$ca_key" 4096
 
+    ca_config=$(mktemp)
+    cat >"$ca_config" <<'EOF'
+[ req ]
+distinguished_name = req_distinguished_name
+x509_extensions = v3_ca
+prompt = no
+
+[ req_distinguished_name ]
+CN = Suderman CA
+
+[ v3_ca ]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:true
+keyUsage = critical, keyCertSign, cRLSign
+EOF
+
     # Generate CA certificate expiring in 70 years
     openssl req -new -x509 -nodes \
+      -config "$ca_config" \
       -extensions v3_ca \
       -days 25568 \
-      -subj "/CN=Suderman CA" \
       -key "$ca_key" \
       -out zones/ca.crt
 
@@ -237,6 +256,7 @@ nixos_generate() {
     # Encrypt CA key with age identity
     age -e -r "$(derive public </tmp/id_age)" <"$ca_key" \
       >zones/ca.age
+    rm -f "$ca_config"
     shred -u "$ca_key"
 
     git add zones/ca.age 2>/dev/null || true
