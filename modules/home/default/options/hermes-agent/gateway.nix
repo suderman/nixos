@@ -111,7 +111,9 @@ in {
             "PATH=${lib.concatStringsSep ":" path}"
             "HERMES_HOME=${dir}"
           ];
-          ExecStart = "${cfg.package}/bin/hermes gateway run";
+          # Hermes tracks gateway state itself, so `--replace` keeps systemd
+          # restarts from failing when Hermes still sees an existing PID/state.
+          ExecStart = "${cfg.package}/bin/hermes gateway run --replace";
         };
 
         Install.WantedBy = ["default.target"];
@@ -131,7 +133,7 @@ in {
             "PATH=${lib.concatStringsSep ":" path}"
             "HERMES_HOME=${dir}/profiles/%I"
           ];
-          ExecStart = "${cfg.package}/bin/hermes gateway run";
+          ExecStart = "${cfg.package}/bin/hermes gateway run --replace";
         };
       };
 

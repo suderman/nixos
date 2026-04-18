@@ -50,6 +50,20 @@ in {
       description = "Port reserved for the Hermes web dashboard";
     };
 
+    proxy = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = {};
+      example = {
+        default = "hermes.kit";
+        grep = "grep.kit";
+      };
+      description = ''
+        Profile-to-hostname map for Traefik exposure.
+        The reserved key `default` targets the root Hermes home, and every other
+        key targets a mutable profile under `profiles/<name>`.
+      '';
+    };
+
     package = lib.mkOption {
       type = lib.types.nullOr lib.types.package;
       description = "The hermes-agent wrapper script to use";

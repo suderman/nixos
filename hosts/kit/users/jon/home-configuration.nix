@@ -33,7 +33,14 @@
   programs.zwift.enable = true;
   programs.opencode.enable = true;
   programs.mmx-cli.enable = true;
-  services.hermes-agent.enable = true;
+
+  services.hermes-agent = {
+    enable = true;
+    proxy = {
+      default = "hermes.kit";
+      grep = "grep.kit";
+    };
+  };
 
   # Remote control for my friendly robot
   programs.openclaw = {

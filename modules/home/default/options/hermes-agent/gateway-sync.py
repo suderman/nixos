@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import hashlib
-import os
 import sys
 from pathlib import Path
 
@@ -20,28 +18,22 @@ def profile_names(profiles_dir: Path) -> list[str]:
     return names
 
 
-def assign_ports(base: int, names: list[str], salt: str) -> dict[str, int]:
+def derive_port(base: int, name: str, salt: str) -> int:
+    """
+    Derive a stable profile port from only the base port and profile name.
+
+    This deliberately does not depend on the set of other profiles, so adding or
+    removing a sibling profile cannot renumber existing profile ports.
+    """
     max_offset = 65535 - base - 1
     if max_offset <= 0:
         raise SystemExit(f"base port {base} leaves no room for profile ports")
 
-    window = min(4096, max_offset)
-    used = {base}
-    assigned: dict[str, int] = {}
+    value = 5381
+    for char in f"{salt}:{name}":
+        value = ((value * 33) + ord(char)) % max_offset
 
-    for name in names:
-        digest = hashlib.sha256(f"{base}:{salt}:{name}".encode()).digest()
-        preferred = int.from_bytes(digest[:4], "big") % window
-        for step in range(window):
-            port = base + 1 + ((preferred + step) % window)
-            if port not in used:
-                used.add(port)
-                assigned[name] = port
-                break
-        else:
-            raise SystemExit(f"unable to allocate port for profile {name}")
-
-    return assigned
+    return base + 1 + value
 
 
 def rewrite_env_base(root_env_base: Path, profile_env_base: Path, api_port: int, dashboard_port: int) -> None:
@@ -78,18 +70,17 @@ def main() -> int:
     dashboard_base = int(sys.argv[4])
 
     names = profile_names(profiles_dir)
-    api_ports = assign_ports(api_base, names, "api")
-    dashboard_ports = assign_ports(dashboard_base, names, "dashboard")
-
     for name in names:
         profile_home = profiles_dir / name
+        api_port = derive_port(api_base, name, "api")
+        dashboard_port = derive_port(dashboard_base, name, "dashboard")
         rewrite_env_base(
             root_env_base,
             profile_home / ".env.base",
-            api_ports[name],
-            dashboard_ports[name],
+            api_port,
+            dashboard_port,
         )
-        print(f"{name}\t{api_ports[name]}\t{dashboard_ports[name]}")
+        print(f"{name}\t{api_port}\t{dashboard_port}")
 
     return 0
 
