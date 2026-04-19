@@ -6,35 +6,29 @@
 }: let
   cfg = config.services.hermes-agent;
   dir = "${config.home.homeDirectory}/${cfg.dataDir}";
-  profileNames = builtins.attrNames cfg.profiles;
-  profileHome = name:
-    if name == "default"
-    then dir
-    else "${dir}/profiles/${name}";
+  agentsDir = "${dir}/agents";
+  agentNames = builtins.attrNames cfg.agents;
+  agentHome = name: "${agentsDir}/${name}";
 
-  inherit (lib) concatMapStringsSep listToAttrs mod nameValuePair optionalString;
+  inherit (lib) concatMapStringsSep listToAttrs mod nameValuePair;
   inherit (lib.strings) charToInt stringToCharacters;
 
-  deriveProfilePort = base: profile: salt: let
+  deriveAgentPort = base: agent: salt: let
     maxOffset = 65535 - base - 1;
     offset =
       if maxOffset <= 0
-      then throw "services.hermes-agent.apiPort must leave room for derived profile ports"
-      else builtins.foldl' (
-        acc: char: mod ((acc * 33) + charToInt char) maxOffset
-      ) 5381 (stringToCharacters "${salt}:${profile}");
+      then throw "services.hermes-agent.apiPort must leave room for derived agent ports"
+      else
+        builtins.foldl' (
+          acc: char: mod ((acc * 33) + charToInt char) maxOffset
+        )
+        5381 (stringToCharacters "${salt}:${agent}");
   in
     base + 1 + offset;
 
-  apiPortFor = name:
-    if name == "default"
-    then cfg.apiPort
-    else deriveProfilePort cfg.apiPort name "api";
+  apiPortFor = name: deriveAgentPort cfg.apiPort name "api";
 
-  dashboardPortFor = name:
-    if name == "default"
-    then cfg.dashboardPort
-    else deriveProfilePort cfg.dashboardPort name "dashboard";
+  dashboardPortFor = name: deriveAgentPort cfg.dashboardPort name "dashboard";
 
   path =
     config.home.sessionPath
@@ -65,29 +59,29 @@
       MemoryDenyWriteExecute = false;
     };
 
-  mkProfileEnv = keysEnv: name: let
+  mkAgentEnv = keysEnv: name: let
     apiPort = apiPortFor name;
     dashboardPort = dashboardPortFor name;
   in ''
-    mkdir -p "${profileHome name}"
-    cat >"${profileHome name}/.env.base" <<'EOF'
-API_SERVER_ENABLED=1
-API_SERVER_PORT=${toString apiPort}
-DASHBOARD_PORT=${toString dashboardPort}
-EOF
-    if [[ -f "${keysEnv}" ]]; then
-      echo >>"${profileHome name}/.env.base"
-      cat "${keysEnv}" >>"${profileHome name}/.env.base"
-    fi
-    chmod 600 "${profileHome name}/.env.base"
+        mkdir -p "${agentHome name}"
+        cat >"${agentHome name}/.env.base" <<'EOF'
+    API_SERVER_ENABLED=1
+    API_SERVER_PORT=${toString apiPort}
+    DASHBOARD_PORT=${toString dashboardPort}
+    EOF
+        if [[ -f "${keysEnv}" ]]; then
+          echo >>"${agentHome name}/.env.base"
+          cat "${keysEnv}" >>"${agentHome name}/.env.base"
+        fi
+        chmod 600 "${agentHome name}/.env.base"
   '';
 
-  mkGatewayService = name:
+  mkGatewayService = agent:
     nameValuePair
-    (if name == "default" then "hermes-gateway" else "hermes-gateway-${name}")
+    "hermes-gateway-${agent}"
     {
       Unit = {
-        Description = "Hermes Agent Gateway${optionalString (name != "default") " (${name})"}";
+        Description = "Hermes Agent Gateway (${agent})";
         After = ["network-online.target" "agenix.service"];
         Requires = ["agenix.service"];
         Wants = ["network-online.target"];
@@ -97,8 +91,11 @@ EOF
         Type = "simple";
         Environment = [
           "PATH=${lib.concatStringsSep ":" path}"
-          "HERMES_HOME=${profileHome name}"
+          "HERMES_HOME=${agentHome agent}"
         ];
+        # Aggressively clean up any stale gateway processes from prior
+        # configurations or binary versions that may not honor --replace.
+        ExecStartPre = "-/run/current-system/sw/bin/bash -c 'pkill -f \"hermes-gateway-${agent}\" 2>/dev/null; sleep 1'";
         ExecStart = "${cfg.package}/bin/hermes gateway run --replace";
       };
 
@@ -113,10 +110,10 @@ in {
         else "/dev/null";
     in
       lib.hm.dag.entryAfter ["writeBoundary"] ''
-        mkdir -p "${dir}" "${dir}/profiles"
-        ${concatMapStringsSep "\n" (mkProfileEnv keysEnv) profileNames}
+        mkdir -p "${dir}" "${agentsDir}"
+        ${concatMapStringsSep "\n" (mkAgentEnv keysEnv) agentNames}
       '';
 
-    systemd.user.services = listToAttrs (map mkGatewayService profileNames);
+    systemd.user.services = listToAttrs (map mkGatewayService agentNames);
   };
 }

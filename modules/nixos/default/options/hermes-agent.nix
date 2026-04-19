@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   perSystem,
   flake,
   ...
@@ -9,42 +8,42 @@
   # Find all home-manager users with hermes service enabled
   users = flake.lib.filterUsers config (user: user.services.hermes-agent.enable);
 
-  inherit (lib) concatMap listToAttrs mapAttrsToList optionalString;
+  inherit (lib) concatMap listToAttrs mapAttrsToList;
   inherit (lib.strings) charToInt stringToCharacters;
 
-  deriveProfilePort = base: profile: salt: let
+  deriveAgentPort = base: agent: salt: let
     maxOffset = 65535 - base - 1;
-    # Keep profile ports stable: derive from only salt + profile name so adding
-    # or removing sibling profiles cannot renumber existing ports.
+    # Keep agent ports stable: derive from only salt + agent name so adding or
+    # removing sibling agents cannot renumber existing ports.
     offset =
       if maxOffset <= 0
-      then throw "services.hermes-agent.apiPort must leave room for derived profile ports"
-      else builtins.foldl' (
-        acc: char: lib.mod ((acc * 33) + charToInt char) maxOffset
-      ) 5381 (stringToCharacters "${salt}:${profile}");
+      then throw "services.hermes-agent.apiPort must leave room for derived agent ports"
+      else
+        builtins.foldl' (
+          acc: char: lib.mod ((acc * 33) + charToInt char) maxOffset
+        )
+        5381 (stringToCharacters "${salt}:${agent}");
   in
     base + 1 + offset;
 
   userProxyEntries = user: let
     inherit (user.home) username;
     cfg = user.services.hermes-agent;
-    proxyUrl = profile: let
-      port =
-        if profile == "default"
-        then cfg.apiPort
-        else deriveProfilePort cfg.apiPort profile "api";
+    proxyUrl = agent: let
+      port = deriveAgentPort cfg.apiPort agent "api";
     in "http://127.0.0.1:${toString port}";
   in
-    builtins.filter (entry: entry != null) (mapAttrsToList (profile: profileCfg:
-      if profileCfg.proxy == null
+    builtins.filter (entry: entry != null) (mapAttrsToList (agent: agentCfg:
+      if agentCfg.proxy == null
       then null
       else {
-        name = "hermes-${username}${optionalString (profile != "default") "-${profile}"}";
+        name = "hermes-${username}-${agent}";
         value = {
-          hostName = profileCfg.proxy;
-          url = proxyUrl profile;
+          hostName = agentCfg.proxy;
+          url = proxyUrl agent;
         };
-      }) cfg.profiles);
+      })
+    cfg.agents);
 in {
   # Derive API server key for each user into /run/hermes/{uid}/api_key
   system.activationScripts.hermes-api-key = let
@@ -75,10 +74,8 @@ in {
       ${mkScript {inherit text path;}}
     '';
 
-  # Explicitly proxy only the Hermes profiles declared in each user's
-  # home-manager config. `default` targets the root Hermes home; other keys
-  # target ~/.hermes/profiles/<name> using the same stable name-based port
-  # derivation as the home-manager gateway module.
+  # Explicitly proxy only the Hermes agents declared in each user's
+  # home-manager config using the same stable name-based port derivation as the
+  # home-manager gateway module.
   services.traefik.proxy = listToAttrs (concatMap userProxyEntries users);
-
 }

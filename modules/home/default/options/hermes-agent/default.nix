@@ -6,15 +6,17 @@
   ...
 }: let
   cfg = config.services.hermes-agent;
-  profileType = lib.types.submodule ({name, ...}: {
+  agentType = lib.types.submodule ({name, ...}: {
     options.proxy = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
       default = null;
-      example = if name == "default" then "hermes.kit" else "grep.kit";
+      example =
+        if name == "june"
+        then "june.kit"
+        else "agent.kit";
       description = ''
-        Optional Traefik hostname for this Hermes profile. The reserved profile
-        name `default` targets the root Hermes home, and every other name maps
-        to `${cfg.dataDir}/profiles/<name>`.
+        Optional Traefik hostname for this Hermes agent. Each declared agent gets
+        its own standalone Hermes home under `${cfg.dataDir}/agents/<name>`.
       '';
     };
   });
@@ -33,7 +35,8 @@ in {
 
     dataDir = lib.mkOption {
       type = lib.types.str;
-      default = ".hermes";
+      default = ".local/share/hermes";
+      description = "Directory containing all managed Hermes agent homes.";
     };
 
     host = lib.mkOption {
@@ -61,20 +64,20 @@ in {
       description = "Port reserved for the Hermes web dashboard";
     };
 
-    profiles = lib.mkOption {
-      type = lib.types.attrsOf profileType;
-      default = {
-        default = {};
-      };
+    agents = lib.mkOption {
+      type = lib.types.attrsOf agentType;
+      default = {};
       example = {
-        default.proxy = "hermes.kit";
-        grep.proxy = "grep.kit";
+        june.proxy = "june.kit";
+        cid.proxy = "cid.kit";
+        pax.proxy = "pax.kit";
       };
       description = ''
-        Declarative Hermes profiles. The reserved profile name `default` maps to
-        the root Hermes home, and named profiles map to `${cfg.dataDir}/profiles`.
-        Hermes directories and `.env.base` files are created on a best-effort
-        basis for each declared profile.
+        Declarative standalone Hermes agents. Each agent is an equal peer with
+        its own isolated Hermes home under `${cfg.dataDir}/agents/<name>`. The
+        module creates the directory structure and `.env.base` for each agent on
+        a best-effort basis, while leaving the rest of the mutable Hermes home to
+        Hermes itself.
       '';
     };
 
@@ -89,7 +92,6 @@ in {
       description = "The hermes-agent base package to use";
       default = perSystem.llm-agents.hermes-agent;
     };
-
   };
 
   config = lib.mkIf cfg.enable {
@@ -97,7 +99,7 @@ in {
     home.packages = [cfg.basePackage];
     home.file.".local/bin/hermes".source = "${cfg.package}/bin/hermes";
 
-    # Persist ~/.hermes
+    # Persist all standalone Hermes homes.
     persist.storage.directories = [cfg.dataDir];
 
     # Decrypt secrets

@@ -36,9 +36,10 @@
 
   services.hermes-agent = {
     enable = true;
-    profiles = {
-      default.proxy = "hermes.kit";
-      grep.proxy = "grep.kit";
+    agents = {
+      june.proxy = "june.kit";
+      cid.proxy = "cid.kit";
+      pax.proxy = "pax.kit";
     };
   };
 
