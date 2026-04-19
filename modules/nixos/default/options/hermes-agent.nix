@@ -35,13 +35,16 @@
         else deriveProfilePort cfg.apiPort profile "api";
     in "http://127.0.0.1:${toString port}";
   in
-    mapAttrsToList (profile: hostName: {
-      name = "hermes-${username}${optionalString (profile != "default") "-${profile}"}";
-      value = {
-        inherit hostName;
-        url = proxyUrl profile;
-      };
-    }) cfg.proxy;
+    builtins.filter (entry: entry != null) (mapAttrsToList (profile: profileCfg:
+      if profileCfg.proxy == null
+      then null
+      else {
+        name = "hermes-${username}${optionalString (profile != "default") "-${profile}"}";
+        value = {
+          hostName = profileCfg.proxy;
+          url = proxyUrl profile;
+        };
+      }) cfg.profiles);
 in {
   # Derive API server key for each user into /run/hermes/{uid}/api_key
   system.activationScripts.hermes-api-key = let
@@ -72,10 +75,10 @@ in {
       ${mkScript {inherit text path;}}
     '';
 
-  # Explicitly proxy only the Hermes profiles listed in each user's home-manager
-  # config. `default` targets the root Hermes home; other keys target
-  # ~/.hermes/profiles/<name> using the same stable name-based port derivation as
-  # gateway-sync.py.
+  # Explicitly proxy only the Hermes profiles declared in each user's
+  # home-manager config. `default` targets the root Hermes home; other keys
+  # target ~/.hermes/profiles/<name> using the same stable name-based port
+  # derivation as the home-manager gateway module.
   services.traefik.proxy = listToAttrs (concatMap userProxyEntries users);
 
 }

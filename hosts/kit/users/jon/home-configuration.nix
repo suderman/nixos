@@ -36,9 +36,9 @@
 
   services.hermes-agent = {
     enable = true;
-    proxy = {
-      default = "hermes.kit";
-      grep = "grep.kit";
+    profiles = {
+      default.proxy = "hermes.kit";
+      grep.proxy = "grep.kit";
     };
   };
 

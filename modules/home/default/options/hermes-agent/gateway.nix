@@ -2,157 +2,121 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }: let
   cfg = config.services.hermes-agent;
   dir = "${config.home.homeDirectory}/${cfg.dataDir}";
+  profileNames = builtins.attrNames cfg.profiles;
+  profileHome = name:
+    if name == "default"
+    then dir
+    else "${dir}/profiles/${name}";
+
+  inherit (lib) concatMapStringsSep listToAttrs mod nameValuePair optionalString;
+  inherit (lib.strings) charToInt stringToCharacters;
+
+  deriveProfilePort = base: profile: salt: let
+    maxOffset = 65535 - base - 1;
+    offset =
+      if maxOffset <= 0
+      then throw "services.hermes-agent.apiPort must leave room for derived profile ports"
+      else builtins.foldl' (
+        acc: char: mod ((acc * 33) + charToInt char) maxOffset
+      ) 5381 (stringToCharacters "${salt}:${profile}");
+  in
+    base + 1 + offset;
+
+  apiPortFor = name:
+    if name == "default"
+    then cfg.apiPort
+    else deriveProfilePort cfg.apiPort name "api";
+
+  dashboardPortFor = name:
+    if name == "default"
+    then cfg.dashboardPort
+    else deriveProfilePort cfg.dashboardPort name "dashboard";
+
+  path =
+    config.home.sessionPath
+    ++ [
+      "${config.home.profileDirectory}/bin"
+      "/run/current-system/sw/bin"
+      "/usr/bin"
+      "/bin"
+    ];
+
+  mkService = attr:
+    attr
+    // {
+      Restart = "always";
+      RestartSec = 5;
+      TimeoutStopSec = 30;
+      TimeoutStartSec = 30;
+      SuccessExitStatus = "0 143";
+      KillMode = "control-group";
+      NoNewPrivileges = true;
+      PrivateTmp = true;
+      ProtectSystem = "strict";
+      ProtectHome = false;
+      ProtectKernelTunables = true;
+      ProtectKernelModules = true;
+      ProtectControlGroups = true;
+      LockPersonality = true;
+      MemoryDenyWriteExecute = false;
+    };
+
+  mkProfileEnv = keysEnv: name: let
+    apiPort = apiPortFor name;
+    dashboardPort = dashboardPortFor name;
+  in ''
+    mkdir -p "${profileHome name}"
+    cat >"${profileHome name}/.env.base" <<'EOF'
+API_SERVER_ENABLED=1
+API_SERVER_PORT=${toString apiPort}
+DASHBOARD_PORT=${toString dashboardPort}
+EOF
+    if [[ -f "${keysEnv}" ]]; then
+      echo >>"${profileHome name}/.env.base"
+      cat "${keysEnv}" >>"${profileHome name}/.env.base"
+    fi
+    chmod 600 "${profileHome name}/.env.base"
+  '';
+
+  mkGatewayService = name:
+    nameValuePair
+    (if name == "default" then "hermes-gateway" else "hermes-gateway-${name}")
+    {
+      Unit = {
+        Description = "Hermes Agent Gateway${optionalString (name != "default") " (${name})"}";
+        After = ["network-online.target" "agenix.service"];
+        Requires = ["agenix.service"];
+        Wants = ["network-online.target"];
+      };
+
+      Service = mkService {
+        Type = "simple";
+        Environment = [
+          "PATH=${lib.concatStringsSep ":" path}"
+          "HERMES_HOME=${profileHome name}"
+        ];
+        ExecStart = "${cfg.package}/bin/hermes gateway run --replace";
+      };
+
+      Install.WantedBy = ["default.target"];
+    };
 in {
   config = lib.mkIf cfg.enable {
-    services.hermes-agent.gatewaySyncPackage = pkgs.self.mkScript {
-      name = "hermes-gateway-sync";
-      path = [pkgs.python3 pkgs.systemd pkgs.gawk];
-      text =
-        # bash
-        ''
-          set -euo pipefail
-
-          env_only=0
-          if [[ "''${1:-}" == "--env-only" ]]; then
-            env_only=1
-          fi
-
-          allocations="$(mktemp)"
-          trap 'rm -f "$allocations"' EXIT
-          mkdir -p "${dir}/profiles"
-
-          python ${./gateway-sync.py} \
-            "${dir}/profiles" \
-            "${dir}/.env.base" \
-            "${toString cfg.apiPort}" \
-            "${toString cfg.dashboardPort}" \
-            >"$allocations"
-
-          desired_units=()
-
-          while IFS=$'\t' read -r name _api_port _dashboard_port; do
-            [[ -n "$name" ]] || continue
-            desired_units+=("hermes-gateway@$name.service")
-
-            if (( ! env_only )); then
-              systemctl --user start "hermes-gateway@$name.service"
-            fi
-          done <"$allocations"
-
-          if (( env_only )); then
-            exit 0
-          fi
-
-          while read -r unit _; do
-            [[ -n "$unit" ]] || continue
-            case " ''${desired_units[*]} " in
-              *" $unit "*) ;;
-              *) systemctl --user stop "$unit" ;;
-            esac
-          done < <(systemctl --user list-units 'hermes-gateway@*.service' --all --plain --no-legend --no-pager | gawk '{print $1}')
-        '';
-    };
-
-    home.activation.hermes-gateway =
-      lib.hm.dag.entryAfter ["writeBoundary"]
-      # bash
-      ''
-        ${cfg.gatewaySyncPackage}/bin/hermes-gateway-sync --env-only
-        if ${pkgs.systemd}/bin/systemctl --user --quiet is-active default.target 2>/dev/null; then
-          ${pkgs.systemd}/bin/systemctl --user restart hermes-gateway-sync.service || true
-        fi
+    home.activation.hermes-gateway = let
+      keysEnv =
+        if cfg.apiKeys != null
+        then "${config.age.secrets.hermes-env.path}"
+        else "/dev/null";
+    in
+      lib.hm.dag.entryAfter ["writeBoundary"] ''
+        mkdir -p "${dir}" "${dir}/profiles"
+        ${concatMapStringsSep "\n" (mkProfileEnv keysEnv) profileNames}
       '';
 
-    systemd.user.services = let
-      path =
-        config.home.sessionPath
-        ++ [
-          "${config.home.profileDirectory}/bin"
-          "/run/current-system/sw/bin"
-          "/usr/bin"
-          "/bin"
-        ];
-      mkService = attr:
-        attr
-        // {
-          Restart = "always";
-          RestartSec = 5;
-          TimeoutStopSec = 30;
-          TimeoutStartSec = 30;
-          SuccessExitStatus = "0 143";
-          KillMode = "control-group";
-          NoNewPrivileges = true;
-          PrivateTmp = true;
-          ProtectSystem = "strict";
-          ProtectHome = false;
-          ProtectKernelTunables = true;
-          ProtectKernelModules = true;
-          ProtectControlGroups = true;
-          LockPersonality = true;
-          MemoryDenyWriteExecute = false;
-        };
-    in {
-      hermes-gateway = {
-        Unit = {
-          Description = "Hermes Agent Gateway";
-          After = ["network-online.target" "agenix.service"];
-          Requires = ["agenix.service"];
-          Wants = ["network-online.target"];
-        };
-
-        Service = mkService {
-          Type = "simple";
-          Environment = [
-            "PATH=${lib.concatStringsSep ":" path}"
-            "HERMES_HOME=${dir}"
-          ];
-          # Hermes tracks gateway state itself, so `--replace` keeps systemd
-          # restarts from failing when Hermes still sees an existing PID/state.
-          ExecStart = "${cfg.package}/bin/hermes gateway run --replace";
-        };
-
-        Install.WantedBy = ["default.target"];
-      };
-
-      "hermes-gateway@" = {
-        Unit = {
-          Description = "Hermes Agent Gateway (%I)";
-          After = ["network-online.target" "agenix.service"];
-          Requires = ["agenix.service"];
-          Wants = ["network-online.target"];
-        };
-
-        Service = mkService {
-          Type = "simple";
-          Environment = [
-            "PATH=${lib.concatStringsSep ":" path}"
-            "HERMES_HOME=${dir}/profiles/%I"
-          ];
-          ExecStart = "${cfg.package}/bin/hermes gateway run --replace";
-        };
-      };
-
-      hermes-gateway-sync = {
-        Unit = {
-          Description = "Hermes Agent Gateway Profile Sync";
-          After = ["network-online.target" "agenix.service"];
-          Requires = ["agenix.service"];
-          Wants = ["network-online.target"];
-        };
-
-        Service = {
-          Type = "oneshot";
-          Environment = ["PATH=${lib.concatStringsSep ":" path}"];
-          ExecStart = "${cfg.gatewaySyncPackage}/bin/hermes-gateway-sync";
-        };
-
-        Install.WantedBy = ["default.target"];
-      };
-    };
+    systemd.user.services = listToAttrs (map mkGatewayService profileNames);
   };
 }

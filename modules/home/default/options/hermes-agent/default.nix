@@ -1,12 +1,23 @@
 {
   lib,
   config,
-  pkgs,
   perSystem,
   flake,
   ...
 }: let
   cfg = config.services.hermes-agent;
+  profileType = lib.types.submodule ({name, ...}: {
+    options.proxy = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = if name == "default" then "hermes.kit" else "grep.kit";
+      description = ''
+        Optional Traefik hostname for this Hermes profile. The reserved profile
+        name `default` targets the root Hermes home, and every other name maps
+        to `${cfg.dataDir}/profiles/<name>`.
+      '';
+    };
+  });
 in {
   imports = flake.lib.ls ./.;
 
@@ -50,17 +61,20 @@ in {
       description = "Port reserved for the Hermes web dashboard";
     };
 
-    proxy = lib.mkOption {
-      type = lib.types.attrsOf lib.types.str;
-      default = {};
+    profiles = lib.mkOption {
+      type = lib.types.attrsOf profileType;
+      default = {
+        default = {};
+      };
       example = {
-        default = "hermes.kit";
-        grep = "grep.kit";
+        default.proxy = "hermes.kit";
+        grep.proxy = "grep.kit";
       };
       description = ''
-        Profile-to-hostname map for Traefik exposure.
-        The reserved key `default` targets the root Hermes home, and every other
-        key targets a mutable profile under `profiles/<name>`.
+        Declarative Hermes profiles. The reserved profile name `default` maps to
+        the root Hermes home, and named profiles map to `${cfg.dataDir}/profiles`.
+        Hermes directories and `.env.base` files are created on a best-effort
+        basis for each declared profile.
       '';
     };
 
@@ -76,16 +90,11 @@ in {
       default = perSystem.llm-agents.hermes-agent;
     };
 
-    gatewaySyncPackage = lib.mkOption {
-      type = lib.types.nullOr lib.types.package;
-      description = "The hermes-agent gateway sync script to use";
-      default = null;
-    };
   };
 
   config = lib.mkIf cfg.enable {
-    # Add base, sync, and wrapped packages to path
-    home.packages = [cfg.basePackage cfg.gatewaySyncPackage];
+    # Add base and wrapped packages to path
+    home.packages = [cfg.basePackage];
     home.file.".local/bin/hermes".source = "${cfg.package}/bin/hermes";
 
     # Persist ~/.hermes
