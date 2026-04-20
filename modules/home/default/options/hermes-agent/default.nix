@@ -16,7 +16,7 @@
         else "agent.kit";
       description = ''
         Optional Traefik hostname for this Hermes agent. Each declared agent gets
-        its own standalone Hermes home under `${cfg.dataDir}/agents/<name>`.
+        its own standalone Hermes home under `${cfg.dataDir}/<name>`.
       '';
     };
   });
@@ -74,7 +74,7 @@ in {
       };
       description = ''
         Declarative standalone Hermes agents. Each agent is an equal peer with
-        its own isolated Hermes home under `${cfg.dataDir}/agents/<name>`. The
+        its own isolated Hermes home under `${cfg.dataDir}/<name>`. The
         module creates the directory structure and `.env.base` for each agent on
         a best-effort basis, while leaving the rest of the mutable Hermes home to
         Hermes itself.

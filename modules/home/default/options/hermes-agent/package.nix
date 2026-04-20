@@ -19,7 +19,7 @@ in {
           export PYTHONPATH="${pythonPath}:''${PYTHONPATH:-}"
 
           if [[ -z "''${HERMES_HOME:-}" ]]; then
-            printf >&2 'HERMES_HOME is not set. Managed Hermes agents live under %s/agents/<name>.\n' "${config.home.homeDirectory}/${cfg.dataDir}"
+            printf >&2 'HERMES_HOME is not set. Managed Hermes agents live under %s/<name>.\n' "${config.home.homeDirectory}/${cfg.dataDir}"
             exit 1
           fi
 

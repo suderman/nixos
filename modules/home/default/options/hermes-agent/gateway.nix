@@ -6,9 +6,8 @@
 }: let
   cfg = config.services.hermes-agent;
   dir = "${config.home.homeDirectory}/${cfg.dataDir}";
-  agentsDir = "${dir}/agents";
   agentNames = builtins.attrNames cfg.agents;
-  agentHome = name: "${agentsDir}/${name}";
+  agentHome = name: "${dir}/${name}";
 
   inherit (lib) concatMapStringsSep listToAttrs mod nameValuePair;
   inherit (lib.strings) charToInt stringToCharacters;
@@ -110,7 +109,7 @@ in {
         else "/dev/null";
     in
       lib.hm.dag.entryAfter ["writeBoundary"] ''
-        mkdir -p "${dir}" "${agentsDir}"
+        mkdir -p "${dir}"
         ${concatMapStringsSep "\n" (mkAgentEnv keysEnv) agentNames}
       '';
 
