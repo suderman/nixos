@@ -19,7 +19,7 @@
   class = "chromium-browser";
 in {
   # Import chromium lib
-  imports = [./lib.nix];
+  imports = [./lib.nix ./chrome-devtools-mcp.nix];
 
   # Extra options to manage external extensions
   options.programs.chromium = {

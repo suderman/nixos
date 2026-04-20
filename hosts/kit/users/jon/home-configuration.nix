@@ -60,6 +60,7 @@
 
   # User services
   services.syncthing.enable = true;
+  services.chrome-devtools-mcp.enable = true;
   services.withings-sync = {
     enable = true;
     secret = ./withings-sync.age;
