@@ -36,11 +36,7 @@
 
   services.hermes-agent = {
     enable = true;
-    agents = {
-      june.proxy = "june.kit";
-      cid.proxy = "cid.kit";
-      pax.proxy = "pax.kit";
-    };
+    agents = ["june" "cid" "pax"];
   };
 
   # Remote control for my friendly robot

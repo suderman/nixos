@@ -5,34 +5,41 @@
   ...
 }: let
   cfg = config.services.hermes-agent;
+  inherit (config.lib.hermes-agent) dataDir;
 in {
   config = lib.mkIf cfg.enable {
-    services.hermes-agent.package = pkgs.self.mkScript {
-      name = "hermes";
-      text = let
-        pythonPath = with pkgs.python3.pkgs;
-          makePythonPath [python-telegram-bot fastapi uvicorn];
-        envKey = "/run/hermes/${toString config.home.uid}/key.env";
-      in
-        # bash
-        ''
-          export PYTHONPATH="${pythonPath}:''${PYTHONPATH:-}"
+    # Create custom cli package for each agent by name
+    services.hermes-agent.packages = lib.listToAttrs (map (
+        name: let
+          pythonPath = with pkgs.python3.pkgs;
+            makePythonPath [
+              python-telegram-bot
+              fastapi
+              uvicorn
+            ];
+        in {
+          inherit name;
+          value = pkgs.self.mkScript {
+            inherit name;
+            text =
+              # bash
+              ''
+                export PYTHONPATH="${pythonPath}:''${PYTHONPATH:-}"
+                export HERMES_HOME="${dataDir}/${name}"
 
-          if [[ -z "''${HERMES_HOME:-}" ]]; then
-            printf >&2 'HERMES_HOME is not set. Managed Hermes agents live under %s/<name>.\n' "${config.home.homeDirectory}/${cfg.dataDir}"
-            exit 1
-          fi
+                set -a
+                [[ -f "${dataDir}/.env" ]] && . "${dataDir}/.env"
+                [[ -f "${dataDir}/${name}/.env" ]] && . "${dataDir}/${name}/.env"
+                set +a
 
-          mkdir -p "$HERMES_HOME"
+                exec "${cfg.package}/bin/hermes" "$@"
+              '';
+          };
+        }
+      )
+      cfg.agents);
 
-          set -a
-          [[ -f "${envKey}" ]] && . "${envKey}"
-          [[ -f "$HERMES_HOME/.env.base" ]] && . "$HERMES_HOME/.env.base"
-          [[ -f "$HERMES_HOME/.env" ]] && . "$HERMES_HOME/.env"
-          set +a
-
-          exec "${cfg.basePackage}/bin/hermes" "$@"
-        '';
-    };
+    # Add all these agent packages to the path
+    home.packages = builtins.attrValues cfg.packages;
   };
 }
