@@ -83,6 +83,10 @@
     # AI coding agents
     # <https://github.com/numtide/llm-agents.nix>
     llm-agents.url = "github:numtide/llm-agents.nix";
+
+    # Hermes Agent
+    # <https://github.com/NousResearch/hermes-agent>
+    hermes-agent.url = "github:NousResearch/hermes-agent";
   };
 
   outputs = inputs: {
