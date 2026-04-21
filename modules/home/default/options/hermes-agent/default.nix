@@ -28,7 +28,7 @@ in {
     package = lib.mkOption {
       type = lib.types.nullOr lib.types.package;
       description = "The hermes-agent base package to use";
-      default = perSystem.llm-agents.hermes-agent;
+      default = perSystem.hermes-agent.default;
     };
 
     apiKeys = lib.mkOption {

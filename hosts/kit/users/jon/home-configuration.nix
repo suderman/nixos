@@ -41,7 +41,7 @@
 
   # Remote control for my friendly robot
   programs.openclaw = {
-    enable = true;
+    enable = false;
     host = "openclaw-bot.kit";
   };
 

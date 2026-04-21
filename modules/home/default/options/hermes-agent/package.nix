@@ -10,21 +10,13 @@ in {
   config = lib.mkIf cfg.enable {
     # Create custom cli package for each agent by name
     services.hermes-agent.packages = lib.listToAttrs (map (
-        name: let
-          pythonPath = with pkgs.python3.pkgs;
-            makePythonPath [
-              python-telegram-bot
-              fastapi
-              uvicorn
-            ];
-        in {
+        name: {
           inherit name;
           value = pkgs.self.mkScript {
             inherit name;
             text =
               # bash
               ''
-                export PYTHONPATH="${pythonPath}:''${PYTHONPATH:-}"
                 export HERMES_HOME="${dataDir}/${name}"
 
                 set -a
