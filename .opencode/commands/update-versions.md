@@ -12,7 +12,9 @@ Interpret the requested mode like this:
 - empty, `all`, or omitted: run both `update-flake-inputs` and
   `update-dependencies`
 - `flake`: run only `update-flake-inputs`
+- `flake-full` or `flake-heavy`: run only `update-flake-inputs` and require full build-heavy validation
 - `deps`: run only `update-dependencies`
+- `all-full` or `all-heavy`: run both `update-flake-inputs` and `update-dependencies`, and require full build-heavy validation for the flake-input phase
 - `scan`: do not change files yet; inspect the repo for version pins outside
   flake inputs and report what should be added to
   `.opencode/skills/update-dependencies/references.md`
@@ -24,16 +26,26 @@ General rules:
 3. Follow the loaded skill instructions exactly.
 4. Prefer small, reviewable edits.
 5. After making changes, run the validation commands required by the skill(s).
+   - For `update-flake-inputs`, prefer the skill's quick validation by default.
+   - Run full build-heavy validation when the selected mode is `flake-full`, `flake-heavy`, `all-full`, or `all-heavy`.
+   - Otherwise only run full build-heavy validation when explicitly requested or clearly warranted.
 6. At the end, report:
    - what changed
    - what was checked but unchanged
-   - any failed validations
+   - which validations were quick vs full, and any failed validations
    - any new dependency patterns that should be added to `references.md`
 
-If mode is `all` or omitted:
+If mode is `all`, `all-full`, `all-heavy`, or omitted:
 
 - first run `update-flake-inputs`
 - then run `update-dependencies`
+- require full build-heavy validation for the flake-input phase only when mode is `all-full` or `all-heavy`
+- otherwise do not automatically escalate the flake-input phase from quick validation to full build-heavy validation unless the user asked for it
+
+If mode is `flake-full` or `flake-heavy`:
+
+- run only `update-flake-inputs`
+- require full build-heavy validation for that phase
 
 If mode is `scan`:
 
