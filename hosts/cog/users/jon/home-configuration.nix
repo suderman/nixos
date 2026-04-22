@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   flake,
   ...
 }: {
@@ -43,9 +44,19 @@
 
   # Remote control for my friendly robot
   programs.openclaw = {
-    enable = true;
+    enable = false;
     host = "openclaw-bot.kit";
   };
+
+  # easy remote access to june from here too
+  programs.zsh.initContent =
+    lib.mkAfter
+    # sh
+    ''
+      june() {
+        ssh -t kit june "$@"
+      }
+    '';
 
   # Record screen with CPU-based AV1 encoder
   programs.printscreen = {
