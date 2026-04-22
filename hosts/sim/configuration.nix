@@ -28,7 +28,7 @@
       pkgs.vulkan-loader
       pkgs.vulkan-tools # for `vulkaninfo`
       pkgs.libvdpau-va-gl
-      pkgs.glxinfo # for checking OpenGL
+      pkgs.mesa-demos # provides glxinfo for checking OpenGL
     ];
 
     # For newer NixOS versions (23.11+), use:
@@ -42,10 +42,6 @@
       package = pkgs.qemu_kvm;
       runAsRoot = false;
       swtpm.enable = true;
-      ovmf = {
-        enable = true;
-        packages = [pkgs.OVMFFull.fd];
-      };
     };
 
     # Enable virtualization

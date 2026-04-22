@@ -89,17 +89,23 @@
     hermes-agent.url = "github:NousResearch/hermes-agent";
   };
 
-  outputs = inputs: {
+  outputs = inputs: let
+    inherit (inputs.nixpkgs) lib;
+    blueprint = inputs.blueprint {inherit inputs;};
+    helperPackages = ["enableWayland" "mkApplication" "mkScript" "wrapWithFlags"];
+    helperPackageChecks = map (name: "pkgs-${name}") helperPackages;
+  in {
     # Blueprint automatically maps: devshells, hosts, lib, modules, packages
     inherit
-      (inputs.blueprint {inherit inputs;})
-      checks
+      (blueprint)
       devShells
       formatter
       lib
       nixosConfigurations
-      packages
       ;
+
+    packages = lib.mapAttrs (_: packages: builtins.removeAttrs packages helperPackages) blueprint.packages;
+    checks = lib.mapAttrs (_: checks: builtins.removeAttrs checks helperPackageChecks) blueprint.checks;
 
     # Map additional folders to custom outputs
     inherit
