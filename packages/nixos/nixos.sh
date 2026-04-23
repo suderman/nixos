@@ -63,8 +63,7 @@ Usage: nixos [COMMAND]
 
   deploy            Deploy a NixOS host configuration
   cache             Build host closures and push to Attic
-    push [HOST...]  Push all hosts (except iso) or a named subset
-    dry-run [...]   Preview which hosts and output paths would be pushed
+    [HOST...]       Push selected hosts, or use --all for all hosts
   rollback          Rollback this host to a previous generation
   add               Add a NixOS host or user
   generate          Generate missing files
@@ -87,24 +86,17 @@ EOF
 # CACHE
 # ---------------------------------------------------------------------
 nixos_cache() {
-  case "${1:-push}" in
-  push | p)
+  local first_arg="${1-}"
+  if [[ "$first_arg" == "help" ]]; then
     shift || true
-    nixos_cache_push "$@"
-    ;;
-  dry-run | dryrun | d)
-    shift || true
-    nixos_cache_push --dry-run "$@"
-    ;;
-  help | *)
-    nixos_help
-    ;;
-  esac
-}
+    set -- --help "$@"
+  elif [[ "$first_arg" == "push" || "$first_arg" == "p" || "$first_arg" == "dry-run" || "$first_arg" == "dryrun" || "$first_arg" == "d" ]]; then
+    gum_exit "nixos cache no longer uses subcommands; use 'nixos cache [--dry-run] [options] [HOST...]'"
+  fi
 
-nixos_cache_push() {
   local cache="main"
   local dry_run=0
+  local select_all=0
   local include_iso=0
   local host out_path
   local -a requested_hosts=()
@@ -121,16 +113,21 @@ nixos_cache_push() {
       dry_run=1
       shift
       ;;
+    --all)
+      select_all=1
+      shift
+      ;;
     --include-iso)
       include_iso=1
       shift
       ;;
     -h | --help)
       cat <<EOF
-Usage: nixos cache [push|dry-run] [options] [HOST...]
+Usage: nixos cache [options] [HOST...]
 
 Options:
   --cache <name>   Attic cache name to push to (default: main)
+  --all            Select all hosts without prompting
   --dry-run        Print host list and output paths without pushing
   --include-iso    Include the iso configuration when auto-selecting hosts
   -h, --help       Show this help
@@ -156,6 +153,15 @@ EOF
     nix eval --raw 'path:.#nixosConfigurations' \
       --apply 'attrs: builtins.concatStringsSep "\n" (builtins.attrNames attrs)'
   )
+
+  if [[ ${#requested_hosts[@]} -eq 0 && $select_all -eq 1 ]]; then
+    for host in "${all_hosts[@]}"; do
+      if [[ "$host" == "iso" && $include_iso -eq 0 ]]; then
+        continue
+      fi
+      requested_hosts+=("$host")
+    done
+  fi
 
   if [[ ${#requested_hosts[@]} -eq 0 ]]; then
     local -a selectable_hosts=()

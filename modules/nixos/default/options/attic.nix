@@ -82,7 +82,11 @@ in {
       environmentFile = mkDefault cfg.environmentFile;
       settings.listen = mkDefault "127.0.0.1:${toString cfg.port}";
       settings.api-endpoint = mkDefault "https://${hostName}/";
-      settings.allowed-hosts = mkDefault ([hostName] ++ cfg.extraHostNames);
+      settings.allowed-hosts = mkDefault ([
+          hostName
+          "127.0.0.1:${toString cfg.port}"
+          "localhost:${toString cfg.port}"
+        ] ++ cfg.extraHostNames);
       settings.require-proof-of-possession = mkDefault false;
       settings.database.url = mkDefault "sqlite://${cfg.dataDir}/server.db?mode=rwc";
       settings.storage = mkDefault {
