@@ -12,6 +12,7 @@ perSystem.self.mkScript {
     perSystem.self.ipaddr
     pkgs.age
     pkgs.alejandra
+    pkgs.attic-client
     pkgs.bat
     pkgs.git
     pkgs.gnugrep

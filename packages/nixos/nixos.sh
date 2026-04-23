@@ -26,6 +26,9 @@ main() {
   add | a)
     nixos_add "$@"
     ;;
+  cache | c)
+    nixos_cache "$@"
+    ;;
   generate | gen | g)
     nixos_generate "$@"
     ;;
@@ -59,6 +62,9 @@ nixos_help() {
 Usage: nixos [COMMAND]
 
   deploy            Deploy a NixOS host configuration
+  cache             Build host closures and push to Attic
+    push [HOST...]  Push all hosts (except iso) or a named subset
+    dry-run [...]   Preview which hosts and output paths would be pushed
   rollback          Rollback this host to a previous generation
   add               Add a NixOS host or user
   generate          Generate missing files
@@ -75,6 +81,126 @@ Usage: nixos [COMMAND]
     ssh [iso]       SSH into virtual machine (default disk, optinal ISO)
   help              Show this help
 EOF
+}
+
+# ---------------------------------------------------------------------
+# CACHE
+# ---------------------------------------------------------------------
+nixos_cache() {
+  case "${1:-push}" in
+  push | p)
+    shift || true
+    nixos_cache_push "$@"
+    ;;
+  dry-run | dryrun | d)
+    shift || true
+    nixos_cache_push --dry-run "$@"
+    ;;
+  help | *)
+    nixos_help
+    ;;
+  esac
+}
+
+nixos_cache_push() {
+  local cache="main"
+  local dry_run=0
+  local include_iso=0
+  local host out_path
+  local -a requested_hosts=()
+  local -a all_hosts=()
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+    --cache)
+      [[ $# -ge 2 ]] || gum_exit "Missing value for --cache"
+      cache="$2"
+      shift 2
+      ;;
+    --dry-run)
+      dry_run=1
+      shift
+      ;;
+    --include-iso)
+      include_iso=1
+      shift
+      ;;
+    -h | --help)
+      cat <<EOF
+Usage: nixos cache [push|dry-run] [options] [HOST...]
+
+Options:
+  --cache <name>   Attic cache name to push to (default: main)
+  --dry-run        Print host list and output paths without pushing
+  --include-iso    Include the iso configuration when auto-selecting hosts
+  -h, --help       Show this help
+EOF
+      return 0
+      ;;
+    --)
+      shift
+      requested_hosts+=("$@")
+      break
+      ;;
+    -*)
+      gum_exit "Unknown option: $1"
+      ;;
+    *)
+      requested_hosts+=("$1")
+      shift
+      ;;
+    esac
+  done
+
+  mapfile -t all_hosts < <(
+    nix eval --raw 'path:.#nixosConfigurations' \
+      --apply 'attrs: builtins.concatStringsSep "\n" (builtins.attrNames attrs)'
+  )
+
+  if [[ ${#requested_hosts[@]} -eq 0 ]]; then
+    local -a selectable_hosts=()
+    local selection
+    for host in "${all_hosts[@]}"; do
+      if [[ "$host" == "iso" && $include_iso -eq 0 ]]; then
+        continue
+      fi
+      selectable_hosts+=("$host")
+    done
+
+    selection="$(gum choose --no-limit --header='Push which host caches? (ctrl-a to select all)' "${selectable_hosts[@]}")"
+    mapfile -t requested_hosts <<<"$selection"
+  fi
+
+  for host in "${requested_hosts[@]}"; do
+    if [[ ! " ${all_hosts[*]} " =~ [[:space:]]${host}[[:space:]] ]]; then
+      gum_exit "Unknown nixosConfiguration host: $host"
+    fi
+  done
+
+  gum_head "Build host closures and push to Attic:"
+  gum_show "cache: $cache"
+  for host in "${requested_hosts[@]}"; do
+    gum_show "host: $host"
+  done
+
+  if [[ $dry_run -eq 0 ]]; then
+    attic cache info "$cache" >/dev/null
+  fi
+
+  for host in "${requested_hosts[@]}"; do
+    if [[ $dry_run -eq 1 ]]; then
+      out_path="$(nix eval --raw "path:.#nixosConfigurations.${host}.config.system.build.toplevel.outPath")"
+      gum_show "[dry-run] $host -> $out_path"
+      continue
+    fi
+
+    gum_info "Building $host..."
+    out_path="$(nix build --print-out-paths --no-link "path:.#nixosConfigurations.${host}.config.system.build.toplevel")"
+    gum_show "$out_path"
+
+    gum_info "Pushing $host to Attic cache $cache..."
+    attic push "$cache" "$out_path"
+  done
 }
 
 # ---------------------------------------------------------------------
