@@ -23,7 +23,10 @@ main() {
   shift
 
   case "$cmd" in
-  add | a)
+  activate | a)
+    nixos_activate "$@"
+    ;;
+  add)
     nixos_add "$@"
     ;;
   cache | c)
@@ -35,13 +38,16 @@ main() {
   deploy | d)
     nixos_deploy "$@"
     ;;
+  repl | r)
+    nixos_repl "$@"
+    ;;
   detect | t)
     nixos_detect "$@"
     ;;
   iso | i)
     nixos_iso "$@"
     ;;
-  rollback | r)
+  rollback | b)
     nixos_rollback "$@"
     ;;
   sim | s)
@@ -62,9 +68,11 @@ nixos_help() {
 Usage: nixos [COMMAND]
 
   deploy            Deploy a NixOS host configuration
+  rollback          Rollback this host to a previous generation
+  activate          Activate the current system profile on a host
   cache             Build host closures and push to Attic
     [HOST...]       Push selected hosts, or use --all for all hosts
-  rollback          Rollback this host to a previous generation
+  repl              Open a nixos-rebuild repl for a host
   add               Add a NixOS host or user
   generate          Generate missing files
   detect            Detect system devices to generate configuration   
@@ -80,6 +88,24 @@ Usage: nixos [COMMAND]
     ssh [iso]       SSH into virtual machine (default disk, optinal ISO)
   help              Show this help
 EOF
+}
+
+# ---------------------------------------------------------------------
+# ACTIVATE
+# ---------------------------------------------------------------------
+nixos_activate() {
+
+  host=$(dirs hosts | grep -v iso | gum choose --header "Choose host:" --selected "$(hostname)")
+  operation=$(gum choose --header "Choose operation:" switch boot test dry-activate check)
+
+  if [[ "$host" == "$(hostname)" ]]; then
+    gum_show "sudo /run/current-system/bin/switch-to-configuration $operation"
+    sudo /run/current-system/bin/switch-to-configuration "$operation"
+  else
+    gum_show "ssh $host 'sudo /run/current-system/bin/switch-to-configuration $operation'"
+    ssh "$host" "sudo /run/current-system/bin/switch-to-configuration $operation"
+  fi
+
 }
 
 # ---------------------------------------------------------------------
@@ -407,7 +433,7 @@ EOF
 nixos_deploy() {
 
   host=$(dirs hosts | grep -v iso | gum choose --header "Choose host:" --selected "$(hostname)")
-  operation=$(gum choose --header "Choose operation:" switch boot test build repl)
+  operation=$(gum choose --header "Choose operation:" switch boot test build)
   if [[ "$host" == "$(hostname)" ]]; then
     gum_show "sudo nixos-rebuild --flake .#$host $operation"
     sudo nixos-rebuild --flake .#"$host" "$operation"
@@ -415,6 +441,17 @@ nixos_deploy() {
     gum_show "nixos-rebuild --target-host $host --sudo --ask-sudo-password --flake .#$host $operation"
     nixos-rebuild --target-host "$host" --sudo --ask-sudo-password --flake .#"$host" "$operation"
   fi
+
+}
+
+# ---------------------------------------------------------------------
+# REPL
+# ---------------------------------------------------------------------
+nixos_repl() {
+
+  host=$(dirs hosts | grep -v iso | gum choose --header "Choose host:" --selected "$(hostname)")
+  gum_show "nixos-rebuild --flake .#$host repl"
+  nixos-rebuild --flake .#"$host" repl
 
 }
 
