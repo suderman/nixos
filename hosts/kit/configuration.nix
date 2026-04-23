@@ -78,6 +78,8 @@
     name = "git";
   };
 
+  services.attic.enable = true;
+
   # ChatGPT/Codex account load balancer for OpenCode.
   services.codex-lb.enable = true;
 
