@@ -54,10 +54,10 @@ in {
     # https://addons.mozilla.org/en-US/firefox/addon/easy-container-shortcuts/
     "easy-container-shortcuts" = buildFirefoxXpiAddon {
       pname = "easy-container-shortcuts";
-      version = "1.6.0";
+      version = "1.8.0";
       addonId = "easy-container-shortcuts@extraAddons";
-      url = "https://addons.mozilla.org/firefox/downloads/file/4068015/easy_container_shortcuts-1.6.0.xpi";
-      sha256 = "01zn0z1v0a5mcpgk3r8jnr3gy1a2g83ip0iw66hyhalvqdq314q7";
+      url = "https://addons.mozilla.org/firefox/downloads/file/4710923/easy_container_shortcuts-1.8.0.xpi";
+      sha256 = "0ybczzi7ba2yix945dh3k4ipy63f01kszwq0207cvxckk9gy3pxc";
       meta = with lib; {
         description = "Easy, opinionated, keyboard shortcuts for Firefox 57+ containers.";
         license = licenses.bsd2;

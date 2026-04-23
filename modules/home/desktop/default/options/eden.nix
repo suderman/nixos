@@ -11,13 +11,13 @@
   # https://git.eden-emu.dev/eden-emu/eden/releases
   package = pkgs.stdenv.mkDerivation {
     pname = "eden-appimage";
-    version = "0.2.0-rc1";
+    version = "0.2.0-rc2";
 
     # curl -L -O <url>
     # nix hash file <filename>
     src = pkgs.fetchurl {
-      url = "https://git.eden-emu.dev/eden-emu/eden/releases/download/v0.2.0-rc1/Eden-Linux-v0.2.0-rc1-amd64-gcc-standard.AppImage";
-      sha256 = "jPyPrVvG6pFex5MkUvRFhXcGo8FOI5iuODyLe/5FWlI=";
+      url = "https://git.eden-emu.dev/eden-emu/eden/releases/download/v0.2.0-rc2/Eden-Linux-v0.2.0-rc2-amd64-gcc-standard.AppImage";
+      sha256 = "sha256-1Pp6VInWYfr8f8ANuT1ZBxe61xCWcTq/mNH8T6JZJJc=";
     };
 
     unpackPhase = "true";

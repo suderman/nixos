@@ -27,9 +27,9 @@ For each manual dependency, keep:
 - file: modules/home/desktop/default/options/firefox/addons.nix
 - lookup: `config.programs.firefox.extraAddons.easy-container-shortcuts`
 - current_fields:
-  - `version = "1.6.0"`
-  - `url = ".../easy_container_shortcuts-1.6.0.xpi"`
-  - `sha256 = "01zn0z1v0a5mcpgk3r8jnr3gy1a2g83ip0iw66hyhalvqdq314q7"`
+  - `version = "1.8.0"`
+  - `url = ".../easy_container_shortcuts-1.8.0.xpi"`
+  - `sha256 = "0ybczzi7ba2yix945dh3k4ipy63f01kszwq0207cvxckk9gy3pxc"`
 - upstream: https://addons.mozilla.org/en-US/firefox/addon/easy-container-shortcuts/
 - update_rule: use the newest stable addon release on the addon page that matches the XPI download pattern already used here
 - hash_rule: after changing the XPI URL, refresh the source hash for the downloaded XPI and update `sha256`
@@ -45,9 +45,9 @@ For each manual dependency, keep:
 - file: modules/home/desktop/default/options/eden.nix
 - lookup: `package = pkgs.stdenv.mkDerivation { ... version = ...; src = pkgs.fetchurl { ... } }`
 - current_fields:
-  - `version = "0.2.0-rc1"`
-  - `url = "https://git.eden-emu.dev/eden-emu/eden/releases/download/v0.2.0-rc1/Eden-Linux-v0.2.0-rc1-amd64-gcc-standard.AppImage"`
-  - `sha256 = "jPyPrVvG6pFex5MkUvRFhXcGo8FOI5iuODyLe/5FWlI="`
+  - `version = "0.2.0-rc2"`
+  - `url = "https://git.eden-emu.dev/eden-emu/eden/releases/download/v0.2.0-rc2/Eden-Linux-v0.2.0-rc2-amd64-gcc-standard.AppImage"`
+  - `sha256 = "sha256-1Pp6VInWYfr8f8ANuT1ZBxe61xCWcTq/mNH8T6JZJJc="`
 - upstream: https://git.eden-emu.dev/eden-emu/eden/releases
 - update_rule: prefer the latest acceptable Linux AppImage release; if the repo is intentionally on release candidates, do not automatically jump from RC to stable or vice versa without making that explicit in the report
 - hash_rule: after changing the release URL, refresh the fetchurl hash and update `sha256`
@@ -79,7 +79,7 @@ For each manual dependency, keep:
 - file: modules/nixos/default/options/home-assistant/default.nix
 - lookup: `version = ...`
 - current_fields:
-  - `version = "2025.12.4"`
+  - `version = "2026.4.3"`
 - upstream: https://github.com/home-assistant/core/pkgs/container/home-assistant/versions?filters%5Bversion_type%5D=tagged
 - update_rule: use the newest tagged container version that matches the policy already used in this repo
 - hash_rule: no source hash in this file; update only the tag unless the repo later starts pinning digests
@@ -94,7 +94,7 @@ For each manual dependency, keep:
 - file: modules/nixos/default/options/home-assistant/default.nix
 - lookup: `zwaveVersion = ...`
 - current_fields:
-  - `zwaveVersion = "11.9.0"`
+  - `zwaveVersion = "11.16.1"`
 - upstream: https://github.com/zwave-js/zwave-js-ui/pkgs/container/zwave-js-ui/versions?filters%5Bversion_type%5D=tagged
 - update_rule: use the newest tagged container version that matches the policy already used in this repo
 - hash_rule: no source hash in this file; update only the tag unless the repo later starts pinning digests
@@ -124,7 +124,7 @@ For each manual dependency, keep:
 - file: modules/nixos/default/options/codex-lb.nix
 - lookup: `version = ...` and `image = "ghcr.io/soju06/codex-lb:${cfg.version}"`
 - current_fields:
-  - `version = "1.12.0"`
+  - `version = "1.14.1"`
   - `image = "ghcr.io/soju06/codex-lb:${cfg.version}"`
 - upstream: https://github.com/Soju06/codex-lb/pkgs/container/codex-lb
 - update_rule: use the newest tagged container version compatible with the repo’s existing policy
