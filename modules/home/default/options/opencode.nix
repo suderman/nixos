@@ -205,9 +205,10 @@ in {
         KillMode = "control-group";
 
         # Hardening
+        # Keep the service able to write to repos outside $HOME, such as
+        # /etc/nixos, so interactive coding sessions can use git normally.
         NoNewPrivileges = true;
         PrivateTmp = true;
-        ProtectSystem = "strict";
         ProtectHome = false;
         ProtectKernelTunables = true;
         ProtectKernelModules = true;
