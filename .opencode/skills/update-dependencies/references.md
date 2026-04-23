@@ -177,12 +177,13 @@ For each manual dependency, keep:
   - `version = "1.9"`
   - `image = "tessypowder/backblaze-personal-wine:v${version}"`
 - upstream: https://hub.docker.com/r/tessypowder/backblaze-personal-wine/tags
-- update_rule: use the newest tagged container version compatible with the repo's existing policy
+- update_rule: use the newest tagged container version compatible with the repo's existing policy; note that v1.9 is the version currently tracked - there are newer version tags available (v1.13, v1.12, etc.) but the repo is on v1.9
 - hash_rule: no source hash in this file; update only the tag unless the repo later starts pinning digests
 - validate: `nix develop -c nix eval .#nixosConfigurations.lux.config.system.build.toplevel.outPath`
 - notes:
   - the image tag is derived from the local `version` binding
   - confirm the upstream container still uses the same volume and environment conventions before bumping
+  - the current version v1.9 appears to be intentionally pinned; there is a large gap between v1.9 and v1.13
 
 ## rsshub
 
@@ -224,7 +225,7 @@ For each manual dependency, keep:
 - file: modules/nixos/default/options/whoogle.nix
 - lookup: `version = ...` and `image = "benbusby/whoogle-search:${version}"`
 - current_fields:
-  - `version = "0.9.4"`
+  - `version = "1.2.4"`
   - `image = "benbusby/whoogle-search:${version}"`
 - upstream: https://github.com/benbusby/whoogle-search/releases
 - update_rule: use the newest tagged release compatible with the repo's existing policy

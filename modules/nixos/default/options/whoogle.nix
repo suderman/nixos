@@ -5,7 +5,7 @@
   ...
 }: let
   # https://github.com/benbusby/whoogle-search/releases
-  version = "0.9.4";
+  version = "1.2.4";
 
   cfg = config.services.whoogle;
   inherit (lib) mkIf mkOption types;
