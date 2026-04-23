@@ -127,7 +127,10 @@ in {
         # Listen on port 80 and redirect to port 443
         entryPoints = {
           # Run everything on 443
-          websecure.address = ":443";
+          websecure = {
+            address = ":443";
+            transport.respondingTimeouts.readTimeout = "30m";
+          };
 
           # Redirect http to https
           web.address = ":80";
