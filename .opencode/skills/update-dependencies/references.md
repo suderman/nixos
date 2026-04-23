@@ -133,7 +133,114 @@ For each manual dependency, keep:
 - notes:
   - the image string is derived from `cfg.version`; usually only the version default needs changing
 
+## citron-appimage
+
+- name: citron-appimage
+- kind: fetchurl-release
+- file: modules/home/desktop/default/options/citron.nix
+- lookup: `package = pkgs.stdenv.mkDerivation { ... version = ...; src = pkgs.fetchurl { ... } }`
+- current_fields:
+  - `version = "0.12.25"`
+  - `url = "https://git.citron-emu.org/Citron/Emulator/releases/download/0.12.25/citron_stable-01c042048-linux-x86_64_v3.AppImage"`
+  - `sha256 = "G0yX6ZP6f9nDY41VS8k/UVduoTsZLFrAduA5mOD3OmY="`
+- upstream: https://git.citron-emu.org/Citron/Emulator/releases
+- update_rule: prefer the latest acceptable Linux AppImage release that matches the repo's existing stable Citron packaging pattern
+- hash_rule: after changing the release URL, refresh the fetchurl hash and update `sha256`
+- validate: `nix develop -c nix eval .#nixosConfigurations.kit.config.system.build.toplevel.outPath`
+- notes:
+  - the version appears in both the local `version` field and the download URL
+  - preserve the existing AppImage filename pattern unless upstream changed it
+
+## chromium-web-store
+
+- name: chromium-web-store
+- kind: manual-version
+- file: modules/home/desktop/default/options/chromium/registry.nix
+- lookup: `chromium-web-store = "https://github.com/NeverDecaf/chromium-web-store/releases/download/v.../Chromium.Web.Store.crx"`
+- current_fields:
+  - `url = "https://github.com/NeverDecaf/chromium-web-store/releases/download/v1.5.4.3/Chromium.Web.Store.crx"`
+- upstream: https://github.com/NeverDecaf/chromium-web-store/releases
+- update_rule: use the newest stable CRX release URL that preserves the existing download pattern unless the browser-side installation flow changes
+- hash_rule: no inline source hash in this file; update only the release URL unless the repo later starts pinning a CRX hash
+- validate: evaluate the smallest desktop host that imports this chromium registry, for example `nix develop -c nix eval .#nixosConfigurations.cog.config.system.build.toplevel.outPath`
+- notes:
+  - this registry stores the CRX URL directly rather than splitting out a separate version field
+  - keep the extension id mapping behavior unchanged; only the release URL should move during routine updates
+
+## backblaze-personal-wine
+
+- name: backblaze-personal-wine
+- kind: container-tag
+- file: modules/nixos/default/options/backblaze.nix
+- lookup: `version = ...` and `image = "tessypowder/backblaze-personal-wine:v${version}"`
+- current_fields:
+  - `version = "1.9"`
+  - `image = "tessypowder/backblaze-personal-wine:v${version}"`
+- upstream: https://hub.docker.com/r/tessypowder/backblaze-personal-wine/tags
+- update_rule: use the newest tagged container version compatible with the repo's existing policy
+- hash_rule: no source hash in this file; update only the tag unless the repo later starts pinning digests
+- validate: `nix develop -c nix eval .#nixosConfigurations.lux.config.system.build.toplevel.outPath`
+- notes:
+  - the image tag is derived from the local `version` binding
+  - confirm the upstream container still uses the same volume and environment conventions before bumping
+
+## rsshub
+
+- name: rsshub
+- kind: container-tag
+- file: modules/nixos/default/options/rsshub.nix
+- lookup: `tag = ...` and `image = "diygod/rsshub:${cfg.tag}"`
+- current_fields:
+  - `tag = "chromium-bundled"`
+  - `image = "diygod/rsshub:${cfg.tag}"`
+- upstream: https://hub.docker.com/r/diygod/rsshub/tags
+- update_rule: use the newest acceptable tag that matches the repo's chosen RSSHub flavor; do not silently switch away from `chromium-bundled` to another variant
+- hash_rule: no source hash in this file; update only the tag unless the repo later starts pinning digests
+- validate: evaluate the smallest NixOS target that uses this module; default to `nix develop -c nix eval .#nixosConfigurations.hub.config.system.build.toplevel.outPath`
+- notes:
+  - `chromium-bundled` is a flavor choice, not just a version string
+  - keep the docker network and companion redis container assumptions aligned with the chosen image tag
+
+## rsshub-redis
+
+- name: rsshub-redis
+- kind: container-tag
+- file: modules/nixos/default/options/rsshub.nix
+- lookup: `image = "redis:6.2"`
+- current_fields:
+  - `image = "redis:6.2"`
+- upstream: https://hub.docker.com/_/redis/tags
+- update_rule: use the newest acceptable Redis tag compatible with the RSSHub setup in this repo; prefer conservative major-version changes
+- hash_rule: no source hash in this file; update only the tag unless the repo later starts pinning digests
+- validate: evaluate the smallest NixOS target that uses this module; default to `nix develop -c nix eval .#nixosConfigurations.hub.config.system.build.toplevel.outPath`
+- notes:
+  - this is a companion container pin for RSSHub rather than a standalone service module version binding
+  - treat Redis major-version bumps as higher risk than patch/minor tag updates
+
+## whoogle-search
+
+- name: whoogle-search
+- kind: container-tag
+- file: modules/nixos/default/options/whoogle.nix
+- lookup: `version = ...` and `image = "benbusby/whoogle-search:${version}"`
+- current_fields:
+  - `version = "0.9.4"`
+  - `image = "benbusby/whoogle-search:${version}"`
+- upstream: https://github.com/benbusby/whoogle-search/releases
+- update_rule: use the newest tagged release compatible with the repo's existing policy
+- hash_rule: no source hash in this file; update only the tag unless the repo later starts pinning digests
+- validate: `nix develop -c nix eval .#nixosConfigurations.cog.config.system.build.toplevel.outPath`
+- notes:
+  - the image tag is derived from the local `version` binding
+  - the module may be disabled on some hosts but the pin is still a tracked maintenance target
+
 ---
+
+## Explicit non-tracked pin policies
+
+- `modules/nixos/default/options/unifi.nix`:
+  - keep `version = "7.5"` pinned permanently unless the user explicitly asks to revisit that policy
+  - do not add Unifi as a routine auto-update target in this registry
 
 ## Candidate patterns to discover later
 
