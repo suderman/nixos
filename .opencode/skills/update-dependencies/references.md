@@ -33,7 +33,7 @@ For each manual dependency, keep:
 - upstream: https://addons.mozilla.org/en-US/firefox/addon/easy-container-shortcuts/
 - update_rule: use the newest stable addon release on the addon page that matches the XPI download pattern already used here
 - hash_rule: after changing the XPI URL, refresh the source hash for the downloaded XPI and update `sha256`
-- validate: evaluate the relevant Home Manager config or the smallest repo command that touches this module
+- validate: `nix develop -c nix eval .#nixosConfigurations.kit.config.system.build.toplevel.outPath`
 - notes:
   - version appears in more than one place and must move together
   - keep `addonId` unchanged unless upstream addon identity changed
@@ -51,7 +51,7 @@ For each manual dependency, keep:
 - upstream: https://git.eden-emu.dev/eden-emu/eden/releases
 - update_rule: prefer the latest acceptable Linux AppImage release; if the repo is intentionally on release candidates, do not automatically jump from RC to stable or vice versa without making that explicit in the report
 - hash_rule: after changing the release URL, refresh the fetchurl hash and update `sha256`
-- validate: evaluate or build the smallest target that uses this module
+- validate: `nix develop -c nix eval .#nixosConfigurations.kit.config.system.build.toplevel.outPath`
 - notes:
   - the version appears in both the local `version` field and the download URL
   - preserve the existing AppImage filename pattern unless upstream changed it
@@ -68,7 +68,7 @@ For each manual dependency, keep:
 - upstream: https://github.com/suderman/mpd-url
 - update_rule: default to the latest commit on the tracked default branch unless this package is intentionally pinned for a reason noted in the repo
 - hash_rule: after changing `rev`, refresh the fetched source hash and update `sha256`
-- validate: build or evaluate the smallest package target that uses `packages/mpd-url.nix`
+- validate: `nix develop -c nix build .#packages.x86_64-linux.mpd-url`
 - notes:
   - branch-based pins are higher risk than tagged releases; call this out in the report
 
@@ -83,7 +83,7 @@ For each manual dependency, keep:
 - upstream: https://github.com/home-assistant/core/pkgs/container/home-assistant/versions?filters%5Bversion_type%5D=tagged
 - update_rule: use the newest tagged container version that matches the policy already used in this repo
 - hash_rule: no source hash in this file; update only the tag unless the repo later starts pinning digests
-- validate: evaluate or build the smallest NixOS target that uses this module
+- validate: `nix develop -c nix eval .#nixosConfigurations.hub.config.system.build.toplevel.outPath`
 - notes:
   - confirm where the version variable is consumed before editing adjacent code
 
@@ -98,7 +98,7 @@ For each manual dependency, keep:
 - upstream: https://github.com/zwave-js/zwave-js-ui/pkgs/container/zwave-js-ui/versions?filters%5Bversion_type%5D=tagged
 - update_rule: use the newest tagged container version that matches the policy already used in this repo
 - hash_rule: no source hash in this file; update only the tag unless the repo later starts pinning digests
-- validate: evaluate or build the smallest NixOS target that uses this module
+- validate: `nix develop -c nix eval .#nixosConfigurations.hub.config.system.build.toplevel.outPath`
 - notes:
   - keep this aligned with the surrounding Home Assistant module expectations
 
@@ -113,7 +113,7 @@ For each manual dependency, keep:
 - upstream: https://github.com/immich-app/immich/releases
 - update_rule: use the newest stable tagged release unless the repo intentionally tracks prereleases
 - hash_rule: no inline source hash shown in this file snippet; update any related tag or image reference in the same module if present
-- validate: evaluate or build the smallest NixOS target that uses this module
+- validate: `nix develop -c nix eval .#nixosConfigurations.sim.config.system.build.toplevel.outPath`
 - notes:
   - search the module for all usages of `version` before editing
 
@@ -129,7 +129,7 @@ For each manual dependency, keep:
 - upstream: https://github.com/Soju06/codex-lb/pkgs/container/codex-lb
 - update_rule: use the newest tagged container version compatible with the repo’s existing policy
 - hash_rule: no source hash in this file; update only the tag unless the repo later starts pinning digests
-- validate: evaluate or build the smallest NixOS target that uses this module
+- validate: `nix develop -c nix eval .#nixosConfigurations.kit.config.system.build.toplevel.outPath`
 - notes:
   - the image string is derived from `cfg.version`; usually only the version default needs changing
 

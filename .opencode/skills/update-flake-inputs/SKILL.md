@@ -34,6 +34,7 @@ Do not use me for manual dependency pins handled outside `flake.lock`. Use `upda
 - Work from `nix develop` so repo wrappers and formatter are available.
 - In this repo, avoid the interactive `nixos` and `agenix` wrappers for unattended automation unless their side effects are explicitly wanted.
 - If the repo does not specify a preferred command, prefer targeted flake update commands rather than broad updates.
+- Use `.opencode/scripts/update-versions/pick-flake-validation.py` to choose the cheapest relevant validation host unless you have stronger repo evidence for a different host.
 
 ## Repo-specific context for this flake
 
@@ -44,6 +45,9 @@ Do not use me for manual dependency pins handled outside `flake.lock`. Use `upda
 - Desktop-only configuration lives under `modules/{home,nixos}/desktop/`; avoid assuming those modules apply to headless hosts.
 - `hosts/sim` is the VM/test host used for simulation and installer work. It is a useful targeted validation host when update fallout hits virtualization or installer-related options.
 - This flake intentionally filters builder helpers like `enableWayland`, `mkScript`, `mkApplication`, and `wrapWithFlags` out of exported `packages` and `checks`; do not treat their absence from flake outputs as an update regression.
+- Deterministic helper scripts live in `.opencode/scripts/update-versions/`:
+  - `pick-flake-validation.py` chooses a validation host from changed inputs and paths
+  - `scan-manual-pins.py` is for manual pin discovery, not normal flake-input updates
 
 ## Validation levels
 
@@ -91,11 +95,12 @@ Warn in the report when full validation was skipped because it may require subst
     - Note which hosts or module areas are most likely to be affected by the specific input change.
 
 3. Perform the update.
-    - Prefer targeted commands for named inputs.
-    - Avoid broad `flake.lock` churn unless the user explicitly asked for a full refresh.
-    - If an input name is ambiguous, stop and explain the ambiguity.
-    - Prefer `nix develop -c nix flake lock --update-input <name>` for targeted updates.
-    - Use `nix develop -c nix flake update` only when the user asked for a broad refresh.
+     - Prefer targeted commands for named inputs.
+     - Avoid broad `flake.lock` churn unless the user explicitly asked for a full refresh.
+     - If an input name is ambiguous, stop and explain the ambiguity.
+     - Prefer `nix develop -c nix flake lock --update-input <name>` for targeted updates.
+     - Use `nix develop -c nix flake update` only when the user asked for a broad refresh.
+     - When the user asked for "all" flake inputs, still review `flake.nix` first so you can call out intentionally pinned inputs like `hyprland` and `hypr-dynamic-cursors` separately from floating inputs.
 
 4. Review the diff.
     - Confirm that only the expected inputs changed.
@@ -103,10 +108,11 @@ Warn in the report when full validation was skipped because it may require subst
     - Distinguish direct top-level input bumps from lockfile churn caused by follows.
 
 5. Validate.
-    - Run quick validation by default.
-    - Use a relevant host eval in addition to `nix flake check --no-build`.
-    - Escalate to full validation only when explicitly requested or clearly warranted.
-    - If full validation is skipped, say so explicitly and explain that it is the heavy path in this multi-host flake.
+     - Run quick validation by default.
+     - Use a relevant host eval in addition to `nix flake check --no-build`.
+     - Prefer to choose that host by running `python3 .opencode/scripts/update-versions/pick-flake-validation.py --input <name> ...` and using the returned quick/full commands.
+     - Escalate to full validation only when explicitly requested or clearly warranted.
+     - If full validation is skipped, say so explicitly and explain that it is the heavy path in this multi-host flake.
 
 6. Report.
     - List updated inputs.

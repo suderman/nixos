@@ -24,12 +24,15 @@ General rules:
 1. Start by reading `AGENTS.md` if present.
 2. Load the relevant skill(s) with the `skill` tool.
 3. Follow the loaded skill instructions exactly.
-4. Prefer small, reviewable edits.
-5. After making changes, run the validation commands required by the skill(s).
+4. Prefer the deterministic helpers in `.opencode/scripts/update-versions/` when they fit:
+   - `pick-flake-validation.py` to choose the cheapest relevant validation host
+   - `scan-manual-pins.py` for `scan` mode or registry discovery work
+5. Prefer small, reviewable edits.
+6. After making changes, run the validation commands required by the skill(s).
    - For `update-flake-inputs`, prefer the skill's quick validation by default.
    - Run full build-heavy validation when the selected mode is `flake-full`, `flake-heavy`, `all-full`, or `all-heavy`.
    - Otherwise only run full build-heavy validation when explicitly requested or clearly warranted.
-6. At the end, report:
+7. At the end, report:
    - what changed
    - what was checked but unchanged
    - which validations were quick vs full, and any failed validations
@@ -49,13 +52,8 @@ If mode is `flake-full` or `flake-heavy`:
 
 If mode is `scan`:
 
-- inspect the repo for version pins such as:
-  - `version = "..."`
-  - `rev = "..."`
-  - `image = "...:tag"`
-  - `fetchurl`
-  - `fetchFromGitHub`
-  - Firefox addon XPI URLs
+- start with `python3 .opencode/scripts/update-versions/scan-manual-pins.py`
+- use follow-up reads/searches only to confirm likely matches from that scan
 - produce a concise report grouped by file
 - propose exact entries to add to
   `.opencode/skills/update-dependencies/references.md`

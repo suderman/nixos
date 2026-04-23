@@ -29,6 +29,8 @@ Treat `references.md` as the registry of known manual dependencies, their upstre
 
 If `references.md` and the repo disagree, trust the repo state for current values and update `references.md` as part of the work.
 
+For discovery work, use the deterministic helper at `.opencode/scripts/update-versions/scan-manual-pins.py` before falling back to ad hoc repo-wide searching.
+
 ## When to use me
 
 Use me when the user asks to:
@@ -48,6 +50,7 @@ Do not use me for standard flake input updates. Use `update-flake-inputs` for th
 - Never leave a changed source with a stale hash.
 - Make targeted edits with minimal unrelated churn.
 - Be conservative when the upstream release policy is ambiguous.
+- Reuse `.opencode/scripts/update-versions/pick-flake-validation.py --path <file>` to pick the cheapest relevant host when a dependency-specific validation target is not already obvious.
 
 ## Workflow
 
@@ -62,10 +65,11 @@ Do not use me for standard flake input updates. Use `update-flake-inputs` for th
    - If the layout drifted, update your understanding from the repo before editing.
 
 3. Check upstream.
-   - Use the documented upstream URL from the registry or nearby repo comments.
-   - Determine the latest acceptable version according to the dependency’s update rule.
-   - If upstream is branch-based, determine the latest acceptable commit according to the documented branch rule.
-   - If the notion of “latest” is ambiguous, stop and report instead of guessing.
+    - Use the documented upstream URL from the registry or nearby repo comments.
+    - Determine the latest acceptable version according to the dependency’s update rule.
+    - If upstream is branch-based, determine the latest acceptable commit according to the documented branch rule.
+    - If the notion of “latest” is ambiguous, stop and report instead of guessing.
+    - Keep this repo's existing policy when it is explicit in the source, for example release-candidate tracking for Eden or image-tag tracking for OCI containers.
 
 4. Update the repo pin.
    - Change the version/rev/tag in the Nix file.
@@ -74,9 +78,15 @@ Do not use me for standard flake input updates. Use `update-flake-inputs` for th
    - If multiple fields must move together, update them in one coherent edit.
 
 5. Validate.
-   - Run the lightest relevant validation first.
-   - Prefer file/package/host-specific validation from the registry when available.
-   - If validation fails, keep the failure details and do not hide the breakage.
+    - Run the lightest relevant validation first.
+    - Prefer file/package/host-specific validation from the registry when available.
+    - In this repo, concrete quick targets are usually:
+      - `modules/home/desktop/...` -> `nix develop -c nix eval .#nixosConfigurations.kit.config.system.build.toplevel.outPath`
+      - `modules/nixos/default/options/home-assistant/...` -> `nix develop -c nix eval .#nixosConfigurations.hub.config.system.build.toplevel.outPath`
+      - `modules/nixos/default/options/codex-lb.nix` -> `nix develop -c nix eval .#nixosConfigurations.kit.config.system.build.toplevel.outPath`
+      - `modules/nixos/default/options/immich.nix` -> `nix develop -c nix eval .#nixosConfigurations.sim.config.system.build.toplevel.outPath`
+      - `packages/<name>.nix` -> `nix develop -c nix build .#packages.x86_64-linux.<name>` when the package is exported directly
+    - If validation fails, keep the failure details and do not hide the breakage.
 
 6. Maintain the registry.
    - Update `references.md` if the file path, current version, update notes, or validation command changed.
@@ -93,6 +103,7 @@ Do not use me for standard flake input updates. Use `update-flake-inputs` for th
 If the user asks for additional manual dependencies beyond the registry:
 
 - Scan for likely pins such as `version =`, `rev =`, `sha256 =`, `hash =`, `image =`, `fetchurl`, `fetchFromGitHub`, `buildFirefoxXpiAddon`, and explicit release/download URLs.
+- Start with `python3 .opencode/scripts/update-versions/scan-manual-pins.py` so the scan is deterministic and cheap to repeat.
 - Prefer candidates that also have a nearby upstream comment or obvious release URL.
 - Add newly confirmed manual dependencies to `references.md`.
 - Do not bulk-edit speculative matches.
