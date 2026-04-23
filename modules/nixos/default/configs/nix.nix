@@ -59,18 +59,11 @@
 
   # Automatically upgrade this system while I sleep
   system.autoUpgrade = {
-    enable = false;
+    enable = true;
     dates = "04:00";
-    flake = "/etc/nixos#${config.networking.hostName}";
-    flags = [
-      # "--update-input" "nixpkgs"
-      # "--update-input" "unstable"
-      # "--update-input" "nur"
-      # "--update-input" "home-manager"
-      # "--update-input" "agenix"
-      # "--update-input" "impermanence"
-      # "--commit-lock-file"
-    ];
+    randomizedDelaySec = "45min";
+    flake = "github:suderman/nixos#${config.networking.hostName}";
+    flags = ["--refresh"];
     allowReboot = true;
   };
 
