@@ -3,10 +3,7 @@
   lib,
   flake,
   ...
-}: let
-  inherit (builtins) attrNames attrValues;
-  inherit (lib) mapAttrs imap1;
-in {
+}: {
   # Nix Settings
   nix.settings = {
     # Enable flakes and pipes
@@ -14,6 +11,10 @@ in {
 
     # 500MB buffer
     download-buffer-size = 500000000;
+
+    # https://bmcgee.ie/posts/2023/12/til-how-to-optimise-substitutions-in-nix/
+    http-connections = 128;
+    max-substitution-jobs = 128;
 
     # Deduplicate and optimize nix store
     auto-optimise-store = true;
@@ -29,10 +30,6 @@ in {
 
     # Speed up remote builds
     builders-use-substitutes = true;
-
-    # Binary caches
-    substituters = imap1 (i: url: "${url}?priority=${toString i}") (attrNames flake.caches);
-    trusted-public-keys = attrValues flake.caches;
   };
 
   nix.sshServe = {
@@ -55,7 +52,7 @@ in {
 
   # Add each flake input as a registry
   # To make nix3 commands consistent with the flake
-  nix.registry = mapAttrs (_: value: {flake = value;}) flake.inputs;
+  nix.registry = lib.mapAttrs (_: value: {flake = value;}) flake.inputs;
 
   # Map registries to channels
   nix.nixPath = ["repl=${flake}/repl.nix" "nixpkgs=${flake.inputs.nixpkgs}"];

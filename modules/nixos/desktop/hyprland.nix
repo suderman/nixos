@@ -90,5 +90,11 @@
 
     # https://home-manager-options.extranix.com/?query=swaylock&release=release-25.05
     security.pam.services.swaylock = {};
+
+    # binary cache
+    nix.settings = {
+      substituters = ["https://hyprland.cachix.org?priority=50"];
+      trusted-public-keys = ["hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="];
+    };
   };
 }
