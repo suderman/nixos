@@ -27,15 +27,15 @@ Use me when the user wants to:
 
 - work from `nix develop`
 - push to Attic cache `main`
-- include all `nixosConfigurations` except `iso`
+- if no hosts are passed, use `nixos cache` interactive multi-select
 - build and push hosts sequentially for deterministic logs
 
 ## Workflow
 
 1. Confirm the target cache and host scope.
    - Default cache: `main`
-   - Default hosts: all `nixosConfigurations` except `iso`
-   - Respect explicit host arguments from the user or command
+   - Default host scope: interactive selection when no hosts were passed
+    - Respect explicit host arguments from the user or command
 
 2. Run the repo command.
    - Dry-run first when the user is asking what would happen
@@ -48,33 +48,39 @@ Use me when the user wants to:
 
 ## Commands
 
-Dry-run all normal hosts:
+Dry-run with interactive host selection:
 
 ```sh
-nix develop --command nixos cache dry-run
+nix develop --command nixos cache --dry-run
 ```
 
-Build and push all normal hosts:
+Build and push with interactive host selection:
 
 ```sh
-nix develop --command nixos cache push
+nix develop --command nixos cache
 ```
 
 Build and push specific hosts:
 
 ```sh
-nix develop --command nixos cache push hub kit pow
+nix develop --command nixos cache hub kit pow
+```
+
+Build and push all hosts without prompting:
+
+```sh
+nix develop --command nixos cache --all
 ```
 
 Include `iso` too:
 
 ```sh
-nix develop --command nixos cache push --include-iso
+nix develop --command nixos cache --all --include-iso
 ```
 
 ## Guardrails
 
-- Do not use the interactive `nixos` wrapper for this workflow.
+- Do not bypass the repo `nixos cache` wrapper with ad hoc build/push commands unless the user asks.
 - Do not deploy or switch hosts here; this skill is only for build-and-push.
 - Do not silently include `iso` unless explicitly requested.
 - Do not commit or push git changes unless the user explicitly asks.

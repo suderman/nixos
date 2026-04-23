@@ -13,21 +13,21 @@ Follow this workflow:
 2. Read `.opencode/skills/build-push-hosts/SKILL.md` and follow it exactly.
 3. Use the deterministic `nixos cache` subcommand.
 4. Work from `nix develop`.
-5. If no hosts were provided, push all normal hosts and exclude `iso` by default.
+5. If no hosts were provided, let `nixos cache` do interactive host selection.
 6. Report:
    - cache name used
    - hosts processed
-   - whether it was a dry-run or a real push
-   - any failures
+    - whether it was a dry-run or a real push
+    - any failures
 
 If the user asks for a preview first, run:
 
 ```sh
-nix develop --command nixos cache dry-run $ARGUMENTS
+nix develop --command nixos cache --dry-run $ARGUMENTS
 ```
 
 Otherwise run:
 
 ```sh
-nix develop --command nixos cache push $ARGUMENTS
+nix develop --command nixos cache $ARGUMENTS
 ```
