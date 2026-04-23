@@ -119,6 +119,7 @@
 
     # Binary cache substituter + public key
     caches = {
+      "https://attic.kit/main" = "main:h4StHo979ngwL9amukioJJO+TJIb3Dbe7+HNSS/umwA=";
       "https://suderman.cachix.org" = "suderman.cachix.org-1:8lYeb2gOOVDPbUn1THnL5J3/L4tFWU30/uVPk7sCGmI=";
       "https://hyprland.cachix.org" = "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc=";
       "https://numtide.cachix.org" = "numtide.cachix.org-1:2ps1kLBUWjxIneOy1Ik6cQjb41X0iXVXeHigGmycPPE=";

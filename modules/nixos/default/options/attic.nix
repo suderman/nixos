@@ -1,4 +1,10 @@
 # services.attic.enable = true;
+#
+# Bootstrap on the server after first deploy:
+#   sudo atticd-atticadm make-token --sub "jon" --validity "12 months" --pull '*' --push '*' --delete '*' --create-cache '*' --configure-cache '*' --configure-cache-retention '*' --destroy-cache '*'
+#   attic login local https://attic.kit <token> --set-default
+#   attic cache create main
+#   attic cache info main
 {
   config,
   lib,
@@ -11,6 +17,7 @@
     getExe
     mkBefore
     mkDefault
+    mkForce
     mkIf
     mkOption
     types
@@ -54,6 +61,14 @@ in {
   };
 
   config = mkIf cfg.enable {
+    users.groups.atticd = {};
+    users.users.atticd = {
+      isSystemUser = true;
+      group = "atticd";
+      home = cfg.dataDir;
+      createHome = false;
+    };
+
     services.traefik = {
       enable = true;
       proxy.${cfg.name} = {
@@ -66,7 +81,7 @@ in {
       enable = true;
       environmentFile = mkDefault cfg.environmentFile;
       settings.listen = mkDefault "127.0.0.1:${toString cfg.port}";
-      settings.api-endpoint = mkDefault "https://${hostName}";
+      settings.api-endpoint = mkDefault "https://${hostName}/";
       settings.allowed-hosts = mkDefault ([hostName] ++ cfg.extraHostNames);
       settings.require-proof-of-possession = mkDefault false;
       settings.database.url = mkDefault "sqlite://${cfg.dataDir}/server.db?mode=rwc";
@@ -76,7 +91,9 @@ in {
       };
     };
 
-    systemd.services.atticd.preStart = mkBefore ''
+    systemd.services.atticd.serviceConfig.DynamicUser = mkForce false;
+
+    system.activationScripts.atticdToken = mkBefore ''
       install -d -m 0700 ${cfg.dataDir}
 
       if [ ! -s ${cfg.environmentFile} ]; then
