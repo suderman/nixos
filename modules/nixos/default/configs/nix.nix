@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   flake,
   ...
 }: {
@@ -65,6 +66,56 @@
     flake = "github:suderman/nixos#${config.networking.hostName}";
     flags = ["--refresh"];
     allowReboot = true;
+  };
+
+  systemd.services.nixos-repo-sync = {
+    description = "Best-effort sync of /etc/nixos";
+    after = ["network-online.target"];
+    wants = ["network-online.target"];
+    serviceConfig = {
+      Type = "oneshot";
+      User = "root";
+      WorkingDirectory = "/etc/nixos";
+    };
+    path = [pkgs.git];
+    script = ''
+      set -euo pipefail
+
+      if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        echo "Skipping /etc/nixos sync: not a git work tree"
+        exit 0
+      fi
+
+      if ! git diff --quiet || ! git diff --cached --quiet; then
+        echo "Skipping /etc/nixos sync: repository has local changes"
+        exit 0
+      fi
+
+      if [[ -n "$(git ls-files --others --exclude-standard)" ]]; then
+        echo "Skipping /etc/nixos sync: repository has untracked files"
+        exit 0
+      fi
+
+      branch="$(git symbolic-ref --quiet --short HEAD || true)"
+      if [[ -z "$branch" ]]; then
+        echo "Skipping /etc/nixos sync: detached HEAD"
+        exit 0
+      fi
+
+      git fetch --quiet origin "$branch"
+      git pull --ff-only --quiet origin "$branch"
+    '';
+  };
+
+  systemd.timers.nixos-repo-sync = {
+    description = "Best-effort sync of /etc/nixos";
+    wantedBy = ["timers.target"];
+    timerConfig = {
+      OnCalendar = "03:15";
+      RandomizedDelaySec = "30min";
+      Persistent = true;
+      Unit = "nixos-repo-sync.service";
+    };
   };
 
   # Failing to build manual right now
