@@ -124,7 +124,7 @@ For each manual dependency, keep:
 - file: modules/nixos/default/options/codex-lb.nix
 - lookup: `version = ...` and `image = "ghcr.io/soju06/codex-lb:${cfg.version}"`
 - current_fields:
-  - `version = "1.14.1"`
+  - `version = "1.15.0"`
   - `image = "ghcr.io/soju06/codex-lb:${cfg.version}"`
 - upstream: https://github.com/Soju06/codex-lb/pkgs/container/codex-lb
 - update_rule: use the newest tagged container version compatible with the repo’s existing policy
@@ -158,7 +158,7 @@ For each manual dependency, keep:
 - file: modules/home/desktop/default/options/chromium/registry.nix
 - lookup: `chromium-web-store = "https://github.com/NeverDecaf/chromium-web-store/releases/download/v.../Chromium.Web.Store.crx"`
 - current_fields:
-  - `url = "https://github.com/NeverDecaf/chromium-web-store/releases/download/v1.5.4.3/Chromium.Web.Store.crx"`
+  - `url = "https://github.com/NeverDecaf/chromium-web-store/releases/download/v1.5.5.3/Chromium.Web.Store.crx"`
 - upstream: https://github.com/NeverDecaf/chromium-web-store/releases
 - update_rule: use the newest stable CRX release URL that preserves the existing download pattern unless the browser-side installation flow changes
 - hash_rule: no inline source hash in this file; update only the release URL unless the repo later starts pinning a CRX hash

@@ -89,7 +89,9 @@ Do not use me for standard flake input updates. Use `update-flake-inputs` for th
     - If validation fails, keep the failure details and do not hide the breakage.
 
 6. Maintain the registry.
-   - Update `references.md` if the file path, current version, update notes, or validation command changed.
+   - After each **successful** update-and-validate cycle, immediately sync that dependency's `current_fields` in `references.md` to match the values written to the repo file.
+   - Sync applies to all fields listed under `current_fields` for that entry: version, URL, image tag, rev, sha256, etc.
+   - Only skip syncing `current_fields` for a given dependency if the entry itself was newly created, removed, or had a structural change (path moved, entry added/removed) — not merely because the values happened to match before the run.
    - Add concise notes for any quirks discovered during the run.
 
 7. Report.
