@@ -84,7 +84,7 @@ in {
         [[ -f "${keysEnv}" ]] && . "${keysEnv}"
         set +a
 
-        if [[ -n "$MINIMAX_API_KEY" ]]; then
+        if [[ -n "''${MINIMAX_API_KEY-}" ]]; then
           printf '{"region":"global","api_key":"%s"}\n' "$MINIMAX_API_KEY" > "$MMX_DIR/config.json"
           chmod 600 "$MMX_DIR/config.json"
         fi

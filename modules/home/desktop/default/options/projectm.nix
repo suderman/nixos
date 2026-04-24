@@ -39,7 +39,7 @@ in {
       # bash
       ''
         $DRY_RUN_CMD mkdir -p "$(dirname ${file})"
-        $DRY_RUN_CMD [[ -e ${file} ]] || cat ${properties} >${file}
+        [[ -e ${file} ]] || $DRY_RUN_CMD cat ${properties} >${file}
       '';
   };
 }
