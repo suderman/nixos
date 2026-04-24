@@ -101,11 +101,13 @@ in {
       install -d -m 0700 ${cfg.dataDir}
 
       if [ ! -s ${cfg.environmentFile} ]; then
-        umask 0077
-        ${getExe pkgs.openssl} genrsa -traditional 4096 \
-          | ${pkgs.coreutils}/bin/base64 -w0 \
-          | ${pkgs.gnused}/bin/sed 's/^/ATTIC_SERVER_TOKEN_RS256_SECRET_BASE64=/' \
-          > ${cfg.environmentFile}
+        (
+          umask 0077
+          ${getExe pkgs.openssl} genrsa -traditional 4096 \
+            | ${pkgs.coreutils}/bin/base64 -w0 \
+            | ${pkgs.gnused}/bin/sed 's/^/ATTIC_SERVER_TOKEN_RS256_SECRET_BASE64=/' \
+            > ${cfg.environmentFile}
+        )
       fi
     '';
 
