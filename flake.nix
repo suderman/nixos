@@ -86,7 +86,8 @@
 
     # Hermes Agent
     # <https://github.com/NousResearch/hermes-agent>
-    hermes-agent.url = "github:NousResearch/hermes-agent";
+    # TEMP: pinned to 520b8d9 (works) pending upstream fix for tui npmDepsHash regression in 6f1eed3
+    hermes-agent.url = "github:NousResearch/hermes-agent/520b8d90020f0c952213be6fb65ec95da80d2105";
   };
 
   outputs = inputs: let
