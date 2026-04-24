@@ -27,7 +27,10 @@
         logout_cm = "clear && reset && chvt 1";
       };
     };
-    persist.scratch.files = ["/etc/ly/save.ini"];
+    persist.scratch.files = [
+      "/etc/ly/save.ini"
+      "/etc/ly/save.txt"
+    ];
 
     # The one and only
     programs.hyprland = {

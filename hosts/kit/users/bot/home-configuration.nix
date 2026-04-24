@@ -28,7 +28,7 @@
 
   # Enable OpenClaw gateway!
   services.openclaw = {
-    enable = true;
+    enable = false;
     host = "claw.suderman.org";
   };
 
