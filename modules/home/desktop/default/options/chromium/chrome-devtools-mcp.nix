@@ -11,7 +11,6 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-
     toolchains.javascript.enable = true;
 
     # Expose the browser URL to the MCP at a well-known path

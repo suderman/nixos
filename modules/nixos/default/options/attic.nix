@@ -86,7 +86,8 @@ in {
           hostName
           "127.0.0.1:${toString cfg.port}"
           "localhost:${toString cfg.port}"
-        ] ++ cfg.extraHostNames);
+        ]
+        ++ cfg.extraHostNames);
       settings.require-proof-of-possession = mkDefault false;
       settings.database.url = mkDefault "sqlite://${cfg.dataDir}/server.db?mode=rwc";
       settings.storage = mkDefault {
