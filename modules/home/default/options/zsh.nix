@@ -64,8 +64,12 @@ in {
         # Fix tab completion (disabled because this makes # useless)
         # setopt EXTENDED_GLOB
 
-        # message of the day
-        [[ -e /var/lib/rust-motd/motd ]] && cat /var/lib/rust-motd/motd
+        # MOTD: allow-list terminal contexts to avoid GDM/session handoff leakage.
+        # Intended: SSH (SSH_CONNECTION/SSH_TTY), kitty (KITTY_WINDOW_ID or TERM=xterm-kitty),
+        # or real Linux VT (TERM=linux with parent login/agetty).
+        if [[ -t 1 && ( -n "$SSH_CONNECTION" || -n "$SSH_TTY" || -n "$KITTY_WINDOW_ID" || "$TERM" = xterm-kitty || ( "$TERM" = linux && $(ps -o comm= -p $PPID 2>/dev/null) =~ ^(login|agetty)$ ) ) ]]; then
+          cat /var/lib/rust-motd/motd
+        fi
       '';
 
       autosuggestion.enable = true;

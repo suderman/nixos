@@ -1,10 +1,5 @@
 {...}: let
   caches = [
-    # primary
-    {
-      url = "https://cache.nixos.org?priority=40";
-      key = "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=";
-    }
     # community
     {
       url = "https://nix-community.cachix.org?priority=50";
