@@ -37,11 +37,17 @@ Use me when the user wants to:
    - Default host scope: interactive selection when no hosts were passed
     - Respect explicit host arguments from the user or command
 
-2. Run the repo command.
+2. **Build each host individually with a 60 minute timeout each.**
+   - Large hosts (with Ollama, CUDA, Electron, Qt, WebKit etc.) can take 10+ minutes
+     to download inputs and compile.
+   - Run each host in a **separate** `nix develop --command nixos cache <host>`
+     invocation so each has its own timeout context and does not block others.
+
+3. Run the repo command.
    - Dry-run first when the user is asking what would happen
    - Real run when the user asks to build/push
 
-3. Report clearly.
+4. Report clearly.
    - Which hosts were built
    - Which cache they were pushed to
    - Any host failures, with the first failing command
