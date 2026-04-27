@@ -7,7 +7,7 @@
       # "super, left, workspace, e-1" # cyclenext, prev
       # "super, right, workspace, e+1" # cyclenext
 
-      # Also navigate workspaces with super semicolon/apostrophone (hhkb arrows)
+      # Also navigate workspaces with super semicolon/apostrophe (hhkb arrows)
       "super, semicolon, exec, hypr-workspace prev"
       "super, apostrophe, exec, hypr-workspace next"
       # "super, semicolon, workspace, e-1"

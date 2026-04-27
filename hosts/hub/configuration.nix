@@ -61,6 +61,6 @@
   };
 
   # Reverse proxy for termux syncthing webgui running on my phone
-  services.traefik.proxy."syncthing-jon.phone" = "http://phone.tail:8384";
-  services.traefik.extraInternalHostNames = ["syncthing-jon.phone"];
+  services.traefik.proxy."syncthing-jon.gem" = "http://gem.tail:8384";
+  services.traefik.extraInternalHostNames = ["syncthing-jon.gem"];
 }
