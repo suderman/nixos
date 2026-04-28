@@ -19,7 +19,7 @@
   class = "chromium-browser";
 in {
   # Import chromium lib
-  imports = [./lib.nix ./chrome-devtools-mcp.nix];
+  imports = [./lib.nix];
 
   # Extra options to manage external extensions
   options.programs.chromium = {
@@ -166,7 +166,6 @@ in {
       };
     };
 
-    # chrome-devtools-mcp wrapper with flock
     home.packages = [
       (mkScript {
         name = "chromium-agent";
@@ -185,34 +184,6 @@ in {
               "--remote-debugging-port=${toString cfg.remoteDebuggingPort}"
             ]);
       })
-      # (mkScript {
-      #   name = "chrome-devtools-${port}";
-      #   path = with pkgs; [procps util-linux nodejs];
-      #   text =
-      #     # bash
-      #     ''
-      #       lock="''${XDG_RUNTIME_DIR:-$HOME/.local/state}/chrome-devtools-mcp-${port}.lock"
-      #       mkdir -p "$(dirname "$lock")"
-      #
-      #       exec 9>"$lock"
-      #       if ! flock -n -E 200 9; then
-      #         rc=$?
-      #         if [ "$rc" -eq 200 ]; then
-      #           echo "chrome-devtools-mcp on :${port} is already in use" >&2
-      #           exit 1
-      #         fi
-      #         exit "$rc"
-      #       fi
-      #
-      #       while IFS= read -r pid; do
-      #         [ -n "$pid" ] || continue
-      #         [ "$pid" = "$$" ] && continue
-      #         kill "$pid" 2>/dev/null || true
-      #       done < <(pgrep -f "chrome-devtools-mcp.*127\\.0\\.0\\.1:${port}" || true)
-      #
-      #       exec npx -y chrome-devtools-mcp@latest --browser-url=http://127.0.0.1:${port}
-      #     '';
-      # })
     ];
   };
 }
