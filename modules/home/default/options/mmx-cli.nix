@@ -13,6 +13,8 @@
     text = ''
       MMX_BIN="''${MMX_BIN:-${config.home.sessionVariables.NPM_CONFIG_PREFIX}/bin/mmx}"
       MMX_DIR="''${MMX_DIR:-${config.home.homeDirectory}/${cfgDir}}"
+      MMX_INIT_STAMP="''${MMX_INIT_STAMP:-${config.home.homeDirectory}/${cfgDir}/init.timestamp}"
+      MMX_INIT_INTERVAL="$((24 * 60 * 60))"
 
       mmx_init() {
         mkdir -p "$MMX_DIR"
@@ -22,11 +24,25 @@
           echo "Failed to install mmx binary" >&2
           exit 1
         fi
+
+        mkdir -p "$(dirname "$MMX_INIT_STAMP")"
+        date +%s >"$MMX_INIT_STAMP"
+      }
+
+      mmx_init_stale() {
+        [[ ! -f "$MMX_INIT_STAMP" ]] && return 0
+
+        local now last
+        now="$(date +%s)"
+        last="$(<"$MMX_INIT_STAMP")"
+
+        [[ ! "$last" =~ ^[0-9]+$ ]] && return 0
+        ((now - last >= MMX_INIT_INTERVAL))
       }
 
       if [[ "''${1:-}" == "init" ]]; then
         mmx_init
-      elif [[ ! -f "$MMX_DIR/config.json" ]] || [[ ! -e "$MMX_BIN" ]]; then
+      elif [[ ! -f "$MMX_DIR/config.json" ]] || [[ ! -e "$MMX_BIN" ]] || mmx_init_stale; then
         mmx_init
         "$MMX_BIN" "$@"
       else
