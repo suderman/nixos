@@ -17,6 +17,8 @@
         # Path to OpenCode binary managed by npm
         OPENCODE_BIN="''${OPENCODE_BIN:-${config.home.sessionVariables.NPM_CONFIG_PREFIX}/bin/opencode}"
         OPENCODE_DIR="''${OPENCODE_DIR:-${config.home.homeDirectory}/${cfgDir}}"
+        OPENCODE_INIT_STAMP="''${OPENCODE_INIT_STAMP:-${config.home.homeDirectory}/.local/state/opencode/init.timestamp}"
+        OPENCODE_INIT_INTERVAL="$((24 * 60 * 60))"
 
         # Export environment variables
         set -a
@@ -24,7 +26,7 @@
         [[ -f "$OPENCODE_DIR/.env.local" ]] && . "$OPENCODE_DIR/.env.local"
         set +a
 
-        # Initizalize OpenCode: install via npm
+        # Initialize OpenCode: install via npm
         opencode_init() {
 
           # Git clone OpenCode config repo into config directory
@@ -49,14 +51,28 @@
             exit 1
           fi
 
+          mkdir -p "$(dirname "$OPENCODE_INIT_STAMP")"
+          date +%s >"$OPENCODE_INIT_STAMP"
+
+        }
+
+        opencode_init_stale() {
+          [[ ! -f "$OPENCODE_INIT_STAMP" ]] && return 0
+
+          local now last
+          now="$(date +%s)"
+          last="$(<"$OPENCODE_INIT_STAMP")"
+
+          [[ ! "$last" =~ ^[0-9]+$ ]] && return 0
+          ((now - last >= OPENCODE_INIT_INTERVAL))
         }
 
         # If argument is "init", run the above script
         if [[ "''${@-}" == "init" ]]; then
           opencode_init
 
-        # Else, if the config or binary is missing, run the above script first
-        elif [[ ! -d "$OPENCODE_DIR/.git" ]] || [[ ! -e $OPENCODE_BIN ]]; then
+        # Else, if the config or binary is missing/stale, run the above script first
+        elif [[ ! -d "$OPENCODE_DIR/.git" ]] || [[ ! -e $OPENCODE_BIN ]] || opencode_init_stale; then
           opencode_init
           $OPENCODE_BIN "$@"
 
@@ -116,7 +132,6 @@ in {
     persist.scratch.directories = [
       ".local/share/opencode"
       ".local/state/opencode"
-      ".opencode-browser" # https://github.com/different-ai/opencode-browser
     ];
 
     # Lazy typing
