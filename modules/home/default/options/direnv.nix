@@ -15,8 +15,8 @@ in {
         global.strict_env = true;
         whitelist.prefix = [
           "/etc/nixos"
-          "${config.home.homeDirectory}/Code"
-          "${config.home.homeDirectory}/Work"
+          "${config.home.homeDirectory}/.config"
+          "${config.home.homeDirectory}/.local/share"
         ];
       };
     };
