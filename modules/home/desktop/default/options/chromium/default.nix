@@ -29,6 +29,12 @@ in {
       readOnly = true;
     };
 
+    runDir = mkOption {
+      type = types.path; # /run/user/1000/chromium
+      default = "/run/user/${toString config.home.uid}/chromium";
+      readOnly = true;
+    };
+
     # Registry of chromium extensions
     registry = mkOption {
       type = types.anything;
@@ -161,37 +167,52 @@ in {
     };
 
     # chrome-devtools-mcp wrapper with flock
-    home.packages = let
-      port = toString cfg.remoteDebuggingPort;
-    in [
+    home.packages = [
       (mkScript {
-        name = "chrome-devtools-${port}";
-        path = with pkgs; [procps util-linux nodejs];
+        name = "chromium-agent";
         text =
-          # bash
           ''
-            lock="''${XDG_RUNTIME_DIR:-$HOME/.local/state}/chrome-devtools-mcp-${port}.lock"
-            mkdir -p "$(dirname "$lock")"
-
-            exec 9>"$lock"
-            if ! flock -n -E 200 9; then
-              rc=$?
-              if [ "$rc" -eq 200 ]; then
-                echo "chrome-devtools-mcp on :${port} is already in use" >&2
-                exit 1
-              fi
-              exit "$rc"
-            fi
-
-            while IFS= read -r pid; do
-              [ -n "$pid" ] || continue
-              [ "$pid" = "$$" ] && continue
-              kill "$pid" 2>/dev/null || true
-            done < <(pgrep -f "chrome-devtools-mcp.*127\\.0\\.0\\.1:${port}" || true)
-
-            exec npx -y chrome-devtools-mcp@latest --browser-url=http://127.0.0.1:${port}
-          '';
+            mkdir -p "${cfg.dataDir}-agent"
+            rm -f "${cfg.dataDir}-agent/External Extensions"
+            ln -sf "${cfg.dataDir}/External Extensions" "${cfg.dataDir}-agent/External Extensions"
+          ''
+          + "${lib.getExe cfg.package} "
+          + toString (switches
+            ++ [
+              ''--user-data-dir=${cfg.dataDir}-agent''
+              ''--disk-cache-dir=${cfg.runDir}-agent''
+              ''--profile-directory=Default''
+              "--remote-debugging-port=${toString cfg.remoteDebuggingPort}"
+            ]);
       })
+      # (mkScript {
+      #   name = "chrome-devtools-${port}";
+      #   path = with pkgs; [procps util-linux nodejs];
+      #   text =
+      #     # bash
+      #     ''
+      #       lock="''${XDG_RUNTIME_DIR:-$HOME/.local/state}/chrome-devtools-mcp-${port}.lock"
+      #       mkdir -p "$(dirname "$lock")"
+      #
+      #       exec 9>"$lock"
+      #       if ! flock -n -E 200 9; then
+      #         rc=$?
+      #         if [ "$rc" -eq 200 ]; then
+      #           echo "chrome-devtools-mcp on :${port} is already in use" >&2
+      #           exit 1
+      #         fi
+      #         exit "$rc"
+      #       fi
+      #
+      #       while IFS= read -r pid; do
+      #         [ -n "$pid" ] || continue
+      #         [ "$pid" = "$$" ] && continue
+      #         kill "$pid" 2>/dev/null || true
+      #       done < <(pgrep -f "chrome-devtools-mcp.*127\\.0\\.0\\.1:${port}" || true)
+      #
+      #       exec npx -y chrome-devtools-mcp@latest --browser-url=http://127.0.0.1:${port}
+      #     '';
+      # })
     ];
   };
 }

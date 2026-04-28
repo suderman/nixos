@@ -5,22 +5,18 @@
   ...
 }: let
   cfg = config.programs.chromium;
-  inherit (lib) concatStringsSep mkOption types;
 
   # Add these switches to the wrapper or config
   switches = let
-    # Store cache in volatile directory
-    runDir = "/run/user/${toString config.home.uid}/chromium";
-
     # Convert extension names to comma-separated directories
-    unpackedExtensionsDirs = concatStringsSep "," (
+    unpackedExtensionsDirs = lib.concatStringsSep "," (
       map
       (name: "${osConfig.programs.chromium.dataDir}/${name}/extension")
       (builtins.attrNames cfg.unpackedExtensions)
     );
 
     # Enable these features in chromium
-    features = concatStringsSep "," [
+    features = lib.concatStringsSep "," [
       "DevToolsPrivacyUI"
       "EnableFingerprintingProtectionFilter:activation_level/enabled/enable_console_logging/true"
       "EnableFingerprintingProtectionFilterInIncognito:activation_level/enabled/enable_console_logging/true"
@@ -46,7 +42,7 @@
     # Used in webapps and browser
   in [
     "--user-data-dir=${cfg.dataDir}"
-    "--disk-cache-dir=${runDir}"
+    "--disk-cache-dir=${cfg.runDir}"
     "--profile-directory=Default"
     "--disable-features=EnableTabMuting"
     "--disable-top-sites" # (relates to the browser's new tab page)
@@ -63,7 +59,6 @@
     "--ozone-platform=wayland"
     "--remove-referrers" # (browser privacy feature)
     "--password-store=basic" # persist website sessions
-    "--remote-debugging-port=${toString cfg.remoteDebuggingPort}"
   ];
 
   # Create window class name from URL used by Chromium Web Apps
