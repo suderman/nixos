@@ -32,6 +32,7 @@
 
       # Pre-spawn browser process
       "chromium --no-startup-window"
+      "chromium-agent --no-startup-window"
     ];
 
     input = {

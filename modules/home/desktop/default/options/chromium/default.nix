@@ -10,7 +10,7 @@
   inherit (lib) mkIf mkOption types;
   inherit (config.lib.keyd) mkClass;
   inherit (config.lib.chromium) switches;
-  inherit (perSystem.self) mkScript;
+  inherit (perSystem.self) mkApplication mkScript;
 
   # home-manager module expects this default directory
   dataDir = ".config/chromium";
@@ -167,8 +167,12 @@ in {
     };
 
     home.packages = [
-      (mkScript {
+      (mkApplication {
         name = "chromium-agent";
+        desktopName = "Chromium Agent";
+        genericName = "Web Browser";
+        categories = ["Network" "WebBrowser"];
+        icon = "chromium";
         text =
           ''
             mkdir -p "${cfg.dataDir}-agent"
@@ -176,13 +180,16 @@ in {
             ln -sf "${cfg.dataDir}/External Extensions" "${cfg.dataDir}-agent/External Extensions"
           ''
           + "${lib.getExe cfg.package} "
-          + toString (switches
+          + toString (
+            switches
             ++ [
               ''--user-data-dir=${cfg.dataDir}-agent''
               ''--disk-cache-dir=${cfg.runDir}-agent''
               ''--profile-directory=Default''
               "--remote-debugging-port=${toString cfg.remoteDebuggingPort}"
-            ]);
+            ]
+          )
+          + " \"$@\"";
       })
     ];
   };
