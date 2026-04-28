@@ -116,6 +116,7 @@ in {
     persist.scratch.directories = [
       ".local/share/opencode"
       ".local/state/opencode"
+      ".opencode-browser" # https://github.com/different-ai/opencode-browser
     ];
 
     # Lazy typing
