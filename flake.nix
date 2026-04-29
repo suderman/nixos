@@ -70,7 +70,7 @@
     # <https://wiki.hypr.land/Nix/>
     hyprland.url = "github:hyprwm/Hyprland/v0.54.3";
     # <https://github.com/hyprwm/hyprland-plugins>
-    hyprland-plugins.url = "github:hyprwm/hyprland-plugins";
+    hyprland-plugins.url = "github:hyprwm/hyprland-plugins/6acc0738f298f5efe40a99db2c12449112d65633";
     hyprland-plugins.inputs.hyprland.follows = "hyprland";
     # <https://github.com/VirtCode/hypr-dynamic-cursors>
     hypr-dynamic-cursors.url = "github:VirtCode/hypr-dynamic-cursors/57e14edd0ae265b01828e466e287e96eb1e84dd3";
