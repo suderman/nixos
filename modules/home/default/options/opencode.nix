@@ -32,7 +32,10 @@
           # Git clone OpenCode config repo into config directory
           mkdir -p $OPENCODE_DIR
           if [[ ! -d "$OPENCODE_DIR/.git" ]]; then
-            git clone ${cfg.gitUrl} $OPENCODE_DIR
+            tmp="$(mktemp -d)"
+            git clone ${cfg.gitUrl} "$tmp"
+            cp -a "$tmp"/. "$OPENCODE_DIR"/
+            rm -rf "$tmp"
           fi
 
           # Ensure it was cloned before proceeding
@@ -150,17 +153,13 @@ in {
     };
 
     # Place .env in ~/.config/opencode
-    home.activation.opencode = let
-      # Base env variables for OpenCode
-      baseEnv =
-        pkgs.writeText "base.env"
-        # sh
-        ''
-          # Enable native Exa-backed web search in OpenCode
-          OPENCODE_ENABLE_EXA=1
+    systemd.user.services.opencode-env = let
+      baseEnv = pkgs.writeText "opencode-base.env" ''
+        # Enable native Exa-backed web search in OpenCode
+        OPENCODE_ENABLE_EXA=1
 
-          # API keys
-        '';
+        # API keys
+      '';
 
       # Encrypted API keys
       # MINIMAX_API_KEY=
@@ -169,25 +168,56 @@ in {
       # CONTEXT7_API_KEY=
       keysEnv =
         if cfg.apiKeys != null
-        then "${config.age.secrets.opencode-env.path}"
+        then config.age.secrets.opencode-env.path
         else "/dev/null";
-    in
-      lib.hm.dag.entryAfter ["writeBoundary"]
-      # bash
-      ''
-        mkdir -p ${cfgDir}
-        DOTENV=${cfgDir}/.env
-        cat ${baseEnv} >$DOTENV
-        [[ -f "${keysEnv}" ]] && cat "${keysEnv}" >>$DOTENV
-        chmod 600 $DOTENV
-      '';
+    in {
+      Unit = {
+        Description = "Generate OpenCode .env";
+        Requires = lib.mkIf (cfg.apiKeys != null) ["agenix.service"];
+        After = lib.mkIf (cfg.apiKeys != null) ["agenix.service"];
+      };
+
+      Service = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+
+        ExecStart = pkgs.self.mkScript {
+          text =
+            # sh
+            ''
+              OPENCODE_DIR="${config.home.homeDirectory}/${cfgDir}"
+              DOTENV="$OPENCODE_DIR/.env"
+
+              mkdir -p "$OPENCODE_DIR"
+
+              tmp="$(mktemp "$OPENCODE_DIR/.env.tmp.XXXXXX")"
+              cat ${baseEnv} > "$tmp"
+
+              if [ -r "${keysEnv}" ]; then
+                cat "${keysEnv}" >> "$tmp"
+              ${lib.optionalString (cfg.apiKeys != null) ''
+                else
+                  echo "Missing OpenCode agenix env file: ${keysEnv}" >&2
+                  rm -f "$tmp"
+                  exit 1
+              ''}
+              fi
+
+              chmod 600 "$tmp"
+              mv "$tmp" "$DOTENV"
+            '';
+        };
+      };
+
+      Install.WantedBy = ["default.target"];
+    };
 
     # User service for OpenCode backend and web
     systemd.user.services.opencode = {
       Unit = {
         Description = "OpenCode Server";
-        After = ["network-online.target" "agenix.service"];
-        Requires = ["agenix.service"];
+        After = ["network-online.target" "opencode-env.service"];
+        Requires = ["opencode-env.service"];
         Wants = ["network-online.target"];
       };
 
