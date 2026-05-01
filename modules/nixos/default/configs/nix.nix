@@ -59,12 +59,12 @@
 
   # Automatically upgrade this system while I sleep
   system.autoUpgrade = {
-    enable = true;
+    enable = lib.mkDefault true;
     dates = "04:00";
     randomizedDelaySec = "45min";
     flake = "github:suderman/nixos#${config.networking.hostName}";
     flags = ["--refresh"];
-    allowReboot = true;
+    allowReboot = lib.mkDefault true;
   };
 
   # Failing to build manual right now

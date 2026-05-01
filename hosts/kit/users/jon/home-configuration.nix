@@ -61,7 +61,7 @@
   # User services
   services.syncthing.enable = true;
   services.withings-sync = {
-    enable = true;
+    enable = false;
     secret = ./withings-sync.age;
   };
   services.garmin = {

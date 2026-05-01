@@ -106,6 +106,8 @@
 
   services.usbmuxd.enable = true;
 
+  system.autoUpgrade.allowReboot = false;
+
   environment.systemPackages = with pkgs; [
     libimobiledevice
     ifuse
