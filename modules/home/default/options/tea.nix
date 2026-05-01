@@ -79,22 +79,49 @@ in {
     };
 
     # Create config file with host and token
-    home.activation.giteaToken =
-      lib.mkIf (cfg.token != null)
-      (lib.hm.dag.entryAfter ["writeBoundary"]
-        # bash
-        ''
-          install -d -m 700 "${config.xdg.configHome}/tea"
-          cat >"${config.xdg.configHome}/tea/config.yml" <<EOF
-          logins:
-            - name: ${cfg.host}
-              url: https://${cfg.host}
-              token: $(cat ${config.age.secrets.tea-token.path})
-              user: ${cfg.user}
-              insecure: true
-              default: true
-          EOF
-          chmod 600 "${config.xdg.configHome}/tea/config.yml"
-        '');
+    systemd.user.services.tea-token-config = lib.mkIf (cfg.token != null) {
+      Unit = {
+        Description = "Generate Tea/Gitea CLI token config";
+        Requires = ["agenix.service"];
+        After = ["agenix.service"];
+      };
+
+      Service = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = pkgs.self.mkScript {
+          text =
+            # sh
+            ''
+              token="${config.age.secrets.tea-token.path}"
+              dir="${config.xdg.configHome}/tea"
+
+              if [ ! -r "$token" ]; then
+                echo "Missing Tea token: $token" >&2
+                exit 1
+              fi
+
+              install -d -m 700 "$dir"
+
+              tmp="$(mktemp "$dir/config.yml.tmp.XXXXXX")"
+
+              cat > "$tmp" <<EOF
+              logins:
+                - name: ${cfg.host}
+                  url: https://${cfg.host}
+                  token: $(cat "$token")
+                  user: ${cfg.user}
+                  insecure: true
+                  default: true
+              EOF
+
+              chmod 600 "$tmp"
+              mv "$tmp" "$dir/config.yml"
+            '';
+        };
+      };
+
+      Install.WantedBy = ["default.target"];
+    };
   };
 }

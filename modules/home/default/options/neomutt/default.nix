@@ -100,21 +100,46 @@ in {
     # Abort key set to Esc, so let's make this as snappy as vim
     home.sessionVariables.ESCDELAY = 25;
 
-    # If there is a secret named addresses, format that as a line of alternates for this user
-    home.activation.neomutt = let
-      dir = "$HOME/.config/neomutt";
-      awk = lib.getExe pkgs.gawk;
-      inherit (config.age.secrets.addresses) path;
-    in
-      lib.hm.dag.entryAfter ["writeBoundary"]
-      # bash
-      ''
-        $DRY_RUN_CMD mkdir -p ${dir}
-        $DRY_RUN_CMD touch ${dir}/alternates
-        $DRY_RUN_CMD echo "alternates \"$(${awk} '{printf "%s%s", (NR==1 ? "" : "|"), $0} END {print ""}' ${path})\"" > ${dir}/alternates
-      '';
-
     home.shellAliases.mutt = "neomutt";
     home.localStorePath = [".config/neomutt/neomuttrc"];
+
+    # If there is a secret named addresses, format that as a line of alternates for this user
+    systemd.user.services.neomutt-alternates = {
+      Unit = {
+        Description = "Generate NeoMutt alternates from agenix secret";
+        Requires = ["agenix.service"];
+        After = ["agenix.service"];
+      };
+
+      Service = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = pkgs.self.mkScript {
+          path = [pkgs.gawk];
+          text =
+            # sh
+            ''
+              dir="${config.xdg.configHome}/neomutt"
+              addresses="${config.age.secrets.addresses.path}"
+
+              if [ ! -r "$addresses" ]; then
+                echo "Missing neomutt addresses secret: $addresses" >&2
+                exit 1
+              fi
+
+              mkdir -p "$dir"
+              tmp="$(mktemp "$dir/alternates.tmp.XXXXXX")"
+
+              printf 'alternates "' > "$tmp"
+              gawk '{printf "%s%s", (NR==1 ? "" : "|"), $0} END {print "\""}' "$addresses" >> "$tmp"
+
+              chmod 600 "$tmp"
+              mv "$tmp" "$dir/alternates"
+            '';
+        };
+      };
+
+      Install.WantedBy = ["default.target"];
+    };
   };
 }

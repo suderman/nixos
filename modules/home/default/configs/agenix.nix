@@ -5,9 +5,6 @@
     (flake + /secrets)
   ];
 
-  # systemd.user.services.agenix = {
-  #   Unit = {
-  #     After = ["ssh-agent.service" "gcr-ssh-agent.service"];
-  #   };
-  # };
+  # Prevent unnecessary repeats
+  systemd.user.services.agenix.Service.RemainAfterExit = true;
 }
