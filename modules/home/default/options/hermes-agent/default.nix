@@ -1,6 +1,6 @@
 {
-  lib,
   config,
+  lib,
   perSystem,
   flake,
   ...
@@ -61,24 +61,66 @@ in {
     };
 
     # Generate shared dotenv file for all hermes agents
-    home.activation.hermes-agent = let
+    systemd.user.services.hermes-agent-env = let
       inherit (config.lib.hermes-agent) dataDir runDir;
+
       keysEnv =
         if cfg.apiKeys != null
-        then "${config.age.secrets.hermes-env.path}"
+        then config.age.secrets.hermes-env.path
         else "/dev/null";
-      agentNames = lib.concatStringsSep "," cfg.agents;
-    in
-      lib.hm.dag.entryAfter ["writeBoundary"] ''
-        # Create parent directory dotenv with keys
-        mkdir -p "${dataDir}"
-        echo "API_SERVER_ENABLED=1" >${dataDir}/.env
-        echo "API_SERVER_KEY=$(cat ${runDir}/key)" >>${dataDir}/.env
-        [[ -f "${keysEnv}" ]] && cat "${keysEnv}" >>${dataDir}/.env
-        chmod 600 ${dataDir}/.env
+    in {
+      Unit = {
+        Description = "Generate shared Hermes agent dotenv";
+        Requires = lib.optionals (cfg.apiKeys != null) ["agenix.service"];
+        After = lib.optionals (cfg.apiKeys != null) ["agenix.service"];
+      };
 
-        # Ensure each agent directory exists
-        mkdir -p ${dataDir}/{${agentNames}}
-      '';
+      Service = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+
+        ExecStart = perSystem.self.mkScript {
+          text =
+            # sh
+            ''
+              dataDir="${dataDir}"
+              runDir="${runDir}"
+              keyFile="$runDir/key"
+
+              mkdir -p "$dataDir"
+
+              if [ ! -r "$keyFile" ]; then
+                echo "Missing Hermes API server key: $keyFile" >&2
+                exit 1
+              fi
+
+              tmp="$(mktemp "$dataDir/.env.tmp.XXXXXX")"
+
+              {
+                echo "API_SERVER_ENABLED=1"
+                printf 'API_SERVER_KEY=%s\n' "$(cat "$keyFile")"
+
+                ${lib.optionalString (cfg.apiKeys != null) ''
+                if [ ! -r "${keysEnv}" ]; then
+                  echo "Missing Hermes agenix env file: ${keysEnv}" >&2
+                  exit 1
+                fi
+
+                cat "${keysEnv}"
+              ''}
+              } > "$tmp"
+
+              chmod 600 "$tmp"
+              mv "$tmp" "$dataDir/.env"
+
+              for agent in ${lib.escapeShellArgs cfg.agents}; do
+                mkdir -p "$dataDir/$agent"
+              done
+            '';
+        };
+      };
+
+      Install.WantedBy = ["default.target"];
+    };
   };
 }

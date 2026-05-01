@@ -24,8 +24,8 @@ in {
           {
             Unit = {
               Description = "Hermes Agent Gateway (${agent})";
-              After = ["network-online.target" "agenix.service"];
-              Requires = ["agenix.service"];
+              After = ["network-online.target" "hermes-agent-env.service"];
+              Requires = ["hermes-agent-env.service"];
               Wants = ["network-online.target"];
             };
 
