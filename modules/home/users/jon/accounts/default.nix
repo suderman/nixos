@@ -14,5 +14,21 @@
     age.secrets.fastmail.rekeyFile = ./password-fastmail.age;
     age.secrets.gmail.rekeyFile = ./password-gmail.age;
     age.secrets.icloud.rekeyFile = ./password-icloud.age;
+
+    # vdirsyncer needs agenix service to have already run
+    systemd.user.services.vdirsyncer.Unit = {
+      Requires = ["agenix.service"];
+      After = ["agenix.service"];
+    };
+
+    # imapnotify needs agenix service to have already run
+    systemd.user.services.imapnotify-suderman.Unit = {
+      Requires = ["agenix.service"];
+      After = ["agenix.service"];
+    };
+    systemd.user.services.imapnotify-nonfiction.Unit = {
+      Requires = ["agenix.service"];
+      After = ["agenix.service"];
+    };
   };
 }
