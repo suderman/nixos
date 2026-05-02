@@ -97,6 +97,7 @@ in {
               tmp="$(mktemp "$dataDir/.env.tmp.XXXXXX")"
 
               {
+                echo "HERMES_TUI=1"
                 echo "API_SERVER_ENABLED=1"
                 printf 'API_SERVER_KEY=%s\n' "$(cat "$keyFile")"
 

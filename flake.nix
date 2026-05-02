@@ -86,7 +86,7 @@
 
     # Hermes Agent
     # <https://github.com/NousResearch/hermes-agent>
-    hermes-agent.url = "github:NousResearch/hermes-agent/v2026.4.23";
+    hermes-agent.url = "github:NousResearch/hermes-agent/v2026.4.30";
   };
 
   outputs = inputs: let
