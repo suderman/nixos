@@ -17,6 +17,8 @@ in {
             text =
               # bash
               ''
+                export SSL_CERT_FILE="/etc/ssl/certs/ca-bundle.crt"
+                export REQUESTS_CA_BUNDLE="/etc/ssl/certs/ca-bundle.crt"
                 export HERMES_HOME="${dataDir}/${name}"
 
                 set -a
