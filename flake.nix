@@ -92,30 +92,20 @@
   outputs = inputs: let
     inherit (inputs.nixpkgs) lib;
     blueprint = inputs.blueprint {inherit inputs;};
-    helperPackages = ["enableWayland" "mkApplication" "mkScript" "wrapWithFlags"];
-    helperPackageChecks = map (name: "pkgs-${name}") helperPackages;
+    flake = inputs.self;
   in {
     # Blueprint automatically maps: devshells, hosts, lib, modules, packages
-    inherit
-      (blueprint)
-      devShells
-      formatter
-      lib
-      nixosConfigurations
-      ;
+    inherit (blueprint) devShells formatter lib nixosConfigurations;
 
-    packages = lib.mapAttrs (_: packages: builtins.removeAttrs packages helperPackages) blueprint.packages;
-    checks = lib.mapAttrs (_: checks: builtins.removeAttrs checks helperPackageChecks) blueprint.checks;
+    # Packages and checks (without helper packages)
+    packages = lib.mapAttrs (_: flake.lib.removeHelperPackages) blueprint.packages;
+    checks =
+      lib.mapAttrs
+      (system: checks: flake.lib.removeHelperChecks (blueprint.packages.${system} or {}) checks)
+      blueprint.checks;
 
     # Map additional folders to custom outputs
-    inherit
-      (inputs.self.lib)
-      agenix-rekey
-      homeModules
-      networking
-      nixosModules
-      users
-      ;
+    inherit (flake.lib) agenix-rekey homeModules networking nixosModules users;
 
     # Derive Seeds (BIP-85) > 32-bytes hex > Index Number:
     derivationIndex = 1;
