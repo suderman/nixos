@@ -39,12 +39,6 @@
     agents = ["june" "cid" "pax"];
   };
 
-  # Remote control for my friendly robot
-  programs.openclaw = {
-    enable = false;
-    host = "openclaw-bot.kit";
-  };
-
   # Gaming
   programs.steam.enable = true;
   programs.dolphin-emu.enable = true;

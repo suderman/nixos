@@ -42,12 +42,6 @@
   programs.rmpc.enable = true; # new client
   programs.projectm.enable = true; # visualizer
 
-  # Remote control for my friendly robot
-  programs.openclaw = {
-    enable = false;
-    host = "openclaw-bot.kit";
-  };
-
   # easy remote access to june from here too
   programs.zsh.initContent =
     lib.mkAfter
