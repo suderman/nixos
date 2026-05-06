@@ -49,12 +49,16 @@
         platforms = platforms.all;
       };
     };
-in
-  x:
-    if (isString x)
-    then (fromString x)
-    else if (isPath x)
-    then (fromPath x)
-    else if (isAttrs x)
-    then (fromAttrs x)
-    else {}
+in rec {
+  meta.isHelper = true;
+
+  __functor = _:
+    x:
+      if (isString x)
+      then (fromString x)
+      else if (isPath x)
+      then (fromPath x)
+      else if (isAttrs x)
+      then (fromAttrs x)
+      else {};
+}
