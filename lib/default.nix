@@ -85,6 +85,15 @@ in rec {
   # Format owner and group as "owner:group"
   toOwnership = owner: group: "${toString owner}:${toString group}";
 
+  helperPackageNames = packages:
+    builtins.attrNames (filterAttrs (_: package: package.meta.isHelper or false) packages);
+
+  removeHelperPackages = packages:
+    builtins.removeAttrs packages (helperPackageNames packages);
+
+  removeHelperChecks = packages: checks:
+    builtins.removeAttrs checks (map (name: "pkgs-${name}") (helperPackageNames packages));
+
   # lib.derivationPath "salt"
   derivationPath = salt: let
     prefix =
