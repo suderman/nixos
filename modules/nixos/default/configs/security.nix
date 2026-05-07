@@ -7,6 +7,25 @@
   inherit (lib) genAttrs mkAfter;
   inherit (flake.lib) ls;
   inherit (flake.networking) ca domainName;
+
+  # Convert my computers to trust my custom ca
+  caBundle = "/etc/ssl/certs/ca-bundle.crt";
+  trustEnv = {
+    # Generic OpenSSL-ish clients
+    SSL_CERT_FILE = caBundle;
+
+    # Python requests / httpx-adjacent tooling
+    REQUESTS_CA_BUNDLE = caBundle;
+
+    # curl/libcurl/git ecosystem fallback
+    CURL_CA_BUNDLE = caBundle;
+
+    # nix fetchers/substituters/flakes
+    NIX_SSL_CERT_FILE = caBundle;
+
+    # Node wants the extra CA, not necessarily the whole bundle.
+    NODE_EXTRA_CA_CERTS = ca;
+  };
 in {
   security = {
     # Does sudo need a password?
@@ -47,11 +66,11 @@ in {
     pki.certificateFiles = [ca];
   };
 
-  # Set environment variables for every service
-  environment.sessionVariables = {
-    # Convince node to trust CA certificate
-    NODE_EXTRA_CA_CERTS = ca;
-  };
+  # Interactive shells, desktop sessions, CLI tools, agents launched from user env.
+  environment.sessionVariables = trustEnv;
+
+  # System services. Do not assume sessionVariables reach these.
+  systemd.globalEnvironment = trustEnv;
 
   # Enable passwordless ssh access
   services.openssh = {
@@ -70,7 +89,7 @@ in {
     settings.GatewayPorts = "clientspecified";
   };
 
-  # Start ssh agent and add all configurations as known hosts
+  # Add all configurations as known hosts
   programs.ssh = let
     hostNames = ls {
       path = flake + /hosts;
@@ -82,7 +101,6 @@ in {
       publicKey = readFile (flake + /hosts/${hostName}/ssh_host_ed25519_key.pub);
       extraHostNames = ["${hostName}.${domainName}"];
     });
-    # startAgent = true;
   };
 
   # Custom CA private key

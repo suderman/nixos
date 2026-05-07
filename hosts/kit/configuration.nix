@@ -69,6 +69,12 @@
   # services.traefik.proxy."chat" = config.services.open-webui.port;
 
   services.open-webui.enable = true;
+  services.honcho.enable = true;
+
+  services.mysql = {
+    enable = true;
+    package = pkgs.mariadb;
+  };
 
   services.immich.enable = false;
 
