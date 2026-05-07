@@ -20,8 +20,8 @@ in {
 
     source = mkOption {
       type = types.path;
-      default = flake.inputs.honcho-src;
-      defaultText = lib.literalExpression "flake.inputs.honcho-src";
+      default = flake.inputs.honcho;
+      defaultText = lib.literalExpression "flake.inputs.honcho";
       description = "Pinned Honcho source tree.";
     };
 
@@ -42,7 +42,11 @@ in {
 
     llm = {
       transport = mkOption {
-        type = types.enum ["openai" "anthropic" "gemini"];
+        type = types.enum [
+          "openai"
+          "anthropic"
+          "gemini"
+        ];
         default = "anthropic";
       };
 
@@ -90,9 +94,16 @@ in {
       };
     };
 
+    # derive unique default redis port from cfg.name
     redisPort = mkOption {
       type = types.port;
-      default = 6379;
+      default = let
+        base = 6380;
+        span = 100;
+        op = acc: char: lib.mod ((acc * 33) + lib.strings.charToInt char) span;
+        chars = lib.strings.stringToCharacters "${toString base}:${cfg.name}";
+      in
+        base + (builtins.foldl' op 5381 chars);
     };
   };
 
@@ -150,8 +161,17 @@ in {
     systemd.services = let
       python = pkgs.python313;
       runtimeLibs = [pkgs.stdenv.cc.cc];
-      postgresDeps = ["postgresql.service" "postgresql-setup.service" "honcho-postgresql.service"];
-      runtimeDeps = postgresDeps ++ ["honcho-setup.service" "redis-honcho.service"];
+      postgresDeps = [
+        "postgresql.service"
+        "postgresql-setup.service"
+        "honcho-postgresql.service"
+      ];
+      runtimeDeps =
+        postgresDeps
+        ++ [
+          "honcho-setup.service"
+          "redis-honcho.service"
+        ];
 
       llmApiKeyEnv =
         if cfg.llm.transport == "anthropic"

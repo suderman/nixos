@@ -813,7 +813,7 @@
         "type": "github"
       }
     },
-    "honcho-src": {
+    "honcho": {
       "flake": false,
       "locked": {
         "lastModified": 1778083469,
@@ -1778,7 +1778,7 @@
         "hardware": "hardware",
         "hermes-agent": "hermes-agent",
         "home-manager": "home-manager_2",
-        "honcho-src": "honcho-src",
+        "honcho": "honcho",
         "hypr-dynamic-cursors": "hypr-dynamic-cursors",
         "hyprland": "hyprland",
         "hyprland-plugins": "hyprland-plugins",
