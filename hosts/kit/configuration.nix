@@ -69,7 +69,21 @@
   # services.traefik.proxy."chat" = config.services.open-webui.port;
 
   services.open-webui.enable = true;
-  services.honcho.enable = true;
+
+  services.honcho = {
+    enable = true;
+    apiKeys = ./apikeys-env.age;
+    llm = {
+      baseUrl = "https://api.minimax.io/anthropic";
+      model = "MiniMax-M2.7";
+      apiKeyEnv = "MINIMAX_API_KEY";
+    };
+    embeddings = {
+      baseUrl = "https://openrouter.ai/api/v1";
+      model = "openai/text-embedding-3-small";
+      apiKeyEnv = "OPENROUTER_API_KEY";
+    };
+  };
 
   services.mysql = {
     enable = true;
