@@ -813,22 +813,6 @@
         "type": "github"
       }
     },
-    "honcho": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1778083469,
-        "narHash": "sha256-zcfhg+q3eleHoyZBUnDRB4uxbJLMcT21wh7TRbHZVFE=",
-        "owner": "plastic-labs",
-        "repo": "honcho",
-        "rev": "a4ae372932b064d8b9bdcf2d6a2c4faec4169162",
-        "type": "github"
-      },
-      "original": {
-        "owner": "plastic-labs",
-        "repo": "honcho",
-        "type": "github"
-      }
-    },
     "hypr-dynamic-cursors": {
       "inputs": {
         "hyprland": [
@@ -1778,7 +1762,6 @@
         "hardware": "hardware",
         "hermes-agent": "hermes-agent",
         "home-manager": "home-manager_2",
-        "honcho": "honcho",
         "hypr-dynamic-cursors": "hypr-dynamic-cursors",
         "hyprland": "hyprland",
         "hyprland-plugins": "hyprland-plugins",

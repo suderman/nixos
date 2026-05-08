@@ -87,11 +87,6 @@
     # Hermes Agent
     # <https://github.com/NousResearch/hermes-agent>
     hermes-agent.url = "github:NousResearch/hermes-agent/v2026.4.30";
-
-    # Honcho source
-    # <https://github.com/plastic-labs/honcho>
-    honcho.url = "github:plastic-labs/honcho";
-    honcho.flake = false;
   };
 
   outputs = inputs: let

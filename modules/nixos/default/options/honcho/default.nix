@@ -3,11 +3,19 @@
   config,
   lib,
   pkgs,
-  flake,
   ...
 }: let
   cfg = config.services.honcho;
   inherit (lib) mkOption types;
+
+  # https://github.com/plastic-labs/honcho
+  # last checked 2026-05-06
+  honchoSrc = pkgs.fetchFromGitHub {
+    owner = "plastic-labs";
+    repo = "honcho";
+    rev = "a4ae372932b064d8b9bdcf2d6a2c4faec4169162";
+    hash = "sha256-zcfhg+q3eleHoyZBUnDRB4uxbJLMcT21wh7TRbHZVFE=";
+  };
 in {
   options.services.honcho = {
     enable = lib.mkEnableOption "Plastic Labs Honcho";
@@ -20,8 +28,7 @@ in {
 
     source = mkOption {
       type = types.path;
-      default = flake.inputs.honcho;
-      defaultText = lib.literalExpression "flake.inputs.honcho";
+      default = "${honchoSrc}";
       description = "Pinned Honcho source tree.";
     };
 
@@ -42,20 +49,13 @@ in {
 
     llm = {
       transport = mkOption {
-        type = types.enum [
-          "openai"
-          "anthropic"
-          "gemini"
-        ];
+        type = types.enum ["openai" "anthropic" "gemini"];
         default = "anthropic";
       };
 
       baseUrl = mkOption {
         type = types.str;
-        default =
-          if cfg.llm.transport == "anthropic"
-          then "https://api.minimax.io/anthropic"
-          else "https://api.minimax.io/v1";
+        default = "https://api.minimax.io/anthropic";
       };
 
       model = mkOption {
@@ -71,10 +71,7 @@ in {
       };
 
       transport = mkOption {
-        type = types.enum [
-          "openai"
-          "gemini"
-        ];
+        type = types.enum ["openai" "gemini"];
         default = "openai";
       };
 
@@ -86,11 +83,6 @@ in {
       model = mkOption {
         type = types.str;
         default = "openai/text-embedding-3-small";
-      };
-
-      apiKeyEnv = mkOption {
-        type = types.str;
-        default = "HONCHO_EMBEDDING_API_KEY";
       };
     };
 
@@ -161,18 +153,8 @@ in {
     systemd.services = let
       python = pkgs.python313;
       runtimeLibs = [pkgs.stdenv.cc.cc];
-      postgresDeps = [
-        "postgresql.service"
-        "postgresql-setup.service"
-        "honcho-postgresql.service"
-      ];
-      runtimeDeps =
-        postgresDeps
-        ++ [
-          "honcho-setup.service"
-          "redis-honcho.service"
-        ];
-
+      postgresDeps = ["postgresql.service" "postgresql-setup.service" "honcho-postgresql.service"];
+      runtimeDeps = postgresDeps ++ ["honcho-setup.service" "redis-honcho.service"];
       llmApiKeyEnv =
         if cfg.llm.transport == "anthropic"
         then "LLM_ANTHROPIC_API_KEY"
@@ -239,20 +221,14 @@ in {
               }
           )
           {}
-          [
-            "minimal"
-            "low"
-            "medium"
-            "high"
-            "max"
-          ]
+          ["minimal" "low" "medium" "high" "max"]
         )
         // {
           EMBED_MESSAGES = "true";
           EMBEDDING_MODEL_CONFIG__TRANSPORT = cfg.embeddings.transport;
           EMBEDDING_MODEL_CONFIG__MODEL = cfg.embeddings.model;
           EMBEDDING_MODEL_CONFIG__OVERRIDES__BASE_URL = cfg.embeddings.baseUrl;
-          EMBEDDING_MODEL_CONFIG__OVERRIDES__API_KEY_ENV = cfg.embeddings.apiKeyEnv;
+          EMBEDDING_MODEL_CONFIG__OVERRIDES__API_KEY_ENV = "HONCHO_EMBEDDING_API_KEY";
 
           CACHE_ENABLED = "true";
           CACHE_URL = "redis://127.0.0.1:${toString cfg.redisPort}/0?suppress=true";
@@ -271,13 +247,7 @@ in {
               builtins.foldl'
               (acc: level: acc // {"DIALECTIC_LEVELS__${level}__MODEL_CONFIG__THINKING_BUDGET_TOKENS" = "0";})
               {}
-              [
-                "minimal"
-                "low"
-                "medium"
-                "high"
-                "max"
-              ]
+              ["minimal" "low" "medium" "high" "max"]
             )
         );
 
@@ -314,14 +284,8 @@ in {
     in {
       honcho-postgresql = {
         description = "Prepare Honcho PostgreSQL database";
-        after = [
-          "postgresql.service"
-          "postgresql-setup.service"
-        ];
-        requires = [
-          "postgresql.service"
-          "postgresql-setup.service"
-        ];
+        after = ["postgresql.service" "postgresql-setup.service"];
+        requires = ["postgresql.service" "postgresql-setup.service"];
         serviceConfig = {
           User = "postgres";
           Group = "postgres";
@@ -369,12 +333,7 @@ in {
         after = runtimeDeps;
         requires = runtimeDeps;
         inherit environment;
-        path =
-          [
-            pkgs.uv
-            python
-          ]
-          ++ runtimeLibs;
+        path = [pkgs.uv python] ++ runtimeLibs;
         serviceConfig = mkServiceConfig {
           Restart = "on-failure";
           RestartSec = "5s";
@@ -392,12 +351,7 @@ in {
         after = runtimeDeps;
         requires = runtimeDeps;
         inherit environment;
-        path =
-          [
-            pkgs.uv
-            python
-          ]
-          ++ runtimeLibs;
+        path = [pkgs.uv python] ++ runtimeLibs;
         serviceConfig = mkServiceConfig {
           Restart = "on-failure";
           RestartSec = "5s";
