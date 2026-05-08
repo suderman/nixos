@@ -34,16 +34,26 @@ in {
       ${mkScript {inherit text path;}}
     '';
 
-  # Proxy hermes agents declared by each user
+  # Proxy Hermes dashboards and APIs declared by each user
   services.traefik.proxy = builtins.listToAttrs (
     lib.concatMap (
       user: let
-        inherit (user.lib.hermes-agent) apiPortFor;
+        inherit (config.networking) hostName;
+        inherit (user.lib.hermes-agent) apiPortFor dashboardPortFor;
       in
-        lib.map (name: {
-          inherit name;
-          value = "http://127.0.0.1:${toString (apiPortFor name)}";
-        })
+        lib.concatMap (name: [
+          {
+            inherit name;
+            value = "http://127.0.0.1:${toString (dashboardPortFor name)}";
+          }
+          {
+            name = "api-${name}";
+            value = {
+              hostName = "api.${name}.${hostName}";
+              url = "http://127.0.0.1:${toString (apiPortFor name)}";
+            };
+          }
+        ])
         user.services.hermes-agent.agents
     )
     users
