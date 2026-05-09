@@ -5,8 +5,8 @@ is_floating="$(hyprctl activewindow -j | jq -r .floating)"
 
 # If tiled, set floating
 if [[ "$is_floating" != "true" ]]; then
-  hyprctl --batch "dispatch setfloating address:$addr ; dispatch focuswindow address:$addr"
-  hyprctl --batch "dispatch resizeactive exact 50% 50% ; dispatch centerwindow 1"
+  hyprctl dispatch 'hl.dsp.window.float({ action = "float" })'
+  hyprctl dispatch 'hl.dsp.window.center()'
 
 # Else, cycle the floating window's position around the screen
 else
@@ -25,35 +25,43 @@ else
   next_pos="top_left"
 
   if [[ "$pos" == "top_left" ]]; then
-    hyprctl --batch "dispatch movewindow u ; dispatch movewindow l"
+    hyprctl dispatch 'hl.dsp.window.move({ direction = "up" })'
+    hyprctl dispatch 'hl.dsp.window.move({ direction = "left" })'
     [[ "$dir" == "forward" ]] && next_pos="top_center" || next_pos="middle_left"
 
   elif [[ "$pos" == "top_center" ]]; then
-    hyprctl --batch "dispatch centerwindow 1; dispatch movewindow u"
+    hyprctl dispatch 'hl.dsp.window.center()'
+    hyprctl dispatch 'hl.dsp.window.move({ direction = "up" })'
     [[ "$dir" == "forward" ]] && next_pos="top_right" || next_pos="top_left"
 
   elif [[ "$pos" == "top_right" ]]; then
-    hyprctl --batch "dispatch movewindow u ; dispatch movewindow r"
+    hyprctl dispatch 'hl.dsp.window.move({ direction = "up" })'
+    hyprctl dispatch 'hl.dsp.window.move({ direction = "right" })'
     [[ "$dir" == "forward" ]] && next_pos="middle_right" || next_pos="top_center"
 
   elif [[ "$pos" == "middle_right" ]]; then
-    hyprctl --batch "dispatch centerwindow 1 ; dispatch movewindow r"
+    hyprctl dispatch 'hl.dsp.window.center()'
+    hyprctl dispatch 'hl.dsp.window.move({ direction = "right" })'
     [[ "$dir" == "forward" ]] && next_pos="bottom_right" || next_pos="top_right"
 
   elif [[ "$pos" == "bottom_right" ]]; then
-    hyprctl --batch "dispatch movewindow d ; dispatch movewindow r"
+    hyprctl dispatch 'hl.dsp.window.move({ direction = "down" })'
+    hyprctl dispatch 'hl.dsp.window.move({ direction = "right" })'
     [[ "$dir" == "forward" ]] && next_pos="bottom_center" || next_pos="middle_right"
 
   elif [[ "$pos" == "bottom_center" ]]; then
-    hyprctl --batch "dispatch centerwindow 1 ; dispatch movewindow d"
+    hyprctl dispatch 'hl.dsp.window.center()'
+    hyprctl dispatch 'hl.dsp.window.move({ direction = "down" })'
     [[ "$dir" == "forward" ]] && next_pos="bottom_left" || next_pos="bottom_right"
 
   elif [[ "$pos" == "bottom_left" ]]; then
-    hyprctl --batch "dispatch movewindow d ; dispatch movewindow l"
+    hyprctl dispatch 'hl.dsp.window.move({ direction = "down" })'
+    hyprctl dispatch 'hl.dsp.window.move({ direction = "left" })'
     [[ "$dir" == "forward" ]] && next_pos="middle_left" || next_pos="bottom_center"
 
   elif [[ "$pos" == "middle_left" ]]; then
-    hyprctl --batch "dispatch centerwindow 1 ; dispatch movewindow l"
+    hyprctl dispatch 'hl.dsp.window.center()'
+    hyprctl dispatch 'hl.dsp.window.move({ direction = "left" })'
     [[ "$dir" == "forward" ]] && next_pos="top_left" || next_pos="bottom_left"
   fi
 

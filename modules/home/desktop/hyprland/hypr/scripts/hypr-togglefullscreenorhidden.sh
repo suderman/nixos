@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 
 # If fullscreen, toggle OFF and do nothing else
-if [[ "$(hyprctl activewindow -j | jq '.fullscreen')" != "0" ]]; then
-  hyprctl dispatch fullscreen 1
+fullscreen_mode="$(hyprctl activewindow -j | jq -r '.fullscreen')"
+if [[ "$fullscreen_mode" != "0" ]]; then
+  if [[ "$fullscreen_mode" == "1" ]]; then
+    hyprctl dispatch 'hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" })'
+  else
+    hyprctl dispatch 'hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" })'
+  fi
 
 # Otherwise, toggle visibilty of floating windows
 else
@@ -19,10 +24,6 @@ else
         '[.[] | select(.workspace.name == $ws and .floating == true) | .address] | .[]'
   }
 
-  # Disable animations and begin batch cmds
-  hyprctl keyword animations:enabled 0
-  cmds=""
-
   # Any floats in the hidden workspace?
   special_floats="$(floats "special:hidden$workspace")"
   if [[ -n "$special_floats" ]]; then
@@ -31,8 +32,8 @@ else
     for float in $special_floats; do
 
       # Focus each window and move to regular workspace
-      cmds="$cmds; dispatch focuswindow address:$float"
-      cmds="$cmds; dispatch movetoworkspace $workspace"
+      hyprctl dispatch "hl.dsp.focus({ window = \"address:$float\" })"
+      hyprctl dispatch "hl.dsp.window.move({ workspace = \"$workspace\" })"
 
     done
 
@@ -42,8 +43,8 @@ else
     for float in $(floats "$workspace"); do
 
       # Focus each window and move to hidden workspace
-      cmds="$cmds; dispatch focuswindow address:$float"
-      cmds="$cmds; dispatch movetoworkspacesilent special:hidden$workspace"
+      hyprctl dispatch "hl.dsp.focus({ window = \"address:$float\" })"
+      hyprctl dispatch "hl.dsp.window.move({ workspace = \"special:hidden$workspace\" })"
 
     done
 
@@ -51,11 +52,7 @@ else
 
   # Focus original window (if tiled)
   if [[ -n "$window" ]]; then
-    cmds="$cmds; dispatch focuswindow address:$window"
+    hyprctl dispatch "hl.dsp.focus({ window = \"address:$window\" })"
   fi
-
-  # Re-enable animations and run batch commands
-  cmds="$cmds; keyword animations:enabled 1"
-  hyprctl --batch "$cmds"
 
 fi

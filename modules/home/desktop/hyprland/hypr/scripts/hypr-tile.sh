@@ -9,26 +9,26 @@ if [[ "$is_floating" != "true" ]]; then
 
   if [[ "$layout" == "scrolling" ]]; then
     # scrolling (move window into own column)
-    hyprctl dispatch layoutmsg promote
+    hyprctl dispatch 'hl.dsp.layout("promote")'
 
   # master (cycle orientations)
   elif [[ "$layout" == "master" ]]; then
     if [[ "$mode" == "alt" ]]; then
-      hyprctl dispatch layoutmsg orientationprev
+      hyprctl dispatch 'hl.dsp.layout("orientationprev")'
     else
-      hyprctl dispatch layoutmsg orientationnext
+      hyprctl dispatch 'hl.dsp.layout("orientationnext")'
     fi
 
   else
     # dwindle (toggly/swap a split)
     if [[ "$mode" == "alt" ]]; then
-      hyprctl dispatch layoutmsg swapsplit
+      hyprctl dispatch 'hl.dsp.layout("swapsplit")'
     else
-      hyprctl dispatch layoutmsg togglesplit
+      hyprctl dispatch 'hl.dsp.layout("togglesplit")'
     fi
   fi
 
 # Else, set tiled
 else
-  hyprctl --batch "dispatch settiled address:$addr ; dispatch focuswindow address:$addr"
+  hyprctl dispatch 'hl.dsp.window.float({ action = "tile" })'
 fi

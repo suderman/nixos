@@ -1,7 +1,15 @@
 #!/usr/bin/env bash
-enabled="$(hyprctl getoption plugin:hyprbars:enabled)"
-if [[ $enabled == *1* ]]; then
-  hyprctl keyword plugin:hyprbars:enabled false
-else
-  hyprctl keyword plugin:hyprbars:enabled true
-fi
+hyprctl eval '
+local enabled = hl.get_config("plugin:hyprbars:enabled")
+if enabled == nil then
+  return
+end
+
+hl.config({
+  plugin = {
+    hyprbars = {
+      enabled = not enabled,
+    },
+  },
+})
+'

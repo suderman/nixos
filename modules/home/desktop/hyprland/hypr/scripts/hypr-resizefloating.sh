@@ -2,5 +2,6 @@
 number="${1:-50}"
 is_floating="$(hyprctl activewindow -j | jq -r .floating)"
 if [[ "$is_floating" == "true" ]]; then
-  hyprctl --batch "dispatch resizeactive exact $number% $number% ; dispatch centerwindow 1"
+  hyprctl dispatch "hl.dsp.window.resize({ x = \"$number%\", y = \"$number%\" })"
+  hyprctl dispatch 'hl.dsp.window.center()'
 fi

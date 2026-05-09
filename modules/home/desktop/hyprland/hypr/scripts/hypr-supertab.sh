@@ -25,21 +25,19 @@ last_to_first() {
 # Grab the address at the top of the stack and focus
 focus_window() {
   addr="$(awk 'NR==1{print $1}' $stack)"
-  hyprctl dispatch focuswindow address:$addr
+  hyprctl dispatch "hl.dsp.focus({ window = \"address:$addr\" })"
 }
 
 # Clear all marks
 if [[ "${1-}" == "clear" ]]; then
-  cmds=""
   while read -r addr; do
-    cmds="$cmds; dispatch tagwindow mark address:$addr"
+    [[ -n "$addr" ]] && hyprctl dispatch "hl.dsp.window.tag({ tag = \"mark\", window = \"address:$addr\" })"
   done < <(get_windows mark)
-  hyprctl --batch "$cmds"
   notify-send -t 1000 "Clear all marks"
 
 # Toggle individual marks
 elif [[ "${1-}" == "mark" ]]; then
-  hyprctl dispatch tagwindow mark
+  hyprctl dispatch 'hl.dsp.window.tag({ tag = "mark" })'
 
 # Focus next window in stack
 elif [[ "${1-}" == "next" ]]; then

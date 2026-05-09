@@ -3,11 +3,11 @@ dir="${1:-next}" # next/prev
 
 # Prev workspace
 if [[ "$dir" == "prev" ]]; then
-  hyprctl dispatch workspace e-1
+  hyprctl dispatch 'hl.dsp.focus({ workspace = "e-1" })'
 
 # Next workspace
 else
-  hyprctl dispatch workspace e+1
+  hyprctl dispatch 'hl.dsp.focus({ workspace = "e+1" })'
 fi
 
 # # This was an attempt to prevent workspace wrapping but it wasn't smooth enough
