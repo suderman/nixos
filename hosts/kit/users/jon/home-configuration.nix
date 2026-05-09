@@ -21,7 +21,8 @@
         "__GLX_VENDOR_LIBRARY_NAME,nvidia"
       ];
     };
-    enablePlugins = true; # set false if plugins barf errors
+    enablePlugins = true; # dynamic cursors work on v0.55.0
+    enableOfficialPlugins = false; # hyprbars/hyprexpo broken on v0.55.0
   };
 
   # Hide monitor speakers
