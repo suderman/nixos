@@ -7,7 +7,7 @@
   cfg = config.wayland.windowManager.hyprland;
   inherit (lib) mkIf;
 in {
-  wayland.windowManager.hyprland = mkIf cfg.enablePlugins {
+  wayland.windowManager.hyprland = mkIf cfg.enableOfficialPlugins {
     plugins = [perSystem.hyprland-plugins.hyprbars];
 
     settings = {

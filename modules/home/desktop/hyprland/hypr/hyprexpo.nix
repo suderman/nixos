@@ -7,7 +7,7 @@
   cfg = config.wayland.windowManager.hyprland;
   inherit (lib) mkIf;
 in {
-  wayland.windowManager.hyprland = mkIf cfg.enablePlugins {
+  wayland.windowManager.hyprland = mkIf cfg.enableOfficialPlugins {
     plugins = [perSystem.hyprland-plugins.hyprexpo];
 
     settings = {
@@ -23,11 +23,11 @@ in {
         # gesture_positive = true; # positive = swipe down. Negative = swipe up.
       };
 
-      bind = mkIf cfg.enablePlugins [
+      bind = mkIf cfg.enableOfficialPlugins [
         "super, 0, hyprexpo:expo, toggle"
       ];
 
-      bindsn = mkIf cfg.enablePlugins [
+      bindsn = mkIf cfg.enableOfficialPlugins [
         # Toggle expo with super+semicolon+apostrophe ([;'] same-time)
         "super_l, semicolon&apostrophe, hyprexpo:expo, toggle"
         "super_r, semicolon&apostrophe, hyprexpo:expo, toggle"

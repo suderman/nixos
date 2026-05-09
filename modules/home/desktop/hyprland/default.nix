@@ -11,12 +11,14 @@
 
   options.wayland.windowManager.hyprland = {
     enablePlugins = lib.mkEnableOption "enablePlugins";
+    enableOfficialPlugins = lib.mkEnableOption "enableOfficialPlugins";
   };
 
   config = {
     wayland = {
       windowManager.hyprland = {
         enable = true;
+        enableOfficialPlugins = lib.mkDefault false;
         package = null;
         portalPackage = null;
         systemd.enable = true;
