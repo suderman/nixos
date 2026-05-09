@@ -183,19 +183,6 @@ in {
           float = true,
       })
     '';
-
-    wayland.windowManager.hyprland.settings = {
-      bind = [
-        ", print, exec, printscreen image"
-        "alt, print, exec, printscreen video"
-        "shift, print, exec, printscreen video"
-        "ctrl, print, exec, printscreen color"
-      ];
-      windowrule = [
-        "fullscreen on, float on, match:class com.gabm.satty"
-      ];
-    };
-
     xdg.configFile."satty/config.toml" = let
       settings = {
         general = {

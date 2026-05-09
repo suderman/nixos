@@ -3,6 +3,8 @@ target_layout="${1:-next}" # next prev dwindle master scrolling monocle
 current_layout="$(hyprctl -j activeworkspace | jq -r .tiledLayout)"
 id="$(hyprctl -j activeworkspace | jq -r .id)"
 
+# Lua config mode rejects `hyprctl keyword workspace ...`, so use a runtime
+# workspace rule update instead.
 set_layout() {
   local layout="$1"
   hyprctl eval "hl.workspace_rule({ workspace = \"$id\", layout = \"$layout\" })"

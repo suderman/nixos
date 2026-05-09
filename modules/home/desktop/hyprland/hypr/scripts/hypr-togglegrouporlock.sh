@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# If the active window is already in a real group, toggle the lock state.
+# Otherwise, create/dissolve the group like the old helper did.
 # count number in group
 grouped_windows_count="$(hyprctl activewindow -j | jq '.grouped | length')"
 

@@ -2,16 +2,13 @@
 {
   config,
   lib,
-  options,
   ...
 }: let
   cfg = config.programs.mpv;
   inherit (lib) mkIf mkDefault;
   class = "mpv";
-  hasHyprLua = lib.hasAttrByPath ["wayland" "windowManager" "hyprland" "lua" "features"] options;
 in {
-  config = mkIf cfg.enable (lib.mkMerge [
-    {
+  config = mkIf cfg.enable {
     programs.mpv = {
       config = {
         background = mkDefault "color";
@@ -30,12 +27,6 @@ in {
         "Ctrl+l" = "ab-loop";
       };
     };
-
-    # Treat as media windows by hyprland
-    wayland.windowManager.hyprland.settings = {
-      windowrule = ["tag +media, match:class (${class})"];
-    };
-
     # Make default application for videos
     xdg.mimeApps.defaultApplications = {
       # video
@@ -76,15 +67,12 @@ in {
         for = "unix";
       }
     ];
-    }
-    (lib.optionalAttrs hasHyprLua {
-      wayland.windowManager.hyprland.lua.features.mpv = ''
-        hl.window_rule({
-            name = "mpv-media-tag",
-            match = { class = "${class}" },
-            tag = "+media",
-        })
-      '';
-    })
-  ]);
+    wayland.windowManager.hyprland.lua.features.mpv = ''
+      hl.window_rule({
+          name = "mpv-media-tag",
+          match = { class = "${class}" },
+          tag = "+media",
+      })
+    '';
+  };
 }

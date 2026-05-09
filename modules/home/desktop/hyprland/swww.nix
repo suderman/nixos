@@ -37,15 +37,6 @@
         animation = "fade",
     })
   '';
-
-  wayland.windowManager.hyprland.settings = {
-    # Keybind to change it up
-    bind = ["super+alt+shift, p, exec, wallpaper"];
-    # Pretty animations in hyprland
-    # animations.layerrule = ["animation fade, swww-daemon"];
-    animations.layerrule = ["animation fade, match:namespace swww-daemon"];
-  };
-
   # Select specific wallpaper in Yazi
   programs.yazi.settings.opener.wallpaper = [
     {

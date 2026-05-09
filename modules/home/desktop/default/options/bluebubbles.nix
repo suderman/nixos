@@ -26,11 +26,6 @@ in {
       "super.c" = "C-c";
       "super.v" = "C-v";
     };
-
-    wayland.windowManager.hyprland.settings = {
-      windowrule = [];
-    };
-
     persist.storage.directories = [
       ".var/app/app.bluebubbles.BlueBubbles/config"
       ".var/app/app.bluebubbles.BlueBubbles/data"

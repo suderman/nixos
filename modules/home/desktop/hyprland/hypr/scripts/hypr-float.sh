@@ -3,6 +3,7 @@ is_floating="$(hyprctl activewindow -j | jq -r .floating)"
 is_pinned="$(hyprctl activewindow -j | jq -r .pinned)"
 read -r x y < <(hyprctl activewindow -j | jq -r '.at | "\(.[0]) \(.[1])"')
 
+# Float a tiled window and center it if it would otherwise end up off-screen.
 # If already floating, keep floating. If also pinned, unpin
 if [[ "$is_floating" == "true" ]]; then
   [[ "$is_pinned" == "true" ]] && hyprctl dispatch 'hl.dsp.window.pin()'

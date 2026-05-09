@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Persist an MRU stack outside Hyprland so the same command can be reused by
+# binds, waybar actions, and shell invocations.
 # Stack of hyprland client windows
 stack="$XDG_RUNTIME_DIR/supertab"
 touch $stack

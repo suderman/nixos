@@ -2,31 +2,19 @@
 {
   config,
   lib,
-  options,
   pkgs,
   perSystem,
   ...
 }: let
   cfg = config.programs.steam;
-  inherit (lib) mkIf options;
+  inherit (lib) mkIf;
   dataDir = ".local/share/Steam"; # primary data & configuration
   runDir = ".steam"; # must persist for big picture and gpu settings
-  hasHyprLua = lib.hasAttrByPath ["wayland" "windowManager" "hyprland" "lua" "features"] options;
 in {
-  options.programs.steam.enable = options.mkEnableOption "steam";
-  config = mkIf cfg.enable (lib.mkMerge [
-    {
+  options.programs.steam.enable = lib.options.mkEnableOption "steam";
+  config = mkIf cfg.enable {
     # Persist data directories Steam uses
     persist.scratch.directories = [dataDir runDir];
-
-    # Tag steam and games in hyprland
-    wayland.windowManager.hyprland.settings.windowrule = [
-      "tag +game, match:class [Ss]team"
-      "tag +game, match:class ^steam_app_(.*)$"
-      "tag +game, match:class ^(.*).bin.x86$"
-      "tag +game, match:class ^(.*)x86_64$"
-    ];
-
     # Timer to run backup script daily
     systemd.user.timers.steam-backup = {
       Unit.Description = "Run Steam backup daily";
@@ -76,16 +64,13 @@ in {
                   "$STORAGE/"
             '';
         };
-        };
       };
-    }
-    (lib.optionalAttrs hasHyprLua {
-      wayland.windowManager.hyprland.lua.features.steam = ''
-        hl.window_rule({ name = "steam-game-tag", match = { class = "[Ss]team" }, tag = "+game" })
-        hl.window_rule({ name = "steam-app-tag", match = { class = "^steam_app_(.*)$" }, tag = "+game" })
-        hl.window_rule({ name = "bin-x86-tag", match = { class = "^(.*).bin.x86$" }, tag = "+game" })
-        hl.window_rule({ name = "bin-x86_64-tag", match = { class = "^(.*)x86_64$" }, tag = "+game" })
-      '';
-    })
-  ]);
+    };
+    wayland.windowManager.hyprland.lua.features.steam = ''
+      hl.window_rule({ name = "steam-game-tag", match = { class = "[Ss]team" }, tag = "+game" })
+      hl.window_rule({ name = "steam-app-tag", match = { class = "^steam_app_(.*)$" }, tag = "+game" })
+      hl.window_rule({ name = "bin-x86-tag", match = { class = "^(.*).bin.x86$" }, tag = "+game" })
+      hl.window_rule({ name = "bin-x86_64-tag", match = { class = "^(.*)x86_64$" }, tag = "+game" })
+    '';
+  };
 }

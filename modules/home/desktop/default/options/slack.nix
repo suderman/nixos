@@ -21,11 +21,6 @@ in {
 
     # keyboard shortcuts
     services.keyd.windows."${mkClass class}" = {};
-
-    wayland.windowManager.hyprland.settings = {
-      windowrule = [];
-    };
-
     # Persist reboots, skip backups
     persist.scratch.directories = [".config/Slack"];
   };

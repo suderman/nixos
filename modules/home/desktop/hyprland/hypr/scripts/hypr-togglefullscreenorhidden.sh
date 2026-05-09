@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# If fullscreen, toggle OFF and do nothing else
+# Fullscreen windows take precedence; otherwise this toggles the floating-window
+# scratch layer for the active workspace.
 fullscreen_mode="$(hyprctl activewindow -j | jq -r '.fullscreen')"
 if [[ "$fullscreen_mode" != "0" ]]; then
   if [[ "$fullscreen_mode" == "1" ]]; then

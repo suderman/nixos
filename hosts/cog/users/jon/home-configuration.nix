@@ -12,8 +12,18 @@
 
   # Hyprland embedded display (laptop)
   wayland.windowManager.hyprland = {
-    settings.monitor = ["eDP-1, 2256x1504@59.9990001, 500x1440, 1.333333"];
-    enablePlugins = true; # dynamic cursors work on v0.55.0
+    lua = {
+      enable = true;
+      monitors = [
+        {
+          output = "eDP-1";
+          mode = "2256x1504@59.9990001";
+          position = "500x1440";
+          scale = "1.333333";
+        }
+      ];
+    };
+    enablePlugins = false; # dynamic cursors crash on lua path for now
     enableOfficialPlugins = false; # hyprbars/hyprexpo broken on v0.55.0
   };
 

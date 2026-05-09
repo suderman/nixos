@@ -42,38 +42,34 @@
 
 ## Hyprland Lua migration status
 
-- Hyprland 0.55 migration is in progress. Only `kit` currently enables the Lua path via `wayland.windowManager.hyprland.lua.enable`.
-- `pow` and `cog` still rely on Home Manager-generated hyprlang, so many modules intentionally keep duplicate `wayland.windowManager.hyprland.settings` definitions as compatibility shadow config.
+- Hyprland 0.55 migration is complete for current Hyprland hosts. `kit`, `pow`, and `cog` all use `wayland.windowManager.hyprland.lua.enable`.
 - Preferred new pattern for feature-local Hyprland behavior is:
   - put the feature in its owning module
   - add Lua with `wayland.windowManager.hyprland.lua.features.<name> = '' ... '';`
   - avoid standalone `.lua` files unless the module already spans a directory for other reasons
 - Core shared Lua lives under `modules/home/desktop/hyprland/lua/`. Keep that for compositor-wide behavior only, not app-specific binds/rules.
 
-### Before removing generated hyprlang entirely
+### Current cleanup state
 
-1. Enable the Lua path on all Hyprland hosts, not just `kit`.
-2. Runtime-test those hosts in real sessions, not just `nix eval`.
-3. Remove shadow `wayland.windowManager.hyprland.settings` definitions after their Lua equivalents are verified.
-4. Delete old Home Manager hyprlang-generation paths only after all hosts boot cleanly on Lua.
+1. Legacy Home Manager-generated Hyprland config has been removed from `modules/home/desktop/**`.
+2. Shared compositor behavior now lives in `modules/home/desktop/hyprland/lua/`.
+3. Feature-local rules/binds/extensions should live inline in their owning module via `wayland.windowManager.hyprland.lua.features.<name>`.
+4. `~/.config/hypr/local/init.lua` remains the supported writable scratch hook for quick experiments.
 
-### Known later-migration checklist
+### Known later follow-up checklist
 
-These still contain `wayland.windowManager.hyprland.settings` and should be reviewed before deleting hyprlang generation:
+These no longer block Lua migration, but still deserve later review or runtime validation:
 
-- Core Hyprland modules:
-  - `modules/home/desktop/hyprland/hypr/main.nix`
-  - `modules/home/desktop/hyprland/hypr/graphics.nix`
-  - `modules/home/desktop/hyprland/hypr/layouts.nix`
-  - `modules/home/desktop/hyprland/hypr/workspaces.nix`
-  - `modules/home/desktop/hyprland/hypr/windows.nix`
-  - `modules/home/desktop/hyprland/hypr/groups.nix`
-  - `modules/home/desktop/hyprland/hypr/floating.nix`
-  - `modules/home/desktop/hyprland/hypr/fullscreen.nix`
-  - `modules/home/desktop/hyprland/hypr/launchers.nix`
-  - `modules/home/desktop/hyprland/hypr/special.nix`
-  - `modules/home/desktop/hyprland/hypr/supertab.nix`
-- Hyprland feature modules with Lua shadow already in place:
+- Shared Lua core to runtime-test carefully:
+  - `modules/home/desktop/hyprland/lua/hyprland.lua`
+  - `modules/home/desktop/hyprland/lua/conf/session.lua`
+  - `modules/home/desktop/hyprland/lua/conf/look.lua`
+  - `modules/home/desktop/hyprland/lua/conf/input.lua`
+  - `modules/home/desktop/hyprland/lua/conf/layouts.lua`
+  - `modules/home/desktop/hyprland/lua/conf/group.lua`
+  - `modules/home/desktop/hyprland/lua/binds/main.lua`
+  - `modules/home/desktop/hyprland/lua/rules/windows.lua`
+- Feature-local Lua snippets now embedded in:
   - `modules/home/desktop/hyprland/printscreen.nix`
   - `modules/home/desktop/hyprland/mediactl.nix`
   - `modules/home/desktop/hyprland/mako.nix`
@@ -88,7 +84,8 @@ These still contain `wayland.windowManager.hyprland.settings` and should be revi
   - `modules/home/desktop/hyprland/rofi/calc.nix`
   - `modules/home/desktop/hyprland/rofi/clips.nix`
   - `modules/home/desktop/hyprland/rofi/sinks.nix`
-- Desktop option modules now carrying Lua shadows too:
+  - `modules/home/desktop/hyprland/hypr/scripts/*.sh` now use Lua-aware `hyprctl dispatch`/`eval` syntax and should be smoke-tested on real sessions.
+- Desktop option modules carrying app-specific Lua rules:
   - `modules/home/desktop/default/options/chromium/default.nix`
   - `modules/home/desktop/default/options/firefox/default.nix`
   - `modules/home/desktop/default/options/freetube.nix`
@@ -103,9 +100,8 @@ These still contain `wayland.windowManager.hyprland.settings` and should be revi
   - `modules/home/desktop/default/options/telegram.nix`
   - `modules/home/desktop/default/options/zathura.nix`
   - `modules/home/desktop/default/options/zwift.nix`
-- Low-priority cleanup: these currently expose empty Hyprland settings and can likely just lose them when hyprlang support is removed:
-  - `modules/home/desktop/default/options/slack.nix`
-  - `modules/home/desktop/default/options/bluebubbles.nix`
+- Dynamic cursor plugin note:
+  - `enablePlugins = false` is currently set on `kit`, `pow`, and `cog` because `hypr-dynamic-cursors` crashes on the Lua path. Revisit only after upstream plugin fixes.
 
 ## Simulation / installer work
 

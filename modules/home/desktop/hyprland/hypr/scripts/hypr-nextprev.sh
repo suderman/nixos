@@ -2,6 +2,8 @@
 next_or_prev="${1:-next}" # next/prev
 layout="$(hyprctl -j activeworkspace | jq -r .tiledLayout)"
 
+# Match each layout's native cycling behavior instead of relying on the legacy
+# `cyclenext` string parser.
 if [[ "$layout" == "master" ]]; then
 
   if [[ "$next_or_prev" == "prev" ]]; then

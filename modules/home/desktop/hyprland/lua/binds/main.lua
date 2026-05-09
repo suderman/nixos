@@ -11,6 +11,9 @@ function M.apply(_, _)
     }
     local layout_state = {}
 
+    -- Hyprland's runtime workspace rule updates do not always reflect back
+    -- immediately in activeworkspace JSON, so keep a tiny per-workspace cache
+    -- for layout cycling binds.
     local function active_layout()
         local ws = hl.get_active_workspace()
         if not ws then
@@ -20,6 +23,8 @@ function M.apply(_, _)
         return ws.tiledLayout or ws.layout
     end
 
+    -- Workspace cycling intentionally uses open-workspace selectors (e+/-1)
+    -- so the old "step through existing or empty" behavior is preserved.
     local function cycle_workspace(direction)
         hl.dispatch(hl.dsp.focus({ workspace = direction == "prev" and "e-1" or "e+1" }))
     end
@@ -52,6 +57,7 @@ function M.apply(_, _)
         hl.exec_cmd("pkill -RTMIN+8 waybar")
     end
 
+    -- Respect each layout's own idea of "next" / "previous".
     local function cycle_window(direction)
         local layout = active_layout()
 
@@ -67,6 +73,8 @@ function M.apply(_, _)
         end
     end
 
+    -- Float a tiled window, but leave existing floating windows alone except
+    -- for unpinning if they were pinned.
     local function float_active()
         local win = hl.get_active_window()
         if not win then
@@ -84,6 +92,8 @@ function M.apply(_, _)
         hl.dispatch(hl.dsp.window.center())
     end
 
+    -- Reuse the old tile helper semantics: on master this promotes/cycles,
+    -- elsewhere it toggles or swaps the split depending on the modifier.
     local function tile_active(alt_mode)
         local win = hl.get_active_window()
         if not win then

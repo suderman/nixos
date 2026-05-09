@@ -3,6 +3,8 @@ dir="${1:-forward}" # forward or reverse
 addr="$(hyprctl activewindow -j | jq -r .address)"
 is_floating="$(hyprctl activewindow -j | jq -r .floating)"
 
+# Float first if needed, otherwise cycle through a cached 3x3 grid of anchor
+# positions around the monitor.
 # If tiled, set floating
 if [[ "$is_floating" != "true" ]]; then
   hyprctl dispatch 'hl.dsp.window.float({ action = "float" })'

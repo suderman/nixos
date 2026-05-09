@@ -26,12 +26,6 @@ in {
     util.exec("SUPER + ALT + V", "clips")
     util.exec("ALT + SHIFT + INSERT", "clips")
   '';
-
-  wayland.windowManager.hyprland.settings.bind = [
-    "super+alt, v, exec, clips"
-    "alt+shift, insert, exec, clips"
-  ];
-
   services.cliphist = {
     enable = true;
     allowImages = true;

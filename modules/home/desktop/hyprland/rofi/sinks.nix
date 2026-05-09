@@ -25,12 +25,4 @@ in {
   wayland.windowManager.hyprland.lua.features.rofi_sinks = ''
     util.exec("XF86AudioMedia", "sinks")
   '';
-
-  wayland.windowManager.hyprland.settings = {
-    bind = [", XF86AudioMedia, exec, sinks"];
-    bindsn = [
-      "super_l, a&s, exec, sinks"
-      "super_r, a&s, exec, sinks"
-    ];
-  };
 }

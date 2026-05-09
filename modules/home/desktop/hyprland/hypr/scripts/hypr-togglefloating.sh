@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# Toggle floating, then recenter if the new floating position would land off-screen.
 # Toggle floating and get status
 hyprctl dispatch 'hl.dsp.window.float({ action = "toggle" })'
 

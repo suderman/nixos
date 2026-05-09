@@ -6,7 +6,7 @@
   ...
 }: {
   imports =
-    [flake.homeModules.desktop.default]
+    [flake.homeModules.desktop.default ./lua-options.nix]
     ++ flake.lib.ls ./.;
 
   options.wayland.windowManager.hyprland = {

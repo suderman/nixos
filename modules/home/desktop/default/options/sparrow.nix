@@ -2,7 +2,6 @@
 {
   config,
   lib,
-  options,
   pkgs,
   perSystem,
   ...
@@ -14,7 +13,6 @@
 
   # Window class name
   class = "Sparrow";
-  hasHyprLua = lib.hasAttrByPath ["wayland" "windowManager" "hyprland" "lua" "features"] options;
 in {
   options.programs.sparrow = {
     enable = lib.options.mkEnableOption "sparrow";
@@ -28,8 +26,7 @@ in {
     };
   };
 
-  config = mkIf cfg.enable (lib.mkMerge [
-    {
+  config = mkIf cfg.enable {
     home.packages = [pkgs.sparrow];
 
     xdg.desktopEntries = let
@@ -59,22 +56,12 @@ in {
     services.keyd.windows."${mkClass class}" = {
       "super.w" = "C-w"; # close
     };
-
-    # no blur on context menus (runs in xwayland)
-    wayland.windowManager.hyprland.settings = {
-      windowrule = [
-        "no_blur on, match:class ^${class}$, match:title ^()$"
-      ];
-    };
-    }
-    (lib.optionalAttrs hasHyprLua {
-      wayland.windowManager.hyprland.lua.features.sparrow = ''
-        hl.window_rule({
-            name = "sparrow-no-blur",
-            match = { class = "^${class}$", title = "^()$" },
-            no_blur = true,
-        })
-      '';
-    })
-  ]);
+    wayland.windowManager.hyprland.lua.features.sparrow = ''
+      hl.window_rule({
+          name = "sparrow-no-blur",
+          match = { class = "^${class}$", title = "^()$" },
+          no_blur = true,
+      })
+    '';
+  };
 }

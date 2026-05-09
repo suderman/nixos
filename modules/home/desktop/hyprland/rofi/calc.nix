@@ -33,9 +33,4 @@ in {
     util.exec("SUPER + ALT + C", "calc")
     util.exec("ALT + CTRL + INSERT", "calc")
   '';
-
-  wayland.windowManager.hyprland.settings.bind = [
-    "super+alt, c, exec, calc"
-    "alt+ctrl, insert, exec, calc"
-  ];
 }

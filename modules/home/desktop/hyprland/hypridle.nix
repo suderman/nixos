@@ -37,9 +37,4 @@ in {
   config.wayland.windowManager.hyprland.lua.features.hypridle = ''
     util.exec("num_lock", "sleep 1 && hyprctl dispatch dpms off")
   '';
-
-  # Keyboard shortcut to turn off screen immediately with numlock
-  config.wayland.windowManager.hyprland.settings = {
-    bind = [", num_lock, exec, sleep 1 && hyprctl dispatch dpms off"];
-  };
 }

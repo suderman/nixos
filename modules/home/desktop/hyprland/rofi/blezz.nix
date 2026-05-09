@@ -34,13 +34,6 @@ in {
     util.exec("SUPER + ALT + SPACE", "blezz")
     util.exec("SUPER + SUPER_R", "blezz", { release = true })
   '';
-
-  # Right Super is blezz
-  wayland.windowManager.hyprland.settings = {
-    bindr = ["super, Super_R, exec, blezz"];
-    bind = ["super+alt, space, exec, blezz"];
-  };
-
   xdg.configFile."rofi/blezz".text = ''
     Main:
     dir(p, Programs, window-new-symbolic)

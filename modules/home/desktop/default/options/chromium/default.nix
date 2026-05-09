@@ -2,7 +2,6 @@
   config,
   osConfig,
   lib,
-  options,
   pkgs,
   perSystem,
   ...
@@ -18,7 +17,6 @@
 
   # Window class name
   class = "chromium-browser";
-  hasHyprLua = lib.hasAttrByPath ["wayland" "windowManager" "hyprland" "lua" "features"] options;
 in {
   # Import chromium lib
   imports = [./lib.nix];
@@ -63,8 +61,7 @@ in {
     };
   };
 
-  config = mkIf cfg.enable (lib.mkMerge [
-    {
+  config = mkIf cfg.enable {
     # using Chromium without Google
     programs.chromium = {
       package = osConfig.programs.chromium.package;
@@ -85,15 +82,6 @@ in {
       # "super.n" = "C-n"; # new window
       "super.r" = "C-r"; # reload
     };
-
-    # tag Chromium and Picture-in-Picture windows
-    wayland.windowManager.hyprland.settings = {
-      windowrule = [
-        "tag +web, match:class (${class})"
-        "tag +pip, match:title ^(Picture-in-Picture)$"
-      ];
-    };
-
     # Share switches with electron apps in ~/.config
     xdg.configFile = let
       configs =
@@ -195,20 +183,17 @@ in {
           + " \"$@\"";
       })
     ];
-    }
-    (lib.optionalAttrs hasHyprLua {
-      wayland.windowManager.hyprland.lua.features.chromium = ''
-        hl.window_rule({
-            name = "chromium-tag",
-            match = { class = "${class}" },
-            tag = "+web",
-        })
-        hl.window_rule({
-            name = "pip-tag-chromium",
-            match = { title = "^(Picture-in-Picture)$" },
-            tag = "+pip",
-        })
-      '';
-    })
-  ]);
+    wayland.windowManager.hyprland.lua.features.chromium = ''
+      hl.window_rule({
+          name = "chromium-tag",
+          match = { class = "${class}" },
+          tag = "+web",
+      })
+      hl.window_rule({
+          name = "pip-tag-chromium",
+          match = { title = "^(Picture-in-Picture)$" },
+          tag = "+pip",
+      })
+    '';
+  };
 }

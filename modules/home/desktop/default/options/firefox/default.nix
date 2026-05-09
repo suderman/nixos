@@ -2,7 +2,6 @@
 {
   config,
   lib,
-  options,
   pkgs,
   flake,
   ...
@@ -12,13 +11,11 @@
 
   # Window class name
   class = "firefox";
-  hasHyprLua = lib.hasAttrByPath ["wayland" "windowManager" "hyprland" "lua" "features"] options;
 in {
   # Extra addons not found in nur
   imports = flake.lib.ls ./.;
 
-  config = lib.mkIf cfg.enable (lib.mkMerge [
-    {
+  config = lib.mkIf cfg.enable {
     programs.firefox = {
       profiles.default = {
         settings = {
@@ -89,34 +86,22 @@ in {
       # "super.n" = "C-n"; # new window
       "super.r" = "C-r"; # reload
     };
-
-    # tag Firefox and Picture-in-Picture windows
-    wayland.windowManager.hyprland.settings = {
-      windowrule = [
-        "tag +web, match:class (${class})"
-        "tag +pip, match:title ^(Picture in picture)$"
-      ];
-    };
-
     # Apply pretty colors
     # stylix.targets.firefox.profileNames = [ "default" ];
 
     # Persist browser data
     persist.storage.directories = [".mozilla/firefox/default"];
-    }
-    (lib.optionalAttrs hasHyprLua {
-      wayland.windowManager.hyprland.lua.features.firefox = ''
-        hl.window_rule({
-            name = "firefox-tag",
-            match = { class = "${class}" },
-            tag = "+web",
-        })
-        hl.window_rule({
-            name = "pip-tag-firefox",
-            match = { title = "^(Picture in picture)$" },
-            tag = "+pip",
-        })
-      '';
-    })
-  ]);
+    wayland.windowManager.hyprland.lua.features.firefox = ''
+      hl.window_rule({
+          name = "firefox-tag",
+          match = { class = "${class}" },
+          tag = "+web",
+      })
+      hl.window_rule({
+          name = "pip-tag-firefox",
+          match = { title = "^(Picture in picture)$" },
+          tag = "+pip",
+      })
+    '';
+  };
 }

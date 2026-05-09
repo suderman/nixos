@@ -2,7 +2,6 @@
 {
   config,
   lib,
-  options,
   pkgs,
   ...
 }: let
@@ -57,10 +56,8 @@
         </style>
       '';
   };
-  hasHyprLua = lib.hasAttrByPath ["wayland" "windowManager" "hyprland" "lua" "features"] options;
 in {
-  config = mkIf cfg.enable (lib.mkMerge [
-    {
+  config = mkIf cfg.enable {
     xdg.desktopEntries = config.lib.chromium.mkWebApp {inherit (pager) name url icon;};
     programs.neomutt.macros = [
       {
@@ -89,11 +86,6 @@ in {
     xdg.mimeApps.defaultApplications = {
       "x-scheme-handler/mailto" = "neomutt.desktop";
     };
-
-    wayland.windowManager.hyprland.settings.windowrule = [
-      "float on, size 800 900, animation gnomed, match:class ${pager.class}"
-    ];
-
     services.keyd.windows."${config.lib.keyd.mkClass pager.class}" = {
       "j" = "down";
       "k" = "up";
@@ -103,17 +95,14 @@ in {
       "q" = "C-w";
       "esc" = "C-w";
     };
-    }
-    (lib.optionalAttrs hasHyprLua {
-      wayland.windowManager.hyprland.lua.features.neomutt = ''
-        hl.window_rule({
-            name = "mutt-preview-float",
-            match = { class = "${pager.class}" },
-            float = true,
-            size = "800 900",
-            animation = "gnomed",
-        })
-      '';
-    })
-  ]);
+    wayland.windowManager.hyprland.lua.features.neomutt = ''
+      hl.window_rule({
+          name = "mutt-preview-float",
+          match = { class = "${pager.class}" },
+          float = true,
+          size = "800 900",
+          animation = "gnomed",
+      })
+    '';
+  };
 }

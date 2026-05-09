@@ -2,14 +2,12 @@
 {
   config,
   lib,
-  options,
   perSystem,
   ...
 }: let
   cfg = config.programs.zwift;
   inherit (lib) mkIf;
   inherit (config.lib.keyd) mkClass;
-  hasHyprLua = lib.hasAttrByPath ["wayland" "windowManager" "hyprland" "lua" "features"] options;
 
   # Window class name
   class = "zwiftapp.exe";
@@ -18,21 +16,12 @@ in {
     enable = lib.options.mkEnableOption "zwift";
   };
 
-  config = mkIf cfg.enable (lib.mkMerge [
-    {
+  config = mkIf cfg.enable {
     # Add to path
     home.packages = [perSystem.self.zwift];
 
     # Persist credentials
     persist.storage.directories = [".local/share/zwift"];
-
-    # Window rules
-    wayland.windowManager.hyprland.settings = {
-      windowrule = [
-        "tile on, match:class (${class})" # don't float
-      ];
-    };
-
     # Keyboard shortcuts
     services.keyd.windows."${mkClass class}" = {
       # "h" = "left";
@@ -79,15 +68,12 @@ in {
       # 0-9 = camera angles
       # tab = skip workout block
     };
-    }
-    (lib.optionalAttrs hasHyprLua {
-      wayland.windowManager.hyprland.lua.features.zwift = ''
-        hl.window_rule({
-            name = "zwift-tile",
-            match = { class = "${class}" },
-            tile = true,
-        })
-      '';
-    })
-  ]);
+    wayland.windowManager.hyprland.lua.features.zwift = ''
+      hl.window_rule({
+          name = "zwift-tile",
+          match = { class = "${class}" },
+          tile = true,
+      })
+    '';
+  };
 }

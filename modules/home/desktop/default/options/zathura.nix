@@ -2,17 +2,14 @@
 {
   config,
   lib,
-  options,
   ...
 }: let
   cfg = config.programs.zathura;
   inherit (lib) mkIf;
   inherit (config.lib.keyd) mkClass;
   class = "org.pwmt.zathura";
-  hasHyprLua = lib.hasAttrByPath ["wayland" "windowManager" "hyprland" "lua" "features"] options;
 in {
-  config = mkIf cfg.enable (lib.mkMerge [
-    {
+  config = mkIf cfg.enable {
     programs.zathura = {
       options = {
         database = "sqlite";
@@ -60,12 +57,6 @@ in {
 
     # Persist history, bookmarks, last page position
     persist.storage.directories = [".local/share/zathura"];
-
-    # Treat as media windows by hyprland
-    wayland.windowManager.hyprland.settings = {
-      windowrule = ["tag +media, match:class (${class})"];
-    };
-
     # Make default application for PDFs, PDFs, XPS
     xdg.mimeApps.defaultApplications = {
       "application/pdf" = ["org.pwmt.zathura.desktop"];
@@ -83,15 +74,12 @@ in {
         for = "unix";
       }
     ];
-    }
-    (lib.optionalAttrs hasHyprLua {
-      wayland.windowManager.hyprland.lua.features.zathura = ''
-        hl.window_rule({
-            name = "zathura-media-tag",
-            match = { class = "${class}" },
-            tag = "+media",
-        })
-      '';
-    })
-  ]);
+    wayland.windowManager.hyprland.lua.features.zathura = ''
+      hl.window_rule({
+          name = "zathura-media-tag",
+          match = { class = "${class}" },
+          tag = "+media",
+      })
+    '';
+  };
 }

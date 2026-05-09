@@ -14,7 +14,6 @@
   wayland.windowManager.hyprland = {
     lua = {
       enable = true;
-      host = "kit";
       monitors = [
         {
           output = "DP-1";

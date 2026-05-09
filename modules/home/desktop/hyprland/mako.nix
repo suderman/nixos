@@ -51,9 +51,4 @@
         animation = "slide",
     })
   '';
-
-  wayland.windowManager.hyprland.settings = {
-    bindn = [", escape, exec, makoctl dismiss"];
-    bind = ["super+alt, u, exec, makoctl restore"];
-  };
 }

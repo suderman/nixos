@@ -55,6 +55,9 @@
         + concatMapStringsSep "\n" (name: "  ${name} = ${renderLuaString attrs.${name}},") names
         + "\n}";
 
+  # Render inline per-feature Lua snippets into standard modules that expose
+  # `apply(host, features)`. This keeps feature ownership in the Nix module
+  # while still letting Hyprland load each feature independently.
   featureModule = name: body: ''
     local util = require("lib.util")
 
@@ -72,10 +75,14 @@
         text = featureModule name luaCfg.features.${name};
       }) (builtins.attrNames luaCfg.features));
 
+  # Deterministic feature load order keeps runtime behavior predictable when
+  # several modules contribute binds or rules.
   generatedFeatureList = ''
     return ${renderLuaList (builtins.attrNames luaCfg.features)}
   '';
 
+  # Runtime values shared by the Lua loader. Keep this as plain data so the
+  # shared Lua files can stay boring and host-agnostic.
   generatedFeatures = ''
     return {
       exec_once = ${renderLuaList (
@@ -99,6 +106,7 @@
     }
   '';
 
+  # Host-specific monitor/env/startup overrides selected from Home Manager.
   generatedHost = ''
     return {
       name = ${renderLuaString luaCfg.host},
@@ -108,63 +116,10 @@
     }
   '';
 in {
-  options.wayland.windowManager.hyprland.lua = {
-    enable = mkEnableOption "direct Hyprland Lua configuration";
-
-    host = mkOption {
-      type = types.str;
-      default = "default";
-      description = "Logical Hyprland host profile name exposed to Lua.";
-    };
-
-    execOnce = mkOption {
-      type = types.listOf types.str;
-      default = [];
-      description = "Host-specific startup commands executed once by hyprland.lua.";
-    };
-
-    env = mkOption {
-      type = types.attrsOf types.str;
-      default = {};
-      description = "Host-specific environment variables exported from hyprland.lua.";
-    };
-
-    monitors = mkOption {
-      default = [];
-      description = "Host-specific monitor declarations for hyprland.lua.";
-      type = types.listOf (types.submodule {
-        options = {
-          output = mkOption {
-            type = types.str;
-          };
-          mode = mkOption {
-            type = types.str;
-            default = "preferred";
-          };
-          position = mkOption {
-            type = types.str;
-            default = "0x0";
-          };
-          scale = mkOption {
-            type = types.str;
-            default = "1";
-          };
-          disabled = mkOption {
-            type = types.bool;
-            default = false;
-          };
-        };
-      });
-    };
-
-    features = mkOption {
-      type = types.attrsOf types.lines;
-      default = {};
-      description = "Feature-local Lua bodies rendered into ~/.config/hypr/features/*.lua.";
-    };
-  };
-
   config = mkIf luaCfg.enable {
+    # Hyprland chooses Lua mode at compositor startup if hyprland.lua exists,
+    # so keep this loader as a real Home Manager file rather than a writable
+    # local-store copy.
     home.file = {
       ".config/hypr/hyprland.lua".source = ./lua/hyprland.lua;
       ".config/hypr/lib/util.lua".source = ./lua/lib/util.lua;
@@ -180,6 +135,8 @@ in {
       ".config/hypr/generated/feature-list.lua".text = generatedFeatureList;
     } // generatedFeatureFiles;
 
+    # Local init stays writable on purpose: quick scratchpad for experiments
+    # without regenerating Home Manager output.
     home.localStorePath = [
       ".config/hypr/local/init.lua"
     ];

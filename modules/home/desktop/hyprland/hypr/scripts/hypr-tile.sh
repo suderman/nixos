@@ -4,6 +4,8 @@ addr="$(hyprctl activewindow -j | jq -r .address)"
 layout="$(hyprctl -j activeworkspace | jq -r .tiledLayout)"
 is_floating="$(hyprctl activewindow -j | jq -r .floating)"
 
+# Preserve the old shell entrypoint, but express the layout actions with
+# Lua-native dispatchers so it works in both Lua and hyprlang sessions.
 # If already tiled, togglesplit or swapsplit
 if [[ "$is_floating" != "true" ]]; then
 
