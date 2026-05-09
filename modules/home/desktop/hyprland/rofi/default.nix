@@ -52,17 +52,28 @@ in {
       };
     };
 
-    # Import extra rasi config at end of file
-    home.file."${cfg.configPath}".text = lib.mkAfter ''
-      @import "extra"
+    wayland.windowManager.hyprland.lua.features.rofi = ''
+      hl.layer_rule({
+          name = "rofi-fade",
+          match = { namespace = "^rofi$" },
+          animation = "fade",
+          dim_around = true,
+      })
     '';
 
-    # Create extra config file next to default config
-    home.file."${cfg.rasiConfigPath}".text = ''
-      configuration {
-        ${builtins.concatStringsSep "\n" cfg.rasiConfig}
-      }
-    '';
+    home.file = {
+      # Import extra rasi config at end of file
+      "${cfg.configPath}".text = lib.mkAfter ''
+        @import "extra"
+      '';
+
+      # Create extra config file next to default config
+      "${cfg.rasiConfigPath}".text = ''
+        configuration {
+          ${builtins.concatStringsSep "\n" cfg.rasiConfig}
+        }
+      '';
+    };
 
     # Use a real file for the rofi config to ease real-time tinkering
     home.localStorePath = [

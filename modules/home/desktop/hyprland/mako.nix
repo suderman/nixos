@@ -1,4 +1,4 @@
-{lib, ...}: {
+{config, lib, ...}: {
   services.mako = {
     enable = true;
     settings = {
@@ -40,6 +40,17 @@
     # [mode=do-not-disturb]
     # invisible=1
   };
+
+  wayland.windowManager.hyprland.lua.features.mako = ''
+    util.exec("ESCAPE", "makoctl dismiss")
+    util.exec("SUPER + ALT + U", "makoctl restore")
+
+    hl.layer_rule({
+        name = "notifications-slide",
+        match = { namespace = "^notifications$" },
+        animation = "slide",
+    })
+  '';
 
   wayland.windowManager.hyprland.settings = {
     bindn = [", escape, exec, makoctl dismiss"];

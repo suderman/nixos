@@ -2,6 +2,7 @@
 {
   config,
   lib,
+  options,
   pkgs,
   flake,
   ...
@@ -11,11 +12,13 @@
 
   # Window class name
   class = "firefox";
+  hasHyprLua = lib.hasAttrByPath ["wayland" "windowManager" "hyprland" "lua" "features"] options;
 in {
   # Extra addons not found in nur
   imports = flake.lib.ls ./.;
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf cfg.enable (lib.mkMerge [
+    {
     programs.firefox = {
       profiles.default = {
         settings = {
@@ -100,5 +103,20 @@ in {
 
     # Persist browser data
     persist.storage.directories = [".mozilla/firefox/default"];
-  };
+    }
+    (lib.optionalAttrs hasHyprLua {
+      wayland.windowManager.hyprland.lua.features.firefox = ''
+        hl.window_rule({
+            name = "firefox-tag",
+            match = { class = "${class}" },
+            tag = "+web",
+        })
+        hl.window_rule({
+            name = "pip-tag-firefox",
+            match = { title = "^(Picture in picture)$" },
+            tag = "+pip",
+        })
+      '';
+    })
+  ]);
 }

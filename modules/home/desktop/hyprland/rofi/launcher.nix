@@ -27,6 +27,11 @@ in {
     })
   ];
 
+  wayland.windowManager.hyprland.lua.features.rofi_launcher = ''
+    util.exec("SUPER + SPACE", "launcher")
+    util.exec("SUPER + SUPER_L", "launcher", { release = true })
+  '';
+
   # Left Super is app launcher/switcher
   wayland.windowManager.hyprland.settings = {
     bindr = ["super, Super_L, exec, launcher"];

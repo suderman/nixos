@@ -30,6 +30,11 @@ in {
     rasiConfig = [''blezz { display-name: ""; }''];
   };
 
+  wayland.windowManager.hyprland.lua.features.rofi_blezz = ''
+    util.exec("SUPER + ALT + SPACE", "blezz")
+    util.exec("SUPER + SUPER_R", "blezz", { release = true })
+  '';
+
   # Right Super is blezz
   wayland.windowManager.hyprland.settings = {
     bindr = ["super, Super_R, exec, blezz"];

@@ -2,12 +2,15 @@
 {
   config,
   lib,
+  options,
   ...
 }: let
   cfg = config.programs.freetube;
   inherit (lib) mkIf;
+  hasHyprLua = lib.hasAttrByPath ["wayland" "windowManager" "hyprland" "lua" "features"] options;
 in {
-  config = mkIf cfg.enable {
+  config = mkIf cfg.enable (lib.mkMerge [
+    {
     programs.freetube = {
       settings = {
         allowDashAv1Formats = true;
@@ -44,5 +47,15 @@ in {
 
     # Persist reboots but skip backups
     persist.scratch.directories = [".config/FreeTube"];
-  };
+    }
+    (lib.optionalAttrs hasHyprLua {
+      wayland.windowManager.hyprland.lua.features.freetube = ''
+        hl.window_rule({
+            name = "freetube-tag",
+            match = { class = "[Ff]reetube" },
+            tag = "+yt",
+        })
+      '';
+    })
+  ]);
 }

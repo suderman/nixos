@@ -2,6 +2,7 @@
   config,
   osConfig,
   lib,
+  options,
   pkgs,
   perSystem,
   ...
@@ -17,6 +18,7 @@
 
   # Window class name
   class = "chromium-browser";
+  hasHyprLua = lib.hasAttrByPath ["wayland" "windowManager" "hyprland" "lua" "features"] options;
 in {
   # Import chromium lib
   imports = [./lib.nix];
@@ -61,7 +63,8 @@ in {
     };
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf cfg.enable (lib.mkMerge [
+    {
     # using Chromium without Google
     programs.chromium = {
       package = osConfig.programs.chromium.package;
@@ -192,5 +195,20 @@ in {
           + " \"$@\"";
       })
     ];
-  };
+    }
+    (lib.optionalAttrs hasHyprLua {
+      wayland.windowManager.hyprland.lua.features.chromium = ''
+        hl.window_rule({
+            name = "chromium-tag",
+            match = { class = "${class}" },
+            tag = "+web",
+        })
+        hl.window_rule({
+            name = "pip-tag-chromium",
+            match = { title = "^(Picture-in-Picture)$" },
+            tag = "+pip",
+        })
+      '';
+    })
+  ]);
 }

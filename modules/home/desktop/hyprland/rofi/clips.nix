@@ -22,6 +22,11 @@ in {
     rasiConfig = [''clips { display-name: ""; }''];
   };
 
+  wayland.windowManager.hyprland.lua.features.rofi_clips = ''
+    util.exec("SUPER + ALT + V", "clips")
+    util.exec("ALT + SHIFT + INSERT", "clips")
+  '';
+
   wayland.windowManager.hyprland.settings.bind = [
     "super+alt, v, exec, clips"
     "alt+shift, insert, exec, clips"

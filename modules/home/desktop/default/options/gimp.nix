@@ -3,12 +3,14 @@
 {
   config,
   lib,
+  options,
   pkgs,
   ...
 }: let
   cfg = config.programs.gimp;
   inherit (lib) mkIf;
   inherit (config.lib.keyd) mkClass;
+  hasHyprLua = lib.hasAttrByPath ["wayland" "windowManager" "hyprland" "lua" "features"] options;
 
   # Window class name
   class = "gimp-3.0";
@@ -17,7 +19,8 @@ in {
     enable = lib.options.mkEnableOption "gimp";
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf cfg.enable (lib.mkMerge [
+    {
     home.packages = [pkgs.gimp3-with-plugins];
 
     xdg.desktopEntries."${class}" = {
@@ -50,5 +53,20 @@ in {
         for = "unix";
       }
     ];
-  };
+    }
+    (lib.optionalAttrs hasHyprLua {
+      wayland.windowManager.hyprland.lua.features.gimp = ''
+        hl.window_rule({
+            name = "gimp-file-dialog-tag",
+            match = { class = "file-png|file-jpeg" },
+            tag = "+dialog",
+        })
+        hl.window_rule({
+            name = "gimp-dialog-tag",
+            match = { class = "gimp", title = "(Open.*|Export.*|Save.*|Preferences.*|Configure.*|Module.*)" },
+            tag = "+dialog",
+        })
+      '';
+    })
+  ]);
 }

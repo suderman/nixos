@@ -1,6 +1,7 @@
 # wallpaper
 {
   config,
+  lib,
   pkgs,
   ...
 }: {
@@ -26,6 +27,16 @@
       ];
     })
   ];
+
+  wayland.windowManager.hyprland.lua.features.swww = ''
+    util.exec("SUPER + ALT + SHIFT + P", "wallpaper")
+
+    hl.layer_rule({
+        name = "swww-fade",
+        match = { namespace = "^swww-daemon$" },
+        animation = "fade",
+    })
+  '';
 
   wayland.windowManager.hyprland.settings = {
     # Keybind to change it up

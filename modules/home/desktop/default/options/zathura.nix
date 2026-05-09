@@ -2,14 +2,17 @@
 {
   config,
   lib,
+  options,
   ...
 }: let
   cfg = config.programs.zathura;
   inherit (lib) mkIf;
   inherit (config.lib.keyd) mkClass;
   class = "org.pwmt.zathura";
+  hasHyprLua = lib.hasAttrByPath ["wayland" "windowManager" "hyprland" "lua" "features"] options;
 in {
-  config = mkIf cfg.enable {
+  config = mkIf cfg.enable (lib.mkMerge [
+    {
     programs.zathura = {
       options = {
         database = "sqlite";
@@ -80,5 +83,15 @@ in {
         for = "unix";
       }
     ];
-  };
+    }
+    (lib.optionalAttrs hasHyprLua {
+      wayland.windowManager.hyprland.lua.features.zathura = ''
+        hl.window_rule({
+            name = "zathura-media-tag",
+            match = { class = "${class}" },
+            tag = "+media",
+        })
+      '';
+    })
+  ]);
 }

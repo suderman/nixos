@@ -1,4 +1,4 @@
-{flake, ...}: {
+{config, flake, lib, ...}: {
   imports = flake.lib.ls ./.;
   programs.waybar = {
     enable = true;
@@ -27,6 +27,15 @@
 
   stylix.targets.waybar.addCss = false; # we'll write our own CSS
   stylix.targets.waybar.font = "sansSerif"; # not monospace
+
+  wayland.windowManager.hyprland.lua.features.waybar = ''
+    hl.layer_rule({
+        name = "waybar-blur",
+        match = { namespace = "^waybar$" },
+        blur = true,
+        animation = "slide",
+    })
+  '';
 
   wayland.windowManager.hyprland.settings = {
     # animations.layerrule = ["animation slide, waybar"]; # slick animations

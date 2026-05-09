@@ -2,6 +2,7 @@
 {
   config,
   lib,
+  options,
   pkgs,
   ...
 }: let
@@ -9,8 +10,10 @@
   inherit (lib) mkIf;
   inherit (config.lib.keyd) mkClass;
   class = "imv";
+  hasHyprLua = lib.hasAttrByPath ["wayland" "windowManager" "hyprland" "lua" "features"] options;
 in {
-  config = mkIf cfg.enable {
+  config = mkIf cfg.enable (lib.mkMerge [
+    {
     programs.imv = {
       settings = {
         options = {
@@ -110,5 +113,15 @@ in {
         for = "unix";
       }
     ];
-  };
+    }
+    (lib.optionalAttrs hasHyprLua {
+      wayland.windowManager.hyprland.lua.features.imv = ''
+        hl.window_rule({
+            name = "imv-media-tag",
+            match = { class = "${class}" },
+            tag = "+media",
+        })
+      '';
+    })
+  ]);
 }

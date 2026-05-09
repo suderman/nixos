@@ -12,16 +12,23 @@
 
   # Hyprland on nvidia desktop
   wayland.windowManager.hyprland = {
-    settings = {
-      # 4k display
-      monitor = ["DP-1, 3840x2160@160.00Hz, 0x0, 1.33"];
-      # nvidia fixes
-      env = [
-        "LIBVA_DRIVER_NAME,nvidia"
-        "__GLX_VENDOR_LIBRARY_NAME,nvidia"
+    lua = {
+      enable = true;
+      host = "kit";
+      monitors = [
+        {
+          output = "DP-1";
+          mode = "3840x2160@160.00Hz";
+          position = "0x0";
+          scale = "1.33";
+        }
       ];
+      env = {
+        LIBVA_DRIVER_NAME = "nvidia";
+        __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+      };
     };
-    enablePlugins = true; # dynamic cursors work on v0.55.0
+    enablePlugins = false; # dynamic cursors crash on lua path for now
     enableOfficialPlugins = false; # hyprbars/hyprexpo broken on v0.55.0
   };
 

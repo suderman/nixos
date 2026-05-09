@@ -20,6 +20,10 @@ in {
     )
   ];
 
+  wayland.windowManager.hyprland.lua.features.wlogout = ''
+    util.exec("XF86PowerOff", "powerkey")
+  '';
+
   # Run wlogout via powerkey button press
   wayland.windowManager.hyprland.settings = {
     bind = [", XF86PowerOff, exec, powerkey"];

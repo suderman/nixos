@@ -2,6 +2,7 @@
 {
   config,
   lib,
+  options,
   pkgs,
   ...
 }: let
@@ -56,8 +57,10 @@
         </style>
       '';
   };
+  hasHyprLua = lib.hasAttrByPath ["wayland" "windowManager" "hyprland" "lua" "features"] options;
 in {
-  config = mkIf cfg.enable {
+  config = mkIf cfg.enable (lib.mkMerge [
+    {
     xdg.desktopEntries = config.lib.chromium.mkWebApp {inherit (pager) name url icon;};
     programs.neomutt.macros = [
       {
@@ -100,5 +103,17 @@ in {
       "q" = "C-w";
       "esc" = "C-w";
     };
-  };
+    }
+    (lib.optionalAttrs hasHyprLua {
+      wayland.windowManager.hyprland.lua.features.neomutt = ''
+        hl.window_rule({
+            name = "mutt-preview-float",
+            match = { class = "${pager.class}" },
+            float = true,
+            size = "800 900",
+            animation = "gnomed",
+        })
+      '';
+    })
+  ]);
 }

@@ -2,21 +2,24 @@
 {
   config,
   lib,
+  options,
   perSystem,
   ...
 }: let
   cfg = config.programs.zwift;
-  inherit (lib) mkIf options;
+  inherit (lib) mkIf;
   inherit (config.lib.keyd) mkClass;
+  hasHyprLua = lib.hasAttrByPath ["wayland" "windowManager" "hyprland" "lua" "features"] options;
 
   # Window class name
   class = "zwiftapp.exe";
 in {
   options.programs.zwift = {
-    enable = options.mkEnableOption "zwift";
+    enable = lib.options.mkEnableOption "zwift";
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf cfg.enable (lib.mkMerge [
+    {
     # Add to path
     home.packages = [perSystem.self.zwift];
 
@@ -76,5 +79,15 @@ in {
       # 0-9 = camera angles
       # tab = skip workout block
     };
-  };
+    }
+    (lib.optionalAttrs hasHyprLua {
+      wayland.windowManager.hyprland.lua.features.zwift = ''
+        hl.window_rule({
+            name = "zwift-tile",
+            match = { class = "${class}" },
+            tile = true,
+        })
+      '';
+    })
+  ]);
 }

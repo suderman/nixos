@@ -38,6 +38,15 @@
     };
   };
 
+  wayland.windowManager.hyprland.lua.features.waybar_center = ''
+    hl.window_rule({
+        name = "gsimplecal-position",
+        match = { class = "gsimplecal" },
+        move = "((monitor_w*0.458)) (30)",
+        opacity = 0.8,
+    })
+  '';
+
   # mini-calendar and top center of screen
   wayland.windowManager.hyprland.settings.windowrule = [
     "move ((monitor_w*0.458)) (30), opacity 0.8, match:class gsimplecal"

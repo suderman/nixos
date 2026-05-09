@@ -1,4 +1,9 @@
-{pkgs, ...}: let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
   mediactl = pkgs.self.mkScript {
     name = "mediactl";
     path = with pkgs; [
@@ -170,6 +175,31 @@ in {
       ];
     };
   };
+
+  wayland.windowManager.hyprland.lua.features.mediactl = ''
+    util.exec("XF86AudioMedia", "sinks")
+    util.exec("XF86AudioMute", "mediactl mute")
+    util.exec("SHIFT + XF86MonBrightnessUp", "mediactl sunset")
+    util.exec("SHIFT + XF86MonBrightnessDown", "mediactl sunset")
+    util.exec("XF86AudioMicMute", "mediactl sunset")
+
+    util.exec("XF86MonBrightnessUp", "mediactl light", { locked = true, repeating = true })
+    util.exec("XF86MonBrightnessDown", "mediactl dark", { locked = true, repeating = true })
+    util.exec("XF86AudioRaiseVolume", "mediactl up", { locked = true, repeating = true })
+    util.exec("XF86AudioLowerVolume", "mediactl down", { locked = true, repeating = true })
+
+    util.exec("XF86AudioPlay", "mediactl play", { locked = true })
+    util.exec("SHIFT + XF86AudioPlay", "mediactl shift", { locked = true })
+    util.exec("XF86AudioPrev", "mediactl rewind", { locked = true })
+    util.exec("SHIFT + XF86AudioLowerVolume", "mediactl rewind", { locked = true })
+    util.exec("XF86AudioNext", "mediactl forward", { locked = true })
+    util.exec("SHIFT + XF86AudioRaiseVolume", "mediactl forward", { locked = true })
+
+    util.exec("XF86AudioPrev", "mediactl prev", { locked = true, long_press = true })
+    util.exec("SHIFT + XF86AudioLowerVolume", "mediactl prev", { locked = true, long_press = true })
+    util.exec("XF86AudioNext", "mediactl next", { locked = true, long_press = true })
+    util.exec("SHIFT + XF86AudioRaiseVolume", "mediactl next", { locked = true, long_press = true })
+  '';
 
   wayland.windowManager.hyprland.settings = {
     binde = [

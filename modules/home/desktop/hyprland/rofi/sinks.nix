@@ -22,6 +22,10 @@ in {
     rasiConfig = [''sinks { display-name: "󰕾"; }''];
   };
 
+  wayland.windowManager.hyprland.lua.features.rofi_sinks = ''
+    util.exec("XF86AudioMedia", "sinks")
+  '';
+
   wayland.windowManager.hyprland.settings = {
     bind = [", XF86AudioMedia, exec, sinks"];
     bindsn = [
