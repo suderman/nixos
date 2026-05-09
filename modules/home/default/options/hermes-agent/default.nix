@@ -1,4 +1,5 @@
 {
+  osConfig,
   config,
   lib,
   perSystem,
@@ -80,43 +81,63 @@ in {
         RemainAfterExit = true;
 
         ExecStart = perSystem.self.mkScript {
-          text =
+          text = let
+            honchoConfigFor = agent:
+              builtins.toJSON {
+                hosts.hermes = {
+                  peerName = config.home.username;
+                  aiPeer = agent;
+                  workspace = osConfig.networking.hostName;
+                  observationMode = "directional";
+                  writeFrequency = "async";
+                  recallMode = "hybrid";
+                  contextTokens = 2000;
+                  dialecticCadence = 3;
+                  dialecticReasoningLevel = "medium";
+                  sessionStrategy = "per-session";
+                  enabled = true;
+                  saveMessages = true;
+                };
+                baseUrl = "https://${osConfig.services.honcho.name}.${osConfig.networking.hostName}";
+                dialecticCadence = 3;
+              };
+          in
             # sh
             ''
-              dataDir="${dataDir}"
-              runDir="${runDir}"
-              keyFile="$runDir/key"
-
-              mkdir -p "$dataDir"
-
-              if [ ! -r "$keyFile" ]; then
-                echo "Missing Hermes API server key: $keyFile" >&2
+              mkdir -p "${dataDir}"
+              if [ ! -r "${runDir}/key" ]; then
+                echo "Missing Hermes API server key: ${runDir}/key" >&2
                 exit 1
               fi
 
-              tmp="$(mktemp "$dataDir/.env.tmp.XXXXXX")"
-
+              tmp="$(mktemp "${dataDir}/.env.tmp.XXXXXX")"
               {
                 echo "HERMES_TUI=1"
                 echo "API_SERVER_ENABLED=1"
-                printf 'API_SERVER_KEY=%s\n' "$(cat "$keyFile")"
+                printf 'API_SERVER_KEY=%s\n' "$(cat "${runDir}/key")"
 
-                ${lib.optionalString (cfg.apiKeys != null) ''
-                if [ ! -r "${keysEnv}" ]; then
-                  echo "Missing Hermes agenix env file: ${keysEnv}" >&2
-                  exit 1
-                fi
+                ${lib.optionalString (cfg.apiKeys != null)
+                # sh
+                ''
+                  if [ ! -r "${keysEnv}" ]; then
+                    echo "Missing Hermes agenix env file: ${keysEnv}" >&2
+                    exit 1
+                  fi
 
-                cat "${keysEnv}"
-              ''}
-              } > "$tmp"
+                  cat "${keysEnv}"
+                ''}
+              } >"$tmp"
 
               chmod 600 "$tmp"
-              mv "$tmp" "$dataDir/.env"
+              mv "$tmp" "${dataDir}/.env"
 
-              for agent in ${lib.escapeShellArgs cfg.agents}; do
-                mkdir -p "$dataDir/$agent"
-              done
+              ${lib.concatMapStringsSep "\n" (agent:
+                # sh
+                ''
+                  mkdir -p "${dataDir}/${agent}"
+                  printf '%s\n' '${honchoConfigFor agent}' > "${dataDir}/${agent}/honcho.json"
+                '')
+              cfg.agents}
             '';
         };
       };
