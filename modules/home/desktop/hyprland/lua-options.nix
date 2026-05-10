@@ -1,4 +1,9 @@
-{lib, osConfig, config, ...}: let
+{
+  lib,
+  osConfig,
+  config,
+  ...
+}: let
   inherit (lib) mkEnableOption mkOption types;
   hostName = osConfig.networking.hostName or config.networking.hostName or "default";
 in {
