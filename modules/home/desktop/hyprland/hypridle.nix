@@ -34,7 +34,9 @@ in {
     };
   };
 
-  config.wayland.windowManager.hyprland.lua.features.hypridle = ''
-    util.exec("num_lock", "sleep 1 && hyprctl dispatch 'hl.dsp.dpms({ action = \"off\" })'")
-  '';
+  config.wayland.windowManager.hyprland.lua.features.hypridle =
+    # lua
+    ''
+      util.exec("num_lock", "sleep 1 && hyprctl dispatch 'hl.dsp.dpms({ action = \"off\" })'")
+    '';
 }

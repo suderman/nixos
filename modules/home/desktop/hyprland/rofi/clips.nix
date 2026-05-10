@@ -22,10 +22,13 @@ in {
     rasiConfig = [''clips { display-name: ""; }''];
   };
 
-  wayland.windowManager.hyprland.lua.features.rofi_clips = ''
-    util.exec("SUPER + ALT + V", "clips")
-    util.exec("ALT + SHIFT + INSERT", "clips")
-  '';
+  wayland.windowManager.hyprland.lua.features.rofi_clips =
+    # lua
+    ''
+      util.exec("SUPER + ALT + V", "clips")
+      util.exec("ALT + SHIFT + INSERT", "clips")
+    '';
+
   services.cliphist = {
     enable = true;
     allowImages = true;

@@ -29,8 +29,10 @@ in {
     rasiConfig = [''calc { display-name: ""; }''];
   };
 
-  wayland.windowManager.hyprland.lua.features.rofi_calc = ''
-    util.exec("SUPER + ALT + C", "calc")
-    util.exec("ALT + CTRL + INSERT", "calc")
-  '';
+  wayland.windowManager.hyprland.lua.features.rofi_calc =
+    # lua
+    ''
+      util.exec("SUPER + ALT + C", "calc")
+      util.exec("ALT + CTRL + INSERT", "calc")
+    '';
 }

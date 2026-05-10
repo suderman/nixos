@@ -170,19 +170,21 @@ in {
   config = lib.mkIf cfg.enable {
     home.packages = [printscreen];
 
-    wayland.windowManager.hyprland.lua.features.printscreen = ''
-      util.exec("PRINT", "printscreen image")
-      util.exec("ALT + PRINT", "printscreen video")
-      util.exec("SHIFT + PRINT", "printscreen video")
-      util.exec("CTRL + PRINT", "printscreen color")
+    wayland.windowManager.hyprland.lua.features.printscreen =
+      # lua
+      ''
+        util.exec("PRINT", "printscreen image")
+        util.exec("ALT + PRINT", "printscreen video")
+        util.exec("SHIFT + PRINT", "printscreen video")
+        util.exec("CTRL + PRINT", "printscreen color")
 
-      hl.window_rule({
+        hl.window_rule({
           name = "satty-fullscreen",
           match = { class = "com.gabm.satty" },
           fullscreen = true,
           float = true,
-      })
-    '';
+        })
+      '';
     xdg.configFile."satty/config.toml" = let
       settings = {
         general = {

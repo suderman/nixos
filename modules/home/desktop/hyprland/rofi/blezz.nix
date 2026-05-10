@@ -30,10 +30,13 @@ in {
     rasiConfig = [''blezz { display-name: ""; }''];
   };
 
-  wayland.windowManager.hyprland.lua.features.rofi_blezz = ''
-    util.exec("SUPER + ALT + SPACE", "blezz")
-    util.exec("SUPER + SUPER_R", "blezz", { release = true })
-  '';
+  wayland.windowManager.hyprland.lua.features.rofi_blezz =
+    # lua
+    ''
+      util.exec("SUPER + ALT + SPACE", "blezz")
+      util.exec("SUPER + SUPER_R", "blezz", { release = true })
+    '';
+
   xdg.configFile."rofi/blezz".text = ''
     Main:
     dir(p, Programs, window-new-symbolic)
