@@ -68,12 +68,14 @@ in {
       # 0-9 = camera angles
       # tab = skip workout block
     };
-    wayland.windowManager.hyprland.lua.features.zwift = ''
-      hl.window_rule({
+    wayland.windowManager.hyprland.lua.features.zwift =
+      # lua
+      ''
+        hl.window_rule({
           name = "zwift-tile",
           match = { class = "${class}" },
           tile = true,
-      })
-    '';
+        })
+      '';
   };
 }

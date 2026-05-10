@@ -25,12 +25,14 @@ in {
       "text/x-markdown" = ["obsidian.desktop"];
       "x-scheme-handler/obsidian" = ["obsidian.desktop"];
     };
-    wayland.windowManager.hyprland.lua.features.obsidian = ''
-      hl.window_rule({
+    wayland.windowManager.hyprland.lua.features.obsidian =
+      # lua
+      ''
+        hl.window_rule({
           name = "obsidian-notes-tag",
           match = { class = "${class}" },
           tag = "+notes",
-      })
-    '';
+        })
+      '';
   };
 }

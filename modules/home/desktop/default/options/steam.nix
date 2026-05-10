@@ -66,11 +66,13 @@ in {
         };
       };
     };
-    wayland.windowManager.hyprland.lua.features.steam = ''
-      hl.window_rule({ name = "steam-game-tag", match = { class = "[Ss]team" }, tag = "+game" })
-      hl.window_rule({ name = "steam-app-tag", match = { class = "^steam_app_(.*)$" }, tag = "+game" })
-      hl.window_rule({ name = "bin-x86-tag", match = { class = "^(.*).bin.x86$" }, tag = "+game" })
-      hl.window_rule({ name = "bin-x86_64-tag", match = { class = "^(.*)x86_64$" }, tag = "+game" })
-    '';
+    wayland.windowManager.hyprland.lua.features.steam =
+      # lua
+      ''
+        hl.window_rule({ name = "steam-game-tag", match = { class = "[Ss]team" }, tag = "+game" })
+        hl.window_rule({ name = "steam-app-tag", match = { class = "^steam_app_(.*)$" }, tag = "+game" })
+        hl.window_rule({ name = "bin-x86-tag", match = { class = "^(.*).bin.x86$" }, tag = "+game" })
+        hl.window_rule({ name = "bin-x86_64-tag", match = { class = "^(.*)x86_64$" }, tag = "+game" })
+      '';
   };
 }

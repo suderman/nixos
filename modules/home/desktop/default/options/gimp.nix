@@ -43,17 +43,19 @@ in {
         for = "unix";
       }
     ];
-    wayland.windowManager.hyprland.lua.features.gimp = ''
-      hl.window_rule({
+    wayland.windowManager.hyprland.lua.features.gimp =
+      # lua
+      ''
+        hl.window_rule({
           name = "gimp-file-dialog-tag",
           match = { class = "file-png|file-jpeg" },
           tag = "+dialog",
-      })
-      hl.window_rule({
+        })
+        hl.window_rule({
           name = "gimp-dialog-tag",
           match = { class = "gimp", title = "(Open.*|Export.*|Save.*|Preferences.*|Configure.*|Module.*)" },
           tag = "+dialog",
-      })
-    '';
+        })
+      '';
   };
 }

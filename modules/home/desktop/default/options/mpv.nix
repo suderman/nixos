@@ -67,12 +67,14 @@ in {
         for = "unix";
       }
     ];
-    wayland.windowManager.hyprland.lua.features.mpv = ''
-      hl.window_rule({
+    wayland.windowManager.hyprland.lua.features.mpv =
+      # lua
+      ''
+        hl.window_rule({
           name = "mpv-media-tag",
           match = { class = "${class}" },
           tag = "+media",
-      })
-    '';
+        })
+      '';
   };
 }

@@ -36,12 +36,14 @@ in {
 
     # Persist reboots but skip backups
     persist.scratch.directories = [".config/FreeTube"];
-    wayland.windowManager.hyprland.lua.features.freetube = ''
-      hl.window_rule({
+    wayland.windowManager.hyprland.lua.features.freetube =
+      # lua
+      ''
+        hl.window_rule({
           name = "freetube-tag",
           match = { class = "[Ff]reetube" },
           tag = "+yt",
-      })
-    '';
+        })
+      '';
   };
 }

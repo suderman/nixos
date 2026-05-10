@@ -104,12 +104,14 @@ in {
         for = "unix";
       }
     ];
-    wayland.windowManager.hyprland.lua.features.imv = ''
-      hl.window_rule({
+    wayland.windowManager.hyprland.lua.features.imv =
+      # lua
+      ''
+        hl.window_rule({
           name = "imv-media-tag",
           match = { class = "${class}" },
           tag = "+media",
-      })
-    '';
+        })
+      '';
   };
 }
