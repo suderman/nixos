@@ -42,7 +42,7 @@
   };
 
   wayland.windowManager.hyprland.lua.features.mako = ''
-    util.exec("ESCAPE", "makoctl dismiss")
+    util.exec("ESCAPE", "makoctl dismiss", { non_consuming = true })
     util.exec("SUPER + ALT + U", "makoctl restore")
 
     hl.layer_rule({
