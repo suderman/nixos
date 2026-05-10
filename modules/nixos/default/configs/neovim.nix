@@ -1,16 +1,11 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  perSystem,
+  ...
+}: {
   environment = {
-    systemPackages = [
-      # Personal neovim configuration
-      # https://github.com/NotAShelf/nvf
-      pkgs.nvf
-
-      # Also create wrapper for nvf with expected name nvim
-      (pkgs.self.mkScript {
-        name = "nvim";
-        text = ''exec ${pkgs.nvf}/bin/nvf "$@"'';
-      })
-    ];
+    # Personal neovim configuration
+    systemPackages = [perSystem.neovim.default];
 
     sessionVariables.EDITOR = "nvim";
 

@@ -49,7 +49,7 @@
   programs.lesspipe.enable = lib.mkDefault true;
   programs.lsd.enable = lib.mkDefault true;
   programs.micro.enable = lib.mkDefault true; # easy text editor
-  programs.neovim.enable = lib.mkDefault false; # using nvf instead
+  programs.neovim.enable = lib.mkDefault false; # using personal neovim flake instead
   programs.nnn.enable = lib.mkDefault true;
   programs.ripgrep-all.enable = lib.mkDefault true; # rga
   programs.ripgrep.enable = lib.mkDefault true; # rg
