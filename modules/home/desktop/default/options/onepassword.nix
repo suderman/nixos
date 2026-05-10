@@ -29,28 +29,28 @@ in {
       # lua
       ''
         hl.window_rule({
-            name = "onepassword-main-tag",
-            match = { class = "${class}", title = "^(1Password)$" },
-            tag = "+pwd",
+          name = "onepassword-main-tag",
+          match = { class = "${class}", title = "^(1Password)$" },
+          tag = "+pwd",
         })
         hl.window_rule({
-            name = "onepassword-main-float",
-            match = { tag = "pwd" },
-            float = true,
-            size = "1024 768",
+          name = "onepassword-main-float",
+          match = { tag = "pwd" },
+          float = true,
+          size = "1024 768",
         })
         hl.window_rule({
-            name = "onepassword-dialog-tag",
-            match = { class = "${class}", title = "^(.*)Password — 1Password$" },
-            tag = "+pwd_dialog",
+          name = "onepassword-dialog-tag",
+          match = { class = "${class}", title = "^(.*)Password — 1Password$" },
+          tag = "+pwd_dialog",
         })
         hl.window_rule({
-            name = "onepassword-dialog-float",
-            match = { tag = "pwd_dialog" },
-            float = true,
-            size = "1280 240",
-            center = true,
-            pin = true,
+          name = "onepassword-dialog-float",
+          match = { tag = "pwd_dialog" },
+          float = true,
+          size = "1280 240",
+          center = true,
+          pin = true,
         })
       '';
   };
