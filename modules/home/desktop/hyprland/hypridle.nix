@@ -27,14 +27,14 @@ in {
         }
         {
           timeout = 1200;
-          on-timeout = "hyprctl dispatch dpms off";
-          on-resume = "hyprctl dispatch dpms on";
+          on-timeout = "hyprctl dispatch 'hl.dsp.dpms({ action = \"off\" })'";
+          on-resume = "hyprctl dispatch 'hl.dsp.dpms({ action = \"on\" })'";
         }
       ];
     };
   };
 
   config.wayland.windowManager.hyprland.lua.features.hypridle = ''
-    util.exec("num_lock", "sleep 1 && hyprctl dispatch dpms off")
+    util.exec("num_lock", "sleep 1 && hyprctl dispatch 'hl.dsp.dpms({ action = \"off\" })'")
   '';
 }

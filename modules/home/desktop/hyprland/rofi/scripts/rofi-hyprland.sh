@@ -81,7 +81,7 @@ if command -v hyprctl &>/dev/null; then
 
     # Focus selected window
     addr="$(hyprctl clients -j | jq -r ".[] | select(.focusHistoryID==${ROFI_INFO-0}) | .address")"
-    coproc hyprctl dispatch focuswindow address:$addr 2>&1
+    coproc hyprctl dispatch "hl.dsp.focus({ window = \"address:$addr\" })" 2>&1
 
   fi
 fi

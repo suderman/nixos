@@ -52,7 +52,7 @@ in {
     dir(f, Focus window)
     dir(r, Resize window)
     dir(m, Move window)
-    act(q, Quit window, hyprctl dispatch killactive)
+    act(q, Quit window, hyprctl dispatch 'hl.dsp.window.kill()')
 
     Media:
     actReload(a, Volume Down, mediactl down, audio-volume-low)

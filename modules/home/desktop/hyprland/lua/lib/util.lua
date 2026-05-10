@@ -6,7 +6,7 @@ function M.exec(keys, command, opts)
 end
 
 function M.dispatch(keys, command, opts)
-    return M.exec(keys, "hyprctl dispatch " .. command, opts)
+    return M.exec(keys, "hyprctl dispatch '" .. command .. "'", opts)
 end
 
 function M.workspace_bind(key, workspace)
