@@ -1,4 +1,9 @@
-{config, flake, lib, ...}: {
+{
+  config,
+  flake,
+  lib,
+  ...
+}: {
   imports = flake.lib.ls ./.;
   programs.waybar = {
     enable = true;
@@ -28,14 +33,17 @@
   stylix.targets.waybar.addCss = false; # we'll write our own CSS
   stylix.targets.waybar.font = "sansSerif"; # not monospace
 
-  wayland.windowManager.hyprland.lua.features.waybar = ''
-    hl.layer_rule({
+  wayland.windowManager.hyprland.lua.features.waybar =
+    # lua
+    ''
+      hl.layer_rule({
         name = "waybar-blur",
         match = { namespace = "^waybar$" },
         blur = true,
         animation = "slide",
-    })
-  '';
+      })
+    '';
+
   home.localStorePath = [
     ".config/waybar/config"
     ".config/waybar/style.css"

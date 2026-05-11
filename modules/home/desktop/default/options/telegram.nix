@@ -23,12 +23,14 @@ in {
     services.keyd.windows."${mkClass class}" = {};
     # Persist reboots, skip backups
     persist.scratch.directories = [".local/share/TelegramDesktop/tdata"];
-    wayland.windowManager.hyprland.lua.features.telegram = ''
-      hl.window_rule({
+    wayland.windowManager.hyprland.lua.features.telegram =
+      # lua
+      ''
+        hl.window_rule({
           name = "telegram-media-viewer",
           match = { class = "^(${class}|telegramdesktop)$", title = "^(Media viewer)$" },
           float = true,
-      })
-    '';
+        })
+      '';
   };
 }

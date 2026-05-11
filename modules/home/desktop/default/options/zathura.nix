@@ -74,12 +74,14 @@ in {
         for = "unix";
       }
     ];
-    wayland.windowManager.hyprland.lua.features.zathura = ''
-      hl.window_rule({
+    wayland.windowManager.hyprland.lua.features.zathura =
+      # lua
+      ''
+        hl.window_rule({
           name = "zathura-media-tag",
           match = { class = "${class}" },
           tag = "+media",
-      })
-    '';
+        })
+      '';
   };
 }

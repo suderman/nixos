@@ -183,17 +183,19 @@ in {
           + " \"$@\"";
       })
     ];
-    wayland.windowManager.hyprland.lua.features.chromium = ''
-      hl.window_rule({
+    wayland.windowManager.hyprland.lua.features.chromium =
+      # lua
+      ''
+        hl.window_rule({
           name = "chromium-tag",
           match = { class = "${class}" },
           tag = "+web",
-      })
-      hl.window_rule({
+        })
+        hl.window_rule({
           name = "pip-tag-chromium",
           match = { title = "^(Picture-in-Picture)$" },
           tag = "+pip",
-      })
-    '';
+        })
+      '';
   };
 }

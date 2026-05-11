@@ -52,14 +52,16 @@ in {
       };
     };
 
-    wayland.windowManager.hyprland.lua.features.rofi = ''
-      hl.layer_rule({
+    wayland.windowManager.hyprland.lua.features.rofi =
+      # lua
+      ''
+        hl.layer_rule({
           name = "rofi-fade",
           match = { namespace = "^rofi$" },
           animation = "fade",
           dim_around = true,
-      })
-    '';
+        })
+      '';
 
     home.file = {
       # Import extra rasi config at end of file

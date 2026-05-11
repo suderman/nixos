@@ -30,10 +30,13 @@ in {
     rasiConfig = [''blezz { display-name: ""; }''];
   };
 
-  wayland.windowManager.hyprland.lua.features.rofi_blezz = ''
-    util.exec("SUPER + ALT + SPACE", "blezz")
-    util.exec("SUPER + SUPER_R", "blezz", { release = true })
-  '';
+  wayland.windowManager.hyprland.lua.features.rofi_blezz =
+    # lua
+    ''
+      util.exec("SUPER + ALT + SPACE", "blezz")
+      util.exec("SUPER + SUPER_R", "blezz", { release = true })
+    '';
+
   xdg.configFile."rofi/blezz".text = ''
     Main:
     dir(p, Programs, window-new-symbolic)
@@ -52,7 +55,7 @@ in {
     dir(f, Focus window)
     dir(r, Resize window)
     dir(m, Move window)
-    act(q, Quit window, hyprctl dispatch killactive)
+    act(q, Quit window, hyprctl dispatch 'hl.dsp.window.kill()')
 
     Media:
     actReload(a, Volume Down, mediactl down, audio-volume-low)

@@ -56,12 +56,14 @@ in {
     services.keyd.windows."${mkClass class}" = {
       "super.w" = "C-w"; # close
     };
-    wayland.windowManager.hyprland.lua.features.sparrow = ''
-      hl.window_rule({
+    wayland.windowManager.hyprland.lua.features.sparrow =
+      # lua
+      ''
+        hl.window_rule({
           name = "sparrow-no-blur",
           match = { class = "^${class}$", title = "^()$" },
           no_blur = true,
-      })
-    '';
+        })
+      '';
   };
 }

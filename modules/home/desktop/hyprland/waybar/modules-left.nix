@@ -2,8 +2,8 @@
   programs.waybar.settings.bar = let
     mkLayout = name: icon: {
       on-click = "exec hypr-layout ${name}";
-      on-scroll-up = "exec hyprctl -- dispatch layoutmsg move -col";
-      on-scroll-down = "exec hyprctl -- dispatch layoutmsg move +col";
+      on-scroll-up = "exec hyprctl dispatch 'hl.dsp.layout(\"move -col\")'";
+      on-scroll-down = "exec hyprctl dispatch 'hl.dsp.layout(\"move +col\")'";
       signal = 8;
       return-type = "json";
       exec = pkgs.self.mkScript {
@@ -60,8 +60,8 @@
     "custom/layout" = {
       on-click = "exec hypr-layout next";
       on-click-right = "exec hypr-layout prev";
-      on-scroll-up = "exec hyprctl -- dispatch layoutmsg move -col";
-      on-scroll-down = "exec hyprctl -- dispatch layoutmsg move +col";
+      on-scroll-up = "exec hyprctl dispatch 'hl.dsp.layout(\"move -col\")'";
+      on-scroll-down = "exec hyprctl dispatch 'hl.dsp.layout(\"move +col\")'";
       signal = 8;
       return-type = "json";
       exec = pkgs.self.mkScript {

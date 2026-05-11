@@ -27,8 +27,10 @@ in {
     })
   ];
 
-  wayland.windowManager.hyprland.lua.features.rofi_launcher = ''
-    util.exec("SUPER + SPACE", "launcher")
-    util.exec("SUPER + SUPER_L", "launcher", { release = true })
-  '';
+  wayland.windowManager.hyprland.lua.features.rofi_launcher =
+    # lua
+    ''
+      util.exec("SUPER + SPACE", "launcher")
+      util.exec("SUPER + SUPER_L", "launcher", { release = true })
+    '';
 }

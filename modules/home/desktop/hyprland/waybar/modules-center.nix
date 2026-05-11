@@ -38,12 +38,14 @@
     };
   };
 
-  wayland.windowManager.hyprland.lua.features.waybar_center = ''
-    hl.window_rule({
+  wayland.windowManager.hyprland.lua.features.waybar_center =
+    # lua
+    ''
+      hl.window_rule({
         name = "gsimplecal-position",
         match = { class = "gsimplecal" },
         move = "((monitor_w*0.458)) (30)",
         opacity = 0.8,
-    })
-  '';
+      })
+    '';
 }

@@ -91,17 +91,19 @@ in {
 
     # Persist browser data
     persist.storage.directories = [".mozilla/firefox/default"];
-    wayland.windowManager.hyprland.lua.features.firefox = ''
-      hl.window_rule({
+    wayland.windowManager.hyprland.lua.features.firefox =
+      # lua
+      ''
+        hl.window_rule({
           name = "firefox-tag",
           match = { class = "${class}" },
           tag = "+web",
-      })
-      hl.window_rule({
+        })
+        hl.window_rule({
           name = "pip-tag-firefox",
           match = { title = "^(Picture in picture)$" },
           tag = "+pip",
-      })
-    '';
+        })
+      '';
   };
 }

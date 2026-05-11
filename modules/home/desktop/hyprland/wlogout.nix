@@ -20,9 +20,12 @@ in {
     )
   ];
 
-  wayland.windowManager.hyprland.lua.features.wlogout = ''
-    util.exec("XF86PowerOff", "powerkey")
-  '';
+  wayland.windowManager.hyprland.lua.features.wlogout =
+    # lua
+    ''
+      util.exec("XF86PowerOff", "powerkey")
+    '';
+
   # Configure grid of 4 buttons
   programs.wlogout = {
     enable = true;
@@ -42,7 +45,7 @@ in {
       }
       {
         label = "logout";
-        action = "hyprctl dispatch exit 0";
+        action = "hyprctl dispatch 'hl.dsp.exit()'";
         text = "logout";
         keybind = "q";
       }
