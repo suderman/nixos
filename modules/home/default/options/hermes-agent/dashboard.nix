@@ -33,7 +33,7 @@ in {
               Environment = [
                 "PATH=${lib.concatStringsSep ":" path}"
                 "HERMES_HOME=${dataDir}/${agent}"
-                "HERMES_KANBAN_HOME=${cfg.dataDir}"
+                "HERMES_KANBAN_HOME=${dataDir}"
                 "HERMES_DASHBOARD_TUI=1"
               ];
               ExecStart = "${hermes} dashboard --no-open --port ${toString (dashboardPortFor agent)}";
