@@ -1,0 +1,118 @@
+{...}: let
+  minimax = extra:
+    {
+      provider = "minimax";
+      model = "MiniMax-M2.7";
+      base_url = "https://api.minimax.io/anthropic";
+      api_key = "\${MINIMAX_API_KEY}";
+    }
+    // extra;
+  gpt = extra:
+    {
+      provider = "custom";
+      model = "gpt-5.4";
+      base_url = "https://codex-lb.kit/v1";
+      api_key = "\${CODEX_LB_API_KEY}";
+      api_mode = "chat_completions";
+    }
+    // extra;
+  gptmini = extra:
+    {
+      provider = "custom";
+      model = "gpt-5.4-mini";
+      base_url = "https://codex-lb.kit/v1";
+      api_key = "\${CODEX_LB_API_KEY}";
+      api_mode = "chat_completions";
+    }
+    // extra;
+in {
+  services.hermes-agent = {
+    enable = true;
+
+    # Shared configuration
+    config = {
+      model = {
+        inherit (minimax {}) provider base_url api_key;
+        default = (minimax {}).model;
+      };
+      auxiliary = {
+        # Image analysis (vision_analyze tool + browser screenshots)
+        vision = gptmini {
+          timeout = 120;
+          download_timeout = 30;
+        };
+
+        # Web page summarization + browser page text extraction
+        web_extract = minimax {
+          timeout = 360;
+        };
+
+        # Smart command-approval classification
+        approval = minimax {
+          timeout = 30;
+        };
+
+        # Context compression timeout
+        compression = minimax {
+          timeout = 120;
+        };
+
+        # Past session summarization
+        session_search = minimax {
+          timeout = 30;
+          max_concurrency = 3;
+        };
+
+        # Skill search and discovery
+        skills_hub = minimax {
+          timeout = 30;
+        };
+
+        # MCP tool dispatch
+        mcp = minimax {
+          timeout = 30;
+        };
+
+        # Session title summaries
+        title_generation = minimax {
+          timeout = 30;
+        };
+
+        # Prune and tend to my skills garden
+        curator = minimax {
+          timeout = 600;
+        };
+
+        # Before session disappears, decide what should be remembered
+        flush_memories = minimax {
+          timeout = 30;
+        };
+
+        # Kanban triage specifier
+        triage_specifier = minimax {
+          timeout = 120;
+        };
+      };
+    };
+
+    # Agents and their configuration overrides
+    agents = {
+      june.gateway = true;
+      pax.gateway = true;
+      cid = {
+        gateway = true;
+
+        config = {
+          model = {
+            inherit (gpt {}) provider base_url api_key api_mode;
+            default = (gpt {}).model;
+          };
+          auxiliary.compression = gptmini {
+            timeout = 120;
+          };
+        };
+      };
+      dot.client = "gem";
+    };
+  };
+}

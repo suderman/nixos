@@ -1,5 +1,4 @@
 {
-  osConfig,
   config,
   lib,
   perSystem,
@@ -28,8 +27,8 @@ in {
 
     package = lib.mkOption {
       type = lib.types.nullOr lib.types.package;
-      description = "The hermes-agent base package to use";
       default = perSystem.hermes-agent.default;
+      description = "The hermes-agent base package to use";
     };
 
     apiKeys = lib.mkOption {
@@ -38,12 +37,56 @@ in {
       description = "Path to encrypted .env file with API keys (OPENROUTER_API_KEY, etc.)";
     };
 
-    agents = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      description = "List of agent names";
-      default = ["hermes"];
-      example = ["june" "cid" "pax"];
+    config = lib.mkOption {
+      type = lib.types.attrsOf lib.types.anything;
+      default = {};
+      description = "Shared Hermes configuration applied to all agents later.";
     };
+
+    agents = let
+      agentType = lib.types.submodule ({name, ...}: {
+        options = {
+          client = lib.mkOption {
+            type = lib.types.either lib.types.bool lib.types.str;
+            default = false;
+            example = true;
+            description = ''
+              How this host should expose the ${name} client.
+
+              - `true`: install a local wrapper for this agent
+              - `"host"`: install an SSH shim that runs `${name}` on `host.home`
+              - `false`: do not install a client wrapper on this host
+
+              Agents with `gateway = true` implicitly get a local client.
+            '';
+          };
+
+          gateway = lib.mkOption {
+            type = lib.types.bool;
+            default = false;
+            description = "Whether to run and expose the Hermes gateway for this agent.";
+          };
+
+          config = lib.mkOption {
+            type = lib.types.attrsOf lib.types.anything;
+            default = {};
+            description = "Agent-specific Hermes configuration to merge with shared config later.";
+          };
+        };
+      });
+    in
+      lib.mkOption {
+        type = lib.types.attrsOf agentType;
+        description = "Hermes agents keyed by agent name.";
+        default = {};
+        example = {
+          june.gateway = true;
+          cid = {
+            gateway = true;
+            config.model.default = "gpt-5.4";
+          };
+        };
+      };
 
     packages = lib.mkOption {
       type = lib.types.attrsOf lib.types.package;
@@ -81,27 +124,7 @@ in {
         RemainAfterExit = true;
 
         ExecStart = perSystem.self.mkScript {
-          text = let
-            honchoConfigFor = agent:
-              builtins.toJSON {
-                hosts.hermes = {
-                  peerName = config.home.username;
-                  aiPeer = agent;
-                  workspace = osConfig.networking.hostName;
-                  observationMode = "directional";
-                  writeFrequency = "async";
-                  recallMode = "hybrid";
-                  contextTokens = 2000;
-                  dialecticCadence = 3;
-                  dialecticReasoningLevel = "medium";
-                  sessionStrategy = "per-session";
-                  enabled = true;
-                  saveMessages = true;
-                };
-                baseUrl = "https://${osConfig.services.honcho.name}.${osConfig.networking.hostName}";
-                dialecticCadence = 3;
-              };
-          in
+          text =
             # sh
             ''
               mkdir -p "${dataDir}"
@@ -130,14 +153,6 @@ in {
 
               chmod 600 "$tmp"
               mv "$tmp" "${dataDir}/.env"
-
-              ${lib.concatMapStringsSep "\n" (agent:
-                # sh
-                ''
-                  mkdir -p "${dataDir}/${agent}"
-                  printf '%s\n' '${honchoConfigFor agent}' > "${dataDir}/${agent}/honcho.json"
-                '')
-              cfg.agents}
             '';
         };
       };

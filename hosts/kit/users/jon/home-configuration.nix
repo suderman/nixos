@@ -8,6 +8,7 @@
     flake.homeModules.default
     flake.homeModules.desktop.hyprland
     flake.homeModules.users.jon
+    ./hermes-agent.nix
   ];
 
   # Hyprland on nvidia desktop
@@ -40,11 +41,6 @@
   programs.zwift.enable = true;
   programs.opencode.enable = true;
   programs.mmx-cli.enable = true;
-
-  services.hermes-agent = {
-    enable = true;
-    agents = ["june" "cid" "pax"];
-  };
 
   # Gaming
   programs.steam.enable = true;

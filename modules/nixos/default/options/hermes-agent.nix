@@ -39,13 +39,16 @@ in {
     lib.concatMap (
       user: let
         inherit (config.networking) hostName;
-        inherit (user.lib.hermes-agent) apiPortFor dashboardPortFor;
+        inherit (user.lib.hermes-agent) agentNames apiPortFor dashboardPortFor gatewayAgents;
       in
-        lib.concatMap (name: [
+        (lib.concatMap (name: [
           {
             inherit name;
             value = "http://127.0.0.1:${toString (dashboardPortFor name)}";
           }
+        ])
+        agentNames)
+        ++ (lib.concatMap (name: [
           {
             name = "api-${name}";
             value = {
@@ -54,8 +57,8 @@ in {
             };
           }
         ])
-        user.services.hermes-agent.agents
-    )
-    users
-  );
+        gatewayAgents)
+     )
+     users
+   );
 }

@@ -4,7 +4,7 @@
   ...
 }: let
   cfg = config.services.hermes-agent;
-  inherit (config.lib.hermes-agent) dataDir dashboardPortFor;
+  inherit (config.lib.hermes-agent) dataDir dashboardPortFor gatewayAgents;
 in {
   config = lib.mkIf cfg.enable {
     systemd.user.services = lib.listToAttrs (map (
@@ -56,6 +56,6 @@ in {
             Install.WantedBy = ["default.target"];
           }
       )
-      cfg.agents);
+      gatewayAgents);
   };
 }

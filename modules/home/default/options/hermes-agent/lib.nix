@@ -9,6 +9,25 @@ in {
     # Parent data diretory for all hermes agents
     dataDir = "${config.home.homeDirectory}/${cfg.dataDir}";
 
+    # Agent names declared in the module.
+    agentNames = builtins.attrNames cfg.agents;
+
+    # Agents with gateway enabled.
+    gatewayAgents = builtins.attrNames (lib.filterAttrs (_: agent: agent.gateway) cfg.agents);
+
+    # Agents with local client wrappers on this host.
+    localClientAgents = builtins.attrNames (
+      lib.filterAttrs (_: agent: agent.gateway || agent.client == true) cfg.agents
+    );
+
+    # Agents with SSH client shims on this host.
+    remoteClientAgents = builtins.attrNames (
+      lib.filterAttrs (_: agent: builtins.isString agent.client) cfg.agents
+    );
+
+    # Agents runnable from this host, local or remote.
+    clientAgents = localClientAgents ++ remoteClientAgents;
+
     # The api secret is written to the user's run directory
     runDir = "/run/hermes/${toString config.home.uid}";
 

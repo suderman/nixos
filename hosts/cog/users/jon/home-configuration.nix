@@ -44,6 +44,16 @@
   programs.opencode.enable = true;
   programs.mmx-cli.enable = true;
 
+  services.hermes-agent = {
+    enable = true;
+    agents = {
+      june.client = "kit";
+      pax.client = "kit";
+      cid.client = "kit";
+      dot.client = "gem";
+    };
+  };
+
   # User services
   services.syncthing.enable = true;
 
