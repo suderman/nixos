@@ -5,7 +5,7 @@
   ...
 }: let
   cfg = config.services.hermes-agent;
-  inherit (config.lib.hermes-agent) agentNames dataDir;
+  inherit (config.lib.hermes-agent) agentNames dataDir gatewayAgents;
 
   # Shared override for each agent's config.yaml
   overrides = let
@@ -68,13 +68,13 @@ in {
           $DRY_RUN_CMD mkdir -p "${dataDir}/${agent}/profiles"
           $DRY_RUN_CMD ${python} "${./config.py}" replace "${dataDir}/${agent}/config.yaml" "${override}"
           $DRY_RUN_CMD ${python} "${./config.py}" fill "${dataDir}/${agent}/skins/${agent}.yaml" "${skin}"
-          ${lib.concatMapStringsSep "\n" (otherAgent:
-            lib.optionalString (otherAgent != agent)
-            # sh
-            ''
-              $DRY_RUN_CMD ln -sfn "../../${otherAgent}" "${dataDir}/${agent}/profiles/${otherAgent}"
-            '')
-          agentNames}
+           ${lib.concatMapStringsSep "\n" (otherAgent:
+             lib.optionalString (otherAgent != agent)
+             # sh
+             ''
+               $DRY_RUN_CMD ln -sfn "../../${otherAgent}" "${dataDir}/${agent}/profiles/${otherAgent}"
+             '')
+           gatewayAgents}
         '')
       agentNames}
     '';
