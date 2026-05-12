@@ -3,60 +3,68 @@
   config,
   pkgs,
   ...
-}:
-let
+}: let
   cfg = config.services.hermes-agent;
-  inherit (config.lib.hermes-agent)
+  inherit
+    (config.lib.hermes-agent)
     agentNames
     clientAgents
     dataDir
     localClientAgents
     ;
 
-  knownAgentCase = lib.concatMapStringsSep "\n" (
-    name:
-    # bash
-    ''
-      ${name})
-        return 0
-        ;;
-    '') clientAgents;
+  knownAgentCase =
+    lib.concatMapStringsSep "\n" (
+      name:
+      # bash
+      ''
+        ${name})
+          return 0
+          ;;
+      ''
+    )
+    clientAgents;
 
   profileListCommand =
-    if clientAgents == [ ] then
-      "exit 0"
-    else
-      "printf '%s\\n' '${lib.concatStringsSep "\n" clientAgents}'\nexit 0";
+    if clientAgents == []
+    then "exit 0"
+    else "printf '%s\\n' '${lib.concatStringsSep "\n" clientAgents}'\nexit 0";
 
-  profileInfoCase = lib.concatMapStringsSep "\n" (
-    name:
-    let
-      agent = cfg.agents.${name};
-      isLocal = builtins.elem name localClientAgents;
-      infoLines = [
-        "name: ${name}"
-        "mode: ${if isLocal then "local" else "ssh"}"
-      ]
-      ++ lib.optionals isLocal [
-        "home: ${dataDir}/${name}"
-        "config: ${dataDir}/${name}/config.yaml"
-        "skin: ${dataDir}/${name}/skins/${name}.yaml"
-        "honcho: ${dataDir}/${name}/honcho.json"
-      ]
-      ++ lib.optionals (!isLocal) [
-        "ssh_target: ${agent.client}.home"
-        "ssh_command: ${name}"
-      ];
-      infoCommand = lib.concatMapStringsSep "\n" (line: "printf '%s\\n' '${line}'") infoLines;
-    in
-    # bash
-    ''
-      ${name})
-        ${infoCommand}
-        exit 0
-        ;;
-    ''
-  ) clientAgents;
+  profileInfoCase =
+    lib.concatMapStringsSep "\n" (
+      name: let
+        agent = cfg.agents.${name};
+        isLocal = builtins.elem name localClientAgents;
+        infoLines =
+          [
+            "name: ${name}"
+            "mode: ${
+              if isLocal
+              then "local"
+              else "ssh"
+            }"
+          ]
+          ++ lib.optionals isLocal [
+            "home: ${dataDir}/${name}"
+            "config: ${dataDir}/${name}/config.yaml"
+            "skin: ${dataDir}/${name}/skins/${name}.yaml"
+            "honcho: ${dataDir}/${name}/honcho.json"
+          ]
+          ++ lib.optionals (!isLocal) [
+            "ssh_target: ${agent.client}.home"
+            "ssh_command: ${name}"
+          ];
+        infoCommand = lib.concatMapStringsSep "\n" (line: "printf '%s\\n' '${line}'") infoLines;
+      in
+        # bash
+        ''
+          ${name})
+            ${infoCommand}
+            exit 0
+            ;;
+        ''
+    )
+    clientAgents;
 
   profileHelpCommand = lib.concatStringsSep "\n" [
     "printf '%s\\n' 'Managed Hermes profiles:'"
@@ -180,6 +188,7 @@ let
       ""
       "if [[ -n \"$agent\" ]]; then"
       "  require_known_agent \"$agent\""
+      "  export HERMES_TUI=0"
       "  exec \"${config.home.profileDirectory}/bin/$agent\" \"$@\""
       "fi"
       ""
@@ -194,8 +203,7 @@ let
       ""
     ];
   };
-in
-{
+in {
   config = lib.mkIf cfg.enable {
     assertions = [
       {
@@ -203,17 +211,18 @@ in
         message = "services.hermes-agent.agents cannot include 'hermes'; that binary name is reserved for the profile shim.";
       }
       {
-        assertion = lib.all (
-          name:
-          let
-            agent = cfg.agents.${name};
-          in
-          !(agent.gateway && builtins.isString agent.client)
-        ) agentNames;
+        assertion =
+          lib.all (
+            name: let
+              agent = cfg.agents.${name};
+            in
+              !(agent.gateway && builtins.isString agent.client)
+          )
+          agentNames;
         message = "services.hermes-agent.agents.<name>.gateway cannot be combined with a string client SSH alias.";
       }
     ];
 
-    home.packages = [ hermesShim ];
+    home.packages = [hermesShim];
   };
 }

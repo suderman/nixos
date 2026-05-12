@@ -22,6 +22,7 @@
             export REQUESTS_CA_BUNDLE="/etc/ssl/certs/ca-bundle.crt"
             export HERMES_KANBAN_HOME="${dataDir}"
             export HERMES_HOME="${dataDir}/${name}"
+            export HERMES_TUI="''${HERMES_TUI:-1}"
 
             set -a
             [[ -f "${dataDir}/.env" ]] && . "${dataDir}/.env"
