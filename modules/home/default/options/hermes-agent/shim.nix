@@ -97,7 +97,7 @@
     text = lib.concatStringsSep "\n" [
       "export SSL_CERT_FILE=\"/etc/ssl/certs/ca-bundle.crt\""
       "export REQUESTS_CA_BUNDLE=\"/etc/ssl/certs/ca-bundle.crt\""
-      "export HERMES_KANBAN_HOME=\"${cfg.dataDir}\""
+      "export HERMES_KANBAN_HOME=\"${dataDir}\""
       ""
       "set -a"
       "[[ -f \"${dataDir}/.env\" ]] && . \"${dataDir}/.env\""
@@ -222,6 +222,11 @@ in {
         message = "services.hermes-agent.agents.<name>.gateway cannot be combined with a string client SSH alias.";
       }
     ];
+
+    home.activation.hermes-agent-shim = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      $DRY_RUN_CMD mkdir -p "${config.home.homeDirectory}/bin"
+      $DRY_RUN_CMD ln -sfn "${hermesShim}/bin/hermes" "${config.home.homeDirectory}/bin/hermes"
+    '';
 
     home.packages = [hermesShim];
   };

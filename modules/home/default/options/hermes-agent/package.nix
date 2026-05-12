@@ -20,9 +20,17 @@
           ''
             export SSL_CERT_FILE="/etc/ssl/certs/ca-bundle.crt"
             export REQUESTS_CA_BUNDLE="/etc/ssl/certs/ca-bundle.crt"
+            export HERMES_CLI_NAME="${name}"
             export HERMES_KANBAN_HOME="${dataDir}"
             export HERMES_HOME="${dataDir}/${name}"
-            export HERMES_TUI="''${HERMES_TUI:-1}"
+
+            if [[ -z "''${HERMES_TUI-}" ]]; then
+              if [[ -t 0 && -t 1 ]]; then
+                export HERMES_TUI=1
+              else
+                export HERMES_TUI=0
+              fi
+            fi
 
             set -a
             [[ -f "${dataDir}/.env" ]] && . "${dataDir}/.env"
