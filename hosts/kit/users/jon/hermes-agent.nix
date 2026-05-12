@@ -93,6 +93,22 @@ in {
           timeout = 120;
         };
       };
+
+      # Enable tools web_search and understand_image
+      mcp_servers = {
+        minimax = {
+          command = "uvx";
+          args = ["minimax-coding-plan-mcp" "-y"];
+          env = {
+            MINIMAX_API_KEY = (minimax {}).api_key;
+            MINIMAX_API_HOST = "https://api.minimax.io";
+          };
+          tools = {
+            prompts = false;
+            resources = false;
+          };
+        };
+      };
     };
 
     # Agents and their configuration overrides
@@ -115,4 +131,7 @@ in {
       dot.client = "gem";
     };
   };
+
+  # Ensure uvx is available for mcp servers
+  toolchains.python.enable = true;
 }
