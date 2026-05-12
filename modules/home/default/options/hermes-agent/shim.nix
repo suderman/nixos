@@ -224,8 +224,12 @@ in {
     ];
 
     home.activation.hermes-agent-shim = lib.hm.dag.entryAfter ["writeBoundary"] ''
-      $DRY_RUN_CMD mkdir -p "${config.home.homeDirectory}/bin"
-      $DRY_RUN_CMD ln -sfn "${hermesShim}/bin/hermes" "${config.home.homeDirectory}/bin/hermes"
+      if [ -L "${config.home.homeDirectory}/bin/hermes" ]; then
+        target="$(readlink -f "${config.home.homeDirectory}/bin/hermes" || true)"
+        if [ "$target" = "${hermesShim}/bin/hermes" ]; then
+          $DRY_RUN_CMD rm -f "${config.home.homeDirectory}/bin/hermes"
+        fi
+      fi
     '';
 
     home.packages = [hermesShim];
