@@ -5,6 +5,7 @@
   ...
 }: let
   account = "calendars";
+  primaryCollection = "Personal";
 in {
   # I've configured Fastmail to syncronize shared calendars from iCloud & Gmail.
   # This way, I only need to configure the below calendars to talk to Fastmail
@@ -15,7 +16,7 @@ in {
     accounts.calendar.basePath = ".local/share";
     accounts.calendar.accounts.${account} = {
       primary = true;
-      primaryCollection = "Personal";
+      primaryCollection = primaryCollection;
       remote = {
         userName = "suderman@fastmail.com";
         passwordCommand = ["/run/current-system/sw/bin/cat" config.age.secrets.fastmail.path];
@@ -37,7 +38,7 @@ in {
           ["Garbage" "3e8ff532-6aea-403d-a90a-a1ce2b172aa9" "Garbage"]
         ];
         conflictResolution = "remote wins";
-        metadata = ["color" "displayname" "description" "order"];
+        metadata = ["color" "description" "order"];
       };
       khal = {
         enable = true;
@@ -61,7 +62,7 @@ in {
 
     programs.khal = {
       enable = true;
-      settings.default.default_calendar = account;
+      settings.default.default_calendar = primaryCollection;
     };
   };
 }
