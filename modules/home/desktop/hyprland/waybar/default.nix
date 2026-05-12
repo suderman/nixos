@@ -2,11 +2,19 @@
   config,
   flake,
   lib,
+  pkgs,
   ...
 }: {
   imports = flake.lib.ls ./.;
   programs.waybar = {
     enable = true;
+    package = pkgs.waybar.overrideAttrs (old: {
+      postPatch =
+        (old.postPatch or "")
+        + ''
+          ${pkgs.python3}/bin/python3 ${./patch-workspace-lua-dispatch.py}
+        '';
+    });
     systemd.enable = true;
     settings.bar = {
       layer = "top";
