@@ -10,7 +10,7 @@
   # Shared override for each agent's config.yaml
   overrides = let
     configFor = agentName: {
-      # Customize memory to be bigger and use honcho
+      # customize memory to be bigger and use honcho
       memory = {
         provider = "honcho";
         memory_char_limit = 8000;
@@ -18,6 +18,8 @@
         nudge_interval = 6;
         flush_min_turns = 3;
       };
+      # make cron-triggered messages look natural
+      cron.wrap_response = false;
       agent.gateway_notify_interval = 600;
       display.skin = agentName; # custom tui skin
     };
@@ -69,12 +71,12 @@ in {
           $DRY_RUN_CMD ${python} "${./config.py}" replace "${dataDir}/${agent}/config.yaml" "${override}"
           $DRY_RUN_CMD ${python} "${./config.py}" fill "${dataDir}/${agent}/skins/${agent}.yaml" "${skin}"
            ${lib.concatMapStringsSep "\n" (otherAgent:
-             lib.optionalString (otherAgent != agent)
-             # sh
-             ''
-               $DRY_RUN_CMD ln -sfn "../../${otherAgent}" "${dataDir}/${agent}/profiles/${otherAgent}"
-             '')
-           gatewayAgents}
+            lib.optionalString (otherAgent != agent)
+            # sh
+            ''
+              $DRY_RUN_CMD ln -sfn "../../${otherAgent}" "${dataDir}/${agent}/profiles/${otherAgent}"
+            '')
+          gatewayAgents}
         '')
       agentNames}
     '';
