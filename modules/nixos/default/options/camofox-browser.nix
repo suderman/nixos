@@ -18,14 +18,39 @@
     base + 1 + (builtins.foldl' op 5381 chars);
 
   deriveServicePort = service: profile: base: derivePort "${service}:${profile}" base;
+  helperPortFor = cfg: user: profile: deriveServicePort "camofox-vnc-helper" profile (cfg.helperBasePort + user.home.portOffset);
 in {
+  services.traefik.dynamicConfigOptions.http.middlewares = lib.mkMerge [
+    (lib.listToAttrs (
+      lib.concatMap (user: let
+        gatewayAgents =
+          if user.services.hermes-agent.enable
+          then builtins.attrNames (lib.filterAttrs (_: agent: agent.gateway) user.services.hermes-agent.agents)
+          else [];
+        profiles = lib.unique (user.services.camofox-browser.profiles ++ gatewayAgents);
+        cfg = user.services.camofox-browser;
+      in map (profile: {
+        name = "${profile}-${cfg.name}-vnc-root";
+        value.redirectRegex = {
+          regex = "^https?://([^/]+)/?$";
+          replacement = "https://$${1}/vnc.html";
+          permanent = false;
+        };
+      }) (if cfg.enableVnc then profiles else [])) users
+    ))
+  ];
+
   system.activationScripts.camofox-browser-keys = let
     inherit (perSystem.self) mkScript derive;
     hex = config.age.secrets.hex.path;
 
     perUser = user: let
       inherit (user.home) username;
-      profiles = lib.unique user.services.camofox-browser.profiles;
+      gatewayAgents =
+        if user.services.hermes-agent.enable
+        then builtins.attrNames (lib.filterAttrs (_: agent: agent.gateway) user.services.hermes-agent.agents)
+        else [];
+      profiles = lib.unique (user.services.camofox-browser.profiles ++ gatewayAgents);
       runDir = user.services.camofox-browser.runDir;
       seed = "camofox:${user.home.username}:${config.networking.hostName}";
     in
@@ -51,7 +76,7 @@ in {
       # bash
       ''
         if [[ -f ${hex} ]]; then
-          ${perUser user}
+          ${if perUser user == "" then ":" else perUser user}
         fi
       '')
     users;
@@ -85,18 +110,67 @@ in {
             }
           ])
           profiles)
-        ++ (lib.concatMap (profile:
-          lib.optionals cfg.enableVnc [
-            {
-              name = "${profile}-${cfg.name}";
-              value = {
-                hostName = "${profile}.${cfg.name}.${hostName}";
-                url = "http://127.0.0.1:${toString (vncPortFor profile)}";
-              };
-            }
-          ])
-        profiles)
     )
     users
   );
+
+  services.traefik.dynamicConfigOptions.http.services = lib.mkMerge [
+    (lib.listToAttrs (
+      lib.concatMap (user: let
+        gatewayAgents =
+          if user.services.hermes-agent.enable
+          then builtins.attrNames (lib.filterAttrs (_: agent: agent.gateway) user.services.hermes-agent.agents)
+          else [];
+        profiles = lib.unique (user.services.camofox-browser.profiles ++ gatewayAgents);
+        cfg = user.services.camofox-browser;
+      in lib.concatMap (profile: [
+        {
+          name = "${profile}-${cfg.name}-vnc-helper";
+          value.loadBalancer.servers = [{url = "http://127.0.0.1:${toString (helperPortFor cfg user profile)}";}];
+        }
+        {
+          name = "${profile}-${cfg.name}-vnc";
+          value.loadBalancer.servers = [{url = "http://127.0.0.1:${toString (deriveServicePort "camofox-vnc" profile (cfg.vncBasePort + user.home.portOffset))}";}];
+        }
+      ]) (if cfg.enableVnc then profiles else [])) users
+    ))
+  ];
+
+  services.traefik.dynamicConfigOptions.http.routers = lib.mkMerge [
+    (lib.listToAttrs (
+      lib.concatMap (user: let
+        inherit (config.networking) hostName;
+        gatewayAgents =
+          if user.services.hermes-agent.enable
+          then builtins.attrNames (lib.filterAttrs (_: agent: agent.gateway) user.services.hermes-agent.agents)
+          else [];
+        profiles = lib.unique (user.services.camofox-browser.profiles ++ gatewayAgents);
+        cfg = user.services.camofox-browser;
+        hostFor = profile: "${profile}.${cfg.name}.${hostName}";
+      in lib.concatMap (profile: [
+        {
+          name = "${profile}-${cfg.name}-root";
+          value = {
+            entrypoints = "websecure";
+            tls = true;
+            rule = ''Host(`${hostFor profile}`) && (Path("/") || Path("/wake"))'';
+            middlewares = ["local"];
+            priority = 100;
+            service = "${profile}-${cfg.name}-vnc-helper";
+          };
+        }
+        {
+          name = "${profile}-${cfg.name}-vnc";
+          value = {
+            entrypoints = "websecure";
+            tls = true;
+            rule = ''Host(`${hostFor profile}`) && PathPrefix("/")'';
+            middlewares = ["local"];
+            priority = 10;
+            service = "${profile}-${cfg.name}-vnc";
+          };
+        }
+      ]) (if cfg.enableVnc then profiles else [])) users
+    ))
+  ];
 }
