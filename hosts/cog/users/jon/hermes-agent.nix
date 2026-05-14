@@ -113,30 +113,14 @@ in {
 
     # Agents and their configuration overrides
     agents = {
-      june.gateway = true;
-      pax.gateway = true;
-      cid = {
-        gateway = true;
-
-        config = {
-          model = {
-            inherit (gpt {}) provider base_url api_key api_mode;
-            default = (gpt {}).model;
-          };
-          auxiliary.compression = gptmini {
-            timeout = 120;
-          };
-        };
-      };
+      watt.gateway = true;
+      june.gateway = "kit";
+      pax.gateway = "kit";
+      cid.gateway = "kit";
       dot.client = "gem";
     };
   };
 
   # Ensure uvx is available for mcp servers
   toolchains.python.enable = true;
-
-  services.camofox-browser = {
-    enable = true;
-    enableVnc = true;
-  };
 }
