@@ -5,7 +5,7 @@
   ...
 }: let
   # https://github.com/Soju06/codex-lb/pkgs/container/codex-lb
-  version = "1.15.0";
+  version = "1.17.0";
 
   cfg = config.services.codex-lb;
   inherit (lib) mkIf mkOption types;
