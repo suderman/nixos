@@ -6,22 +6,25 @@
   ...
 }: let
   cfg = config.programs.kitty;
-  inherit (lib) mkIf mkDefault mkAfter;
 in {
-  config = mkIf cfg.enable {
+  config = lib.mkIf cfg.enable {
     programs.kitty.settings = {
       bold_font = "auto";
       italic_font = "auto";
-      bold_italic_font = "auto";
-      adjust_line_height = "100%";
-
-      scrollback_lines = 10000;
       enable_audio_bell = false;
       update_check_interval = 0;
       confirm_os_window_close = 0;
+      allow_remote_control = "yes";
+      scrollback_lines = 10000;
+
+      # Clipboard
+      copy_on_select = "clipboard";
+      clear_selection_on_clipboard_loss = "yes";
 
       # disable ligatures when cursor is on them
       disable_ligatures = "cursor";
+      bold_italic_font = "auto";
+      adjust_line_height = "100%";
 
       # Window layout
       hide_window_decorations = "titlebar-only";
@@ -37,8 +40,6 @@ in {
       active_tab_font_style = "bold";
       inactive_tab_font_style = "normal";
       tab_activity_symbol = "";
-
-      allow_remote_control = "yes";
     };
 
     programs.kitty.environment = {
@@ -55,9 +56,6 @@ in {
       "ctrl+shift+left" = "previous_tab";
       "ctrl+shift+equal" = "change_font_size all +1.0";
       "ctrl+shift+minus" = "change_font_size all -1.0";
-      # "super+0" = "change_font_size all 0";
-      # "super+r" = "load_config_file";
-      # "ctrl+shift+slash" = "launch --type=overlay --stdin-source=@screen_scrollback ${pkgs.fzf}/bin/fzf -m --no-sort --no-mouse --exact -i --tac | ${pkgs.wl-clipboard}/bin/wl-copy";
     };
 
     programs.kitty.shellIntegration.mode = "enabled";
@@ -69,10 +67,7 @@ in {
         "super.w" = "C-S-q"; # close tab
         "super.[" = "C-S-left"; # prev tab
         "super.]" = "C-S-right"; # next tab
-        # "super.n" = "C-S-n"; # new window
         "super.r" = "C-r"; # reload
-        # "super.c" = "C-insert"; # copy
-        # "super.p" = "S-insert"; # paste
         "super.equal" = "C-S-equal";
         "super.minus" = "C-S-minus";
         "super.g" = "macro(C-S-h slash)"; # grep scrollback
@@ -85,7 +80,7 @@ in {
       icat = "kitty +kitten icat";
     };
 
-    programs.zsh.initContent = mkAfter ''
+    programs.zsh.initContent = lib.mkAfter ''
       # Alias ssh command if using kitty
       [ "$TERM" = "xterm-kitty" ] && alias ssh="kitty +kitten ssh"
       # Alias diff command if using kitty
