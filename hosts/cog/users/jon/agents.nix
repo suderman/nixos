@@ -121,6 +121,16 @@ in {
     };
   };
 
+  # # easy remote access to june from here too
+  # programs.zsh.initContent =
+  #   lib.mkAfter
+  #   # sh
+  #   ''
+  #     june() {
+  #       ssh -t kit june "$@"
+  #     }
+  #   '';
+
   # Ensure uvx is available for mcp servers
   toolchains.python.enable = true;
 }

@@ -12,7 +12,7 @@
       execOnce = ["freetube" "zwift"];
     };
     enablePlugins = false; # dynamic cursors crash on lua path for now
-    enableOfficialPlugins = false; # hyprbars/hyprexpo broken on v0.55.0
+    enableOfficialPlugins = true;
   };
 
   programs.zwift.enable = true; # fitness
