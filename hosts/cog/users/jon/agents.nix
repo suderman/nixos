@@ -113,23 +113,23 @@ in {
 
     # Agents and their configuration overrides
     agents = {
-      watt.gateway = true;
-      june.gateway = "kit";
-      pax.gateway = "kit";
-      cid.gateway = "kit";
+      cid = {
+        gateway = true;
+        config = {
+          model = {
+            inherit (gpt {}) provider base_url api_key api_mode;
+            default = (gpt {}).model;
+          };
+          auxiliary.compression = gptmini {
+            timeout = 120;
+          };
+        };
+      };
+      june.client = "kit";
+      pax.client = "kit";
       dot.client = "gem";
     };
   };
-
-  # # easy remote access to june from here too
-  # programs.zsh.initContent =
-  #   lib.mkAfter
-  #   # sh
-  #   ''
-  #     june() {
-  #       ssh -t kit june "$@"
-  #     }
-  #   '';
 
   # Ensure uvx is available for mcp servers
   toolchains.python.enable = true;

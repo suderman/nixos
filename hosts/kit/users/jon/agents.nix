@@ -114,10 +114,8 @@ in {
     # Agents and their configuration overrides
     agents = {
       june.gateway = true;
-      pax.gateway = true;
-      cid = {
+      pax = {
         gateway = true;
-
         config = {
           model = {
             inherit (gpt {}) provider base_url api_key api_mode;
@@ -128,6 +126,7 @@ in {
           };
         };
       };
+      cid.client = "cog";
       dot.client = "gem";
     };
   };
