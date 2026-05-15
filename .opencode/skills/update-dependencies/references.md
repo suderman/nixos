@@ -79,7 +79,7 @@ For each manual dependency, keep:
 - file: modules/nixos/default/options/home-assistant/default.nix
 - lookup: `version = ...`
 - current_fields:
-  - `version = "2026.4.3"`
+  - `version = "2026.5.0"`
 - upstream: https://github.com/home-assistant/core/pkgs/container/home-assistant/versions?filters%5Bversion_type%5D=tagged
 - update_rule: use the newest tagged container version that matches the policy already used in this repo
 - hash_rule: no source hash in this file; update only the tag unless the repo later starts pinning digests
@@ -94,7 +94,7 @@ For each manual dependency, keep:
 - file: modules/nixos/default/options/home-assistant/default.nix
 - lookup: `zwaveVersion = ...`
 - current_fields:
-  - `zwaveVersion = "11.16.1"`
+  - `zwaveVersion = "11.16.2"`
 - upstream: https://github.com/zwave-js/zwave-js-ui/pkgs/container/zwave-js-ui/versions?filters%5Bversion_type%5D=tagged
 - update_rule: use the newest tagged container version that matches the policy already used in this repo
 - hash_rule: no source hash in this file; update only the tag unless the repo later starts pinning digests
@@ -124,7 +124,7 @@ For each manual dependency, keep:
 - file: modules/nixos/default/options/codex-lb.nix
 - lookup: `version = ...` and `image = "ghcr.io/soju06/codex-lb:${cfg.version}"`
 - current_fields:
-  - `version = "1.15.0"`
+  - `version = "1.17.0"`
   - `image = "ghcr.io/soju06/codex-lb:${cfg.version}"`
 - upstream: https://github.com/Soju06/codex-lb/pkgs/container/codex-lb
 - update_rule: use the newest tagged container version compatible with the repo’s existing policy
@@ -225,7 +225,7 @@ For each manual dependency, keep:
 - file: modules/nixos/default/options/whoogle.nix
 - lookup: `version = ...` and `image = "benbusby/whoogle-search:${version}"`
 - current_fields:
-  - `version = "1.2.4"`
+  - `version = "1.2.5"`
   - `image = "benbusby/whoogle-search:${version}"`
 - upstream: https://github.com/benbusby/whoogle-search/releases
 - update_rule: use the newest tagged release compatible with the repo's existing policy
