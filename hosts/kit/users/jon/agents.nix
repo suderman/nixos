@@ -114,18 +114,19 @@ in {
     # Agents and their configuration overrides
     agents = {
       june.gateway = true;
-      pax = {
-        gateway = true;
-        config = {
-          model = {
-            inherit (gpt {}) provider base_url api_key api_mode;
-            default = (gpt {}).model;
-          };
-          auxiliary.compression = gptmini {
-            timeout = 120;
-          };
-        };
-      };
+      pax.gateway = true;
+      # pax = {
+      #   gateway = true;
+      #   config = {
+      #     model = {
+      #       inherit (gpt {}) provider base_url api_key api_mode;
+      #       default = (gpt {}).model;
+      #     };
+      #     auxiliary.compression = gptmini {
+      #       timeout = 120;
+      #     };
+      #   };
+      # };
       cid.client = "cog";
       dot.client = "gem";
     };
