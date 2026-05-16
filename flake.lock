@@ -1623,11 +1623,11 @@
         "nixpkgs": "nixpkgs_9"
       },
       "locked": {
-        "lastModified": 1778913857,
-        "narHash": "sha256-Q75UNXhIX+j7e7GkCs0RzbCKW4+t1Av3/GnneKm/Dac=",
+        "lastModified": 1778917664,
+        "narHash": "sha256-a715heKtCVLn1CNhS2bINUasOoF+jxHze0XK9Jze8AM=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "894c287292502ca974420ca24746b9344b5be9e6",
+        "rev": "74a40708d803f641d4f09b1d47fe29685fe2f32d",
         "type": "github"
       },
       "original": {
