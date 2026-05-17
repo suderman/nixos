@@ -21,8 +21,11 @@
   programs.dolphin-emu.enable = true;
   programs.citron.enable = true;
   programs.zwift.enable = true; # fitness
+
+  # Agents
   programs.opencode.enable = true;
   programs.mmx-cli.enable = true;
+  programs.iamb.enable = true;
 
   # User services
   services.syncthing.enable = true;

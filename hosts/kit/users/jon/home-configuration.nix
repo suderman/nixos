@@ -15,8 +15,11 @@
   programs.davinci-resolve.enable = true;
   programs.sparrow.enable = true;
   programs.zwift.enable = true;
+
+  # Agents
   programs.opencode.enable = true;
   programs.mmx-cli.enable = true;
+  programs.iamb.enable = true;
 
   # Gaming
   programs.steam.enable = true;

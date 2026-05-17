@@ -25,4 +25,13 @@
     # Bashly CLI
     bashly = "docker run --rm -it --user $(id -u):$(id -g) --volume \"$PWD:/app\" dannyben/bashly";
   };
+
+  # Matrix TUI client
+  programs.iamb.settings = {
+    default_profile = "jon";
+    profiles.jon = {
+      user_id = "@jon:matrix.kit";
+      url = "https://matrix.kit";
+    };
+  };
 }
