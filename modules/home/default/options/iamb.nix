@@ -22,13 +22,17 @@ in {
     programs.iamb = {
       package = iamb-native-tls;
       settings = {
+        # https://iamb.chat/configure.html
         settings = {
           message_user_color = true;
           request_timeout = 180;
-          typing_notice_display = false;
-          typing_notice_send = false;
+          typing_notice_display = true;
+          typing_notice_send = true;
           username_display = "localpart";
           notifications.enabled = true;
+          reaction_display = true;
+          reaction_shortcode_display = false;
+          image_preview.protocol.type = "kitty";
         };
         layout.style = "restore";
       };
