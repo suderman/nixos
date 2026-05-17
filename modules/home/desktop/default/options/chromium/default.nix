@@ -19,7 +19,7 @@
   class = "chromium-browser";
 in {
   # Import chromium lib
-  imports = [./lib.nix];
+  imports = [./lib.nix ./agents.nix];
 
   # Extra options to manage external extensions
   options.programs.chromium = {
@@ -157,32 +157,6 @@ in {
       };
     };
 
-    home.packages = [
-      (mkApplication {
-        name = "chromium-agent";
-        desktopName = "Chromium Agent";
-        genericName = "Web Browser";
-        categories = ["Network" "WebBrowser"];
-        icon = "chromium";
-        text =
-          ''
-            mkdir -p "${cfg.dataDir}-agent"
-            rm -f "${cfg.dataDir}-agent/External Extensions"
-            ln -sf "${cfg.dataDir}/External Extensions" "${cfg.dataDir}-agent/External Extensions"
-          ''
-          + "${lib.getExe cfg.package} "
-          + toString (
-            switches
-            ++ [
-              ''--user-data-dir=${cfg.dataDir}-agent''
-              ''--disk-cache-dir=${cfg.runDir}-agent''
-              ''--profile-directory=Default''
-              "--remote-debugging-port=${toString cfg.remoteDebuggingPort}"
-            ]
-          )
-          + " \"$@\"";
-      })
-    ];
     wayland.windowManager.hyprland.lua.features.chromium =
       # lua
       ''
