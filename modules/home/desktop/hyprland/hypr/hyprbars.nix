@@ -64,7 +64,8 @@ in
           hl.on("hyprland.start", load_and_configure_hyprbars)
         end
 
-        util.exec("ESCAPE", "hypr-toggletitlebars", { non_consuming = true, long_press = true })
+        util.exec("ESCAPE", "hypr-toggletitlebars", { non_consuming = true })
+        util.exec("SUPER + SLASH", "hypr-toggletitlebars", { non_consuming = true })
       '';
   };
 }
