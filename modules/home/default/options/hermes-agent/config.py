@@ -18,10 +18,12 @@ def load_yaml(path: str) -> dict:
     return data
 
 
-def merge(base, override):
+def merge(base, override, top_level=False):
     result = dict(base)
     for key, value in override.items():
-        if isinstance(result.get(key), dict) and isinstance(value, dict):
+        if top_level and key in {"model", "fallback_providers", "auxiliary"}:
+            result[key] = value
+        elif isinstance(result.get(key), dict) and isinstance(value, dict):
             result[key] = merge(result[key], value)
         else:
             result[key] = value
@@ -50,7 +52,7 @@ def replace_mode(target: str, layer_path: str) -> int:
 
     base = load_yaml(target)
     layer = load_yaml(layer_path)
-    merged = merge(base, layer)
+    merged = merge(base, layer, top_level=True)
 
     if os.path.exists(target):
         os.replace(target, backup)
