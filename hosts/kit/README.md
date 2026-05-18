@@ -28,3 +28,12 @@ Custom build sitting on my home office desk. Great for coding, video editing, AI
 Powered by [Hyprland](https://hypr.land/)!
 
 Thankfully I purchased & assembled this rig before storage and memory prices went insane.
+
+## Matrix notes
+
+- Well-known: `curl -i https://matrix.kit/.well-known/matrix/client`
+- Confirm JSON includes `"io.element.e2ee": { "force_disable": true }`
+- Confirm `Access-Control-Allow-Origin: *`
+- Confirm Synapse eval/config has `encryption_enabled_by_default_for_room_type = "off"`
+- Create a fresh room or DM and verify there is no `m.room.encryption`; abandon/recreate any existing encrypted rooms or DMs
+- Android/GrapheneOS Element and Element X may not fully honor the Element well-known override; if they still force encrypted DMs, use unencrypted rooms or a client/admin/bot flow that creates non-E2EE rooms

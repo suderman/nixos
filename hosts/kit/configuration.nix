@@ -75,10 +75,6 @@
     enable = true;
     localUsers = {
       jon.admin = true;
-      june = {};
-      pax = {};
-      cid = {};
-      dot = {};
     };
   };
 

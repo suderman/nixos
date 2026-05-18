@@ -10,6 +10,7 @@
   inherit (config.services.traefik.lib) mkHostName;
 
   hostName = mkHostName cfg.name;
+  wellKnownPort = cfg.port + 1;
   localUserNames = builtins.attrNames cfg.localUsers;
 in {
   # This extends the upstream NixOS Synapse module with the repo's private
@@ -118,6 +119,9 @@ in {
       settings = mkForce {
         server_name = hostName;
         public_baseurl = "https://${hostName}/";
+        # This private server uses TLS, private network access control, and
+        # bots/server-side history, but intentionally keeps Matrix E2EE off.
+        encryption_enabled_by_default_for_room_type = "off";
         report_stats = false;
         presence.enabled = false;
         url_preview_enabled = false;
@@ -318,5 +322,43 @@ in {
     # A bare proxy name becomes matrix.<host>, which is private Blocky DNS plus
     # internal-CA HTTPS in this repo's Traefik module.
     services.traefik.proxy.${cfg.name} = "http://127.0.0.1:${toString cfg.port}";
+
+    # Serve the Matrix client well-known document locally, then expose it
+    # through Traefik on the exact path so Synapse still handles everything
+    # else.
+    services.nginx.enable = true;
+    services.nginx.virtualHosts."matrix-well-known" = {
+      listen = [
+        {
+          addr = "127.0.0.1";
+          port = wellKnownPort;
+        }
+      ];
+
+      extraConfig = ''
+        location = /.well-known/matrix/client {
+          default_type application/json;
+          add_header Access-Control-Allow-Origin "*" always;
+          return 200 '{"m.homeserver":{"base_url":"https://${hostName}"},"io.element.e2ee":{"force_disable":true}}';
+        }
+      '';
+    };
+
+    services.traefik.dynamicConfigOptions.http = {
+      routers."matrix-well-known" = {
+        entrypoints = "websecure";
+        rule = "Host(`${hostName}`) && Path(`/.well-known/matrix/client`)";
+        priority = 1000;
+        tls = {};
+        middlewares = ["local"];
+        service = "matrix-well-known";
+      };
+
+      services."matrix-well-known".loadBalancer.servers = [
+        {
+          url = "http://127.0.0.1:${toString wellKnownPort}";
+        }
+      ];
+    };
   };
 }
