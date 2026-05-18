@@ -28,6 +28,7 @@
 in {
   services.hermes-agent = {
     enable = true;
+    matrix.enable = true;
 
     # Shared configuration
     config = {

@@ -35,6 +35,7 @@
             set -a
             [[ -f "${dataDir}/.env" ]] && . "${dataDir}/.env"
             [[ -f "${dataDir}/${name}/.env" ]] && . "${dataDir}/${name}/.env"
+            [[ -f "${dataDir}/${name}/.env.matrix" ]] && . "${dataDir}/${name}/.env.matrix"
             [[ -f "${dataDir}/${name}/.env.camofox" ]] && . "${dataDir}/${name}/.env.camofox"
             set +a
 

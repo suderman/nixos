@@ -43,6 +43,28 @@ in {
       description = "Shared Hermes configuration applied to all agents later.";
     };
 
+    matrix = {
+      enable = lib.mkEnableOption "Matrix access for Hermes agents";
+
+      homeserver = lib.mkOption {
+        type = lib.types.str;
+        default = "https://matrix.kit";
+        description = "Matrix homeserver URL used by Hermes agents.";
+      };
+
+      serverName = lib.mkOption {
+        type = lib.types.str;
+        default = "matrix.kit";
+        description = "Matrix server name used for deterministic account and password derivation.";
+      };
+
+      allowedUsers = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = ["@${config.home.username}:${cfg.matrix.serverName}"];
+        description = "Matrix user IDs Hermes agents may message.";
+      };
+    };
+
     agents = let
       agentType = lib.types.submodule ({name, ...}: {
         options = {
@@ -107,6 +129,7 @@ in {
     # Generate shared dotenv file for all hermes agents
     systemd.user.services.hermes-agent-env = let
       inherit (config.lib.hermes-agent) dataDir runDir;
+      matrixAgents = builtins.attrNames cfg.agents;
 
       keysEnv =
         if cfg.apiKeys != null
@@ -152,6 +175,37 @@ in {
 
               chmod 600 "$tmp"
               mv "$tmp" "${dataDir}/.env"
+
+              ${lib.optionalString cfg.matrix.enable (lib.concatMapStrings (agent: ''
+                passwordFile="${runDir}/matrix/${agent}.password"
+                envFile="${dataDir}/${agent}/.env.matrix"
+
+                if [ ! -r "$passwordFile" ]; then
+                  echo "Missing Hermes Matrix password: $passwordFile" >&2
+                  exit 1
+                fi
+
+                mkdir -p "${dataDir}/${agent}"
+                tmp_matrix="$(mktemp "${dataDir}/${agent}/.env.matrix.tmp.XXXXXX")"
+                {
+                  printf 'MATRIX_HOMESERVER=%q\n' "${cfg.matrix.homeserver}"
+                  printf 'MATRIX_USER_ID=%q\n' "@${agent}:${cfg.matrix.serverName}"
+                  printf 'MATRIX_PASSWORD=%q\n' "$(cat "$passwordFile")"
+                  printf 'MATRIX_ALLOWED_USERS=%q\n' "${lib.concatStringsSep "," cfg.matrix.allowedUsers}"
+                } >"$tmp_matrix"
+
+                chmod 600 "$tmp_matrix"
+                mv "$tmp_matrix" "$envFile"
+              '') matrixAgents)}
+
+              ${lib.optionalString (!cfg.matrix.enable) (lib.concatMapStrings (agent: ''
+                rm -f "${runDir}/matrix/${agent}.password"
+                rm -f "${dataDir}/${agent}/.env.matrix"
+              '') matrixAgents)}
+
+              ${lib.optionalString (!cfg.matrix.enable) ''
+                rmdir "${runDir}/matrix" 2>/dev/null || true
+              ''}
             '';
         };
       };

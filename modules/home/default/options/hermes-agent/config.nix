@@ -22,6 +22,13 @@
       cron.wrap_response = false;
       agent.gateway_notify_interval = 600;
       display.skin = agentName; # custom tui skin
+    } // lib.optionalAttrs cfg.matrix.enable {
+      group_sessions_per_user = true;
+      matrix = {
+        require_mention = true;
+        auto_thread = true;
+        dm_mention_threads = false;
+      };
     } // lib.optionalAttrs (builtins.elem agentName gatewayAgents) {
       browser.camofox.managed_persistence = true;
     };
