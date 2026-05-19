@@ -119,9 +119,6 @@ in {
       settings = mkForce {
         server_name = hostName;
         public_baseurl = "https://${hostName}/";
-        # This private server uses TLS, private network access control, and
-        # bots/server-side history, but intentionally keeps Matrix E2EE off.
-        encryption_enabled_by_default_for_room_type = "off";
         report_stats = false;
         presence.enabled = false;
         url_preview_enabled = false;
@@ -339,7 +336,7 @@ in {
         location = /.well-known/matrix/client {
           default_type application/json;
           add_header Access-Control-Allow-Origin "*" always;
-          return 200 '{"m.homeserver":{"base_url":"https://${hostName}"},"io.element.e2ee":{"force_disable":true}}';
+          return 200 '{"m.homeserver":{"base_url":"https://${hostName}"}}';
         }
       '';
     };
