@@ -161,6 +161,9 @@ in {
       }
     ];
 
+    # This will default to true in 26.05
+    boot.initrd.systemd.enable = false;
+
     # Script to wipe the root subvolume at boot
     boot.initrd.postResumeCommands =
       mkAfter
