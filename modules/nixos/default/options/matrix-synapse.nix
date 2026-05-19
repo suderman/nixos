@@ -344,7 +344,7 @@ in {
     services.traefik.dynamicConfigOptions.http = {
       routers."matrix-well-known" = {
         entrypoints = "websecure";
-        rule = "Host(`${hostName}`) && Path(`/.well-known/matrix/client`)";
+        rule = ''Host(`${hostName}`) && Path("/.well-known/matrix/client")'';
         priority = 1000;
         tls = {};
         middlewares = ["local"];
