@@ -112,8 +112,14 @@ in {
 
     packages = lib.mkOption {
       type = lib.types.attrsOf lib.types.package;
-      description = "The hermes-agent package of each agent";
+      description = "The hermes-agent package of each agent.";
       default = {};
+    };
+
+    models = lib.mkOption {
+      type = lib.types.attrsOf lib.types.anything;
+      default = {};
+      description = "Freeform attr set to store models for later use.";
     };
   };
 
