@@ -6,7 +6,7 @@
   cfg = config.services.keyd;
   inherit (lib) removePrefix removeSuffix replaceStrings toLower;
 
-  # Create window class name from hyprland string to what keyd-application-mapper makes:
+  # Create window class names that match keyd-application-mapper:
   # 427 def normalize_class(s):
   # 423   return re.sub('[^A-Za-z0-9]+', '-', s).strip('-').lower()
   mkClass = str: let

@@ -9,7 +9,7 @@
   cfg = config.services.keyd;
   ini = pkgs.formats.ini {};
   inherit (perSystem.self) mkScript;
-  inherit (lib) concatStringsSep mapAttrsToList mkDefault mkIf mkOption types;
+  inherit (lib) mkOption types;
 in {
   # Import keyd lib
   imports = [./lib.nix];
@@ -19,6 +19,10 @@ in {
     systemdTarget = mkOption {
       type = types.str;
       default = "";
+    };
+    mapper.enable = mkOption {
+      type = types.bool;
+      default = true;
     };
     windows = mkOption {
       type = types.anything;
@@ -43,9 +47,9 @@ in {
       // cfg.windows);
   };
 
-  # User service runs keyd-application-mapper
+  # User service runs keyd-application-mapper.
   config.systemd.user.services =
-    if cfg.systemdTarget == ""
+    if cfg.systemdTarget == "" || !cfg.mapper.enable
     then {}
     else {
       keyd.Unit = {
@@ -60,37 +64,6 @@ in {
         ExecStart = mkScript {
           path = [pkgs.keyd];
           text = "keyd-application-mapper";
-        };
-      };
-
-      # Similar functionality as keyd-application-mapper, but watch for hyprland layer changes instead of windows
-      keyd-layers.Unit = {
-        Description = "Keyd Hyprland Layer Events";
-        After = [cfg.systemdTarget];
-        Requires = [cfg.systemdTarget];
-      };
-      keyd-layers.Install.WantedBy = [cfg.systemdTarget];
-      keyd-layers.Service = {
-        Type = "simple";
-        Restart = "always";
-        ExecStart = mkScript {
-          path = with pkgs; [socat keyd];
-          text = let
-            openlayers = concatStringsSep "\n" (
-              mapAttrsToList (layer: pairs: let
-                binds = mapAttrsToList (from: to: "${from}=${to}") pairs;
-              in "openlayer\\>\\>${layer}) keyd bind ${toString binds} ;;")
-              cfg.layers
-            );
-          in ''
-            handle() {
-              case $1 in
-                closelayer\>\>*) keyd bind reset ;;
-                ${openlayers}
-              esac
-            }
-            socat -U - UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock | while read -r line; do handle "$line"; done
-          '';
         };
       };
     };
