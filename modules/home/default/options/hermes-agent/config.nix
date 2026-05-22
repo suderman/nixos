@@ -9,29 +9,33 @@
 
   # Shared override for each agent's config.yaml
   overrides = let
-    configFor = agentName: {
-      # customize memory to be bigger and use honcho
-      memory = {
-        provider = "honcho";
-        memory_char_limit = 8000;
-        user_char_limit = 5000;
-        nudge_interval = 6;
-        flush_min_turns = 3;
+    configFor = agentName:
+      {
+        # customize memory to be bigger and use honcho
+        memory = {
+          provider = "honcho";
+          memory_char_limit = 8000;
+          user_char_limit = 5000;
+          nudge_interval = 6;
+          flush_min_turns = 3;
+        };
+        compression.threshold = 0.4;
+        # make cron-triggered messages look natural
+        cron.wrap_response = false;
+        agent.gateway_notify_interval = 600;
+        display.skin = agentName; # custom tui skin
+      }
+      // lib.optionalAttrs cfg.matrix.enable {
+        group_sessions_per_user = true;
+        matrix = {
+          require_mention = true;
+          auto_thread = true;
+          dm_mention_threads = false;
+        };
+      }
+      // lib.optionalAttrs (builtins.elem agentName gatewayAgents) {
+        browser.camofox.managed_persistence = true;
       };
-      # make cron-triggered messages look natural
-      cron.wrap_response = false;
-      agent.gateway_notify_interval = 600;
-      display.skin = agentName; # custom tui skin
-    } // lib.optionalAttrs cfg.matrix.enable {
-      group_sessions_per_user = true;
-      matrix = {
-        require_mention = true;
-        auto_thread = true;
-        dm_mention_threads = false;
-      };
-    } // lib.optionalAttrs (builtins.elem agentName gatewayAgents) {
-      browser.camofox.managed_persistence = true;
-    };
   in
     lib.mapAttrs (
       name: agent:
