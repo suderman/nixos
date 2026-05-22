@@ -9,12 +9,12 @@
   inherit (lib) mkOption types;
 
   # https://github.com/plastic-labs/honcho
-  # last checked 2026-05-06
+  # last checked 2026-05-21
   honchoSrc = pkgs.fetchFromGitHub {
     owner = "plastic-labs";
     repo = "honcho";
-    rev = "a4ae372932b064d8b9bdcf2d6a2c4faec4169162";
-    hash = "sha256-zcfhg+q3eleHoyZBUnDRB4uxbJLMcT21wh7TRbHZVFE=";
+    rev = "7470866d12845ed4b56bf3449d058e65df96b1c1";
+    hash = "sha256-g/uZgSqCOzNiGSAQugEkPwz2+Wt6DPBiMNCRjzmA8sc=";
   };
 in {
   options.services.honcho = {
