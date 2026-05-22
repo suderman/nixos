@@ -40,7 +40,7 @@ in {
               ExecStart = "${hermes} gateway run --replace";
               Restart = "always";
               RestartSec = 5;
-              TimeoutStopSec = 30;
+              TimeoutStopSec = 210;
               TimeoutStartSec = 30;
               SuccessExitStatus = "0 143";
               KillMode = "control-group";
