@@ -72,6 +72,22 @@ For each manual dependency, keep:
 - notes:
   - branch-based pins are higher risk than tagged releases; call this out in the report
 
+## honcho
+
+- name: honcho
+- kind: fetch-github-rev
+- file: modules/nixos/default/options/honcho.nix
+- lookup: `pkgs.fetchFromGitHub { owner = "plastic-labs"; repo = "honcho"; rev = ...; hash = ...; }`
+- current_fields:
+  - `rev = "7470866d12845ed4b56bf3449d058e65df96b1c1"`
+  - `hash = "sha256-g/uZgSqCOzNiGSAQugEkPwz2+Wt6DPBiMNCRjzmA8sc="`
+- upstream: https://github.com/plastic-labs/honcho
+- update_rule: default to the latest commit on the tracked default branch unless this package is intentionally pinned for a reason noted in the repo
+- hash_rule: after changing `rev`, refresh the fetched source hash and update `hash`
+- validate: `nix develop -c nix eval .#nixosConfigurations.kit.config.system.build.toplevel.outPath`
+- notes:
+  - confirmed manual `fetchFromGitHub` pin
+
 ## home-assistant
 
 - name: home-assistant
