@@ -17,6 +17,7 @@ in {
 
   config = lib.mkIf cfg.enable {
     programs.firefox = {
+      configPath = "${config.xdg.configHome}/mozilla/firefox";
       profiles.default = {
         settings = {
           "ui.key.menuAccessKeyFocuses" = false; # don't toggle menu with alt key
