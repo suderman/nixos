@@ -19,7 +19,7 @@
   # Agents
   programs.opencode.enable = true;
   programs.mmx-cli.enable = true;
-  programs.iamb.enable = true;
+  programs.iamb.enable = false;
 
   # Gaming
   programs.steam.enable = true;

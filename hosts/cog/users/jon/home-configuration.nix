@@ -25,7 +25,7 @@
   # Agents
   programs.opencode.enable = true;
   programs.mmx-cli.enable = true;
-  programs.iamb.enable = true;
+  programs.iamb.enable = false;
 
   # User services
   services.syncthing.enable = true;
