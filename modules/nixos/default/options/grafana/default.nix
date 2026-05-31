@@ -36,6 +36,12 @@ in {
           check_for_plugin_updates = false;
         };
 
+        security = {
+          # Preserve Grafana's pre-26.05 implicit default to keep upgrades building
+          # and avoid breaking decryption of any existing DB-stored secrets.
+          secret_key = "SW2YcwTIb9zpOOhoPsMm";
+        };
+
         panels = {
           disable_sanitize_html = true;
           enable_alpha = true;
