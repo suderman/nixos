@@ -7,14 +7,6 @@
 }: let
   inherit (lib) mkIf mkOption types;
 in {
-  options.home.uid = mkOption {
-    type = with types; nullOr int;
-    default = osConfig.users.users.${config.home.username}.uid or null;
-    description = ''
-      Lookup uid from flake.users.<name>.uid and assign to config.home.uid
-    '';
-  };
-
   options.home.portOffset = mkOption {
     type = with types; nullOr int;
     default = let
@@ -44,6 +36,8 @@ in {
   # User Configuration
   # ---------------------------------------------------------------------------
   config = {
+    home.uid = lib.mkDefault (osConfig.users.users.${config.home.username}.uid or null);
+
     # Add prioritized support for ~/bin and ~/.local/bin
     home.sessionPath = lib.mkBefore [
       "${config.home.homeDirectory}/bin"
