@@ -29,7 +29,7 @@ in {
       popups = mkDefault 1.0;
     };
 
-    iconTheme = {
+    icons = {
       enable = true;
 
       # package = pkgs.reversal-icon-theme;
