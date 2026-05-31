@@ -61,10 +61,10 @@
     port ? null,
   }:
     {
-      hostname = hostName;
-      inherit user;
+      HostName = hostName;
+      User = user;
     }
-    // lib.optionalAttrs (port != null) {inherit port;};
+    // lib.optionalAttrs (port != null) {Port = port;};
 
   # Every zone record gets a fully qualified alias like `logos.home`. These are
   # always safe because they preserve the zone context explicitly.
@@ -125,22 +125,22 @@ in {
     # default match block, which is where SSH expects broad fallback settings.
     # Put shared defaults here instead of `extraConfig` so ordering stays
     # stable and explicit.
-    matchBlocks =
+    settings =
       longBlocks
       // shortHostBlocks
       // shortZoneBlocks
       // sharedOverrides
       // {
         "*" = {
-          identityFile = ["~/.ssh/id_ed25519" "~/.ssh/id_rsa"];
-          identitiesOnly = true;
-          addKeysToAgent = "8h";
-          forwardAgent = false;
-          controlMaster = "auto";
-          controlPath = "~/.ssh/control-%C";
-          controlPersist = "10m";
-          extraOptions.StrictHostKeyChecking = "accept-new";
-          extraOptions.LogLevel = "ERROR";
+          IdentityFile = ["~/.ssh/id_ed25519" "~/.ssh/id_rsa"];
+          IdentitiesOnly = true;
+          AddKeysToAgent = "8h";
+          ForwardAgent = false;
+          ControlMaster = "auto";
+          ControlPath = "~/.ssh/control-%C";
+          ControlPersist = "10m";
+          StrictHostKeyChecking = "accept-new";
+          LogLevel = "ERROR";
         };
       };
   };

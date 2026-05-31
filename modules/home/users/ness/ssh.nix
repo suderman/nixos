@@ -1,3 +1,3 @@
 {...}: {
-  programs.ssh.matchBlocks = {};
+  programs.ssh.settings = {};
 }
