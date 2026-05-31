@@ -5,7 +5,7 @@
   ...
 }: let
   # https://github.com/Soju06/codex-lb/pkgs/container/codex-lb
-  version = "1.18.2";
+  version = "1.19.0";
 
   cfg = config.services.codex-lb;
   inherit (lib) mkIf mkOption types;
@@ -78,6 +78,9 @@ in {
           CODEX_LB_DASHBOARD_BOOTSTRAP_TOKEN = "bootstrap";
           CODEX_LB_OAUTH_CALLBACK_HOST = "0.0.0.0";
           CODEX_LB_OAUTH_REDIRECT_URI = "http://localhost:1455/auth/callback";
+          CODEX_LB_UPSTREAM_CONNECT_TIMEOUT_SECONDS = "60"; # default 30
+          CODEX_LB_PROXY_REQUEST_BUDGET_SECONDS = "1200"; # default 600
+          CODEX_LB_STREAM_IDLE_TIMEOUT_SECONDS = "600"; # default 300
         }
         // cfg.environment;
 
