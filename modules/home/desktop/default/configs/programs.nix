@@ -29,7 +29,10 @@
 
   home.packages = with pkgs; [
     gnome-disk-utility # format and partition gui
-    xorg.xeyes # test for x11
+    xeyes # test for x11
     ripdrag # drag + drop files from/to the terminal
   ];
+
+  # legacy default is config.gtk.theme;
+  gtk.gtk4.theme = null;
 }
