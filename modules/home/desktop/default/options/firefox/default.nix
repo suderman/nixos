@@ -79,19 +79,15 @@ in {
 
     # keyboard shortcuts
     services.keyd.windows."${mkClass class}" = {
-      # "super.t" = "C-t"; # new tab
       "super.t" = "C-A-t"; # new tab (in same container)
       "super.w" = "C-w"; # close tab
       "super.[" = "C-pageup"; # prev tab
       "super.]" = "C-pagedown"; # next tab
-      # "super.n" = "C-n"; # new window
       "super.r" = "C-r"; # reload
     };
-    # Apply pretty colors
-    # stylix.targets.firefox.profileNames = [ "default" ];
 
     # Persist browser data
-    persist.storage.directories = [".mozilla/firefox/default"];
+    persist.storage.directories = [".config/mozilla/firefox/default"];
     wayland.windowManager.hyprland.lua.features.firefox =
       # lua
       ''
