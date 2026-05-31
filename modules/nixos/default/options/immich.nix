@@ -136,19 +136,22 @@ in {
       # Allow connections from any docker IP addresses
       authentication = mkBefore "host immich immich 172.16.0.0/12 md5";
 
-      # Postgres extension pgvecto.rs required since Immich 1.91.0
-      extensions = [
-        (pkgs.postgresqlPackages.pgvecto-rs.override rec {
-          postgresql = config.services.postgresql.package;
-        })
+      # Immich now uses VectorChord, which depends on pgvector.
+      extensions = ps: [
+        ps.pgvector
+        ps.vectorchord
       ];
-      settings.shared_preload_libraries = "vectors.so";
+      settings.shared_preload_libraries = "vchord.so";
     };
 
     # Immich expects its postgres user to be a "superuser"
     # ...not ideal, but getting tired of fighting against this...
     systemd.services.postgresql.postStart = mkAfter ''
       ${config.services.postgresql.package}/bin/psql -tAc 'ALTER USER immich WITH SUPERUSER;'
+      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS vector;'
+      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS vchord CASCADE;'
+      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'ALTER EXTENSION vector UPDATE;'
+      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'ALTER EXTENSION vchord UPDATE;'
     '';
 
     # Init service
