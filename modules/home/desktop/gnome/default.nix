@@ -1,4 +1,6 @@
 {
+  config,
+  lib,
   pkgs,
   flake,
   ...
@@ -7,6 +9,17 @@
 
   config = {
     programs.gnome-shell.enable = true;
+
+    stylix.targets.qt.enable = lib.mkForce false;
+
+    qt = {
+      enable = true;
+      platformTheme.name = "adwaita";
+      style.name =
+        if config.stylix.polarity == "dark"
+        then "adwaita-dark"
+        else "adwaita";
+    };
 
     home.packages = with pkgs.gnomeExtensions; [
       auto-move-windows
