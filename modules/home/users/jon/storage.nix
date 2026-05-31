@@ -1,43 +1,43 @@
 {config, ...}: {
   home.directories = {
     # Standard user directories
-    XDG_DESKTOP_DIR = {
+    DESKTOP = {
       path = "Desktop";
       persist = "storage";
       sync = true;
       enable = true;
     };
-    XDG_DOCUMENTS_DIR = {
+    DOCUMENTS = {
       path = "Documents";
       persist = "storage";
       sync = true;
       enable = true;
     };
-    XDG_DOWNLOAD_DIR = {
+    DOWNLOAD = {
       path = "Downloads";
       persist = "scratch";
       sync = false;
       enable = true;
     };
-    XDG_MUSIC_DIR = {
+    MUSIC = {
       path = "Music";
       persist = "storage";
       sync = true;
       enable = true;
     };
-    XDG_PICTURES_DIR = {
+    PICTURES = {
       path = "Pictures";
       persist = "storage";
       sync = true;
       enable = true;
     };
-    XDG_PUBLICSHARE_DIR = {
+    PUBLICSHARE = {
       path = "Public";
       persist = "storage";
       sync = true;
       enable = true;
     };
-    XDG_VIDEOS_DIR = {
+    VIDEOS = {
       path = "Movies";
       persist = "storage";
       sync = true;
@@ -45,40 +45,40 @@
     };
 
     # Standard user directories (disabled)
-    XDG_TEMPLATES_DIR.enable = false;
+    TEMPLATES.enable = false;
 
     # Custom user directories
-    XDG_BIN_DIR = {
+    BIN = {
       path = "bin";
       persist = "storage";
       sync = true;
       enable = true;
     };
-    XDG_ORG_DIR = {
+    ORG = {
       path = "org";
       persist = "storage";
       sync = true;
       enable = true;
     };
-    XDG_NOTES_DIR = {
+    NOTES = {
       path = "notes";
       persist = "storage";
       sync = true;
       enable = true;
     };
-    XDG_GAMES_DIR = {
+    GAMES = {
       path = "games";
       persist = "storage";
       sync = true;
       enable = true;
     };
-    XDG_SOURCE_DIR = {
+    SOURCE = {
       path = "src";
       persist = "storage";
       sync = false;
       enable = true;
     };
-    XDG_WORKSPACE_DIR = {
+    WORKSPACE = {
       path = "workspace";
       persist = "storage";
       sync = true;
@@ -88,7 +88,7 @@
 
   # Code cloned here, auto-whitelist for direnv
   programs.direnv.config.whitelist.prefix = [
-    config.xdg.userDirs.extraConfig.XDG_SOURCE_DIR
+    "${config.home.homeDirectory}/${config.home.directories.SOURCE.path}"
   ];
 
   # Known device ids to auomatically setup in syncthing

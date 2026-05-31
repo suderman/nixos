@@ -1,12 +1,12 @@
 {...}: {
   home.directories = {
-    XDG_DESKTOP_DIR.persist = "storage";
-    XDG_DOWNLOAD_DIR.persist = "scratch";
-    XDG_DOCUMENTS_DIR.persist = "storage";
-    XDG_MUSIC_DIR.persist = "storage";
-    XDG_PICTURES_DIR.persist = "storage";
-    XDG_VIDEOS_DIR.persist = "storage";
-    XDG_PUBLICSHARE_DIR.enable = false;
-    XDG_TEMPLATES_DIR.enable = false;
+    DESKTOP.persist = "storage";
+    DOWNLOAD.persist = "scratch";
+    DOCUMENTS.persist = "storage";
+    MUSIC.persist = "storage";
+    PICTURES.persist = "storage";
+    VIDEOS.persist = "storage";
+    PUBLICSHARE.enable = false;
+    TEMPLATES.enable = false;
   };
 }

@@ -8,6 +8,7 @@
 
   # List of enabled user directories
   directories = filterAttrs (_name: directory: directory.enable) config.home.directories;
+  dirPaths = mapAttrs (_: d: "${config.home.homeDirectory}/${d.path}") directories;
 in {
   options.home.directories = mkOption {
     type = types.attrsOf (types.submodule {
@@ -52,49 +53,49 @@ in {
 
       # Standard user directories
       directories = {
-        XDG_DESKTOP_DIR = {
+        DESKTOP = {
           path = mkDefault "Desktop";
           persist = mkDefault null;
           sync = mkDefault true;
           enable = mkDefault true;
         };
-        XDG_DOWNLOAD_DIR = {
+        DOWNLOAD = {
           path = mkDefault "Downloads";
           persist = mkDefault null;
           sync = mkDefault false;
           enable = mkDefault true;
         };
-        XDG_DOCUMENTS_DIR = {
+        DOCUMENTS = {
           path = mkDefault "Documents";
           persist = mkDefault null;
           sync = mkDefault true;
           enable = mkDefault true;
         };
-        XDG_MUSIC_DIR = {
+        MUSIC = {
           path = mkDefault "Music";
           persist = mkDefault null;
           sync = mkDefault true;
           enable = mkDefault true;
         };
-        XDG_PICTURES_DIR = {
+        PICTURES = {
           path = mkDefault "Pictures";
           persist = mkDefault null;
           sync = mkDefault true;
           enable = mkDefault true;
         };
-        XDG_PUBLICSHARE_DIR = {
+        PUBLICSHARE = {
           path = mkDefault "Public";
           persist = mkDefault null;
           sync = mkDefault false;
           enable = mkDefault true;
         };
-        XDG_TEMPLATES_DIR = {
+        TEMPLATES = {
           path = mkDefault "Templates";
           persist = mkDefault null;
           sync = mkDefault false;
           enable = mkDefault true;
         };
-        XDG_VIDEOS_DIR = {
+        VIDEOS = {
           path = mkDefault "Videos";
           persist = mkDefault null;
           sync = mkDefault true;
@@ -106,6 +107,7 @@ in {
     # XDG base directories
     xdg = {
       enable = true;
+
       cacheHome = "${config.home.homeDirectory}/.cache"; # XDG_CACHE_HOME
       configHome = "${config.home.homeDirectory}/.config"; # XDG_CONFIG_HOME
       dataHome = "${config.home.homeDirectory}/.local/share"; # XDG_DATA_HOME
@@ -114,17 +116,18 @@ in {
       # Default XDG user directories
       userDirs = rec {
         enable = mkDefault true;
+        setSessionVariables = mkDefault true;
         createDirectories = mkDefault true;
-        extraConfig = mapAttrs (_: d: "${config.home.homeDirectory}/${d.path}") directories;
+        extraConfig = dirPaths;
         # Ensure these align with extraConfig
-        desktop = extraConfig.XDG_DESKTOP_DIR or null;
-        documents = extraConfig.XDG_DOCUMENTS_DIR or null;
-        download = extraConfig.XDG_DOWNLOAD_DIR or null;
-        music = extraConfig.XDG_MUSIC_DIR or null;
-        pictures = extraConfig.XDG_PICTURES_DIR or null;
-        templates = extraConfig.XDG_TEMPLATES_DIR or null;
-        publicShare = extraConfig.XDG_PUBLICSHARE_DIR or null;
-        videos = extraConfig.XDG_VIDEOS_DIR or null;
+        desktop = dirPaths.DESKTOP or null;
+        documents = dirPaths.DOCUMENTS or null;
+        download = dirPaths.DOWNLOAD or null;
+        music = dirPaths.MUSIC or null;
+        pictures = dirPaths.PICTURES or null;
+        templates = dirPaths.TEMPLATES or null;
+        publicShare = dirPaths.PUBLICSHARE or null;
+        videos = dirPaths.VIDEOS or null;
       };
     };
 

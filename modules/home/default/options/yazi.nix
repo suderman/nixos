@@ -10,17 +10,17 @@
 
   dir = with config.xdg.userDirs; rec {
     home = config.home.homeDirectory;
-    desktop = extraConfig.XDG_DESKTOP_DIR or "${home}/Desktop";
-    documents = extraConfig.XDG_DOCUMENTS_DIR or "${home}/Documents";
-    download = extraConfig.XDG_DOWNLOAD_DIR or "${home}/Downloads";
-    games = extraConfig.XDG_GAMES_DIR or "${home}/Games";
-    music = extraConfig.XDG_MUSIC_DIR or "${home}/Music";
-    notes = extraConfig.XDG_NOTES_DIR or "${home}/Notes";
-    pictures = extraConfig.XDG_PICTURES_DIR or "${home}/Pictures";
-    publicShare = extraConfig.XDG_PUBLICSHARE_DIR or "${home}/Public";
-    source = extraConfig.XDG_SOURCE_DIR or "${home}/Source";
-    templates = extraConfig.XDG_TEMPLATES_DIR or "${home}/Templates";
-    videos = extraConfig.XDG_VIDEOS_DIR or "${home}/Videos";
+    desktop = extraConfig.DESKTOP or "${home}/Desktop";
+    documents = extraConfig.DOCUMENTS or "${home}/Documents";
+    download = extraConfig.DOWNLOAD or "${home}/Downloads";
+    games = extraConfig.GAMES or "${home}/Games";
+    music = extraConfig.MUSIC or "${home}/Music";
+    notes = extraConfig.NOTES or "${home}/Notes";
+    pictures = extraConfig.PICTURES or "${home}/Pictures";
+    publicShare = extraConfig.PUBLICSHARE or "${home}/Public";
+    source = extraConfig.SOURCE or "${home}/Source";
+    templates = extraConfig.TEMPLATES or "${home}/Templates";
+    videos = extraConfig.VIDEOS or "${home}/Videos";
   };
 in {
   config = mkIf cfg.enable {
