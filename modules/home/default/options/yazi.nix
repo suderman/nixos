@@ -67,9 +67,9 @@ in {
         }
       ];
 
-      settings.open.rules = [
+      settings.open.prepend_rules = [
         {
-          name = "*.pdf";
+          url = "*.pdf";
           use = "pdf";
         }
         {
@@ -85,7 +85,7 @@ in {
           use = ["image" "edit-image" "wallpaper"];
         }
         {
-          name = "*";
+          url = "*";
           use = "default";
         }
       ];
