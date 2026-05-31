@@ -95,6 +95,7 @@ in {
     };
   in {
     # required by other modules so they don't complain
+    tui = filler;
     settings = filler;
     themes = filler;
 
