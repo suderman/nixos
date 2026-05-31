@@ -49,9 +49,6 @@
       # package32 = hyprpkgs.pkgsi686Linux.mesa;
     };
 
-    # Enable screen brightness control
-    programs.light.enable = true;
-
     # https://github.com/ArtsyMacaw/wlogout/issues/61
     programs.gdk-pixbuf.modulePackages = [pkgs.librsvg];
 
@@ -72,6 +69,7 @@
 
     environment.systemPackages = with pkgs; [
       alsa-utils # provides amixer/alsamixer/...
+      brightnessctl # screen brightness control
       networkmanagerapplet # provide GUI app: nm-connection-editor
       wl-clipboard
       vulkan-tools
