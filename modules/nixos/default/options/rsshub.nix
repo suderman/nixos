@@ -14,6 +14,7 @@
   inherit (config.services.traefik.lib) mkLabels;
   inherit (lib) mkIf mkOption options types;
 in {
+  disabledModules = ["services/web-apps/rsshub.nix"];
   options.services.rsshub = {
     enable = options.mkEnableOption "rsshub";
     tag = mkOption {
