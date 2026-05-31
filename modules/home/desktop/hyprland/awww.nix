@@ -6,10 +6,10 @@
   ...
 }: {
   # Enable wallpaper service
-  services.swww.enable = true;
+  services.awww.enable = true;
 
   # Persist last wallpaper path
-  persist.storage.directories = [".cache/swww"];
+  persist.storage.directories = [".cache/awww"];
 
   # Set a wallpaper (random if none specified)
   home.packages = let
@@ -20,7 +20,7 @@
     (pkgs.self.mkScript {
       name = "wallpaper";
       text = toString [
-        "swww img"
+        "awww img"
         "--transition-type=any"
         "--transition-duration=1"
         "\${1:-\$(find ${dir} -type f | shuf -n 1)}"
@@ -28,14 +28,14 @@
     })
   ];
 
-  wayland.windowManager.hyprland.lua.features.swww =
+  wayland.windowManager.hyprland.lua.features.awww =
     # lua
     ''
       util.exec("SUPER + ALT + SHIFT + P", "wallpaper")
 
       hl.layer_rule({
-        name = "swww-fade",
-        match = { namespace = "^swww-daemon$" },
+        name = "awww-fade",
+        match = { namespace = "^awww-daemon$" },
         animation = "fade",
       })
     '';
