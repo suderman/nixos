@@ -73,7 +73,7 @@ These no longer block Lua migration, but still deserve later review or runtime v
   - `modules/home/desktop/hyprland/printscreen.nix`
   - `modules/home/desktop/hyprland/mediactl.nix`
   - `modules/home/desktop/hyprland/mako.nix`
-  - `modules/home/desktop/hyprland/swww.nix`
+  - `modules/home/desktop/hyprland/awww.nix`
   - `modules/home/desktop/hyprland/waybar/default.nix`
   - `modules/home/desktop/hyprland/waybar/modules-center.nix`
   - `modules/home/desktop/hyprland/wlogout.nix`

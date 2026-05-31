@@ -4,17 +4,17 @@
   inputs = {
     # Nix Packages
     # <https://search.nixos.org/packages>
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     # Home Manager
     # <https://mipmip.github.io/home-manager-option-search>
-    home-manager.url = "github:nix-community/home-manager/release-25.11"; # github:nix-community/home-manager
+    home-manager.url = "github:nix-community/home-manager/release-26.05"; # github:nix-community/home-manager
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     # System-wide colorscheming & typography
-    # <https://github.com/danth/stylix>
-    stylix.url = "github:danth/stylix/release-25.11"; # github:danth/stylix
+    # <https://github.com/nix-community/stylix>
+    stylix.url = "github:nix-community/stylix"; # github:nix-community/stylix/release-26.05
     stylix.inputs.nixpkgs.follows = "nixpkgs";
 
     # Nix Index Database
