@@ -3,6 +3,12 @@
 in {
   nixpkgs.overlays = [
     (_final: prev: {
+      pipx = prev.python3.pkgs.toPythonApplication (
+        prev.python3.pkgs.pipx.overridePythonAttrs (_: {
+          doCheck = false;
+        })
+      );
+
       # These packages support Wayland but sometimes need to be persuaded
       digikam = enableWayland {
         type = "qt";
