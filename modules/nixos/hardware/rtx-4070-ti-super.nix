@@ -5,24 +5,17 @@
   flake,
   ...
 }: let
-  # https://raw.githubusercontent.com/aaronp24/nvidia-versions/master/nvidia-versions.txt
-  beta = true; # I want to use current LTS, so setting this to true
+  # NixOS 26.05 follows NVIDIA's official branch names.
+  # `production` is the long-lived stable branch; `beta` is now strictly beta.
+  nvidiaBranch = "production";
 in {
   # https://github.com/NixOS/nixos-hardware/tree/master/common/gpu/nvidia
   imports = [flake.inputs.hardware.nixosModules.common-gpu-nvidia-nonprime];
 
   boot.initrd.kernelModules = ["nvidia"];
-  boot.extraModulePackages = with config.boot.kernelPackages;
-    if beta
-    then [nvidia_x11_beta]
-    else [nvidia_x11];
 
-  # Current LTS kernel 6.12 seems to work better with nvidia's beta driver
-  # If not using beta, stay on previous LTS kernel 6.6 for now
-  boot.kernelPackages =
-    if beta
-    then pkgs.linuxPackages_6_12
-    else pkgs.linuxPackages_6_6;
+  # Current upstream longterm kernel.
+  boot.kernelPackages = pkgs.linuxPackages_6_18;
 
   # Fix extra screen
   boot.kernelParams = ["nvidia-drm.fbdev=1"];
@@ -41,18 +34,15 @@ in {
     # Fine-grained power management. Turns off GPU when not in use.
     powerManagement.finegrained = false;
 
-    # Disable open source kernel module
-    open = false;
-
     # nvidia-settings
     nvidiaSettings = true;
 
-    # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/os-specific/linux/nvidia-x11/default.nix
-    package = with config.boot.kernelPackages;
-    # if beta then nvidiaPackages.beta else nvidiaPackages.latest;
-      if beta
-      then nvidiaPackages.beta
-      else nvidiaPackages.production; # https://github.com/NixOS/nixpkgs/pull/365711
+    # Ada supports the open module, but keep proprietary until explicitly tested.
+    # https://wiki.nixos.org/wiki/NVIDIA
+    open = false;
+
+    # Use the official stable production branch on NixOS 26.05.
+    branch = nvidiaBranch;
   };
 
   hardware.graphics = {
