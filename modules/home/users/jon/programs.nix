@@ -30,6 +30,7 @@
 
   # All the tools!
   toolchains = {
+    go.enable = true;
     javascript.enable = true;
     lua.enable = true;
     php.enable = true;
