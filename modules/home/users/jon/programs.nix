@@ -1,8 +1,4 @@
-{
-  config,
-  pkgs,
-  ...
-}: {
+{config, ...}: {
   # Personal browser extensions
   programs = config.desktop {
     chromium.externalExtensions = {

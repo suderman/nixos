@@ -5,7 +5,7 @@
   pkgs,
   ...
 }: let
-  cfg = config.programs.opencode;
+  cfg = config.programs.nf;
   cfgDir = ".config/nf";
 in {
   options.programs.nf = {
@@ -40,10 +40,10 @@ in {
     # Place .env in ~/.config/nf
     systemd.user.services.nf-env = let
       # Encrypted API keys
-      # DNSIMPLE_TOKEN=
-      # KINSTA_API_KEY=
-      # LINODE_TOKEN=
       # NF_PASSWORD_SALT=
+      # DNSIMPLE_TOKEN=
+      # LINODE_TOKEN=
+      # KINSTA_API_KEY=
       nfEnv =
         if cfg.apiKeys != null
         then config.age.secrets.nf-env.path
@@ -66,7 +66,8 @@ in {
             ''
               mkdir -p "${nfDir}"
               if [ -r "${nfEnv}" ]; then
-                cat "${nfEnv}" > "${nfDir}/.env"
+                rm -f "${nfDir}/.env"
+                cat "${nfEnv}" >"${nfDir}/.env"
               fi
               chmod 600 "${nfDir}/.env"
             '';
