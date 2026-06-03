@@ -266,7 +266,8 @@ in {
       # Networking for docker containers
       extraOptions =
         [
-          "--network=immich"
+          ''--network=immich''
+          ''--health-cmd=python3 -c "import socket; s = socket.create_connection(('127.0.0.1', 3003), 2); s.close()"''
         ]
         ++ (
           if cfg.cuda
