@@ -15,6 +15,7 @@
   programs.davinci-resolve.enable = true;
   programs.sparrow.enable = true;
   programs.zwift.enable = true;
+  programs.nf.enable = true;
 
   # Agents
   programs.opencode.enable = true;
