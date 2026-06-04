@@ -14,7 +14,7 @@
 
     # System-wide colorscheming & typography
     # <https://github.com/nix-community/stylix>
-    stylix.url = "github:nix-community/stylix"; # github:nix-community/stylix/release-26.05
+    stylix.url = "github:nix-community/stylix/release-26.05"; # github:nix-community/stylix
     stylix.inputs.nixpkgs.follows = "nixpkgs";
 
     # Nix Index Database
