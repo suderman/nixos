@@ -3,10 +3,12 @@
   config,
   lib,
   pkgs,
+  perSystem,
   ...
 }: let
   cfg = config.programs.nf;
   cfgDir = ".config/nf";
+  nf = perSystem.nf.default;
 in {
   options.programs.nf = {
     enable = lib.mkEnableOption "nf";
@@ -18,7 +20,13 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    toolchains.go.enable = true;
+    # Add to path
+    home.packages = [nf];
+
+    programs = {
+      zsh.initContent = lib.mkAfter "source <(${nf}/bin/nf completion zsh)";
+      bash.initExtra = lib.mkAfter "source <(${nf}/bin/nf completion bash)";
+    };
 
     # Persist the config, data and state directories
     persist.storage.directories = [cfgDir];
@@ -27,10 +35,10 @@ in {
       ".local/state/nf"
     ];
 
-    # Temporary alias until this program is finished being written
-    home.shellAliases = {
-      nf = "nix run ${config.home.homeDirectory}/src/nonfiction/nf --";
-    };
+    # # Temporary alias until this program is finished being written
+    # home.shellAliases = {
+    #   nf = "nix run ${config.home.homeDirectory}/src/nonfiction/nf --";
+    # };
 
     # Let agenix know about any secrets set
     age.secrets = lib.mkIf (cfg.apiKeys != null) {
