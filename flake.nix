@@ -76,6 +76,10 @@
     hypr-dynamic-cursors.url = "github:VirtCode/hypr-dynamic-cursors";
     hypr-dynamic-cursors.inputs.hyprland.follows = "hyprland";
 
+    # nonfiction studios
+    # <https://github.com/nonfiction/nf>
+    nf.url = "github:nonfiction/nf";
+
     # Neovim flake
     # <https://github.com/suderman/neovim>
     neovim.url = "github:suderman/neovim";
