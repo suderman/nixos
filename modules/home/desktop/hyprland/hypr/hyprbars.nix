@@ -48,7 +48,7 @@ in
             },
           })
 
-          button("", 20, "hypr-togglegrouporkill")
+          button("", 20, "hypr-togglegrouporclose")
           button("󰽤", 17, "hypr-togglegrouporlock")
           button("", 17, "hypr-togglefloating")
         end
