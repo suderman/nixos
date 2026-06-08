@@ -79,14 +79,15 @@ For each manual dependency, keep:
 - file: modules/nixos/default/options/honcho.nix
 - lookup: `pkgs.fetchFromGitHub { owner = "plastic-labs"; repo = "honcho"; rev = ...; hash = ...; }`
 - current_fields:
-  - `rev = "7470866d12845ed4b56bf3449d058e65df96b1c1"`
-  - `hash = "sha256-g/uZgSqCOzNiGSAQugEkPwz2+Wt6DPBiMNCRjzmA8sc="`
-- upstream: https://github.com/plastic-labs/honcho
-- update_rule: default to the latest commit on the tracked default branch unless this package is intentionally pinned for a reason noted in the repo
+  - `rev = "v3.0.9"`
+  - `hash = "sha256-z6Bx0NvouGxzb1WMwctNPBDhc37pXrc6tJQme5jTiuI="`
+- upstream: https://github.com/plastic-labs/honcho/releases
+- update_rule: use the newest tagged release unless the repo intentionally tracks a commit for a reason noted in the module
 - hash_rule: after changing `rev`, refresh the fetched source hash and update `hash`
 - validate: `nix develop -c nix eval .#nixosConfigurations.kit.config.system.build.toplevel.outPath`
 - notes:
   - confirmed manual `fetchFromGitHub` pin
+  - pinned to a release tag, not a branch commit
 
 ## home-assistant
 

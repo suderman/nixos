@@ -8,13 +8,13 @@
   cfg = config.services.honcho;
   inherit (lib) mkOption types;
 
-  # https://github.com/plastic-labs/honcho
-  # last checked 2026-05-21
+  # https://github.com/plastic-labs/honcho/releases
+  # last checked 2026-06-07
   honchoSrc = pkgs.fetchFromGitHub {
     owner = "plastic-labs";
     repo = "honcho";
-    rev = "7470866d12845ed4b56bf3449d058e65df96b1c1";
-    hash = "sha256-g/uZgSqCOzNiGSAQugEkPwz2+Wt6DPBiMNCRjzmA8sc=";
+    rev = "v3.0.9";
+    hash = "sha256-z6Bx0NvouGxzb1WMwctNPBDhc37pXrc6tJQme5jTiuI=";
   };
 in {
   options.services.honcho = {
