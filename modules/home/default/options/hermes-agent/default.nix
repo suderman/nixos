@@ -28,7 +28,7 @@ in {
     package = lib.mkOption {
       type = lib.types.nullOr lib.types.package;
       default = perSystem.hermes-agent.default.override {
-        extraDependencyGroups = ["messaging" "matrix"];
+        extraDependencyGroups = ["messaging" "matrix" "anthropic"];
       };
       description = "The hermes-agent base package to use";
     };

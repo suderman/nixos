@@ -16,7 +16,7 @@
       minimax = extra:
         {
           provider = "minimax";
-          model = "MiniMax-M2.7";
+          model = "MiniMax-M3";
           base_url = "https://api.minimax.io/anthropic";
           api_key = "\${MINIMAX_API_KEY}";
         }
@@ -24,7 +24,7 @@
       gpt = extra:
         {
           provider = "custom";
-          model = "gpt-5.4";
+          model = "gpt-5.5";
           base_url = "https://codex-lb.kit/v1";
           api_key = "\${CODEX_LB_API_KEY}";
           api_mode = "chat_completions";
@@ -46,18 +46,18 @@
       inherit (config.services.hermes-agent.models) minimax gptmini gpt;
     in {
       model = {
-        inherit (gpt {}) provider base_url api_key api_mode;
-        default = (gpt {}).model;
+        inherit (minimax {}) provider base_url api_key;
+        default = (minimax {}).model;
       };
       auxiliary = {
         # Image analysis (vision_analyze tool + browser screenshots)
-        vision = gptmini {
+        vision = minimax {
           timeout = 120;
           download_timeout = 30;
         };
 
         # Context compression timeout
-        compression = gptmini {
+        compression = minimax {
           timeout = 120;
         };
 
