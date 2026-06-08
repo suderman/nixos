@@ -12,10 +12,10 @@
   inherit (flake.lib) extraGroups ls sudoers;
 
   # https://github.com/home-assistant/core/pkgs/container/home-assistant/versions?filters%5Bversion_type%5D=tagged
-  version = "2026.5.0";
+  version = "2026.6.1";
 
   # https://github.com/zwave-js/zwave-js-ui/pkgs/container/zwave-js-ui/versions?filters%5Bversion_type%5D=tagged
-  zwaveVersion = "11.16.2";
+  zwaveVersion = "11.19.1";
 in {
   imports = ls ./.;
   disabledModules = ["services/home-automation/home-assistant.nix"];
