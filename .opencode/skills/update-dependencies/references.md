@@ -140,7 +140,7 @@ For each manual dependency, keep:
 - file: modules/nixos/default/options/codex-lb.nix
 - lookup: `version = ...` and `image = "ghcr.io/soju06/codex-lb:${cfg.version}"`
 - current_fields:
-  - `version = "1.17.0"`
+  - `version = "1.19.0"`
   - `image = "ghcr.io/soju06/codex-lb:${cfg.version}"`
 - upstream: https://github.com/Soju06/codex-lb/pkgs/container/codex-lb
 - update_rule: use the newest tagged container version compatible with the repo’s existing policy
