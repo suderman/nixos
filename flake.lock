@@ -1238,11 +1238,11 @@
         "opencode-nvim": "opencode-nvim"
       },
       "locked": {
-        "lastModified": 1781008387,
-        "narHash": "sha256-XMf5Eg579JpGmFbH6gPBifEkoJkxonHXTRvWZSx9TC8=",
+        "lastModified": 1781012592,
+        "narHash": "sha256-Uc7OUBs41RfVlVZGnRn5NwtPhM7Zpoqy52kmahFHft8=",
         "owner": "suderman",
         "repo": "neovim",
-        "rev": "4b1f16d35278692c5811dc6029bc32d546b2031a",
+        "rev": "3f95cbec3bfe8cacd9ca68ef29bb6bbe86335d7b",
         "type": "github"
       },
       "original": {
