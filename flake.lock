@@ -1258,11 +1258,11 @@
         "nixpkgs": "nixpkgs_9"
       },
       "locked": {
-        "lastModified": 1780953935,
-        "narHash": "sha256-rOfjGg4mQTea5e99e2wme2JcvnaNMlrhcy6G0IvEDHk=",
+        "lastModified": 1781038836,
+        "narHash": "sha256-xn0PFK2BUDIiU/zRnTl9XXOfTuU2fzGpFHEivEkKKs0=",
         "owner": "nonfiction",
         "repo": "nf",
-        "rev": "f151dc53f60c5fc627abfb3a0ac2835bb6a7903d",
+        "rev": "c51cc7c86ec9eb0747cbf813e99f5b7771d2dfc9",
         "type": "github"
       },
       "original": {
