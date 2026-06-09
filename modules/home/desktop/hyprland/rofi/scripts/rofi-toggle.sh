@@ -2,7 +2,7 @@
 if $(pidof -q rofi >/dev/null); then
   kill $(pidof -s rofi)
 else
-  if [[ -n "${@-}" ]]; then
+  if [[ -n ${@-} ]]; then
     rofi "${@}"
   fi
 fi

@@ -3,8 +3,8 @@
 # Fullscreen windows take precedence; otherwise this toggles the floating-window
 # scratch layer for the active workspace.
 fullscreen_mode="$(hyprctl activewindow -j | jq -r '.fullscreen')"
-if [[ "$fullscreen_mode" != "0" ]]; then
-  if [[ "$fullscreen_mode" == "1" ]]; then
+if [[ $fullscreen_mode != "0" ]]; then
+  if [[ $fullscreen_mode == "1" ]]; then
     hyprctl dispatch 'hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" })'
   else
     hyprctl dispatch 'hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" })'
@@ -27,7 +27,7 @@ else
 
   # Any floats in the hidden workspace?
   special_floats="$(floats "special:hidden$workspace")"
-  if [[ -n "$special_floats" ]]; then
+  if [[ -n $special_floats ]]; then
 
     # Loop all floating windows
     for float in $special_floats; do
@@ -52,7 +52,7 @@ else
   fi
 
   # Focus original window (if tiled)
-  if [[ -n "$window" ]]; then
+  if [[ -n $window ]]; then
     hyprctl dispatch "hl.dsp.focus({ window = \"address:$window\" })"
   fi
 

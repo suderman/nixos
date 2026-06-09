@@ -7,15 +7,15 @@ is_floating="$(hyprctl activewindow -j | jq -r .floating)"
 # Preserve the old shell entrypoint, but express the layout actions with
 # Lua-native dispatchers so it works in both Lua and hyprlang sessions.
 # If already tiled, togglesplit or swapsplit
-if [[ "$is_floating" != "true" ]]; then
+if [[ $is_floating != "true" ]]; then
 
-  if [[ "$layout" == "scrolling" ]]; then
+  if [[ $layout == "scrolling" ]]; then
     # scrolling (move window into own column)
     hyprctl dispatch 'hl.dsp.layout("promote")'
 
   # master (cycle orientations)
-  elif [[ "$layout" == "master" ]]; then
-    if [[ "$mode" == "alt" ]]; then
+  elif [[ $layout == "master" ]]; then
+    if [[ $mode == "alt" ]]; then
       hyprctl dispatch 'hl.dsp.layout("orientationprev")'
     else
       hyprctl dispatch 'hl.dsp.layout("orientationnext")'
@@ -23,7 +23,7 @@ if [[ "$is_floating" != "true" ]]; then
 
   else
     # dwindle (toggly/swap a split)
-    if [[ "$mode" == "alt" ]]; then
+    if [[ $mode == "alt" ]]; then
       hyprctl dispatch 'hl.dsp.layout("swapsplit")'
     else
       hyprctl dispatch 'hl.dsp.layout("togglesplit")'

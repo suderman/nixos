@@ -35,7 +35,7 @@ Use me when the user wants to:
 1. Confirm the target cache and host scope.
    - Default cache: `main`
    - Default host scope: interactive selection when no hosts were passed
-    - Respect explicit host arguments from the user or command
+   - Respect explicit host arguments from the user or command
 
 2. **Build each host individually with a 60 minute timeout each.**
    - Large hosts (with Ollama, CUDA, Electron, Qt, WebKit etc.) can take 10+ minutes

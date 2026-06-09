@@ -37,7 +37,7 @@ config.persist.storage.files = [
   "/etc/machine-id"
   {
     file = "/var/keys/secret_file";
-    parentDirectory = { mode = "u=rwx,g=,o="; }; 
+    parentDirectory = { mode = "u=rwx,g=,o="; };
   }
 ];
 
@@ -60,11 +60,11 @@ modules. Examples:
 config.tmpfiles.directories = [
   "/etc/ensure-this-dir-exists"
   {
-    target = "/etc/my-copied-dir"; 
+    target = "/etc/my-copied-dir";
     source = "/mnt/example/original-dir";
-    user = "someuser"; 
-    group = "somegroup"; 
-    mode = 775; 
+    user = "someuser";
+    group = "somegroup";
+    mode = 775;
   }
 ];
 
@@ -72,27 +72,27 @@ config.tmpfiles.directories = [
 config.tmpfiles.directories = [
   ".mydir"
   {
-    target = ".local/share/example-dir"; 
+    target = ".local/share/example-dir";
     source = "/mnt/example/original-dir";
-    mode = 700; 
+    mode = 700;
   }
 ];
 
 # nixos
 config.tmpfiles.files = [
   {
-    target = "/etc/my-copied-file.txt"; 
+    target = "/etc/my-copied-file.txt";
     source = "/mnt/example/original-file.txt";
-    user = "jon"; 
-    group = "users"; 
-    mode = 775; 
+    user = "jon";
+    group = "users";
+    mode = 775;
   }
   {
-    target = "/etc/my-created-file.txt"; 
+    target = "/etc/my-created-file.txt";
     text = "Hello world!";
-    user = "jon"; 
-    group = "users"; 
-    mode = 775; 
+    user = "jon";
+    group = "users";
+    mode = 775;
   }
 ];
 
@@ -105,7 +105,7 @@ config.tmpfiles.files = [
 # nixos / home-manager
 config.tmpfiles.symlinks = [
   {
-    target = "/tmp/my-symlink.txt"; 
+    target = "/tmp/my-symlink.txt";
     source = "/mnt/example/my-real-file.txt";
   }
 ];
@@ -120,7 +120,7 @@ and extended in
 with the following options:
 
 ```nix
-# All hostnames this host can be reached at 
+# All hostnames this host can be reached at
 config.networking.homeNames = ["kit" "kit.home" "kit.tail"];
 
 # Primary IP address this host can be reached at";

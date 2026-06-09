@@ -89,36 +89,36 @@ Warn in the report when full validation was skipped because it may require subst
    - Otherwise inspect `flake.nix` and `flake.lock` and choose a conservative update scope.
 
 2. Inspect the current state.
-    - Read `flake.nix` and `flake.lock`.
-    - Note which inputs are top-level and which are follows/indirect.
-    - Watch for repo comments that say certain inputs should stay pinned.
-    - Note which hosts or module areas are most likely to be affected by the specific input change.
+   - Read `flake.nix` and `flake.lock`.
+   - Note which inputs are top-level and which are follows/indirect.
+   - Watch for repo comments that say certain inputs should stay pinned.
+   - Note which hosts or module areas are most likely to be affected by the specific input change.
 
 3. Perform the update.
-     - Prefer targeted commands for named inputs.
-     - Avoid broad `flake.lock` churn unless the user explicitly asked for a full refresh.
-     - If an input name is ambiguous, stop and explain the ambiguity.
-     - Prefer `nix develop -c nix flake lock --update-input <name>` for targeted updates.
-     - Use `nix develop -c nix flake update` only when the user asked for a broad refresh.
-     - When the user asked for "all" flake inputs, still review `flake.nix` first so you can call out intentionally pinned inputs like `hyprland` and `hypr-dynamic-cursors` separately from floating inputs.
+   - Prefer targeted commands for named inputs.
+   - Avoid broad `flake.lock` churn unless the user explicitly asked for a full refresh.
+   - If an input name is ambiguous, stop and explain the ambiguity.
+   - Prefer `nix develop -c nix flake lock --update-input <name>` for targeted updates.
+   - Use `nix develop -c nix flake update` only when the user asked for a broad refresh.
+   - When the user asked for "all" flake inputs, still review `flake.nix` first so you can call out intentionally pinned inputs like `hyprland` and `hypr-dynamic-cursors` separately from floating inputs.
 
 4. Review the diff.
-    - Confirm that only the expected inputs changed.
-    - Call out indirect follower changes separately.
-    - Distinguish direct top-level input bumps from lockfile churn caused by follows.
+   - Confirm that only the expected inputs changed.
+   - Call out indirect follower changes separately.
+   - Distinguish direct top-level input bumps from lockfile churn caused by follows.
 
 5. Validate.
-     - Run quick validation by default.
-     - Use a relevant host eval in addition to `nix flake check --no-build`.
-     - Prefer to choose that host by running `python3 .opencode/scripts/update-versions/pick-flake-validation.py --input <name> ...` and using the returned quick/full commands.
-     - Escalate to full validation only when explicitly requested or clearly warranted.
-     - If full validation is skipped, say so explicitly and explain that it is the heavy path in this multi-host flake.
+   - Run quick validation by default.
+   - Use a relevant host eval in addition to `nix flake check --no-build`.
+   - Prefer to choose that host by running `python3 .opencode/scripts/update-versions/pick-flake-validation.py --input <name> ...` and using the returned quick/full commands.
+   - Escalate to full validation only when explicitly requested or clearly warranted.
+   - If full validation is skipped, say so explicitly and explain that it is the heavy path in this multi-host flake.
 
 6. Report.
-    - List updated inputs.
-    - List any indirect changes.
-    - List validation commands run, whether they passed, and whether they were quick or full.
-    - List anything skipped because of ambiguity, policy, or failure.
+   - List updated inputs.
+   - List any indirect changes.
+   - List validation commands run, whether they passed, and whether they were quick or full.
+   - List anything skipped because of ambiguity, policy, or failure.
 
 ## Guardrails
 
@@ -133,16 +133,20 @@ Warn in the report when full validation was skipped because it may require subst
 Use this structure in the final report:
 
 ### Updated flake inputs
+
 - `<input>`: `<old>` -> `<new>`
 
 ### Indirect lockfile changes
+
 - `<input>`: `<reason>`
 
 ### Validation
+
 - Quick:
   - `<command>`: passed/failed
 - Full:
   - `<command>`: passed/failed/skipped
 
 ### Notes
+
 - ambiguity, skipped items, or follow-up recommendations

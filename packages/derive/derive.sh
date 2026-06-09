@@ -12,7 +12,7 @@ main() {
   # If standard input is missing, change cmd to help
   local input
   input="$([ -t 0 ] || cat)"
-  [[ -z "$input" ]] && cmd="help"
+  [[ -z $input ]] && cmd="help"
 
   case "$cmd" in
   age | a)
@@ -57,17 +57,17 @@ derive_age() {
   # Exit if standard input is missing
   local input
   input="$([ -t 0 ] || cat)"
-  [[ -z "$input" ]] && exit 0
+  [[ -z $input ]] && exit 0
 
   # Use derive ssh (this package) to generate ssh key from input
   local ssh
   ssh="$(derive_ssh <<<"$input")"
-  [[ -z "$ssh" ]] && exit 0
+  [[ -z $ssh ]] && exit 0
 
   # Use https://github.com/Mic92/ssh-to-age to generate age from ssh key
   local age
   age="$(ssh-to-age -private-key <<<"$ssh")"
-  [[ -z "$age" ]] && exit 0
+  [[ -z $age ]] && exit 0
 
   # Use derive public (this package) to generate formatted identity and output
   echo "# imported from: $(derive_public <<<"$ssh")"
@@ -84,11 +84,11 @@ derive_hex() {
   # Exit if standard input is missing
   local input
   input="$([ -t 0 ] || cat)"
-  [[ -z "$input" ]] && exit 0
+  [[ -z $input ]] && exit 0
 
   local salt="${1-}" # optional salt, optional character length (default 64)
-  local len="${2:-64}" && [[ "$len" =~ ^[0-9]+$ ]] && ((len >= 1)) || len=""
-  if [[ -z "$salt" ]]; then
+  local len="${2:-64}" && [[ $len =~ ^[0-9]+$ ]] && ((len >= 1)) || len=""
+  if [[ -z $salt ]]; then
     python3 "${path_to_hex_py-}" <<<"$input"
   else
     python3 "${path_to_hex_py-}" "$salt" <<<"$input" | cut -c 1-"$len"
@@ -104,7 +104,7 @@ derive_public() {
   # Exit if standard input is missing
   local input
   input="$([ -t 0 ] || cat)"
-  [[ -z "$input" ]] && exit 0
+  [[ -z $input ]] && exit 0
 
   # If age identity detected, extract recipient from secret and output
   if grep -q "AGE-SECRET-KEY" <<<"$input"; then
@@ -130,10 +130,10 @@ derive_ssh() {
   # Exit if standard input is missing
   local input
   input="$([ -t 0 ] || cat)"
-  [[ -z "$input" ]] && exit 0
+  [[ -z $input ]] && exit 0
 
   local passphrase="${1-}" # optional passphrase
-  if [[ -z "$passphrase" ]]; then
+  if [[ -z $passphrase ]]; then
     python3 "${path_to_ssh_py-}" <<<"$input"
   else
     local key

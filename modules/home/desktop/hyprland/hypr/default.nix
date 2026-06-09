@@ -1,7 +1,4 @@
-{
-  flake,
-  ...
-}: {
+{flake, ...}: {
   imports = flake.lib.ls ./.;
 
   # Keep a local Lua hook for quick experiments without regenerating Nix.

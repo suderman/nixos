@@ -29,14 +29,20 @@ in {
           else [];
         profiles = lib.unique (user.services.camofox-browser.profiles ++ gatewayAgents);
         cfg = user.services.camofox-browser;
-      in map (profile: {
-        name = "${profile}-${cfg.name}-vnc-root";
-        value.redirectRegex = {
-          regex = "^https?://([^/]+)/?$";
-          replacement = "https://$${1}/vnc.html";
-          permanent = false;
-        };
-      }) (if cfg.enableVnc then profiles else [])) users
+      in
+        map (profile: {
+          name = "${profile}-${cfg.name}-vnc-root";
+          value.redirectRegex = {
+            regex = "^https?://([^/]+)/?$";
+            replacement = "https://$${1}/vnc.html";
+            permanent = false;
+          };
+        }) (
+          if cfg.enableVnc
+          then profiles
+          else []
+        ))
+      users
     ))
   ];
 
@@ -76,7 +82,11 @@ in {
       # bash
       ''
         if [[ -f ${hex} ]]; then
-          ${if perUser user == "" then ":" else perUser user}
+          ${
+          if perUser user == ""
+          then ":"
+          else perUser user
+        }
         fi
       '')
     users;
@@ -99,17 +109,16 @@ in {
         cfg = user.services.camofox-browser;
         apiPortFor = profile: deriveServicePort "camofox" profile (cfg.apiBasePort + user.home.portOffset);
         vncPortFor = profile: deriveServicePort "camofox-vnc" profile (cfg.vncBasePort + user.home.portOffset);
-      in
-        (lib.concatMap (profile: [
-            {
-              name = "api-${profile}-${cfg.name}";
-              value = {
-                hostName = "api.${profile}.${cfg.name}.${hostName}";
-                url = "http://127.0.0.1:${toString (apiPortFor profile)}";
-              };
-            }
-          ])
-          profiles)
+      in (lib.concatMap (profile: [
+          {
+            name = "api-${profile}-${cfg.name}";
+            value = {
+              hostName = "api.${profile}.${cfg.name}.${hostName}";
+              url = "http://127.0.0.1:${toString (apiPortFor profile)}";
+            };
+          }
+        ])
+        profiles)
     )
     users
   );
@@ -123,16 +132,22 @@ in {
           else [];
         profiles = lib.unique (user.services.camofox-browser.profiles ++ gatewayAgents);
         cfg = user.services.camofox-browser;
-      in lib.concatMap (profile: [
-        {
-          name = "${profile}-${cfg.name}-vnc-helper";
-          value.loadBalancer.servers = [{url = "http://127.0.0.1:${toString (helperPortFor cfg user profile)}";}];
-        }
-        {
-          name = "${profile}-${cfg.name}-vnc";
-          value.loadBalancer.servers = [{url = "http://127.0.0.1:${toString (deriveServicePort "camofox-vnc" profile (cfg.vncBasePort + user.home.portOffset))}";}];
-        }
-      ]) (if cfg.enableVnc then profiles else [])) users
+      in
+        lib.concatMap (profile: [
+          {
+            name = "${profile}-${cfg.name}-vnc-helper";
+            value.loadBalancer.servers = [{url = "http://127.0.0.1:${toString (helperPortFor cfg user profile)}";}];
+          }
+          {
+            name = "${profile}-${cfg.name}-vnc";
+            value.loadBalancer.servers = [{url = "http://127.0.0.1:${toString (deriveServicePort "camofox-vnc" profile (cfg.vncBasePort + user.home.portOffset))}";}];
+          }
+        ]) (
+          if cfg.enableVnc
+          then profiles
+          else []
+        ))
+      users
     ))
   ];
 
@@ -147,30 +162,36 @@ in {
         profiles = lib.unique (user.services.camofox-browser.profiles ++ gatewayAgents);
         cfg = user.services.camofox-browser;
         hostFor = profile: "${profile}.${cfg.name}.${hostName}";
-      in lib.concatMap (profile: [
-        {
-          name = "${profile}-${cfg.name}-root";
-          value = {
-            entrypoints = "websecure";
-            tls = true;
-            rule = ''Host(`${hostFor profile}`) && (Path("/") || Path("/wake"))'';
-            middlewares = ["local"];
-            priority = 100;
-            service = "${profile}-${cfg.name}-vnc-helper";
-          };
-        }
-        {
-          name = "${profile}-${cfg.name}-vnc";
-          value = {
-            entrypoints = "websecure";
-            tls = true;
-            rule = ''Host(`${hostFor profile}`) && PathPrefix("/")'';
-            middlewares = ["local"];
-            priority = 10;
-            service = "${profile}-${cfg.name}-vnc";
-          };
-        }
-      ]) (if cfg.enableVnc then profiles else [])) users
+      in
+        lib.concatMap (profile: [
+          {
+            name = "${profile}-${cfg.name}-root";
+            value = {
+              entrypoints = "websecure";
+              tls = true;
+              rule = ''Host(`${hostFor profile}`) && (Path("/") || Path("/wake"))'';
+              middlewares = ["local"];
+              priority = 100;
+              service = "${profile}-${cfg.name}-vnc-helper";
+            };
+          }
+          {
+            name = "${profile}-${cfg.name}-vnc";
+            value = {
+              entrypoints = "websecure";
+              tls = true;
+              rule = ''Host(`${hostFor profile}`) && PathPrefix("/")'';
+              middlewares = ["local"];
+              priority = 10;
+              service = "${profile}-${cfg.name}-vnc";
+            };
+          }
+        ]) (
+          if cfg.enableVnc
+          then profiles
+          else []
+        ))
+      users
     ))
   ];
 }

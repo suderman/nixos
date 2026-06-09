@@ -91,7 +91,9 @@ def main() -> int:
         description="Pick the cheapest relevant validation host for flake or module updates."
     )
     parser.add_argument("--path", action="append", default=[], help="Changed repo path")
-    parser.add_argument("--input", action="append", default=[], help="Changed flake input")
+    parser.add_argument(
+        "--input", action="append", default=[], help="Changed flake input"
+    )
     parser.add_argument(
         "--format",
         choices=("text", "json"),

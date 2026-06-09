@@ -12,7 +12,7 @@ main() {
   # Get hostname (or create new one)
   local hostname
   hostname="$(get_hostname)"
-  if [[ -z "$hostname" ]]; then
+  if [[ -z $hostname ]]; then
     echo "No host selected"
     exit 1
   fi
@@ -93,12 +93,12 @@ get_disks() {
 # Destroy, format, and mount disks
 set_disks() {
   local diskcfg="${1}"
-  if [[ -e "$diskcfg" ]]; then
+  if [[ -e $diskcfg ]]; then
     lsblk -o ID-LINK,NAME,FSTYPE,LABEL,SIZE,FSUSE%,MOUNTPOINTS --tree=ID-LINK
     # Destroy & format disks
     disks="$(get_disks "$diskcfg")"
     disko "$diskcfg" -m destroy,format,mount --dry-run &>/dev/null
-    if [[ "$disks" != "[]" ]]; then
+    if [[ $disks != "[]" ]]; then
       disko "$diskcfg" -m destroy --arg disks "$disks"
       disko "$diskcfg" -m format --arg disks "$disks"
     fi

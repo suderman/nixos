@@ -3,13 +3,11 @@
   lib,
   perSystem,
   ...
-}:
-let
+}: let
   cfg = config.wayland.windowManager.hyprland;
   hyprbars = "${perSystem.hyprland-plugins.hyprbars}/lib/libhyprbars.so";
   inherit (lib) mkIf;
-in
-{
+in {
   config = mkIf cfg.enableOfficialPlugins {
     wayland.windowManager.hyprland.lua.features.hyprbars =
       # lua

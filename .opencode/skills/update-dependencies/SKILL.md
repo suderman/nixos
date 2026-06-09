@@ -65,11 +65,11 @@ Do not use me for standard flake input updates. Use `update-flake-inputs` for th
    - If the layout drifted, update your understanding from the repo before editing.
 
 3. Check upstream.
-    - Use the documented upstream URL from the registry or nearby repo comments.
-    - Determine the latest acceptable version according to the dependency’s update rule.
-    - If upstream is branch-based, determine the latest acceptable commit according to the documented branch rule.
-    - If the notion of “latest” is ambiguous, stop and report instead of guessing.
-    - Keep this repo's existing policy when it is explicit in the source, for example release-candidate tracking for Eden or image-tag tracking for OCI containers.
+   - Use the documented upstream URL from the registry or nearby repo comments.
+   - Determine the latest acceptable version according to the dependency’s update rule.
+   - If upstream is branch-based, determine the latest acceptable commit according to the documented branch rule.
+   - If the notion of “latest” is ambiguous, stop and report instead of guessing.
+   - Keep this repo's existing policy when it is explicit in the source, for example release-candidate tracking for Eden or image-tag tracking for OCI containers.
 
 4. Update the repo pin.
    - Change the version/rev/tag in the Nix file.
@@ -78,15 +78,15 @@ Do not use me for standard flake input updates. Use `update-flake-inputs` for th
    - If multiple fields must move together, update them in one coherent edit.
 
 5. Validate.
-    - Run the lightest relevant validation first.
-    - Prefer file/package/host-specific validation from the registry when available.
-    - In this repo, concrete quick targets are usually:
-      - `modules/home/desktop/...` -> `nix develop -c nix eval .#nixosConfigurations.kit.config.system.build.toplevel.outPath`
-      - `modules/nixos/default/options/home-assistant/...` -> `nix develop -c nix eval .#nixosConfigurations.hub.config.system.build.toplevel.outPath`
-      - `modules/nixos/default/options/codex-lb.nix` -> `nix develop -c nix eval .#nixosConfigurations.kit.config.system.build.toplevel.outPath`
-      - `modules/nixos/default/options/immich.nix` -> `nix develop -c nix eval .#nixosConfigurations.sim.config.system.build.toplevel.outPath`
-      - `packages/<name>.nix` -> `nix develop -c nix build .#packages.x86_64-linux.<name>` when the package is exported directly
-    - If validation fails, keep the failure details and do not hide the breakage.
+   - Run the lightest relevant validation first.
+   - Prefer file/package/host-specific validation from the registry when available.
+   - In this repo, concrete quick targets are usually:
+     - `modules/home/desktop/...` -> `nix develop -c nix eval .#nixosConfigurations.kit.config.system.build.toplevel.outPath`
+     - `modules/nixos/default/options/home-assistant/...` -> `nix develop -c nix eval .#nixosConfigurations.hub.config.system.build.toplevel.outPath`
+     - `modules/nixos/default/options/codex-lb.nix` -> `nix develop -c nix eval .#nixosConfigurations.kit.config.system.build.toplevel.outPath`
+     - `modules/nixos/default/options/immich.nix` -> `nix develop -c nix eval .#nixosConfigurations.sim.config.system.build.toplevel.outPath`
+     - `packages/<name>.nix` -> `nix develop -c nix build .#packages.x86_64-linux.<name>` when the package is exported directly
+   - If validation fails, keep the failure details and do not hide the breakage.
 
 6. Maintain the registry.
    - After each **successful** update-and-validate cycle, immediately sync that dependency's `current_fields` in `references.md` to match the values written to the repo file.
@@ -135,16 +135,21 @@ Do not rewrite working code just to force standardization during a routine updat
 Use this structure in the final report:
 
 ### Updated manual dependencies
+
 - `<name>`: `<old>` -> `<new>`
 
 ### Refreshed source hashes or digests
+
 - `<name>`: `<field>` updated
 
 ### Validation
+
 - `<command>`: passed/failed
 
 ### Skipped or ambiguous
+
 - `<name>`: `<reason>`
 
 ### Registry maintenance
+
 - entries added or notes updated in `references.md`

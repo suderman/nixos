@@ -17,8 +17,8 @@ Follow this workflow:
 6. Report:
    - cache name used
    - hosts processed
-    - whether it was a dry-run or a real push
-    - any failures
+   - whether it was a dry-run or a real push
+   - any failures
 
 If the user asks for a preview first, run:
 

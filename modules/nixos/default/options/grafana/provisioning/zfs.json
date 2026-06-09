@@ -101,9 +101,7 @@
         "justifyMode": "auto",
         "orientation": "horizontal",
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
@@ -175,9 +173,7 @@
         "minVizWidth": 200,
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
@@ -262,12 +258,8 @@
       {
         "current": {
           "selected": true,
-          "text": [
-            "blockbuster"
-          ],
-          "value": [
-            "blockbuster"
-          ]
+          "text": ["blockbuster"],
+          "value": ["blockbuster"]
         },
         "datasource": {
           "type": "prometheus",

@@ -1235,14 +1235,15 @@
         "gen-luarc": "gen-luarc",
         "nixpkgs": "nixpkgs_8",
         "nvim-docs-view": "nvim-docs-view",
-        "opencode-nvim": "opencode-nvim"
+        "opencode-nvim": "opencode-nvim",
+        "treefmt-nix": "treefmt-nix_3"
       },
       "locked": {
-        "lastModified": 1781012592,
-        "narHash": "sha256-Uc7OUBs41RfVlVZGnRn5NwtPhM7Zpoqy52kmahFHft8=",
+        "lastModified": 1781026881,
+        "narHash": "sha256-B8JPq3GUe8YH3wYjikm+i/vi/SUrRoTg+koEVo5FFeQ=",
         "owner": "suderman",
         "repo": "neovim",
-        "rev": "3f95cbec3bfe8cacd9ca68ef29bb6bbe86335d7b",
+        "rev": "9615ee94c09cd920bfc8f2861ac48964b01e4146",
         "type": "github"
       },
       "original": {
@@ -1776,7 +1777,8 @@
         "nixpkgs": "nixpkgs_10",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "nur": "nur",
-        "stylix": "stylix"
+        "stylix": "stylix",
+        "treefmt-nix": "treefmt-nix_4"
       }
     },
     "stylix": {
@@ -2007,6 +2009,47 @@
       "inputs": {
         "nixpkgs": [
           "llm-agents",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1780220602,
+        "narHash": "sha256-eynAfOmbmxJnkp7YewvCEbShNnnYJ9gLLqkzsYtBPeM=",
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "rev": "db947814a175b7ca6ded66e21383d938df01c227",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "treefmt-nix_3": {
+      "inputs": {
+        "nixpkgs": [
+          "neovim",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1780220602,
+        "narHash": "sha256-eynAfOmbmxJnkp7YewvCEbShNnnYJ9gLLqkzsYtBPeM=",
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "rev": "db947814a175b7ca6ded66e21383d938df01c227",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "treefmt-nix_4": {
+      "inputs": {
+        "nixpkgs": [
           "nixpkgs"
         ]
       },

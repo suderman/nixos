@@ -20,13 +20,13 @@ named_sink() {
   ')"
 
   # Did we find a name?
-  if [[ -z "$name" ]]; then
+  if [[ -z $name ]]; then
 
     # Try to get name from bluetoothctl (if paired)
-    if [[ "$sink" =~ ^bluez.* ]]; then
+    if [[ $sink =~ ^bluez.* ]]; then
       addr="$(echo $sink | tr _ : | awk -F. '{ print $2 }')"
       name="$(bluetoothctl devices | grep $addr | awk '{ $1=""; $2=""; print $0 }' | xargs)"
-      [[ -z "$name" ]] && name="$addr"
+      [[ -z $name ]] && name="$addr"
 
     # All else fails, try to pretty-up this unknown sink name
     else
@@ -46,13 +46,13 @@ connect_sink() {
   sink="${1-unknown}"
 
   # Only try to connect if sink is bluetooth
-  if [[ "$sink" =~ ^bluez.* ]]; then
+  if [[ $sink =~ ^bluez.* ]]; then
 
     # Get name from bluetoothctl (if paired)
     addr="$(echo $sink | tr _ : | awk -F. '{ print $2 }')"
 
     # If device is paired, attempt to connect (two times in case of timeout)
-    if [[ ! -z "$(bluetoothctl devices | grep $addr)" ]]; then
+    if [[ -n "$(bluetoothctl devices | grep $addr)" ]]; then
       bluetoothctl unblock $addr >/dev/null 2>&1
       bluetoothctl connect $addr >/dev/null 2>&1 || bluetoothctl connect $addr >/dev/null 2>&1
     fi
@@ -91,7 +91,7 @@ if [ -z "${1-}" ]; then
   filter="$(sed -z s/.$// $dir/hidden | tr '\n' '|')"
 
   # if there are no hidden sinks to filter, just output appended
-  if [[ -z "$filter" ]]; then
+  if [[ -z $filter ]]; then
     echo -en "$(cat $dir/appended)"
 
   # if there are, filter with grep
@@ -112,7 +112,7 @@ else
   pactl set-default-sink "$sink" 2>/dev/null && connected=yes || connected=no
 
   # check if successful
-  if [[ "$connected" == "yes" ]]; then
+  if [[ $connected == "yes" ]]; then
 
     # move everything to this sink
     declare i

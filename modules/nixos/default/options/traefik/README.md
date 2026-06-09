@@ -3,7 +3,7 @@
 Custom CA certificates are automatically generated with OpenSSL for each
 internal host name discovered in the Traefik configuration. External host names
 will get certificates from Let's Encrypt using DNS validation against
-CloudFlare's API. 
+CloudFlare's API.
 
 Private host names have an IP whitelist middleware to filter out any publicly
 routable IP addresses, and their private IP will be added to Blocky's custom
@@ -23,7 +23,7 @@ external and assumed public by default.
 }
 ```
 
-...becomes...  
+...becomes...
 
 ```nix
 {
@@ -52,7 +52,8 @@ external and assumed public by default.
   services.traefik.proxy."foo.com" = "http://baz.eve:80";
 }
 ```
-...becomes...  
+
+...becomes...
 
 ```nix
 {
@@ -63,7 +64,7 @@ external and assumed public by default.
       middlewares = [ "foo.com" ];
       service = "foo.com";
       tls = {
-        certresolver = "resolver-dns"; 
+        certresolver = "resolver-dns";
         domains = [{
           main = "foo.com";
           sans = "*.foo.com";
@@ -84,7 +85,7 @@ external and assumed public by default.
 
 ```nix
 {
-  services.traefik = { 
+  services.traefik = {
     proxy.isy = "http://${this.networks.home.isy}:80";
     dynamicConfigOptions.http = {
       middlewares.isy.headers.customRequestHeaders.authorization = "Basic {{ env `ISY_BASIC_AUTH` }}";
@@ -104,18 +105,18 @@ external and assumed public by default.
 }
 ```
 
-...becomes...  
+...becomes...
 
 ```nix
 {
   virtualisation.oci-containers.containers.lunasea = {
     image = "ghcr.io/jagandeepbrar/lunasea:stable";
-    extraOptions = [ 
-      "--label=traefik.enable=true" 
+    extraOptions = [
+      "--label=traefik.enable=true"
       "--label=traefik.http.routers.lunasea.entrypoints=websecure"
-      "--label=traefik.http.routers.lunasea.rule=Host(`lunasea.lux`)" 
-      "--label=traefik.http.routers.lunasea.tls=true" 
-      "--label=traefik.http.routers.lunasea.middlewares=local@file" 
+      "--label=traefik.http.routers.lunasea.rule=Host(`lunasea.lux`)"
+      "--label=traefik.http.routers.lunasea.tls=true"
+      "--label=traefik.http.routers.lunasea.middlewares=local@file"
     ];
   };
 }
@@ -132,14 +133,14 @@ external and assumed public by default.
 }
 ```
 
-...becomes...  
+...becomes...
 
 ```nix
 {
   virtualisation.oci-containers.containers.lunasea = {
     image = "ghcr.io/jagandeepbrar/lunasea:stable";
-    extraOptions = [ 
-      "--label=traefik.enable=true" 
+    extraOptions = [
+      "--label=traefik.enable=true"
       "--label=traefik.http.routers.example_com.entrypoints=websecure"
       "--label=traefik.http.routers.example_com.rule=Host(`example.com`) || Host(`PUBLIC`)"
       "--label=traefik.http.routers.example_com.tls.certresolver=resolver-dns"

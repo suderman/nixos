@@ -4,9 +4,9 @@ layout="$(hyprctl -j activeworkspace | jq -r .tiledLayout)"
 
 # Match each layout's native cycling behavior instead of relying on the legacy
 # `cyclenext` string parser.
-if [[ "$layout" == "master" ]]; then
+if [[ $layout == "master" ]]; then
 
-  if [[ "$next_or_prev" == "prev" ]]; then
+  if [[ $next_or_prev == "prev" ]]; then
     hyprctl dispatch 'hl.dsp.layout("rollprev")'
     hyprctl dispatch 'hl.dsp.focus({ window = "master" })'
   else
@@ -14,17 +14,17 @@ if [[ "$layout" == "master" ]]; then
     hyprctl dispatch 'hl.dsp.focus({ window = "master" })'
   fi
 
-elif [[ "$layout" == "scrolling" ]]; then
+elif [[ $layout == "scrolling" ]]; then
 
-  if [[ "$next_or_prev" == "prev" ]]; then
+  if [[ $next_or_prev == "prev" ]]; then
     hyprctl dispatch 'hl.dsp.focus({ direction = "left" })'
   else
     hyprctl dispatch 'hl.dsp.focus({ direction = "right" })'
   fi
 
-elif [[ "$layout" == "monocle" ]]; then
+elif [[ $layout == "monocle" ]]; then
 
-  if [[ "$next_or_prev" == "prev" ]]; then
+  if [[ $next_or_prev == "prev" ]]; then
     hyprctl dispatch 'hl.dsp.layout("cycleprev")'
   else
     hyprctl dispatch 'hl.dsp.layout("cyclenext")'
@@ -32,7 +32,7 @@ elif [[ "$layout" == "monocle" ]]; then
 
 else # dwindle
 
-  if [[ "$next_or_prev" == "prev" ]]; then
+  if [[ $next_or_prev == "prev" ]]; then
     hyprctl dispatch 'hl.dsp.window.cycle_next({ next = false })'
   else
     hyprctl dispatch 'hl.dsp.window.cycle_next()'

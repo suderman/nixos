@@ -51,9 +51,9 @@ in {
       ''
         if [[ -f ${hex} ]]; then
           ${lib.optionalString user.services.hermes-agent.matrix.enable ''
-            install -dm700 -o ${username} -g users "${runDir}/matrix"
+          install -dm700 -o ${username} -g users "${runDir}/matrix"
 
-            ${lib.concatMapStrings (agent: let
+          ${lib.concatMapStrings (agent: let
               serverName = user.services.hermes-agent.matrix.serverName;
               seed = "matrix-synapse:${serverName}:${agent}:password";
             in ''
@@ -61,18 +61,19 @@ in {
               derive hex ${lib.escapeShellArg seed} <${hex} >"$password"
               install -m600 -o ${username} -g users "$password" "${runDir}/matrix/${agent}.password"
               rm -f "$password"
-            '') matrixAgents}
-          ''}
+            '')
+            matrixAgents}
+        ''}
 
           ${lib.optionalString (!user.services.hermes-agent.matrix.enable) ''
-            if [[ -d "${runDir}/matrix" ]]; then
-              shopt -s nullglob
-              for password in "${runDir}/matrix"/*.password; do
-                rm -f "$password"
-              done
-              rmdir "${runDir}/matrix" 2>/dev/null || true
-            fi
-          ''}
+          if [[ -d "${runDir}/matrix" ]]; then
+            shopt -s nullglob
+            for password in "${runDir}/matrix"/*.password; do
+              rm -f "$password"
+            done
+            rmdir "${runDir}/matrix" 2>/dev/null || true
+          fi
+        ''}
         fi
       '';
     text = lib.concatMapStrings perUser users;
@@ -91,30 +92,31 @@ in {
         inherit (user.lib.hermes-agent) agentNames apiPortFor dashboardPortFor gatewayAgents;
       in
         (lib.concatMap (name: [
-          {
-            inherit name;
-            value = "http://127.0.0.1:${toString (dashboardPortFor name)}";
-          }
-        ])
-        agentNames)
+            {
+              inherit name;
+              value = "http://127.0.0.1:${toString (dashboardPortFor name)}";
+            }
+          ])
+          agentNames)
         ++ (lib.concatMap (name: [
-          {
-            name = "api-${name}";
-            value = {
-              hostName = "api.${name}.${hostName}";
-              url = "http://127.0.0.1:${toString (apiPortFor name)}";
-            };
-          }
-        ])
-        gatewayAgents)
+            {
+              name = "api-${name}";
+              value = {
+                hostName = "api.${name}.${hostName}";
+                url = "http://127.0.0.1:${toString (apiPortFor name)}";
+              };
+            }
+          ])
+          gatewayAgents)
     )
     users
   );
 
   services.matrix-synapse.localUsers = lib.mkIf config.services.matrix-synapse.enable (
     builtins.listToAttrs (map (name: {
-      inherit name;
-      value = {};
-    }) matrixLocalUserNames)
+        inherit name;
+        value = {};
+      })
+      matrixLocalUserNames)
   );
 }

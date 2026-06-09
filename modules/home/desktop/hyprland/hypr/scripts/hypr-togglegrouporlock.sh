@@ -6,8 +6,8 @@
 grouped_windows_count="$(hyprctl activewindow -j | jq '.grouped | length')"
 
 f_or_b="${1:-}" # f/b
-if [[ -n "$f_or_b" ]]; then
-  if [[ "$f_or_b" == "b" ]]; then
+if [[ -n $f_or_b ]]; then
+  if [[ $f_or_b == "b" ]]; then
     hyprctl dispatch 'hl.dsp.group.prev()'
   else
     hyprctl dispatch 'hl.dsp.group.next()'

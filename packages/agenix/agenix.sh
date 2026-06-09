@@ -9,7 +9,7 @@ gum_head() { gum style --foreground=99 "$*"; }
 gum_show() { gum style --foreground=177 "    $*"; }
 
 # If PRJ_ROOT is set, change to that directory
-[[ -n "${PRJ_ROOT-}" ]] && cd "$PRJ_ROOT"
+[[ -n ${PRJ_ROOT-} ]] && cd "$PRJ_ROOT"
 
 # ---------------------------------------------------------------------
 # MAIN
@@ -75,14 +75,14 @@ agenix_import() {
   local hex=""
 
   # If GUI detected, offer QR scanning
-  if [[ -n "${DISPLAY-}" || -n "${WAYLAND_DISPLAY-}" ]]; then
+  if [[ -n ${DISPLAY-} || -n ${WAYLAND_DISPLAY-} ]]; then
     if [[ "$(gum choose "Scan QR code" "Enter manually")" == "Scan QR code" ]]; then
       hex="$(qr || true)"
     fi
   fi
 
   # If hex not entered via QR, allow manual input
-  if [[ -z "$hex" ]]; then
+  if [[ -z $hex ]]; then
     hex="$(gum input --placeholder "Enter 32-byte hex" | xargs)"
   fi
 
@@ -126,7 +126,7 @@ agenix_import() {
 agenix_unlock() {
 
   # If quiet and the decrypted age identity already exists, stop here
-  if [[ "${1:-}" == "quiet" ]]; then
+  if [[ ${1:-} == "quiet" ]]; then
     [[ -f /tmp/id_age ]] && return 0
   fi
 
@@ -134,10 +134,10 @@ agenix_unlock() {
   id="$([ -t 0 ] || cat)"
 
   # Attempt to decrypt age identity using passphrse
-  if [[ -z "$id" ]]; then
+  if [[ -z $id ]]; then
     [[ ! -f secrets/id_age.age ]] && gum_exit "./secrets/id_age.age missing"
     id="$(age -d <secrets/id_age.age 2>/dev/null || true)"
-    [[ -z "$id" ]] && gum_exit "Incorrect passphrase"
+    [[ -z $id ]] && gum_exit "Incorrect passphrase"
   fi
 
   # Shift any existing phrase to backup
@@ -149,7 +149,7 @@ agenix_unlock() {
   chmod 600 /tmp/id_age /tmp/id_age_
 
   # Notify user unless quiet
-  if [[ "${1:-}" != "quiet" ]]; then
+  if [[ ${1:-} != "quiet" ]]; then
     gum style \
       --border="rounded" \
       --border-foreground="29" \
@@ -187,11 +187,11 @@ agenix_verify() {
   local public_id_file="$dir/id_age.pub"
 
   # Ensure private key exists
-  [[ -f "$private_id_file" ]] ||
+  [[ -f $private_id_file ]] ||
     gum_exit "[agenix] $private_id_file missing"
 
   # Ensure public key exists
-  [[ -f "$public_id_file" ]] ||
+  [[ -f $public_id_file ]] ||
     gum_exit "[agenix] $public_id_file missing"
 
   # Extract public id from current file
@@ -201,7 +201,7 @@ agenix_verify() {
   derived_public_id="$(derive public <"$private_id_file" | xargs)"
 
   # Ensure key pair actually matches
-  if [[ "$current_public_id" == "$derived_public_id" ]]; then
+  if [[ $current_public_id == "$derived_public_id" ]]; then
     gum_info "[agenix] $private_id_file valid match"
   else
     gum_warn "[agenix] $private_id_file invalid match"

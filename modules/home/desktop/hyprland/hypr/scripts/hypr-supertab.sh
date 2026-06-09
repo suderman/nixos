@@ -8,7 +8,7 @@ touch $stack
 
 # Get all window addresses or windows tagged with "mark"
 get_windows() {
-  [[ "${1-}" == "mark" ]] && local mark='| select(.tags | index("mark"))'
+  [[ ${1-} == "mark" ]] && local mark='| select(.tags | index("mark"))'
   hyprctl clients -j | jq -r "sort_by(.focusHistoryID) | .[] ${mark-} | .address"
 }
 
@@ -31,23 +31,23 @@ focus_window() {
 }
 
 # Clear all marks
-if [[ "${1-}" == "clear" ]]; then
+if [[ ${1-} == "clear" ]]; then
   while read -r addr; do
-    [[ -n "$addr" ]] && hyprctl dispatch "hl.dsp.window.tag({ tag = \"mark\", window = \"address:$addr\" })"
+    [[ -n $addr ]] && hyprctl dispatch "hl.dsp.window.tag({ tag = \"mark\", window = \"address:$addr\" })"
   done < <(get_windows mark)
   notify-send -t 1000 "Clear all marks"
 
 # Toggle individual marks
-elif [[ "${1-}" == "mark" ]]; then
+elif [[ ${1-} == "mark" ]]; then
   hyprctl dispatch 'hl.dsp.window.tag({ tag = "mark" })'
 
 # Focus next window in stack
-elif [[ "${1-}" == "next" ]]; then
+elif [[ ${1-} == "next" ]]; then
   first_to_last
   focus_window
 
 # Focus previous window in stack
-elif [[ "${1-}" == "prev" ]]; then
+elif [[ ${1-} == "prev" ]]; then
   last_to_first
   focus_window
 
@@ -57,7 +57,7 @@ else
   windows="$(get_windows mark)"
 
   # If there are none, fall back on all windows
-  if [[ -z "$windows" ]]; then
+  if [[ -z $windows ]]; then
     windows="$(get_windows)"
   fi
 

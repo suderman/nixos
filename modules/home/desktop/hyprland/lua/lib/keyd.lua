@@ -6,11 +6,7 @@ function M.apply(keyd_bin, window_rules, layer_rules)
 	local last_command = nil
 
 	local function normalize(value, pattern)
-		return (value or "")
-			:gsub(pattern, "-")
-			:gsub("^%-+", "")
-			:gsub("%-+$", "")
-			:lower()
+		return (value or ""):gsub(pattern, "-"):gsub("^%-+", ""):gsub("%-+$", ""):lower()
 	end
 
 	local function normalize_class(value)
@@ -143,10 +139,8 @@ function M.apply(keyd_bin, window_rules, layer_rules)
 	end
 
 	local function reapply()
-		local bindings = merge_bindings(
-			select_window_bindings(active_window.class, active_window.title),
-			select_layer_rules()
-		)
+		local bindings =
+			merge_bindings(select_window_bindings(active_window.class, active_window.title), select_layer_rules())
 		local command = bindings_to_command(bindings)
 
 		if command == last_command then

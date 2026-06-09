@@ -12,7 +12,7 @@ gum_show() { gum style --foreground=177 "    $*"; }
 dirs() { find "$1" -mindepth 1 -maxdepth 1 -type d -printf '%f\n'; }
 
 # If PRJ_ROOT is set, change to that directory
-[[ -n "${PRJ_ROOT-}" ]] && cd "$PRJ_ROOT"
+[[ -n ${PRJ_ROOT-} ]] && cd "$PRJ_ROOT"
 
 # ---------------------------------------------------------------------
 # MAIN
@@ -98,7 +98,7 @@ nixos_activate() {
   host=$(dirs hosts | grep -v iso | gum choose --header "Choose host:" --selected "$(hostname)")
   operation=$(gum choose --header "Choose operation:" switch boot test dry-activate check)
 
-  if [[ "$host" == "$(hostname)" ]]; then
+  if [[ $host == "$(hostname)" ]]; then
     gum_show "sudo /run/current-system/bin/switch-to-configuration $operation"
     sudo /run/current-system/bin/switch-to-configuration "$operation"
   else
@@ -113,10 +113,10 @@ nixos_activate() {
 # ---------------------------------------------------------------------
 nixos_cache() {
   local first_arg="${1-}"
-  if [[ "$first_arg" == "help" ]]; then
+  if [[ $first_arg == "help" ]]; then
     shift || true
     set -- --help "$@"
-  elif [[ "$first_arg" == "push" || "$first_arg" == "p" || "$first_arg" == "dry-run" || "$first_arg" == "dryrun" || "$first_arg" == "d" ]]; then
+  elif [[ $first_arg == "push" || $first_arg == "p" || $first_arg == "dry-run" || $first_arg == "dryrun" || $first_arg == "d" ]]; then
     gum_exit "nixos cache no longer uses subcommands; use 'nixos cache [--dry-run] [options] [HOST...]'"
   fi
 
@@ -182,7 +182,7 @@ EOF
 
   if [[ ${#requested_hosts[@]} -eq 0 && $select_all -eq 1 ]]; then
     for host in "${all_hosts[@]}"; do
-      if [[ "$host" == "iso" && $include_iso -eq 0 ]]; then
+      if [[ $host == "iso" && $include_iso -eq 0 ]]; then
         continue
       fi
       requested_hosts+=("$host")
@@ -193,7 +193,7 @@ EOF
     local -a selectable_hosts=()
     local selection
     for host in "${all_hosts[@]}"; do
-      if [[ "$host" == "iso" && $include_iso -eq 0 ]]; then
+      if [[ $host == "iso" && $include_iso -eq 0 ]]; then
         continue
       fi
       selectable_hosts+=("$host")
@@ -240,7 +240,7 @@ EOF
 # ---------------------------------------------------------------------
 nixos_add() {
   local add_type="${1-}"
-  if [[ "$add_type" != "user" && "$add_type" != "host" ]]; then
+  if [[ $add_type != "user" && $add_type != "host" ]]; then
     add_type=$(gum choose --header="Add to this flake:" "user" "host")
   fi
   "nixos_add_${add_type}"
@@ -256,11 +256,11 @@ nixos_add_user() {
   username="$(gum input --placeholder "username")"
 
   # Ensure a username was provided
-  [[ -z "$username" ]] && gum_exit "Missing username"
+  [[ -z $username ]] && gum_exit "Missing username"
   local user="users/${username}"
 
   # Ensure it doesn't already exist
-  if [[ -e "$user" ]]; then
+  if [[ -e $user ]]; then
     gum_info "User configuration exists:"
     gum_show "./$user"
   else
@@ -291,11 +291,11 @@ nixos_add_host() {
   hostname="$(gum input --placeholder "hostname")"
 
   # Ensure a hostname was provided
-  [[ -z "$hostname" ]] && gum_exit "Missing hostname"
+  [[ -z $hostname ]] && gum_exit "Missing hostname"
   local host="hosts/${hostname}"
 
   # Ensure it doesn't already exist
-  if [[ -e "$host" ]]; then
+  if [[ -e $host ]]; then
     gum_info "Host configuration exists:"
     gum_show "./$host"
   else
@@ -434,7 +434,7 @@ nixos_deploy() {
 
   host=$(dirs hosts | grep -v iso | gum choose --header "Choose host:" --selected "$(hostname)")
   operation=$(gum choose --header "Choose operation:" switch boot test build)
-  if [[ "$host" == "$(hostname)" ]]; then
+  if [[ $host == "$(hostname)" ]]; then
     gum_show "sudo nixos-rebuild --flake .#$host $operation"
     sudo nixos-rebuild --flake .#"$host" "$operation"
   else
@@ -482,7 +482,7 @@ nixos_detect_disks() {
   local out
   out="$(lsblk -o ID-LINK,NAME,FSTYPE,LABEL,SIZE,FSUSE%,MOUNTPOINTS --tree=ID-LINK |
     sed 's/^/# /' | cat - "${templates-}"/disk-configuration.nix | alejandra -q)"
-  [[ -n "$file" ]] && echo "$out" >"$file"
+  [[ -n $file ]] && echo "$out" >"$file"
   bat --file-name "disk-configuration.nix" <<<"$out"
   nc -N x0.at 9999 <<<"$out" || true
 }
@@ -495,7 +495,7 @@ nixos_detect_hardware() {
   local out
   out="$(sudo nixos-generate-config --no-filesystems --show-hardware-config 2>/dev/null |
     alejandra -q)"
-  [[ -n "$file" ]] && echo "$out" >"$file"
+  [[ -n $file ]] && echo "$out" >"$file"
   bat --file-name "hardware-configuration.nix" <<<"$out"
   nc -N x0.at 9999 <<<"$out" || true
 }
@@ -552,7 +552,7 @@ nixos_iso_flash() {
   usb_devices=$(lsblk -dpno NAME,SIZE,MODEL,TRAN | grep -i usb || true)
 
   # Ensure a USB drive is plugged in
-  [[ -z "$usb_devices" ]] && gum_exit "No USB drives detected."
+  [[ -z $usb_devices ]] && gum_exit "No USB drives detected."
 
   # Select USB device
   usb_selection=$(echo "$usb_devices" | gum choose --header "Select USB drive to flash the ISO to")
@@ -561,7 +561,7 @@ nixos_iso_flash() {
   # Get path to ISO
   local iso_path
   iso_path="$(nixos_iso_path)"
-  if [[ -z "$iso_path" ]]; then
+  if [[ -z $iso_path ]]; then
     nixos_iso_build
     iso_path="$(nixos_iso_path)"
   fi
@@ -590,7 +590,7 @@ nixos_rollback() {
     sort -r | gum choose --header "Choose previous generation:")"
 
   # Do nothing if the selected generation is the current generation
-  if [[ "$line" != *"(current)"* ]]; then
+  if [[ $line != *"(current)"* ]]; then
     id=$(echo "$line" | awk '{print $1}') # extract the id
 
     # Show the commands
@@ -648,7 +648,7 @@ nixos_sim() {
 nixos_sim_up() {
 
   local boot=()
-  [[ "$1" == "iso" ]] && boot=(-boot d -cdrom "$(nixos iso path)")
+  [[ $1 == "iso" ]] && boot=(-boot d -cdrom "$(nixos iso path)")
 
   nix run nixpkgs#qemu -- \
     -enable-kvm \
@@ -677,7 +677,7 @@ nixos_sim_up() {
 # ---------------------------------------------------------------------
 nixos_sim_rebuild() {
 
-  if [[ "${1-switch}" == "boot" ]]; then
+  if [[ ${1-switch} == "boot" ]]; then
     gum_show "nixos-rebuild --target-host root@localhost --flake .#sim boot"
     nixos-rebuild --target-host root@localhost --flake .#sim boot
   else
@@ -692,7 +692,7 @@ nixos_sim_rebuild() {
 # ---------------------------------------------------------------------
 nixos_sim_ssh() {
 
-  if [[ "${1-disk}" == "iso" ]]; then
+  if [[ ${1-disk} == "iso" ]]; then
     gum_show "passh -p x ssh $NIX_SSHOPTS root@localhost"
     # shellcheck disable=SC2086
     passh -p x ssh $NIX_SSHOPTS root@localhost

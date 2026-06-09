@@ -73,9 +73,7 @@
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
@@ -157,9 +155,7 @@
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
@@ -237,9 +233,7 @@
         "minVizWidth": 200,
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
@@ -321,9 +315,7 @@
         "minVizWidth": 200,
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
@@ -602,12 +594,8 @@
       {
         "current": {
           "selected": true,
-          "text": [
-            "matrix:9199"
-          ],
-          "value": [
-            "matrix:9199"
-          ]
+          "text": ["matrix:9199"],
+          "value": ["matrix:9199"]
         },
         "datasource": {
           "type": "prometheus",

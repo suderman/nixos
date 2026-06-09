@@ -53,6 +53,11 @@
     blueprint.url = "github:numtide/blueprint";
     blueprint.inputs.nixpkgs.follows = "nixpkgs";
 
+    # Code formatting
+    # <https://github.com/numtide/treefmt-nix>
+    treefmt-nix.url = "github:numtide/treefmt-nix";
+    treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
+
     # Developer environments
     # <https://github.com/numtide/devshell>
     devshell.url = "github:numtide/devshell";

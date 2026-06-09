@@ -52,8 +52,8 @@ if command -v hyprctl &>/dev/null; then
 
         # If desktop entry found, extract attribute
         if [[ -e $entry ]]; then
-          name="$(awk -F= "/^Name=/{print \$2; exit}" $entry)"
-          icon="$(awk -F= "/^Icon=/{print \$2; exit}" $entry)"
+          name="$(awk -F= '/^Name=/{print $2; exit}' $entry)"
+          icon="$(awk -F= '/^Icon=/{print $2; exit}' $entry)"
         fi
 
         # Save env file to disk

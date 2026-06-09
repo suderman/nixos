@@ -4,14 +4,14 @@
   lib,
   pkgs,
   ...
-}:
-let
+}: let
   cfg = config.services.postgresql;
-  admins = config.users.groups.wheel.members ++ [ "root" ];
+  admins = config.users.groups.wheel.members ++ ["root"];
   databases = genAttrs (unique config.services.postgresql.ensureDatabases) (_database: admins);
   # databases = genAttrs admins (_database: admins);
   inherit (config.services.prometheus) exporters;
-  inherit (lib)
+  inherit
+    (lib)
     concatLines
     flatten
     genAttrs
@@ -27,23 +27,23 @@ let
   sql = unique (
     flatten (
       mapAttrsToList (
-        database: admins:
-        (
+        database: admins: (
           [
             # Grant all priveleges for this database to the database user
             "${psql} -d \"${database}\" -tAc 'GRANT ALL PRIVILEGES ON SCHEMA public TO \"${database}\";'"
           ]
           ++ (map (
-            admin:
-            # Grant all priveleges for this database to each admin user
-            "${psql} -d \"${database}\" -tAc 'GRANT ALL PRIVILEGES ON SCHEMA public TO \"${admin}\";'"
-          ) admins)
+              admin:
+              # Grant all priveleges for this database to each admin user
+              "${psql} -d \"${database}\" -tAc 'GRANT ALL PRIVILEGES ON SCHEMA public TO \"${admin}\";'"
+            )
+            admins)
         )
-      ) databases
+      )
+      databases
     )
   );
-in
-{
+in {
   config = mkIf cfg.enable {
     services.postgresql = {
       # 14 was default package as of 22.11
@@ -55,10 +55,12 @@ in
 
       # Database & role for each admin
       ensureDatabases = admins;
-      ensureUsers = map (name: {
-        inherit name;
-        ensureDBOwnership = true;
-      }) admins;
+      ensureUsers =
+        map (name: {
+          inherit name;
+          ensureDBOwnership = true;
+        })
+        admins;
 
       # Listen everywhere
       enableTCPIP = true;
@@ -77,10 +79,10 @@ in
     services.oidentd.enable = true;
 
     # Allow docker containers to connect
-    networking.firewall.allowedTCPPorts = [ config.services.postgresql.settings.port ];
+    networking.firewall.allowedTCPPorts = [config.services.postgresql.settings.port];
 
     # Persist the data directory
-    persist.storage.directories = [ "/var/lib/postgresql" ];
+    persist.storage.directories = ["/var/lib/postgresql"];
 
     # Metrics
     services.prometheus = {
@@ -92,7 +94,7 @@ in
         {
           job_name = "postgresql";
           static_configs = [
-            { targets = [ "127.0.0.1:${toString exporters.postgres.port}" ]; }
+            {targets = ["127.0.0.1:${toString exporters.postgres.port}"];}
           ];
         }
       ];
