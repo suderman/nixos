@@ -1,6 +1,6 @@
 # /etc/nixos agent notes
 
-- Work from `nix develop`. Repo-specific tools (`nixos`, `agenix`, `derive`, `sshed`, `browse`, `alejandra`) come from the devshell.
+- Work from `nix develop`. Repo-specific tools (`nixos`, `agenix`, `derive`, `sshed`, `browse`, `treefmt`) come from the devshell.
 - `nixos` and `agenix` here are wrapper scripts from `packages/`, not stock CLIs. Many subcommands are interactive (`gum`) and some auto-stage files in git; avoid them for unattended automation unless you want that behavior.
 
 ## Read before changing repo structure
@@ -12,7 +12,7 @@
 
 ## High-impact commands
 
-- Format: `nix fmt` (or `alejandra .` inside the devshell).
+- Format: `nix fmt`.
 - Eval one host without building: `nix eval .#nixosConfigurations.<host>.config.system.build.toplevel.outPath`
 - Build one host: `nix build .#nixosConfigurations.<host>.config.system.build.toplevel`
 - Full repo check: `nix flake check`

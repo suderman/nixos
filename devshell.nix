@@ -55,7 +55,6 @@ perSystem.devshell.mkShell {
   # Base list of packages for devshell, plus extra
   packages = [
     pkgs.age
-    pkgs.alejandra
     pkgs.cachix
     pkgs.git
     pkgs.nix-inspect
@@ -64,6 +63,7 @@ perSystem.devshell.mkShell {
     perSystem.self.agenix
     perSystem.self.default
     perSystem.self.derive
+    perSystem.self.formatter
     perSystem.self.ipaddr
     perSystem.self.sshed
   ];
