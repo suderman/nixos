@@ -82,7 +82,7 @@
     apiKeys = ./apikeys-env.age;
     llm = {
       baseUrl = "https://api.minimax.io/anthropic";
-      model = "MiniMax-M2.7";
+      model = "MiniMax-M3";
       apiKeyEnv = "MINIMAX_API_KEY";
     };
     embeddings = {
