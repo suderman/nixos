@@ -64,32 +64,38 @@
           socat -U - UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock | while read -r line; do handle "$line"; done
         '';
     };
-  in ''
-    return {
-      exec_once = ${toLuaList (
-      [
-        "${pkgs.dbus}/bin/dbus-update-activation-environment --systemd DISPLAY HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY XDG_CURRENT_DESKTOP && systemctl --user stop hyprland-session.target && systemctl --user start hyprland-session.target"
-        "${waybarWatcher}"
-      ]
-      ++ lib.optional cfg.enablePlugins "hyprctl plugin load ${perSystem.hypr-dynamic-cursors.default}/lib/libhypr-dynamic-cursors.so"
-    )},
-      exec = ${toLuaList [
-      "pkill -RTMIN+8 waybar"
-      "chromium --no-startup-window"
-      "chromium-agent --no-startup-window"
-    ]},
-      plugins = {
-        dynamic_cursors = {
-          enabled = ${
-      if cfg.enablePlugins
-      then "true"
-      else "false"
-    },
-          path = ${toJSON "${perSystem.hypr-dynamic-cursors.default}/lib/libhypr-dynamic-cursors.so"},
-        },
+  in
+    # lua
+    ''
+      return {
+        exec_once = ${toLuaList (
+        [
+          "${pkgs.dbus}/bin/dbus-update-activation-environment --systemd DISPLAY HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY XDG_CURRENT_DESKTOP && systemctl --user stop hyprland-session.target && systemctl --user start hyprland-session.target"
+          "${waybarWatcher}"
+        ]
+        ++ lib.optional cfg.enablePlugins "hyprctl plugin load ${perSystem.hypr-dynamic-cursors.default}/lib/libhypr-dynamic-cursors.so"
+      )},
+        exec = ${toLuaList [
+        "pkill -RTMIN+8 waybar"
+        "chromium --no-startup-window"
+        "chromium-agent --no-startup-window"
+      ]},
+        plugins = {
+          dynamic_cursors = {
+            enabled = ${
+        if cfg.enablePlugins
+        then "true"
+        else "false"
       },
-    }
-  '';
+            path = ${
+        if cfg.enablePlugins
+        then toJSON "${perSystem.hypr-dynamic-cursors.default}/lib/libhypr-dynamic-cursors.so"
+        else "nil"
+      },
+          },
+        },
+      }
+    '';
 
   # Host-specific monitor/env/startup overrides selected from Home Manager.
   generatedHost = let
