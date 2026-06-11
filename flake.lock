@@ -1259,11 +1259,11 @@
         "nixpkgs": "nixpkgs_9"
       },
       "locked": {
-        "lastModified": 1781136071,
-        "narHash": "sha256-9Ou6CI95TwzoDlVdD8OzyNc4heI4q9GiAn0PJwrR+Fs=",
+        "lastModified": 1781151941,
+        "narHash": "sha256-pijb00tjpRR07CkpgOKyjFyBerVyAmFaszDWJ8Zq1Es=",
         "owner": "nonfiction",
         "repo": "nf",
-        "rev": "8c05ab21224db3d30d4fdbfb954964812d2534b6",
+        "rev": "a7ce6f8ea6ac299463902b918bb78015c4e08b73",
         "type": "github"
       },
       "original": {
