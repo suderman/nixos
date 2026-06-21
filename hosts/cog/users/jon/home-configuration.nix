@@ -21,6 +21,7 @@
   programs.steam.enable = true;
   programs.dolphin-emu.enable = true;
   programs.citron.enable = true;
+  programs.prismlauncher.enable = true;
   programs.zwift.enable = true; # fitness
 
   # Agents

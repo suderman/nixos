@@ -28,6 +28,7 @@
   programs.citron.enable = true;
   programs.eden.enable = true;
   programs.ryubing.enable = true;
+  programs.prismlauncher.enable = true;
 
   # Music
   services.mpd.enable = true; # music daemon
