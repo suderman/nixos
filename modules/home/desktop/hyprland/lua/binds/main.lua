@@ -20,7 +20,7 @@ function M.apply(_, _)
 			return nil
 		end
 
-		return ws.tiledLayout or ws.layout
+		return ws.tiled_layout or ws.layout
 	end
 
 	-- Workspace cycling intentionally uses open-workspace selectors (e+/-1)
@@ -36,7 +36,7 @@ function M.apply(_, _)
 		end
 
 		local layouts = { "dwindle", "master", "scrolling", "monocle" }
-		local current = layout_state[ws.id] or ws.tiledLayout or ws.layout or "dwindle"
+		local current = layout_state[ws.id] or ws.tiled_layout or ws.layout or "dwindle"
 		local idx = 1
 
 		for i, layout in ipairs(layouts) do
@@ -63,7 +63,6 @@ function M.apply(_, _)
 
 		if layout == "master" then
 			hl.dispatch(hl.dsp.layout(direction == "prev" and "rollprev" or "rollnext"))
-			hl.dispatch(hl.dsp.focus({ window = "master" }))
 		elseif layout == "scrolling" then
 			hl.dispatch(hl.dsp.focus({ direction = direction == "prev" and "left" or "right" }))
 		elseif layout == "monocle" then
@@ -158,6 +157,12 @@ function M.apply(_, _)
 	hl.bind("SUPER + ALT + N", function()
 		cycle_workspace("next")
 	end)
+	hl.bind("SUPER + P", function()
+		cycle_window("prev")
+	end, { repeating = true })
+	hl.bind("SUPER + N", function()
+		cycle_window("next")
+	end, { repeating = true })
 	hl.bind("SUPER + SLASH", function()
 		cycle_layout("next")
 	end)
