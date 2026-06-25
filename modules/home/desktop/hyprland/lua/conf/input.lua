@@ -1,6 +1,15 @@
 local M = {}
 
 function M.apply(_, _)
+	local function move_scrolling_column(command)
+		local ws = hl.get_active_workspace()
+		local layout = ws and (ws.tiled_layout or ws.layout)
+
+		if layout == "scrolling" and hl.get_active_window() then
+			hl.dispatch(hl.dsp.layout(command))
+		end
+	end
+
 	hl.config({
 		input = {
 			kb_layout = "us",
@@ -23,14 +32,14 @@ function M.apply(_, _)
 		fingers = 3,
 		direction = "left",
 		action = function()
-			hl.dispatch(hl.dsp.layout("move +col"))
+			move_scrolling_column("move +col")
 		end,
 	})
 	hl.gesture({
 		fingers = 3,
 		direction = "right",
 		action = function()
-			hl.dispatch(hl.dsp.layout("move -col"))
+			move_scrolling_column("move -col")
 		end,
 	})
 end
