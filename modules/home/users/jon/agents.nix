@@ -9,6 +9,9 @@
   # Preload mmx-cli with my API keys
   programs.mmx-cli.apiKeys = ./apikeys-env.age;
 
+  # Preload pi with my API keys
+  programs.pi-coding-agent.apiKeys = ./apikeys-env.age;
+
   # Set my API keys and preferred models for hermes agent
   services.hermes-agent = {
     apiKeys = ./apikeys-env.age;
