@@ -11,23 +11,29 @@
     pkgs._1password-cli # op
     # pkgs.calcure # calendar viewer
     # pkgs.distrobox pkgs.distrobox-tui
+    pkgs.fd # find files
+    pkgs.file # detect file types
+    pkgs.glow # markdown renderer
     pkgs.imagemagick # animate compare composite conjure convert display identify import magick magick-script mogrify montage stream
     pkgs.isd # systemctl tui
+    pkgs.jq # JSON processor
     pkgs.killall # kill by process name
     pkgs.lame # mp3 codec
     pkgs.lazydocker # docker tui
-    pkgs.lf
+    pkgs.lf # yazi/ranger alternative in go
     pkgs.linode-cli # control linode virtual servers
-    pkgs.lsd
+    pkgs.lsd # ls alternative
     pkgs.mosh # ssh despite bad networks
     pkgs.nano # text editor
     pkgs.ncdu # recover available disk space
+    pkgs.openssl # cryptographic library
+    pkgs.pandoc # document conversion
     pkgs.parted # manage disks
     pkgs.rclone # sync webdav and other remote stores
-    pkgs.wget # download the internet
     pkgs.sysz # systemctl tui
+    pkgs.tesseract # ocr engine
     pkgs.trash-cli # alternative to rm
-    pkgs.jq # JSON processor
+    pkgs.wget # download the internet
     pkgs.yq-go # YAML processor
 
     # dev ergonomics
