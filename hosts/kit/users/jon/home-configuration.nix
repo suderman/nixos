@@ -19,6 +19,7 @@
 
   # Agents
   programs.opencode.enable = true;
+  programs.pi-coding-agent.enable = true;
   programs.mmx-cli.enable = true;
   programs.iamb.enable = false;
 
