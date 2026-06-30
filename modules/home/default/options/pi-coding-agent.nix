@@ -5,13 +5,18 @@
   pkgs,
   ...
 }: let
-  # PI_CODING_AGENT_DIR
-  # PI_CODING_AGENT_SESSION_DIR
   cfg = config.programs.pi-coding-agent;
+
+  # Upstream pi expects to own one mutable directory. Keep that path as a
+  # disposable facade and link durable files back to the repo's normal persisted
+  # config/state roots below.
   agentDir = ".pi/agent";
   configDir = ".config/pi";
   stateDir = ".local/state/pi";
 
+  # The real pi package is installed imperatively into the user's npm prefix.
+  # This wrapper makes that install lazy and recreates the expected directory
+  # layout before every invocation.
   pi-init = pkgs.self.mkScript {
     name = "pi";
     path = [pkgs.nodejs pkgs.systemd];
@@ -87,6 +92,8 @@
         }
 
         pi_agent_init() {
+          # These guards keep a bad override from deleting or symlinking over
+          # $HOME, /, or one of the persistence roots.
           pi_safe_dir "config" "$PI_CONFIG_DIR"
           pi_safe_dir "state" "$PI_STATE_DIR"
           pi_safe_dir "agent" "$PI_DIR"
@@ -98,6 +105,7 @@
 
           mkdir -p "$PI_CONFIG_DIR" "$PI_STATE_DIR" "$PI_DIR"
 
+          # User-editable configuration is persisted across rebuilds and hosts.
           pi_file "$PI_CONFIG_DIR/AGENTS.md"
           pi_json_file "$PI_CONFIG_DIR/models.json"
           pi_json_file "$PI_CONFIG_DIR/keybindings.json"
@@ -109,6 +117,9 @@
           pi_dir "$PI_CONFIG_DIR/themes"
           pi_dir "$PI_CONFIG_DIR/skills"
 
+          # Auth, trust decisions, sessions, and npm/git scratch data are state:
+          # keep them out of the config backup path, but survive one CLI run to
+          # the next on machines with scratch persistence enabled.
           pi_json_file "$PI_STATE_DIR/auth.json" 0600
           pi_json_file "$PI_STATE_DIR/mcp-onboarding.json" 0600
           pi_json_file "$PI_STATE_DIR/trust.json" 0600
@@ -116,6 +127,8 @@
           pi_dir "$PI_STATE_DIR/npm"
           pi_dir "$PI_STATE_DIR/git"
 
+          # Rebuild the facade unconditionally so upstream can keep using its
+          # flat directory layout while Home Manager controls where data lives.
           pi_link "$PI_CONFIG_DIR/AGENTS.md" "$PI_DIR/AGENTS.md"
           pi_link "$PI_CONFIG_DIR/models.json" "$PI_DIR/models.json"
           pi_link "$PI_CONFIG_DIR/keybindings.json" "$PI_DIR/keybindings.json"
@@ -137,6 +150,9 @@
 
         pi_init() {
           pi_agent_init
+
+          # pi is not packaged in nixpkgs here, so install the published npm CLI
+          # into the Home Manager-managed npm prefix on first use.
           npm i -g --ignore-scripts @earendil-works/pi-coding-agent
 
           if [[ ! -f "$PI_BIN" ]]; then
@@ -183,15 +199,26 @@ in {
   config = lib.mkIf cfg.enable {
     toolchains.javascript.enable = true;
 
+    # Config is durable; runtime auth/session/cache data is only scratch-persisted.
     persist.storage.directories = [configDir];
     persist.scratch.directories = [stateDir];
 
+    # Put the wrapper at the conventional user-bin path without exposing the
+    # implementation package name to callers.
     home.file.".local/bin/pi".source = "${cfg.package}/bin/pi";
 
     age.secrets = lib.mkIf (cfg.apiKeys != null) {
       pi-coding-agent-env.rekeyFile = cfg.apiKeys;
     };
 
+    # pi commonly enters its own agent directory; allow direnv there without
+    # broadening the whitelist to the rest of $HOME.
+    programs.direnv.config.whitelist.prefix = [
+      "${config.home.homeDirectory}/${agentDir}"
+    ];
+
+    # Materialize API keys as the .env file pi expects. The wrapper restarts this
+    # oneshot before loading .env so key changes are picked up opportunistically.
     systemd.user.services.pi-coding-agent-env = lib.mkIf (cfg.apiKeys != null) {
       Unit = {
         Description = "Generate pi-coding-agent .env";
