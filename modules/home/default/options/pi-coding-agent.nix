@@ -5,13 +5,16 @@
   pkgs,
   ...
 }: let
+  # PI_CODING_AGENT_DIR
+  # PI_CODING_AGENT_SESSION_DIR
   cfg = config.programs.pi-coding-agent;
-  cfgDir = ".pi";
-  agentDir = "${cfgDir}/agent";
+  agentDir = ".pi/agent";
+  configDir = ".config/pi";
+  stateDir = ".local/state/pi";
 
   pi-init = pkgs.self.mkScript {
     name = "pi";
-    path = [pkgs.git pkgs.nodejs pkgs.systemd];
+    path = [pkgs.nodejs pkgs.systemd];
     text =
       # bash
       ''
@@ -19,10 +22,56 @@
         export NPM_CONFIG_CACHE="${config.home.sessionVariables.NPM_CONFIG_CACHE}"
 
         PI_BIN="''${PI_BIN:-${config.home.sessionVariables.NPM_CONFIG_PREFIX}/bin/pi}"
-        PI_CONFIG_DIR="''${PI_CONFIG_DIR:-${config.home.homeDirectory}/${cfgDir}}"
-        PI_DIR="''${PI_DIR:-${config.home.homeDirectory}/${agentDir}}"
-        PI_INIT_STAMP="''${PI_INIT_STAMP:-${config.home.homeDirectory}/.local/state/pi-coding-agent/init.timestamp}"
-        PI_INIT_INTERVAL="$((24 * 60 * 60))"
+        PI_CONFIG_DIR="''${PI_CONFIG_DIR:-${config.home.homeDirectory}/${configDir}}"
+        PI_STATE_DIR="''${PI_STATE_DIR:-${config.home.homeDirectory}/${stateDir}}"
+        PI_DIR="''${PI_DIR:-''${PI_CODING_AGENT_DIR:-${config.home.homeDirectory}/${agentDir}}}"
+
+        export PI_CODING_AGENT_DIR="$PI_DIR"
+
+        pi_safe_dir() {
+          local label="$1"
+          local dir="$2"
+
+          if [[ -z "$dir" || "$dir" == "/" || "$dir" == "${config.home.homeDirectory}" ]]; then
+            echo "Refusing to manage unsafe pi-coding-agent $label directory: $dir" >&2
+            exit 1
+          fi
+        }
+
+        pi_json_file() {
+          local target="$1"
+          local mode="''${2:-0644}"
+
+          mkdir -p "$(dirname "$target")"
+          if [[ ! -e "$target" ]]; then
+            printf '{}\n' >"$target"
+            chmod "$mode" "$target"
+          fi
+        }
+
+        pi_file() {
+          local target="$1"
+          local mode="''${2:-0644}"
+
+          mkdir -p "$(dirname "$target")"
+          if [[ ! -e "$target" ]]; then
+            : >"$target"
+            chmod "$mode" "$target"
+          fi
+        }
+
+        pi_dir() {
+          mkdir -p "$1"
+        }
+
+        pi_link() {
+          local source="$1"
+          local target="$2"
+
+          mkdir -p "$(dirname "$target")"
+          rm -rf "$target"
+          ln -s "$source" "$target"
+        }
 
         pi_env_init() {
           if systemctl --user --quiet is-enabled pi-coding-agent-env.service 2>/dev/null; then
@@ -37,56 +86,63 @@
           set +a
         }
 
-        pi_config_init() {
-          if [[ ! -d "$PI_CONFIG_DIR/.git" ]]; then
-            if [[ -z "$PI_CONFIG_DIR" || "$PI_CONFIG_DIR" == "/" || "$PI_CONFIG_DIR" == "${config.home.homeDirectory}" ]]; then
-              echo "Refusing to reset unsafe pi-coding-agent config directory: $PI_CONFIG_DIR" >&2
-              exit 1
-            fi
+        pi_agent_init() {
+          pi_safe_dir "config" "$PI_CONFIG_DIR"
+          pi_safe_dir "state" "$PI_STATE_DIR"
+          pi_safe_dir "agent" "$PI_DIR"
 
-            mkdir -p "$PI_CONFIG_DIR"
-            shopt -s dotglob nullglob
-            rm -rf "$PI_CONFIG_DIR"/*
-            shopt -u dotglob nullglob
-
-            tmp="$(mktemp -d)"
-            git clone "${cfg.gitUrl}" "$tmp"
-            cp -a "$tmp"/. "$PI_CONFIG_DIR"/
-            rm -rf "$tmp"
-          fi
-
-          if [[ ! -d "$PI_CONFIG_DIR/.git" ]]; then
-            echo "Failed to clone pi-coding-agent configuration" >&2
+          if [[ "$PI_DIR" == "$PI_CONFIG_DIR" || "$PI_DIR" == "$PI_STATE_DIR" ]]; then
+            echo "Refusing to use pi-coding-agent facade directory as a persistence root: $PI_DIR" >&2
             exit 1
           fi
+
+          mkdir -p "$PI_CONFIG_DIR" "$PI_STATE_DIR" "$PI_DIR"
+
+          pi_file "$PI_CONFIG_DIR/AGENTS.md"
+          pi_json_file "$PI_CONFIG_DIR/models.json"
+          pi_json_file "$PI_CONFIG_DIR/keybindings.json"
+          pi_json_file "$PI_CONFIG_DIR/settings.json"
+          pi_json_file "$PI_CONFIG_DIR/settings-extensions.json"
+          pi_json_file "$PI_CONFIG_DIR/mcp.json"
+          pi_dir "$PI_CONFIG_DIR/extensions"
+          pi_dir "$PI_CONFIG_DIR/prompts"
+          pi_dir "$PI_CONFIG_DIR/themes"
+          pi_dir "$PI_CONFIG_DIR/skills"
+
+          pi_json_file "$PI_STATE_DIR/auth.json" 0600
+          pi_json_file "$PI_STATE_DIR/mcp-onboarding.json" 0600
+          pi_json_file "$PI_STATE_DIR/trust.json" 0600
+          pi_dir "$PI_STATE_DIR/sessions"
+          pi_dir "$PI_STATE_DIR/npm"
+          pi_dir "$PI_STATE_DIR/git"
+
+          pi_link "$PI_CONFIG_DIR/AGENTS.md" "$PI_DIR/AGENTS.md"
+          pi_link "$PI_CONFIG_DIR/models.json" "$PI_DIR/models.json"
+          pi_link "$PI_CONFIG_DIR/keybindings.json" "$PI_DIR/keybindings.json"
+          pi_link "$PI_CONFIG_DIR/settings.json" "$PI_DIR/settings.json"
+          pi_link "$PI_CONFIG_DIR/settings-extensions.json" "$PI_DIR/settings-extensions.json"
+          pi_link "$PI_CONFIG_DIR/mcp.json" "$PI_DIR/mcp.json"
+          pi_link "$PI_CONFIG_DIR/extensions" "$PI_DIR/extensions"
+          pi_link "$PI_CONFIG_DIR/prompts" "$PI_DIR/prompts"
+          pi_link "$PI_CONFIG_DIR/themes" "$PI_DIR/themes"
+          pi_link "$PI_CONFIG_DIR/skills" "$PI_DIR/skills"
+
+          pi_link "$PI_STATE_DIR/auth.json" "$PI_DIR/auth.json"
+          pi_link "$PI_STATE_DIR/mcp-onboarding.json" "$PI_DIR/mcp-onboarding.json"
+          pi_link "$PI_STATE_DIR/trust.json" "$PI_DIR/trust.json"
+          pi_link "$PI_STATE_DIR/sessions" "$PI_DIR/sessions"
+          pi_link "$PI_STATE_DIR/npm" "$PI_DIR/npm"
+          pi_link "$PI_STATE_DIR/git" "$PI_DIR/git"
         }
 
         pi_init() {
-          pi_config_init
-          mkdir -p "$PI_DIR"
+          pi_agent_init
           npm i -g --ignore-scripts @earendil-works/pi-coding-agent
-
-          # Also install hypa
-          npm i -g @hypabolic/hypa
 
           if [[ ! -f "$PI_BIN" ]]; then
             echo "Failed to install pi binary" >&2
             exit 1
           fi
-
-          mkdir -p "$(dirname "$PI_INIT_STAMP")"
-          date +%s >"$PI_INIT_STAMP"
-        }
-
-        pi_init_stale() {
-          [[ ! -f "$PI_INIT_STAMP" ]] && return 0
-
-          local now last
-          now="$(date +%s)"
-          last="$(<"$PI_INIT_STAMP")"
-
-          [[ ! "$last" =~ ^[0-9]+$ ]] && return 0
-          ((now - last >= PI_INIT_INTERVAL))
         }
 
         if [[ "''${1:-}" == "init" ]]; then
@@ -95,7 +151,9 @@
           exit 0
         fi
 
-        if [[ ! -e "$PI_BIN" ]] || pi_init_stale; then
+        pi_agent_init
+
+        if [[ ! -e "$PI_BIN" ]]; then
           pi_init
         fi
 
@@ -120,19 +178,13 @@ in {
       default = null;
       description = "Path to multi-line .env file with API keys such as ANTHROPIC_API_KEY.";
     };
-
-    gitUrl = lib.mkOption {
-      type = lib.types.str;
-      default = "https://github.com/suderman/pi";
-      description = "Git repository cloned into ~/.pi for global pi-coding-agent configuration.";
-    };
   };
 
   config = lib.mkIf cfg.enable {
     toolchains.javascript.enable = true;
 
-    persist.storage.directories = [cfgDir];
-    persist.scratch.directories = [".local/state/pi-coding-agent"];
+    persist.storage.directories = [configDir];
+    persist.scratch.directories = [stateDir];
 
     home.file.".local/bin/pi".source = "${cfg.package}/bin/pi";
 
