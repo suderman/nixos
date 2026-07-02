@@ -3,6 +3,7 @@
 /result
 .crush
 .data
+.plans
 .direnv
 .Trash*
 *.qcow2
