@@ -11,6 +11,7 @@
     google-analytics.enable = lib.mkDefault true;
     harvest.enable = lib.mkDefault true;
     libreoffice.enable = lib.mkDefault true;
+    emacs.enable = lib.mkDefault true;
     asana.enable = lib.mkDefault true;
     obsidian.enable = lib.mkDefault true;
   };

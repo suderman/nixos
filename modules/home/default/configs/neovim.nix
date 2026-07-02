@@ -1,4 +1,5 @@
 {
+  lib,
   pkgs,
   perSystem,
   ...
@@ -7,7 +8,7 @@
     # Personal neovim configuration
     packages = [perSystem.neovim.default];
 
-    sessionVariables.EDITOR = "nvim";
+    sessionVariables.EDITOR = lib.mkDefault "nvim";
 
     shellAliases = {
       v = "nvim";
