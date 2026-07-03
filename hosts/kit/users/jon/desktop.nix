@@ -18,6 +18,7 @@ _: {
     };
     enablePlugins = false; # dynamic cursors crash on lua path for now
     enableOfficialPlugins = true;
+    waybar.codex-lb.enable = true;
   };
 
   # Hide monitor speakers

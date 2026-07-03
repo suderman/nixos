@@ -14,6 +14,7 @@ _: {
     };
     enablePlugins = false; # dynamic cursors crash on lua path for now
     enableOfficialPlugins = true;
+    waybar.codex-lb.enable = true;
   };
 
   # Record screen with CPU-based AV1 encoder
