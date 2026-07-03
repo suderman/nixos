@@ -79,6 +79,9 @@ in {
       shfmt
       stylua
       yamlfmt
+
+      # previews and conversions
+      pandoc
     ];
 
     # Native build tools for vterm, modules, and day-to-day Emacs experiments.
