@@ -69,6 +69,13 @@ in {
       };
     };
 
+    # Quickshell reads QML at startup and the upstream Home Manager unit only
+    # references the config name. Include the generated path in the unit so
+    # sd-switch restarts Quickshell when declarative QML changes.
+    systemd.user.services.quickshell.Service.Environment = [
+      "QUICKSHELL_CONFIG_GENERATION=${configDir}"
+    ];
+
     wayland.windowManager.hyprland.lua.features.quickshell =
       # lua
       ''
