@@ -12,6 +12,9 @@
       ++ lib.optionals config.wayland.windowManager.hyprland.waybar.codex-lb.enable [
         "custom/codex-lb"
       ]
+      ++ lib.optionals config.wayland.windowManager.hyprland.waybar.minimax-quota.enable [
+        "custom/minimax-quota"
+      ]
       ++ [
         "pulseaudio"
         "group/hardware"
