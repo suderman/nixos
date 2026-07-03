@@ -7,12 +7,15 @@
   cfg = config.wayland.windowManager.hyprland.waybar.codex-lb;
   qsCfg = config.wayland.windowManager.hyprland.quickshell;
   colors = config.lib.stylix.colors;
-  inherit (lib) mkIf mkMerge mkOption optionalAttrs types;
+  inherit (lib) mkIf mkMerge mkOption types;
 
   script = pkgs.self.mkScript {
     name = "waybar-codex-lb";
     path = with pkgs; [curl jq];
-    env.CODEX_LB_URL = cfg.url;
+    env = {
+      CODEX_LB_URL = cfg.url;
+      CODEX_LB_ALERT_COLOR = "#${colors.base08}";
+    };
     text =
       # bash
       ''
@@ -60,11 +63,13 @@
 
         overview="$tmp/overview.json"
         projections="$tmp/projections.json"
+        request_logs="$tmp/request-logs.json"
 
         overview_code="$(fetch '/api/dashboard/overview?timeframe=7d' "$overview")"
         projections_code="$(fetch '/api/dashboard/projections' "$projections")"
+        request_logs_code="$(fetch '/api/request-logs?limit=1' "$request_logs")"
 
-        if [[ "$overview_code" == "401" || "$overview_code" == "403" || "$projections_code" == "401" || "$projections_code" == "403" ]]; then
+        if [[ "$overview_code" == "401" || "$overview_code" == "403" || "$projections_code" == "401" || "$projections_code" == "403" || "$request_logs_code" == "401" || "$request_logs_code" == "403" ]]; then
           json \
             "codex-lb auth" \
             "Dashboard read access is required. Enable read-only guest access in codex-lb or provide another dashboard auth path.\n\nURL: $CODEX_LB_URL" \
@@ -72,10 +77,10 @@
           exit 0
         fi
 
-        if [[ ! "$overview_code" =~ ^2 ]] || [[ ! "$projections_code" =~ ^2 ]]; then
+        if [[ ! "$overview_code" =~ ^2 ]] || [[ ! "$projections_code" =~ ^2 ]] || [[ ! "$request_logs_code" =~ ^2 ]]; then
           json \
-            "codex-lb $overview_code/$projections_code" \
-            "codex-lb returned HTTP $overview_code for overview and HTTP $projections_code for projections.\n\nURL: $CODEX_LB_URL" \
+            "codex-lb $overview_code/$projections_code/$request_logs_code" \
+            "codex-lb returned HTTP $overview_code for overview, HTTP $projections_code for projections, and HTTP $request_logs_code for request logs.\n\nURL: $CODEX_LB_URL" \
             "critical"
           exit 0
         fi
@@ -83,7 +88,9 @@
         if ! output="$(jq -cn \
           --slurpfile overview "$overview" \
           --slurpfile projections "$projections" \
+          --slurpfile request_logs "$request_logs" \
           --arg url "$CODEX_LB_URL" \
+          --arg alert_color "$CODEX_LB_ALERT_COLOR" \
           '
           def num_text($n):
             ($n | tonumber? // null) as $v |
@@ -201,6 +208,7 @@
 
           $overview[0] as $o |
           $projections[0] as $p |
+          ($request_logs[0].requests // []) as $requests |
           ($o.summary.primaryWindow // $o.summary.primary_window // $o.windows.primary // {}) as $primary |
           ($o.summary.secondaryWindow // $o.summary.secondary_window // $o.windows.secondary // {}) as $secondary |
           ($p.weeklyCreditPace // $p.weekly_credit_pace // {}) as $pace |
@@ -211,6 +219,9 @@
           ($pace.confidence // "unknown") as $confidence |
           (($pace.staleAccountCount // $pace.stale_account_count // 0) | tonumber? // 0) as $stale |
           (($pace.inactiveAccountCount // $pace.inactive_account_count // 0) | tonumber? // 0) as $inactive |
+          (($requests[0].status // "ok") | tostring) as $latest_request_status |
+          ($latest_request_status != "ok") as $latest_request_non_ok |
+          (if $latest_request_non_ok then "<span color=\"" + $alert_color + "\">󰚩</span>" else "󰚩" end) as $robot |
           (if $status == "danger" then "danger"
            elif $confidence == "low" or $stale > 0 then "warning"
            elif $status == "behind" then "behind"
@@ -220,41 +231,17 @@
            end) as $class |
           {
             text: (
-              "󰚩  "
+              $robot
+              + "  "
               + pct_text(window_percent($primary))
               + " " + pct_text(window_percent($secondary))
               + " " + signed_num_text($delta)
             ),
             tooltip: ([
-              "URL: " + $url,
-              "last sync: " + time_text($o.lastSyncAt // $o.last_sync_at // null),
-              "",
-              "Aggregate",
               "5h " + window_line($primary),
               "7d " + window_line($secondary),
-              "",
-              "Weekly pace",
-              "  status " + ($status | tostring),
-              "  actual used " + pct_text($pace.actualUsedPercent // $pace.actual_used_percent // null),
-              "  scheduled used " + pct_text($pace.scheduledUsedPercent // $pace.scheduled_used_percent // null),
-              "  delta " + signed_pct_text($delta),
-              "  gap " + num_text($gap) + " cr",
-              "  shortfall " + num_text($pace.projectedShortfallCredits // $pace.projected_shortfall_credits // null) + " cr",
-              "  confidence " + ($confidence | tostring) + ", stale " + ($stale | tostring) + ", inactive " + ($inactive | tostring)
+              "last sync: " + time_text($o.lastSyncAt // $o.last_sync_at // null)
             ]
-            + optional_line(
-              (if ($pace.forecastBurnRateCreditsPerHour // $pace.forecast_burn_rate_credits_per_hour // null) != null and ($pace.scheduledBurnRateCreditsPerHour // $pace.scheduled_burn_rate_credits_per_hour // null) != null then true else null end);
-              "  burn " + num_text($pace.forecastBurnRateCreditsPerHour // $pace.forecast_burn_rate_credits_per_hour // null) + " cr/h forecast, " + num_text($pace.scheduledBurnRateCreditsPerHour // $pace.scheduled_burn_rate_credits_per_hour // null) + " cr/h scheduled"
-            )
-            + optional_line(
-              (if ($pace.throttleToPercent // $pace.throttle_to_percent // null) != null and ($pace.reduceByPercent // $pace.reduce_by_percent // null) != null then true else null end);
-              "  throttle " + pct_text($pace.throttleToPercent // $pace.throttle_to_percent // null) + ", reduce by " + pct_text($pace.reduceByPercent // $pace.reduce_by_percent // null)
-            )
-            + optional_line(
-              ($pace.pauseForBreakEvenHours // $pace.pause_for_break_even_hours // null);
-              "  pause for break-even " + num_text($pace.pauseForBreakEvenHours // $pace.pause_for_break_even_hours // null) + " h"
-            )
-            + (if ($accounts | length) > 0 then ["", ($accounts | map(account_lines(.)) | join("\n\n"))] else [] end)
             | join("\n")),
             class: $class
           }
@@ -293,7 +280,8 @@
               title: $title,
               message: $message,
               url: $url,
-              accounts: []
+              accounts: [],
+              recentLogs: []
             }'
         }
 
@@ -329,11 +317,13 @@
 
         overview="$tmp/overview.json"
         projections="$tmp/projections.json"
+        request_logs="$tmp/request-logs.json"
 
         overview_code="$(fetch '/api/dashboard/overview?timeframe=7d' "$overview")"
         projections_code="$(fetch '/api/dashboard/projections' "$projections")"
+        request_logs_code="$(fetch '/api/request-logs?limit=100' "$request_logs")"
 
-        if [[ "$overview_code" == "401" || "$overview_code" == "403" || "$projections_code" == "401" || "$projections_code" == "403" ]]; then
+        if [[ "$overview_code" == "401" || "$overview_code" == "403" || "$projections_code" == "401" || "$projections_code" == "403" || "$request_logs_code" == "401" || "$request_logs_code" == "403" ]]; then
           json_error \
             "auth" \
             "codex-lb auth required" \
@@ -341,17 +331,18 @@
           exit 0
         fi
 
-        if [[ ! "$overview_code" =~ ^2 ]] || [[ ! "$projections_code" =~ ^2 ]]; then
+        if [[ ! "$overview_code" =~ ^2 ]] || [[ ! "$projections_code" =~ ^2 ]] || [[ ! "$request_logs_code" =~ ^2 ]]; then
           json_error \
             "http" \
-            "codex-lb HTTP $overview_code/$projections_code" \
-            "codex-lb returned HTTP $overview_code for overview and HTTP $projections_code for projections.\n\nURL: $CODEX_LB_URL"
+            "codex-lb HTTP $overview_code/$projections_code/$request_logs_code" \
+            "codex-lb returned HTTP $overview_code for overview, HTTP $projections_code for projections, and HTTP $request_logs_code for request logs.\n\nURL: $CODEX_LB_URL"
           exit 0
         fi
 
         if ! output="$(jq -cn \
           --slurpfile overview "$overview" \
           --slurpfile projections "$projections" \
+          --slurpfile request_logs "$request_logs" \
           --arg url "$CODEX_LB_URL" \
           '
           def number($n): $n | tonumber? // null;
@@ -383,6 +374,26 @@
               ($iso | fromdateiso8601? // null) as $epoch |
               if $epoch == null then ($iso | sub("T"; " ") | sub("Z$"; "") | .[0:16])
               else ($epoch | localtime | strftime("%b %-d %-I:%M%P"))
+              end
+            end;
+
+          def log_time_text($s):
+            if $s == null or $s == "" then "--"
+            else
+              ($s | tostring | sub("\\.[0-9]+"; "")) as $iso |
+              ($iso | fromdateiso8601? // null) as $epoch |
+              if $epoch == null then ($iso | sub("T"; " ") | sub("Z$"; "") | .[11:19])
+              else ($epoch | localtime | strftime("%-I:%M:%S%P"))
+              end
+            end;
+
+          def log_date_text($s):
+            if $s == null or $s == "" then "--"
+            else
+              ($s | tostring | sub("\\.[0-9]+"; "")) as $iso |
+              ($iso | fromdateiso8601? // null) as $epoch |
+              if $epoch == null then ($iso | sub("T"; " ") | sub("Z$"; "") | .[0:10])
+              else ($epoch | localtime | strftime("%m/%d/%Y"))
               end
             end;
 
@@ -421,6 +432,14 @@
             // $account.account_id
             // "account";
 
+          def account_id($account):
+            $account.accountId // $account.account_id // null;
+
+          def account_label($accounts; $account_id):
+            if $account_id == null or $account_id == "" then "Unassigned"
+            else ([ $accounts[]? | select(account_id(.) == $account_id) | account_name(.) ][0] // $account_id)
+            end;
+
           def account_plan($account):
             ([
               $account.planType // $account.plan_type,
@@ -456,12 +475,54 @@
               secondary: account_metric($account; "secondary")
             };
 
+          def request_status_label($status):
+            ($status | tostring) as $value |
+            if $value == "ok" then "OK"
+            elif $value == "rate_limit" then "Rate limit"
+            elif $value == "quota" then "Quota"
+            elif $value == "error" then "Error"
+            else ($value | gsub("_"; " "))
+            end;
+
+          def model_label($log):
+            (($log.model // "--") | tostring) as $model |
+            (($log.reasoningEffort // $log.reasoning_effort // "") | tostring) as $effort |
+            if $effort == "" then $model else $model + " (" + $effort + ")" end;
+
+          def tokens_text($tokens):
+            (number($tokens)) as $value |
+            if $value == null then "-- tok" else ($value | tostring) + " tok" end;
+
+          def cost_text($cost):
+            (number($cost)) as $value |
+            if $value == null then "$--"
+            else "$" + ((($value * 10000 | round) / 10000) | tostring)
+            end;
+
+          def request_log_card($log; $accounts):
+            (($log.status // "unknown") | tostring) as $status |
+            ($log.errorCode // $log.error_code // null) as $error_code |
+            ($log.errorMessage // $log.error_message // null) as $error_message |
+            {
+              timeText: log_time_text($log.requestedAt // $log.requested_at // null),
+              dateText: log_date_text($log.requestedAt // $log.requested_at // null),
+              account: account_label($accounts; $log.accountId // $log.account_id // null),
+              model: model_label($log),
+              tokensText: tokens_text($log.tokens // null),
+              costText: cost_text($log.costUsd // $log.cost_usd // null),
+              status: $status,
+              statusText: request_status_label($status),
+              errorCode: $error_code,
+              errorMessage: $error_message
+            };
+
           def pace_status($pace): $pace.status // "unknown";
           def pace_delta($pace): $pace.smoothedDeltaPercent // $pace.smoothed_delta_percent // $pace.deltaPercent // $pace.delta_percent // null;
           def pace_gap($pace): $pace.smoothedScheduleGapCredits // $pace.smoothed_schedule_gap_credits // $pace.scheduleGapCredits // $pace.schedule_gap_credits // null;
 
           $overview[0] as $o |
           $projections[0] as $p |
+          ($request_logs[0].requests // []) as $requests |
           ($o.summary.primaryWindow // $o.summary.primary_window // $o.windows.primary // {}) as $primary |
           ($o.summary.secondaryWindow // $o.summary.secondary_window // $o.windows.secondary // {}) as $secondary |
           ($p.weeklyCreditPace // $p.weekly_credit_pace // {}) as $pace |
@@ -510,7 +571,10 @@
                 + ", inactive " + ($inactive | tostring)
               )
             },
-            accounts: ($accounts | map(account_card(.)))
+            accounts: ($accounts | map(account_card(.))),
+            recentLogs: ($requests | map(request_log_card(.; $accounts))),
+            latestLogStatus: (($requests[0].status // "unknown") | tostring),
+            latestLogNonOk: ((($requests[0].status // "ok") | tostring) != "ok")
           }
           ' 2>"$tmp/jq.err")"; then
           json_error \
@@ -527,6 +591,7 @@
   popupQml = pkgs.writeText "CodexLb.qml" (builtins.replaceStrings
     [
       "@DATA_COMMAND@"
+      "@OPEN_COMMAND@"
       "@INTERVAL_MS@"
       "@BASE00@"
       "@BASE01@"
@@ -545,6 +610,7 @@
     ]
     [
       (lib.getExe popupData)
+      "${pkgs.xdg-utils}/bin/xdg-open"
       (toString (cfg.interval * 1000))
       "#${colors.base00}"
       "#${colors.base01}"
@@ -627,20 +693,19 @@ in {
   config = mkIf cfg.enable (mkMerge [
     {
       programs.waybar.settings.bar = {
-        "custom/codex-lb" =
-          {
-            return-type = "json";
-            exec = lib.getExe script;
-            interval = cfg.interval;
-            tooltip = true;
-            on-click =
-              if cfg.popup.enable
-              then "${lib.getExe popupToggle} toggle"
-              else "${pkgs.xdg-utils}/bin/xdg-open ${lib.escapeShellArg cfg.url}";
-          }
-          // optionalAttrs cfg.popup.enable {
-            on-click-right = "${pkgs.xdg-utils}/bin/xdg-open ${lib.escapeShellArg cfg.url}";
-          };
+        "custom/codex-lb" = {
+          return-type = "json";
+          exec = lib.getExe script;
+          format = "{text}";
+          escape = false;
+          interval = cfg.interval;
+          tooltip = true;
+          on-click-right = "${pkgs.xdg-utils}/bin/xdg-open ${lib.escapeShellArg cfg.url}";
+          on-click =
+            if cfg.popup.enable
+            then "${lib.getExe popupToggle} toggle"
+            else "${pkgs.xdg-utils}/bin/xdg-open ${lib.escapeShellArg cfg.url}";
+        };
       };
     }
 

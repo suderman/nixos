@@ -7,8 +7,9 @@ Scope {
   id: root
 
   property bool open: false
-  property var data: ({ ok: false, status: "idle", title: "codex-lb", message: "Open the popup to refresh quota data.", accounts: [] })
+  property var data: ({ ok: false, status: "idle", title: "codex-lb", message: "Open the popup to refresh quota data.", accounts: [], recentLogs: [] })
   readonly property var accounts: data.accounts || []
+  readonly property var recentLogs: data.recentLogs || []
 
   readonly property string base00: "@BASE00@"
   readonly property string base01: "@BASE01@"
@@ -37,18 +38,24 @@ Scope {
 
   function statusColor(status) {
     var value = String(status || "");
-    if (value === "danger" || value === "critical" || value === "quota_exceeded" || value === "error") return base08;
-    if (value === "behind" || value === "warning" || value === "stale" || value === "rate_limited") return base09;
+    if (value === "danger" || value === "critical" || value === "quota" || value === "quota_exceeded" || value === "error") return base08;
+    if (value === "behind" || value === "warning" || value === "stale" || value === "rate_limit" || value === "rate_limited") return base09;
     if (value === "ahead" || value === "on_track" || value === "active" || value === "ok") return base0B;
     return base0D;
   }
 
   function statusText(status) {
-    return String(status || "unknown").replace(/_/g, " ");
+    var value = String(status || "unknown");
+    if (value === "ok") return "OK";
+    if (value === "rate_limit") return "Rate limit";
+    if (value === "quota") return "Quota";
+    if (value === "error") return "Error";
+    return value.replace(/_/g, " ");
   }
 
   function show() {
     open = true;
+    focusTimer.start();
     refresh();
   }
 
@@ -68,6 +75,10 @@ Scope {
     if (!fetch.running) fetch.running = true;
   }
 
+  function openDashboard() {
+    if (!openUrl.running && (data.url || "") !== "") openUrl.running = true;
+  }
+
   function applyData(text) {
     try {
       data = JSON.parse(text);
@@ -77,7 +88,8 @@ Scope {
         status: "parse",
         title: "codex-lb parse error",
         message: String(error),
-        accounts: []
+        accounts: [],
+        recentLogs: []
       };
     }
   }
@@ -101,6 +113,12 @@ Scope {
     }
   }
 
+  Process {
+    id: openUrl
+    command: ["@OPEN_COMMAND@", root.data.url || ""]
+    running: false
+  }
+
   Timer {
     interval: @INTERVAL_MS@
     repeat: true
@@ -108,14 +126,21 @@ Scope {
     onTriggered: root.refresh()
   }
 
+  Timer {
+    id: focusTimer
+    interval: 1
+    repeat: false
+    onTriggered: frame.forceActiveFocus()
+  }
+
   PanelWindow {
     id: popup
     visible: root.open
     color: "transparent"
-    implicitWidth: 560
-    implicitHeight: 760
+    implicitWidth: 700
+    implicitHeight: 980
     exclusionMode: ExclusionMode.Ignore
-    focusable: false
+    focusable: true
 
     anchors {
       top: true
@@ -129,20 +154,25 @@ Scope {
 
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "quickshell-codex-lb"
-    WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
     Rectangle {
+      id: frame
       anchors.fill: parent
       color: root.alpha(root.base00, "f0")
       radius: 18
       border.color: root.alpha(root.base05, "33")
       border.width: 1
+      focus: true
+
+      Keys.onEscapePressed: root.hide()
 
       Flickable {
         id: scroller
         anchors.fill: parent
         anchors.margins: 18
         clip: true
+        boundsBehavior: Flickable.StopAtBounds
         contentWidth: width
         contentHeight: content.implicitHeight
 
@@ -167,12 +197,35 @@ Scope {
                 font.bold: true
               }
 
-              Text {
+              Row {
                 width: parent.width
-                color: root.base04
-                text: (root.data.url || "") + "  last sync " + (root.data.lastSyncText || "n/a")
-                elide: Text.ElideRight
-                font.pixelSize: 12
+                spacing: 8
+
+                Text {
+                  id: urlLabel
+                  width: Math.min(implicitWidth, parent.width * 0.5)
+                  color: urlArea.containsMouse ? root.base0D : root.base04
+                  text: root.data.url || ""
+                  elide: Text.ElideRight
+                  font.pixelSize: 12
+                  font.underline: urlArea.containsMouse
+
+                  MouseArea {
+                    id: urlArea
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    hoverEnabled: true
+                    onClicked: root.openDashboard()
+                  }
+                }
+
+                Text {
+                  width: parent.width - urlLabel.width - parent.spacing
+                  color: root.base04
+                  text: "last sync " + (root.data.lastSyncText || "n/a")
+                  elide: Text.ElideRight
+                  font.pixelSize: 12
+                }
               }
             }
 
@@ -314,18 +367,89 @@ Scope {
             visible: root.data.ok === true && root.accounts.length > 0
           }
 
-          Column {
-            id: accountList
+          Grid {
+            id: accountGrid
             width: parent.width
-            spacing: 10
+            columns: 2
+            columnSpacing: 10
+            rowSpacing: 10
             visible: root.data.ok === true
 
             Repeater {
               model: root.accounts
 
               AccountCard {
-                width: accountList.width
+                width: (accountGrid.width - accountGrid.columnSpacing) / 2
                 account: modelData
+              }
+            }
+          }
+
+          Rectangle {
+            width: parent.width
+            height: 270
+            radius: 16
+            color: root.alpha(root.base01, "dd")
+            border.color: root.alpha(root.data.latestLogNonOk ? root.base08 : root.base05, root.data.latestLogNonOk ? "88" : "22")
+            visible: root.data.ok === true
+
+            Column {
+              anchors.fill: parent
+              anchors.margins: 14
+              spacing: 10
+
+              Row {
+                id: logsHeader
+                width: parent.width
+                spacing: 10
+
+                Text {
+                  width: parent.width - latestLogPill.width - parent.spacing
+                  color: root.base06
+                  text: "Recent logs"
+                  font.pixelSize: 16
+                  font.bold: true
+                }
+
+                Pill {
+                  id: latestLogPill
+                  label: root.statusText(root.data.latestLogStatus || "unknown")
+                  accent: root.statusColor(root.data.latestLogStatus || "unknown")
+                }
+              }
+
+              Text {
+                width: parent.width
+                color: root.base04
+                text: "No request logs returned."
+                visible: root.recentLogs.length === 0
+                font.pixelSize: 12
+              }
+
+              Flickable {
+                id: logScroller
+                width: parent.width
+                height: parent.height - logsHeader.height - parent.spacing
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
+                contentWidth: width
+                contentHeight: logList.implicitHeight
+                visible: root.recentLogs.length > 0
+
+                Column {
+                  id: logList
+                  width: logScroller.width
+                  spacing: 8
+
+                  Repeater {
+                    model: root.recentLogs
+
+                    LogRow {
+                      width: logList.width
+                      log: modelData
+                    }
+                  }
+                }
               }
             }
           }
@@ -551,6 +675,105 @@ Scope {
         label: "7d"
         metric: account.secondary || ({})
         accent: root.base0E
+      }
+    }
+  }
+
+  component LogRow: Rectangle {
+    property var log: ({})
+
+    implicitHeight: logContent.implicitHeight + 16
+    radius: 12
+    color: root.alpha(root.base00, "66")
+    border.color: root.alpha(root.statusColor(log.status), log.status === "ok" ? "22" : "88")
+
+    Column {
+      id: logContent
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.top: parent.top
+      anchors.margins: 8
+      spacing: 6
+
+      Row {
+        width: parent.width
+        spacing: 10
+
+        Column {
+          width: 82
+          spacing: 2
+
+          Text {
+            width: parent.width
+            color: root.base06
+            text: log.timeText || "--"
+            elide: Text.ElideRight
+            font.pixelSize: 12
+            font.bold: true
+          }
+
+          Text {
+            width: parent.width
+            color: root.base04
+            text: log.dateText || "--"
+            elide: Text.ElideRight
+            font.pixelSize: 10
+          }
+        }
+
+        Text {
+          width: 92
+          color: root.base05
+          text: log.account || "Unassigned"
+          elide: Text.ElideRight
+          font.pixelSize: 12
+        }
+
+        Text {
+          width: parent.width - 82 - 92 - 70 - 58 - logStatusPill.width - parent.spacing * 5
+          color: root.base06
+          text: log.model || "--"
+          elide: Text.ElideRight
+          font.pixelSize: 12
+          font.family: "monospace"
+        }
+
+        Text {
+          width: 70
+          color: root.base05
+          text: log.tokensText || "-- tok"
+          horizontalAlignment: Text.AlignRight
+          elide: Text.ElideRight
+          font.pixelSize: 11
+          font.family: "monospace"
+        }
+
+        Text {
+          width: 58
+          color: root.base05
+          text: log.costText || "$--"
+          horizontalAlignment: Text.AlignRight
+          elide: Text.ElideRight
+          font.pixelSize: 11
+          font.family: "monospace"
+        }
+
+        Pill {
+          id: logStatusPill
+          label: root.statusText(log.status)
+          accent: root.statusColor(log.status)
+        }
+      }
+
+      Text {
+        width: parent.width
+        color: root.base04
+        text: ((log.errorCode || "") !== "" ? log.errorCode + ": " : "") + (log.errorMessage || "")
+        visible: (log.status || "ok") !== "ok" && text !== ""
+        wrapMode: Text.WordWrap
+        maximumLineCount: 2
+        elide: Text.ElideRight
+        font.pixelSize: 11
       }
     }
   }
