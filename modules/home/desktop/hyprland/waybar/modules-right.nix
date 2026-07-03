@@ -1,17 +1,24 @@
 {
+  config,
   lib,
   pkgs,
   ...
 }: {
   programs.waybar.settings.bar = {
-    modules-right = [
-      "group/tray"
-      "pulseaudio"
-      "group/hardware"
-      "idle_inhibitor"
-      "battery"
-      "custom/power"
-    ];
+    modules-right =
+      [
+        "group/tray"
+      ]
+      ++ lib.optionals config.wayland.windowManager.hyprland.waybar.codex-lb.enable [
+        "custom/codex-lb"
+      ]
+      ++ [
+        "pulseaudio"
+        "group/hardware"
+        "idle_inhibitor"
+        "battery"
+        "custom/power"
+      ];
 
     pulseaudio = {
       format = "{icon}  {volume}%";
