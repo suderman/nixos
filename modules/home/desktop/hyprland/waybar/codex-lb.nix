@@ -128,6 +128,27 @@
               end
             end;
 
+          def duration_text($seconds):
+            (if $seconds < 0 then 0 else $seconds end | floor) as $value |
+            ($value / 86400 | floor) as $days |
+            (($value % 86400) / 3600 | floor) as $hours |
+            (($value % 3600) / 60 | floor) as $minutes |
+            if $days > 0 then ($days | tostring) + "d " + ($hours | tostring) + "h"
+            elif $hours > 0 then ($hours | tostring) + "h " + ($minutes | tostring) + "m"
+            else ($minutes | tostring) + "m"
+            end;
+
+          def reset_text($s):
+            if $s == null or $s == "" then "n/a"
+            else
+              ($s | tostring | sub("\\.[0-9]+"; "")) as $iso |
+              ($iso | fromdateiso8601? // null) as $epoch |
+              if $epoch == null then "n/a" else "in " + duration_text($epoch - now) end
+            end;
+
+          def host_text($u):
+            $u | tostring | sub("^[A-Za-z][A-Za-z0-9+.-]*://"; "") | split("/")[0];
+
           def window_percent($w):
             $w.remainingPercent // $w.remaining_percent // null;
 
@@ -148,7 +169,7 @@
           def window_line($w):
             pct_text(window_percent($w))
             + credit_text(window_remaining($w); window_capacity($w))
-            + ", reset " + time_text(window_reset($w));
+            + ", reset " + reset_text(window_reset($w));
 
           def account_name($account):
             $account.alias
@@ -167,14 +188,14 @@
                 $account.remainingCreditsPrimary // $account.remaining_credits_primary // null;
                 $account.capacityCreditsPrimary // $account.capacity_credits_primary // null
               )
-              + ", reset " + time_text($account.resetAtPrimary // $account.reset_at_primary // null)
+              + ", reset " + reset_text($account.resetAtPrimary // $account.reset_at_primary // null)
             else
               pct_text($usage.secondaryRemainingPercent // $usage.secondary_remaining_percent // null)
               + credit_text(
                 $account.remainingCreditsSecondary // $account.remaining_credits_secondary // null;
                 $account.capacityCreditsSecondary // $account.capacity_credits_secondary // null
               )
-              + ", reset " + time_text($account.resetAtSecondary // $account.reset_at_secondary // null)
+              + ", reset " + reset_text($account.resetAtSecondary // $account.reset_at_secondary // null)
             end;
 
           def account_lines($account):
@@ -238,9 +259,10 @@
               + " " + signed_num_text($delta)
             ),
             tooltip: ([
+              host_text($url),
               "5h " + window_line($primary),
               "7d " + window_line($secondary),
-              "last sync: " + time_text($o.lastSyncAt // $o.last_sync_at // null)
+              "updated: " + time_text($o.lastSyncAt // $o.last_sync_at // null)
             ]
             | join("\n")),
             class: $class
@@ -377,6 +399,24 @@
               end
             end;
 
+          def duration_text($seconds):
+            (if $seconds < 0 then 0 else $seconds end | floor) as $value |
+            ($value / 86400 | floor) as $days |
+            (($value % 86400) / 3600 | floor) as $hours |
+            (($value % 3600) / 60 | floor) as $minutes |
+            if $days > 0 then ($days | tostring) + "d " + ($hours | tostring) + "h"
+            elif $hours > 0 then ($hours | tostring) + "h " + ($minutes | tostring) + "m"
+            else ($minutes | tostring) + "m"
+            end;
+
+          def reset_text($s):
+            if $s == null or $s == "" then "n/a"
+            else
+              ($s | tostring | sub("\\.[0-9]+"; "")) as $iso |
+              ($iso | fromdateiso8601? // null) as $epoch |
+              if $epoch == null then "n/a" else "in " + duration_text($epoch - now) end
+            end;
+
           def log_time_text($s):
             if $s == null or $s == "" then "--"
             else
@@ -417,7 +457,7 @@
               remaining: $r,
               capacity: $c,
               creditsText: credits_text($r; $c),
-              resetText: time_text($reset)
+              resetText: reset_text($reset)
             };
 
           def window_metric($w):
