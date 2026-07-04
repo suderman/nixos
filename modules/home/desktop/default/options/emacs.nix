@@ -84,6 +84,9 @@ in {
       pandoc
     ];
 
+    # tui emacs
+    home.shellAliases.em = "emacsclient --tty";
+
     # Native build tools for vterm, modules, and day-to-day Emacs experiments.
     toolchains.native.enable = true;
 
