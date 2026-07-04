@@ -192,7 +192,7 @@ Scope {
               Text {
                 width: parent.width
                 color: root.base07
-                text: "Codex quota"
+                text: "OpenAI Codex quota"
                 font.pixelSize: 22
                 font.bold: true
               }

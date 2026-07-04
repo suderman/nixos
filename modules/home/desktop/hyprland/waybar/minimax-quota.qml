@@ -168,7 +168,7 @@ Scope {
             Text {
               width: parent.width
               color: root.base07
-              text: "MiniMax Plus quota"
+              text: "MiniMax quota"
               font.pixelSize: 22
               font.bold: true
             }
