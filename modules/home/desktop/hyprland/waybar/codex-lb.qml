@@ -7,6 +7,8 @@ Scope {
   id: root
 
   property bool open: false
+  property bool pinned: false
+  property bool panelHovered: false
   property var data: ({ ok: false, status: "idle", title: "codex-lb", message: "Open the popup to refresh quota data.", accounts: [], recentLogs: [] })
   readonly property var accounts: data.accounts || []
   readonly property var recentLogs: data.recentLogs || []
@@ -55,12 +57,20 @@ Scope {
 
   function show() {
     open = true;
+    dismissTimer.stop();
     focusTimer.start();
     refresh();
   }
 
-  function hide() {
+  function dismiss() {
     open = false;
+    panelHovered = false;
+    dismissTimer.stop();
+  }
+
+  function hide() {
+    pinned = false;
+    dismiss();
   }
 
   function toggle() {
@@ -69,6 +79,39 @@ Scope {
     } else {
       show();
     }
+  }
+
+  function panelEnter() {
+    panelHovered = true;
+    dismissTimer.stop();
+  }
+
+  function panelLeave() {
+    panelHovered = false;
+    scheduleDismiss();
+  }
+
+  function togglePinned() {
+    pinned = !pinned;
+    if (pinned) {
+      dismissTimer.stop();
+    } else {
+      scheduleDismiss();
+    }
+  }
+
+  function scheduleDismiss() {
+    if (!open || pinned) {
+      dismissTimer.stop();
+      return;
+    }
+
+    if (panelHovered) {
+      dismissTimer.stop();
+      return;
+    }
+
+    dismissTimer.restart();
   }
 
   function refresh() {
@@ -127,6 +170,15 @@ Scope {
   }
 
   Timer {
+    id: dismissTimer
+    interval: 300
+    repeat: false
+    onTriggered: {
+      if (!root.pinned && !root.panelHovered) root.dismiss();
+    }
+  }
+
+  Timer {
     id: focusTimer
     interval: 1
     repeat: false
@@ -167,6 +219,13 @@ Scope {
 
       Keys.onEscapePressed: root.hide()
 
+      HoverHandler {
+        onHoveredChanged: {
+          if (hovered) root.panelEnter();
+          else root.panelLeave();
+        }
+      }
+
       Flickable {
         id: scroller
         anchors.fill: parent
@@ -186,7 +245,7 @@ Scope {
             spacing: 12
 
             Column {
-              width: parent.width - closeButton.width - parent.spacing
+              width: parent.width - pinButton.width - parent.spacing
               spacing: 4
 
               Text {
@@ -230,25 +289,25 @@ Scope {
             }
 
             Rectangle {
-              id: closeButton
-              width: 30
+              id: pinButton
+              width: 58
               height: 30
               radius: 15
-              color: closeArea.containsMouse ? root.alpha(root.base08, "44") : root.alpha(root.base05, "22")
+              color: root.pinned ? root.alpha(root.base0D, "66") : (pinArea.containsMouse ? root.alpha(root.base05, "33") : root.alpha(root.base05, "22"))
 
               Text {
                 anchors.centerIn: parent
-                color: root.base06
-                text: "x"
-                font.pixelSize: 16
+                color: root.pinned ? root.base00 : root.base06
+                text: root.pinned ? "pinned" : "pin"
+                font.pixelSize: 11
                 font.bold: true
               }
 
               MouseArea {
-                id: closeArea
+                id: pinArea
                 anchors.fill: parent
                 hoverEnabled: true
-                onClicked: root.hide()
+                onClicked: root.togglePinned()
               }
             }
           }
