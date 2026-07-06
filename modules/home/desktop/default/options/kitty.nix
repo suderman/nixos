@@ -71,6 +71,14 @@ in {
         "super.equal" = "C-S-equal";
         "super.minus" = "C-S-minus";
         "super.g" = "macro(C-S-h slash)"; # grep scrollback
+        "meta.t" = "C-S-t"; # new tab
+        "meta.w" = "C-S-q"; # close tab
+        "meta.[" = "C-S-left"; # prev tab
+        "meta.]" = "C-S-right"; # next tab
+        "meta.r" = "C-r"; # reload
+        "meta.equal" = "C-S-equal";
+        "meta.minus" = "C-S-minus";
+        "meta.g" = "macro(C-S-h slash)"; # grep scrollback
       };
     };
 

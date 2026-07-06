@@ -17,7 +17,7 @@ in {
         "super.z" = "C-z";
 
         # Quick access to escape key
-        "j+k" = "esc";
+        # "j+k" = "esc";
 
         # # Media keys
         # "alt.a" = "volumedown";
