@@ -16,7 +16,7 @@ in {
   config.stylix = {
     enable = mkDefault true;
     autoEnable = mkDefault cfg.enable;
-    polarity = mkDefault "either"; # dark light either
+    polarity = mkDefault "dark"; # dark light either
 
     image = mkDefault (pixel "base00");
     base16Scheme = mkDefault "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";

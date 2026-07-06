@@ -125,6 +125,7 @@ function M.apply(_, _)
 	util.exec("SUPER + SHIFT + B", "chromium-browser --incognito")
 	util.exec("SUPER + ALT + B", "firefox")
 	util.exec("SUPER + ALT + SHIFT + B", "firefox --private-window")
+	util.exec("SUPER + ALT + SHIFT + T", "stylix-theme-toggle")
 	util.exec("SUPER + CTRL + PERIOD", "1password")
 
 	hl.bind("SUPER + LEFT", function()

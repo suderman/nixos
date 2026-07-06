@@ -46,7 +46,11 @@
       # Gnome desktop
       "org/gnome/desktop/interface" = {
         clock-format = "12h";
-        color-scheme = "default"; # prefer-dark prefer-light default
+        color-scheme = lib.mkDefault (
+          if config.stylix.polarity == "dark"
+          then "prefer-dark"
+          else "default"
+        );
         show-battery-percentage = true;
       };
 
