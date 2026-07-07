@@ -31,6 +31,6 @@ in {
     # lua
     ''
       util.exec("SUPER + SPACE", "launcher")
-      -- util.exec("SUPER + SUPER_L", "launcher", { release = true })
+      util.exec("SUPER + SUPER_L", "launcher", { release = true })
     '';
 }

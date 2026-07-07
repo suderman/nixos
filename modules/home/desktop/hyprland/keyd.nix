@@ -9,7 +9,7 @@ in {
   services.keyd = {
     enable = true;
     systemdTarget = config.wayland.systemd.target;
-    mapper.enable = lib.mkDefault false;
+    mapper.enable = lib.mkDefault true;
     windows = {
       "*" = {
         # Map meta a/z to ctrl a/z

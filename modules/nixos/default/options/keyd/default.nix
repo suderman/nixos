@@ -7,7 +7,7 @@
   ...
 }: let
   cfg = config.services.keyd;
-  inherit (lib) mkIf mkForce mkOption types;
+  inherit (lib) mkIf mkOption types recursiveUpdate;
   inherit (lib.options) mkEnableOption;
 in {
   options.services.keyd = {
@@ -21,13 +21,15 @@ in {
     };
     externalKeyboards = mkOption {
       type = types.anything;
-      default = {
-        apple = import ./keyboards/apple.nix;
-        g600 = import ./keyboards/g600.nix;
-        hhkb = import ./keyboards/hhkb.nix;
-        k811 = import ./keyboards/k811.nix;
-        rii = import ./keyboards/rii.nix;
-        w3 = import ./keyboards/w3.nix;
+      default = let
+        get = path: recursiveUpdate (import ./keyboards/all.nix) (import path);
+      in {
+        apple = get ./keyboards/apple.nix;
+        g600 = get ./keyboards/g600.nix;
+        hhkb = get ./keyboards/hhkb.nix;
+        k811 = get ./keyboards/k811.nix;
+        rii = get ./keyboards/rii.nix;
+        w3 = get ./keyboards/w3.nix;
       };
     };
     keyboard = mkOption {

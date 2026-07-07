@@ -8,43 +8,36 @@
 # 6 = ON     # Wake Up Enable
 {
   ids = ["0853:0100" "04fe:0006"];
-  settings =
-    {
-      main =
-        {
-          # Use tab as custom modifier
-          tab = "overloadt2(nav, tab, 200)";
+  settings = {
+    main = {
+      # Use tab as custom modifier
+      tab = "overloadt2(fn, tab, 200)";
 
-          # Tapping left control is escape
-          leftcontrol = "overload(control, escape)";
+      # Tapping left control is escape
+      leftcontrol = "overloadt2(control, escape, 100)";
 
-          # Leave the default modifiers as-is
-          leftshift = "layer(shift)";
-          leftalt = "layer(alt)";
-          leftmeta = "layer(super)";
+      # Leave the default modifiers as-is
+      leftshift = "layer(shift)";
+      leftalt = "layer(alt)";
+      leftmeta = "layer(super)";
 
-          # Allow right modifers to be unique keys
-          rightmeta = "rightmeta";
-          rightalt = "rightalt";
-          rightshift = "rightshift";
+      # Allow right modifers to be unique keys
+      rightmeta = "rightmeta";
+      rightalt = "rightalt";
+      rightshift = "rightshift";
 
-          # Fn keypad as media keys
-          # [+] next song
-          # [-] previous song
-          # [*] play-pause
-          # [/] media program
-          kpplus = "nextsong";
-          kpminus = "previoussong";
-          kpasterisk = "playpause";
-          kpslash = "media";
+      # Fn keypad as media keys
+      # [+] next song
+      # [-] previous song
+      # [*] play-pause
+      # [/] media program
+      kpplus = "nextsong";
+      kpminus = "previoussong";
+      kpasterisk = "playpause";
+      kpslash = "media";
 
-          # Pause/Break key as media play-pause
-          pause = "playpause";
-
-          # Both volume keys together trigger media key
-          "volumedown+volumeup" = "media";
-        }
-        // import ./home-row-mods.nix;
-    }
-    // import ./all.nix;
+      # Pause/Break key as media play-pause
+      pause = "playpause";
+    };
+  };
 }
