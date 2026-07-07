@@ -155,7 +155,7 @@
       slash = "down";
     };
 
-    "controlfn" = {
+    "controlfn:C" = {
       "1" = "C-f1";
       "2" = "C-f2";
       "3" = "C-f3";
@@ -170,7 +170,7 @@
       equal = "C-f12";
     };
 
-    "altfn" = {
+    "altfn:A" = {
       "1" = "A-f1";
       "2" = "A-f2";
       "3" = "A-f3";
