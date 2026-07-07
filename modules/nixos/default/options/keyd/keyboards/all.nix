@@ -1,7 +1,7 @@
 {
   settings = {
     global = {
-      chord_timeout = 25;
+      chord_timeout = 40;
       chord_hold_timeout = 80;
     };
     main = {
