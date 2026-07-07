@@ -1,8 +1,8 @@
 {
   settings = {
     global = {
-      chord_timeout = 50;
-      chord_hold_timeout = 0;
+      chord_timeout = 25;
+      chord_hold_timeout = 80;
     };
     main = {
       # Chord pair for super
@@ -88,7 +88,7 @@
       "volumedown+volumeup" = "media";
 
       # [✥] nav is [space]
-      space = "lettermod(nav, space, 200, 220)";
+      space = "lettermod(nav, space, 200, 250)";
     };
 
     # Super (meta) layer
