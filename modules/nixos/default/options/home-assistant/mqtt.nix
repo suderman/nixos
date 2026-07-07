@@ -65,6 +65,14 @@ in {
       ];
     };
 
+    tmpfiles.directories = [
+      {
+        target = mqtt.dataDir;
+        mode = "0700";
+        user = "mosquitto";
+        group = "mosquitto";
+      }
+    ];
     persist.storage.directories = [mqtt.dataDir];
     networking.firewall.allowedTCPPorts = [mqtt.port];
 
