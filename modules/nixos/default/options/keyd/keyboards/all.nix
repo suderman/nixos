@@ -82,7 +82,7 @@
       # Chord pair for media
       # [z][x][ ][ ][ ]  |  [ ][ ][ ][,][.]
       "z+x" = "layer(media)";
-      "comma+period" = "layer(media)";
+      "comma+dot" = "layer(media)";
 
       # Both volume keys together trigger media key
       "volumedown+volumeup" = "media";
@@ -147,11 +147,11 @@
       l = "pageup";
       semicolon = "left";
       apostrophe = "right";
-      return = "enter";
+      enter = "enter";
       n = "kpplus";
       m = "kpminus";
       comma = "end";
-      period = "pagedown";
+      dot = "pagedown";
       slash = "down";
     };
 

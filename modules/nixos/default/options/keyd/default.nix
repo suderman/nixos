@@ -9,27 +9,26 @@
   cfg = config.services.keyd;
   inherit (lib) mkIf mkOption types recursiveUpdate;
   inherit (lib.options) mkEnableOption;
+  getKeyboard = path: recursiveUpdate (import ./keyboards/all.nix) (import path);
 in {
   options.services.keyd = {
     quirks = mkEnableOption "quirks";
     internalKeyboards = mkOption {
       type = types.anything;
       default = {
-        framework = import ./keyboards/framework.nix;
-        t480s = import ./keyboards/t480s.nix;
+        framework = getKeyboard ./keyboards/framework.nix;
+        t480s = getKeyboard ./keyboards/t480s.nix;
       };
     };
     externalKeyboards = mkOption {
       type = types.anything;
-      default = let
-        get = path: recursiveUpdate (import ./keyboards/all.nix) (import path);
-      in {
-        apple = get ./keyboards/apple.nix;
-        g600 = get ./keyboards/g600.nix;
-        hhkb = get ./keyboards/hhkb.nix;
-        k811 = get ./keyboards/k811.nix;
-        rii = get ./keyboards/rii.nix;
-        w3 = get ./keyboards/w3.nix;
+      default = {
+        apple = getKeyboard ./keyboards/apple.nix;
+        g600 = getKeyboard ./keyboards/g600.nix;
+        hhkb = getKeyboard ./keyboards/hhkb.nix;
+        k811 = getKeyboard ./keyboards/k811.nix;
+        rii = getKeyboard ./keyboards/rii.nix;
+        w3 = getKeyboard ./keyboards/w3.nix;
       };
     };
     keyboard = mkOption {
