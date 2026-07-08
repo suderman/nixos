@@ -13,12 +13,12 @@
       # [Nav/Tab]
       # [Control]
       # [fn] [Control] [Alt] [Super] [Space] [Super] [Alt]
-      tab = "overloadt2(nav, tab, 200)";
-      capslock = "layer(control)";
+      tab = "overloadt2(fn, tab, 200)";
+      capslock = "overloadt2(control, escape, 100)";
       leftshift = "layer(shift)";
       leftcontrol = "layer(control)";
-      leftalt = "layer(alt)";
-      leftmeta = "layer(super)";
+      leftalt = "overload(super, f14)";
+      leftmeta = "overload(alt, f13)";
 
       # Allow right modifers to be unique keys
       rightmeta = "rightmeta";

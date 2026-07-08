@@ -32,34 +32,6 @@
       s = "lettermod(shift, s, 200, 250)";
       l = "lettermod(shift, l, 200, 250)";
 
-      # Chord pair for super+alt
-      "d+f" = "layer(superalt)";
-      "j+k" = "layer(superalt)";
-
-      # Chord pair for super+shift
-      "s+f" = "layer(supershift)";
-      "j+l" = "layer(supershift)";
-
-      # Chord pair for super+alt+shift
-      "a+f" = "layer(superaltshift)";
-      "j+semicolon" = "layer(superaltshift)";
-
-      # Chord pair for ctrl+alt
-      "d+c" = "layer(controlalt)";
-      "m+k" = "layer(controlalt)";
-
-      # Chord pair for ctrl+shift
-      "s+c" = "layer(controlshift)";
-      "m+l" = "layer(controlshift)";
-
-      # Chord pair for ctrl+alt+shift
-      "a+c" = "layer(controlaltshift)";
-      "m+semicolon" = "layer(controlaltshift)";
-
-      # Chord pair for alt+shift
-      "s+d" = "layer(altshift)";
-      "k+l" = "layer(altshift)";
-
       # Both volume keys together trigger media key
       "volumedown+volumeup" = "media";
     };
@@ -209,6 +181,28 @@
     [controlaltshift:C-A-S]
 
     [altshift:A-S]
+
+    [typing:layout]
+    d+f = layer(superalt)
+    j+k = layer(superalt)
+
+    s+f = layer(supershift)
+    j+l = layer(supershift)
+
+    d+c = layer(controlalt)
+    m+k = layer(controlalt)
+
+    s+c = layer(controlshift)
+    m+l = layer(controlshift)
+
+    s+d = layer(altshift)
+    k+l = layer(altshift)
+
+    s+d+f = layer(superaltshift)
+    j+k+l = layer(superaltshift)
+
+    s+d+c = layer(controlaltshift)
+    m+k+l = layer(controlaltshift)
 
     [gaming:layout]
 

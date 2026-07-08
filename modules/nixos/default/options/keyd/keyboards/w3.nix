@@ -5,18 +5,18 @@
   settings = {
     main = {
       # Assign tab to capslock key, and use as custom modifier
-      capslock = "overloadt2(nav, tab, 200)";
+      capslock = "overloadt2(fn, tab, 200)";
 
       # Assign super to leftalt key
-      leftalt = "layer(super)";
+      leftalt = "overload(super, f14)";
 
       # Assign alt to compose key
-      compose = "layer(alt)";
+      compose = "overload(alt, f13)";
 
       # Homepage/back button
       # Short press is super (default is back), long press is oneshot super (default is homepage)
-      back = "layer(super)";
-      homepage = "oneshot(super)";
+      back = "overload(super, f14)";
+      homepage = "overload(super, f14)";
     };
   };
 }

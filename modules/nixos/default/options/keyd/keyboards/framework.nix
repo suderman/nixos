@@ -17,8 +17,8 @@
       leftshift = "layer(shift)";
       # leftcontrol = "layer(control)";
       leftcontrol = "s"; # my s key is broken...
-      leftmeta = "layer(alt)";
-      leftalt = "layer(super)";
+      leftmeta = "overload(alt, f13)";
+      leftalt = "overload(super, f14)";
 
       # Allow right modifers to be unique keys
       rightalt = "rightmeta";

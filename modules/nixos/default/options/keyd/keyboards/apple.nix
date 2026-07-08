@@ -17,8 +17,8 @@
       capslock = "overloadt2(control, escape, 100)";
       leftshift = "layer(shift)";
       leftcontrol = "layer(control)";
-      leftalt = "layer(alt)";
-      leftmeta = "layer(super)";
+      leftalt = "overload(alt, f13)";
+      leftmeta = "overload(super, f14)";
 
       # Allow right modifers to be unique keys
       rightmeta = "rightmeta";

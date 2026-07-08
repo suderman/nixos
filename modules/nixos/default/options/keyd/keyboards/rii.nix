@@ -5,16 +5,16 @@
   settings = {
     main = {
       # Use tab as custom modifier
-      tab = "overloadt2(nav, tab, 200)";
+      tab = "overloadt2(fn, tab, 200)";
 
       # Assign super to leftalt key
-      leftalt = "layer(super)";
+      leftalt = "overload(super, f14)";
 
       # Assign alt to compose key
-      compose = "layer(alt)";
+      compose = "overload(alt, f13)";
 
       # Assign super to homepage key
-      homepage = "layer(super)";
+      homepage = "overload(super, f14)";
     };
   };
 }
