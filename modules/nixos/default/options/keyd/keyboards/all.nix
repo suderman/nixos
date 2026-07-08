@@ -1,8 +1,8 @@
 {
   settings = {
     global = {
-      chord_timeout = 40;
-      chord_hold_timeout = 80;
+      chord_timeout = 50;
+      chord_hold_timeout = 150;
     };
     main = {
       # Chord pair for super
@@ -65,19 +65,19 @@
       "l+semicolon" = "layer(shift)";
 
       # Chord pair for fn
-      # [ ][ ][e][r][ ]  |  [ ][u][i][ ][ ]
-      "e+r" = "layer(fn)";
-      "u+i" = "layer(fn)";
+      # [q][w][ ][ ][ ]  |  [ ][ ][ ][[][]]
+      "q+w" = "layer(fn)";
+      "leftbrace+rightbrace" = "layer(fn)";
 
       # Chord pair for ctrl-fn
-      # [ ][w][ ][r][ ]  |  [ ][u][ ][o][ ]
-      "w+r" = "layer(controlfn)";
-      "u+o" = "layer(controlfn)";
+      # [q][ ][e][ ][ ]  |  [ ][ ][p][ ][]]
+      "q+e" = "layer(controlfn)";
+      "p+rightbrace" = "layer(controlfn)";
 
       # Chord pair for alt-fn
-      # [q][ ][ ][r][ ]  |  [ ][u][ ][ ][p]
+      # [q][ ][ ][r][ ]  |  [ ][o][ ][ ][]]
       "q+r" = "layer(altfn)";
-      "u+p" = "layer(altfn)";
+      "o+rightbrace" = "layer(altfn)";
 
       # Chord pair for media
       # [z][x][ ][ ][ ]  |  [ ][ ][ ][,][.]
