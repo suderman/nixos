@@ -16,12 +16,10 @@
       # Tapping left control is escape
       leftcontrol = "overloadt2(control, escape, 100)";
 
-      # Leave the default modifiers as-is
+      # Tap real left modifiers for standalone actions; hold as modifiers.
       leftshift = "layer(shift)";
-      leftalt = "layer(alt)";
-      leftmeta = "layer(super)";
-      # leftalt = "overloadt2(alt, F13, 100)";
-      # leftmeta = "overloadt2(super, F14, 100)";
+      leftalt = "overload(alt, f13)";
+      leftmeta = "overload(super, f14)";
 
       # Allow right modifers to be unique keys
       rightmeta = "rightmeta";
@@ -40,6 +38,10 @@
 
       # Pause/Break key as media play-pause
       pause = "playpause";
+    };
+
+    "shift:S" = {
+      leftalt = "overload(alt, S-f13)";
     };
   };
 }

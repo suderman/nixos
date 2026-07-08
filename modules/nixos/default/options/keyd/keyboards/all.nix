@@ -12,15 +12,19 @@
       z = "lettermod(media, z, 200, 250)";
       slash = "lettermod(media, slash, 200, 250)";
 
+      # Lettermod for super
       f = "lettermod(super, f, 200, 250)";
       j = "lettermod(super, j, 200, 250)";
 
+      # Lettermod for ctrl
       c = "lettermod(control, c, 200, 250)";
       m = "lettermod(control, m, 200, 250)";
 
+      # Lettermod for alt
       d = "lettermod(alt, d, 200, 250)";
       k = "lettermod(alt, k, 200, 250)";
 
+      # Lettermod for shift
       s = "lettermod(shift, s, 200, 250)";
       l = "lettermod(shift, l, 200, 250)";
 
@@ -178,146 +182,28 @@
     };
   };
 
+  # Define HRM/chord modifier layers without per-key pass-throughs.
+  # Unbound keys fall through with these layer modifiers applied, which keeps
+  # real modifier chords from re-entering [main] and triggering lettermods.
   extraConfig = ''
-    [super:M]
-    space=M-space
-    z=M-z
-    slash=M-slash
-    # c=M-c
-    d=M-d
-    f=M-f
-    j=M-j
-    k=M-k
-    l=M-l
-    m=M-m
-    s=M-s
-
-    [superalt:M-A]
-    space=M-A-space
-    z=M-A-z
-    slash=M-A-slash
-    c=M-A-c
-    d=M-A-d
-    f=M-A-f
-    j=M-A-j
-    k=M-A-k
-    l=M-A-l
-    m=M-A-m
-    s=M-A-s
-
-    [superaltshift:M-A-S]
-    space=M-A-S-space
-    z=M-A-S-z
-    slash=M-A-S-slash
-    c=M-A-S-c
-    d=M-A-S-d
-    f=M-A-S-f
-    j=M-A-S-j
-    k=M-A-S-k
-    l=M-A-S-l
-    m=M-A-S-m
-    s=M-A-S-s
-
-    [supershift:M-S]
-    space=M-S-space
-    z=M-S-z
-    slash=M-S-slash
-    c=M-S-c
-    d=M-S-d
-    f=M-S-f
-    j=M-S-j
-    k=M-S-k
-    l=M-S-l
-    m=M-S-m
-    s=M-S-s
-
     [control:C]
-    space=C-space
-    z=C-z
-    slash=C-slash
-    c=C-c
-    d=C-d
-    f=C-f
-    j=C-j
-    k=C-k
-    l=C-l
-    m=C-m
-    s=C-s
-
-    [controlalt:C-A]
-    space=C-A-space
-    z=C-A-z
-    slash=C-A-slash
-    c=C-A-c
-    d=C-A-d
-    f=C-A-f
-    j=C-A-j
-    k=C-A-k
-    l=C-A-l
-    m=C-A-m
-    s=C-A-s
-
-    [controlshift:C-S]
-    space=C-S-space
-    z=C-S-z
-    slash=C-S-slash
-    c=C-S-c
-    d=C-S-d
-    f=C-S-f
-    j=C-S-j
-    k=C-S-k
-    l=C-S-l
-    m=C-S-m
-    s=C-S-s
-
-    [controlaltshift:C-A-S]
-    space=C-A-S-space
-    z=C-A-S-z
-    slash=C-A-S-slash
-    c=C-A-S-c
-    d=C-A-S-d
-    f=C-A-S-f
-    j=C-A-S-j
-    k=C-A-S-k
-    l=C-A-S-l
-    m=C-A-S-m
-    s=C-A-S-s
 
     [alt:A]
-    space=A-space
-    z=A-z
-    slash=A-slash
-    c=A-c
-    d=A-d
-    f=A-f
-    j=A-j
-    k=A-k
-    l=A-l
-    m=A-m
-    s=A-s
-
-    [altshift:A-S]
-    space=A-S-space
-    z=A-S-z
-    slash=A-S-slash
-    c=A-S-c
-    d=A-S-d
-    f=A-S-f
-    j=A-S-j
-    k=A-S-k
-    l=A-S-l
-    m=A-S-m
-    s=A-S-s
 
     [shift:S]
-    space=S-space
-    c=S-c
-    d=S-d
-    f=S-f
-    j=S-j
-    k=S-k
-    l=S-l
-    m=S-m
-    s=S-s
+
+    [superalt:M-A]
+
+    [superaltshift:M-A-S]
+
+    [supershift:M-S]
+
+    [controlalt:C-A]
+
+    [controlshift:C-S]
+
+    [controlaltshift:C-A-S]
+
+    [altshift:A-S]
   '';
 }

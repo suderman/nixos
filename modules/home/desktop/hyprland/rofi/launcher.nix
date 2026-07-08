@@ -32,6 +32,7 @@ in {
     ''
       util.exec("SUPER + SPACE", "launcher")
       -- util.exec("SUPER + SUPER_L", "launcher", { release = true })
-      util.exec("F14", "launcher")
+      -- keyd f14 arrives in Hyprland as XKB code 192; ignore keyd's modifier guard.
+      util.exec("code:192", "launcher", { ignore_mods = true })
     '';
 }

@@ -44,8 +44,9 @@ in {
         scroll-method = 0;
         color-enabled = true;
         kb-accept-entry = ["space" "Return"];
-        kb-mode-next = ["Alt_L" "Shift+Right" "Control+Tab"];
-        kb-mode-previous = ["Shift+Alt_L" "Shift+Left" "Control+ISO_Left_Tab"];
+        # keyd f13 arrives in Rofi as XKB code 191.
+        kb-mode-next = ["[191]" "Shift+Right" "Control+Tab"];
+        kb-mode-previous = ["Shift+[191]" "Shift+Left" "Control+ISO_Left_Tab"];
         me-select-entry = "MousePrimary";
         me-accept-entry = "!MousePrimary";
         kb-accept-custom = ["backslash" "Control+Return"];
