@@ -3,8 +3,12 @@
     global = {
       chord_timeout = 50;
       chord_hold_timeout = 150;
+      default_layout = "typing";
     };
-    main = {
+
+    # Smart typing layout. Switch to the empty gaming layout with fn+g when
+    # regular keys should behave like a vanilla keyboard.
+    "typing:layout" = {
       # [✥] nav is [space]
       space = "lettermod(nav, space, 200, 250)";
 
@@ -205,5 +209,13 @@
     [controlaltshift:C-A-S]
 
     [altshift:A-S]
+
+    [gaming:layout]
+
+    [typing+fn]
+    g = setlayout(gaming)
+
+    [gaming+fn]
+    g = setlayout(typing)
   '';
 }
