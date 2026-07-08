@@ -64,21 +64,6 @@
       "a+s" = "layer(shift)";
       "l+semicolon" = "layer(shift)";
 
-      # Chord pair for fn
-      # [q][w][ ][ ][ ]  |  [ ][ ][ ][[][]]
-      "q+w" = "layer(fn)";
-      "leftbrace+rightbrace" = "layer(fn)";
-
-      # Chord pair for ctrl-fn
-      # [q][ ][e][ ][ ]  |  [ ][ ][p][ ][]]
-      "q+e" = "layer(controlfn)";
-      "p+rightbrace" = "layer(controlfn)";
-
-      # Chord pair for alt-fn
-      # [q][ ][ ][r][ ]  |  [ ][o][ ][ ][]]
-      "q+r" = "layer(altfn)";
-      "o+rightbrace" = "layer(altfn)";
-
       # Chord pair for media
       # [z][x][ ][ ][ ]  |  [ ][ ][ ][,][.]
       "z+x" = "layer(media)";
@@ -116,6 +101,7 @@
       p = "M-left";
     };
 
+    # Replicate the function layer on hhkb
     fn = {
       "1" = "f1";
       "2" = "f2";
@@ -155,39 +141,8 @@
       slash = "down";
     };
 
-    "controlfn:C" = {
-      "1" = "C-f1";
-      "2" = "C-f2";
-      "3" = "C-f3";
-      "4" = "C-f4";
-      "5" = "C-f5";
-      "6" = "C-f6";
-      "7" = "C-f7";
-      "8" = "C-f8";
-      "9" = "C-f9";
-      "0" = "C-f10";
-      minus = "C-f11";
-      equal = "C-f12";
-    };
-
-    "altfn:A" = {
-      "1" = "A-f1";
-      "2" = "A-f2";
-      "3" = "A-f3";
-      "4" = "A-f4";
-      "5" = "A-f5";
-      "6" = "A-f6";
-      "7" = "A-f7";
-      "8" = "A-f8";
-      "9" = "A-f9";
-      "0" = "A-f10";
-      minus = "A-f11";
-      equal = "A-f12";
-    };
-
-    # Nav (text navigation)
     nav = {
-      # navigation
+      # vim navigation
       k = "up";
       l = "right";
       j = "down";
@@ -219,7 +174,6 @@
 
     # media keys
     media = {
-      # Media keys
       a = "volumedown"; # [a]djust down...
       s = "volumeup"; # [s]ound up!
       d = "mute"; # [d]on't play sound
@@ -229,6 +183,7 @@
       x = "brightnessup"; # need e[x]tra light
       c = "micmute"; # mi[c] mute
       v = "media"; # [v]olume source
+
       space = "playpause";
 
       # right side
@@ -266,7 +221,5 @@
     space=A-S-space
     [shift:S]
     space=S-space
-    [controlfn:C]
-    [altfn:A]
   '';
 }
