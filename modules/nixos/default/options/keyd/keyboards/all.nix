@@ -4,19 +4,13 @@ let
     [${layer}]
     ${concatLines (builtins.map (key: "${key} = ${mod}-${key}") keys)}
   '';
-  smartKeys = [
-    "space"
-    "z"
-    "slash"
-    "c"
-    "d"
-    "f"
-    "j"
-    "k"
-    "l"
-    "m"
-    "s"
-  ];
+  # When using real modifiers, these homerow mod keys should be pass through
+  smartKeys =
+    ["d" "s" "f" "j" "k" "l"]
+    ++ ["z" "c" "m" "slash"]
+    ++ ["space"];
+
+  # skip c because we already define it deliberately for copy (C-insert)
   superKeys = builtins.filter (key: key != "c") smartKeys;
 in {
   settings = {
