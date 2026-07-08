@@ -1,4 +1,24 @@
-{
+let
+  concatLines = builtins.concatStringsSep "\n";
+  passthrough = layer: mod: keys: ''
+    [${layer}]
+    ${concatLines (builtins.map (key: "${key} = ${mod}-${key}") keys)}
+  '';
+  smartKeys = [
+    "space"
+    "z"
+    "slash"
+    "c"
+    "d"
+    "f"
+    "j"
+    "k"
+    "l"
+    "m"
+    "s"
+  ];
+  superKeys = builtins.filter (key: key != "c") smartKeys;
+in {
   settings = {
     global = {
       chord_timeout = 50;
@@ -155,62 +175,63 @@
       n = "brightnessup";
       m = "media";
       comma = "micmute";
-      period = "mute";
+      dot = "mute";
     };
   };
 
-  # Define HRM/chord modifier layers without per-key pass-throughs.
-  # Unbound keys fall through with these layer modifiers applied, which keeps
-  # real modifier chords from re-entering [main] and triggering lettermods.
-  extraConfig = ''
-    [control:C]
+  # Physical modifier layers explicitly pass smart keys through so real
+  # modifiers do not trigger typing-layer lettermods.
+  # Chords are raw config because keyd chord parsing is order-sensitive.
+  extraConfig = concatLines [
+    (passthrough "control:C" "C" smartKeys)
+    (passthrough "alt:A" "A" smartKeys)
+    (passthrough "shift:S" "S" smartKeys)
+    (passthrough "super:M" "M" superKeys)
+    ''
 
-    [alt:A]
+      [superalt:M-A]
 
-    [shift:S]
+      [superaltshift:M-A-S]
 
-    [superalt:M-A]
+      [supershift:M-S]
 
-    [superaltshift:M-A-S]
+      [controlalt:C-A]
 
-    [supershift:M-S]
+      [controlshift:C-S]
 
-    [controlalt:C-A]
+      [controlaltshift:C-A-S]
 
-    [controlshift:C-S]
+      [altshift:A-S]
 
-    [controlaltshift:C-A-S]
+      [typing:layout]
+      d+f = layer(superalt)
+      j+k = layer(superalt)
 
-    [altshift:A-S]
+      s+f = layer(supershift)
+      j+l = layer(supershift)
 
-    [typing:layout]
-    d+f = layer(superalt)
-    j+k = layer(superalt)
+      d+c = layer(controlalt)
+      m+k = layer(controlalt)
 
-    s+f = layer(supershift)
-    j+l = layer(supershift)
+      s+c = layer(controlshift)
+      m+l = layer(controlshift)
 
-    d+c = layer(controlalt)
-    m+k = layer(controlalt)
+      s+d = layer(altshift)
+      k+l = layer(altshift)
 
-    s+c = layer(controlshift)
-    m+l = layer(controlshift)
+      s+d+f = layer(superaltshift)
+      j+k+l = layer(superaltshift)
 
-    s+d = layer(altshift)
-    k+l = layer(altshift)
+      s+d+c = layer(controlaltshift)
+      m+k+l = layer(controlaltshift)
 
-    s+d+f = layer(superaltshift)
-    j+k+l = layer(superaltshift)
+      [gaming:layout]
 
-    s+d+c = layer(controlaltshift)
-    m+k+l = layer(controlaltshift)
+      [typing+fn]
+      g = setlayout(gaming)
 
-    [gaming:layout]
-
-    [typing+fn]
-    g = setlayout(gaming)
-
-    [gaming+fn]
-    g = setlayout(typing)
-  '';
+      [gaming+fn]
+      g = setlayout(typing)
+    ''
+  ];
 }
