@@ -20,6 +20,8 @@
       leftshift = "layer(shift)";
       leftalt = "layer(alt)";
       leftmeta = "layer(super)";
+      # leftalt = "overloadt2(alt, F13, 100)";
+      # leftmeta = "overloadt2(super, F14, 100)";
 
       # Allow right modifers to be unique keys
       rightmeta = "rightmeta";
