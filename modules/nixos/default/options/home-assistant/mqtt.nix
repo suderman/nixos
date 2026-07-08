@@ -8,7 +8,10 @@
   cfg = config.services.home-assistant;
   mqtt = cfg.mqtt;
   inherit (lib) concatMapStringsSep mkEnableOption mkIf mkOption types;
-  passwordFileFor = userName: "${mqtt.passwordDir}/${userName}";
+  passwordDir = "/run/mosquitto-passwords";
+  homeAssistantUser = "homeassistant";
+  deviceUser = "mqtt-device";
+  passwordFileFor = userName: "${passwordDir}/${userName}";
 in {
   options.services.home-assistant.mqtt = {
     enable = mkEnableOption "MQTT broker for Home Assistant";
@@ -22,26 +25,6 @@ in {
       type = types.path;
       default = "/var/lib/mosquitto";
     };
-
-    passwordDir = mkOption {
-      type = types.str;
-      default = "/run/mosquitto-passwords";
-    };
-
-    discoveryPrefix = mkOption {
-      type = types.str;
-      default = "homeassistant";
-    };
-
-    homeAssistantUser = mkOption {
-      type = types.str;
-      default = "homeassistant";
-    };
-
-    deviceUser = mkOption {
-      type = types.str;
-      default = "mqtt-device";
-    };
   };
 
   config = mkIf (cfg.enable && mqtt.enable) {
@@ -51,13 +34,14 @@ in {
       listeners = [
         {
           inherit (mqtt) port;
+          # Separate credentials avoid sharing Home Assistant's password with devices.
           users = {
-            ${mqtt.homeAssistantUser} = {
-              passwordFile = passwordFileFor mqtt.homeAssistantUser;
+            ${homeAssistantUser} = {
+              passwordFile = passwordFileFor homeAssistantUser;
               acl = ["readwrite #"];
             };
-            ${mqtt.deviceUser} = {
-              passwordFile = passwordFileFor mqtt.deviceUser;
+            ${deviceUser} = {
+              passwordFile = passwordFileFor deviceUser;
               acl = ["readwrite #"];
             };
           };
@@ -65,14 +49,6 @@ in {
       ];
     };
 
-    tmpfiles.directories = [
-      {
-        target = mqtt.dataDir;
-        mode = "0700";
-        user = "mosquitto";
-        group = "mosquitto";
-      }
-    ];
     persist.storage.directories = [mqtt.dataDir];
     networking.firewall.allowedTCPPorts = [mqtt.port];
 
@@ -80,8 +56,8 @@ in {
       inherit (perSystem.self) mkScript derive;
       hex = config.age.secrets.hex.path;
       userNames = [
-        mqtt.homeAssistantUser
-        mqtt.deviceUser
+        homeAssistantUser
+        deviceUser
       ];
       writePassword = userName: ''
         derive hex ${lib.escapeShellArg "mqtt:${config.networking.hostName}:${userName}"} 32 <${hex} >"$tmp"
@@ -91,7 +67,7 @@ in {
         # bash
         ''
           if [[ -f ${hex} ]]; then
-            install -dm700 -o root -g root ${lib.escapeShellArg mqtt.passwordDir}
+            install -dm700 -o root -g root ${lib.escapeShellArg passwordDir}
             tmp="$(mktemp)"
 
             ${concatMapStringsSep "\n" writePassword userNames}
