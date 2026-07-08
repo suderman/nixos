@@ -13,7 +13,7 @@
       # [Control]
       # [Control] [fn] [Alt] [Super] [Space] [Super] [Alt]
       tab = "overloadt2(fn, tab, 200)";
-      capslock = "overloadt2(control, escape, 100)";
+      capslock = "overloadt2(control, escape, 200)";
       leftshift = "layer(shift)";
       # leftcontrol = "layer(control)";
       leftcontrol = "s"; # my s key is broken...

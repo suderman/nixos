@@ -14,7 +14,7 @@
       # [Control]
       # [fn] [Control] [Alt] [Super] [Space] [Super] [Alt]
       tab = "overloadt2(fn, tab, 200)";
-      capslock = "overloadt2(control, escape, 100)";
+      capslock = "overloadt2(control, escape, 200)";
       leftshift = "layer(shift)";
       leftcontrol = "layer(control)";
       leftalt = "overload(super, f14)";

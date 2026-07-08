@@ -14,7 +14,7 @@
       tab = "overloadt2(fn, tab, 200)";
 
       # Tapping left control is escape
-      leftcontrol = "overloadt2(control, escape, 100)";
+      leftcontrol = "overloadt2(control, escape, 200)";
 
       # Tap real left modifiers for standalone actions; hold as modifiers.
       leftshift = "layer(shift)";

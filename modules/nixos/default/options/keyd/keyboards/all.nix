@@ -147,14 +147,15 @@
       space = "playpause";
 
       # right side
+      h = "previoussong";
       j = "volumedown";
       k = "volumeup";
-      h = "previoussong";
       l = "nextsong";
+      p = "brightnessdown";
+      n = "brightnessup";
       m = "media";
-      n = "mute";
-      u = "brightnessdown";
-      i = "brightnessup";
+      comma = "micmute";
+      period = "mute";
     };
   };
 
