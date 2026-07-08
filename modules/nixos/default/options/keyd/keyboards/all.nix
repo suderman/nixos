@@ -64,16 +64,20 @@
       "a+s" = "layer(shift)";
       "l+semicolon" = "layer(shift)";
 
-      # Chord pair for media
-      # [z][x][ ][ ][ ]  |  [ ][ ][ ][,][.]
-      "z+x" = "layer(media)";
-      "comma+dot" = "layer(media)";
+      # # Chord pair for media
+      # # [z][x][ ][ ][ ]  |  [ ][ ][ ][,][.]
+      # "z+x" = "layer(media)";
+      # "comma+dot" = "layer(media)";
 
       # Both volume keys together trigger media key
       "volumedown+volumeup" = "media";
 
       # [✥] nav is [space]
       space = "lettermod(nav, space, 200, 250)";
+
+      # [𝅘𝅥𝅮] media is [z][/]
+      z = "lettermod(media, z, 200, 250)";
+      slash = "lettermod(media, slash, 200, 250)";
     };
 
     # Super (meta) layer
@@ -201,24 +205,43 @@
   extraConfig = ''
     [super:M]
     space=M-space
+    z=M-z
+    slash=M-slash
     [superalt:M-A]
     space=M-A-space
+    z=M-A-z
+    slash=M-A-slash
     [superaltshift:M-A-S]
     space=M-A-S-space
+    z=M-A-S-z
+    slash=M-A-S-slash
     [supershift:M-S]
     space=M-S-space
+    z=M-S-z
+    slash=M-S-slash
     [control:C]
     space=C-space
+    z=C-z
     [controlalt:C-A]
     space=C-A-space
+    z=C-A-z
+    slash=C-A-slash
     [controlshift:C-S]
     space=C-S-space
+    z=C-S-z
+    slash=C-S-slash
     [controlaltshift:C-A-S]
     space=C-A-S-space
+    z=C-A-S-z
+    slash=C-A-S-slash
     [alt:A]
     space=A-space
+    z=A-z
+    slash=A-slash
     [altshift:A-S]
     space=A-S-space
+    z=A-S-z
+    slash=A-S-slash
     [shift:S]
     space=S-space
   '';
