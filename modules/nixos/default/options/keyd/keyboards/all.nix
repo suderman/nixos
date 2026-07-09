@@ -20,6 +20,9 @@ in {
       default_layout = "typing";
     };
 
+    # Shared tab-as-fn behavior
+    main.tab = "overloadt2(fn, tab, 200)";
+
     # Default typing layout
     "typing:layout" = {
       # [✥] nav is [space]

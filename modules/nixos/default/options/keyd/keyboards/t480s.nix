@@ -4,15 +4,12 @@
   settings = {
     main = {
       ## Modifers before:
-      # [Tab]
       # [Capslock]
       # [fn] [Control] [Meta] [Alt] [Space] [Alt] [PrtSc] [Control]
 
       ## Modifer after:
-      # [fn/Tab]
       # [Control]
       # [fn] [Control] [Alt] [Super] [Space] [Super] [PrtSc] [Control]
-      tab = "overloadt2(fn, tab, 200)";
       leftshift = "layer(shift)";
       capslock = "overloadt2(control, escape, 200)";
       leftcontrol = "layer(control)";

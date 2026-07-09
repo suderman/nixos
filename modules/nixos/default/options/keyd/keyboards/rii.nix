@@ -4,9 +4,6 @@
   ids = ["1997:2466"];
   settings = {
     main = {
-      # Use tab as custom modifier
-      tab = "overloadt2(fn, tab, 200)";
-
       # Assign super to leftalt key
       leftalt = "overload(super, f14)";
 

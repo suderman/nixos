@@ -10,9 +10,6 @@
   ids = ["0853:0100" "04fe:0006"];
   settings = {
     main = {
-      # Use tab as custom modifier
-      tab = "overloadt2(fn, tab, 200)";
-
       # Tapping left control is escape
       leftcontrol = "overloadt2(control, escape, 200)";
 
