@@ -5,13 +5,13 @@ let
     ${concatLines (builtins.map (key: "${key} = ${mod}-${key}") keys)}
   '';
   # When using real modifiers, these homerow mod keys should be pass through
-  smartKeys =
+  modKeys =
     ["d" "s" "f" "j" "k" "l"]
     ++ ["z" "c" "m" "slash"]
     ++ ["space"];
 
-  # skip c because we already define it deliberately for copy (C-insert)
-  superKeys = builtins.filter (key: key != "c") smartKeys;
+  # lettermod(<layer>, <key>, <idle timeout>, <hold timeout>)
+  lettermod = layer: key: "lettermod(${layer}, ${key}, 200, 400)";
 in {
   settings = {
     global = {
@@ -20,31 +20,30 @@ in {
       default_layout = "typing";
     };
 
-    # Smart typing layout. Switch to the empty gaming layout with fn+g when
-    # regular keys should behave like a vanilla keyboard.
+    # Default typing layout
     "typing:layout" = {
       # [✥] nav is [space]
-      space = "lettermod(nav, space, 200, 250)";
+      space = lettermod "nav" "space";
 
       # [𝅘𝅥𝅮] media is [z][/]
-      z = "lettermod(media, z, 200, 250)";
-      slash = "lettermod(media, slash, 200, 250)";
+      z = lettermod "media" "z";
+      slash = lettermod "media" "slash";
 
       # Lettermod for super
-      f = "lettermod(super, f, 200, 250)";
-      j = "lettermod(super, j, 200, 250)";
+      f = lettermod "super" "f";
+      j = lettermod "super" "j";
 
       # Lettermod for ctrl
-      c = "lettermod(control, c, 200, 250)";
-      m = "lettermod(control, m, 200, 250)";
+      c = lettermod "control" "c";
+      m = lettermod "control" "m";
 
       # Lettermod for alt
-      d = "lettermod(alt, d, 200, 250)";
-      k = "lettermod(alt, k, 200, 250)";
+      d = lettermod "alt" "d";
+      k = lettermod "alt" "k";
 
       # Lettermod for shift
-      s = "lettermod(shift, s, 200, 250)";
-      l = "lettermod(shift, l, 200, 250)";
+      s = lettermod "shift" "s";
+      l = lettermod "shift" "l";
 
       # Both volume keys together trigger media key
       "volumedown+volumeup" = "media";
@@ -165,22 +164,21 @@ in {
       j = "volumedown";
       k = "volumeup";
       l = "nextsong";
-      p = "brightnessdown";
-      n = "brightnessup";
+      p = "brightnessup";
+      n = "brightnessdown";
       m = "media";
       comma = "micmute";
       dot = "mute";
     };
   };
 
-  # Physical modifier layers explicitly pass smart keys through so real
-  # modifiers do not trigger typing-layer lettermods.
-  # Chords are raw config because keyd chord parsing is order-sensitive.
+  # Physical modifier layers explicitly pass mod keys through so real modifiers do not trigger typing-layer lettermods.
   extraConfig = concatLines [
-    (passthrough "control:C" "C" smartKeys)
-    (passthrough "alt:A" "A" smartKeys)
-    (passthrough "shift:S" "S" smartKeys)
-    (passthrough "super:M" "M" superKeys)
+    (passthrough "control:C" "C" modKeys)
+    (passthrough "alt:A" "A" modKeys)
+    (passthrough "shift:S" "S" modKeys)
+    # skip c because we already defined it to copy (C-insert)
+    (passthrough "super:M" "M" (builtins.filter (key: key != "c") modKeys))
     ''
 
       [superalt:M-A]
@@ -197,6 +195,9 @@ in {
 
       [altshift:A-S]
 
+    ''
+    # Chords are raw config because keyd chord parsing is order-sensitive.
+    ''
       [typing:layout]
       d+f = layer(superalt)
       j+k = layer(superalt)
@@ -218,6 +219,9 @@ in {
 
       s+d+c = layer(controlaltshift)
       m+k+l = layer(controlaltshift)
+    ''
+    # Empty gaming layout for vanilla keyboard experience, toggled with fn+g (tab+g)
+    ''
 
       [gaming:layout]
 
@@ -226,6 +230,7 @@ in {
 
       [gaming+fn]
       g = setlayout(typing)
+
     ''
   ];
 }
