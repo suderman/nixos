@@ -1779,6 +1779,7 @@
         "nixpkgs-unstable": "nixpkgs-unstable",
         "nur": "nur",
         "stylix": "stylix",
+        "suderpkgs": "suderpkgs",
         "treefmt-nix": "treefmt-nix_4"
       }
     },
@@ -1813,6 +1814,32 @@
         "owner": "nix-community",
         "ref": "release-26.05",
         "repo": "stylix",
+        "type": "github"
+      }
+    },
+    "suderpkgs": {
+      "inputs": {
+        "blueprint": [
+          "blueprint"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "treefmt-nix": [
+          "treefmt-nix"
+        ]
+      },
+      "locked": {
+        "lastModified": 1783702346,
+        "narHash": "sha256-+DO89/7BcS/Uo9sS4H1FFNINE7YTbm7y8E3sEeiAcbM=",
+        "owner": "suderman",
+        "repo": "suderpkgs",
+        "rev": "ace66ffbdad103efd864a56c5340d9cb5b764f54",
+        "type": "github"
+      },
+      "original": {
+        "owner": "suderman",
+        "repo": "suderpkgs",
         "type": "github"
       }
     },
