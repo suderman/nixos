@@ -9,16 +9,26 @@ let
   plainKeys = keyMap (key: key);
   modifiedKeys = mod: keyMap (key: "${mod}-${key}");
 
-  leftHandKeys = ["q" "w" "e" "r" "t" "a" "s" "d" "f" "g" "z" "x" "c" "v" "b"];
-  rightHandKeys = ["y" "u" "i" "o" "p" "h" "j" "k" "l" "semicolon" "n" "m" "comma" "dot" "slash"];
+  # letter keys on the left side of the keyboard
+  leftHandKeys =
+    ["q" "w" "e" "r" "t"]
+    ++ ["a" "s" "d" "f" "g"]
+    ++ ["z" "x" "c" "v" "b"];
 
-  # Active modifier layers need explicit pass-through for other home-row mod keys.
+  # letter keys on the right side of the keyboard
+  rightHandKeys =
+    ["y" "u" "i" "o" "p"]
+    ++ ["h" "j" "k" "l" "semicolon"]
+    ++ ["n" "m" "comma" "dot" "slash"];
+
+  # active modifier layers need explicit pass-through for other home-row mod keys.
   modKeys =
     ["d" "s" "f" "j" "k" "l"]
     ++ ["z" "c" "m" "slash"]
     ++ ["space"];
   guardedModLayer = mod: handKeys: modifiedKeys mod modKeys // plainKeys handKeys;
 
+  # custom behaviour of super key everywhere
   superBindings = {
     # Open window switcher (super tab)
     tab = "swapm(switcher, M-tab)";
@@ -73,21 +83,29 @@ in {
       "volumedown+volumeup" = "media";
     };
 
-    # Super (meta) layer
-    "super:M" = modifiedKeys "M" superModKeys // superBindings;
-    "leftsuper:M" = guardedSuperLayer leftHandKeys;
-    "rightsuper:M" = guardedSuperLayer rightHandKeys;
-
-    # Home-row modifier layers shadow same-hand letters as plain keys to avoid roll mistakes.
+    # Control layer
     "control:C" = modifiedKeys "C" modKeys;
+    # Home-row ctrl layers shadow same-hand letters as plain keys to avoid roll mistakes
     "leftcontrol:C" = guardedModLayer "C" leftHandKeys;
     "rightcontrol:C" = guardedModLayer "C" rightHandKeys;
+
+    # Alt layer
     "alt:A" = modifiedKeys "A" modKeys;
+    # Home-row alt layers shadow same-hand letters as plain keys to avoid roll mistakes
     "leftalt:A" = guardedModLayer "A" leftHandKeys;
     "rightalt:A" = guardedModLayer "A" rightHandKeys;
+
+    # Shift layer
     "shift:S" = modifiedKeys "S" modKeys;
+    # Home-row shift layers shadow same-hand letters as plain keys to avoid roll mistakes
     "leftshift:S" = guardedModLayer "S" leftHandKeys;
     "rightshift:S" = guardedModLayer "S" rightHandKeys;
+
+    # Super (meta) layer
+    "super:M" = modifiedKeys "M" superModKeys // superBindings;
+    # Home-row super layers shadow same-hand letters as plain keys to avoid roll mistakes
+    "leftsuper:M" = guardedSuperLayer leftHandKeys;
+    "rightsuper:M" = guardedSuperLayer rightHandKeys;
 
     # Switcher (while holding down meta/super-tab)
     "switcher:M" = {
