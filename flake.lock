@@ -290,6 +290,27 @@
         "type": "github"
       }
     },
+    "devshell_3": {
+      "inputs": {
+        "nixpkgs": [
+          "suderpkgs",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1768818222,
+        "narHash": "sha256-460jc0+CZfyaO8+w8JNtlClB2n4ui1RbHfPTLkpwhU8=",
+        "owner": "numtide",
+        "repo": "devshell",
+        "rev": "255a2b1725a20d060f566e4755dbf571bbbb5f76",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "devshell",
+        "type": "github"
+      }
+    },
     "disko": {
       "inputs": {
         "nixpkgs": [
@@ -1822,6 +1843,7 @@
         "blueprint": [
           "blueprint"
         ],
+        "devshell": "devshell_3",
         "nixpkgs": [
           "nixpkgs"
         ],
@@ -1830,11 +1852,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1783702346,
-        "narHash": "sha256-+DO89/7BcS/Uo9sS4H1FFNINE7YTbm7y8E3sEeiAcbM=",
+        "lastModified": 1783723570,
+        "narHash": "sha256-0rZnsw++XN8CZHlS6KPKtQaz41KSdFZ4nO9OjS7QKHY=",
         "owner": "suderman",
         "repo": "suderpkgs",
-        "rev": "ace66ffbdad103efd864a56c5340d9cb5b764f54",
+        "rev": "88ec75d70acb258f2f66c206843e436fa163db25",
         "type": "github"
       },
       "original": {
