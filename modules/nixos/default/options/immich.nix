@@ -19,7 +19,8 @@
   environment = {
     PUID = toString config.ids.uids.immich;
     PGID = toString config.ids.gids.immich;
-    DB_URL = "socket://immich@/run/postgresql?db=immich";
+    DB_URL = "postgresql://immich@/immich?host=/run/postgresql";
+    IMMICH_MEDIA_LOCATION = "/usr/src/app/upload";
     REDIS_SOCKET = "/run/redis-immich/redis.sock";
     REVERSE_GEOCODING_DUMP_DIRECTORY = "/usr/src/app/geocoding";
   };
@@ -147,8 +148,18 @@ in {
     # ...not ideal, but getting tired of fighting against this...
     systemd.services.postgresql.postStart = mkAfter ''
       ${config.services.postgresql.package}/bin/psql -tAc 'ALTER USER immich WITH SUPERUSER;'
+      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS unaccent;'
+      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'
+      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS cube;'
+      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS earthdistance CASCADE;'
+      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS pg_trgm;'
       ${config.services.postgresql.package}/bin/psql -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS vector;'
       ${config.services.postgresql.package}/bin/psql -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS vchord CASCADE;'
+      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'ALTER EXTENSION unaccent UPDATE;'
+      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'ALTER EXTENSION "uuid-ossp" UPDATE;'
+      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'ALTER EXTENSION cube UPDATE;'
+      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'ALTER EXTENSION earthdistance UPDATE;'
+      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'ALTER EXTENSION pg_trgm UPDATE;'
       ${config.services.postgresql.package}/bin/psql -d immich -tAc 'ALTER EXTENSION vector UPDATE;'
       ${config.services.postgresql.package}/bin/psql -d immich -tAc 'ALTER EXTENSION vchord UPDATE;'
     '';
@@ -218,7 +229,7 @@ in {
 
       # Traefik labels
       extraOptions =
-        mkLabels cfg.name
+        mkLabels [cfg.name 2283]
         # Networking for docker containers
         ++ [
           "--network=immich"
