@@ -1,8 +1,8 @@
-{
+{flake, ...}: {
   alby = "iokeahhehimjnekafflcihljlcjccdbe";
   auto-tab-discard-suspend = "jhnleheckmknfcgijgkadoemagpecfol";
   built-with = "dapjbgnjinbpoindlpdmhochffioedbn";
-  chromium-web-store = "https://github.com/NeverDecaf/chromium-web-store/releases/download/v1.5.5.3/Chromium.Web.Store.crx";
+  chromium-web-store = flake.inputs.suderpkgs.pins.chromium.chromium-web-store.url;
   contextsearch = "ddippghibegbgpjcaaijbacfhjjeafjh";
   dark-reader = "eimadpbcbfnmbkopoojfekhnkhdbieeh";
   fake-data = "gchcfdihakkhjgfmokemfeembfokkajj";

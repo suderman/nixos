@@ -3,30 +3,12 @@
   config,
   lib,
   pkgs,
+  perSystem,
   ...
 }: let
   cfg = config.programs.citron;
   inherit (lib) mkIf options;
-
-  # https://git.citron-emu.org/Citron/Emulator/releases
-  package = pkgs.stdenv.mkDerivation {
-    pname = "citron-appimage";
-    version = "0.12.25";
-
-    # curl -L -O <url>
-    # nix hash file <filename>
-    src = pkgs.fetchurl {
-      url = "https://git.citron-emu.org/Citron/Emulator/releases/download/0.12.25/citron_stable-01c042048-linux-x86_64_v3.AppImage";
-      sha256 = "G0yX6ZP6f9nDY41VS8k/UVduoTsZLFrAduA5mOD3OmY=";
-    };
-
-    unpackPhase = "true";
-    installPhase = ''
-      mkdir -p $out/bin
-      echo $src > $out/path
-    '';
-    meta.description = "Citron Nintendo Switch emulator (AppImage)";
-  };
+  package = perSystem.suderpkgs.citron;
 in {
   options.programs.citron.enable = options.mkEnableOption "citron";
   config = mkIf cfg.enable {

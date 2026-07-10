@@ -1,45 +1,10 @@
 {
   lib,
-  pkgs,
+  perSystem,
   ...
 }: let
-  inherit (lib) makeOverridable mkOption types;
-  inherit (pkgs) fetchurl;
-  inherit (pkgs.stdenv) mkDerivation;
-
-  # https://github.com/nix-community/nur-combined/blob/master/repos/rycee/pkgs/firefox-addons/default.nix
-  buildFirefoxXpiAddon = makeOverridable ({
-    pname,
-    version,
-    addonId,
-    url,
-    sha256,
-    meta,
-    ...
-  }:
-    mkDerivation {
-      name = "${pname}-${version}";
-
-      inherit meta;
-
-      src = fetchurl {inherit url sha256;};
-
-      preferLocalBuild = true;
-      allowSubstitutes = true;
-
-      passthru = {inherit addonId;};
-
-      # buildCommand = ''
-      #   dst="$out/share/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
-      #   mkdir -p "$dst"
-      #   install -v -m644 "$src" "$dst/${addonId}.xpi"
-      # '';
-      buildCommand = ''
-        dst="$out/share/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
-        mkdir -p "$dst"
-        install -v -m644 "$src" "$dst/${pname}@extraAddons.xpi"
-      '';
-    });
+  inherit (lib) mkOption types;
+  inherit (perSystem.suderpkgs) easy-container-shortcuts;
 in {
   options.programs.firefox = {
     extraAddons = mkOption {
@@ -51,19 +16,6 @@ in {
   # To get details, install via firefox and check this URL:
   # about:debugging#/runtime/this-firefox
   config.programs.firefox.extraAddons = {
-    # https://addons.mozilla.org/en-US/firefox/addon/easy-container-shortcuts/
-    "easy-container-shortcuts" = buildFirefoxXpiAddon {
-      pname = "easy-container-shortcuts";
-      version = "1.8.0";
-      addonId = "easy-container-shortcuts@extraAddons";
-      url = "https://addons.mozilla.org/firefox/downloads/file/4710923/easy_container_shortcuts-1.8.0.xpi";
-      sha256 = "0ybczzi7ba2yix945dh3k4ipy63f01kszwq0207cvxckk9gy3pxc";
-      meta = with lib; {
-        description = "Easy, opinionated, keyboard shortcuts for Firefox 57+ containers.";
-        license = licenses.bsd2;
-        mozPermissions = ["tabs" "contextualIdentities" "cookies"];
-        platforms = platforms.all;
-      };
-    };
+    inherit easy-container-shortcuts;
   };
 }

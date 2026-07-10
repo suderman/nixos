@@ -1,5 +1,6 @@
 {
   config,
+  flake,
   osConfig,
   lib,
   pkgs,
@@ -38,7 +39,7 @@ in {
     # Registry of chromium extensions
     registry = mkOption {
       type = types.anything;
-      default = import ./registry.nix;
+      default = import ./registry.nix {inherit flake;};
       readOnly = true;
     };
 
