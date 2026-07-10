@@ -9,7 +9,9 @@
   cfg = config.services.keyd;
   ini = pkgs.formats.ini {};
   inherit (perSystem.self) mkScript;
+  inherit (config.lib.keyd) expandHomeRowModifierRules;
   inherit (lib) mkOption types;
+  expandedWindows = expandHomeRowModifierRules cfg.windows;
 in {
   # Import keyd lib
   imports = [./lib.nix];
@@ -44,7 +46,7 @@ in {
         # [obsidian]
         # [slack]
       }
-      // cfg.windows);
+      // expandedWindows);
   };
 
   # User service runs keyd-application-mapper.

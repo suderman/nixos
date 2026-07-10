@@ -5,6 +5,9 @@
   ...
 }: let
   cfg = config.services.keyd;
+  inherit (config.lib.keyd) expandHomeRowModifierRules;
+  expandedWindows = expandHomeRowModifierRules cfg.windows;
+  expandedLayers = expandHomeRowModifierRules cfg.layers;
 in {
   services.keyd = {
     enable = true;
@@ -54,8 +57,8 @@ in {
     ''
       require("lib.keyd").apply(
         ${toJSON (getExe' pkgs.keyd "keyd")},
-        ${toLuaRules cfg.windows},
-        ${toLuaRules cfg.layers}
+        ${toLuaRules expandedWindows},
+        ${toLuaRules expandedLayers}
       )
     '';
 }
