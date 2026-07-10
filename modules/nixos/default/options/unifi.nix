@@ -94,7 +94,8 @@ in {
     # The controller requires a dated version of mongodb that nixpkgs has dropped.
     # https://github.com/NixOS/nixpkgs/commit/45d27d43c4dfc0eb6f6b55aa9fbdfb90513271df
     virtualisation.oci-containers.containers."unifi" = {
-      image = pin.image;
+      # image = pin.image;
+      image = "jacobalberty/unifi:v7.5"; # https://hub.docker.com/r/jacobalberty/unifi/tags
       autoStart = false;
 
       # Traefik labels
