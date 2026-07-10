@@ -11,11 +11,7 @@
   inherit (lib) mkIf mkOption options types;
   inherit (flake.lib) extraGroups ls sudoers;
 
-  # https://github.com/home-assistant/core/pkgs/container/home-assistant/versions?filters%5Bversion_type%5D=tagged
-  version = "2026.7.1";
-
-  # https://github.com/zwave-js/zwave-js-ui/pkgs/container/zwave-js-ui/versions?filters%5Bversion_type%5D=tagged
-  zwaveVersion = "11.21.1";
+  pins = flake.inputs.suderpkgs.pins.containers;
 in {
   imports = ls ./.;
   disabledModules = ["services/home-automation/home-assistant.nix"];
@@ -25,7 +21,7 @@ in {
 
     version = mkOption {
       type = types.str;
-      default = version;
+      default = pins.home-assistant.version;
     };
 
     name = mkOption {
@@ -62,7 +58,7 @@ in {
 
     zwaveVersion = mkOption {
       type = types.str;
-      default = zwaveVersion;
+      default = pins.zwave-js-ui.version;
       description = "Version of the Z-Wave instance";
     };
 

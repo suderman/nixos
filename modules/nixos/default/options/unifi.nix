@@ -1,12 +1,12 @@
 # services.unifi.enable = true;
 {
   config,
+  flake,
   lib,
   pkgs,
   ...
 }: let
-  # https://hub.docker.com/r/jacobalberty/unifi/tags
-  version = "7.5";
+  pin = flake.inputs.suderpkgs.pins.containers.unifi;
 
   cfg = config.services.unifi;
   inherit (lib) mkIf mkOption options types;
@@ -94,7 +94,7 @@ in {
     # The controller requires a dated version of mongodb that nixpkgs has dropped.
     # https://github.com/NixOS/nixpkgs/commit/45d27d43c4dfc0eb6f6b55aa9fbdfb90513271df
     virtualisation.oci-containers.containers."unifi" = {
-      image = "jacobalberty/unifi:v${version}";
+      image = pin.image;
       autoStart = false;
 
       # Traefik labels

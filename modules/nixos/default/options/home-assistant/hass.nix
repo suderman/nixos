@@ -1,10 +1,12 @@
 {
   config,
+  flake,
   lib,
   pkgs,
   ...
 }: let
   cfg = config.services.home-assistant;
+  pin = flake.inputs.suderpkgs.pins.containers.home-assistant;
   inherit (builtins) readFile;
   inherit (lib) mkIf;
   inherit (pkgs) writeText;
@@ -16,7 +18,10 @@ in {
 
     # Home Assistant container
     virtualisation.oci-containers.containers.home-assistant = {
-      image = "ghcr.io/home-assistant/home-assistant:${cfg.version}";
+      image =
+        if cfg.version == pin.version
+        then pin.image
+        else "ghcr.io/home-assistant/home-assistant:${cfg.version}";
       autoStart = false;
 
       # Traefik labels

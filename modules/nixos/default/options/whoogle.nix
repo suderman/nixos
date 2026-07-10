@@ -1,11 +1,11 @@
 # services.whoogle.enable = true;
 {
   config,
+  flake,
   lib,
   ...
 }: let
-  # https://github.com/benbusby/whoogle-search/releases
-  version = "1.2.5";
+  pin = flake.inputs.suderpkgs.pins.containers.whoogle-search;
 
   cfg = config.services.whoogle;
   inherit (lib) mkIf mkOption types;
@@ -25,7 +25,7 @@ in {
 
     # Configure OCI container
     virtualisation.oci-containers.containers."whoogle" = {
-      image = "benbusby/whoogle-search:${version}";
+      image = pin.image;
       extraOptions = mkLabels cfg.name;
     };
 

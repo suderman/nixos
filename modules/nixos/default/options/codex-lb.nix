@@ -1,11 +1,11 @@
 # services.codex-lb.enable = true;
 {
   config,
+  flake,
   lib,
   ...
 }: let
-  # https://github.com/Soju06/codex-lb/pkgs/container/codex-lb
-  version = "1.20.1";
+  pin = flake.inputs.suderpkgs.pins.containers.codex-lb;
 
   cfg = config.services.codex-lb;
   inherit (lib) mkIf mkOption types;
@@ -28,7 +28,7 @@ in {
 
     version = mkOption {
       type = types.str;
-      default = version;
+      default = pin.version;
     };
 
     environment = mkOption {

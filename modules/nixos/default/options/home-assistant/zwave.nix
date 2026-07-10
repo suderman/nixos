@@ -1,9 +1,11 @@
 {
   config,
+  flake,
   lib,
   ...
 }: let
   cfg = config.services.home-assistant;
+  pin = flake.inputs.suderpkgs.pins.containers.zwave-js-ui;
   inherit (lib) mkIf;
   inherit (config.services.traefik.lib) mkLabels;
 in {
@@ -13,7 +15,10 @@ in {
 
     # Z-Wave JS UI container
     virtualisation.oci-containers.containers.zwave = {
-      image = "ghcr.io/zwave-js/zwave-js-ui:${cfg.zwaveVersion}";
+      image =
+        if cfg.zwaveVersion == pin.version
+        then pin.image
+        else "ghcr.io/zwave-js/zwave-js-ui:${cfg.zwaveVersion}";
       autoStart = false;
 
       # Traefik labels

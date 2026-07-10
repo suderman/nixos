@@ -8,8 +8,7 @@
   flake,
   ...
 }: let
-  # https://github.com/immich-app/immich/releases
-  version = "2.7.5";
+  pin = flake.inputs.suderpkgs.pins.containers.immich;
 
   cfg = config.services.immich;
 
@@ -35,7 +34,7 @@ in {
 
     version = mkOption {
       type = types.str;
-      default = version;
+      default = pin.version;
     };
 
     name = mkOption {
@@ -182,7 +181,10 @@ in {
 
     # Server back-end
     virtualisation.oci-containers.containers.immich-server = {
-      image = "ghcr.io/immich-app/immich-server:v${cfg.version}";
+      image =
+        if cfg.version == pin.version
+        then pin.serverImage
+        else "ghcr.io/immich-app/immich-server:v${cfg.version}";
       autoStart = false;
 
       # Run as immich user
@@ -249,7 +251,13 @@ in {
         then "${cfg.version}-cuda"
         else cfg.version;
     in {
-      image = "ghcr.io/immich-app/immich-machine-learning:v${version}";
+      image =
+        if cfg.version == pin.version
+        then
+          if cfg.cuda
+          then pin.machineLearningCudaImage
+          else pin.machineLearningImage
+        else "ghcr.io/immich-app/immich-machine-learning:v${version}";
       autoStart = false;
 
       # Environment variables

@@ -7,11 +7,11 @@
 # };
 {
   config,
+  flake,
   lib,
   ...
 }: let
-  # https://hub.docker.com/r/tessypowder/backblaze-personal-wine/tags
-  version = "1.9";
+  pin = flake.inputs.suderpkgs.pins.containers.backblaze-personal-wine;
 
   # https://github.com/JonathanTreffler/backblaze-personal-wine-container
   cfg = config.services.backblaze;
@@ -53,7 +53,7 @@ in {
 
     # Docker container
     virtualisation.oci-containers.containers."backblaze" = {
-      image = "tessypowder/backblaze-personal-wine:v${version}";
+      image = pin.image;
       autoStart = true;
 
       # Traefik labels
