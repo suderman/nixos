@@ -6,7 +6,8 @@
 }: let
   cfg = config.services.mpd;
   inherit (lib) mkIf;
-  inherit (perSystem.self) mkScript mpd-url;
+  inherit (perSystem.self) mkScript;
+  inherit (perSystem.suderpkgs) mpd-url;
 in {
   config = mkIf cfg.enable {
     home.packages = [mpd-url];
