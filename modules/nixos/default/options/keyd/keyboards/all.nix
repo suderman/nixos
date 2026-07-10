@@ -33,12 +33,12 @@ in {
       slash = lettermod "media" "slash";
 
       # Lettermod for super
-      f = lettermod "super" "f";
-      j = lettermod "super" "j";
+      c = lettermod "super" "c";
+      m = lettermod "super" "m";
 
       # Lettermod for ctrl
-      c = lettermod "control" "c";
-      m = lettermod "control" "m";
+      f = lettermod "control" "f";
+      j = lettermod "control" "j";
 
       # Lettermod for alt
       d = lettermod "alt" "d";
@@ -202,26 +202,26 @@ in {
     # Chords are raw config because keyd chord parsing is order-sensitive.
     ''
       [typing:layout]
-      d+f = layer(superalt)
-      j+k = layer(superalt)
+      c+d = layer(superalt)
+      m+k = layer(superalt)
 
-      s+f = layer(supershift)
-      j+l = layer(supershift)
+      c+s = layer(supershift)
+      m+l = layer(supershift)
 
-      d+c = layer(controlalt)
-      m+k = layer(controlalt)
+      f+d = layer(controlalt)
+      j+k = layer(controlalt)
 
-      s+c = layer(controlshift)
-      m+l = layer(controlshift)
+      f+s = layer(controlshift)
+      j+l = layer(controlshift)
 
-      s+d = layer(altshift)
+      d+s = layer(altshift)
       k+l = layer(altshift)
 
-      s+d+f = layer(superaltshift)
-      j+k+l = layer(superaltshift)
+      c+d+s = layer(superaltshift)
+      m+k+l = layer(superaltshift)
 
-      s+d+c = layer(controlaltshift)
-      m+k+l = layer(controlaltshift)
+      f+d+s = layer(controlaltshift)
+      j+k+l = layer(controlaltshift)
     ''
     # Empty gaming layout for vanilla keyboard experience, toggled with fn+g (tab+g)
     ''
