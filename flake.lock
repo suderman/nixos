@@ -1261,11 +1261,11 @@
         "treefmt-nix": "treefmt-nix_3"
       },
       "locked": {
-        "lastModified": 1782016158,
-        "narHash": "sha256-Y7lV2Hhl7sLWkfZYVBbbDrefkDp7FLJcgGM21flHEBo=",
+        "lastModified": 1783729815,
+        "narHash": "sha256-JWChgnyVyL/BagI5hfJ9GexkKnwpNkfT4qMuw3JOaOo=",
         "owner": "suderman",
         "repo": "neovim",
-        "rev": "2aed23a6c365df9f7563731e5b3ca2ce43b113ae",
+        "rev": "0348cb329001f97a5d5f8efd8a741f1cd54782c0",
         "type": "github"
       },
       "original": {
@@ -1515,11 +1515,11 @@
     },
     "nixpkgs_8": {
       "locked": {
-        "lastModified": 1781607440,
-        "narHash": "sha256-rxO+uc/KFbSJp+pgyXRuAX6QlG9hJdnt0BXpEQRXY+U=",
+        "lastModified": 1783571997,
+        "narHash": "sha256-ctVbuCjDg0HwGCjjTHtwmjjK23GTPtNady1fTs24kjY=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "3e41b24abd260e8f71dbe2f5737d24122f972158",
+        "rev": "80bd90efcad203e11e2c13e968c82a0ce2db3a2e",
         "type": "github"
       },
       "original": {
@@ -1629,11 +1629,11 @@
     "opencode-nvim": {
       "flake": false,
       "locked": {
-        "lastModified": 1781916047,
-        "narHash": "sha256-EI3VthUFvy11EY8zrhTVhx0OQBbHqKPs1ys+GNAtS94=",
+        "lastModified": 1783698253,
+        "narHash": "sha256-RlnMta2KY3mqUabWFyhRYmBg+e2jgFJXeGFcEBjKaFA=",
         "owner": "sudo-tee",
         "repo": "opencode.nvim",
-        "rev": "6ab7d2fa0167ee81f1e22af712aaaaea4b64488a",
+        "rev": "3f1baf43ae5011216d147878f7fdc939b38ce226",
         "type": "github"
       },
       "original": {
