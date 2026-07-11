@@ -12,7 +12,7 @@ metadata:
 
 I update normal flake inputs that are managed through `flake.nix` and `flake.lock`.
 
-I am for inputs that should be updated through the flake tooling itself, not for manual version pins inside Nix modules, package derivations, container tags, Firefox addon XPI URLs, or custom fetchers outside the flake input graph.
+I am for inputs that should be updated through the flake tooling itself, not for manual version pins, container tags, Firefox addon XPI URLs, or custom fetchers. Manual pins are maintained in the separate `suderman/pins` flake.
 
 ## When to use me
 
@@ -23,7 +23,7 @@ Use me when the user wants to:
 - selectively bump specific inputs with minimal unrelated churn
 - validate that the repo still evaluates or builds after the update
 
-Do not use me for manual dependency pins handled outside `flake.lock`. Use `update-dependencies` for those.
+Do not use me for manual dependency pins handled by `inputs.pins`. Maintain those in `~/src/suderman/pins`.
 
 ## Working style
 
@@ -34,7 +34,7 @@ Do not use me for manual dependency pins handled outside `flake.lock`. Use `upda
 - Work from `nix develop` so repo wrappers and formatter are available.
 - In this repo, avoid the interactive `nixos` and `agenix` wrappers for unattended automation unless their side effects are explicitly wanted.
 - If the repo does not specify a preferred command, prefer targeted flake update commands rather than broad updates.
-- Use `.opencode/scripts/update-versions/pick-flake-validation.py` to choose the cheapest relevant validation host unless you have stronger repo evidence for a different host.
+- Choose a focused validation host from the changed inputs and paths; prefer repo evidence over broad defaults.
 
 ## Repo-specific context for this flake
 
@@ -45,9 +45,6 @@ Do not use me for manual dependency pins handled outside `flake.lock`. Use `upda
 - Desktop-only configuration lives under `modules/{home,nixos}/desktop/`; avoid assuming those modules apply to headless hosts.
 - `hosts/sim` is the VM/test host used for simulation and installer work. It is a useful targeted validation host when update fallout hits virtualization or installer-related options.
 - This flake intentionally filters builder helpers like `enableWayland`, `mkScript`, `mkApplication`, and `wrapWithFlags` out of exported `packages` and `checks`; do not treat their absence from flake outputs as an update regression.
-- Deterministic helper scripts live in `.opencode/scripts/update-versions/`:
-  - `pick-flake-validation.py` chooses a validation host from changed inputs and paths
-  - `scan-manual-pins.py` is for manual pin discovery, not normal flake-input updates
 
 ## Validation levels
 
@@ -66,12 +63,12 @@ Why:
 - verifies all exported outputs still evaluate
 - avoids the time, bandwidth, and disk cost of building every checked derivation in this multi-host flake
 
-Pick the most relevant host for the changed inputs when possible:
+Pick the most relevant host for the changed inputs and paths when possible:
 
 - default fallback: `hub`
-- virtualization / installer fallout: `sim`
-- desktop stack fallout: a desktop host such as `cog`, `eve`, `kit`, `lux`, `pow`, or `wit`, whichever is most relevant
-- ISO / installer-specific inputs: `iso`
+- ISO / installer fallout: `iso` for `disko` or `hosts/iso/` changes
+- simulation or hardware fallout: `sim` for `hardware`, `hosts/sim/`, or `modules/nixos/hardware/` changes
+- desktop stack fallout: `cog` for `home-manager`, `stylix`, `hyprland`, `hyprland-plugins`, `nix-flatpak`, `modules/home/desktop/`, `modules/nixos/desktop/`, or host user config changes unless another desktop host is clearly more relevant
 
 ### Full validation (heavy, optional)
 
@@ -110,7 +107,7 @@ Warn in the report when full validation was skipped because it may require subst
 5. Validate.
    - Run quick validation by default.
    - Use a relevant host eval in addition to `nix flake check --no-build`.
-   - Prefer to choose that host by running `python3 .opencode/scripts/update-versions/pick-flake-validation.py --input <name> ...` and using the returned quick/full commands.
+   - Choose that host from the validation host rules above using the updated inputs and changed paths.
    - Escalate to full validation only when explicitly requested or clearly warranted.
    - If full validation is skipped, say so explicitly and explain that it is the heavy path in this multi-host flake.
 
@@ -122,7 +119,7 @@ Warn in the report when full validation was skipped because it may require subst
 
 ## Guardrails
 
-- Do not convert manual dependency pins into flake inputs unless the user asks for a refactor.
+- Do not edit `~/src/suderman/pins` as part of a flake-input update unless the user explicitly includes that repo in scope.
 - Do not combine flake-input updates with unrelated cleanup.
 - Do not commit, push, or create PRs unless explicitly asked.
 - If a broad flake update causes surprising churn, stop and summarize instead of improvising more changes.
