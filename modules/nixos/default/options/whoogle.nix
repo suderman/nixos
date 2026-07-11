@@ -5,8 +5,6 @@
   lib,
   ...
 }: let
-  pin = flake.inputs.suderpkgs.pins.containers.whoogle-search;
-
   cfg = config.services.whoogle;
   inherit (lib) mkIf mkOption types;
   inherit (config.services.traefik.lib) mkLabels;
@@ -25,7 +23,7 @@ in {
 
     # Configure OCI container
     virtualisation.oci-containers.containers."whoogle" = {
-      image = pin.image;
+      inherit (flake.inputs.pins.default.containers.whoogle-search) image;
       extraOptions = mkLabels cfg.name;
     };
 

@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: let
-  pin = flake.inputs.suderpkgs.pins.github.mpd-url;
+  pin = flake.inputs.pins.default.github.mpd-url;
 in
   pkgs.stdenvNoCC.mkDerivation {
     pname = "mpd-url";

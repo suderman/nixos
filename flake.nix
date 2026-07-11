@@ -89,12 +89,10 @@
     # <https://github.com/suderman/neovim>
     neovim.url = "github:suderman/neovim";
 
-    # Personal packages and manually tracked release pins
-    # <https://github.com/suderman/suderpkgs>
-    suderpkgs.url = "github:suderman/suderpkgs";
-    suderpkgs.inputs.blueprint.follows = "blueprint";
-    suderpkgs.inputs.nixpkgs.follows = "nixpkgs";
-    suderpkgs.inputs.treefmt-nix.follows = "treefmt-nix";
+    # Manually tracked release pins
+    # <https://github.com/suderman/pins>
+    pins.url = "github:suderman/pins";
+    pins.inputs.nixpkgs.follows = "nixpkgs";
 
     # AI coding agents
     # <https://github.com/numtide/llm-agents.nix>

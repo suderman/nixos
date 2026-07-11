@@ -10,8 +10,6 @@
   cfg = config.services.home-assistant;
   inherit (lib) mkIf mkOption options types;
   inherit (flake.lib) extraGroups ls sudoers;
-
-  pins = flake.inputs.suderpkgs.pins.containers;
 in {
   imports = ls ./.;
   disabledModules = ["services/home-automation/home-assistant.nix"];
@@ -21,7 +19,7 @@ in {
 
     version = mkOption {
       type = types.str;
-      default = pins.home-assistant.version;
+      default = flake.inputs.pins.default.containers.home-assistant.version;
     };
 
     name = mkOption {

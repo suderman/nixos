@@ -5,7 +5,6 @@
   lib,
   ...
 }: let
-  pin = flake.inputs.suderpkgs.pins.containers.whoami;
   cfg = config.services.whoami;
   inherit (lib) mkIf mkOption types mkDefault recursiveUpdate;
   inherit (config.services.traefik.lib) mkLabels;
@@ -27,7 +26,7 @@ in {
 
     # Configure OCI container
     virtualisation.oci-containers.containers."whoami" = {
-      image = pin.image;
+      inherit (flake.inputs.pins.default.containers.whoami) image;
       cmd = ["--port=2001"];
       extraOptions =
         mkLabels [cfg.name 2001]

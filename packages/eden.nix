@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: let
-  pin = flake.inputs.suderpkgs.pins.fetchurl.eden;
+  pin = flake.inputs.pins.default.fetchurl.eden;
   src = pkgs.fetchurl {
     inherit (pin) url sha256;
   };

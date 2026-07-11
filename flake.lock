@@ -293,7 +293,7 @@
     "devshell_3": {
       "inputs": {
         "nixpkgs": [
-          "suderpkgs",
+          "pins",
           "nixpkgs"
         ]
       },
@@ -1642,6 +1642,28 @@
         "type": "github"
       }
     },
+    "pins": {
+      "inputs": {
+        "devshell": "devshell_3",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "treefmt-nix": "treefmt-nix_4"
+      },
+      "locked": {
+        "lastModified": 1783742097,
+        "narHash": "sha256-wOeZKbemxieBmTJqFzI7rsqTFwQRyLE46QMo8kxheV8=",
+        "owner": "suderman",
+        "repo": "pins",
+        "rev": "5a39831b993675f5dd69ea4a9369f62ba14cc963",
+        "type": "github"
+      },
+      "original": {
+        "owner": "suderman",
+        "repo": "pins",
+        "type": "github"
+      }
+    },
     "pre-commit-hooks": {
       "inputs": {
         "flake-compat": "flake-compat",
@@ -1799,9 +1821,9 @@
         "nixpkgs": "nixpkgs_10",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "nur": "nur",
+        "pins": "pins",
         "stylix": "stylix",
-        "suderpkgs": "suderpkgs",
-        "treefmt-nix": "treefmt-nix_4"
+        "treefmt-nix": "treefmt-nix_5"
       }
     },
     "stylix": {
@@ -1835,33 +1857,6 @@
         "owner": "nix-community",
         "ref": "release-26.05",
         "repo": "stylix",
-        "type": "github"
-      }
-    },
-    "suderpkgs": {
-      "inputs": {
-        "blueprint": [
-          "blueprint"
-        ],
-        "devshell": "devshell_3",
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "treefmt-nix": [
-          "treefmt-nix"
-        ]
-      },
-      "locked": {
-        "lastModified": 1783723570,
-        "narHash": "sha256-0rZnsw++XN8CZHlS6KPKtQaz41KSdFZ4nO9OjS7QKHY=",
-        "owner": "suderman",
-        "repo": "suderpkgs",
-        "rev": "88ec75d70acb258f2f66c206843e436fa163db25",
-        "type": "github"
-      },
-      "original": {
-        "owner": "suderman",
-        "repo": "suderpkgs",
         "type": "github"
       }
     },
@@ -2098,6 +2093,27 @@
       }
     },
     "treefmt-nix_4": {
+      "inputs": {
+        "nixpkgs": [
+          "pins",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1780220602,
+        "narHash": "sha256-eynAfOmbmxJnkp7YewvCEbShNnnYJ9gLLqkzsYtBPeM=",
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "rev": "db947814a175b7ca6ded66e21383d938df01c227",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "treefmt-nix_5": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"

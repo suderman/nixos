@@ -2,7 +2,7 @@
   alby = "iokeahhehimjnekafflcihljlcjccdbe";
   auto-tab-discard-suspend = "jhnleheckmknfcgijgkadoemagpecfol";
   built-with = "dapjbgnjinbpoindlpdmhochffioedbn";
-  chromium-web-store = flake.inputs.suderpkgs.pins.chromium.chromium-web-store.url;
+  chromium-web-store = flake.inputs.pins.default.chromium.chromium-web-store.url;
   contextsearch = "ddippghibegbgpjcaaijbacfhjjeafjh";
   dark-reader = "eimadpbcbfnmbkopoojfekhnkhdbieeh";
   fake-data = "gchcfdihakkhjgfmokemfeembfokkajj";

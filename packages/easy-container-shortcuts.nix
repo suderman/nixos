@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: let
-  pin = flake.inputs.suderpkgs.pins.firefox.easy-container-shortcuts;
+  pin = flake.inputs.pins.default.firefox.easy-container-shortcuts;
 in
   pkgs.stdenv.mkDerivation {
     name = "${pin.pname}-${pin.version}";

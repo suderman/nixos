@@ -6,7 +6,6 @@
   ...
 }: let
   cfg = config.services.home-assistant;
-  pin = flake.inputs.suderpkgs.pins.containers.home-assistant;
   inherit (builtins) readFile;
   inherit (lib) mkIf;
   inherit (pkgs) writeText;
@@ -17,7 +16,9 @@ in {
     services.traefik.enable = true;
 
     # Home Assistant container
-    virtualisation.oci-containers.containers.home-assistant = {
+    virtualisation.oci-containers.containers.home-assistant = let
+      pin = flake.inputs.pins.default.containers.home-assistant;
+    in {
       image =
         if cfg.version == pin.version
         then pin.image

@@ -6,9 +6,6 @@
   pkgs,
   ...
 }: let
-  pin = flake.inputs.suderpkgs.pins.containers.rsshub;
-  redisPin = flake.inputs.suderpkgs.pins.containers.rsshub-redis;
-
   # https://docs.rsshub.app/en/install/#docker-compose-deployment-install
   cfg = config.services.rsshub;
 
@@ -20,7 +17,7 @@ in {
     enable = options.mkEnableOption "rsshub";
     tag = mkOption {
       type = types.str;
-      default = pin.tag;
+      default = flake.inputs.pins.default.containers.rsshub.tag;
     };
     name = mkOption {
       type = types.str;
@@ -55,7 +52,9 @@ in {
     };
 
     # Web front-end
-    virtualisation.oci-containers.containers.rsshub-web = {
+    virtualisation.oci-containers.containers.rsshub-web = let
+      pin = flake.inputs.pins.default.containers.rsshub;
+    in {
       image =
         if cfg.tag == pin.tag
         then pin.image
@@ -83,7 +82,7 @@ in {
 
     # Redis cache
     virtualisation.oci-containers.containers.rsshub-redis = {
-      image = redisPin.image;
+      image = flake.inputs.pins.default.containers.rsshub-redis.image;
       autoStart = false;
 
       # Map volumes to host

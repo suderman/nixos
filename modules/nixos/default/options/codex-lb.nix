@@ -5,8 +5,6 @@
   lib,
   ...
 }: let
-  pin = flake.inputs.suderpkgs.pins.containers.codex-lb;
-
   cfg = config.services.codex-lb;
   inherit (lib) mkIf mkOption types;
   inherit (config.services.traefik.lib) mkHostName mkLabels;
@@ -28,7 +26,7 @@ in {
 
     version = mkOption {
       type = types.str;
-      default = pin.version;
+      default = flake.inputs.pins.default.containers.codex-lb.version;
     };
 
     environment = mkOption {

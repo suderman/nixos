@@ -11,8 +11,6 @@
   lib,
   ...
 }: let
-  pin = flake.inputs.suderpkgs.pins.containers.backblaze-personal-wine;
-
   # https://github.com/JonathanTreffler/backblaze-personal-wine-container
   cfg = config.services.backblaze;
   inherit (config.services.traefik.lib) mkLabels;
@@ -53,7 +51,7 @@ in {
 
     # Docker container
     virtualisation.oci-containers.containers."backblaze" = {
-      image = pin.image;
+      image = flake.inputs.pins.default.containers.backblaze-personal-wine.image;
       autoStart = true;
 
       # Traefik labels

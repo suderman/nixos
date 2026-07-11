@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: let
-  pin = flake.inputs.suderpkgs.pins.fetchurl.citron;
+  pin = flake.inputs.pins.default.fetchurl.citron;
   src = pkgs.fetchurl {
     inherit (pin) url sha256;
   };

@@ -8,9 +8,8 @@
   flake,
   ...
 }: let
-  pin = flake.inputs.suderpkgs.pins.containers.immich;
-
   cfg = config.services.immich;
+  pin = flake.inputs.pins.default.containers.immich;
 
   inherit (lib) mkIf mkOption mkAfter mkBefore options types;
   inherit (config.services.traefik.lib) mkAlias mkLabels;
