@@ -8,7 +8,7 @@
 }: let
   cfg = config.programs.citron;
   inherit (lib) mkIf options;
-  package = perSystem.suderpkgs.citron;
+  package = perSystem.self.citron;
 in {
   options.programs.citron.enable = options.mkEnableOption "citron";
   config = mkIf cfg.enable {

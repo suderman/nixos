@@ -8,7 +8,7 @@
 }: let
   cfg = config.programs.eden;
   inherit (lib) mkIf options;
-  package = perSystem.suderpkgs.eden;
+  package = perSystem.self.eden;
 in {
   options.programs.eden.enable = options.mkEnableOption "eden";
   config = mkIf cfg.enable {

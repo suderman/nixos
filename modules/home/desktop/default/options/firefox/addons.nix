@@ -4,7 +4,7 @@
   ...
 }: let
   inherit (lib) mkOption types;
-  inherit (perSystem.suderpkgs) easy-container-shortcuts;
+  inherit (perSystem.self) easy-container-shortcuts;
 in {
   options.programs.firefox = {
     extraAddons = mkOption {
