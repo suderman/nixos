@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   perSystem,
   ...
 }: let
@@ -21,13 +22,29 @@ in {
         genericName = "Web Browser";
         categories = ["Network" "WebBrowser"];
         icon = "chromium";
+        path = [pkgs.procps];
         text =
           ''
-            mkdir -p "${cfg.dataDir}-agent"
-            rm -f "${cfg.dataDir}-agent/External Extensions"
-            ln -sf "${cfg.dataDir}/External Extensions" "${cfg.dataDir}-agent/External Extensions"
+            data_dir="${cfg.dataDir}-agent"
+            profile_pattern="[c]hromium.*--user-data-dir=$data_dir"
+
+            if pgrep -f -- "$profile_pattern" >/dev/null; then
+              pkill -TERM -f -- "$profile_pattern" || true
+              for _ in {1..50}; do
+                pgrep -f -- "$profile_pattern" >/dev/null || break
+                sleep 0.1
+              done
+              pkill -KILL -f -- "$profile_pattern" || true
+            fi
+
+            mkdir -p "$data_dir"
+            rm -f "$data_dir"/Singleton{Cookie,Lock,Socket}
+            rm -rf "$data_dir/Default/Sessions"
+            rm -f "$data_dir/Default"/{Current,Last}\ {Session,Tabs}
+            rm -f "$data_dir/External Extensions"
+            ln -sf "${cfg.dataDir}/External Extensions" "$data_dir/External Extensions"
           ''
-          + "${lib.getExe cfg.package} "
+          + "exec ${lib.getExe cfg.package} "
           + toString (
             switches
             ++ [
