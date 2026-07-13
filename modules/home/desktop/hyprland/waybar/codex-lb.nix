@@ -34,6 +34,18 @@
         tmp="$(mktemp -d)"
         trap 'rm -rf "$tmp"' EXIT
         CODEX_LB_URL="''${CODEX_LB_URL%/}"
+        icon="󰚩"
+
+        fetch_failed() {
+          local path="$1"
+          local error="$2"
+
+          json \
+            "$icon offline" \
+            "Failed to reach $CODEX_LB_URL$path\n$(<"$error")" \
+            "critical"
+          exit 0
+        }
 
         fetch() {
           local path="$1"
@@ -51,11 +63,7 @@
             --output "$output" \
             "$CODEX_LB_URL$path" \
             2>"$error")"; then
-            json \
-              "codex-lb offline" \
-              "Failed to reach $CODEX_LB_URL\n$(<"$error")" \
-              "critical"
-            exit 0
+            return 1
           fi
 
           printf '%s' "$code"
@@ -64,14 +72,25 @@
         overview="$tmp/overview.json"
         projections="$tmp/projections.json"
         request_logs="$tmp/request-logs.json"
+        overview_path='/api/dashboard/overview?timeframe=7d'
+        projections_path='/api/dashboard/projections'
+        request_logs_path='/api/request-logs?limit=1'
 
-        overview_code="$(fetch '/api/dashboard/overview?timeframe=7d' "$overview")"
-        projections_code="$(fetch '/api/dashboard/projections' "$projections")"
-        request_logs_code="$(fetch '/api/request-logs?limit=1' "$request_logs")"
+        if ! overview_code="$(fetch "$overview_path" "$overview")"; then
+          fetch_failed "$overview_path" "$overview.err"
+        fi
+
+        if ! projections_code="$(fetch "$projections_path" "$projections")"; then
+          fetch_failed "$projections_path" "$projections.err"
+        fi
+
+        if ! request_logs_code="$(fetch "$request_logs_path" "$request_logs")"; then
+          fetch_failed "$request_logs_path" "$request_logs.err"
+        fi
 
         if [[ "$overview_code" == "401" || "$overview_code" == "403" || "$projections_code" == "401" || "$projections_code" == "403" || "$request_logs_code" == "401" || "$request_logs_code" == "403" ]]; then
           json \
-            "codex-lb auth" \
+            "$icon auth" \
             "Dashboard read access is required. Enable read-only guest access in codex-lb or provide another dashboard auth path.\n\nURL: $CODEX_LB_URL" \
             "warning"
           exit 0
@@ -79,7 +98,7 @@
 
         if [[ ! "$overview_code" =~ ^2 ]] || [[ ! "$projections_code" =~ ^2 ]] || [[ ! "$request_logs_code" =~ ^2 ]]; then
           json \
-            "codex-lb $overview_code/$projections_code/$request_logs_code" \
+            "$icon http" \
             "codex-lb returned HTTP $overview_code for overview, HTTP $projections_code for projections, and HTTP $request_logs_code for request logs.\n\nURL: $CODEX_LB_URL" \
             "critical"
           exit 0
@@ -269,7 +288,7 @@
           }
           ' 2>"$tmp/jq.err")"; then
           json \
-            "codex-lb parse" \
+            "$icon parse" \
             "Failed to parse codex-lb dashboard response.\n$(<"$tmp/jq.err")" \
             "critical"
           exit 0
@@ -311,6 +330,17 @@
         trap 'rm -rf "$tmp"' EXIT
         CODEX_LB_URL="''${CODEX_LB_URL%/}"
 
+        fetch_failed() {
+          local path="$1"
+          local error="$2"
+
+          json_error \
+            "offline" \
+            "codex-lb offline" \
+            "Failed to reach $CODEX_LB_URL$path\n$(<"$error")"
+          exit 0
+        }
+
         fetch() {
           local path="$1"
           local output="$2"
@@ -327,11 +357,7 @@
             --output "$output" \
             "$CODEX_LB_URL$path" \
             2>"$error")"; then
-            json_error \
-              "offline" \
-              "codex-lb offline" \
-              "Failed to reach $CODEX_LB_URL\n$(<"$error")"
-            exit 0
+            return 1
           fi
 
           printf '%s' "$code"
@@ -340,10 +366,21 @@
         overview="$tmp/overview.json"
         projections="$tmp/projections.json"
         request_logs="$tmp/request-logs.json"
+        overview_path='/api/dashboard/overview?timeframe=7d'
+        projections_path='/api/dashboard/projections'
+        request_logs_path='/api/request-logs?limit=100'
 
-        overview_code="$(fetch '/api/dashboard/overview?timeframe=7d' "$overview")"
-        projections_code="$(fetch '/api/dashboard/projections' "$projections")"
-        request_logs_code="$(fetch '/api/request-logs?limit=100' "$request_logs")"
+        if ! overview_code="$(fetch "$overview_path" "$overview")"; then
+          fetch_failed "$overview_path" "$overview.err"
+        fi
+
+        if ! projections_code="$(fetch "$projections_path" "$projections")"; then
+          fetch_failed "$projections_path" "$projections.err"
+        fi
+
+        if ! request_logs_code="$(fetch "$request_logs_path" "$request_logs")"; then
+          fetch_failed "$request_logs_path" "$request_logs.err"
+        fi
 
         if [[ "$overview_code" == "401" || "$overview_code" == "403" || "$projections_code" == "401" || "$projections_code" == "403" || "$request_logs_code" == "401" || "$request_logs_code" == "403" ]]; then
           json_error \
@@ -738,6 +775,7 @@ in {
           exec = lib.getExe script;
           format = "{text}";
           escape = false;
+          max-length = 32;
           interval = cfg.interval;
           tooltip = true;
           on-click-right = "${pkgs.xdg-utils}/bin/xdg-open ${lib.escapeShellArg cfg.url}";

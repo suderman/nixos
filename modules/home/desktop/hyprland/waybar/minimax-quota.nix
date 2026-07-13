@@ -56,13 +56,19 @@
         quota="$tmp/quota.json"
         err="$tmp/quota.err"
 
-        "$MINIMAX_QUOTA_COMMAND" quota --non-interactive --quiet --output json >"$quota" 2>"$err"
-        code=$?
-        if (( code != 0 )); then
+        if "$MINIMAX_QUOTA_COMMAND" quota --non-interactive --quiet --output json >"$quota" 2>"$err"; then
+          :
+        else
+          code=$?
+          message="Failed to run mmx quota --output json (exit $code)."
+          if [[ -s "$err" ]]; then
+            message="$(printf '%s\n%s' "$message" "$(<"$err")")"
+          fi
+
           json_error \
             "command" \
             "MiniMax quota failed" \
-            "Failed to run mmx quota --output json (exit $code)."
+            "$message"
           exit 0
         fi
 
@@ -232,11 +238,9 @@
             '{text: $text, tooltip: $tooltip, class: $class}'
         }
 
-        data="$(${lib.getExe quotaData})"
-        code=$?
-        if (( code != 0 )); then
+        if ! data="$(${lib.getExe quotaData})"; then
           json \
-            "$MINIMAX_QUOTA_ICON  quota error" \
+            "$MINIMAX_QUOTA_ICON  error" \
             "Failed to collect MiniMax quota data." \
             "critical"
           exit 0
@@ -245,6 +249,14 @@
         if ! output="$(printf '%s\n' "$data" | jq -c \
           --arg icon "$MINIMAX_QUOTA_ICON" \
           '
+          def error_text($status):
+            ($status | tostring) as $s |
+            if $s == "missing" then "missing"
+            elif $s == "parse" then "parse"
+            elif $s == "api" then "api"
+            else "error"
+            end;
+
           if .ok == true then
             {
               text: ($icon + "  " + (.interval.percentText // "n/a") + " " + (.weekly.percentText // "n/a")),
@@ -258,14 +270,14 @@
             }
           else
             {
-              text: ($icon + "  quota error"),
+              text: ($icon + "  " + error_text(.status // "error")),
               tooltip: (((.title // "MiniMax quota unavailable") + "\n" + (.message // "No quota data available."))),
               class: (.class // "critical")
             }
           end
           ' 2>/dev/null)"; then
           json \
-            "$MINIMAX_QUOTA_ICON  parse error" \
+            "$MINIMAX_QUOTA_ICON  parse" \
             "Failed to format MiniMax quota data." \
             "critical"
           exit 0
@@ -386,6 +398,7 @@ in {
           exec = lib.getExe script;
           format = "{text}";
           escape = false;
+          max-length = 32;
           interval = cfg.interval;
           tooltip = true;
           on-click-right = "${pkgs.xdg-utils}/bin/xdg-open https://platform.minimax.io/console/usage";
