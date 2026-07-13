@@ -105,8 +105,15 @@
 
   outputs = inputs: let
     inherit (inputs.nixpkgs) lib;
-    blueprint = inputs.blueprint {inherit inputs;};
     flake = inputs.self;
+    blueprint = inputs.blueprint {
+      inherit inputs;
+      nixpkgs.config = {
+        allowUnfree = true;
+        nvidia.acceptLicense = true;
+        permittedInsecurePackages = ["pnpm-9.15.9"]; # prettier depends on insecure pnpm_9
+      };
+    };
   in {
     # Blueprint automatically maps: devshells, hosts, lib, modules, packages
     inherit
