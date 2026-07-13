@@ -264,8 +264,10 @@ in {
     # https://dash.cloudflare.com/profile/api-tokens
     # CF_DNS_API_TOKEN=xxxxxx
     age.secrets.cloudflare.rekeyFile = ./cloudflare.age;
-    systemd.services.traefik.serviceConfig = {
-      EnvironmentFile = [config.age.secrets.cloudflare.path];
+    systemd.services.traefik = {
+      # Certificates are regenerated during activation and loaded only at process start.
+      restartTriggers = [config.system.activationScripts.traefik.text];
+      serviceConfig.EnvironmentFile = [config.age.secrets.cloudflare.path];
     };
 
     # Self-signed certificates
@@ -300,7 +302,7 @@ in {
 
             [ alt_names ]
             DNS.1 = ${hostName}
-            DNS.2 = *.${hostName}
+            ${lib.optionalString (lib.hasInfix "." hostName) "DNS.2 = *.${hostName}"}
             ${addresses}
           '';
         };
