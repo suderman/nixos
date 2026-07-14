@@ -8,37 +8,34 @@
 # 6 = ON     # Wake Up Enable
 {
   ids = ["0853:0100" "04fe:0006"];
-  settings = {
-    main = {
-      # Tapping left control is escape
-      leftcontrol = "overloadt2(control, escape, 200)";
+  settings.main = {
+    # Tapping left control is escape
+    leftcontrol = "overloadt2(control, escape, 200)";
 
-      # Tap real left modifiers for standalone actions; hold as modifiers.
-      leftshift = "layer(shift)";
-      leftalt = "overload(alt, f13)";
-      leftmeta = "overload(super, f14)";
+    # Tap real left modifiers for standalone actions; hold as modifiers.
+    leftshift = "layer(shift)";
+    leftalt = "overload(alt, f13)";
+    leftmeta = "overload(super, f14)";
 
-      # Allow right modifers to be unique keys
-      rightmeta = "rightmeta";
-      rightalt = "rightalt";
-      rightshift = "rightshift";
+    # Allow right modifers to be unique keys
+    rightmeta = "rightmeta";
+    rightalt = "rightalt";
+    rightshift = "rightshift";
 
-      # Fn keypad as media keys
-      # [+] next song
-      # [-] previous song
-      # [*] play-pause
-      # [/] media program
-      kpplus = "nextsong";
-      kpminus = "previoussong";
-      kpasterisk = "playpause";
-      kpslash = "media";
+    # Fn keypad as media keys
+    # [+] next song
+    # [-] previous song
+    # [*] play-pause
+    # [/] media program
+    kpplus = "nextsong";
+    kpminus = "previoussong";
+    kpasterisk = "playpause";
+    kpslash = "media";
 
-      # Pause/Break key as media play-pause
-      pause = "playpause";
-    };
-
-    "shift:S" = {
-      leftalt = "overload(alt, S-f13)";
-    };
+    # Pause/Break key as media play-pause
+    pause = "playpause";
   };
+
+  # Tapping shift+alt triggers shift+F13
+  settings."shift:S".leftalt = "overload(alt, S-f13)";
 }

@@ -2,16 +2,15 @@
 # https://www.amazon.ca/gp/product/B081CTNB5W/
 {
   ids = ["1997:2466"];
-  settings = {
-    main = {
-      # Assign super to leftalt key
-      leftalt = "overload(super, f14)";
+  settings.main = {
+    # Assign super to leftalt key
+    leftalt = "overload(super, f14)";
+    leftmeta = "overload(super, f14)";
 
-      # Assign alt to compose key
-      compose = "overload(alt, f13)";
+    # Assign alt to compose key
+    compose = "overload(alt, f13)";
 
-      # Assign super to homepage key
-      homepage = "overload(super, f14)";
-    };
+    # Assign super to homepage key
+    homepage = "overload(super, f14)";
   };
 }

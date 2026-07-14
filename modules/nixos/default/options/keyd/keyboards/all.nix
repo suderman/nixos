@@ -1,45 +1,14 @@
 let
   concatLines = builtins.concatStringsSep "\n";
-  keyMap = f: keys:
-    builtins.listToAttrs (builtins.map (key: {
-        name = key;
-        value = f key;
-      })
-      keys);
-  plainKeys = keyMap (key: key);
-  modifiedKeys = mod: keyMap (key: "${mod}-${key}");
-
-  # letter keys on the left side of the keyboard
-  leftHandKeys =
-    ["q" "w" "e" "r" "t"]
-    ++ ["a" "s" "d" "f" "g"]
-    ++ ["z" "x" "c" "v" "b"];
-
-  # letter keys on the right side of the keyboard
-  rightHandKeys =
-    ["y" "u" "i" "o" "p"]
-    ++ ["h" "j" "k" "l" "semicolon"]
-    ++ ["n" "m" "comma" "dot" "slash"];
-
-  # active modifier layers need explicit pass-through for other home-row mod keys.
+  passthrough = layer: mod: keys: ''
+    [${layer}]
+    ${concatLines (builtins.map (key: "${key} = ${mod}-${key}") keys)}
+  '';
+  # When using real modifiers, these homerow mod keys should be pass through
   modKeys =
     ["d" "s" "f" "j" "k" "l"]
     ++ ["z" "c" "m" "slash"]
     ++ ["space"];
-  guardedModLayer = mod: handKeys: modifiedKeys mod modKeys // plainKeys handKeys;
-
-  # custom behaviour of super key everywhere
-  superBindings = {
-    # Open window switcher (super tab)
-    tab = "swapm(switcher, M-tab)";
-
-    # Cut/Copy/Paste clipboard
-    x = "S-delete";
-    c = "C-insert";
-    v = "S-insert";
-  };
-  superModKeys = builtins.filter (key: key != "c") modKeys;
-  guardedSuperLayer = handKeys: modifiedKeys "M" superModKeys // plainKeys handKeys // superBindings;
 
   # lettermod(<layer>, <key>, <idle timeout>, <hold timeout>)
   lettermod = layer: key: "lettermod(${layer}, ${key}, 200, 400)";
@@ -64,48 +33,35 @@ in {
       slash = lettermod "media" "slash";
 
       # Lettermod for super
-      c = lettermod "leftsuper" "c";
-      m = lettermod "rightsuper" "m";
+      c = lettermod "super" "c";
+      m = lettermod "super" "m";
 
       # Lettermod for ctrl
-      f = lettermod "leftcontrol" "f";
-      j = lettermod "rightcontrol" "j";
+      f = lettermod "control" "f";
+      j = lettermod "control" "j";
 
       # Lettermod for alt
-      d = lettermod "leftalt" "d";
-      k = lettermod "rightalt" "k";
+      d = lettermod "alt" "d";
+      k = lettermod "alt" "k";
 
       # Lettermod for shift
-      s = lettermod "leftshift" "s";
-      l = lettermod "rightshift" "l";
+      s = lettermod "shift" "s";
+      l = lettermod "shift" "l";
 
       # Both volume keys together trigger media key
       "volumedown+volumeup" = "media";
     };
 
-    # Control layer
-    "control:C" = modifiedKeys "C" modKeys;
-    # Home-row ctrl layers shadow same-hand letters as plain keys to avoid roll mistakes
-    "leftcontrol:C" = guardedModLayer "C" leftHandKeys;
-    "rightcontrol:C" = guardedModLayer "C" rightHandKeys;
-
-    # Alt layer
-    "alt:A" = modifiedKeys "A" modKeys;
-    # Home-row alt layers shadow same-hand letters as plain keys to avoid roll mistakes
-    "leftalt:A" = guardedModLayer "A" leftHandKeys;
-    "rightalt:A" = guardedModLayer "A" rightHandKeys;
-
-    # Shift layer
-    "shift:S" = modifiedKeys "S" modKeys;
-    # Home-row shift layers shadow same-hand letters as plain keys to avoid roll mistakes
-    "leftshift:S" = guardedModLayer "S" leftHandKeys;
-    "rightshift:S" = guardedModLayer "S" rightHandKeys;
-
     # Super (meta) layer
-    "super:M" = modifiedKeys "M" superModKeys // superBindings;
-    # Home-row super layers shadow same-hand letters as plain keys to avoid roll mistakes
-    "leftsuper:M" = guardedSuperLayer leftHandKeys;
-    "rightsuper:M" = guardedSuperLayer rightHandKeys;
+    "super:M" = {
+      # Open window switcher (super tab)
+      tab = "swapm(switcher, M-tab)";
+
+      # Cut/Copy/Paste clipboard
+      x = "S-delete";
+      c = "C-insert";
+      v = "S-insert";
+    };
 
     # Switcher (while holding down meta/super-tab)
     "switcher:M" = {
@@ -140,7 +96,7 @@ in {
       tab = "capslock";
       i = "sysrq";
       o = "scrolllock";
-      p = "pause";
+      p = "playpause";
       leftbrace = "up";
       backspace = "numlock";
       a = "volumedown";
@@ -159,16 +115,27 @@ in {
       comma = "end";
       dot = "pagedown";
       slash = "down";
+      space = "playpause";
     };
 
     nav = {
       # vim navigation
+      h = "left";
+      j = "down";
       k = "up";
       l = "right";
-      j = "down";
-      h = "left";
+
+      # bigger motions on left hand
+      g = "end";
+      f = "pagedown";
+      d = "pageup";
+      s = "home";
+
+      # word traversial
       w = "C-right";
       b = "C-left";
+
+      # emacs style
       p = "pageup"; # previous up
       n = "pagedown"; # next down
       a = "home"; # < start of line
@@ -219,8 +186,13 @@ in {
     };
   };
 
-  # Keep order-sensitive keyd config raw; generated settings sort entries alphabetically.
+  # Physical modifier layers explicitly pass mod keys through so real modifiers do not trigger typing-layer lettermods.
   extraConfig = concatLines [
+    (passthrough "control:C" "C" modKeys)
+    (passthrough "alt:A" "A" modKeys)
+    (passthrough "shift:S" "S" modKeys)
+    # skip c because we already defined it to copy (C-insert)
+    (passthrough "super:M" "M" (builtins.filter (key: key != "c") modKeys))
     ''
 
       [superalt:M-A]
