@@ -101,6 +101,10 @@ in {
     programs.kitty.extraConfig =
       # sh
       ''
+        # Let agent TUIs handle Shift+Insert themselves so image clipboard paste works.
+        # Kitty's paste_from_clipboard only pastes text, so remap to each TUI's Ctrl+V paste action there.
+        map --when-focus-on "cmdline:pi or cmdline:opencode" shift+insert send_key ctrl+v
+
         # Seti-UI + Custom
         symbol_map U+E5FA-U+E6AC Symbols Nerd Font
 

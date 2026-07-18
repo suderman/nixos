@@ -32,9 +32,9 @@ in {
       z = lettermod "media" "z";
       slash = lettermod "media" "slash";
 
-      # Lettermod for super
-      c = lettermod "super" "c";
-      m = lettermod "super" "m";
+      # # Lettermod for super
+      # c = lettermod "super" "c";
+      # m = lettermod "super" "m";
 
       # Lettermod for ctrl
       f = lettermod "control" "f";
@@ -44,9 +44,9 @@ in {
       d = lettermod "alt" "d";
       k = lettermod "alt" "k";
 
-      # Lettermod for shift
-      s = lettermod "shift" "s";
-      l = lettermod "shift" "l";
+      # # Lettermod for shift
+      # s = lettermod "shift" "s";
+      # l = lettermod "shift" "l";
 
       # Both volume keys together trigger media key
       "volumedown+volumeup" = "media";
@@ -213,11 +213,11 @@ in {
     # Chords are raw config because keyd chord parsing is order-sensitive.
     ''
       [typing:layout]
-      c+d = layer(superalt)
-      m+k = layer(superalt)
+      # c+d = layer(superalt)
+      # m+k = layer(superalt)
 
-      c+s = layer(supershift)
-      m+l = layer(supershift)
+      # c+s = layer(supershift)
+      # m+l = layer(supershift)
 
       f+d = layer(controlalt)
       j+k = layer(controlalt)
@@ -228,8 +228,8 @@ in {
       d+s = layer(altshift)
       k+l = layer(altshift)
 
-      c+d+s = layer(superaltshift)
-      m+k+l = layer(superaltshift)
+      # c+d+s = layer(superaltshift)
+      # m+k+l = layer(superaltshift)
 
       f+d+s = layer(controlaltshift)
       j+k+l = layer(controlaltshift)
