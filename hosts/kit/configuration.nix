@@ -55,7 +55,13 @@
     enable = true;
     host = "0.0.0.0";
     openFirewall = true; # allow network access
-    package = pkgs.unstable.ollama-cuda; # gpu power
+    # Ollama treats Nix's semicolon-delimited toolkit search list as one path.
+    package = pkgs.unstable.ollama-cuda.overrideAttrs (old: {
+      preBuild = ''
+        unset CUDAToolkit_ROOT
+        ${old.preBuild}
+      '';
+    }); # gpu power
     models = "/data/models/ollama"; # model storage on separate disk
   };
 
