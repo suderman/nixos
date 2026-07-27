@@ -73,9 +73,9 @@
 
     # Hyprland
     # <https://wiki.hypr.land/Nix/>
-    hyprland.url = "github:hyprwm/Hyprland/v0.55.4";
+    hyprland.url = "github:hyprwm/Hyprland/v0.56.1";
     # <https://github.com/hyprwm/hyprland-plugins>
-    hyprland-plugins.url = "github:hyprwm/hyprland-plugins/v0.55.0";
+    hyprland-plugins.url = "github:hyprwm/hyprland-plugins/v0.56.0";
     hyprland-plugins.inputs.hyprland.follows = "hyprland";
     # <https://github.com/VirtCode/hypr-dynamic-cursors>
     hypr-dynamic-cursors.url = "github:VirtCode/hypr-dynamic-cursors";
@@ -100,7 +100,7 @@
 
     # Hermes Agent
     # <https://github.com/NousResearch/hermes-agent>
-    hermes-agent.url = "github:NousResearch/hermes-agent/v2026.7.7.2";
+    hermes-agent.url = "github:NousResearch/hermes-agent/v2026.7.20";
   };
 
   outputs = inputs: let
