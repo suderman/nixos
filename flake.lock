@@ -1232,11 +1232,11 @@
         "nixpkgs": "nixpkgs_9"
       },
       "locked": {
-        "lastModified": 1785212355,
-        "narHash": "sha256-W66oZZyOsXFClkfrarWg+W/vpyIdL5JBVXXw4Y51Xa4=",
+        "lastModified": 1785277168,
+        "narHash": "sha256-29vghYz48Prgbpg6yBhXbDDFJLtbU+tPd85ds8htQRs=",
         "owner": "nonfiction",
         "repo": "nf",
-        "rev": "269df5b6f9e8481f32e938195540c05923d48acf",
+        "rev": "526116ab1a395ba71586038fa3446e8df2b4307d",
         "type": "github"
       },
       "original": {
