@@ -19,6 +19,7 @@ in {
 
       # Clipboard
       copy_on_select = "clipboard";
+      strip_trailing_spaces = "smart";
       clear_selection_on_clipboard_loss = "yes";
 
       # disable ligatures when cursor is on them
