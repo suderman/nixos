@@ -2,7 +2,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }: let
   cfg = config.programs.onepassword;
@@ -17,7 +16,6 @@ in {
   };
 
   config = mkIf cfg.enable {
-    home.packages = [pkgs._1password-gui pkgs._1password-cli];
     # keyboard shortcuts
     services.keyd.windows."${mkClass class}" = {
       "esc" = "C-w";

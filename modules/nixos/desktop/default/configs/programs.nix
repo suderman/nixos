@@ -132,6 +132,9 @@ in
         xdg-utils # xdg-desktop-icon xdg-desktop-menu xdg-email xdg-icon-resource xdg-mime xdg-open xdg-screensaver xdg-settings xdg-terminal
       ];
 
+      # 1Password desktop integration requires the system setgid CLI wrapper.
+      programs._1password.enable = lib.mkDefault true;
+
       # AirDrop alternative
       programs.localsend.enable = true;
     }

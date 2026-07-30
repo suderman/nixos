@@ -8,7 +8,6 @@
   home.packages = [
     perSystem.self.ipaddr # where you at?
     perSystem.self.sv # wrapper for systemctl/journalctl
-    pkgs._1password-cli # op
     # pkgs.calcure # calendar viewer
     # pkgs.distrobox pkgs.distrobox-tui
     pkgs.fd # find files
