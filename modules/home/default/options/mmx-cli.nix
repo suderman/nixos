@@ -20,7 +20,7 @@
 
         mmx_init() {
           mkdir -p "$MMX_DIR"
-          npm i -g mmx-cli
+          npm i -g mmx-cli >&2
 
           if [[ ! -f "$MMX_BIN" ]]; then
             echo "Failed to install mmx binary" >&2
