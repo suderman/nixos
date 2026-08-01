@@ -33,11 +33,18 @@ The idle contract is:
 - every target is `current`
 - `secrets/rotation/ACTIVE` does not exist
 
-An active transition requires the marker, a distinct `nextIndex`, and a state
-for every target. A target must move through `current`, `bridge`, and `next` one
-step at a time. Moving backward one step supports rollback. Active mode can end
-only after every target has returned to `current`, or after every target has
-reached `next` and `nextIndex` is promoted to `currentIndex`.
+An active transition requires the marker, a non-negative `nextIndex`, and a
+state for every target. A target must move through `current`, `bridge`, and
+`next` one step at a time. Moving backward one step supports rollback. Active
+mode can end only after every target has returned to `current`, or after every
+target has reached `next` and `nextIndex` is promoted to `currentIndex`.
+
+The indexes are operator-declared BIP-85 recovery metadata, not cryptographic
+generation counters. The repository cannot verify which mnemonic and index
+produced a supplied root. Routine rotations normally increment the index, while
+a new mnemonic may reset or reuse an index. Preparation proves that a root
+generation changed by validating distinct master, host, and user public
+identities, not by comparing index numbers.
 
 The validator only reads manifests and repository paths. It does not decrypt,
 derive, generate, rekey, or deploy identity material.
@@ -110,9 +117,11 @@ or writing production artifacts.
 
 ## Rotation scope
 
-This is a routine BIP-85 index rotation, not compromise recovery. The planned
-transition keeps the current fleet-global v1 derivation model. Versioned domain
-separation and per-host roots remain separate future work.
+This is a routine root-generation rotation, not compromise recovery. The next
+root may come from another BIP-85 index on the current mnemonic or any index on
+a new mnemonic. The transition keeps the current fleet-global v1 derivation
+model. Versioned domain separation and per-host roots remain separate future
+work.
 
 The transition must:
 

@@ -148,6 +148,17 @@ def verify_transitions() -> None:
         validate_transition(before, after)
     validate_transition(rolled_back, idle)
 
+    # The BIP-85 index is operator-declared recovery metadata, not a generation
+    # counter. A fresh mnemonic may reset or reuse its index.
+    for next_index in (0, 1):
+        alternate_prepared = fixture_state(status="active", next_index=next_index)
+        alternate_all_next = moved(
+            moved(alternate_prepared, "alpha", "next"), "beta", "next"
+        )
+        alternate_finalized = fixture_state(current_index=next_index)
+        validate_transition(idle, alternate_prepared)
+        validate_transition(alternate_all_next, alternate_finalized)
+
     skipped_bridge = moved(prepared, "alpha", "next")
     expect_invalid(
         lambda: validate_transition(prepared, skipped_bridge),
@@ -350,6 +361,14 @@ def verify_managed_state() -> None:
         create_marker(marker, 1, 2)
         command_cancel(managed_args(repository, manifest, marker))
         assert not marker.exists()
+
+        for next_index in (0, 1):
+            alternate_prepare = managed_args(
+                repository, manifest, marker, next_index=next_index
+            )
+            command_prepare(alternate_prepare)
+            assert json.loads(manifest.read_text())["nextIndex"] == next_index
+            command_cancel(managed_args(repository, manifest, marker))
 
 
 def main() -> None:

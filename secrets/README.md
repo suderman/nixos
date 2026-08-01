@@ -29,6 +29,12 @@ The practical model is:
 
 This means key recovery here is seed-based, not backup-based.
 
+`derivationIndex` is operator-declared recovery metadata. The repository does
+not receive the mnemonic and cannot verify that a supplied root came from that
+index. Routine rotations normally increment it; changing to a new mnemonic may
+reset or reuse it. The actual next generation is proven by its distinct derived
+public identities.
+
 The root hex is fleet-global and is deployed to every host so each machine can
 derive the identities and credentials it needs. A compromise of that hex on any
 host therefore compromises every deterministic host, user, and service identity

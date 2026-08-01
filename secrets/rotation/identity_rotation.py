@@ -265,8 +265,6 @@ def validate_state(
     next_index = state["nextIndex"]
     if next_index is not None:
         next_index = _positive_index(next_index, "nextIndex")
-        if next_index == current_index:
-            raise RotationError("currentIndex and nextIndex must differ")
 
     targets = state["targets"]
     if not isinstance(targets, dict) or set(targets) != set(CATEGORIES):
@@ -458,8 +456,6 @@ def command_prepare(args: argparse.Namespace) -> None:
     )
     if before["status"] != "idle":
         raise RotationError("prepare requires idle state")
-    if args.next_index == before["currentIndex"]:
-        raise RotationError("next index must differ from currentIndex")
 
     validate_next_artifacts(args.repository, expected)
     after = copy.deepcopy(before)
