@@ -188,6 +188,7 @@ def active_state(
     result["status"] = "active"
     result["nextIndex"] = next_index
     result["preparedHosts"] = []
+    result["nextHosts"] = []
     for category in result["targets"].values():
         for name in category:
             category[name] = target_state

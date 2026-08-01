@@ -12,6 +12,14 @@
   );
   matrixLocalUserNames = lib.unique (lib.concatMap (user: builtins.attrNames user.services.hermes-agent.agents) matrixUsers);
 in {
+  identityRotation.verificationCommands =
+    lib.concatMapStrings (user: let
+      inherit (user.lib.hermes-agent) runDir seed;
+    in ''
+      verify_derived ${lib.escapeShellArg seed} ${lib.escapeShellArg "${runDir}/key"}
+    '')
+    users;
+
   # Derive API server key for each user into /run/hermes/{uid}/key
   system.activationScripts.hermes-api-key = let
     inherit (perSystem.self) mkScript derive;

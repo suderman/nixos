@@ -28,6 +28,15 @@ in {
   };
 
   config = mkIf (cfg.enable && mqtt.enable) {
+    identityRotation.verificationCommands =
+      concatMapStringsSep "\n" (userName: ''
+        verify_derived ${lib.escapeShellArg "mqtt:${config.networking.hostName}:${userName}"} ${lib.escapeShellArg (passwordFileFor userName)} 32
+      '') [homeAssistantUser deviceUser]
+      + ''
+        systemctl is-active --quiet mosquitto.service
+      '';
+    identityRotation.verificationUnits = ["mosquitto.service"];
+
     services.mosquitto = {
       enable = true;
       dataDir = mqtt.dataDir;
@@ -48,6 +57,8 @@ in {
         }
       ];
     };
+
+    systemd.services.mosquitto.restartTriggers = [config.identityRotation.hexPath];
 
     persist.storage.directories = [mqtt.dataDir];
     networking.firewall.allowedTCPPorts = [mqtt.port];

@@ -1,7 +1,6 @@
 _: {
   services.hermes-agent = {
     enable = true;
-    matrix.enable = true;
 
     # Agents and their configuration overrides
     agents = {

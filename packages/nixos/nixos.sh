@@ -19,10 +19,13 @@ rotation_state="${IDENTITY_ROTATION_STATE:-secrets/rotation/state.json}"
 rotation_directory="${identity_rotation_directory:-secrets/rotation}"
 rotation_script="${IDENTITY_ROTATION_SCRIPT:-$rotation_directory/identity_rotation.py}"
 rotation_artifacts_script="${IDENTITY_ARTIFACTS_SCRIPT:-$rotation_directory/identity_artifacts.py}"
+rotation_finalization_script="${IDENTITY_FINALIZATION_SCRIPT:-$rotation_directory/identity_finalization.py}"
 rotation_journal="${IDENTITY_ROTATION_JOURNAL:-secrets/rotation/PREPARE.json}"
+rotation_finalize_journal="${IDENTITY_FINALIZATION_JOURNAL:-secrets/rotation/FINALIZE.json}"
+rotation_finalize_backup="${IDENTITY_FINALIZATION_BACKUP:-secrets/rotation/finalize-backup}"
 
 identity_rotation_guard() {
-  if [[ ${IDENTITY_ROTATION_ALLOW:-0} != "1" && (-e $rotation_marker || -e $rotation_journal) ]]; then
+  if [[ ${IDENTITY_ROTATION_ALLOW:-0} != "1" && (-e $rotation_marker || -e $rotation_journal || -e $rotation_finalize_journal) ]]; then
     gum_exit "Identity rotation is active; use the managed rotation workflow"
   fi
 }
@@ -96,11 +99,16 @@ Usage: nixos [COMMAND]
                     Deploy and verify one host's prepared configuration
     verify-prepared HOST
                     Record one host's prepared runtime attestation
+    deploy-next HOST
+                    Boot one remote host into the all-next configuration
+    verify-next HOST
+                    Record one host's all-next runtime attestation
     move TYPE NAME STATE
                     Move one target through current/bridge/next
     cancel          Leave active state after all targets return to current
     cleanup         Remove verified next artifacts after cancellation
-    recover         Recover an interrupted artifact preparation transaction
+    finalize        Promote the fully migrated generation transactionally
+    recover         Recover an interrupted preparation or finalization
   add               Add a NixOS host or user
   generate          Generate missing files
   detect            Detect system devices to generate configuration   
@@ -149,6 +157,14 @@ nixos_rotation() {
     [[ $# -eq 1 ]] || gum_exit "Usage: nixos rotation verify-prepared HOST"
     nixos_rotation_verify_prepared "$1"
     ;;
+  deploy-next)
+    [[ $# -eq 1 ]] || gum_exit "Usage: nixos rotation deploy-next HOST"
+    nixos_rotation_deploy_next "$1"
+    ;;
+  verify-next)
+    [[ $# -eq 1 ]] || gum_exit "Usage: nixos rotation verify-next HOST"
+    nixos_rotation_verify_next "$1"
+    ;;
   move | m)
     [[ $# -eq 3 ]] || gum_exit "Usage: nixos rotation move TYPE NAME STATE"
     python3 "$rotation_script" move "${common[@]}" "$1" "$2" "$3"
@@ -175,14 +191,25 @@ nixos_rotation() {
     ;;
   recover)
     [[ $# -eq 0 ]] || gum_exit "Usage: nixos rotation recover"
-    python3 "$rotation_artifacts_script" recover \
-      --repository . \
-      --manifest "$rotation_state" \
-      --marker "$rotation_marker" \
-      --journal "$rotation_journal"
+    if [[ -e $rotation_finalize_journal ]]; then
+      python3 "$rotation_finalization_script" recover \
+        --repository . \
+        --journal "$rotation_finalize_journal" \
+        --backup "$rotation_finalize_backup" \
+        --runtime-current /tmp/id_age \
+        --runtime-previous /tmp/id_age_ \
+        --runtime-next /tmp/id_age_next
+    else
+      python3 "$rotation_artifacts_script" recover \
+        --repository . \
+        --manifest "$rotation_state" \
+        --marker "$rotation_marker" \
+        --journal "$rotation_journal"
+    fi
     ;;
   finalize | f)
-    gum_exit "Finalization is blocked until atomic identity and ciphertext promotion is implemented"
+    [[ $# -eq 0 ]] || gum_exit "Usage: nixos rotation finalize"
+    nixos_rotation_finalize
     ;;
   help | -h | --help)
     nixos_help
@@ -191,6 +218,33 @@ nixos_rotation() {
     gum_exit "Unknown identity rotation command: $command"
     ;;
   esac
+}
+
+nixos_rotation_finalize() {
+  agenix unlock quiet
+  local paths_file
+  paths_file="$(mktemp)"
+  local status=0
+  python3 "$rotation_finalization_script" finalize \
+    --repository . \
+    --manifest "$rotation_state" \
+    --marker "$rotation_marker" \
+    --journal "$rotation_finalize_journal" \
+    --backup "$rotation_finalize_backup" \
+    --derivation-index "${derivation_index:?derivation_index is required}" \
+    --system "${identity_rotation_system:?identity_rotation_system is required}" \
+    --paths-output "$paths_file" \
+    --runtime-current /tmp/id_age \
+    --runtime-previous /tmp/id_age_ \
+    --runtime-next /tmp/id_age_next || status=$?
+  if [[ $status -eq 0 ]]; then
+    local -a finalized_paths
+    mapfile -t finalized_paths <"$paths_file"
+    ((${#finalized_paths[@]} > 0)) || gum_exit "Finalization did not report changed paths"
+    git add -A -- "${finalized_paths[@]}"
+  fi
+  rm -f "$paths_file"
+  return "$status"
 }
 
 nixos_rotation_prepare() {
@@ -269,6 +323,47 @@ nixos_rotation_deploy_prepared() {
     nixos-rebuild --target-host "$host" --sudo --ask-sudo-password --flake ".#$host" switch
   fi
   nixos_rotation_verify_prepared "$host"
+}
+
+nixos_rotation_verify_next() {
+  local host="$1"
+  local expected actual
+  expected="$(nix eval --raw "path:.#nixosConfigurations.${host}.config.identityRotation.nextToken")" ||
+    gum_exit "Every rotation target must be next before host attestation"
+  if [[ $host == "$(hostname)" ]]; then
+    actual="$(</run/identity-rotation/next-verified)"
+  else
+    actual="$(ssh "$host" cat /run/identity-rotation/next-verified)"
+  fi
+  [[ $actual == "$expected" ]] || gum_exit "$host has not booted and verified the all-next identity configuration"
+  python3 "$rotation_script" mark-next \
+    "$rotation_state" \
+    --repository . \
+    --derivation-index "${derivation_index:?derivation_index is required}" \
+    --marker "$rotation_marker" \
+    "$host"
+  git add -- "$rotation_state"
+}
+
+nixos_rotation_deploy_next() {
+  local host="$1"
+  [[ $host != "$(hostname)" ]] ||
+    gum_exit "Deploy the local all-next generation with boot, reboot, then run: nixos rotation verify-next $host"
+
+  nix eval --raw "path:.#nixosConfigurations.${host}.config.identityRotation.nextToken" >/dev/null ||
+    gum_exit "Every rotation target must be next before deployment"
+  nixos-rebuild --target-host "$host" --sudo --ask-sudo-password --flake ".#$host" boot
+  ssh -t "$host" sudo systemctl reboot || true
+
+  local attempt
+  for attempt in {1..60}; do
+    sleep 5
+    if ssh -o ConnectTimeout=5 "$host" true 2>/dev/null; then
+      nixos_rotation_verify_next "$host"
+      return
+    fi
+  done
+  gum_exit "$host did not return after reboot; run verify-next when it is available"
 }
 
 # ---------------------------------------------------------------------

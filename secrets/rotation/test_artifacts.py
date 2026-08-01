@@ -24,6 +24,7 @@ def state(status: str) -> dict:
         "currentIndex": 1,
         "nextIndex": 0 if status == "active" else None,
         "preparedHosts": [],
+        "nextHosts": [],
         "targets": {
             "home": {"alpha-alice": "current"},
             "identities": {"alice": "current"},

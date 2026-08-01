@@ -14,6 +14,12 @@
   port = 8008; # package default is 8080
 in {
   config = mkIf cfg.enable {
+    identityRotation.verificationCommands = ''
+      grep -Eq "^api_key[[:space:]]*=[[:space:]]*$(cat /etc/machine-id)$" ${arr.configFile}
+      systemctl is-active --quiet ${name}.service
+    '';
+    identityRotation.verificationUnits = ["${name}-config.service" "${name}.service"];
+
     services.${name} = {
       enable = true;
       user = name;

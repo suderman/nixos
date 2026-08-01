@@ -17,8 +17,8 @@ commands that can rewrite identity state fleet-wide:
 - `agenix rekey`
 - `agenix update-masterkeys`
 
-`IDENTITY_ROTATION_ALLOW=1` is reserved for a future validated finalization
-transaction. Do not use it to bypass these guards manually. Active source-secret
+`IDENTITY_ROTATION_ALLOW=1` is reserved for isolated tests and managed workflow
+internals. Do not use it to bypass these guards manually. Active source-secret
 edits are intentionally frozen; `artifacts.json` also records their hashes so a
 direct edit makes every managed transition fail validation.
 
@@ -35,15 +35,16 @@ The idle contract is:
 - `nextIndex` is `null`
 - every target is `current`
 - `preparedHosts` is empty
+- `nextHosts` is empty
 - `secrets/rotation/ACTIVE` does not exist
 
 An active transition requires the marker, a non-negative `nextIndex`, and a
-state for every target. `preparedHosts` records remote attestations one host at
-a time. No target can move until all eight NixOS hosts are prepared. A target
-must then move through `current`, `bridge`, and `next` one step at a time.
-Moving backward one step supports rollback. Active mode can end only after every
-target has returned to `current`, or after every target has reached `next` and
-`nextIndex` is promoted to `currentIndex`.
+state for every target. `preparedHosts` records all-current remote attestations
+one host at a time. No target can move until all eight NixOS hosts are prepared.
+A target must then move through `current`, `bridge`, and `next` one step at a
+time. Moving backward one step supports rollback and clears all `nextHosts`
+attestations. Finalization requires every target at `next` and all eight hosts
+remotely attested in `nextHosts` after booting the all-next generation.
 
 The indexes are operator-declared BIP-85 recovery metadata, not cryptographic
 generation counters. The repository cannot verify which mnemonic and index
@@ -68,10 +69,16 @@ nixos rotation deploy-prepared cog
 nixos rotation verify-prepared eve
 nixos rotation move nixos kit bridge
 nixos rotation move nixos kit next
+nixos rotation deploy-next kit
+nixos rotation verify-next kit
+nixos rotation finalize
+
+# Or roll every target back before finalization:
 nixos rotation move nixos kit bridge
 nixos rotation move nixos kit current
 nixos rotation cancel
 nixos rotation cleanup
+
 nixos rotation recover
 ```
 
@@ -108,6 +115,22 @@ the manifest only after validating repository membership, source/artifact
 hashes, full fleet readiness, and the transition. It cannot skip `bridge` or
 mutate derivation indexes.
 
+After every target reaches `next`, `deploy-next HOST` installs that host's boot
+generation and reboots it. The command is intentionally remote-only so its
+operator survives the reboot; a locally administered host can be installed and
+rebooted manually before `verify-next HOST`. The all-next verifier refuses a
+mere switched generation by requiring `/run/booted-system` and
+`/run/current-system` to match. It then validates the next host key pair,
+machine ID, enabled MQTT, Hermes, Camofox, and Arr/SABnzbd derived values, and
+the required services. Only then does it write
+`/run/identity-rotation/next-verified`. Every activation first removes any old
+token, preventing replay after a rollback or failed switch.
+
+`verify-next HOST` compares that remote token with a deterministic hash of the
+complete target ledger and `artifacts.json`, excluding only the incrementally
+updated attestation lists. It records the host in `nextHosts` only after an exact
+match. Any subsequent target rollback clears all all-next attestations.
+
 `cancel` succeeds only after every target has returned to `current`. It writes
 the idle ledger before removing the marker, so an interruption remains guarded.
 It can also remove a marker left by an interrupted prepare whose manifest is
@@ -115,11 +138,22 @@ still valid and idle. Next artifacts remain until the reverted idle state has
 been deployed everywhere. `cleanup` then verifies every artifact and source
 hash before removing the next set and staging those deletions.
 
-There is intentionally no usable `finalize` command yet. Finalization must
-promote the master identity, root ciphertext, canonical public keys, generated
-ciphertext, and `flake.derivationIndex` as one rollback-capable transaction. A
-state-only finalization would produce an undecryptable fleet, so the wrapper
-refuses it.
+`finalize` requires a clean worktree, every target at `next`, all eight prepared
+hosts, and all eight all-next runtime attestations. In an isolated tracked-tree
+copy it decrypts each source with the retained current/next identities,
+re-encrypts it only to the next master, promotes canonical public artifacts and
+`flake.derivationIndex`, regenerates exact final target ciphertext, and
+evaluates every host. It then installs the complete result under the durable
+ignored `FINALIZE.json` and `finalize-backup/` transaction. The ignored
+passphrase-encrypted `secrets/id_age.age` participates in the same backup and
+replacement even though Git cannot restore it.
+
+An interruption before commit rolls every repository path back only when its
+hash is still one of the recorded before/after values. An interruption after
+commit rolls forward runtime master promotion and cleanup. `rotation recover`
+selects preparation or finalization recovery from the journal that exists.
+Final source ciphertext is next-master-only; the previous runtime identity is
+removed only after repository promotion verifies.
 
 Run the focused check with:
 
@@ -168,7 +202,7 @@ The transition must:
 - support prepare, partial rollout, rollback, resume, and finalize in an
   isolated simulation before touching a live target
 
-Matrix Synapse and Hermes' Matrix integration are disabled before rotation, so
+Matrix Synapse and Hermes' Matrix integrations are disabled before rotation, so
 their experimental persistent credentials are not part of the migration.
 
 ## Bridge contract
@@ -259,12 +293,12 @@ Derived user and service identities:
 Generated outputs for removed `fit`, `fit-jon`, and `kit-bot` targets were
 deleted during preflight and must not reappear.
 
-## Remaining blockers
+## Production gate
 
-Do not create production next-root artifacts until these remaining items are
-implemented and tested:
-
-- rollback-capable finalization of root, master, public, source, and generated
-  ciphertext artifacts; state-only finalization remains blocked
-- migration checks for machine IDs, Arr, MQTT, Hermes, Camofox, and other
-  derived runtime credentials, including required service restarts or reboots
+The managed implementation now covers preparation, fleet readiness, adjacent
+rollout and rollback, booted all-next runtime attestation, and recoverable
+cryptographic finalization. Production preparation must still begin only from a
+clean, reviewed, and fully passing repository. Commit each managed state change,
+retain the offline recovery material and both master passphrases until the final
+idle generation is deployed everywhere, and do not bypass a failed runtime
+verifier.

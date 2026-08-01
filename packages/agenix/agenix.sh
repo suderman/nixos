@@ -17,9 +17,10 @@ identity_file="$runtime_dir/id_age"
 previous_identity_file="$runtime_dir/id_age_"
 rotation_marker="${IDENTITY_ROTATION_MARKER:-$secrets_dir/rotation/ACTIVE}"
 rotation_journal="${IDENTITY_ROTATION_JOURNAL:-$secrets_dir/rotation/PREPARE.json}"
+rotation_finalize_journal="${IDENTITY_FINALIZATION_JOURNAL:-$secrets_dir/rotation/FINALIZE.json}"
 
 identity_rotation_guard() {
-  if [[ ${IDENTITY_ROTATION_ALLOW:-0} != "1" && (-e $rotation_marker || -e $rotation_journal) ]]; then
+  if [[ ${IDENTITY_ROTATION_ALLOW:-0} != "1" && (-e $rotation_marker || -e $rotation_journal || -e $rotation_finalize_journal) ]]; then
     gum_exit "Identity rotation is active; use the managed rotation workflow"
   fi
 }

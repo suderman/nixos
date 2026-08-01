@@ -23,6 +23,69 @@
       builtins.hashFile "sha256" (flake + /secrets/rotation/next/artifacts.json);
   };
 
+  system.activationScripts.identity-rotation-attestation.text = ''
+    # A token is valid only after the verifier succeeds for this activation.
+    rm -f /run/identity-rotation/next-verified
+  '';
+
+  systemd.services.identity-rotation-next-verify = lib.mkIf config.identityRotation.allNext {
+    description = "Verify the all-next identity rotation runtime";
+    wantedBy = ["multi-user.target"];
+    after = ["sshed.service"] ++ config.identityRotation.verificationUnits;
+    wants = config.identityRotation.verificationUnits;
+    requires = ["sshed.service"];
+    serviceConfig.Type = "oneshot";
+    path = [
+      perSystem.self.derive
+      perSystem.self.sshed
+      pkgs.coreutils
+      pkgs.systemd
+    ];
+    script = let
+      storage = config.persist.storage.path;
+      nextHostKey = "${storage}/etc/ssh/ssh_host_ed25519_key.next";
+      nextHostPublicKey = flake + /hosts/${hostName}/ssh_host_ed25519_key.pub.next;
+      nextHex = config.identityRotation.nextHexPath;
+      token = config.identityRotation.nextToken;
+    in ''
+      test "$(readlink -f /run/booted-system)" = "$(readlink -f /run/current-system)" || {
+        echo "The all-next configuration must be booted before attestation" >&2
+        exit 1
+      }
+
+      sshed verify-pair ${nextHostKey} ${nextHostPublicKey}
+      expected_machine_id="$(derive hex ${hostName} 32 <${nextHex})"
+      test "$(cat /etc/machine-id)" = "$expected_machine_id" || {
+        echo "Next machine ID is not active" >&2
+        exit 1
+      }
+
+      verify_derived() {
+        local salt="$1" output="$2" length="''${3:-}"
+        local expected
+        expected="$(mktemp)"
+        trap 'rm -f "$expected"' RETURN
+        if [[ -n $length ]]; then
+          derive hex "$salt" "$length" <${nextHex} >"$expected"
+        else
+          derive hex "$salt" <${nextHex} >"$expected"
+        fi
+        cmp -s "$expected" "$output" || {
+          echo "Next derived runtime value is not active: $output" >&2
+          exit 1
+        }
+        rm -f "$expected"
+        trap - RETURN
+      }
+
+      ${config.identityRotation.verificationCommands}
+
+      install -dm755 /run/identity-rotation
+      printf '%s\n' ${lib.escapeShellArg token} >/run/identity-rotation/next-verified
+      chmod 644 /run/identity-rotation/next-verified
+    '';
+  };
+
   # Add /mnt/main/storage/etc/ssh/ssh_host_ed25519_key.pub and /etc/machine-id
   system.activationScripts.etc.text = let
     rotation = flake.lib.identityRotation // {inherit (config.identityRotation) active;};

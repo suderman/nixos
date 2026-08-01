@@ -20,6 +20,22 @@
   deriveServicePort = service: profile: base: derivePort "${service}:${profile}" base;
   helperPortFor = cfg: user: profile: deriveServicePort "camofox-vnc-helper" profile (cfg.helperBasePort + user.home.portOffset);
 in {
+  identityRotation.verificationCommands = lib.concatMapStrings (user: let
+    gatewayAgents =
+      if user.services.hermes-agent.enable
+      then builtins.attrNames (lib.filterAttrs (_: agent: agent.gateway) user.services.hermes-agent.agents)
+      else [];
+    profiles = lib.unique (user.services.camofox-browser.profiles ++ gatewayAgents);
+    runDir = user.services.camofox-browser.runDir;
+    seed = "camofox:${user.home.username}:${config.networking.hostName}";
+  in
+    lib.concatMapStrings (profile:
+      lib.concatMapStrings (kind: ''
+        verify_derived ${lib.escapeShellArg "${seed}:${profile}:${kind}"} ${lib.escapeShellArg (runFileFor runDir profile kind)}
+      '') ["api-key" "access-key" "admin-key"])
+    profiles)
+  users;
+
   services.traefik.dynamicConfigOptions.http.middlewares = lib.mkMerge [
     (lib.listToAttrs (
       lib.concatMap (user: let

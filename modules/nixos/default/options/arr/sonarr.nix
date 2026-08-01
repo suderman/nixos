@@ -15,6 +15,12 @@
   prometheusPort = 9708;
 in {
   config = mkIf cfg.enable {
+    identityRotation.verificationCommands = ''
+      grep -Fq "<ApiKey>$(cat /etc/machine-id)</ApiKey>" ${arr.dataDir}/config.xml
+      systemctl is-active --quiet ${name}.service
+    '';
+    identityRotation.verificationUnits = ["${name}-config.service" "${name}.service"];
+
     services.${name} = {
       enable = true;
       user = name;

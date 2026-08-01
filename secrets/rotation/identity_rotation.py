@@ -26,6 +26,7 @@ ROOT_KEYS = {
     "currentIndex",
     "nextIndex",
     "preparedHosts",
+    "nextHosts",
     "targets",
 }
 
@@ -316,19 +317,27 @@ def target_states(state: dict[str, Any]) -> list[str]:
     ]
 
 
-def prepared_hosts(state: dict[str, Any]) -> set[str]:
-    value = state["preparedHosts"]
+def _host_attestations(state: dict[str, Any], field: str) -> set[str]:
+    value = state[field]
     if not isinstance(value, list) or not all(
         isinstance(host, str) and host for host in value
     ):
-        raise RotationError("preparedHosts must be a list of host names")
+        raise RotationError(f"{field} must be a list of host names")
     result = set(value)
     if len(result) != len(value):
-        raise RotationError("preparedHosts contains duplicate names")
+        raise RotationError(f"{field} contains duplicate names")
     unknown = result - set(state["targets"]["nixos"])
     if unknown:
-        raise RotationError(f"preparedHosts contains unknown hosts: {sorted(unknown)}")
+        raise RotationError(f"{field} contains unknown hosts: {sorted(unknown)}")
     return result
+
+
+def prepared_hosts(state: dict[str, Any]) -> set[str]:
+    return _host_attestations(state, "preparedHosts")
+
+
+def next_hosts(state: dict[str, Any]) -> set[str]:
+    return _host_attestations(state, "nextHosts")
 
 
 def validate_state(
@@ -382,6 +391,17 @@ def validate_state(
                 )
 
     ready_hosts = prepared_hosts(state)
+    verified_next_hosts = next_hosts(state)
+    invalid_next_hosts = {
+        host
+        for host in verified_next_hosts
+        if state["targets"]["nixos"][host] != "next"
+    }
+    if invalid_next_hosts:
+        raise RotationError(
+            "nextHosts contains hosts whose NixOS target is not next: "
+            f"{sorted(invalid_next_hosts)}"
+        )
 
     if derivation_index is not None and current_index != derivation_index:
         raise RotationError(
@@ -399,6 +419,8 @@ def validate_state(
             raise RotationError("idle state requires every target to be current")
         if ready_hosts:
             raise RotationError("idle state must not retain preparedHosts")
+        if verified_next_hosts:
+            raise RotationError("idle state must not retain nextHosts")
     elif next_index is None:
         raise RotationError("active state requires nextIndex")
 
@@ -432,6 +454,8 @@ def validate_transition(before: dict[str, Any], after: dict[str, Any]) -> None:
     changes = _target_changes(before, after)
     before_prepared = prepared_hosts(before)
     after_prepared = prepared_hosts(after)
+    before_next_hosts = next_hosts(before)
+    after_next_hosts = next_hosts(after)
     before_status = before["status"]
     after_status = after["status"]
 
@@ -442,6 +466,8 @@ def validate_transition(before: dict[str, Any], after: dict[str, Any]) -> None:
             raise RotationError("prepare must leave every target current")
         if after_prepared:
             raise RotationError("prepare must start without prepared hosts")
+        if after_next_hosts:
+            raise RotationError("prepare must start without next hosts")
         return
 
     if before_status == "active" and after_status == "active":
@@ -451,7 +477,7 @@ def validate_transition(before: dict[str, Any], after: dict[str, Any]) -> None:
         ):
             raise RotationError("active transition changes derivation indexes")
         if before_prepared != after_prepared:
-            if changes:
+            if changes or before_next_hosts != after_next_hosts:
                 raise RotationError("prepared host transition also changes a target")
             added = after_prepared - before_prepared
             removed = before_prepared - after_prepared
@@ -461,10 +487,26 @@ def validate_transition(before: dict[str, Any], after: dict[str, Any]) -> None:
                 )
             return
 
+        if before_next_hosts != after_next_hosts and not changes:
+            added = after_next_hosts - before_next_hosts
+            removed = before_next_hosts - after_next_hosts
+            if len(added) != 1 or removed:
+                raise RotationError("next host transition must add exactly one host")
+            if any(value != "next" for value in target_states(before)):
+                raise RotationError(
+                    "next host attestation requires every target at next"
+                )
+            return
+
         if len(changes) != 1:
             raise RotationError("active transition must change exactly one target")
         if before_prepared != set(before["targets"]["nixos"]):
             raise RotationError("target transition requires every NixOS host prepared")
+        if before_next_hosts:
+            if after_next_hosts:
+                raise RotationError("target rollback must clear next host attestations")
+        elif after_next_hosts:
+            raise RotationError("target transition cannot add next host attestations")
         _, _, old_state, new_state = changes[0]
         if abs(STATE_RANK[old_state] - STATE_RANK[new_state]) != 1:
             raise RotationError("target transition must move through bridge")
@@ -477,11 +519,17 @@ def validate_transition(before: dict[str, Any], after: dict[str, Any]) -> None:
             raise RotationError("active source lacks nextIndex")
 
         if all(value == "current" for value in target_states(before)):
+            if before_next_hosts:
+                raise RotationError("rollback cannot retain next host attestations")
             if after["currentIndex"] != before["currentIndex"]:
                 raise RotationError("rollback changes currentIndex")
             return
 
         if all(value == "next" for value in target_states(before)):
+            if before_next_hosts != set(before["targets"]["nixos"]):
+                raise RotationError(
+                    "finalize requires every NixOS host attested at next"
+                )
             if after["currentIndex"] != before["nextIndex"]:
                 raise RotationError("finalize does not promote nextIndex")
             return
@@ -557,6 +605,7 @@ def command_status(args: argparse.Namespace) -> None:
         f" bridge={counts['bridge']}"
         f" next={counts['next']}"
         f" preparedHosts={len(prepared_hosts(state))}/{len(state['targets']['nixos'])}"
+        f" nextHosts={len(next_hosts(state))}/{len(state['targets']['nixos'])}"
     )
 
 
@@ -575,6 +624,7 @@ def command_prepare(args: argparse.Namespace) -> None:
     after["status"] = "active"
     after["nextIndex"] = args.next_index
     after["preparedHosts"] = []
+    after["nextHosts"] = []
     validate_transition(before, after)
     validate_state(
         after,
@@ -608,6 +658,8 @@ def command_move(args: argparse.Namespace) -> None:
 
     after = copy.deepcopy(before)
     after["targets"][args.category][args.name] = args.target_state
+    if before["nextHosts"]:
+        after["nextHosts"] = []
     validate_transition(before, after)
     validate_state(
         after,
@@ -648,6 +700,35 @@ def command_mark_prepared(args: argparse.Namespace) -> None:
     print(f"identity rotation host prepared: {args.host}")
 
 
+def command_mark_next(args: argparse.Namespace) -> None:
+    before, expected = managed_context(
+        args.manifest,
+        args.repository,
+        args.derivation_index,
+        args.marker,
+    )
+    if before["status"] != "active":
+        raise RotationError("next host recording requires active state")
+    if args.host not in before["targets"]["nixos"]:
+        raise RotationError(f"unknown NixOS rotation target {args.host}")
+    if args.host in next_hosts(before):
+        raise RotationError(
+            f"NixOS rotation target already attested at next: {args.host}"
+        )
+
+    after = copy.deepcopy(before)
+    after["nextHosts"] = sorted([*before["nextHosts"], args.host])
+    validate_transition(before, after)
+    validate_state(
+        after,
+        expected_targets=expected,
+        derivation_index=args.derivation_index,
+        marker_active=True,
+    )
+    atomic_write_manifest(args.manifest, after)
+    print(f"identity rotation host attested at next: {args.host}")
+
+
 def command_cancel(args: argparse.Namespace) -> None:
     state = load_manifest(args.manifest)
     expected = discover_targets(args.repository)
@@ -678,6 +759,7 @@ def command_cancel(args: argparse.Namespace) -> None:
     after["status"] = "idle"
     after["nextIndex"] = None
     after["preparedHosts"] = []
+    after["nextHosts"] = []
     validate_transition(state, after)
     validate_state(
         after,
@@ -739,6 +821,13 @@ def parser() -> argparse.ArgumentParser:
     add_managed_arguments(mark_prepared)
     mark_prepared.add_argument("host")
     mark_prepared.set_defaults(run=command_mark_prepared)
+
+    mark_next = commands.add_parser(
+        "mark-next", help="record one remotely verified all-next host"
+    )
+    add_managed_arguments(mark_next)
+    mark_next.add_argument("host")
+    mark_next.set_defaults(run=command_mark_next)
 
     cancel = commands.add_parser(
         "cancel", help="leave active state after every target returns to current"

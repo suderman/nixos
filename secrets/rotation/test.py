@@ -16,6 +16,7 @@ from identity_rotation import (
     RotationError,
     atomic_write_manifest,
     command_cancel,
+    command_mark_next,
     command_mark_prepared,
     command_move,
     command_prepare,
@@ -53,6 +54,7 @@ def fixture_state(
     current_index: int = 1,
     next_index: int | None = None,
     prepared: bool = False,
+    next_verified: bool = False,
 ) -> dict:
     return {
         "schema": 1,
@@ -60,6 +62,7 @@ def fixture_state(
         "currentIndex": current_index,
         "nextIndex": next_index,
         "preparedHosts": ["alpha", "beta"] if prepared else [],
+        "nextHosts": ["alpha", "beta"] if next_verified else [],
         "targets": {
             "home": {},
             "identities": {},
@@ -77,6 +80,12 @@ def moved(state: dict, target: str, target_state: str) -> dict:
 def readied(state: dict, *hosts: str) -> dict:
     result = copy.deepcopy(state)
     result["preparedHosts"] = sorted(hosts)
+    return result
+
+
+def next_readied(state: dict, *hosts: str) -> dict:
+    result = copy.deepcopy(state)
+    result["nextHosts"] = sorted(hosts)
     return result
 
 
@@ -130,6 +139,8 @@ def verify_transitions() -> None:
     alpha_next = moved(resumed, "alpha", "next")
     beta_bridge = moved(alpha_next, "beta", "bridge")
     all_next = moved(beta_bridge, "beta", "next")
+    alpha_next_verified = next_readied(all_next, "alpha")
+    all_next_verified = next_readied(all_next, "alpha", "beta")
     finalized = fixture_state(current_index=2)
 
     validate_state(
@@ -143,6 +154,8 @@ def verify_transitions() -> None:
         alpha_next,
         beta_bridge,
         all_next,
+        alpha_next_verified,
+        all_next_verified,
     ):
         validate_state(state, expected_targets=TARGETS, marker_active=True)
     validate_state(
@@ -159,7 +172,9 @@ def verify_transitions() -> None:
         (resumed, alpha_next),
         (alpha_next, beta_bridge),
         (beta_bridge, all_next),
-        (all_next, finalized),
+        (all_next, alpha_next_verified),
+        (alpha_next_verified, all_next_verified),
+        (all_next_verified, finalized),
     )
     for before, after in sequence:
         validate_transition(before, after)
@@ -174,6 +189,7 @@ def verify_transitions() -> None:
         alternate_all_next = moved(
             moved(alternate_prepared, "alpha", "next"), "beta", "next"
         )
+        alternate_all_next["nextHosts"] = ["alpha", "beta"]
         alternate_finalized = fixture_state(current_index=next_index)
         validate_transition(idle, alternate_unprepared)
         validate_transition(alternate_unprepared, alternate_alpha)
@@ -188,6 +204,10 @@ def verify_transitions() -> None:
     expect_invalid(
         lambda: validate_transition(alpha_next, finalized),
         "partially migrated state finalized",
+    )
+    expect_invalid(
+        lambda: validate_transition(all_next, finalized),
+        "unattested all-next state finalized",
     )
     expect_invalid(
         lambda: validate_state(prepared, expected_targets=TARGETS, marker_active=False),
@@ -308,6 +328,7 @@ def managed_fixture(repository: Path) -> tuple[Path, Path]:
         "currentIndex": 1,
         "nextIndex": None,
         "preparedHosts": [],
+        "nextHosts": [],
         "targets": {
             "home": {"alpha-alice": "current"},
             "identities": {"alice": "current"},
@@ -382,6 +403,13 @@ def verify_managed_state() -> None:
             command_mark_prepared(managed_args(repository, manifest, marker, host=host))
         assert json.loads(manifest.read_text())["preparedHosts"] == ["alpha", "beta"]
 
+        expect_invalid(
+            lambda: command_mark_next(
+                managed_args(repository, manifest, marker, host="alpha")
+            ),
+            "managed next attestation accepted a partial target state",
+        )
+
         skipped = managed_args(
             repository,
             manifest,
@@ -437,6 +465,51 @@ def verify_managed_state() -> None:
                     managed_args(repository, manifest, marker, host=host)
                 )
             command_cancel(managed_args(repository, manifest, marker))
+
+        artifact_manifest = repository / "secrets/rotation/next/artifacts.json"
+        artifact_state = json.loads(artifact_manifest.read_text())
+        artifact_state["recoveryIndex"] = 2
+        artifact_manifest.write_text(json.dumps(artifact_state, indent=2) + "\n")
+        command_prepare(prepare)
+        for host in ("alpha", "beta"):
+            command_mark_prepared(managed_args(repository, manifest, marker, host=host))
+        for host in ("alpha", "beta"):
+            for target_state in ("bridge", "next"):
+                command_move(
+                    managed_args(
+                        repository,
+                        manifest,
+                        marker,
+                        category="nixos",
+                        name=host,
+                        target_state=target_state,
+                    )
+                )
+        for category, name in (("home", "alpha-alice"), ("identities", "alice")):
+            for target_state in ("bridge", "next"):
+                command_move(
+                    managed_args(
+                        repository,
+                        manifest,
+                        marker,
+                        category=category,
+                        name=name,
+                        target_state=target_state,
+                    )
+                )
+        command_mark_next(managed_args(repository, manifest, marker, host="alpha"))
+        attested = json.loads(manifest.read_text())
+        assert attested["nextHosts"] == ["alpha"]
+        rollback = managed_args(
+            repository,
+            manifest,
+            marker,
+            category="identities",
+            name="alice",
+            target_state="bridge",
+        )
+        command_move(rollback)
+        assert json.loads(manifest.read_text())["nextHosts"] == []
 
 
 def main() -> None:

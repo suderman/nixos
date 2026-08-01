@@ -18,6 +18,19 @@
     else hostName;
   managedTarget = builtins.hasAttr targetName identityRotation.state.targets.${targetCategory};
   rotationActive = identityRotation.active && managedTarget;
+  allNext =
+    rotationActive
+    && lib.all (state: state == "next") (
+      lib.concatMap builtins.attrValues (builtins.attrValues identityRotation.state.targets)
+    );
+  nextToken =
+    if allNext && !isHome
+    then
+      builtins.hashString "sha256" (builtins.toJSON {
+        artifactHash = builtins.hashFile "sha256" (flake + /secrets/rotation/next/artifacts.json);
+        inherit (identityRotation.state) currentIndex nextIndex targets;
+      })
+    else null;
   targetState =
     if managedTarget
     then identityRotation.targetState targetCategory targetName
@@ -53,6 +66,28 @@ in {
       readOnly = true;
       description = "Selected decrypted fleet root on NixOS targets";
     };
+    allNext = lib.mkOption {
+      type = lib.types.bool;
+      readOnly = true;
+      description = "Whether every managed target selects the next generation";
+    };
+    nextToken = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      readOnly = true;
+      description = "All-next runtime attestation token for this NixOS target";
+    };
+    verificationCommands = lib.mkOption {
+      type = lib.types.lines;
+      default = "";
+      internal = true;
+      description = "Host-specific all-next runtime verification commands";
+    };
+    verificationUnits = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      internal = true;
+      description = "Units that must complete before all-next runtime verification";
+    };
   };
 
   config = {
@@ -66,7 +101,7 @@ in {
         then config.age.secrets.hex-next.path
         else null;
     in {
-      inherit currentHexPath nextHexPath targetState;
+      inherit allNext currentHexPath nextHexPath nextToken targetState;
       active = rotationActive;
       hexPath =
         if !isHome && targetState == "next"

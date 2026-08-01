@@ -160,16 +160,17 @@ agenix rekey -a
 
 ## Root rotation
 
-Coordinated root rotation is not implemented by `agenix import` or `nixos
+Coordinated root rotation is not performed by `agenix import` or `nixos
 generate`. Do not bypass the recipient guard to rotate in place: generated host
 keys, user keys, service credentials, source master encryption, and deployed
-target ciphertext must move through an explicit staged transition. A dedicated
-dual-key rotation workflow remains future work. Preflight invariants, the active
-target snapshot, and the safety marker are documented in
+target ciphertext must move through the managed staged transition. Preparation,
+dual-key rollout, remote runtime attestation, rollback, recovery, and
+cryptographic finalization are documented in
 [`rotation/README.md`](rotation/README.md).
 
 When `secrets/rotation/ACTIVE` exists, the repository wrappers block broad
-identity mutations. `IDENTITY_ROTATION_ALLOW=1` is reserved for the future
-managed workflow and must not be used to bypass those checks manually.
+identity mutations. `IDENTITY_ROTATION_ALLOW=1` is reserved for isolated tests
+and managed workflow internals and must not be used to bypass those checks
+manually.
 
 Never commit plaintext secrets.
