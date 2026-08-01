@@ -151,3 +151,25 @@ if env \
   exit 1
 fi
 [[ $(artifact_hashes) == "$before_interruption" ]]
+
+# Broad identity mutations stop before doing any work during a managed rotation.
+mkdir -p "$secrets_dir/rotation"
+touch "$secrets_dir/rotation/ACTIVE"
+before_rotation_guard="$(artifact_hashes)"
+
+if TEST_HEX="$root" run_agenix import >"$test_dir/rotation-import.out" 2>&1; then
+  printf 'FAIL: import ran while identity rotation was active\n' >&2
+  exit 1
+fi
+
+if run_agenix rekey -a >"$test_dir/rotation-rekey.out" 2>&1; then
+  printf 'FAIL: all-target rekey ran while identity rotation was active\n' >&2
+  exit 1
+fi
+
+if run_agenix update-masterkeys >"$test_dir/rotation-masterkeys.out" 2>&1; then
+  printf 'FAIL: master-key update ran while identity rotation was active\n' >&2
+  exit 1
+fi
+
+[[ $(artifact_hashes) == "$before_rotation_guard" ]]

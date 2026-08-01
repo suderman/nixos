@@ -14,6 +14,14 @@ dirs() { find "$1" -mindepth 1 -maxdepth 1 -type d -printf '%f\n'; }
 # If PRJ_ROOT is set, change to that directory
 [[ -n ${PRJ_ROOT-} ]] && cd "$PRJ_ROOT"
 
+rotation_marker="${IDENTITY_ROTATION_MARKER:-secrets/rotation/ACTIVE}"
+
+identity_rotation_guard() {
+  if [[ ${IDENTITY_ROTATION_ALLOW:-0} != "1" && -e $rotation_marker ]]; then
+    gum_exit "Identity rotation is active; use the managed rotation workflow"
+  fi
+}
+
 # ---------------------------------------------------------------------
 # MAIN
 # ---------------------------------------------------------------------
@@ -239,6 +247,8 @@ EOF
 # ADD
 # ---------------------------------------------------------------------
 nixos_add() {
+  identity_rotation_guard
+
   local add_type="${1-}"
   if [[ $add_type != "user" && $add_type != "host" ]]; then
     add_type=$(gum choose --header="Add to this flake:" "user" "host")
@@ -330,6 +340,8 @@ nixos_add_host() {
 # GENERATE
 # ---------------------------------------------------------------------
 nixos_generate() {
+
+  identity_rotation_guard
 
   # Ensure access to age identity
   agenix unlock quiet

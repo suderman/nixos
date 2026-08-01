@@ -15,6 +15,32 @@ secrets_dir="${AGENIX_SECRETS_DIR:-secrets}"
 runtime_dir="${AGENIX_RUNTIME_DIR:-/tmp}"
 identity_file="$runtime_dir/id_age"
 previous_identity_file="$runtime_dir/id_age_"
+rotation_marker="${IDENTITY_ROTATION_MARKER:-$secrets_dir/rotation/ACTIVE}"
+
+identity_rotation_guard() {
+  if [[ ${IDENTITY_ROTATION_ALLOW:-0} != "1" && -e $rotation_marker ]]; then
+    gum_exit "Identity rotation is active; use the managed rotation workflow"
+  fi
+}
+
+agenix_rotation_guard_command() {
+  local cmd="${1:-}"
+  shift || true
+
+  case "$cmd" in
+  update-masterkeys)
+    identity_rotation_guard
+    ;;
+  rekey)
+    local arg
+    for arg in "$@"; do
+      if [[ $arg == "-a" || $arg == "--all" ]]; then
+        identity_rotation_guard
+      fi
+    done
+    ;;
+  esac
+}
 
 # ---------------------------------------------------------------------
 # MAIN
@@ -48,6 +74,7 @@ main() {
     exit 0
     ;;
   *)
+    agenix_rotation_guard_command "$@"
     agenix_unlock quiet
     agenix "$@"
     ;;
@@ -93,6 +120,8 @@ agenix_import_cleanup() {
 
 # Bootstrap or recover the master identity from its BIP-85 32-byte hex.
 agenix_import() {
+
+  identity_rotation_guard
 
   # Confirm derivation path
   local path="Derive Seeds (BIP-85) > 32-bytes hex > Index Number ${derivation_index-}"

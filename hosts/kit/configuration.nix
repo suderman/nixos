@@ -75,14 +75,6 @@
 
   services.open-webui.enable = true;
 
-  # Private Matrix homeserver
-  services.matrix-synapse = {
-    enable = true;
-    localUsers = {
-      jon.admin = true;
-    };
-  };
-
   services.honcho = {
     enable = true;
     apiKeys = ./apikeys-env.age;

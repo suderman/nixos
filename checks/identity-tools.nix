@@ -13,13 +13,16 @@ pkgs.runCommand "identity-tools-check" {
   ];
   DERIVE_BIN = "${perSystem.self.derive}/bin/derive";
   AGENIX_SCRIPT = ../packages/agenix/agenix.sh;
+  NIXOS_SCRIPT = ../packages/nixos/nixos.sh;
   BASH_BIN = "${pkgs.bash}/bin/bash";
   REAL_MV = "${pkgs.coreutils}/bin/mv";
 } ''
   bash -n ${../packages/agenix/agenix.sh}
   bash -n ${../packages/derive/derive.sh}
+  bash -n ${../packages/nixos/nixos.sh}
   PYTHONPYCACHEPREFIX="$TMPDIR/pycache" python3 -m py_compile ${../packages/derive/hex.py}
   bash ${../packages/derive/test.sh}
   bash ${../packages/agenix/test.sh}
+  bash ${../packages/nixos/test.sh}
   touch "$out"
 ''

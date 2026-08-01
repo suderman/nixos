@@ -158,6 +158,12 @@ Coordinated root rotation is not implemented by `agenix import` or `nixos
 generate`. Do not bypass the recipient guard to rotate in place: generated host
 keys, user keys, service credentials, source master encryption, and deployed
 target ciphertext must move through an explicit staged transition. A dedicated
-dual-key rotation workflow remains future work.
+dual-key rotation workflow remains future work. Preflight invariants, the active
+target snapshot, and the safety marker are documented in
+[`rotation/README.md`](rotation/README.md).
+
+When `secrets/rotation/ACTIVE` exists, the repository wrappers block broad
+identity mutations. `IDENTITY_ROTATION_ALLOW=1` is reserved for the future
+managed workflow and must not be used to bypass those checks manually.
 
 Never commit plaintext secrets.

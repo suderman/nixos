@@ -23,6 +23,7 @@
 
 - `nixos generate` is broad: it unlocks `secrets/id_age.age` into `/tmp/id_age`, rewrites host/user public keys under `hosts/*` and `users/*`, ensures `zones/ca.{crt,age}` exists, and runs `agenix rekey -a`.
 - `nixos add host|user` scaffolds files, stages them in git, then runs `nixos generate`.
+- `secrets/rotation/ACTIVE` blocks broad identity mutation through the repo wrappers. `IDENTITY_ROTATION_ALLOW=1` is reserved for the managed rotation workflow, not manual bypass.
 - Edit secrets with `agenix edit <path>.age`. After changing recipients or adding/removing secrets, run `agenix rekey -a` (or `nixos generate`). Never commit plaintext secrets.
 
 ## Repo structure that matters
