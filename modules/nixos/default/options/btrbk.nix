@@ -8,10 +8,13 @@
 }: let
   cfg = config.services.btrbk;
   inherit (lib) mkAfter mkIf mkOption types;
+  inherit (flake.lib) identityRotation;
 
   # Path to private and public ssh key
   sshKey = "/etc/btrbk/id_ed25519";
   sshPubKey = flake + /users/btrbk/id_ed25519.pub;
+  nextSshKey = "${sshKey}.next";
+  nextSshPubKey = identityRotation.nextPath sshPubKey;
 
   # Enable if there are any volumes set (default true)
   enable = builtins.length (builtins.attrNames cfg.volumes) > 0;
@@ -28,12 +31,12 @@ in {
 
   # Use btrbk to snapshot persistent states and home
   config = mkIf enable {
-    services.btrbk.sshAccess = [
-      {
-        key = builtins.readFile sshPubKey;
+    services.btrbk.sshAccess =
+      map (publicKey: {
+        key = builtins.readFile publicKey;
         roles = ["info" "source" "target" "delete" "snapshot" "send" "receive"];
-      }
-    ];
+      })
+      (identityRotation.keyFiles [sshPubKey]);
 
     # Extra packages for btrbk
     environment.systemPackages = [pkgs.lz4 pkgs.mbuffer];
@@ -46,7 +49,10 @@ in {
         stream_buffer = "256m";
         snapshot_dir = "snapshots";
         ssh_user = "btrbk";
-        ssh_identity = sshKey;
+        ssh_identity =
+          if identityRotation.useNext "identities" "btrbk"
+          then nextSshKey
+          else sshKey;
       };
     in {
       # All snapshots are retained for at least 6 hours regardless of other policies.
@@ -105,7 +111,7 @@ in {
     # Write btrbk ssh keys to /etc/btrbk
     system.activationScripts.users.text = let
       inherit (perSystem.self) mkScript;
-      hex = config.age.secrets.hex.path;
+      inherit (config.identityRotation) currentHexPath nextHexPath;
 
       # Derive ssh key for btrbk user
       text =
@@ -117,16 +123,31 @@ in {
           # Copy public ssh user key from this repo
           cat ${sshPubKey} > ${sshKey}.pub
 
+          write_btrbk_identity() {
+            local root="$1" private_key="$2" public_key="$3"
+            derive hex btrbk <"$root" | derive ssh >"$private_key"
+            sshed verify-pair "$private_key" "$public_key"
+          }
+
           # Derive private ssh user key and verify
-          if [[ -f ${hex} ]]; then
-            derive hex btrbk <${hex} |
-            derive ssh >${sshKey}
-            sshed verify || rm -f ${sshKey}
+          if [[ -f ${currentHexPath} ]]; then
+            write_btrbk_identity ${currentHexPath} ${sshKey} ${sshKey}.pub
           fi
+
+          ${lib.optionalString identityRotation.active ''
+            cat ${nextSshPubKey} >${nextSshKey}.pub
+            test -f ${nextHexPath}
+            write_btrbk_identity ${nextHexPath} ${nextSshKey} ${nextSshKey}.pub
+          ''}
+          ${lib.optionalString (!identityRotation.active) ''
+            rm -f ${nextSshKey} ${nextSshKey}.pub
+          ''}
 
           # Ensure proper permissions and ownership
           [[ -f ${sshKey} ]] && chmod 600 ${sshKey}
           [[ -f ${sshKey}.pub ]] && chmod 644 ${sshKey}.pub
+          [[ -f ${nextSshKey} ]] && chmod 600 ${nextSshKey}
+          [[ -f ${nextSshKey}.pub ]] && chmod 644 ${nextSshKey}.pub
           chown btrbk:btrbk ${sshKey}*
         '';
 

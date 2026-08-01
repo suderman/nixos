@@ -64,7 +64,7 @@ in {
     # derived values only land in /var/lib at activation time.
     system.activationScripts.matrix-synapse-secrets = let
       inherit (perSystem.self) mkScript derive;
-      hex = config.age.secrets.hex.path;
+      hex = config.identityRotation.hexPath;
       secretsDir = builtins.dirOf cfg.secretsFile;
       usersDir = "${cfg.stateDir}/users";
       text =

@@ -54,7 +54,7 @@ in {
 
     system.activationScripts.home-assistant-mqtt-passwords = let
       inherit (perSystem.self) mkScript derive;
-      hex = config.age.secrets.hex.path;
+      hex = config.identityRotation.hexPath;
       userNames = [
         homeAssistantUser
         deviceUser

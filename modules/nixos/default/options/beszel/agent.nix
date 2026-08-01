@@ -18,7 +18,7 @@ in {
         sshPub = flake + /users/beszel/id_ed25519.pub;
       in
         if pathExists sshPub
-        then readFile sshPub
+        then lib.concatMapStringsSep "\n" readFile (flake.lib.identityRotation.keyFiles [sshPub])
         else "";
     };
     enableAgent = mkOption {

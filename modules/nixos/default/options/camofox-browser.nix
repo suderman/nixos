@@ -48,7 +48,7 @@ in {
 
   system.activationScripts.camofox-browser-keys = let
     inherit (perSystem.self) mkScript derive;
-    hex = config.age.secrets.hex.path;
+    hex = config.identityRotation.hexPath;
 
     perUser = user: let
       inherit (user.home) username;

@@ -59,8 +59,9 @@ and `beta` only in a temporary directory.
 
 The simulator proves the manifest rules for prepare, partial rollout, rollback,
 resume, and finalize, including rejection of skipped and inconsistent states.
-It does not yet prove NixOS activation, persistent host-key rollback, or secret
-decryption in a running VM.
+The bridge policy also has fixed Nix assertions for current/bridge/next
+selection and explicit SSH key-pair tests. It does not yet prove NixOS
+activation, persistent host-key rollback, or secret decryption in a running VM.
 
 ## Rotation scope
 
@@ -81,6 +82,43 @@ The transition must:
 
 Matrix Synapse and Hermes' Matrix integration are disabled before rotation, so
 their experimental persistent credentials are not part of the migration.
+
+## Bridge contract
+
+The bridge is inert while `state.json` is idle. An active manifest expects these
+next-generation artifacts:
+
+- encrypted next root: `secrets/rotation/next/hex.age`
+- host public keys: `hosts/<host>/ssh_host_ed25519_key.pub.next`
+- user/service SSH public keys: `users/<name>/id_ed25519.pub.next`
+- user age recipients: `users/<name>/id_age.pub.next`
+- next master identity at runtime: `/tmp/id_age_next`
+
+Generated `hex-next` ciphertext is deployed only to NixOS targets. Home Manager
+targets never receive either fleet root; they use the user age identities that
+the NixOS activation prepares side by side.
+
+While the manifest is active:
+
+- every system trusts current and next host and login public keys
+- NixOS and Home Manager agenix use both local private identity paths
+- host state `current` advertises only the current host key
+- host state `bridge` advertises current then next
+- host state `next` advertises next then current and selects the next root for
+  machine IDs, password salts, and derived runtime credentials
+- Home Manager state `next` selects its next age recipient for generated
+  ciphertext
+- identity state `next` selects the next SSH client, Btrbk, or Beszel identity
+
+Current private material remains available throughout active mode. Returning a
+target from `next` through `bridge` to `current` therefore restores current
+selection without recreating keys. On finalization, the prepared host private
+key is promoted only if it matches the new canonical public key; rollback
+instead removes the unused next key.
+
+Preparation must commit the marker, active manifest, next public artifacts, and
+generated `hex-next` ciphertext together. Deploy that all-current prepared state
+to every target before moving any target to `bridge`.
 
 ## Active target snapshot
 
@@ -127,13 +165,12 @@ deleted during preflight and must not reappear.
 
 ## Remaining blockers
 
-Do not create production index-2 artifacts until these are implemented and
-tested:
+Do not create production index-2 artifacts until these remaining items are
+implemented and tested:
 
-- dual host-key paths, known-host entries, and rollback-safe `sshed` behavior
-- dual NixOS and Home Manager age identity paths
-- dual login, Btrbk, and Beszel SSH authorization
+- a managed command that prepares, validates, and advances one atomic target
+  transition without bypassing the rotation guard manually
 - migration checks for machine IDs, Arr, MQTT, Hermes, Camofox, and other
-  derived runtime credentials
+  derived runtime credentials, including required service restarts or reboots
 - a two-node NixOS VM test covering bridge deployment and persistent-key
-  rollback
+  rollback, generated secret decryption with both identities, and finalization

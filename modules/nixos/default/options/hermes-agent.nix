@@ -15,7 +15,7 @@ in {
   # Derive API server key for each user into /run/hermes/{uid}/key
   system.activationScripts.hermes-api-key = let
     inherit (perSystem.self) mkScript derive;
-    hex = config.age.secrets.hex.path;
+    hex = config.identityRotation.hexPath;
     perUser = user: let
       inherit (user.home) username;
       inherit (user.lib.hermes-agent) runDir seed;
@@ -41,7 +41,7 @@ in {
   # Derive Matrix passwords for each enabled Hermes user and agent.
   system.activationScripts.hermes-matrix-passwords = let
     inherit (perSystem.self) mkScript derive;
-    hex = config.age.secrets.hex.path;
+    hex = config.identityRotation.hexPath;
     perUser = user: let
       inherit (user.home) username;
       inherit (user.lib.hermes-agent) runDir;
