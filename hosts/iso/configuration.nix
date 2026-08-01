@@ -15,12 +15,8 @@
     (flake + /secrets)
   ];
 
-  # Set host platform and config options
-  nixpkgs = {
-    hostPlatform = lib.mkDefault "x86_64-linux";
-    config.allowUnfree = true;
-    config.nvidia.acceptLicense = true;
-  };
+  # Set host platform
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
   # Enable flakes and larger download buffer
   nix.settings = {
@@ -50,7 +46,6 @@
 
   # Start wireless
   networking.networkmanager.enable = true;
-  networking.wireless.enable = false;
 
   # Virtualization
   services.qemuGuest.enable = true;
