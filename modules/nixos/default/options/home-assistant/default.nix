@@ -56,7 +56,7 @@ in {
 
     zwaveVersion = mkOption {
       type = types.str;
-      default = flake.inputs.pins.containers.zwave-js-ui.version;
+      default = flake.inputs.pins.default.containers.zwave-js-ui.version;
       description = "Version of the Z-Wave instance";
     };
 
