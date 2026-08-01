@@ -84,6 +84,7 @@ Run the focused check with:
 
 ```sh
 nix build 'path:.#checks.x86_64-linux.identity-rotation' -L
+nix build 'path:.#checks.x86_64-linux.identity-rotation-vm' -L
 ```
 
 The `path:.` form includes uncommitted scaffold changes while developing them.
@@ -98,8 +99,14 @@ and `beta` only in a temporary directory.
 The simulator proves the manifest rules for prepare, partial rollout, rollback,
 resume, and finalize, including rejection of skipped and inconsistent states.
 The bridge policy also has fixed Nix assertions for current/bridge/next
-selection and explicit SSH key-pair tests. It does not yet prove NixOS
-activation, persistent host-key rollback, or secret decryption in a running VM.
+selection and explicit SSH key-pair tests.
+
+The two-node NixOS VM check uses the same public fixtures with real agenix
+activation and OpenSSH. It proves current boot, all-current preparation, partial
+rollout, rollback and cancellation, dual-recipient decryption, strict host-key
+trust, machine-ID selection, and final promotion of persistent host and age
+identities. It models the production lifecycle without reading production roots
+or writing production artifacts.
 
 ## Rotation scope
 
@@ -212,5 +219,3 @@ implemented and tested:
   and generated ciphertext artifacts; state-only finalization is blocked
 - migration checks for machine IDs, Arr, MQTT, Hermes, Camofox, and other
   derived runtime credentials, including required service restarts or reboots
-- a two-node NixOS VM test covering bridge deployment and persistent-key
-  rollback, generated secret decryption with both identities, and finalization
