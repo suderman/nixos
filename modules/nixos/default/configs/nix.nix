@@ -40,7 +40,7 @@
         dirsWith = ["id_ed25519.pub"];
       };
     in
-      map (key: builtins.readFile key) userKeys;
+      map builtins.readFile (flake.lib.identityRotation.keyFiles userKeys);
   };
 
   # Automatic garbage collection

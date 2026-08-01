@@ -4,8 +4,9 @@
   ...
 }: let
   inherit (builtins) readFile;
-  inherit (lib) genAttrs mkAfter;
+  inherit (lib) genAttrs listToAttrs mkAfter nameValuePair;
   inherit (flake.lib) ls;
+  inherit (flake.lib) identityRotation;
   inherit (flake.networking) ca domainName;
 
   # Convert my computers to trust my custom ca
@@ -97,10 +98,20 @@ in {
       asPath = false;
     };
   in {
-    knownHosts = genAttrs hostNames (hostName: {
-      publicKey = readFile (flake + /hosts/${hostName}/ssh_host_ed25519_key.pub);
-      extraHostNames = ["${hostName}.${domainName}"];
-    });
+    knownHosts = let
+      hostNamesFor = hostName: [hostName "${hostName}.${domainName}"];
+      current = genAttrs hostNames (hostName: {
+        hostNames = hostNamesFor hostName;
+        publicKey = readFile (flake + /hosts/${hostName}/ssh_host_ed25519_key.pub);
+      });
+      next = listToAttrs (map (hostName:
+        nameValuePair "${hostName}-rotation" {
+          hostNames = hostNamesFor hostName;
+          publicKey = readFile (identityRotation.nextPath (flake + /hosts/${hostName}/ssh_host_ed25519_key.pub));
+        })
+      hostNames);
+    in
+      current // lib.optionalAttrs identityRotation.active next;
   };
 
   # Custom CA private key

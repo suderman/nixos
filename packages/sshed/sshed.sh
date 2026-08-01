@@ -32,6 +32,9 @@ main() {
   verify | v)
     sshed_verify "$@"
     ;;
+  verify-pair | vp)
+    sshed_verify_pair "$@"
+    ;;
   help | *)
     sshed_help
     ;;
@@ -50,6 +53,7 @@ Usage: sshed COMMAND
   receive [DIR]
   send [HOST] [IP]
   verify [DIR]
+  verify-pair PRIVATE_KEY PUBLIC_KEY
   help
 EOF
 }
@@ -203,30 +207,45 @@ sshed_verify() {
 
   # Determine which key pair to check
   if [[ -f "$dir/ssh_host_ed25519_key" ]]; then
-    private_key_file="$dir/ssh_host_ed25519_key"
-    public_key_file="$dir/ssh_host_ed25519_key.pub"
+    local private_key_file="$dir/ssh_host_ed25519_key"
+    local public_key_file="$dir/ssh_host_ed25519_key.pub"
   elif [[ -f "$dir/id_ed25519" ]]; then
-    private_key_file="$dir/id_ed25519"
-    public_key_file="$dir/id_ed25519.pub"
+    local private_key_file="$dir/id_ed25519"
+    local public_key_file="$dir/id_ed25519.pub"
   else
     gum_exit "[sshed] no valid ed25519 key pair found in $dir"
   fi
 
+  sshed_verify_pair "$private_key_file" "$public_key_file"
+
+}
+
+# ---------------------------------------------------------------------
+# VERIFY PAIR
+# ---------------------------------------------------------------------
+sshed_verify_pair() {
+
+  local private_key_file="${1-}"
+  local public_key_file="${2-}"
+
   # Ensure private key exists
-  [[ -f $private_key_file ]] ||
+  [[ -n $private_key_file && -f $private_key_file ]] ||
     gum_exit "[sshed] $private_key_file missing"
 
   # Ensure public key exists
-  [[ -f $public_key_file ]] ||
+  [[ -n $public_key_file && -f $public_key_file ]] ||
     gum_exit "[sshed] $public_key_file missing"
 
   # Extract type from current public key (should be ssh-ed25519)
+  local current_pub_type
   current_pub_type="$(cut -d' ' -f1 <"$public_key_file" | xargs)"
 
   # Extract key from current public key (without comment)
+  local current_pub_key
   current_pub_key="$(cut -d' ' -f1,2 <"$public_key_file" | xargs)"
 
   # Derive expected public key from current private key (should match above)
+  local derived_pub_key
   derived_pub_key="$(derive public <"$private_key_file" | xargs)"
 
   # Ensure public key type

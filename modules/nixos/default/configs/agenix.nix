@@ -20,41 +20,89 @@
 
   # Add /mnt/main/storage/etc/ssh/ssh_host_ed25519_key.pub and /etc/machine-id
   system.activationScripts.etc.text = let
-    inherit (config.age.rekey) hostPubkey;
-    hex = config.age.secrets.hex.path;
+    rotation = flake.lib.identityRotation;
+    inherit (config.identityRotation) hexPath nextHexPath;
     storage = config.persist.storage.path;
-    path = [perSystem.self.derive];
+    currentHostKey = "${storage}/etc/ssh/ssh_host_ed25519_key";
+    currentHostPublicKey = flake + /hosts/${hostName}/ssh_host_ed25519_key.pub;
+    nextHostKey = "${currentHostKey}.next";
+    nextHostPublicKey = rotation.nextPath currentHostPublicKey;
+    path = [perSystem.self.derive perSystem.self.sshed];
     text =
       # bash
       ''
         # Copy public ssh host key from this repo to /mnt/main/storage
         mkdir -p ${storage}/etc/ssh
-        echo "${hostPubkey}" >${storage}/etc/ssh/ssh_host_ed25519_key.pub
-        chmod 644 ${storage}/etc/ssh/ssh_host_ed25519_key.pub
+        cat ${currentHostPublicKey} >${currentHostKey}.pub
+        chmod 644 ${currentHostKey}.pub
         # Ensure private ssh host key (even if an empty file) exists too
-        touch ${storage}/etc/ssh/ssh_host_ed25519_key
-        chmod 600 ${storage}/etc/ssh/ssh_host_ed25519_key
+        touch ${currentHostKey}
+        chmod 600 ${currentHostKey}
+      ''
+      + lib.optionalString rotation.active
+      # bash
+      ''
+        # Prepare the next deterministic host key without replacing the current key.
+        test -f ${nextHexPath}
+        cat ${nextHostPublicKey} >${nextHostKey}.pub
+        next_tmp="$(mktemp ${nextHostKey}.tmp.XXXXXX)"
+        trap 'rm -f "$next_tmp"' EXIT
+        derive hex ${hostName} <${nextHexPath} | derive ssh >"$next_tmp"
+        chmod 600 "$next_tmp"
+        sshed verify-pair "$next_tmp" ${nextHostKey}.pub
+        mv "$next_tmp" ${nextHostKey}
+        trap - EXIT
+        chmod 644 ${nextHostKey}.pub
+      ''
+      + lib.optionalString (!rotation.active)
+      # bash
+      ''
+        # Finalize by promoting a prepared key that matches the new canonical public key.
+        if [[ -f ${nextHostKey} ]] &&
+           sshed verify-pair ${nextHostKey} ${currentHostKey}.pub &&
+           ! sshed verify-pair ${currentHostKey} ${currentHostKey}.pub; then
+          mv ${nextHostKey} ${currentHostKey}
+          chmod 600 ${currentHostKey}
+        fi
+        rm -f ${nextHostKey} ${nextHostKey}.pub
+      ''
+      +
+      # bash
+      ''
         # Derive machine id from decrypted hex (if agenix decrypting)
         echo 00000000000000000000000000000000 >/etc/machine-id
-        [[ -f ${hex} ]] && derive hex ${hostName} 32 <${hex} >/etc/machine-id
+        [[ -f ${hexPath} ]] && derive hex ${hostName} 32 <${hexPath} >/etc/machine-id
         chmod 444 /etc/machine-id
       '';
   in
     lib.mkAfter "${perSystem.self.mkScript {inherit path text;}}";
 
-  services.openssh.hostKeys = [
-    {
+  services.openssh.hostKeys = let
+    rotation = flake.lib.identityRotation;
+    current = {
       # ed25519 derived from hex
       path = "${config.persist.storage.path}/etc/ssh/ssh_host_ed25519_key";
       type = "ed25519";
-    }
-    {
-      # rsa automatically generated
-      path = "${config.persist.storage.path}/etc/ssh/ssh_host_rsa_key";
-      type = "rsa";
-      bits = 4096;
-    }
-  ];
+    };
+    next = current // {path = "${current.path}.next";};
+    ed25519 =
+      if !rotation.active
+      then [current]
+      else if config.identityRotation.targetState == "current"
+      then [current]
+      else if config.identityRotation.targetState == "bridge"
+      then [current next]
+      else [next current];
+  in
+    ed25519
+    ++ [
+      {
+        # rsa automatically generated
+        path = "${config.persist.storage.path}/etc/ssh/ssh_host_rsa_key";
+        type = "rsa";
+        bits = 4096;
+      }
+    ];
 
   # Helps bootstrap a new system with expected SSH private key
   # When needed, listens on port 12345 for a key to be sent via netcat
@@ -72,12 +120,14 @@
       pkgs.hostname
       pkgs.systemd
     ];
-    script = ''
+    script = let
+      rotation = flake.lib.identityRotation;
+      sshDir = "${config.persist.storage.path}/etc/ssh";
+      currentKey = "${sshDir}/ssh_host_ed25519_key";
+      nextKey = "${currentKey}.next";
+    in ''
       # Verify private ssh key matches public key
-      cd ${config.persist.storage.path}/etc/ssh
-      if sshed verify; then
-        echo "SSH host keys VALID"
-      else
+      if ! sshed verify-pair ${currentKey} ${currentKey}.pub; then
 
         # Wait for IP and hostname to be available
         while [[ -z "$(ipaddr lan)" ]]; do sleep 1; done
@@ -94,6 +144,15 @@
         systemctl reboot
 
       fi
+
+      ${lib.optionalString rotation.active ''
+        if ! sshed verify-pair ${nextKey} ${nextKey}.pub; then
+          echo "Next SSH host key INVALID" >&2
+          exit 1
+        fi
+      ''}
+
+      echo "SSH host keys VALID"
     '';
   };
 

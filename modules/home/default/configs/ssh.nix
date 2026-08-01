@@ -14,6 +14,7 @@
   #   tail = { hub = "100.x.x.x"; ...; };
   # }
   inherit (flake.networking) zones;
+  inherit (flake.lib) identityRotation;
   zoneNames = builtins.attrNames zones;
 
   # NixOS hosts declared in `hosts/<name>/configuration.nix` that also have a
@@ -111,6 +112,17 @@
       port = 2222;
     };
   };
+
+  sshIdentityFiles = let
+    current = "~/.ssh/id_ed25519";
+    next = "~/.ssh/id_ed25519.next";
+    useNext = identityRotation.useNext "identities" username;
+  in
+    if !identityRotation.active
+    then [current "~/.ssh/id_rsa"]
+    else if useNext
+    then [next current "~/.ssh/id_rsa"]
+    else [current next "~/.ssh/id_rsa"];
 in {
   programs.ssh = {
     enable = true;
@@ -132,7 +144,7 @@ in {
       // sharedOverrides
       // {
         "*" = {
-          IdentityFile = ["~/.ssh/id_ed25519" "~/.ssh/id_rsa"];
+          IdentityFile = sshIdentityFiles;
           IdentitiesOnly = true;
           AddKeysToAgent = "8h";
           ForwardAgent = false;

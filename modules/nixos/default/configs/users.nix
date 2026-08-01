@@ -76,20 +76,23 @@ in {
   system.activationScripts = let
     inherit (lib) concatMapStrings mkAfter;
     inherit (perSystem.self) mkScript;
-    hex = config.age.secrets.hex.path;
+    rotation = flake.lib.identityRotation;
+    inherit (config.identityRotation) currentHexPath hexPath nextHexPath;
 
     # All users in this configuration including root
     everyone = userNames ++ ["root"];
 
-    usermeta = name: {
+    usermeta = name: rec {
       # Get user from nixos configuration
       user = config.users.users.${name};
 
       # Public ssh user key derived from 32-byte hex
       publicKey = flake + /users/${name}/id_ed25519.pub;
+      nextPublicKey = rotation.nextPath publicKey;
 
       # Public age id derived from 32-byte hex
       publicId = flake + /users/${name}/id_age.pub;
+      nextPublicId = rotation.nextPath publicId;
 
       # Password encrypted with age identity
       password = config.age.secrets."${name}-password".path;
@@ -103,9 +106,9 @@ in {
         # bash
         ''
           # Hash user password and store as file in /run/user
-          if [[ -f ${hex} ]]; then
+          if [[ -f ${hexPath} ]]; then
             mkdir -p /run/user
-            mkpasswd -m sha-512 -S $(cut -c 1-16<${hex}) $(cat ${password}) \
+            mkpasswd -m sha-512 -S $(cut -c 1-16<${hexPath}) $(cat ${password}) \
             >/run/user/${userName}
             chmod 600 /run/user/${userName}
           fi
@@ -120,7 +123,7 @@ in {
     users.text = let
       perUser = userName: let
         inherit (builtins) dirOf;
-        inherit (usermeta userName) user publicId publicKey password;
+        inherit (usermeta userName) user publicId publicKey nextPublicId nextPublicKey password;
         sshDir = "${user.home}/.ssh";
         ageDir = "${user.home}/.config/age";
       in
@@ -130,47 +133,77 @@ in {
           install -o ${user.name} -g ${user.group} -m 700 -d ${dirOf ageDir} ${ageDir}
           cat ${publicId} >${ageDir}/id_age.pub
 
+          write_age_identity() {
+            local root="$1" private_key="$2" public_key="$3"
+            derive hex ${userName} <"$root" | derive age >"$private_key"
+            if [[ "$(derive public <"$private_key" | xargs)" != "$(xargs <"$public_key")" ]]; then
+              rm -f "$private_key"
+              return 1
+            fi
+          }
+
           # Generate private age id derived from 32-byte hex
-          # Delete if derived id doesn't verify with repo's public id
-          if [[ -f ${hex} ]]; then
-            derive hex ${userName}<${hex} |
-            derive age >${ageDir}/id_age
-            agenix verify ${ageDir} || rm -f ${ageDir}/id_age
+          if [[ -f ${currentHexPath} ]]; then
+            write_age_identity ${currentHexPath} ${ageDir}/id_age ${ageDir}/id_age.pub
           fi
+
+          ${lib.optionalString rotation.active ''
+            cat ${nextPublicId} >${ageDir}/id_age.next.pub
+            test -f ${nextHexPath}
+            write_age_identity ${nextHexPath} ${ageDir}/id_age.next ${ageDir}/id_age.next.pub
+          ''}
+          ${lib.optionalString (!rotation.active) ''
+            rm -f ${ageDir}/id_age.next ${ageDir}/id_age.next.pub
+          ''}
 
           # Ensure proper permissions and ownership
           [[ -f ${ageDir}/id_age ]] && chmod 600 ${ageDir}/id_age
           [[ -f ${ageDir}/id_age.pub ]] && chmod 644 ${ageDir}/id_age.pub
+          [[ -f ${ageDir}/id_age.next ]] && chmod 600 ${ageDir}/id_age.next
+          [[ -f ${ageDir}/id_age.next.pub ]] && chmod 644 ${ageDir}/id_age.next.pub
           chown -R ${user.name}:${user.group} ${ageDir}
 
           # Copy public ssh user key from this repo to ~/.ssh
           install -o ${user.name} -g ${user.group} -m 700 -d ${sshDir}
           cat ${publicKey} >${sshDir}/id_ed25519.pub
 
-          # Generate private ssh user key derived from 32-byte hex
-          # Delete if derived private key doesn't verify with repo's public key
-          if [[ -f ${hex} ]]; then
-            derive hex ${userName}<${hex} |
-            derive ssh >${sshDir}/id_ed25519
-            sshed verify ${sshDir} || rm -f ${sshDir}/id_ed25519
+          write_ssh_identity() {
+            local root="$1" private_key="$2" public_key="$3" verify_key
+            verify_key="$(mktemp ${sshDir}/id_ed25519.verify.XXXXXX)"
+            derive hex ${userName} <"$root" | derive ssh >"$verify_key"
+            if ! sshed verify-pair "$verify_key" "$public_key"; then
+              rm -f "$verify_key" "$private_key"
+              return 1
+            fi
+            rm -f "$verify_key"
+            derive hex ${userName} <"$root" |
+              derive ssh "$(cat ${password})" >"$private_key"
+          }
+
+          # Generate passphrase-protected SSH identities after public-key validation.
+          if [[ -f ${currentHexPath} ]]; then
+            write_ssh_identity ${currentHexPath} ${sshDir}/id_ed25519 ${sshDir}/id_ed25519.pub
           fi
 
-          # If matching private key successfully derived, do it again
-          # encrypted with passphrase matching user password into ~/.ssh
-          if [[ -f ${hex} && -f ${sshDir}/id_ed25519 ]]; then
-            derive hex ${userName}<${hex} |
-            derive ssh "$(cat ${password})" \
-            >${sshDir}/id_ed25519
-          fi
+          ${lib.optionalString rotation.active ''
+            cat ${nextPublicKey} >${sshDir}/id_ed25519.next.pub
+            test -f ${nextHexPath}
+            write_ssh_identity ${nextHexPath} ${sshDir}/id_ed25519.next ${sshDir}/id_ed25519.next.pub
+          ''}
+          ${lib.optionalString (!rotation.active) ''
+            rm -f ${sshDir}/id_ed25519.next ${sshDir}/id_ed25519.next.pub
+          ''}
 
           # Ensure proper permissions and ownership
           [[ -f ${sshDir}/id_ed25519 ]] && chmod 600 ${sshDir}/id_ed25519
           [[ -f ${sshDir}/id_ed25519.pub ]] && chmod 644 ${sshDir}/id_ed25519.pub
+          [[ -f ${sshDir}/id_ed25519.next ]] && chmod 600 ${sshDir}/id_ed25519.next
+          [[ -f ${sshDir}/id_ed25519.next.pub ]] && chmod 644 ${sshDir}/id_ed25519.next.pub
           chown -R ${user.name}:${user.group} ${sshDir}
         '';
 
       text = concatMapStrings perUser everyone;
-      path = [perSystem.self.agenix perSystem.self.derive perSystem.self.sshed];
+      path = [perSystem.self.derive perSystem.self.sshed];
     in
       mkAfter "${mkScript {inherit text path;}}";
   };
