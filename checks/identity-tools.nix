@@ -10,6 +10,7 @@ pkgs.runCommand "identity-tools-check" {
     pkgs.gnugrep
     pkgs.python3
     perSystem.self.derive
+    perSystem.self.nixos
     perSystem.self.sshed
   ];
   DERIVE_BIN = "${perSystem.self.derive}/bin/derive";
@@ -28,5 +29,7 @@ pkgs.runCommand "identity-tools-check" {
   bash ${../packages/agenix/test.sh}
   bash ${../packages/nixos/test.sh}
   bash ${../packages/sshed/test.sh}
+  PRJ_ROOT=${../.} ${perSystem.self.nixos}/bin/nixos rotation status |
+    grep -q 'status=idle currentIndex=1 nextIndex=None'
   touch "$out"
 ''

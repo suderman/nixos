@@ -8,9 +8,20 @@ import json
 import os
 import subprocess
 import tempfile
+from argparse import Namespace
 from pathlib import Path
 
-from identity_rotation import RotationError, validate_state, validate_transition
+from identity_rotation import (
+    RotationError,
+    atomic_write_manifest,
+    command_cancel,
+    command_move,
+    command_prepare,
+    create_marker,
+    parser,
+    validate_state,
+    validate_transition,
+)
 
 
 HERE = Path(__file__).resolve().parent
@@ -170,10 +181,182 @@ def verify_transitions() -> None:
     )
 
 
+def write_artifact(path: Path, value: str = "test artifact") -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(f"{value}\n")
+
+
+def write_age_ciphertext(path: Path) -> None:
+    write_artifact(path, "age-encryption.org/v1\nfixture ciphertext")
+
+
+def managed_fixture(repository: Path) -> tuple[Path, Path]:
+    vectors = json.loads((FIXTURES / "vectors.json").read_text())
+    for host in ("alpha", "beta"):
+        write_artifact(repository / f"hosts/{host}/configuration.nix")
+        write_artifact(
+            repository / f"hosts/{host}/ssh_host_ed25519_key.pub",
+            vectors["current"][host]["sshPublic"],
+        )
+        write_artifact(
+            repository / f"hosts/{host}/ssh_host_ed25519_key.pub.next",
+            vectors["next"][host]["sshPublic"],
+        )
+        write_age_ciphertext(repository / f"secrets/nixos/{host}/fixture-hex-next.age")
+
+    write_artifact(repository / "hosts/alpha/users/alice.nix")
+    write_artifact(repository / "users/alice/default.nix")
+    write_artifact(
+        repository / "users/alice/id_age.pub",
+        vectors["current"]["beta"]["ageRecipient"],
+    )
+    write_artifact(
+        repository / "users/alice/id_age.pub.next",
+        vectors["next"]["beta"]["ageRecipient"],
+    )
+    write_artifact(
+        repository / "users/alice/id_ed25519.pub",
+        vectors["current"]["beta"]["sshPublic"],
+    )
+    write_artifact(
+        repository / "users/alice/id_ed25519.pub.next",
+        vectors["next"]["beta"]["sshPublic"],
+    )
+
+    write_artifact(
+        repository / "secrets/id_age.pub",
+        vectors["current"]["alpha"]["ageRecipient"],
+    )
+    write_age_ciphertext(repository / "secrets/rotation/next/hex.age")
+    write_age_ciphertext(repository / "secrets/rotation/next/id_age.age")
+    write_artifact(
+        repository / "secrets/rotation/next/id_age.pub",
+        vectors["next"]["alpha"]["ageRecipient"],
+    )
+
+    manifest = repository / "secrets/rotation/state.json"
+    marker = repository / "secrets/rotation/ACTIVE"
+    state = {
+        "schema": 1,
+        "status": "idle",
+        "currentIndex": 1,
+        "nextIndex": None,
+        "targets": {
+            "home": {"alpha-alice": "current"},
+            "identities": {"alice": "current"},
+            "nixos": {"alpha": "current", "beta": "current"},
+        },
+    }
+    atomic_write_manifest(manifest, state)
+    return manifest, marker
+
+
+def managed_args(repository: Path, manifest: Path, marker: Path, **values) -> Namespace:
+    return Namespace(
+        repository=repository,
+        manifest=manifest,
+        marker=marker,
+        derivation_index=1,
+        **values,
+    )
+
+
+def verify_managed_state() -> None:
+    with tempfile.TemporaryDirectory(prefix="identity-rotation-managed.") as directory:
+        repository = Path(directory)
+        manifest, marker = managed_fixture(repository)
+        prepare = managed_args(repository, manifest, marker, next_index=2)
+
+        missing_artifact = repository / "users/alice/id_age.pub.next"
+        saved_artifact = missing_artifact.read_text()
+        missing_artifact.unlink()
+        original_manifest = manifest.read_bytes()
+        expect_invalid(
+            lambda: command_prepare(prepare),
+            "managed prepare accepted an incomplete artifact set",
+        )
+        assert manifest.read_bytes() == original_manifest
+        assert not marker.exists()
+        missing_artifact.write_text(saved_artifact)
+
+        invalid_public = repository / "hosts/alpha/ssh_host_ed25519_key.pub.next"
+        saved_public = invalid_public.read_text()
+        invalid_public.write_text("not an SSH public key\n")
+        expect_invalid(
+            lambda: command_prepare(prepare),
+            "managed prepare accepted malformed public material",
+        )
+        assert manifest.read_bytes() == original_manifest
+        assert not marker.exists()
+        invalid_public.write_text(saved_public)
+
+        parsed = parser().parse_args(
+            [
+                "prepare",
+                str(manifest),
+                "--repository",
+                str(repository),
+                "--derivation-index",
+                "1",
+                "--marker",
+                str(marker),
+                "2",
+            ]
+        )
+        assert parsed.next_index == 2
+
+        command_prepare(prepare)
+        prepared = json.loads(manifest.read_text())
+        assert prepared["status"] == "active"
+        assert prepared["nextIndex"] == 2
+        assert marker.read_text() == "identity rotation active: 1 -> 2\n"
+
+        skipped = managed_args(
+            repository,
+            manifest,
+            marker,
+            category="nixos",
+            name="alpha",
+            target_state="next",
+        )
+        prepared_manifest = manifest.read_bytes()
+        expect_invalid(
+            lambda: command_move(skipped),
+            "managed move bypassed bridge",
+        )
+        assert manifest.read_bytes() == prepared_manifest
+
+        bridge = managed_args(
+            repository,
+            manifest,
+            marker,
+            category="nixos",
+            name="alpha",
+            target_state="bridge",
+        )
+        command_move(bridge)
+        expect_invalid(
+            lambda: command_cancel(managed_args(repository, manifest, marker)),
+            "managed cancel accepted a partially migrated state",
+        )
+        assert marker.exists()
+
+        bridge.target_state = "current"
+        command_move(bridge)
+        command_cancel(managed_args(repository, manifest, marker))
+        assert json.loads(manifest.read_text())["status"] == "idle"
+        assert not marker.exists()
+
+        create_marker(marker, 1, 2)
+        command_cancel(managed_args(repository, manifest, marker))
+        assert not marker.exists()
+
+
 def main() -> None:
     with tempfile.TemporaryDirectory(prefix="identity-rotation-test.") as directory:
         verify_vectors(Path(directory))
     verify_transitions()
+    verify_managed_state()
     print("identity rotation simulation passed")
 
 

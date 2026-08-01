@@ -15,9 +15,9 @@ commands that can rewrite identity state fleet-wide:
 - `agenix rekey -a`
 - `agenix update-masterkeys`
 
-The future managed rotation workflow may set `IDENTITY_ROTATION_ALLOW=1` only
-around its validated, phase-specific operations. Do not use that override to
-run the blocked commands manually.
+The managed rotation workflow may eventually set `IDENTITY_ROTATION_ALLOW=1`
+only around validated, phase-specific cryptographic operations. Do not use that
+override to run the blocked commands manually.
 
 ## State manifest
 
@@ -41,6 +41,44 @@ reached `next` and `nextIndex` is promoted to `currentIndex`.
 
 The validator only reads manifests and repository paths. It does not decrypt,
 derive, generate, rekey, or deploy identity material.
+
+## Managed state commands
+
+The `nixos rotation` command owns marker and ledger changes. It never uses the
+rotation guard override and never reads plaintext identity material.
+
+```sh
+nixos rotation status
+nixos rotation prepare 2
+nixos rotation move nixos kit bridge
+nixos rotation move nixos kit next
+nixos rotation move nixos kit bridge
+nixos rotation move nixos kit current
+nixos rotation cancel
+```
+
+`prepare` works only from a valid idle ledger. Before entering active state it
+requires a complete non-empty next artifact set, verifies every next public key
+is a valid age recipient or Ed25519 SSH key and differs from its canonical key,
+and requires valid age ciphertext plus exactly one generated `hex-next`
+ciphertext per NixOS target. It then creates the safety marker before atomically
+replacing `state.json` and stages the complete preparation set.
+
+`move` changes exactly one target by one adjacent state and atomically replaces
+the manifest only after validating repository membership and the transition.
+It cannot skip `bridge` or mutate derivation indexes.
+
+`cancel` succeeds only after every target has returned to `current`. It writes
+the idle ledger before removing the marker, so an interruption remains guarded.
+It can also remove a marker left by an interrupted prepare whose manifest is
+still valid and idle. Next artifacts are retained for explicit review or secure
+cleanup; cancellation does not silently delete cryptographic material.
+
+There is intentionally no usable `finalize` command yet. Finalization must
+promote the master identity, root ciphertext, canonical public keys, generated
+ciphertext, and `flake.derivationIndex` as one rollback-capable transaction. A
+state-only finalization would produce an undecryptable fleet, so the wrapper
+refuses it.
 
 Run the focused check with:
 
@@ -89,6 +127,8 @@ The bridge is inert while `state.json` is idle. An active manifest expects these
 next-generation artifacts:
 
 - encrypted next root: `secrets/rotation/next/hex.age`
+- passphrase-encrypted next master: `secrets/rotation/next/id_age.age`
+- next master recipient: `secrets/rotation/next/id_age.pub`
 - host public keys: `hosts/<host>/ssh_host_ed25519_key.pub.next`
 - user/service SSH public keys: `users/<name>/id_ed25519.pub.next`
 - user age recipients: `users/<name>/id_age.pub.next`
@@ -168,8 +208,8 @@ deleted during preflight and must not reappear.
 Do not create production index-2 artifacts until these remaining items are
 implemented and tested:
 
-- a managed command that prepares, validates, and advances one atomic target
-  transition without bypassing the rotation guard manually
+- managed creation and rollback-capable finalization of root, master, public,
+  and generated ciphertext artifacts; state-only finalization is blocked
 - migration checks for machine IDs, Arr, MQTT, Hermes, Camofox, and other
   derived runtime credentials, including required service restarts or reboots
 - a two-node NixOS VM test covering bridge deployment and persistent-key

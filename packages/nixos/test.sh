@@ -8,8 +8,11 @@ trap 'rm -rf "$test_dir"' EXIT
 
 mock_bin="$test_dir/bin"
 rotation_marker="$test_dir/ACTIVE"
+rotation_state="$test_dir/state.json"
+rotation_args="$test_dir/rotation.args"
 mkdir -p "$mock_bin"
 touch "$rotation_marker"
+printf '{}\n' >"$rotation_state"
 
 printf '#!%s\n' "$bash_bin" >"$mock_bin/gum"
 cat >>"$mock_bin/gum" <<'EOF'
@@ -23,9 +26,20 @@ exit 97
 EOF
 chmod +x "$mock_bin/gum"
 
+printf '#!%s\n' "$bash_bin" >"$mock_bin/python3"
+cat >>"$mock_bin/python3" <<'EOF'
+set -euo pipefail
+printf '%s\n' "$*" >"$ROTATION_ARGS"
+EOF
+chmod +x "$mock_bin/python3"
+
 run_nixos() {
   env \
     IDENTITY_ROTATION_MARKER="$rotation_marker" \
+    IDENTITY_ROTATION_SCRIPT="$test_dir/identity_rotation.py" \
+    IDENTITY_ROTATION_STATE="$rotation_state" \
+    ROTATION_ARGS="$rotation_args" \
+    derivation_index=1 \
     PATH="$mock_bin:$PATH" \
     bash "$nixos_script" "$@"
 }
@@ -37,5 +51,17 @@ fi
 
 if run_nixos add host >"$test_dir/add.out" 2>&1; then
   printf 'FAIL: nixos add ran while identity rotation was active\n' >&2
+  exit 1
+fi
+
+run_nixos rotation status
+expected="${test_dir}/identity_rotation.py status ${rotation_state} --repository . --derivation-index 1 --marker ${rotation_marker}"
+if [[ $(<"$rotation_args") != "$expected" ]]; then
+  printf 'FAIL: nixos rotation status dispatched unexpected arguments\n' >&2
+  exit 1
+fi
+
+if run_nixos rotation finalize >"$test_dir/finalize.out" 2>&1; then
+  printf 'FAIL: unsafe identity rotation finalization was available\n' >&2
   exit 1
 fi

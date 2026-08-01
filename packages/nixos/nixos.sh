@@ -15,6 +15,8 @@ dirs() { find "$1" -mindepth 1 -maxdepth 1 -type d -printf '%f\n'; }
 [[ -n ${PRJ_ROOT-} ]] && cd "$PRJ_ROOT"
 
 rotation_marker="${IDENTITY_ROTATION_MARKER:-secrets/rotation/ACTIVE}"
+rotation_state="${IDENTITY_ROTATION_STATE:-secrets/rotation/state.json}"
+rotation_script="${IDENTITY_ROTATION_SCRIPT:-${identity_rotation_script:-secrets/rotation/identity_rotation.py}}"
 
 identity_rotation_guard() {
   if [[ ${IDENTITY_ROTATION_ALLOW:-0} != "1" && -e $rotation_marker ]]; then
@@ -49,6 +51,9 @@ main() {
   repl | r)
     nixos_repl "$@"
     ;;
+  rotation | rotate)
+    nixos_rotation "$@"
+    ;;
   detect | t)
     nixos_detect "$@"
     ;;
@@ -81,6 +86,12 @@ Usage: nixos [COMMAND]
   cache             Build host closures and push to Attic
     [HOST...]       Push selected hosts, or use --all for all hosts
   repl              Open a nixos-rebuild repl for a host
+  rotation          Manage validated identity-rotation state
+    status          Validate and summarize the current state
+    prepare INDEX   Enter active state after artifact validation
+    move TYPE NAME STATE
+                    Move one target through current/bridge/next
+    cancel          Leave active state after all targets return to current
   add               Add a NixOS host or user
   generate          Generate missing files
   detect            Detect system devices to generate configuration   
@@ -96,6 +107,68 @@ Usage: nixos [COMMAND]
     ssh [iso]       SSH into virtual machine (default disk, optinal ISO)
   help              Show this help
 EOF
+}
+
+# ---------------------------------------------------------------------
+# IDENTITY ROTATION
+# ---------------------------------------------------------------------
+nixos_rotation() {
+  local command="${1:-status}"
+  shift || true
+  local -a common=(
+    "$rotation_state"
+    --repository .
+    --derivation-index "${derivation_index:?derivation_index is required}"
+    --marker "$rotation_marker"
+  )
+
+  case "$command" in
+  status | s)
+    [[ $# -eq 0 ]] || gum_exit "Usage: nixos rotation status"
+    python3 "$rotation_script" status "${common[@]}"
+    ;;
+  prepare | p)
+    [[ $# -eq 1 ]] || gum_exit "Usage: nixos rotation prepare INDEX"
+    python3 "$rotation_script" prepare "${common[@]}" "$1"
+    nixos_rotation_stage_prepare
+    ;;
+  move | m)
+    [[ $# -eq 3 ]] || gum_exit "Usage: nixos rotation move TYPE NAME STATE"
+    python3 "$rotation_script" move "${common[@]}" "$1" "$2" "$3"
+    git add -- "$rotation_state"
+    ;;
+  cancel | c)
+    [[ $# -eq 0 ]] || gum_exit "Usage: nixos rotation cancel"
+    python3 "$rotation_script" cancel "${common[@]}"
+    git add -A -- "$rotation_state" "$rotation_marker"
+    ;;
+  finalize | f)
+    gum_exit "Finalization is blocked until atomic identity and ciphertext promotion is implemented"
+    ;;
+  help | -h | --help)
+    nixos_help
+    ;;
+  *)
+    gum_exit "Unknown identity rotation command: $command"
+    ;;
+  esac
+}
+
+nixos_rotation_stage_prepare() {
+  local -a artifacts=(
+    "$rotation_state"
+    "$rotation_marker"
+    secrets/rotation/next/hex.age
+    secrets/rotation/next/id_age.age
+    secrets/rotation/next/id_age.pub
+  )
+  local path
+  shopt -s nullglob
+  for path in hosts/*/ssh_host_ed25519_key.pub.next; do artifacts+=("$path"); done
+  for path in users/*/id_age.pub.next users/*/id_ed25519.pub.next; do artifacts+=("$path"); done
+  for path in secrets/nixos/*/*-hex-next.age; do artifacts+=("$path"); done
+  shopt -u nullglob
+  git add -- "${artifacts[@]}"
 }
 
 # ---------------------------------------------------------------------

@@ -22,6 +22,7 @@ perSystem.self.mkScript {
     pkgs.netcat
     pkgs.openssh
     pkgs.passh
+    pkgs.python3
     # pkgs.qemu (install separately on desktop)
   ];
 
@@ -29,7 +30,9 @@ perSystem.self.mkScript {
   env.templates = ./templates;
 
   # Derivation path for key
+  env.derivation_index = toString flake.derivationIndex;
   env.derivation_path = "bip85-hex32-index${toString flake.derivationIndex}";
+  env.identity_rotation_script = ../../secrets/rotation/identity_rotation.py;
 
   # Bash script
   text = builtins.readFile ./nixos.sh;
