@@ -167,6 +167,16 @@ if run_agenix rekey -a >"$test_dir/rotation-rekey.out" 2>&1; then
   exit 1
 fi
 
+if run_agenix rekey secrets/hex.age >"$test_dir/rotation-single-rekey.out" 2>&1; then
+  printf 'FAIL: single-secret rekey ran while identity rotation was active\n' >&2
+  exit 1
+fi
+
+if run_agenix edit "$secrets_dir/hex.age" >"$test_dir/rotation-edit.out" 2>&1; then
+  printf 'FAIL: secret edit ran while identity rotation was active\n' >&2
+  exit 1
+fi
+
 if run_agenix update-masterkeys >"$test_dir/rotation-masterkeys.out" 2>&1; then
   printf 'FAIL: master-key update ran while identity rotation was active\n' >&2
   exit 1

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import os
 import subprocess
@@ -15,6 +16,7 @@ from identity_rotation import (
     RotationError,
     atomic_write_manifest,
     command_cancel,
+    command_mark_prepared,
     command_move,
     command_prepare,
     create_marker,
@@ -46,13 +48,18 @@ def derive(value: str, *arguments: str) -> str:
 
 
 def fixture_state(
-    *, status: str = "idle", current_index: int = 1, next_index: int | None = None
+    *,
+    status: str = "idle",
+    current_index: int = 1,
+    next_index: int | None = None,
+    prepared: bool = False,
 ) -> dict:
     return {
         "schema": 1,
         "status": status,
         "currentIndex": current_index,
         "nextIndex": next_index,
+        "preparedHosts": ["alpha", "beta"] if prepared else [],
         "targets": {
             "home": {},
             "identities": {},
@@ -64,6 +71,12 @@ def fixture_state(
 def moved(state: dict, target: str, target_state: str) -> dict:
     result = copy.deepcopy(state)
     result["targets"]["nixos"][target] = target_state
+    return result
+
+
+def readied(state: dict, *hosts: str) -> dict:
+    result = copy.deepcopy(state)
+    result["preparedHosts"] = sorted(hosts)
     return result
 
 
@@ -108,7 +121,9 @@ def verify_vectors(work_dir: Path) -> None:
 
 def verify_transitions() -> None:
     idle = fixture_state()
-    prepared = fixture_state(status="active", next_index=2)
+    active_unprepared = fixture_state(status="active", next_index=2)
+    alpha_prepared = readied(active_unprepared, "alpha")
+    prepared = fixture_state(status="active", next_index=2, prepared=True)
     partial = moved(prepared, "alpha", "bridge")
     rolled_back = moved(partial, "alpha", "current")
     resumed = moved(rolled_back, "alpha", "bridge")
@@ -135,7 +150,9 @@ def verify_transitions() -> None:
     )
 
     sequence = (
-        (idle, prepared),
+        (idle, active_unprepared),
+        (active_unprepared, alpha_prepared),
+        (alpha_prepared, prepared),
         (prepared, partial),
         (partial, rolled_back),
         (rolled_back, resumed),
@@ -151,12 +168,16 @@ def verify_transitions() -> None:
     # The BIP-85 index is operator-declared recovery metadata, not a generation
     # counter. A fresh mnemonic may reset or reuse its index.
     for next_index in (0, 1):
-        alternate_prepared = fixture_state(status="active", next_index=next_index)
+        alternate_unprepared = fixture_state(status="active", next_index=next_index)
+        alternate_alpha = readied(alternate_unprepared, "alpha")
+        alternate_prepared = readied(alternate_unprepared, "alpha", "beta")
         alternate_all_next = moved(
             moved(alternate_prepared, "alpha", "next"), "beta", "next"
         )
         alternate_finalized = fixture_state(current_index=next_index)
-        validate_transition(idle, alternate_prepared)
+        validate_transition(idle, alternate_unprepared)
+        validate_transition(alternate_unprepared, alternate_alpha)
+        validate_transition(alternate_alpha, alternate_prepared)
         validate_transition(alternate_all_next, alternate_finalized)
 
     skipped_bridge = moved(prepared, "alpha", "next")
@@ -201,6 +222,10 @@ def write_age_ciphertext(path: Path) -> None:
     write_artifact(path, "age-encryption.org/v1\nfixture ciphertext")
 
 
+def file_hash(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
 def managed_fixture(repository: Path) -> tuple[Path, Path]:
     vectors = json.loads((FIXTURES / "vectors.json").read_text())
     for host in ("alpha", "beta"):
@@ -213,7 +238,8 @@ def managed_fixture(repository: Path) -> tuple[Path, Path]:
             repository / f"hosts/{host}/ssh_host_ed25519_key.pub.next",
             vectors["next"][host]["sshPublic"],
         )
-        write_age_ciphertext(repository / f"secrets/nixos/{host}/fixture-hex-next.age")
+        write_age_ciphertext(repository / f"secrets/nixos/{host}/current-hex-next.age")
+        write_age_ciphertext(repository / f"secrets/nixos/{host}/next-hex-next.age")
 
     write_artifact(repository / "hosts/alpha/users/alice.nix")
     write_artifact(repository / "users/alice/default.nix")
@@ -245,6 +271,35 @@ def managed_fixture(repository: Path) -> tuple[Path, Path]:
         vectors["next"]["alpha"]["ageRecipient"],
     )
 
+    artifact_paths = [
+        "hosts/alpha/ssh_host_ed25519_key.pub.next",
+        "hosts/beta/ssh_host_ed25519_key.pub.next",
+        "users/alice/id_age.pub.next",
+        "users/alice/id_ed25519.pub.next",
+        "secrets/rotation/next/hex.age",
+        "secrets/rotation/next/id_age.age",
+        "secrets/rotation/next/id_age.pub",
+        "secrets/nixos/alpha/current-hex-next.age",
+        "secrets/nixos/alpha/next-hex-next.age",
+        "secrets/nixos/beta/current-hex-next.age",
+        "secrets/nixos/beta/next-hex-next.age",
+    ]
+    write_artifact(
+        repository / "secrets/rotation/next/artifacts.json",
+        json.dumps(
+            {
+                "schema": 1,
+                "recoveryIndex": 2,
+                "sourceSecrets": {},
+                "artifacts": {
+                    path: file_hash(repository / path) for path in artifact_paths
+                },
+                "hosts": ["alpha", "beta"],
+            },
+            indent=2,
+        ),
+    )
+
     manifest = repository / "secrets/rotation/state.json"
     marker = repository / "secrets/rotation/ACTIVE"
     state = {
@@ -252,6 +307,7 @@ def managed_fixture(repository: Path) -> tuple[Path, Path]:
         "status": "idle",
         "currentIndex": 1,
         "nextIndex": None,
+        "preparedHosts": [],
         "targets": {
             "home": {"alpha-alice": "current"},
             "identities": {"alice": "current"},
@@ -322,6 +378,10 @@ def verify_managed_state() -> None:
         assert prepared["nextIndex"] == 2
         assert marker.read_text() == "identity rotation active: 1 -> 2\n"
 
+        for host in ("alpha", "beta"):
+            command_mark_prepared(managed_args(repository, manifest, marker, host=host))
+        assert json.loads(manifest.read_text())["preparedHosts"] == ["alpha", "beta"]
+
         skipped = managed_args(
             repository,
             manifest,
@@ -363,11 +423,19 @@ def verify_managed_state() -> None:
         assert not marker.exists()
 
         for next_index in (0, 1):
+            artifact_manifest = repository / "secrets/rotation/next/artifacts.json"
+            artifact_state = json.loads(artifact_manifest.read_text())
+            artifact_state["recoveryIndex"] = next_index
+            artifact_manifest.write_text(json.dumps(artifact_state, indent=2) + "\n")
             alternate_prepare = managed_args(
                 repository, manifest, marker, next_index=next_index
             )
             command_prepare(alternate_prepare)
             assert json.loads(manifest.read_text())["nextIndex"] == next_index
+            for host in ("alpha", "beta"):
+                command_mark_prepared(
+                    managed_args(repository, manifest, marker, host=host)
+                )
             command_cancel(managed_args(repository, manifest, marker))
 
 

@@ -16,10 +16,13 @@ dirs() { find "$1" -mindepth 1 -maxdepth 1 -type d -printf '%f\n'; }
 
 rotation_marker="${IDENTITY_ROTATION_MARKER:-secrets/rotation/ACTIVE}"
 rotation_state="${IDENTITY_ROTATION_STATE:-secrets/rotation/state.json}"
-rotation_script="${IDENTITY_ROTATION_SCRIPT:-${identity_rotation_script:-secrets/rotation/identity_rotation.py}}"
+rotation_directory="${identity_rotation_directory:-secrets/rotation}"
+rotation_script="${IDENTITY_ROTATION_SCRIPT:-$rotation_directory/identity_rotation.py}"
+rotation_artifacts_script="${IDENTITY_ARTIFACTS_SCRIPT:-$rotation_directory/identity_artifacts.py}"
+rotation_journal="${IDENTITY_ROTATION_JOURNAL:-secrets/rotation/PREPARE.json}"
 
 identity_rotation_guard() {
-  if [[ ${IDENTITY_ROTATION_ALLOW:-0} != "1" && -e $rotation_marker ]]; then
+  if [[ ${IDENTITY_ROTATION_ALLOW:-0} != "1" && (-e $rotation_marker || -e $rotation_journal) ]]; then
     gum_exit "Identity rotation is active; use the managed rotation workflow"
   fi
 }
@@ -89,9 +92,15 @@ Usage: nixos [COMMAND]
   rotation          Manage validated identity-rotation state
     status          Validate and summarize the current state
     prepare INDEX   Enter active state after artifact validation
+    deploy-prepared HOST
+                    Deploy and verify one host's prepared configuration
+    verify-prepared HOST
+                    Record one host's prepared runtime attestation
     move TYPE NAME STATE
                     Move one target through current/bridge/next
     cancel          Leave active state after all targets return to current
+    cleanup         Remove verified next artifacts after cancellation
+    recover         Recover an interrupted artifact preparation transaction
   add               Add a NixOS host or user
   generate          Generate missing files
   detect            Detect system devices to generate configuration   
@@ -129,8 +138,16 @@ nixos_rotation() {
     ;;
   prepare | p)
     [[ $# -eq 1 ]] || gum_exit "Usage: nixos rotation prepare INDEX"
-    python3 "$rotation_script" prepare "${common[@]}" "$1"
+    nixos_rotation_prepare "$1"
     nixos_rotation_stage_prepare
+    ;;
+  deploy-prepared)
+    [[ $# -eq 1 ]] || gum_exit "Usage: nixos rotation deploy-prepared HOST"
+    nixos_rotation_deploy_prepared "$1"
+    ;;
+  verify-prepared)
+    [[ $# -eq 1 ]] || gum_exit "Usage: nixos rotation verify-prepared HOST"
+    nixos_rotation_verify_prepared "$1"
     ;;
   move | m)
     [[ $# -eq 3 ]] || gum_exit "Usage: nixos rotation move TYPE NAME STATE"
@@ -141,6 +158,28 @@ nixos_rotation() {
     [[ $# -eq 0 ]] || gum_exit "Usage: nixos rotation cancel"
     python3 "$rotation_script" cancel "${common[@]}"
     git add -A -- "$rotation_state" "$rotation_marker"
+    ;;
+  cleanup)
+    [[ $# -eq 0 ]] || gum_exit "Usage: nixos rotation cleanup"
+    local -a cleanup_paths
+    mapfile -t cleanup_paths < <(
+      python3 "$rotation_artifacts_script" paths secrets/rotation/next/artifacts.json
+    )
+    python3 "$rotation_artifacts_script" cleanup \
+      --repository . \
+      --state "$rotation_state" \
+      --marker "$rotation_marker" \
+      --journal "$rotation_journal" \
+      --runtime-next /tmp/id_age_next
+    git add -A -- "${cleanup_paths[@]}"
+    ;;
+  recover)
+    [[ $# -eq 0 ]] || gum_exit "Usage: nixos rotation recover"
+    python3 "$rotation_artifacts_script" recover \
+      --repository . \
+      --manifest "$rotation_state" \
+      --marker "$rotation_marker" \
+      --journal "$rotation_journal"
     ;;
   finalize | f)
     gum_exit "Finalization is blocked until atomic identity and ciphertext promotion is implemented"
@@ -154,21 +193,82 @@ nixos_rotation() {
   esac
 }
 
+nixos_rotation_prepare() {
+  local next_index="$1"
+  local root_file cleanup_root="false"
+  if [[ -n ${IDENTITY_ROTATION_ROOT_FILE:-} ]]; then
+    root_file="$IDENTITY_ROTATION_ROOT_FILE"
+  else
+    root_file="$(mktemp)"
+    cleanup_root="true"
+    chmod 600 "$root_file"
+    local root=""
+    if [[ -n ${DISPLAY-} || -n ${WAYLAND_DISPLAY-} ]]; then
+      if [[ "$(gum choose "Scan QR code" "Enter manually")" == "Scan QR code" ]]; then
+        root="$(qr || true)"
+      fi
+    fi
+    [[ -n $root ]] || root="$(gum input --placeholder "Enter next 32-byte hex" | xargs)"
+    [[ $root =~ ^[0-9a-fA-F]{64}$ ]] || gum_exit "Failed to receive valid next hex"
+    printf '%s\n' "${root,,}" >"$root_file"
+    unset root
+  fi
+
+  agenix unlock quiet
+  local status=0
+  python3 "$rotation_artifacts_script" prepare \
+    --repository . \
+    --manifest "$rotation_state" \
+    --marker "$rotation_marker" \
+    --journal "$rotation_journal" \
+    --state-script "$rotation_script" \
+    --derivation-index "${derivation_index:?derivation_index is required}" \
+    --next-index "$next_index" \
+    --root-file "$root_file" \
+    --runtime-next /tmp/id_age_next \
+    --system "${identity_rotation_system:?identity_rotation_system is required}" || status=$?
+  [[ $cleanup_root == "false" ]] || rm -f "$root_file"
+  return "$status"
+}
+
 nixos_rotation_stage_prepare() {
-  local -a artifacts=(
-    "$rotation_state"
-    "$rotation_marker"
-    secrets/rotation/next/hex.age
-    secrets/rotation/next/id_age.age
-    secrets/rotation/next/id_age.pub
+  local -a artifacts=("$rotation_state" "$rotation_marker")
+  mapfile -t prepared_paths < <(
+    python3 "$rotation_artifacts_script" paths secrets/rotation/next/artifacts.json
   )
-  local path
-  shopt -s nullglob
-  for path in hosts/*/ssh_host_ed25519_key.pub.next; do artifacts+=("$path"); done
-  for path in users/*/id_age.pub.next users/*/id_ed25519.pub.next; do artifacts+=("$path"); done
-  for path in secrets/nixos/*/*-hex-next.age; do artifacts+=("$path"); done
-  shopt -u nullglob
+  artifacts+=("${prepared_paths[@]}")
   git add -- "${artifacts[@]}"
+}
+
+nixos_rotation_verify_prepared() {
+  local host="$1"
+  local manifest=secrets/rotation/next/artifacts.json
+  [[ -f $manifest ]] || gum_exit "Prepared artifact manifest is missing"
+  local expected actual
+  expected="$(sha256sum "$manifest" | cut -d ' ' -f 1)"
+  if [[ $host == "$(hostname)" ]]; then
+    actual="$(</etc/identity-rotation/prepared)"
+  else
+    actual="$(ssh "$host" cat /etc/identity-rotation/prepared)"
+  fi
+  [[ $actual == "$expected" ]] || gum_exit "$host is not running the prepared identity configuration"
+  python3 "$rotation_script" mark-prepared \
+    "$rotation_state" \
+    --repository . \
+    --derivation-index "${derivation_index:?derivation_index is required}" \
+    --marker "$rotation_marker" \
+    "$host"
+  git add -- "$rotation_state"
+}
+
+nixos_rotation_deploy_prepared() {
+  local host="$1"
+  if [[ $host == "$(hostname)" ]]; then
+    sudo nixos-rebuild --flake ".#$host" switch
+  else
+    nixos-rebuild --target-host "$host" --sudo --ask-sudo-password --flake ".#$host" switch
+  fi
+  nixos_rotation_verify_prepared "$host"
 }
 
 # ---------------------------------------------------------------------

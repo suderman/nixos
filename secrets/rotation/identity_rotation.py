@@ -7,6 +7,7 @@ import argparse
 import base64
 import binascii
 import copy
+import hashlib
 import json
 import os
 import sys
@@ -19,7 +20,14 @@ from typing import Any
 CATEGORIES = ("home", "identities", "nixos")
 TARGET_STATES = ("current", "bridge", "next")
 STATE_RANK = {state: rank for rank, state in enumerate(TARGET_STATES)}
-ROOT_KEYS = {"schema", "status", "currentIndex", "nextIndex", "targets"}
+ROOT_KEYS = {
+    "schema",
+    "status",
+    "currentIndex",
+    "nextIndex",
+    "preparedHosts",
+    "targets",
+}
 
 
 class RotationError(ValueError):
@@ -173,10 +181,75 @@ def _require_age_ciphertext(path: Path) -> None:
             raise RotationError(f"invalid age ciphertext artifact: {path}")
 
 
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def _validated_relative_path(value: str, field: str) -> Path:
+    path = Path(value)
+    if not value or path.is_absolute() or ".." in path.parts:
+        raise RotationError(f"{field} contains an unsafe path: {value}")
+    return path
+
+
+def validate_artifact_manifest(
+    repository: Path,
+    expected_targets: dict[str, set[str]],
+    next_index: int,
+) -> None:
+    path = repository / "secrets/rotation/next/artifacts.json"
+    value = load_manifest(path)
+    expected_fields = {"schema", "recoveryIndex", "sourceSecrets", "artifacts", "hosts"}
+    if set(value) != expected_fields or value["schema"] != 1:
+        raise RotationError(f"invalid artifact manifest schema: {path}")
+    if value["recoveryIndex"] != next_index:
+        raise RotationError("artifact manifest recoveryIndex differs from nextIndex")
+    if value["hosts"] != sorted(expected_targets["nixos"]):
+        raise RotationError("artifact manifest host inventory differs from repository")
+
+    for field in ("sourceSecrets", "artifacts"):
+        entries = value[field]
+        if not isinstance(entries, dict):
+            raise RotationError(f"artifact manifest {field} must be an object")
+        for relative_value, expected_hash in entries.items():
+            relative = _validated_relative_path(relative_value, field)
+            if not isinstance(expected_hash, str) or len(expected_hash) != 64:
+                raise RotationError(
+                    f"artifact manifest contains invalid hash: {relative}"
+                )
+            artifact = repository / relative
+            if not artifact.is_file() or _sha256(artifact) != expected_hash:
+                raise RotationError(f"artifact manifest hash mismatch: {relative}")
+
+    artifact_paths = set(value["artifacts"])
+    required = {
+        "secrets/rotation/next/hex.age",
+        "secrets/rotation/next/id_age.age",
+        "secrets/rotation/next/id_age.pub",
+    }
+    required.update(
+        f"hosts/{host}/ssh_host_ed25519_key.pub.next"
+        for host in expected_targets["nixos"]
+    )
+    for identity in expected_targets["identities"]:
+        required.add(f"users/{identity}/id_age.pub.next")
+        required.add(f"users/{identity}/id_ed25519.pub.next")
+    missing = required - artifact_paths
+    if missing:
+        raise RotationError(
+            f"artifact manifest omits required paths: {sorted(missing)}"
+        )
+
+
 def validate_next_artifacts(
-    repository: Path, expected_targets: dict[str, set[str]]
+    repository: Path, expected_targets: dict[str, set[str]], next_index: int
 ) -> None:
     """Require a complete, distinct next-generation artifact set."""
+    validate_artifact_manifest(repository, expected_targets, next_index)
     rotation_next = repository / "secrets/rotation/next"
     for name in ("hex.age", "id_age.age"):
         _require_age_ciphertext(rotation_next / name)
@@ -190,14 +263,15 @@ def validate_next_artifacts(
             current, current.with_name(current.name + ".next"), "ssh"
         )
 
-        generated = list(
+        generated = sorted(
             (repository / f"secrets/nixos/{host_name}").glob("*-hex-next.age")
         )
-        if len(generated) != 1 or generated[0].stat().st_size == 0:
+        if len(generated) != 2 or any(path.stat().st_size == 0 for path in generated):
             raise RotationError(
-                f"expected one generated hex-next ciphertext for NixOS target {host_name}"
+                f"expected current and next generated hex-next ciphertexts for NixOS target {host_name}"
             )
-        _require_age_ciphertext(generated[0])
+        for path in generated:
+            _require_age_ciphertext(path)
 
     for identity in sorted(expected_targets["identities"]):
         for name in ("id_age.pub", "id_ed25519.pub"):
@@ -240,6 +314,21 @@ def target_states(state: dict[str, Any]) -> list[str]:
         for category in CATEGORIES
         for target_state in state["targets"][category].values()
     ]
+
+
+def prepared_hosts(state: dict[str, Any]) -> set[str]:
+    value = state["preparedHosts"]
+    if not isinstance(value, list) or not all(
+        isinstance(host, str) and host for host in value
+    ):
+        raise RotationError("preparedHosts must be a list of host names")
+    result = set(value)
+    if len(result) != len(value):
+        raise RotationError("preparedHosts contains duplicate names")
+    unknown = result - set(state["targets"]["nixos"])
+    if unknown:
+        raise RotationError(f"preparedHosts contains unknown hosts: {sorted(unknown)}")
+    return result
 
 
 def validate_state(
@@ -292,6 +381,8 @@ def validate_state(
                     f" stale={sorted(actual_names - expected_names)}"
                 )
 
+    ready_hosts = prepared_hosts(state)
+
     if derivation_index is not None and current_index != derivation_index:
         raise RotationError(
             f"currentIndex {current_index} does not match derivationIndex "
@@ -306,6 +397,8 @@ def validate_state(
             raise RotationError("idle state must not have nextIndex")
         if any(value != "current" for value in all_states):
             raise RotationError("idle state requires every target to be current")
+        if ready_hosts:
+            raise RotationError("idle state must not retain preparedHosts")
     elif next_index is None:
         raise RotationError("active state requires nextIndex")
 
@@ -337,6 +430,8 @@ def validate_transition(before: dict[str, Any], after: dict[str, Any]) -> None:
         raise RotationError("transition changes schema")
 
     changes = _target_changes(before, after)
+    before_prepared = prepared_hosts(before)
+    after_prepared = prepared_hosts(after)
     before_status = before["status"]
     after_status = after["status"]
 
@@ -345,6 +440,8 @@ def validate_transition(before: dict[str, Any], after: dict[str, Any]) -> None:
             raise RotationError("prepare changes currentIndex")
         if changes:
             raise RotationError("prepare must leave every target current")
+        if after_prepared:
+            raise RotationError("prepare must start without prepared hosts")
         return
 
     if before_status == "active" and after_status == "active":
@@ -353,8 +450,21 @@ def validate_transition(before: dict[str, Any], after: dict[str, Any]) -> None:
             or before["nextIndex"] != after["nextIndex"]
         ):
             raise RotationError("active transition changes derivation indexes")
+        if before_prepared != after_prepared:
+            if changes:
+                raise RotationError("prepared host transition also changes a target")
+            added = after_prepared - before_prepared
+            removed = before_prepared - after_prepared
+            if len(added) != 1 or removed:
+                raise RotationError(
+                    "prepared host transition must add exactly one host"
+                )
+            return
+
         if len(changes) != 1:
             raise RotationError("active transition must change exactly one target")
+        if before_prepared != set(before["targets"]["nixos"]):
+            raise RotationError("target transition requires every NixOS host prepared")
         _, _, old_state, new_state = changes[0]
         if abs(STATE_RANK[old_state] - STATE_RANK[new_state]) != 1:
             raise RotationError("target transition must move through bridge")
@@ -399,6 +509,8 @@ def managed_context(
         derivation_index=derivation_index,
         marker_active=marker.exists() if marker_active is None else marker_active,
     )
+    if state["status"] == "active":
+        validate_artifact_manifest(repository, expected, state["nextIndex"])
     return state, expected
 
 
@@ -444,6 +556,7 @@ def command_status(args: argparse.Namespace) -> None:
         f" current={counts['current']}"
         f" bridge={counts['bridge']}"
         f" next={counts['next']}"
+        f" preparedHosts={len(prepared_hosts(state))}/{len(state['targets']['nixos'])}"
     )
 
 
@@ -457,10 +570,11 @@ def command_prepare(args: argparse.Namespace) -> None:
     if before["status"] != "idle":
         raise RotationError("prepare requires idle state")
 
-    validate_next_artifacts(args.repository, expected)
+    validate_next_artifacts(args.repository, expected, args.next_index)
     after = copy.deepcopy(before)
     after["status"] = "active"
     after["nextIndex"] = args.next_index
+    after["preparedHosts"] = []
     validate_transition(before, after)
     validate_state(
         after,
@@ -507,6 +621,33 @@ def command_move(args: argparse.Namespace) -> None:
     )
 
 
+def command_mark_prepared(args: argparse.Namespace) -> None:
+    before, expected = managed_context(
+        args.manifest,
+        args.repository,
+        args.derivation_index,
+        args.marker,
+    )
+    if before["status"] != "active":
+        raise RotationError("prepared host recording requires active state")
+    if args.host not in before["targets"]["nixos"]:
+        raise RotationError(f"unknown NixOS rotation target {args.host}")
+    if args.host in prepared_hosts(before):
+        raise RotationError(f"NixOS rotation target already prepared: {args.host}")
+
+    after = copy.deepcopy(before)
+    after["preparedHosts"] = sorted([*before["preparedHosts"], args.host])
+    validate_transition(before, after)
+    validate_state(
+        after,
+        expected_targets=expected,
+        derivation_index=args.derivation_index,
+        marker_active=True,
+    )
+    atomic_write_manifest(args.manifest, after)
+    print(f"identity rotation host prepared: {args.host}")
+
+
 def command_cancel(args: argparse.Namespace) -> None:
     state = load_manifest(args.manifest)
     expected = discover_targets(args.repository)
@@ -536,6 +677,7 @@ def command_cancel(args: argparse.Namespace) -> None:
     after = copy.deepcopy(state)
     after["status"] = "idle"
     after["nextIndex"] = None
+    after["preparedHosts"] = []
     validate_transition(state, after)
     validate_state(
         after,
@@ -590,6 +732,13 @@ def parser() -> argparse.ArgumentParser:
     move.add_argument("name")
     move.add_argument("target_state", choices=TARGET_STATES)
     move.set_defaults(run=command_move)
+
+    mark_prepared = commands.add_parser(
+        "mark-prepared", help="record one remotely verified prepared host"
+    )
+    add_managed_arguments(mark_prepared)
+    mark_prepared.add_argument("host")
+    mark_prepared.set_defaults(run=command_mark_prepared)
 
     cancel = commands.add_parser(
         "cancel", help="leave active state after every target returns to current"

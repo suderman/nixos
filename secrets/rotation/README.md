@@ -1,7 +1,8 @@
 # Identity rotation preflight
 
-No root rotation is active. This directory contains the inert transition state
-and validation scaffold used before any next-root material is created.
+No root rotation is active. This directory contains the transition ledger,
+artifact transaction code, and public test fixtures. Production next-root
+material is created only by the managed preparation command.
 
 ## Safety marker
 
@@ -12,12 +13,14 @@ commands that can rewrite identity state fleet-wide:
 - `nixos add`
 - `nixos generate`
 - `agenix import`
-- `agenix rekey -a`
+- `agenix edit`
+- `agenix rekey`
 - `agenix update-masterkeys`
 
-The managed rotation workflow may eventually set `IDENTITY_ROTATION_ALLOW=1`
-only around validated, phase-specific cryptographic operations. Do not use that
-override to run the blocked commands manually.
+`IDENTITY_ROTATION_ALLOW=1` is reserved for a future validated finalization
+transaction. Do not use it to bypass these guards manually. Active source-secret
+edits are intentionally frozen; `artifacts.json` also records their hashes so a
+direct edit makes every managed transition fail validation.
 
 ## State manifest
 
@@ -31,13 +34,16 @@ The idle contract is:
 - `currentIndex` matches `flake.derivationIndex`
 - `nextIndex` is `null`
 - every target is `current`
+- `preparedHosts` is empty
 - `secrets/rotation/ACTIVE` does not exist
 
 An active transition requires the marker, a non-negative `nextIndex`, and a
-state for every target. A target must move through `current`, `bridge`, and
-`next` one step at a time. Moving backward one step supports rollback. Active
-mode can end only after every target has returned to `current`, or after every
-target has reached `next` and `nextIndex` is promoted to `currentIndex`.
+state for every target. `preparedHosts` records remote attestations one host at
+a time. No target can move until all eight NixOS hosts are prepared. A target
+must then move through `current`, `bridge`, and `next` one step at a time.
+Moving backward one step supports rollback. Active mode can end only after every
+target has returned to `current`, or after every target has reached `next` and
+`nextIndex` is promoted to `currentIndex`.
 
 The indexes are operator-declared BIP-85 recovery metadata, not cryptographic
 generation counters. The repository cannot verify which mnemonic and index
@@ -46,8 +52,9 @@ a new mnemonic may reset or reuse an index. Preparation proves that a root
 generation changed by validating distinct master, host, and user public
 identities, not by comparing index numbers.
 
-The validator only reads manifests and repository paths. It does not decrypt,
-derive, generate, rekey, or deploy identity material.
+`identity_rotation.py` only reads manifests and repository paths. Cryptographic
+preparation is isolated in `identity_artifacts.py`, which derives artifacts in a
+temporary tracked-tree copy and installs them through a recovery journal.
 
 ## Managed state commands
 
@@ -56,30 +63,57 @@ rotation guard override and never reads plaintext identity material.
 
 ```sh
 nixos rotation status
-nixos rotation prepare 2
+nixos rotation prepare 0
+nixos rotation deploy-prepared cog
+nixos rotation verify-prepared eve
 nixos rotation move nixos kit bridge
 nixos rotation move nixos kit next
 nixos rotation move nixos kit bridge
 nixos rotation move nixos kit current
 nixos rotation cancel
+nixos rotation cleanup
+nixos rotation recover
 ```
 
-`prepare` works only from a valid idle ledger. Before entering active state it
-requires a complete non-empty next artifact set, verifies every next public key
-is a valid age recipient or Ed25519 SSH key and differs from its canonical key,
-and requires valid age ciphertext plus exactly one generated `hex-next`
-ciphertext per NixOS target. It then creates the safety marker before atomically
-replacing `state.json` and stages the complete preparation set.
+`prepare` works only from a clean Git worktree and valid idle ledger. It accepts
+the new fleet root through QR scanning or hidden local input, derives the next
+master, host, user, and service identities in a temporary repository, and
+passphrase-encrypts the next master. It evaluates agenix-rekey once with every
+target current and once with every target next, then retains the union of both
+generated ciphertext sets. This includes current- and next-recipient
+`hex-next` ciphertext for every NixOS host.
+
+Before installation, preparation verifies that public identities changed,
+checks the next root can be decrypted by the next master, evaluates every NixOS
+host in all-current and all-next states, and writes `artifacts.json` with exact
+artifact and source-secret hashes. New files are installed with atomic renames
+under a durable `PREPARE.json` journal. Only after all files exist does the
+command create `ACTIVE` and atomically activate `state.json`; it then stages the
+complete fleet-wide set.
+
+`recover` handles an interrupted preparation. An idle transaction is rolled
+back only when installed hashes still match the journal. An already-active
+transaction is completed only after every installed hash verifies. Changed
+files are never silently removed.
+
+`deploy-prepared HOST` deploys the all-current active configuration and then
+verifies `/etc/identity-rotation/prepared` over SSH. `verify-prepared HOST`
+performs only that attestation step. A matching token proves the host activated
+the exact local `artifacts.json`; successful activation has already decrypted
+the next root and validated current/next private-public pairs. The host name is
+added to `preparedHosts` only after that proof.
 
 `move` changes exactly one target by one adjacent state and atomically replaces
-the manifest only after validating repository membership and the transition.
-It cannot skip `bridge` or mutate derivation indexes.
+the manifest only after validating repository membership, source/artifact
+hashes, full fleet readiness, and the transition. It cannot skip `bridge` or
+mutate derivation indexes.
 
 `cancel` succeeds only after every target has returned to `current`. It writes
 the idle ledger before removing the marker, so an interruption remains guarded.
 It can also remove a marker left by an interrupted prepare whose manifest is
-still valid and idle. Next artifacts are retained for explicit review or secure
-cleanup; cancellation does not silently delete cryptographic material.
+still valid and idle. Next artifacts remain until the reverted idle state has
+been deployed everywhere. `cleanup` then verifies every artifact and source
+hash before removing the next set and staging those deletions.
 
 There is intentionally no usable `finalize` command yet. Finalization must
 promote the master identity, root ciphertext, canonical public keys, generated
@@ -149,6 +183,7 @@ next-generation artifacts:
 - user/service SSH public keys: `users/<name>/id_ed25519.pub.next`
 - user age recipients: `users/<name>/id_age.pub.next`
 - next master identity at runtime: `/tmp/id_age_next`
+- artifact/source hash ledger: `secrets/rotation/next/artifacts.json`
 
 Generated `hex-next` ciphertext is deployed only to NixOS targets. Home Manager
 targets never receive either fleet root; they use the user age identities that
@@ -172,9 +207,14 @@ selection without recreating keys. On finalization, the prepared host private
 key is promoted only if it matches the new canonical public key; rollback
 instead removes the unused next key.
 
-Preparation must commit the marker, active manifest, next public artifacts, and
-generated `hex-next` ciphertext together. Deploy that all-current prepared state
-to every target before moving any target to `bridge`.
+Preparation commits the marker, active manifest, next public artifacts, and the
+union of current- and next-recipient generated ciphertext together. Deploy that
+all-current prepared state to every NixOS host and record all eight attestations
+before moving any NixOS, Home Manager, or identity target to `bridge`.
+
+The ISO configuration is intentionally outside the rotation target inventory.
+It continues using current recipients during active evaluations and never
+receives next private root material.
 
 ## Active target snapshot
 
@@ -221,10 +261,10 @@ deleted during preflight and must not reappear.
 
 ## Remaining blockers
 
-Do not create production index-2 artifacts until these remaining items are
+Do not create production next-root artifacts until these remaining items are
 implemented and tested:
 
-- managed creation and rollback-capable finalization of root, master, public,
-  and generated ciphertext artifacts; state-only finalization is blocked
+- rollback-capable finalization of root, master, public, source, and generated
+  ciphertext artifacts; state-only finalization remains blocked
 - migration checks for machine IDs, Arr, MQTT, Hermes, Camofox, and other
   derived runtime credentials, including required service restarts or reboots

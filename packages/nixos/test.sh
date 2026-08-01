@@ -10,6 +10,7 @@ mock_bin="$test_dir/bin"
 rotation_marker="$test_dir/ACTIVE"
 rotation_state="$test_dir/state.json"
 rotation_args="$test_dir/rotation.args"
+rotation_journal="$test_dir/PREPARE.json"
 mkdir -p "$mock_bin"
 touch "$rotation_marker"
 printf '{}\n' >"$rotation_state"
@@ -37,7 +38,9 @@ run_nixos() {
   env \
     IDENTITY_ROTATION_MARKER="$rotation_marker" \
     IDENTITY_ROTATION_SCRIPT="$test_dir/identity_rotation.py" \
+    IDENTITY_ARTIFACTS_SCRIPT="$test_dir/identity_artifacts.py" \
     IDENTITY_ROTATION_STATE="$rotation_state" \
+    IDENTITY_ROTATION_JOURNAL="$rotation_journal" \
     ROTATION_ARGS="$rotation_args" \
     derivation_index=1 \
     PATH="$mock_bin:$PATH" \
@@ -58,6 +61,13 @@ run_nixos rotation status
 expected="${test_dir}/identity_rotation.py status ${rotation_state} --repository . --derivation-index 1 --marker ${rotation_marker}"
 if [[ $(<"$rotation_args") != "$expected" ]]; then
   printf 'FAIL: nixos rotation status dispatched unexpected arguments\n' >&2
+  exit 1
+fi
+
+run_nixos rotation recover
+expected="${test_dir}/identity_artifacts.py recover --repository . --manifest ${rotation_state} --marker ${rotation_marker} --journal ${rotation_journal}"
+if [[ $(<"$rotation_args") != "$expected" ]]; then
+  printf 'FAIL: nixos rotation recover dispatched unexpected arguments\n' >&2
   exit 1
 fi
 

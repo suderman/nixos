@@ -16,9 +16,10 @@ runtime_dir="${AGENIX_RUNTIME_DIR:-/tmp}"
 identity_file="$runtime_dir/id_age"
 previous_identity_file="$runtime_dir/id_age_"
 rotation_marker="${IDENTITY_ROTATION_MARKER:-$secrets_dir/rotation/ACTIVE}"
+rotation_journal="${IDENTITY_ROTATION_JOURNAL:-$secrets_dir/rotation/PREPARE.json}"
 
 identity_rotation_guard() {
-  if [[ ${IDENTITY_ROTATION_ALLOW:-0} != "1" && -e $rotation_marker ]]; then
+  if [[ ${IDENTITY_ROTATION_ALLOW:-0} != "1" && (-e $rotation_marker || -e $rotation_journal) ]]; then
     gum_exit "Identity rotation is active; use the managed rotation workflow"
   fi
 }
@@ -28,16 +29,14 @@ agenix_rotation_guard_command() {
   shift || true
 
   case "$cmd" in
+  edit)
+    identity_rotation_guard
+    ;;
   update-masterkeys)
     identity_rotation_guard
     ;;
   rekey)
-    local arg
-    for arg in "$@"; do
-      if [[ $arg == "-a" || $arg == "--all" ]]; then
-        identity_rotation_guard
-      fi
-    done
+    identity_rotation_guard
     ;;
   esac
 }
@@ -271,7 +270,7 @@ agenix_unlock() {
 
 # Delete decrypted /tmp/id_age
 agenix_lock() {
-  rm -f "$identity_file" "$previous_identity_file"
+  rm -f "$identity_file" "$previous_identity_file" "$runtime_dir/id_age_next"
   gum style \
     --border="rounded" \
     --border-foreground="124" \

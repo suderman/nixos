@@ -18,9 +18,14 @@
   # > import-id
   age.secrets.hex.rekeyFile = flake + /secrets/hex.age;
 
+  environment.etc = lib.optionalAttrs config.identityRotation.active {
+    "identity-rotation/prepared".text =
+      builtins.hashFile "sha256" (flake + /secrets/rotation/next/artifacts.json);
+  };
+
   # Add /mnt/main/storage/etc/ssh/ssh_host_ed25519_key.pub and /etc/machine-id
   system.activationScripts.etc.text = let
-    rotation = flake.lib.identityRotation;
+    rotation = flake.lib.identityRotation // {inherit (config.identityRotation) active;};
     inherit (config.identityRotation) hexPath nextHexPath;
     storage = config.persist.storage.path;
     currentHostKey = "${storage}/etc/ssh/ssh_host_ed25519_key";
@@ -78,7 +83,7 @@
     lib.mkAfter "${perSystem.self.mkScript {inherit path text;}}";
 
   services.openssh.hostKeys = let
-    rotation = flake.lib.identityRotation;
+    rotation = flake.lib.identityRotation // {inherit (config.identityRotation) active;};
     current = {
       # ed25519 derived from hex
       path = "${config.persist.storage.path}/etc/ssh/ssh_host_ed25519_key";
@@ -121,7 +126,7 @@
       pkgs.systemd
     ];
     script = let
-      rotation = flake.lib.identityRotation;
+      rotation = flake.lib.identityRotation // {inherit (config.identityRotation) active;};
       sshDir = "${config.persist.storage.path}/etc/ssh";
       currentKey = "${sshDir}/ssh_host_ed25519_key";
       nextKey = "${currentKey}.next";

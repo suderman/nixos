@@ -16,7 +16,12 @@
     if isHome
     then "${hostName}-${username}"
     else hostName;
-  targetState = identityRotation.targetState targetCategory targetName;
+  managedTarget = builtins.hasAttr targetName identityRotation.state.targets.${targetCategory};
+  rotationActive = identityRotation.active && managedTarget;
+  targetState =
+    if managedTarget
+    then identityRotation.targetState targetCategory targetName
+    else "current";
   currentIdentity =
     if isHome
     then "${config.home.homeDirectory}/.config/age/id_age"
@@ -57,12 +62,12 @@ in {
         then null
         else config.age.secrets.hex.path;
       nextHexPath =
-        if identityRotation.active && !isHome
+        if rotationActive && !isHome
         then config.age.secrets.hex-next.path
         else null;
     in {
       inherit currentHexPath nextHexPath targetState;
-      inherit (identityRotation) active;
+      active = rotationActive;
       hexPath =
         if !isHome && targetState == "next"
         then nextHexPath
@@ -74,9 +79,9 @@ in {
       # List of recipient keys (age or ssh) used to decrypt secrets
       identityPaths =
         [currentIdentity]
-        ++ lib.optional identityRotation.active "${currentIdentity}.next";
+        ++ lib.optional rotationActive "${currentIdentity}.next";
 
-      secrets = lib.optionalAttrs (identityRotation.active && !isHome) {
+      secrets = lib.optionalAttrs (rotationActive && !isHome) {
         hex-next.rekeyFile = flake + /secrets/rotation/next/hex.age;
       };
 
@@ -101,7 +106,7 @@ in {
           then currentSshPub
           else flake + /secrets/id_age.pub;
         selectedPub =
-          if identityRotation.active && targetState == "next"
+          if rotationActive && targetState == "next"
           then identityRotation.nextPath currentPub
           else currentPub;
       in {
@@ -109,7 +114,7 @@ in {
         # > agenix unlock
         masterIdentities =
           [/tmp/id_age /tmp/id_age_]
-          ++ lib.optional identityRotation.active /tmp/id_age_next;
+          ++ lib.optional rotationActive /tmp/id_age_next;
 
         # Public ssh host key derived from 32-byte hex
         # > nixos generate

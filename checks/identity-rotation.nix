@@ -12,6 +12,10 @@
       if status == "active"
       then 2
       else null;
+    preparedHosts =
+      if status == "active"
+      then ["alpha"]
+      else [];
     targets = {
       home."alpha-jon" = targetState;
       identities.jon = targetState;
@@ -38,11 +42,15 @@ in
       REPOSITORY = ../.;
     } ''
       export PYTHONPYCACHEPREFIX="$TMPDIR/pycache"
-      python3 -m py_compile "$REPOSITORY/secrets/rotation/identity_rotation.py"
+      export PYTHONPATH="$REPOSITORY/secrets/rotation"
+      python3 -m py_compile \
+        "$REPOSITORY/secrets/rotation/identity_rotation.py" \
+        "$REPOSITORY/secrets/rotation/identity_artifacts.py"
       python3 "$REPOSITORY/secrets/rotation/identity_rotation.py" validate \
         "$REPOSITORY/secrets/rotation/state.json" \
         --repository "$REPOSITORY" \
         --derivation-index "$DERIVATION_INDEX"
       python3 "$REPOSITORY/secrets/rotation/test.py"
+      python3 "$REPOSITORY/secrets/rotation/test_artifacts.py"
       touch "$out"
     ''

@@ -76,7 +76,7 @@ in {
   system.activationScripts = let
     inherit (lib) concatMapStrings mkAfter;
     inherit (perSystem.self) mkScript;
-    rotation = flake.lib.identityRotation;
+    rotation = flake.lib.identityRotation // {inherit (config.identityRotation) active;};
     inherit (config.identityRotation) currentHexPath hexPath nextHexPath;
 
     # All users in this configuration including root
