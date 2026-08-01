@@ -29,6 +29,30 @@ The practical model is:
 
 This means key recovery here is seed-based, not backup-based.
 
+The root hex is fleet-global and is deployed to every host so each machine can
+derive the identities and credentials it needs. A compromise of that hex on any
+host therefore compromises every deterministic host, user, and service identity
+derived from it. It must be treated as fleet-wide root key material, not as a
+host-local secret.
+
+## Canonical root format
+
+The root stored in `secrets/hex.age` must be exactly 64 lowercase hexadecimal
+characters. `agenix import` accepts uppercase input but normalizes it before
+writing. Exact 32-byte hex input is also normalized before salted derivation;
+the existing textual v1 derivation remains unchanged for canonical lowercase
+roots and for non-hex input.
+
+Validate the encrypted root without printing it:
+
+```sh
+agenix hex --check
+```
+
+This requires the interactive passphrase when the master identity is locked.
+`nixos generate` runs this check before rewriting any generated identity, and
+refuses to proceed if the root is not canonical.
+
 ## Important files
 
 - `secrets/id_age.age`: passphrase-protected master age identity
@@ -61,7 +85,8 @@ These include:
 
 `nixos generate` is broad. It unlocks the master identity, rewrites generated
 public identity files, ensures `zones/ca.{crt,age}` exists, and runs
-`agenix rekey -a`.
+`agenix rekey -a`. The recipient rewrite is immediate across the repository; it
+is not a staged or dual-key fleet rollout.
 
 ## Rekey / recipient behavior
 
@@ -73,6 +98,16 @@ public identity files, ensures `zones/ca.{crt,age}` exists, and runs
   `secrets/home/<host>-<user>`.
 - Rekeying uses `/tmp/id_age` or `/tmp/id_age_` as the master identity after
   `agenix unlock`.
+
+The two rekey operations serve different layers:
+
+- `agenix update-masterkeys` re-encrypts source `rekeyFile` secrets to the
+  configured master identities.
+- `agenix rekey -a` creates the generated per-host and per-user ciphertext for
+  configured target recipients.
+
+Changing a root identity requires both layers. Running only `agenix rekey -a`
+does not rotate the master encryption on source secrets.
 
 ## CLI usage
 
@@ -94,8 +129,11 @@ To recover this flake's age identity:
 agenix import
 ```
 
-`agenix import` is the bootstrap/recovery path for a fresh machine: it takes the
-BIP-85 32-byte hex and recreates the flake's master identity files.
+`agenix import` is only a bootstrap/recovery command. It takes the BIP-85
+32-byte hex and transactionally prepares and validates all three master
+artifacts before replacing them. If `secrets/id_age.pub` already exists, the
+derived recipient must match it. A different root is refused, while same-root
+recovery remains available for damaged or missing encrypted artifacts.
 
 The QR code for index `1` can be found following this path on the COLDCARD Q:
 
@@ -113,5 +151,13 @@ After changing recipients or adding/removing `.age` files, rekey with:
 ```sh
 agenix rekey -a
 ```
+
+## Root rotation
+
+Coordinated root rotation is not implemented by `agenix import` or `nixos
+generate`. Do not bypass the recipient guard to rotate in place: generated host
+keys, user keys, service credentials, source master encryption, and deployed
+target ciphertext must move through an explicit staged transition. A dedicated
+dual-key rotation workflow remains future work.
 
 Never commit plaintext secrets.

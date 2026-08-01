@@ -17,6 +17,7 @@ import sys
 import base64
 import hashlib
 import binascii
+import re
 
 
 def parse_input(input_data: str, salt: str | None = None) -> bytes:
@@ -34,6 +35,11 @@ def parse_input(input_data: str, salt: str | None = None) -> bytes:
         ValueError: If the input cannot be parsed.
     """
     try:
+        # Preserve the existing textual v1 salted derivation while ensuring that
+        # equivalent 32-byte hex inputs cannot diverge based on letter casing.
+        if re.fullmatch(r"[0-9a-fA-F]{64}", input_data):
+            input_data = input_data.lower()
+
         # Base64 decode
         try:
             data_bytes = base64.b64decode(input_data, validate=True)

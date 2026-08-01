@@ -334,6 +334,9 @@ nixos_generate() {
   # Ensure access to age identity
   agenix unlock quiet
 
+  # Never rewrite fleet identities from a non-canonical root representation.
+  agenix hex --check
+
   # Generate missing SSH keys for hosts and users
   gum_info "Generating SSH keys..."
   for host in $(dirs hosts | grep -v iso); do
