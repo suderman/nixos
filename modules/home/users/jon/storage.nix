@@ -52,6 +52,7 @@
       path = "bin";
       persist = "storage";
       sync = true;
+      syncDevices = ["kit" "cog"];
       enable = true;
     };
     ORG = {
@@ -70,6 +71,7 @@
       path = "games";
       persist = "storage";
       sync = true;
+      syncDevices = ["kit" "cog"];
       enable = true;
     };
     SOURCE = {
@@ -82,6 +84,7 @@
       path = "workspace";
       persist = "storage";
       sync = true;
+      syncDevices = ["kit" "cog"];
       enable = true;
     };
   };

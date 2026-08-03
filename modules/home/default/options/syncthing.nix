@@ -5,7 +5,7 @@
   ...
 }: let
   cfg = config.services.syncthing;
-  inherit (lib) mkIf mkForce mapAttrs filterAttrs;
+  inherit (lib) filterAttrs mapAttrs mkForce mkIf;
   toPort = port: toString (port + config.home.portOffset);
 
   syncPort = 22000; # tcp/udp
@@ -14,6 +14,16 @@
   # All peer device ids (skipping this system)
   # { cog = "PPAG274-GPYIMXP-5CY62WF-B4QNQCP-5KWIT3Y-RG6OCJG-PRQDBP3-HW5VBQY"; }
   deviceIds = builtins.removeAttrs cfg.deviceIds [config.networking.hostName];
+  syncFolders = filterAttrs (_: folder: folder.enable && folder.sync) config.home.directories;
+  folderDevices = folder:
+    builtins.filter
+    (name: name != config.networking.hostName)
+    (
+      if folder.syncDevices == null
+      then builtins.attrNames cfg.deviceIds
+      else folder.syncDevices
+    );
+  ignoreFile = config.xdg.configFile."syncthing/stignore".source;
 in {
   options.services.syncthing.deviceIds = lib.mkOption {
     type = lib.types.attrsOf lib.types.str;
@@ -21,6 +31,22 @@ in {
   };
 
   config = mkIf cfg.enable {
+    assertions =
+      lib.mapAttrsToList (name: folder: let
+        unknownDevices =
+          builtins.filter
+          (device: !(builtins.hasAttr device cfg.deviceIds))
+          (
+            if folder.syncDevices == null
+            then []
+            else folder.syncDevices
+          );
+      in {
+        assertion = unknownDevices == [];
+        message = "Syncthing folder ${name} references unknown devices: ${lib.concatStringsSep ", " unknownDevices}";
+      })
+      syncFolders;
+
     services.syncthing = {
       tray.enable = false;
       package = pkgs.unstable.syncthing;
@@ -33,7 +59,7 @@ in {
       settings.devices =
         builtins.mapAttrs (_: id: {
           inherit id;
-          autoAcceptFolders = true;
+          autoAcceptFolders = false;
         })
         deviceIds;
 
@@ -42,9 +68,9 @@ in {
         mapAttrs
         (_: folder: {
           path = "~/${folder.path}";
-          devices = builtins.attrNames deviceIds;
+          devices = folderDevices folder;
         })
-        (filterAttrs (_: d: (d.enable && d.sync)) config.home.directories);
+        syncFolders;
 
       # Unique listen ports per user on host
       settings.listenAddresses = [
@@ -72,19 +98,20 @@ in {
     # Persist state across reboots
     persist.storage.directories = [".local/state/syncthing"];
 
-    # Drop .stignore template in each synced folder
-    tmpfiles = rec {
-      directories =
-        map
-        (n: builtins.baseNameOf n)
-        (builtins.attrValues (mapAttrs (_: v: v.path) cfg.settings.folders));
-      files =
-        map (folder: {
-          target = "${folder}/.stignore";
-          source = "${config.xdg.configHome}/syncthing/stignore";
-        })
-        directories;
-    };
+    # Syncthing does not sync .stignore, so install a regular copy for every folder.
+    home.activation.syncthingIgnoreFiles = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      ${lib.concatStringsSep "\n" (lib.mapAttrsToList (_: folder: let
+          target = "${config.home.homeDirectory}/${folder.path}/.stignore";
+        in ''
+          $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -Dm0644 \
+            ${lib.escapeShellArg ignoreFile} \
+            ${lib.escapeShellArg "${target}.tmp"}
+          $DRY_RUN_CMD ${pkgs.coreutils}/bin/mv -fT \
+            ${lib.escapeShellArg "${target}.tmp"} \
+            ${lib.escapeShellArg target}
+        '')
+        syncFolders)}
+    '';
 
     # Syncthing ignore template
     xdg.configFile."syncthing/stignore".text =

@@ -33,6 +33,11 @@ in {
           default = false;
           description = "Whether to sync this directory with Syncthing";
         };
+        syncDevices = mkOption {
+          type = types.nullOr (types.listOf types.str);
+          default = null;
+          description = "Syncthing devices to share this directory with; null shares it with all devices";
+        };
         enable = mkOption {
           type = types.bool;
           default = false;
