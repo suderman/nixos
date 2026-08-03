@@ -247,15 +247,16 @@ nixos_rotation_finalize() {
   return "$status"
 }
 
-nixos_rotation_prepare() {
+nixos_rotation_prepare() (
   local next_index="$1"
-  local root_file cleanup_root="false"
+  local root_file
   if [[ -n ${IDENTITY_ROTATION_ROOT_FILE:-} ]]; then
     root_file="$IDENTITY_ROTATION_ROOT_FILE"
   else
+    umask 077
     root_file="$(mktemp)"
-    cleanup_root="true"
-    chmod 600 "$root_file"
+    trap 'rm -f -- "$root_file"' EXIT
+    trap 'exit 130' HUP INT TERM
     local root=""
     if [[ -n ${DISPLAY-} || -n ${WAYLAND_DISPLAY-} ]]; then
       if [[ "$(gum choose "Scan QR code" "Enter manually")" == "Scan QR code" ]]; then
@@ -269,7 +270,6 @@ nixos_rotation_prepare() {
   fi
 
   agenix unlock quiet
-  local status=0
   python3 "$rotation_artifacts_script" prepare \
     --repository . \
     --manifest "$rotation_state" \
@@ -280,10 +280,8 @@ nixos_rotation_prepare() {
     --next-index "$next_index" \
     --root-file "$root_file" \
     --runtime-next /tmp/id_age_next \
-    --system "${identity_rotation_system:?identity_rotation_system is required}" || status=$?
-  [[ $cleanup_root == "false" ]] || rm -f "$root_file"
-  return "$status"
-}
+    --system "${identity_rotation_system:?identity_rotation_system is required}"
+)
 
 nixos_rotation_stage_prepare() {
   local -a artifacts=("$rotation_state" "$rotation_marker")

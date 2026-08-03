@@ -24,10 +24,21 @@ if [[ $1 == "style" ]]; then
   printf '%s\n' "${*: -1}"
   exit 0
 fi
+if [[ $1 == "input" && ${ALLOW_ROTATION_INPUT:-0} == "1" ]]; then
+  printf '%064d\n' 0
+  exit 0
+fi
 printf 'FAIL: guarded command reached gum %s\n' "$1" >&2
 exit 97
 EOF
 chmod +x "$mock_bin/gum"
+
+printf '#!%s\n' "$bash_bin" >"$mock_bin/agenix"
+cat >>"$mock_bin/agenix" <<'EOF'
+set -euo pipefail
+[[ ${FAIL_AGENIX:-0} != "1" ]]
+EOF
+chmod +x "$mock_bin/agenix"
 
 printf '#!%s\n' "$bash_bin" >"$mock_bin/python3"
 cat >>"$mock_bin/python3" <<'EOF'
@@ -101,6 +112,18 @@ run_nixos rotation status
 expected="${test_dir}/identity_rotation.py status ${rotation_state} --repository . --derivation-index 1 --marker ${rotation_marker}"
 if [[ $(<"$rotation_args") != "$expected" ]]; then
   printf 'FAIL: nixos rotation status dispatched unexpected arguments\n' >&2
+  exit 1
+fi
+
+root_tmp="$test_dir/root-tmp"
+mkdir "$root_tmp"
+if ALLOW_ROTATION_INPUT=1 FAIL_AGENIX=1 TMPDIR="$root_tmp" \
+  run_nixos rotation prepare 2 >"$test_dir/prepare.out" 2>&1; then
+  printf 'FAIL: nixos rotation prepare ignored unlock failure\n' >&2
+  exit 1
+fi
+if compgen -G "$root_tmp/*" >/dev/null; then
+  printf 'FAIL: nixos rotation prepare retained plaintext root after failure\n' >&2
   exit 1
 fi
 
