@@ -6,9 +6,10 @@ material is created only by the managed preparation command.
 
 ## Safety marker
 
-Create `secrets/rotation/ACTIVE` in the rotation commit before preparing or
-deploying transition artifacts. While it exists, the normal wrappers refuse
-commands that can rewrite identity state fleet-wide:
+Do not create `secrets/rotation/ACTIVE` manually. `nixos rotation prepare`
+creates it only after installing and validating the transition artifacts.
+While it or a recovery journal exists, the normal wrappers refuse commands
+that can rewrite identity state fleet-wide:
 
 - `nixos add`
 - `nixos generate`
@@ -90,13 +91,14 @@ target current and once with every target next, then retains the union of both
 generated ciphertext sets. This includes current- and next-recipient
 `hex-next` ciphertext for every NixOS host.
 
-Before installation, preparation verifies that public identities changed,
-checks the next root can be decrypted by the next master, evaluates every NixOS
-host in all-current and all-next states, and writes `artifacts.json` with exact
+Before exposing the next runtime identity, preparation starts a durable
+`PREPARE.json` journal. It then verifies that public identities changed, checks
+the next root can be decrypted by the next master, evaluates every NixOS host
+in all-current and all-next states, and writes `artifacts.json` with exact
 artifact and source-secret hashes. New files are installed with atomic renames
-under a durable `PREPARE.json` journal. Only after all files exist does the
-command create `ACTIVE` and atomically activate `state.json`; it then stages the
-complete fleet-wide set.
+under the same journal. Only after all files exist does the command create
+`ACTIVE` and atomically activate `state.json`; it then stages the complete
+fleet-wide set.
 
 `recover` handles an interrupted preparation. An idle transaction is rolled
 back only when installed hashes still match the journal. An already-active
