@@ -10,6 +10,7 @@ import copy
 import hashlib
 import json
 import os
+import subprocess
 import sys
 import tempfile
 from collections import Counter
@@ -197,6 +198,29 @@ def _validated_relative_path(value: str, field: str) -> Path:
     return path
 
 
+def source_secret_paths(repository: Path) -> set[str]:
+    if (repository / ".git").exists():
+        output = subprocess.run(
+            ["git", "ls-files", "-z", "--", "*.age"],
+            cwd=repository,
+            check=True,
+            stdout=subprocess.PIPE,
+        ).stdout
+        paths = (Path(os.fsdecode(path)) for path in output.split(b"\0") if path)
+    else:
+        paths = (path.relative_to(repository) for path in repository.rglob("*.age"))
+
+    result: set[str] = set()
+    for path in paths:
+        relative = path.as_posix()
+        if relative == "secrets/id_age.age" or relative.startswith(
+            ("secrets/nixos/", "secrets/home/", "secrets/rotation/next/")
+        ):
+            continue
+        result.add(relative)
+    return result
+
+
 def validate_artifact_manifest(
     repository: Path,
     expected_targets: dict[str, set[str]],
@@ -225,6 +249,11 @@ def validate_artifact_manifest(
             artifact = repository / relative
             if not artifact.is_file() or _sha256(artifact) != expected_hash:
                 raise RotationError(f"artifact manifest hash mismatch: {relative}")
+
+    if set(value["sourceSecrets"]) != source_secret_paths(repository):
+        raise RotationError(
+            "artifact manifest source secret inventory differs from repository"
+        )
 
     artifact_paths = set(value["artifacts"])
     required = {

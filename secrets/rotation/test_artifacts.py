@@ -8,7 +8,13 @@ import os
 import tempfile
 from pathlib import Path
 
-from identity_artifacts import ArtifactError, install_artifacts, recover, sha256
+from identity_artifacts import (
+    ArtifactError,
+    begin_artifact_transaction,
+    install_artifacts,
+    recover,
+    sha256,
+)
 from identity_rotation import atomic_write_manifest
 
 
@@ -71,6 +77,14 @@ def assert_absent(repository: Path, paths: list[Path], journal: Path) -> None:
 def main() -> None:
     with tempfile.TemporaryDirectory(prefix="identity-artifact-transactions.") as value:
         root = Path(value)
+
+        repository, _, paths, manifest, marker, journal = fixture(root / "prepare")
+        runtime_next = root / "prepare/runtime-next"
+        begin_artifact_transaction(journal, runtime_next)
+        write(runtime_next, "private identity\n")
+        recover(repository, manifest, marker, journal)
+        assert not runtime_next.exists()
+        assert_absent(repository, paths, journal)
 
         repository, staging, paths, manifest, marker, journal = fixture(root / "fail")
         os.environ["IDENTITY_ROTATION_FAIL_AFTER"] = "2"

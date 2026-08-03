@@ -336,6 +336,8 @@ def managed_fixture(repository: Path) -> tuple[Path, Path]:
         },
     }
     atomic_write_manifest(manifest, state)
+    subprocess.run(["git", "init", "--quiet"], cwd=repository, check=True)
+    subprocess.run(["git", "add", "-A"], cwd=repository, check=True)
     return manifest, marker
 
 
@@ -354,6 +356,19 @@ def verify_managed_state() -> None:
         repository = Path(directory)
         manifest, marker = managed_fixture(repository)
         prepare = managed_args(repository, manifest, marker, next_index=2)
+
+        added_source = repository / "users/alice/new-secret.age"
+        write_age_ciphertext(added_source)
+        subprocess.run(["git", "add", str(added_source)], cwd=repository, check=True)
+        expect_invalid(
+            lambda: command_prepare(prepare),
+            "managed prepare accepted a changed source secret inventory",
+        )
+        subprocess.run(
+            ["git", "rm", "--quiet", "--force", str(added_source)],
+            cwd=repository,
+            check=True,
+        )
 
         missing_artifact = repository / "users/alice/id_age.pub.next"
         saved_artifact = missing_artifact.read_text()

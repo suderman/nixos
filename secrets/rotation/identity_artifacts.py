@@ -24,6 +24,7 @@ from identity_rotation import (  # noqa: E402
     atomic_write_manifest,
     discover_targets,
     load_manifest,
+    source_secret_paths,
     validate_artifact_manifest,
     validate_state,
 )
@@ -258,24 +259,10 @@ def merge_generated(slots: list[Path], destination: Path) -> None:
 
 
 def source_secret_hashes(repository: Path) -> dict[str, str]:
-    output = subprocess.run(
-        ["git", "ls-files", "-z", "--", "*.age"],
-        cwd=repository,
-        check=True,
-        stdout=subprocess.PIPE,
-    ).stdout
-    result: dict[str, str] = {}
-    for raw_path in output.split(b"\0"):
-        if not raw_path:
-            continue
-        relative = Path(os.fsdecode(raw_path))
-        value = relative.as_posix()
-        if value.startswith(
-            ("secrets/nixos/", "secrets/home/", "secrets/rotation/next/")
-        ):
-            continue
-        result[value] = sha256(repository / relative)
-    return dict(sorted(result.items()))
+    return {
+        relative: sha256(repository / relative)
+        for relative in sorted(source_secret_paths(repository))
+    }
 
 
 def copy_candidate_artifacts(
@@ -396,6 +383,18 @@ def install_artifacts(
             raise ArtifactError(f"injected failure after artifact {count}")
 
 
+def begin_artifact_transaction(journal: Path, runtime_next: Path) -> None:
+    atomic_write_manifest(
+        journal,
+        {
+            "schema": 1,
+            "status": "preparing",
+            "runtimeNext": str(runtime_next),
+            "artifacts": {},
+        },
+    )
+
+
 def verify_hashes(repository: Path, values: dict[str, str], label: str) -> None:
     for relative, expected_hash in values.items():
         path = repository / relative
@@ -500,6 +499,7 @@ def command_prepare(args: argparse.Namespace) -> None:
                 raise ArtifactError(
                     f"next runtime identity already exists: {args.runtime_next}"
                 )
+            begin_artifact_transaction(args.journal, args.runtime_next)
             args.runtime_next.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(master_identity, args.runtime_next)
             args.runtime_next.chmod(0o600)
