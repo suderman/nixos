@@ -35,6 +35,8 @@ in
   assert next.useNext "identities" "jon";
     pkgs.runCommand "identity-rotation-check" {
       nativeBuildInputs = [
+        pkgs.age
+        pkgs.git
         pkgs.python3
         perSystem.self.derive
       ];
