@@ -1603,11 +1603,11 @@
         "treefmt-nix": "treefmt-nix_4"
       },
       "locked": {
-        "lastModified": 1785065908,
-        "narHash": "sha256-u5L+89TvEZzU9Lyr3F2zYztNa6e9ro+3sol5zumDPk4=",
+        "lastModified": 1785844791,
+        "narHash": "sha256-mQm0fKknoOxIyOrhL9rUcC9c9RvXYm8Ff5Fi/0/WBug=",
         "owner": "suderman",
         "repo": "pins",
-        "rev": "6e4cef9a86c4d2866ef4bc4864e04b8049102a70",
+        "rev": "c52e9f75940e48528bfdd48817ec15c06599de12",
         "type": "github"
       },
       "original": {
