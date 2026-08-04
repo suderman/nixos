@@ -15,7 +15,7 @@
         ublock-origin
         ;
     };
-    go.enable = true;
+    hrvst-cli.enable = true;
   };
 
   # Pixel Buds Pro
