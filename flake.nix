@@ -73,7 +73,9 @@
 
     # Hyprland
     # <https://wiki.hypr.land/Nix/>
-    hyprland.url = "github:hyprwm/Hyprland/v0.56.1";
+    hyprland.url = "github:hyprwm/Hyprland/v0.56.2";
+    # v0.56.2 needs glaze <8 and wayland-protocols >=1.49.
+    hyprland.inputs.nixpkgs.url = "github:NixOS/nixpkgs/61b7c44c4073f0b827768aff0049561b5110ea5a";
     # <https://github.com/hyprwm/hyprland-plugins>
     hyprland-plugins.url = "github:hyprwm/hyprland-plugins/v0.56.0";
     hyprland-plugins.inputs.hyprland.follows = "hyprland";
