@@ -90,6 +90,7 @@ in {
       # gnome.enable = false;
       # grub.enable = false;
       # gtk.enable = false;
+      gtksourceview.enable = false; # Home Manager installs the theme without rebuilding dependents.
       # kmscon.enable = false;
       # lightdm.enable = false;
       # nixos-icons.enable = false;
