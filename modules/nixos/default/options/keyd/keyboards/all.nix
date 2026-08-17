@@ -28,21 +28,17 @@ in {
       # [✥] nav is [space]
       space = lettermod "nav" "space";
 
-      # [𝅘𝅥𝅮] media is [z][/]
-      z = lettermod "media" "z";
-      slash = lettermod "media" "slash";
-
       # # Lettermod for super
       # c = lettermod "super" "c";
       # m = lettermod "super" "m";
 
-      # Lettermod for ctrl
-      f = lettermod "control" "f";
-      j = lettermod "control" "j";
-
-      # Lettermod for alt
-      d = lettermod "alt" "d";
-      k = lettermod "alt" "k";
+      # # Lettermod for ctrl
+      # f = lettermod "control" "f";
+      # j = lettermod "control" "j";
+      #
+      # # Lettermod for alt
+      # d = lettermod "alt" "d";
+      # k = lettermod "alt" "k";
 
       # # Lettermod for shift
       # s = lettermod "shift" "s";
@@ -116,6 +112,13 @@ in {
       dot = "pagedown";
       slash = "down";
       space = "playpause";
+
+      q = "previoussong"; # rewind [q]uick
+      w = "nextsong"; # for[w]ard
+      z = "brightnessdown"; # [z]zz sleepy
+      x = "brightnessup"; # need e[x]tra light
+      c = "micmute"; # mi[c] mute
+      v = "media"; # [v]olume source
     };
 
     nav = {
@@ -157,32 +160,6 @@ in {
       "7" = "C-A-f7";
       "8" = "C-A-f8";
       "9" = "C-A-f9";
-    };
-
-    # media keys
-    media = {
-      a = "volumedown"; # [a]djust down...
-      s = "volumeup"; # [s]ound up!
-      d = "mute"; # [d]on't play sound
-      f = "nextsong"; # [f]orward
-      r = "previoussong"; # [r]ewind
-      z = "brightnessdown"; # [z]zz sleepy
-      x = "brightnessup"; # need e[x]tra light
-      c = "micmute"; # mi[c] mute
-      v = "media"; # [v]olume source
-
-      space = "playpause";
-
-      # right side
-      h = "previoussong";
-      j = "volumedown";
-      k = "volumeup";
-      l = "nextsong";
-      p = "brightnessup";
-      n = "brightnessdown";
-      m = "media";
-      comma = "micmute";
-      dot = "mute";
     };
   };
 
