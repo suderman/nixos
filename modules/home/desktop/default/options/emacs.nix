@@ -11,7 +11,7 @@
 in {
   config = mkIf cfg.enable {
     programs.emacs = {
-      package = mkDefault pkgs.emacs-pgtk;
+      package = mkDefault pkgs.unstable.emacs31-pgtk;
 
       # Keep pure Elisp and day-to-day package iteration in mutable Emacs land.
       # Nix owns native/problematic packages and grammar libraries.
