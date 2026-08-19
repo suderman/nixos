@@ -86,7 +86,7 @@ in {
 
     # keyboard shortcuts
     services.keyd.windows."emacs" = {
-      "super.w" = "macro(C-x t 0)"; # close tab
+      "super.w" = "macro(C-x 0)"; # close window or tab
       "super.t" = "macro(C-x t 2)"; # new tab
       "super.r" = "f5"; # reload
     };
