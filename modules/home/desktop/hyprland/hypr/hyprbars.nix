@@ -29,7 +29,8 @@ in {
             plugin = {
               hyprbars = {
                 enabled = true,
-                bar_blur = true,
+                -- Work around hyprwm/hyprland-plugins#697 (rounding + blur stencil corruption).
+                bar_blur = false,
                 bar_button_padding = 4,
                 bar_color = stylix.base00.rgba(0.8),
                 ["col.text"] = stylix.base05.rgba(0.8),
