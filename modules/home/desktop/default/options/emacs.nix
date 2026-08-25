@@ -3,25 +3,31 @@
   config,
   lib,
   perSystem,
+  pkgs,
   ...
 }: let
   cfg = config.programs.emacs;
   inherit (lib) mkDefault mkIf;
   configDir = ".config/emacs";
+  # Prefer a writable checkout without losing the flake's bundled fallback.
+  emacsPackage = pkgs.symlinkJoin {
+    inherit (perSystem.emacs.default) name meta;
+    paths = [perSystem.emacs.default];
+    nativeBuildInputs = [pkgs.makeWrapper];
+    postBuild = ''
+      wrapProgram "$out/bin/emacs" \
+        --run 'config_dir="''${XDG_CONFIG_HOME:-$HOME/.config}/emacs"; if [ -f "$config_dir/init.el" ]; then set -- --init-directory "$config_dir" "$@"; fi'
+    '';
+  };
 in {
   config = mkIf cfg.enable {
-    programs.emacs.package = mkDefault perSystem.emacs.default;
+    programs.emacs.package = mkDefault emacsPackage;
 
     services.emacs = {
       enable = mkDefault true;
       client.enable = mkDefault true;
       defaultEditor = mkDefault true;
       startWithUserSession = mkDefault "graphical";
-      # The package defaults to its pinned config; the host daemon uses the checkout.
-      extraOptions = mkDefault [
-        "--init-directory"
-        "${config.xdg.configHome}/emacs"
-      ];
     };
 
     # keyboard shortcuts

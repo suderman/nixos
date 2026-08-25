@@ -306,6 +306,49 @@
         "type": "github"
       }
     },
+    "emacs": {
+      "inputs": {
+        "emacs-overlay": "emacs-overlay",
+        "nixpkgs": [
+          "nixpkgs-unstable"
+        ]
+      },
+      "locked": {
+        "lastModified": 1787696896,
+        "narHash": "sha256-7cEAk8L7i6fB3TG4k8OTpR7CHkPZyI34+Ui9PkBKd3I=",
+        "owner": "suderman",
+        "repo": "emacs",
+        "rev": "fd4664801b919db049bb4efac3dbda815eca970b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "suderman",
+        "repo": "emacs",
+        "type": "github"
+      }
+    },
+    "emacs-overlay": {
+      "inputs": {
+        "nixpkgs": [
+          "emacs",
+          "nixpkgs"
+        ],
+        "nixpkgs-stable": "nixpkgs-stable"
+      },
+      "locked": {
+        "lastModified": 1787675906,
+        "narHash": "sha256-9eBC4+56LSyjM9MvaVWNXwdvByEZoIEEn0rYyTeSlww=",
+        "owner": "nix-community",
+        "repo": "emacs-overlay",
+        "rev": "d07d286c378783a94363685fea65b2afbeac425b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "emacs-overlay",
+        "type": "github"
+      }
+    },
     "firefox-gnome-theme": {
       "flake": false,
       "locked": {
@@ -591,7 +634,7 @@
           "gen-luarc",
           "nixpkgs"
         ],
-        "nixpkgs-stable": "nixpkgs-stable"
+        "nixpkgs-stable": "nixpkgs-stable_2"
       },
       "locked": {
         "lastModified": 1723803910,
@@ -1307,6 +1350,22 @@
     },
     "nixpkgs-stable": {
       "locked": {
+        "lastModified": 1787640266,
+        "narHash": "sha256-MrkfE5hF5xx4L/0h5NyJ3xQkKVftwSuKSkFSrvlTxGY=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "f4f698677b11021a8f84f452e23ae9ef2427bec3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-26.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-stable_2": {
+      "locked": {
         "lastModified": 1720386169,
         "narHash": "sha256-NGKVY4PjzwAa4upkGtAMz1npHGoRzWotlSnVlqI40mo=",
         "owner": "NixOS",
@@ -1718,6 +1777,7 @@
         "blueprint": "blueprint",
         "devshell": "devshell_2",
         "disko": "disko",
+        "emacs": "emacs",
         "flake-registry": "flake-registry",
         "hardware": "hardware",
         "hermes-agent": "hermes-agent",
