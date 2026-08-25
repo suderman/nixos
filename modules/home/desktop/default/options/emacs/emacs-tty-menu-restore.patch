@@ -1,7 +1,0 @@
-diff --git a/src/term.c b/src/term.c
---- a/src/term.c
-+++ b/src/term.c
-@@ -3455,2 +3455,2 @@ restore_desired_matrix (struct frame *f, struct glyph_matrix *saved)
-       bool need_new_hash = false;
--      for (int x = 0; x < f->desired_matrix->matrix_w; ++x)
-+      for (int x = 0; x < to->used[TEXT_AREA]; ++x)

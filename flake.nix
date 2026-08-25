@@ -91,6 +91,11 @@
     # <https://github.com/suderman/neovim>
     neovim.url = "github:suderman/neovim";
 
+    # Emacs flake
+    # <https://github.com/suderman/emacs>
+    emacs.url = "github:suderman/emacs";
+    emacs.inputs.nixpkgs.follows = "nixpkgs-unstable";
+
     # Manually tracked release pins
     # <https://github.com/suderman/pins>
     pins.url = "github:suderman/pins";
