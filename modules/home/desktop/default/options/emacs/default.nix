@@ -8,10 +8,14 @@
   cfg = config.programs.emacs;
   inherit (lib) mkDefault mkIf;
   configDir = ".config/emacs";
+  # Avoid dereferencing unused glyph slots when restoring native TTY menus.
+  emacs-pgtk-tty-menu = pkgs.unstable.emacs31-pgtk.overrideAttrs (old: {
+    patches = (old.patches or []) ++ [./emacs-tty-menu-restore.patch];
+  });
 in {
   config = mkIf cfg.enable {
     programs.emacs = {
-      package = mkDefault pkgs.unstable.emacs31-pgtk;
+      package = mkDefault emacs-pgtk-tty-menu;
 
       # Keep pure Elisp and day-to-day package iteration in mutable Emacs land.
       # Nix owns native/problematic packages and grammar libraries.
