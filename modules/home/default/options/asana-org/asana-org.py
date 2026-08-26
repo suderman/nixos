@@ -211,7 +211,9 @@ def org_date(value, brackets="<>"):
 
 
 def render_task(task, status, level):
-    lines = [f"{'*' * level} {status} {task['name']}"]
+    project = ", ".join(task["projects"])
+    title = f"{project} > {task['name']}" if project else task["name"]
+    lines = [f"{'*' * level} {status} {title}"]
     if status == "DONE":
         completed = task["completed_datetime"].astimezone()
         lines.append(f"CLOSED: {org_date(completed, '[]')[:-1]} {completed:%H:%M}]")
@@ -344,8 +346,16 @@ def parse_entries(body):
     return entries
 
 
-def relevel_block(block, level):
-    return re.sub(r"^\*+ ", "*" * level + " ", block, count=1)
+def update_retained_block(block, level):
+    block = re.sub(r"^\*+ ", "*" * level + " ", block, count=1)
+    project = re.search(r"(?m)^Project: (.+)$", block)
+    if not project:
+        return block
+    prefix = project.group(1).rstrip("\r") + " > "
+    heading = re.match(r"^\*+ (?:TODO|PROG|EVAL|HOLD|DONE) (.+)", block)
+    if heading.group(1).startswith(prefix):
+        return block
+    return block[: heading.start(1)] + prefix + block[heading.start(1) :]
 
 
 def merge_tasks(active, previous, fetch_task, task_level):
@@ -376,7 +386,7 @@ def merge_tasks(active, previous, fetch_task, task_level):
     )
     newly_completed.sort(key=lambda task: task["completed_datetime"], reverse=True)
     retained_done = [
-        relevel_block(entry["block"], task_level)
+        update_retained_block(entry["block"], task_level)
         for entry in previous
         if entry["status"] == "DONE" and entry["gid"] not in active_by_gid
     ]
@@ -518,7 +528,11 @@ def self_test():
             "assignee_section": None,
         }
     )
-    old_done = render_task({**completed, "gid": "3", "name": "Older task"}, "DONE", 3)
+    old_done = render_task(
+        {**completed, "gid": "3", "name": "Older task", "projects": ["Archive"]},
+        "DONE",
+        3,
+    ).replace("*** DONE Archive > Older task", "*** DONE Older task")
     previous = parse_entries(
         "*** TODO Missing now\n:PROPERTIES:\n:ASANA_ID: 2\n:END:\n\n" + old_done + "\n"
     )
@@ -526,8 +540,12 @@ def self_test():
         [active], previous, lambda gid: completed if gid == "2" else None, 3
     )
     assert todo_count == 1 and done_count == 2
-    assert body.index("*** TODO Current task") < body.index("*** DONE Finished task")
-    assert body.index("*** DONE Finished task") < body.index("*** DONE Older task")
+    assert body.index("*** TODO Site > Current task") < body.index(
+        "*** DONE Finished task"
+    )
+    assert body.index("*** DONE Finished task") < body.index(
+        "*** DONE Archive > Older task"
+    )
     assert "\n  * not a heading\n" in body
     assert "\n  #+title: not a directive" in body
     source = (
