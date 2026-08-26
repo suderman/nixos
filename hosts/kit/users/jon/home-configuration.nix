@@ -13,6 +13,7 @@
 
   # Programs
   programs.davinci-resolve.enable = true;
+  programs.fresha-org.enable = true;
   programs.sparrow.enable = true;
   programs.zwift.enable = true;
   programs.nf.enable = true;
