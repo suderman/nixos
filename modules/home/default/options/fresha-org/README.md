@@ -15,6 +15,11 @@ Then write the schedule to an Org file manually:
 fresha-org > ~/org/fresha.org
 ```
 
+Jon's configuration on `kit` also runs the command at 04:00 and 16:00 through
+`fresha-org.timer`. The service renders into a temporary file and atomically
+replaces `~/org/fresha.org` only after a successful run. Browser, login, network,
+or Fresha errors leave the previous schedule in place.
+
 Example output:
 
 ```org
@@ -38,10 +43,3 @@ time off and location closures remove coverage.
 The module runs the script with Node.js 24. An open Fresha tab is optional. If
 none exists, the script opens the calendar in a background tab. It does not
 automate login.
-
-The executable is vendored from `/home/jon/src/suderman/fresha-org`. Update the
-source repository first, then copy the tested executable here.
-
-This uses Fresha's unsupported internal APIs. Fresha's terms prohibit automated
-scripts and scraping. Manual, low-frequency runs do not remove the account
-risk.
