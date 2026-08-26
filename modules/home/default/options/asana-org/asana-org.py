@@ -51,17 +51,24 @@ class Asana:
     def __init__(self, token):
         self.token = token
 
-    def get(self, path, params=None):
+    def request(self, method, path, params=None, data=None):
         url = API_BASE + path
         if params:
             url += "?" + urllib.parse.urlencode(params)
+        headers = {
+            "Authorization": f"Bearer {self.token}",
+            "Accept": "application/json",
+            "User-Agent": "asana-org/1",
+        }
+        body = None
+        if data is not None:
+            headers["Content-Type"] = "application/json"
+            body = json.dumps({"data": data}).encode("utf-8")
         request = urllib.request.Request(
             url,
-            headers={
-                "Authorization": f"Bearer {self.token}",
-                "Accept": "application/json",
-                "User-Agent": "asana-org/1",
-            },
+            data=body,
+            headers=headers,
+            method=method,
         )
         try:
             with urllib.request.urlopen(request, timeout=30) as response:
@@ -75,6 +82,12 @@ class Asana:
         if not isinstance(payload, dict) or "data" not in payload:
             raise SyncError(f"Asana returned an invalid response for {path}")
         return payload
+
+    def get(self, path, params=None):
+        return self.request("GET", path, params)
+
+    def put(self, path, data, params=None):
+        return self.request("PUT", path, params, data)
 
     def paginated(self, path, params):
         results = []
@@ -219,7 +232,15 @@ def render_task(task, status, level):
         lines.append(f"CLOSED: {org_date(completed, '[]')[:-1]} {completed:%H:%M}]")
     if task["due_date"]:
         lines.append(f"DEADLINE: {org_date(task['due_date'])}")
-    lines.extend((":PROPERTIES:", f":ASANA_ID: {task['gid']}", ":END:"))
+    completed = "true" if task["completed"] else "false"
+    lines.extend(
+        (
+            ":PROPERTIES:",
+            f":ASANA_ID: {task['gid']}",
+            f":ASANA_COMPLETED: {completed}",
+            ":END:",
+        )
+    )
     if task["projects"]:
         lines.append("Project: " + ", ".join(task["projects"]))
     if task["sections"]:
@@ -335,10 +356,14 @@ def parse_entries(body):
         if ids[0] in seen:
             raise SyncError(f"Managed Asana region contains duplicate task {ids[0]}")
         seen.add(ids[0])
+        states = re.findall(r"(?m)^:ASANA_COMPLETED:[ \t]*(.*?)[ \t]*\r?$", block)
+        if len(states) > 1 or (states and states[0] not in ("true", "false")):
+            raise SyncError(f"Managed Asana task {ids[0]} has invalid completion state")
         entries.append(
             {
                 "gid": ids[0],
                 "status": heading.group(2),
+                "synced_completed": (states[0] == "true" if states else None),
                 "level": len(heading.group(1)),
                 "block": block,
             }
@@ -348,6 +373,25 @@ def parse_entries(body):
 
 def update_retained_block(block, level):
     block = re.sub(r"^\*+ ", "*" * level + " ", block, count=1)
+    state = re.search(r"(?m)^:ASANA_COMPLETED:[^\r\n]*\r?$", block)
+    if state:
+        ending = "\r" if state.group(0).endswith("\r") else ""
+        block = (
+            block[: state.start()]
+            + ":ASANA_COMPLETED: true"
+            + ending
+            + block[state.end() :]
+        )
+    else:
+        drawer_end = re.search(r"(?m)^:END:\r?$", block)
+        if not drawer_end:
+            raise SyncError("Managed Asana task has no property drawer end")
+        newline = "\r\n" if "\r\n" in block else "\n"
+        block = (
+            block[: drawer_end.start()]
+            + f":ASANA_COMPLETED: true{newline}"
+            + block[drawer_end.start() :]
+        )
     project = re.search(r"(?m)^Project: (.+)$", block)
     if not project:
         return block
@@ -358,7 +402,7 @@ def update_retained_block(block, level):
     return block[: heading.start(1)] + prefix + block[heading.start(1) :]
 
 
-def merge_tasks(active, previous, fetch_task, task_level):
+def merge_tasks(active, previous, fetch_task, complete_task, task_level):
     active_by_gid = {}
     for task in active:
         if task["completed"]:
@@ -367,13 +411,31 @@ def merge_tasks(active, previous, fetch_task, task_level):
             raise SyncError(f"Asana returned duplicate task {task['gid']}")
         active_by_gid[task["gid"]] = task
 
-    newly_completed = []
+    remotely_completed = []
     for entry in previous:
-        if entry["status"] == "DONE" or entry["gid"] in active_by_gid:
+        if entry["gid"] in active_by_gid or (
+            entry["status"] == "DONE" and entry["synced_completed"] in (True, None)
+        ):
             continue
         task = fetch_task(entry["gid"])
         if task is not None and task["completed"]:
-            newly_completed.append(task)
+            remotely_completed.append(task)
+
+    locally_completed = []
+    for entry in previous:
+        if (
+            entry["gid"] in active_by_gid
+            and entry["status"] == "DONE"
+            and entry["synced_completed"] is False
+        ):
+            task = complete_task(entry["gid"])
+            if task["gid"] != entry["gid"] or not task["completed"]:
+                raise SyncError(f"Asana did not complete task {entry['gid']}")
+            locally_completed.append(task)
+
+    completed_ids = {task["gid"] for task in remotely_completed + locally_completed}
+    for gid in completed_ids:
+        active_by_gid.pop(gid, None)
 
     active_sorted = sorted(
         active_by_gid.values(),
@@ -384,11 +446,15 @@ def merge_tasks(active, previous, fetch_task, task_level):
             task["gid"],
         ),
     )
+    newly_completed = remotely_completed + locally_completed
     newly_completed.sort(key=lambda task: task["completed_datetime"], reverse=True)
     retained_done = [
         update_retained_block(entry["block"], task_level)
         for entry in previous
-        if entry["status"] == "DONE" and entry["gid"] not in active_by_gid
+        if entry["status"] == "DONE"
+        and entry["gid"] not in active_by_gid
+        and entry["gid"] not in completed_ids
+        and entry["synced_completed"] in (True, None)
     ]
     blocks = [render_task(task, "TODO", task_level) for task in active_sorted]
     blocks.extend(render_task(task, "DONE", task_level) for task in newly_completed)
@@ -397,6 +463,7 @@ def merge_tasks(active, previous, fetch_task, task_level):
         "\n\n".join(blocks),
         len(active_sorted),
         len(newly_completed) + len(retained_done),
+        len(locally_completed),
     )
 
 
@@ -486,17 +553,32 @@ def sync(org_file, org_heading, token_file, workspace):
                 raise
             return normalize_task(payload["data"])
 
-        merged, todo_count, done_count = merge_tasks(
-            active, previous, fetch_task, task_level
+        def complete_task(gid):
+            if org_file.read_bytes() != original:
+                raise SyncError(
+                    "Org file changed during sync; refusing Asana writeback"
+                )
+            payload = asana.put(
+                f"/tasks/{gid}",
+                {"completed": True},
+                {"opt_fields": TASK_FIELDS},
+            )
+            return normalize_task(payload["data"])
+
+        merged, todo_count, done_count, completed_count = merge_tasks(
+            active, previous, fetch_task, complete_task, task_level
         )
         updated = insert_managed_region(without_region, target, merged).encode("utf-8")
+        counts = f"{todo_count} TODO, {done_count} DONE"
+        if completed_count:
+            counts += f", {completed_count} completed in Asana"
         if updated == original:
-            print(f"No changes to {org_file} ({todo_count} TODO, {done_count} DONE)")
+            print(f"No changes to {org_file} ({counts})")
             return
         if org_file.read_bytes() != original:
             raise SyncError("Org file changed during sync; refusing to overwrite it")
         atomic_write(org_file, updated, stat.S_IMODE(file_stat.st_mode))
-        print(f"Updated {org_file} ({todo_count} TODO, {done_count} DONE)")
+        print(f"Updated {org_file} ({counts})")
 
 
 def self_test():
@@ -533,13 +615,22 @@ def self_test():
         "DONE",
         3,
     ).replace("*** DONE Archive > Older task", "*** DONE Older task")
+    old_done = old_done.replace(":ASANA_COMPLETED: true\n", "")
     previous = parse_entries(
         "*** TODO Missing now\n:PROPERTIES:\n:ASANA_ID: 2\n:END:\n\n" + old_done + "\n"
     )
-    body, todo_count, done_count = merge_tasks(
-        [active], previous, lambda gid: completed if gid == "2" else None, 3
+
+    def unexpected_call(gid):
+        raise AssertionError(f"Unexpected callback for task {gid}")
+
+    body, todo_count, done_count, completed_count = merge_tasks(
+        [active],
+        previous,
+        lambda gid: completed if gid == "2" else None,
+        unexpected_call,
+        3,
     )
-    assert todo_count == 1 and done_count == 2
+    assert todo_count == 1 and done_count == 2 and completed_count == 0
     assert body.index("*** TODO Site > Current task") < body.index(
         "*** DONE Finished task"
     )
@@ -548,6 +639,80 @@ def self_test():
     )
     assert "\n  * not a heading\n" in body
     assert "\n  #+title: not a directive" in body
+    assert all(entry["synced_completed"] is not None for entry in parse_entries(body))
+
+    completed_active = {
+        **active,
+        "completed": True,
+        "completed_datetime": dt.datetime.fromisoformat("2026-08-26T20:00:00+00:00"),
+    }
+    local_done = render_task(active, "TODO", 3).replace("*** TODO ", "*** DONE ", 1)
+    completion_calls = []
+
+    def complete_active(gid):
+        completion_calls.append(gid)
+        return completed_active
+
+    completed_body, todo_count, done_count, completed_count = merge_tasks(
+        [active],
+        parse_entries(local_done),
+        unexpected_call,
+        complete_active,
+        3,
+    )
+    assert completion_calls == ["1"]
+    assert todo_count == 0 and done_count == 1 and completed_count == 1
+    assert "*** DONE Site > Current task" in completed_body
+    assert ":ASANA_COMPLETED: true" in completed_body
+
+    reopened_body, todo_count, done_count, completed_count = merge_tasks(
+        [active],
+        parse_entries(completed_body),
+        unexpected_call,
+        unexpected_call,
+        3,
+    )
+    assert todo_count == 1 and done_count == 0 and completed_count == 0
+    assert "*** TODO Site > Current task" in reopened_body
+    assert ":ASANA_COMPLETED: false" in reopened_body
+
+    legacy_done = local_done.replace(":ASANA_COMPLETED: false\n", "")
+    migrated_body, todo_count, done_count, completed_count = merge_tasks(
+        [active],
+        parse_entries(legacy_done),
+        unexpected_call,
+        unexpected_call,
+        3,
+    )
+    assert todo_count == 1 and done_count == 0 and completed_count == 0
+    assert "*** TODO Site > Current task" in migrated_body
+
+    retried_body, todo_count, done_count, completed_count = merge_tasks(
+        [],
+        parse_entries(local_done),
+        lambda gid: completed_active,
+        unexpected_call,
+        3,
+    )
+    assert todo_count == 0 and done_count == 1 and completed_count == 0
+    assert ":ASANA_COMPLETED: true" in retried_body
+
+    def fail_completion(gid):
+        raise SyncError(f"Expected failure for task {gid}")
+
+    try:
+        merge_tasks(
+            [active],
+            parse_entries(local_done),
+            unexpected_call,
+            fail_completion,
+            3,
+        )
+    except SyncError as error:
+        assert str(error) == "Expected failure for task 1"
+    else:
+        raise AssertionError("Completion error did not abort the sync")
+
     source = (
         "* Old\n"
         f"{LEGACY_BEGIN_MARKER}\n{body}\n{LEGACY_END_MARKER}\n"

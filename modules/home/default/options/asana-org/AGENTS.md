@@ -20,7 +20,13 @@ heading, and secret values out of this shared module.
 - Initial sync must not backfill completed task history.
 - A task first seen while incomplete stays in Org as `DONE` after Asana marks it
   complete.
-- Treat Asana as authoritative for active task status and details.
+- After `:ASANA_COMPLETED:` state is initialized, changing a managed heading
+  from `TODO` to `DONE` completes the task in Asana. No other Org edits write
+  back to Asana.
+- Treat Asana as authoritative for task details and reopened tasks. A task
+  reopened in Asana must return to `TODO` instead of being completed again.
+- Missing completion state is legacy data and must be initialized without an
+  Asana write.
 - Replace only the content between `# asana-org:begin` and `# asana-org:end` in
   the configured Org file. The old `asana-to-org` markers are accepted only for
   migration.
@@ -30,6 +36,8 @@ heading, and secret values out of this shared module.
   managed, so his timer must remain enabled on kit only.
 - Fetch and validate all required API data before writing. API, token, marker,
   or parsing errors must leave `todo.org` unchanged.
+- Completion PUT requests must be safe to retry when an earlier request
+  succeeds but a later request fails.
 - Do not add an Asana SDK or other Python dependency. The standard library is
   enough for this script.
 
