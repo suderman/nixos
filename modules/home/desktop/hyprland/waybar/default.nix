@@ -48,6 +48,7 @@
         name = "waybar-blur",
         match = { namespace = "^waybar$" },
         blur = true,
+        blur_popups = true,
         animation = "slide",
       })
     '';
