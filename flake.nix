@@ -105,16 +105,16 @@
     # <https://github.com/numtide/llm-agents.nix>
     llm-agents.url = "github:numtide/llm-agents.nix";
 
+    # Hermes Agent
+    # <https://github.com/NousResearch/hermes-agent>
+    hermes-agent.url = "github:NousResearch/hermes-agent/v2026.8.27";
+
     # Speech-to-text
     # <https://github.com/cjpais/Handy>
     handy.url = "github:cjpais/Handy/v0.9.6";
     handy.inputs.nixpkgs.follows = "nixpkgs-unstable";
     # bun2nix evaluates Darwin formatters, unsupported by current unstable.
     handy.inputs.bun2nix.inputs.nixpkgs.follows = "nixpkgs";
-
-    # Hermes Agent
-    # <https://github.com/NousResearch/hermes-agent>
-    hermes-agent.url = "github:NousResearch/hermes-agent/v2026.7.20";
   };
 
   outputs = inputs: let
