@@ -19,6 +19,9 @@
         --run 'config_dir="''${XDG_CONFIG_HOME:-$HOME/.config}/emacs"; if [ -f "$config_dir/init.el" ]; then set -- --init-directory "$config_dir" "$@"; fi'
     '';
   };
+  terminalEditor = pkgs.writeShellScript "emacs-editor" ''
+    exec ${lib.getBin cfg.package}/bin/emacs --no-window-system "$@"
+  '';
 in {
   config = mkIf cfg.enable {
     programs.emacs.package = mkDefault emacsPackage;
@@ -26,8 +29,12 @@ in {
     services.emacs = {
       enable = mkDefault true;
       client.enable = mkDefault true;
-      defaultEditor = mkDefault true;
       startWithUserSession = mkDefault "graphical";
+    };
+
+    home.sessionVariables = {
+      EDITOR = terminalEditor;
+      VISUAL = terminalEditor;
     };
 
     # keyboard shortcuts
