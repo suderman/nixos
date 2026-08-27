@@ -144,12 +144,14 @@ function aggregate(shifts) {
 }
 
 function renderOrg(shifts) {
-  const output = ["#+title: Fresha clinic schedule", "#+category: Clinic", ""];
+  const output = [];
   for (const event of aggregate(shifts)) {
     output.push(
-      "* Clinic",
-      `  <${event.date} ${weekday(event.date)} ${event.startTime}-${event.endTime}>`,
-      ...event.lines.map((line) => `  - ${line}`),
+      `* Clinic on ${weekday(event.date, "long")} at ${humanTime(event.startTime)}`,
+      `<${event.date} ${weekday(event.date)} ${event.startTime}-${event.endTime}>`,
+      `Open in Fresha: ${FRESHA_URL}?date=${event.date}`,
+      "",
+      ...event.lines.map((line) => `- ${line}`),
       "",
     );
   }
@@ -363,9 +365,14 @@ function localDate(date, timezone) {
   return `${parts.year}-${parts.month}-${parts.day}`;
 }
 
-function weekday(date) {
-  return new Intl.DateTimeFormat("en-US", { timeZone: "UTC", weekday: "short" })
+function weekday(date, format = "short") {
+  return new Intl.DateTimeFormat("en-US", { timeZone: "UTC", weekday: format })
     .format(new Date(`${date}T00:00:00Z`));
+}
+
+function humanTime(time) {
+  const [hour, minute] = time.split(":").map(Number);
+  return `${hour % 12 || 12}${minute ? `:${String(minute).padStart(2, "0")}` : ""}${hour < 12 ? "am" : "pm"}`;
 }
 
 function addDays(date, count) {
@@ -433,15 +440,18 @@ function selfTest() {
     { date: "2026-07-02", employee: "Ada", startTime: "09:00", endTime: "12:00" },
     { date: "2026-07-02", employee: "Ada", startTime: "13:00", endTime: "17:00" },
   ]);
-  assert.equal(renderOrg(shifts), `#+title: Fresha clinic schedule
-#+category: Clinic
+  assert.equal(renderOrg(shifts), `* Clinic on Thursday at 8:30am
+<2026-07-02 Thu 08:30-18:00>
+Open in Fresha: https://partners.fresha.com/calendar?date=2026-07-02
 
-* Clinic
-  <2026-07-02 Thu 08:30-18:00>
-  - Bea 08:30-18:00
-  - Ada 09:00-12:00
-  - Ada 13:00-17:00
+- Bea 08:30-18:00
+- Ada 09:00-12:00
+- Ada 13:00-17:00
 `);
+  assert.equal(humanTime("00:00"), "12am");
+  assert.equal(humanTime("11:30"), "11:30am");
+  assert.equal(humanTime("12:00"), "12pm");
+  assert.equal(humanTime("15:00"), "3pm");
   assert.throws(() => assertDate("2026-02-31", "date"), /real date/);
 }
 
