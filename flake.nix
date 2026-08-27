@@ -115,6 +115,10 @@
     handy.inputs.nixpkgs.follows = "nixpkgs-unstable";
     # bun2nix evaluates Darwin formatters, unsupported by current unstable.
     handy.inputs.bun2nix.inputs.nixpkgs.follows = "nixpkgs";
+
+    # Buzz desktop client
+    # <https://github.com/mulatta/buzz.nix>
+    buzz.url = "github:mulatta/buzz.nix";
   };
 
   outputs = inputs: let

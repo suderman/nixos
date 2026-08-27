@@ -10,6 +10,11 @@
       url = "https://cache.numtide.com?priority=50";
       key = "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=";
     }
+    # mulatta
+    {
+      url = "https://cache.mulatta.io?priority=50";
+      key = "cache.mulatta.io-1:DrV+Oy2azNyVKM7ihhD1QoOetRUnW+1G6RWToUpSO4U=";
+    }
     # personal
     {
       url = "https://attic.kit/main?priority=60";

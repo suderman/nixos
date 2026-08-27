@@ -16,6 +16,7 @@
   programs.sparrow.enable = true;
   programs.zwift.enable = true;
   programs.nf.enable = true;
+  programs.buzz.enable = true;
 
   # Agents
   programs.opencode.enable = true;
