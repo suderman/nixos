@@ -38,6 +38,7 @@
   programs.projectm.enable = true; # visualizer
 
   # User services
+  services.handy.enable = true;
   services.syncthing.enable = true;
   services.withings-sync = {
     enable = false;

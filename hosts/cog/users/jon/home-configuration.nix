@@ -31,6 +31,7 @@
   programs.iamb.enable = false;
 
   # User services
+  services.handy.enable = true;
   services.syncthing.enable = true;
 
   # Music
