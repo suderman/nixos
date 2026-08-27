@@ -24,7 +24,10 @@ in {
 
   config = lib.mkIf cfg.enable {
     home.packages = [cfg.package];
-    persist.scratch.directories = [".config/com.pais.handy"];
+    persist.scratch.directories = [
+      ".cache/huggingface"
+      ".local/share/com.pais.handy"
+    ];
 
     systemd.user.services.handy = {
       Unit = {
