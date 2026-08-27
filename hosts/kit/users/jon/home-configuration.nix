@@ -17,6 +17,10 @@
   programs.zwift.enable = true;
   programs.nf.enable = true;
   programs.buzz.enable = true;
+  programs.hermes-desktop = {
+    enable = true;
+    profile = "june";
+  };
 
   # Agents
   programs.opencode.enable = true;

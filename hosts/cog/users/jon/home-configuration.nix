@@ -17,6 +17,10 @@
   programs.sparrow.enable = true;
   programs.nf.enable = true;
   programs.buzz.enable = true;
+  programs.hermes-desktop = {
+    enable = true;
+    profile = "cid";
+  };
 
   # Gaming
   programs.steam.enable = true;

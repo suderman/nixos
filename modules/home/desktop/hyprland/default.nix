@@ -46,5 +46,12 @@
         }
       )
     ];
+
+    persist.storage.directories = [
+      {
+        directory = ".local/share/keyrings";
+        mode = "0700";
+      }
+    ];
   };
 }
