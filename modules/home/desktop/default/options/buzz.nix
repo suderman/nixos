@@ -11,7 +11,7 @@ in {
 
   config = lib.mkIf cfg.enable {
     home.packages = [perSystem.buzz.buzz-desktop];
-    persist.storage.directories = [".local/share/xyz.block.buzz.app"];
+    persist.storage.directories = [".buzz" ".local/share/xyz.block.buzz.app"];
     persist.scratch.directories = [".cache/buzz"];
   };
 }
