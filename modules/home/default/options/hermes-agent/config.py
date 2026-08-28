@@ -1,4 +1,5 @@
 import os
+import shutil
 import sys
 import tempfile
 import yaml
@@ -33,16 +34,23 @@ def merge(base, override, top_level=False):
 def write_yaml(path: str, data: dict) -> None:
     parent = os.path.dirname(path) or "."
     fd, tmp_path = tempfile.mkstemp(prefix=f"{os.path.basename(path)}.tmp.", dir=parent)
-    with os.fdopen(fd, "w", encoding="utf-8") as fh:
-        yaml.safe_dump(
-            data,
-            fh,
-            default_flow_style=False,
-            sort_keys=False,
-            allow_unicode=True,
-            width=1000,
-        )
-    os.replace(tmp_path, path)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            yaml.safe_dump(
+                data,
+                fh,
+                default_flow_style=False,
+                sort_keys=False,
+                allow_unicode=True,
+                width=1000,
+            )
+        os.replace(tmp_path, path)
+    except Exception:
+        try:
+            os.unlink(tmp_path)
+        except FileNotFoundError:
+            pass
+        raise
 
 
 def replace_mode(target: str, layer_path: str) -> int:
@@ -55,7 +63,7 @@ def replace_mode(target: str, layer_path: str) -> int:
     merged = merge(base, layer, top_level=True)
 
     if os.path.exists(target):
-        os.replace(target, backup)
+        shutil.copy2(target, backup)
 
     write_yaml(target, merged)
     return 0
@@ -73,6 +81,23 @@ def fill_mode(target: str, defaults_path: str) -> int:
 
 
 def main() -> int:
+    if sys.argv[1:] == ["--self-test"]:
+        with tempfile.TemporaryDirectory() as directory:
+            target = os.path.join(directory, "config.yaml")
+            layer = os.path.join(directory, "layer.yaml")
+            with open(target, "w", encoding="utf-8") as fh:
+                yaml.safe_dump({"model": {"default": "old"}, "runtime": True}, fh)
+            with open(layer, "w", encoding="utf-8") as fh:
+                yaml.safe_dump({"model": {"default": "new"}}, fh)
+            replace_mode(target, layer)
+            assert load_yaml(target) == {"model": {"default": "new"}, "runtime": True}
+            assert load_yaml(f"{target}.bak") == {
+                "model": {"default": "old"},
+                "runtime": True,
+            }
+        print("self-test passed")
+        return 0
+
     mode, target, layer_path = sys.argv[1:4]
     if mode == "replace":
         return replace_mode(target, layer_path)

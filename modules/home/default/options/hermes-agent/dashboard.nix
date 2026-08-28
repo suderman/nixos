@@ -4,59 +4,56 @@
   ...
 }: let
   cfg = config.services.hermes-agent;
-  inherit (config.lib.hermes-agent) dataDir dashboardPortFor gatewayAgents;
+  inherit (config.lib.hermes-agent) dashboardPort dataDir;
+  path =
+    config.home.sessionPath
+    ++ [
+      "${config.home.profileDirectory}/bin"
+      "/run/current-system/sw/bin"
+      "/usr/bin"
+      "/bin"
+    ];
 in {
-  config = lib.mkIf cfg.enable {
-    systemd.user.services = lib.listToAttrs (map (
-        agent: let
-          hermes = "${cfg.packages.${agent}}/bin/${agent}";
-          path =
-            config.home.sessionPath
-            ++ [
-              "${config.home.profileDirectory}/bin"
-              "/run/current-system/sw/bin"
-              "/usr/bin"
-              "/bin"
-            ];
-        in
-          lib.nameValuePair "hermes-dashboard-${agent}"
-          {
-            Unit = {
-              Description = "Hermes Agent Dashboard (${agent})";
-              After = ["network-online.target" "hermes-agent-env.service"];
-              Requires = ["hermes-agent-env.service"];
-              Wants = ["network-online.target"];
-            };
+  config = lib.mkIf (cfg.enable && cfg.dashboard.enable) {
+    systemd.user.services.hermes-dashboard = {
+      Unit = {
+        Description = "Hermes Agent machine dashboard";
+        After = ["default.target" "hermes-agent-env.service"];
+        Requires = ["hermes-agent-env.service"];
+        X-Restart-Triggers = config.systemd.user.services.hermes-agent-env.Service.ExecStart;
+      };
 
-            Service = {
-              Type = "simple";
-              Environment = [
-                "PATH=${lib.concatStringsSep ":" path}"
-                "HERMES_HOME=${dataDir}/${agent}"
-                "HERMES_KANBAN_HOME=${dataDir}"
-                "HERMES_DASHBOARD_TUI=1"
-              ];
-              ExecStart = "${hermes} dashboard --no-open --port ${toString (dashboardPortFor agent)}";
-              Restart = "always";
-              RestartSec = 5;
-              TimeoutStopSec = 30;
-              TimeoutStartSec = 30;
-              SuccessExitStatus = "0 143";
-              KillMode = "control-group";
-              NoNewPrivileges = true;
-              PrivateTmp = true;
-              ProtectSystem = "strict";
-              ProtectHome = false;
-              ProtectKernelTunables = true;
-              ProtectKernelModules = true;
-              ProtectControlGroups = true;
-              LockPersonality = true;
-              MemoryDenyWriteExecute = false;
-            };
+      Service = {
+        Type = "simple";
+        Environment = [
+          "PATH=${lib.concatStringsSep ":" path}"
+          "SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt"
+          "REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-bundle.crt"
+          "HERMES_HOME=${dataDir}"
+          "HERMES_KANBAN_HOME=${dataDir}"
+          "HERMES_MANAGED=home-manager"
+          "HERMES_DASHBOARD_TUI=1"
+        ];
+        ExecStart = "${cfg.package}/bin/hermes dashboard --no-open --port ${toString dashboardPort}";
+        Restart = "always";
+        RestartSec = 5;
+        TimeoutStopSec = 30;
+        TimeoutStartSec = 30;
+        SuccessExitStatus = "0 143";
+        KillMode = "control-group";
+        UMask = "0077";
+        NoNewPrivileges = true;
+        PrivateTmp = true;
+        ProtectSystem = "strict";
+        ProtectHome = false;
+        ProtectKernelTunables = true;
+        ProtectKernelModules = true;
+        ProtectControlGroups = true;
+        LockPersonality = true;
+        MemoryDenyWriteExecute = false;
+      };
 
-            Install.WantedBy = ["default.target"];
-          }
-      )
-      gatewayAgents);
+      Install.WantedBy = ["default.target"];
+    };
   };
 }

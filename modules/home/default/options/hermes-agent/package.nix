@@ -5,7 +5,7 @@
   ...
 }: let
   cfg = config.services.hermes-agent;
-  inherit (config.lib.hermes-agent) clientAgents dataDir localClientAgents;
+  inherit (config.lib.hermes-agent) clientAgents dataDir localProfiles;
 
   # Create a hermes binary named after the agent
   clientPackageFor = name: let
@@ -20,9 +20,10 @@
           ''
             export SSL_CERT_FILE="/etc/ssl/certs/ca-bundle.crt"
             export REQUESTS_CA_BUNDLE="/etc/ssl/certs/ca-bundle.crt"
-            export HERMES_CLI_NAME="${name}"
             export HERMES_KANBAN_HOME="${dataDir}"
-            export HERMES_HOME="${dataDir}/${name}"
+            export HERMES_HOME="${dataDir}"
+            export HERMES_MANAGED="home-manager"
+            unset HASS_TOKEN HASS_URL
 
             if [[ -z "''${HERMES_TUI-}" ]]; then
               if [[ -t 0 && -t 1 ]]; then
@@ -32,14 +33,7 @@
               fi
             fi
 
-            set -a
-            [[ -f "${dataDir}/.env" ]] && . "${dataDir}/.env"
-            [[ -f "${dataDir}/${name}/.env" ]] && . "${dataDir}/${name}/.env"
-            [[ -f "${dataDir}/${name}/.env.matrix" ]] && . "${dataDir}/${name}/.env.matrix"
-            [[ -f "${dataDir}/${name}/.env.camofox" ]] && . "${dataDir}/${name}/.env.camofox"
-            set +a
-
-            exec "${cfg.package}/bin/hermes" "$@"
+            exec "${cfg.package}/bin/hermes" --profile "${name}" "$@"
           '';
       };
 
@@ -50,11 +44,16 @@
         text =
           # bash
           ''
-            exec ssh -t "${sshAlias}" "${name}" "$@"
+            printf -v command '%q ' "${name}" "$@"
+            if [[ -t 0 && -t 1 ]]; then
+              exec ssh -t "${sshAlias}" "''${command% }"
+            else
+              exec ssh -T "${sshAlias}" "''${command% }"
+            fi
           '';
       };
   in
-    if builtins.elem name localClientAgents
+    if builtins.elem name localProfiles
     then localWrapperFor name
     else remoteWrapperFor name agent.client;
 in {

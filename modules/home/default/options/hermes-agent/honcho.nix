@@ -6,7 +6,7 @@
   ...
 }: let
   cfg = config.services.hermes-agent;
-  inherit (config.lib.hermes-agent) agentNames dataDir;
+  inherit (config.lib.hermes-agent) localProfiles profileDirFor;
 
   # Honcho config generator
   honchoConfigFor = agentName: {
@@ -29,7 +29,7 @@
   };
 
   # Create custom honcho config per agent name
-  agentHonchoFiles = lib.genAttrs agentNames (
+  agentHonchoFiles = lib.genAttrs localProfiles (
     name: (pkgs.formats.json {}).generate "hermes-agent-${name}-honcho.json" (honchoConfigFor name)
   );
 in {
@@ -40,10 +40,10 @@ in {
       in
         # sh
         ''
-          $DRY_RUN_CMD mkdir -p "${dataDir}/${agent}"
-          $DRY_RUN_CMD install -m644 "${honchoFile}" "${dataDir}/${agent}/honcho.json"
+          $DRY_RUN_CMD mkdir -p "${profileDirFor agent}"
+          $DRY_RUN_CMD install -m644 "${honchoFile}" "${profileDirFor agent}/honcho.json"
         '')
-      agentNames}
+      localProfiles}
     '';
   };
 }

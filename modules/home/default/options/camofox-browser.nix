@@ -17,7 +17,7 @@
 
   hermesProfiles =
     if config.services.hermes-agent.enable
-    then config.lib.hermes-agent.gatewayAgents
+    then config.lib.hermes-agent.localProfiles
     else [];
   hermesDataDir =
     if config.services.hermes-agent.enable
@@ -288,7 +288,7 @@ in {
 
     tmpfiles.files =
       map (profile: {
-        target = lib.removePrefix "${config.home.homeDirectory}/" "${hermesDataDir}/${profile}/.env.camofox";
+        target = lib.removePrefix "${config.home.homeDirectory}/" "${hermesDataDir}/profiles/${profile}/.env.camofox";
         mode = 600;
         text = ''
           CAMOFOX_URL=http://127.0.0.1:${toString (apiPortFor profile)}

@@ -1,11 +1,16 @@
 _: {
   services.hermes-agent = {
     enable = true;
+    gateway.enable = true;
+    dashboard.enable = true;
 
     # Agents and their configuration overrides
     agents = {
-      june.gateway = true;
-      pax.gateway = true;
+      june = {
+        client = true;
+        homeAssistant = true;
+      };
+      pax.client = true;
       cid.client = "cog";
       dot.client = "gem";
     };

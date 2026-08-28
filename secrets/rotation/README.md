@@ -204,9 +204,6 @@ The transition must:
 - support prepare, partial rollout, rollback, resume, and finalize in an
   isolated simulation before touching a live target
 
-Matrix Synapse and Hermes' Matrix integrations are disabled before rotation, so
-their experimental persistent credentials are not part of the migration.
-
 ## Bridge contract
 
 The bridge is inert while `state.json` is idle. An active manifest expects these

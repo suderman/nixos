@@ -28,7 +28,7 @@ in {
     package = lib.mkOption {
       type = lib.types.nullOr lib.types.package;
       default = perSystem.hermes-agent.default.override {
-        extraDependencyGroups = ["messaging" "matrix" "anthropic"];
+        extraDependencyGroups = ["messaging" "honcho" "anthropic"];
       };
       description = "The hermes-agent base package to use";
     };
@@ -45,28 +45,6 @@ in {
       description = "Shared Hermes configuration applied to all agents later.";
     };
 
-    matrix = {
-      enable = lib.mkEnableOption "Matrix access for Hermes agents";
-
-      homeserver = lib.mkOption {
-        type = lib.types.str;
-        default = "https://matrix.kit";
-        description = "Matrix homeserver URL used by Hermes agents.";
-      };
-
-      serverName = lib.mkOption {
-        type = lib.types.str;
-        default = "matrix.kit";
-        description = "Matrix server name used for deterministic account and password derivation.";
-      };
-
-      allowedUsers = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
-        default = ["@${config.home.username}:${cfg.matrix.serverName}"];
-        description = "Matrix user IDs Hermes agents may message; configured agent IDs are added automatically.";
-      };
-    };
-
     agents = let
       agentType = lib.types.submodule ({name, ...}: {
         options = {
@@ -81,15 +59,10 @@ in {
               - `"host"`: install an SSH shim that runs `${name}` on `host.home`
               - `false`: do not install a client wrapper on this host
 
-              Agents with `gateway = true` implicitly get a local client.
             '';
           };
 
-          gateway = lib.mkOption {
-            type = lib.types.bool;
-            default = false;
-            description = "Whether to run and expose the Hermes gateway for this agent.";
-          };
+          homeAssistant = lib.mkEnableOption "Home Assistant credentials for this local profile";
 
           config = lib.mkOption {
             type = lib.types.attrsOf lib.types.anything;
@@ -104,13 +77,33 @@ in {
         description = "Hermes agents keyed by agent name.";
         default = {};
         example = {
-          june.gateway = true;
+          june.client = true;
           cid = {
-            gateway = true;
+            client = true;
             config.model.default = "gpt-5.4";
           };
         };
       };
+
+    gateway = {
+      enable = lib.mkEnableOption "one multiplex Hermes gateway for this host";
+
+      port = lib.mkOption {
+        type = lib.types.port;
+        default = 8642 + config.home.portOffset;
+        description = "Port for the host Hermes API server.";
+      };
+    };
+
+    dashboard = {
+      enable = lib.mkEnableOption "one machine-wide Hermes dashboard for this host";
+
+      port = lib.mkOption {
+        type = lib.types.port;
+        default = 9119 + config.home.portOffset;
+        description = "Port for the machine-wide Hermes dashboard.";
+      };
+    };
 
     packages = lib.mkOption {
       type = lib.types.attrsOf lib.types.package;
@@ -126,7 +119,7 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    # Persist all standalone Hermes homes.
+    # Persist the native Hermes root and named profiles.
     persist.storage.directories = [cfg.dataDir];
 
     # Decrypt secrets
@@ -134,13 +127,9 @@ in {
       hermes-env.rekeyFile = cfg.apiKeys;
     };
 
-    # Generate shared dotenv file for all hermes agents
+    # Generate the root dotenv and a complete scoped dotenv for each local profile.
     systemd.user.services.hermes-agent-env = let
-      inherit (config.lib.hermes-agent) dataDir runDir;
-      matrixAgents = builtins.attrNames cfg.agents;
-      matrixAllowedUsers = lib.unique (
-        cfg.matrix.allowedUsers ++ map (agent: "@${agent}:${cfg.matrix.serverName}") matrixAgents
-      );
+      inherit (config.lib.hermes-agent) dataDir localProfiles runDir;
 
       keysEnv =
         if cfg.apiKeys != null
@@ -148,9 +137,12 @@ in {
         else "/dev/null";
     in {
       Unit = {
-        Description = "Generate shared Hermes agent dotenv";
+        Description = "Generate Hermes profile dotenv files";
         Requires = lib.optionals (cfg.apiKeys != null) ["agenix.service"];
         After = lib.optionals (cfg.apiKeys != null) ["agenix.service"];
+        Before =
+          lib.optionals cfg.gateway.enable ["hermes-gateway.service"]
+          ++ lib.optionals cfg.dashboard.enable ["hermes-dashboard.service"];
       };
 
       Service = {
@@ -161,6 +153,24 @@ in {
           text =
             # sh
             ''
+              set -eu
+              umask 077
+              tmp=""
+              profile_tmp=""
+              cleanup() {
+                [ -z "$tmp" ] || rm -f "$tmp"
+                [ -z "$profile_tmp" ] || rm -f "$profile_tmp"
+              }
+              append_without_hass() {
+                while IFS= read -r line || [ -n "$line" ]; do
+                  case "$line" in
+                    HASS_TOKEN=*|HASS_URL=*) continue ;;
+                  esac
+                  printf '%s\n' "$line"
+                done <"$1"
+              }
+              trap cleanup EXIT
+
               mkdir -p "${dataDir}"
               if [ ! -r "${runDir}/key" ]; then
                 echo "Missing Hermes API server key: ${runDir}/key" >&2
@@ -180,46 +190,42 @@ in {
                     exit 1
                   fi
 
-                  cat "${keysEnv}"
+                  append_without_hass "${keysEnv}"
                 ''}
               } >"$tmp"
 
               chmod 600 "$tmp"
               mv "$tmp" "${dataDir}/.env"
+              tmp=""
 
-              ${lib.optionalString cfg.matrix.enable (lib.concatMapStrings (agent: ''
-                  passwordFile="${runDir}/matrix/${agent}.password"
-                  envFile="${dataDir}/${agent}/.env.matrix"
+              ${lib.concatMapStrings (profile: ''
+                  profile_dir="${dataDir}/profiles/${profile}"
+                  mkdir -p "$profile_dir"
+                  profile_tmp="$(mktemp "$profile_dir/.env.tmp.XXXXXX")"
+                  cat "${dataDir}/.env" >"$profile_tmp"
 
-                  if [ ! -r "$passwordFile" ]; then
-                    echo "Missing Hermes Matrix password: $passwordFile" >&2
-                    exit 1
-                  fi
+                  ${lib.optionalString (cfg.apiKeys != null) (
+                    if cfg.agents.${profile}.homeAssistant
+                    then ''cat "${keysEnv}" >>"$profile_tmp"''
+                    else ''append_without_hass "${keysEnv}" >>"$profile_tmp"''
+                  )}
 
-                  mkdir -p "${dataDir}/${agent}"
-                  tmp_matrix="$(mktemp "${dataDir}/${agent}/.env.matrix.tmp.XXXXXX")"
-                  {
-                    printf 'MATRIX_HOMESERVER=%q\n' "${cfg.matrix.homeserver}"
-                    printf 'MATRIX_USER_ID=%q\n' "@${agent}:${cfg.matrix.serverName}"
-                    printf 'MATRIX_ENCRYPTION=%q\n' "true"
-                    printf 'MATRIX_PASSWORD=%q\n' "$(cat "$passwordFile")"
-                    printf 'MATRIX_ALLOWED_USERS=%q\n' "${lib.concatStringsSep "," matrixAllowedUsers}"
-                  } >"$tmp_matrix"
+                  for source in "$profile_dir/.env.local" "$profile_dir/.env.camofox"; do
+                    if [ -r "$source" ]; then
+                      printf '\n' >>"$profile_tmp"
+                      ${
+                    if cfg.agents.${profile}.homeAssistant
+                    then ''cat "$source" >>"$profile_tmp"''
+                    else ''append_without_hass "$source" >>"$profile_tmp"''
+                  }
+                    fi
+                  done
 
-                  chmod 600 "$tmp_matrix"
-                  mv "$tmp_matrix" "$envFile"
+                  chmod 600 "$profile_tmp"
+                  mv "$profile_tmp" "$profile_dir/.env"
+                  profile_tmp=""
                 '')
-                matrixAgents)}
-
-              ${lib.optionalString (!cfg.matrix.enable) (lib.concatMapStrings (agent: ''
-                  rm -f "${runDir}/matrix/${agent}.password"
-                  rm -f "${dataDir}/${agent}/.env.matrix"
-                '')
-                matrixAgents)}
-
-              ${lib.optionalString (!cfg.matrix.enable) ''
-                rmdir "${runDir}/matrix" 2>/dev/null || true
-              ''}
+                localProfiles}
             '';
         };
       };
