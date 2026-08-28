@@ -80,13 +80,25 @@ in {
   config = lib.mkIf cfg.enable {
     home.activation.hermes-agent-config = lib.hm.dag.entryAfter ["writeBoundary"] ''
       $DRY_RUN_CMD mkdir -p "${dataDir}/profiles"
+      # Managed Hermes verifies this directory skeleton instead of creating it.
+      $DRY_RUN_CMD install -dm700 \
+        "${dataDir}/cron" \
+        "${dataDir}/sessions" \
+        "${dataDir}/logs" \
+        "${dataDir}/memories"
       $DRY_RUN_CMD ${python} "${./config.py}" replace "${dataDir}/config.yaml" "${rootOverride}"
       $DRY_RUN_CMD ${python} "${./config.py}" fill "${dataDir}/profile.yaml" "${rootMetadata}"
 
       ${lib.concatMapStringsSep "\n" (profile: let
           profileDir = profileDirFor profile;
         in ''
-          $DRY_RUN_CMD mkdir -p "${profileDir}/skins"
+          $DRY_RUN_CMD install -dm700 \
+            "${profileDir}" \
+            "${profileDir}/cron" \
+            "${profileDir}/sessions" \
+            "${profileDir}/logs" \
+            "${profileDir}/memories" \
+            "${profileDir}/skins"
           $DRY_RUN_CMD ${python} "${./config.py}" replace "${profileDir}/config.yaml" "${profileOverrides.${profile}}"
           $DRY_RUN_CMD ${python} "${./config.py}" fill "${profileDir}/profile.yaml" "${profileMetadata.${profile}}"
           $DRY_RUN_CMD ${python} "${./config.py}" fill "${profileDir}/skins/${profile}.yaml" "${skins.${profile}}"
