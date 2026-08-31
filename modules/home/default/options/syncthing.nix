@@ -69,6 +69,7 @@ in {
         (_: folder: {
           path = "~/${folder.path}";
           devices = folderDevices folder;
+          ignorePerms = folder.path == "pictures";
         })
         syncFolders;
 
@@ -139,6 +140,7 @@ in {
         (?d)Thumbs.db
         (?d)Thumbs.db:encryptable
         (?d)ehthumbs.db
+        (?d).thumbnails
         (?d)$RECYCLE.BIN
         (?d)System Volume Information
         *.lnk

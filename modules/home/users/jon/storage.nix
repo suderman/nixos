@@ -61,12 +61,7 @@
       sync = true;
       enable = true;
     };
-    NOTES = {
-      path = "notes";
-      persist = "storage";
-      sync = true;
-      enable = true;
-    };
+    NOTES.enable = false;
     GAMES = {
       path = "games";
       persist = "storage";
