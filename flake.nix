@@ -107,7 +107,7 @@
 
     # Hermes Agent
     # <https://github.com/NousResearch/hermes-agent>
-    hermes-agent.url = "github:NousResearch/hermes-agent/v2026.8.27";
+    hermes-agent.url = "github:NousResearch/hermes-agent/v2026.8.31";
 
     # Speech-to-text
     # <https://github.com/cjpais/Handy>
