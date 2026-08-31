@@ -41,6 +41,7 @@
     "/mnt/data" = ["ssh://pow/mnt/pool/backups/${hostName}"];
     "/mnt/game" = [];
   };
+  services.btrbk.instances.snapshots.settings.volume."/mnt/game".snapshot_preserve = "7d";
 
   # Screen sharing
   services.sunshine = {
