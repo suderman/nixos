@@ -22,7 +22,7 @@
     # Root and sudo users
     trusted-users = ["root" "@wheel"];
 
-    # Supress annoying warning
+    # Suppress annoying warning
     warn-dirty = false;
 
     # https://discourse.nixos.org/t/how-to-prevent-flake-from-downloading-registry-at-every-flake-command/32003/3
@@ -55,7 +55,7 @@
   nix.registry = lib.mapAttrs (_: value: {flake = value;}) flake.inputs;
 
   # Map registries to channels
-  nix.nixPath = ["repl=${flake}/repl.nix" "nixpkgs=${flake.inputs.nixpkgs}"];
+  nix.nixPath = ["nixpkgs=${flake.inputs.nixpkgs}"];
 
   # Automatically upgrade this system while I sleep
   system.autoUpgrade = {

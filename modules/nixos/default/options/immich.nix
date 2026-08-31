@@ -11,7 +11,7 @@
   cfg = config.services.immich;
   pin = flake.inputs.pins.default.containers.immich;
 
-  inherit (lib) mkIf mkOption mkAfter mkBefore options types;
+  inherit (lib) mkIf mkOption mkAfter options types;
   inherit (config.services.traefik.lib) mkAlias mkLabels;
 
   # Shared environment across Immich services
@@ -131,9 +131,6 @@ in {
         }
       ];
       ensureDatabases = ["immich"];
-
-      # Allow connections from any docker IP addresses
-      authentication = mkBefore "host immich immich 172.16.0.0/12 md5";
 
       # Immich now uses VectorChord, which depends on pgvector.
       extensions = ps: [

@@ -1,6 +1,10 @@
-{config, ...}: {
+{
+  config,
+  lib,
+  ...
+}: {
   # Personal browser extensions
-  programs = config.desktop {
+  programs = lib.optionalAttrs config.desktop.enable {
     chromium.externalExtensions = {
       inherit
         (config.programs.chromium.registry)

@@ -29,12 +29,12 @@
       mapAttrsToList (
         database: admins: (
           [
-            # Grant all priveleges for this database to the database user
+            # Grant all privileges for this database to the database user
             "${psql} -d \"${database}\" -tAc 'GRANT ALL PRIVILEGES ON SCHEMA public TO \"${database}\";'"
           ]
           ++ (map (
               admin:
-              # Grant all priveleges for this database to each admin user
+              # Grant all privileges for this database to each admin user
               "${psql} -d \"${database}\" -tAc 'GRANT ALL PRIVILEGES ON SCHEMA public TO \"${admin}\";'"
             )
             admins)
@@ -62,9 +62,6 @@ in {
         })
         admins;
 
-      # Listen everywhere
-      enableTCPIP = true;
-
       # Allow password-less access on 127.0.0.1
       authentication = mkOrder 600 ''
         host all all 127.0.0.1/32 ident
@@ -77,9 +74,6 @@ in {
 
     # ident is equivalent to peer, but requires identd daemon
     services.oidentd.enable = true;
-
-    # Allow docker containers to connect
-    networking.firewall.allowedTCPPorts = [config.services.postgresql.settings.port];
 
     # Persist the data directory
     persist.storage.directories = ["/var/lib/postgresql"];

@@ -1,12 +1,12 @@
 # NixOS host configurations
 
-Each of these directories are included via
+Each of these directories is included via
 [numtide's blueprint](https://numtide.github.io/blueprint/main/getting-started/folder_structure/)
 and available under `flake.nixosConfigurations.*`. NixOS configuration files can
-be found in `configurations/hosts/<hostname>/configuration.nix` and
+be found in `hosts/<hostname>/configuration.nix` and
 host-specific Home Manager configurations can be found in
-`configurations/hosts/<hostname>/users/<username>.nix` or
-`configurations/hosts/<hostname>/users/<username>/home-configuration.nix`
+`hosts/<hostname>/users/<username>.nix` or
+`hosts/<hostname>/users/<username>/home-configuration.nix`.
 
 New hosts are added using this flake's default package:
 
@@ -33,6 +33,8 @@ nixos add host
 - `pow`
   [2009 Mac Pro (at home)](https://github.com/suderman/nixos/tree/main/hosts/pow)
   👟
+- `sim`
+  [NixOS test VM](https://github.com/suderman/nixos/tree/main/hosts/sim)
 - `wit`
   [Thinkpad T480s laptop](https://github.com/suderman/nixos/tree/main/hosts/wit)
   💻

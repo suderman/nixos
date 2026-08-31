@@ -7,7 +7,7 @@
     ]
     ++ flake.lib.ls ./.;
 
-  # Override homm-assistant client with local instance
+  # Override home-assistant client with local instance
   programs.home-assistant.url = "https://hass.cog";
 
   # Override jellyfin client with local instance

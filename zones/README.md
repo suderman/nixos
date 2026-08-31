@@ -44,16 +44,16 @@ The CA won't expire in my lifetime, so installing it on each device is a
 one-time chore. Traefik uses this CA to generate brand new certificates used for
 internal services during each deploy.
 
-### Installation Instructions for each Operation System
+### Installation instructions by operating system
 
 If a `caPort` is provided to a server's
 [Traefik module](https://github.com/suderman/nixos/tree/main/modules/nixos/default/options/traefik),
-the [ca.crt](https://github.com/suderman/nixos/raw/main/networks/ca.crt) file
+the [ca.crt](https://github.com/suderman/nixos/raw/main/zones/ca.crt) file
 can be downloaded on that port.
 
 For example, my
-[hub](ttps://github.com/suderman/nixos/tree/main/hosts/hub)
-configuration on my home network has a IP of `10.1.0.4` and has `caPort` set to
+[hub](https://github.com/suderman/nixos/tree/main/hosts/hub)
+configuration on my home network has an IP of `10.1.0.4` and has `caPort` set to
 `1234`:
 
 ```nix

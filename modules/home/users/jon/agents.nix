@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   pkgs,
   ...
 }: {
@@ -130,7 +131,7 @@
   };
 
   # Self-hosted webapps running from my kit desktop
-  xdg = config.desktop {
+  xdg = lib.optionalAttrs config.desktop.enable {
     desktopEntries = config.lib.chromium.mkWebApp {
       name = "OpenCode";
       url = "https://opencode-jon.kit";

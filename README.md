@@ -2,7 +2,7 @@
 
 ![nixos](https://socialify.git.ci/suderman/nixos/image?description=1&font=Inter&logo=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2F3%2F35%2FNix_Snowflake_Logo.svg&name=1&owner=1&pattern=Circuit%20Board&theme=Auto)
 
-_Welcome to the NixOS configuration for my personal infrastucture!_
+_Welcome to the NixOS configuration for my personal infrastructure!_
 
 Among others, this flake depends on the following fantastic
 [Nix](https://nixos.org/) projects:

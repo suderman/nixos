@@ -61,7 +61,7 @@ in {
             name = "PostgreSQL (Blocky)";
             type = "postgres";
             access = "proxy";
-            url = config.networking.hostName;
+            url = "127.0.0.1:${toString config.services.postgresql.settings.port}";
             user = "blocky";
             jsonData = {
               user = "blocky";

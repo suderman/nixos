@@ -22,7 +22,7 @@
         package = null;
         portalPackage = null;
         systemd.enable = true;
-        configType = "hyprlang"; # change this to lua
+        configType = "hyprlang"; # lua.nix owns hyprland.lua
       };
       systemd.target = "hyprland-session.target";
     };
