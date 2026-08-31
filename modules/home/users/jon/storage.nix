@@ -2,43 +2,43 @@
   home.directories = {
     # Standard user directories
     DESKTOP = {
-      path = "Desktop";
+      path = "desktop";
       persist = "storage";
       sync = true;
       enable = true;
     };
     DOCUMENTS = {
-      path = "Documents";
+      path = "documents";
       persist = "storage";
       sync = true;
       enable = true;
     };
     DOWNLOAD = {
-      path = "Downloads";
+      path = "downloads";
       persist = "scratch";
       sync = false;
       enable = true;
     };
     MUSIC = {
-      path = "Music";
+      path = "music";
       persist = "storage";
       sync = true;
       enable = true;
     };
     PICTURES = {
-      path = "Pictures";
+      path = "pictures";
       persist = "storage";
       sync = true;
       enable = true;
     };
     PUBLICSHARE = {
-      path = "Public";
+      path = "public";
       persist = "storage";
       sync = true;
       enable = true;
     };
     VIDEOS = {
-      path = "Movies";
+      path = "movies";
       persist = "storage";
       sync = true;
       enable = true;
@@ -80,8 +80,8 @@
       sync = false;
       enable = true;
     };
-    WORKSPACE = {
-      path = "workspace";
+    PROJECTS = {
+      path = "projects";
       persist = "storage";
       sync = true;
       syncDevices = ["kit" "cog"];

@@ -15,8 +15,9 @@
     download = extraConfig.DOWNLOAD or "${home}/Downloads";
     games = extraConfig.GAMES or "${home}/Games";
     music = extraConfig.MUSIC or "${home}/Music";
-    notes = extraConfig.NOTES or "${home}/Notes";
+    org = extraConfig.ORG or "${home}/org";
     pictures = extraConfig.PICTURES or "${home}/Pictures";
+    projects = extraConfig.PROJECTS or "${home}/projects";
     publicShare = extraConfig.PUBLICSHARE or "${home}/Public";
     source = extraConfig.SOURCE or "${home}/Source";
     templates = extraConfig.TEMPLATES or "${home}/Templates";
@@ -154,7 +155,7 @@ in {
         {
           on = ["g" "h" "v"];
           run = "cd ${dir.videos}";
-          desc = "go videos";
+          desc = "go movies";
         }
         {
           on = ["g" "h" "m"];
@@ -173,8 +174,13 @@ in {
         }
         {
           on = ["g" "h" "n"];
-          run = "cd ${dir.notes}";
-          desc = "go notes";
+          run = "cd ${dir.org}";
+          desc = "go org";
+        }
+        {
+          on = ["g" "h" "p"];
+          run = "cd ${dir.projects}";
+          desc = "go projects";
         }
         {
           on = ["g" "m"];
@@ -226,8 +232,12 @@ in {
           text = "";
         }
         {
-          name = baseNameOf dir.notes;
+          name = baseNameOf dir.org;
           text = "";
+        }
+        {
+          name = baseNameOf dir.projects;
+          text = "";
         }
         {
           name = baseNameOf dir.videos;
