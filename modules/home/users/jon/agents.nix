@@ -25,19 +25,28 @@
           api_key = "\${MINIMAX_API_KEY}";
         }
         // extra;
-      gpt = extra:
+      gptsol = extra:
         {
           provider = "custom";
-          model = "gpt-5.5";
+          model = "gpt-5.6-sol";
           base_url = "https://codex-lb.kit/v1";
           api_key = "\${CODEX_LB_API_KEY}";
           api_mode = "chat_completions";
         }
         // extra;
-      gptmini = extra:
+      gptterra = extra:
         {
           provider = "custom";
-          model = "gpt-5.4-mini";
+          model = "gpt-5.6-terra";
+          base_url = "https://codex-lb.kit/v1";
+          api_key = "\${CODEX_LB_API_KEY}";
+          api_mode = "chat_completions";
+        }
+        // extra;
+      gptluna = extra:
+        {
+          provider = "custom";
+          model = "gpt-5.6-luna";
           base_url = "https://codex-lb.kit/v1";
           api_key = "\${CODEX_LB_API_KEY}";
           api_mode = "chat_completions";
@@ -47,67 +56,67 @@
 
     # Shared configuration
     config = let
-      inherit (config.services.hermes-agent.models) minimax gptmini gpt;
+      inherit (config.services.hermes-agent.models) minimax gptluna gptterra gptsol;
     in {
       model = {
-        inherit (minimax {}) provider base_url api_key;
-        default = (minimax {}).model;
+        inherit (gptluna {}) provider base_url api_key;
+        default = (gptluna {}).model;
       };
       auxiliary = {
         # Image analysis (vision_analyze tool + browser screenshots)
-        vision = minimax {
+        vision = gptluna {
           timeout = 120;
           download_timeout = 30;
         };
 
         # Context compression timeout
-        compression = minimax {
+        compression = gptluna {
           timeout = 120;
         };
 
         # Web page summarization + browser page text extraction
-        web_extract = minimax {
+        web_extract = gptluna {
           timeout = 360;
         };
 
         # Smart command-approval classification
-        approval = minimax {
+        approval = gptluna {
           timeout = 30;
         };
 
         # Past session summarization
-        session_search = minimax {
+        session_search = gptluna {
           timeout = 30;
           max_concurrency = 3;
         };
 
         # Skill search and discovery
-        skills_hub = minimax {
+        skills_hub = gptluna {
           timeout = 30;
         };
 
         # MCP tool dispatch
-        mcp = minimax {
+        mcp = gptluna {
           timeout = 30;
         };
 
         # Session title summaries
-        title_generation = minimax {
+        title_generation = gptluna {
           timeout = 30;
         };
 
         # Prune and tend to my skills garden
-        curator = minimax {
+        curator = gptluna {
           timeout = 600;
         };
 
         # Before session disappears, decide what should be remembered
-        flush_memories = minimax {
+        flush_memories = gptluna {
           timeout = 30;
         };
 
         # Kanban triage specifier
-        triage_specifier = minimax {
+        triage_specifier = gptluna {
           timeout = 120;
         };
       };
