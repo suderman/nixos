@@ -2,6 +2,7 @@
 {
   config,
   lib,
+  perSystem,
   pkgs,
   ...
 }: let
@@ -14,19 +15,15 @@
   configDir = ".config/pi";
   stateDir = ".local/state/pi";
 
-  # The real pi package is installed imperatively into the user's npm prefix.
-  # This wrapper makes that install lazy and recreates the expected directory
-  # layout before every invocation.
+  # Recreate the expected directory layout before every invocation, then run
+  # the Pi package and configuration from the flake input.
   pi-init = pkgs.self.mkScript {
     name = "pi";
-    path = [pkgs.nodejs pkgs.systemd];
+    path = [pkgs.systemd];
     text =
       # bash
       ''
-        export NPM_CONFIG_PREFIX="${config.home.sessionVariables.NPM_CONFIG_PREFIX}"
-        export NPM_CONFIG_CACHE="${config.home.sessionVariables.NPM_CONFIG_CACHE}"
-
-        PI_BIN="''${PI_BIN:-${config.home.sessionVariables.NPM_CONFIG_PREFIX}/bin/pi}"
+        PI_BIN="''${PI_BIN:-${perSystem.pi.default}/bin/pi}"
         PI_CONFIG_DIR="''${PI_CONFIG_DIR:-${config.home.homeDirectory}/${configDir}}"
         PI_STATE_DIR="''${PI_STATE_DIR:-${config.home.homeDirectory}/${stateDir}}"
         PI_DIR="''${PI_DIR:-''${PI_CODING_AGENT_DIR:-${config.home.homeDirectory}/${agentDir}}}"
@@ -148,30 +145,13 @@
           pi_link "$PI_STATE_DIR/git" "$PI_DIR/git"
         }
 
-        pi_init() {
-          pi_agent_init
-
-          # pi is not packaged in nixpkgs here, so install the published npm CLI
-          # into the Home Manager-managed npm prefix on first use.
-          npm i -g --ignore-scripts @earendil-works/pi-coding-agent
-
-          if [[ ! -f "$PI_BIN" ]]; then
-            echo "Failed to install pi binary" >&2
-            exit 1
-          fi
-        }
-
         if [[ "''${1:-}" == "init" ]]; then
-          pi_init
+          pi_agent_init
           pi_env_init
           exit 0
         fi
 
         pi_agent_init
-
-        if [[ ! -e "$PI_BIN" ]]; then
-          pi_init
-        fi
 
         pi_env_init
         pi_env_load
@@ -186,7 +166,7 @@ in {
     package = lib.mkOption {
       type = lib.types.package;
       default = pi-init;
-      description = "Wrapper package that installs and runs pi-coding-agent.";
+      description = "Pi package with XDG config and state directories.";
     };
 
     apiKeys = lib.mkOption {

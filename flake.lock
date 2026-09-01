@@ -1830,6 +1830,26 @@
         "type": "github"
       }
     },
+    "pi": {
+      "inputs": {
+        "llm-agents": [
+          "llm-agents"
+        ]
+      },
+      "locked": {
+        "lastModified": 1788296863,
+        "narHash": "sha256-UdDkM3N7fUhRxe7kSriuwGqtveGSuMmfSWS4e/59ggs=",
+        "owner": "suderman",
+        "repo": "pi",
+        "rev": "bf18c55b0464c25455a58bdabf2ab798448a86d4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "suderman",
+        "repo": "pi",
+        "type": "github"
+      }
+    },
     "pins": {
       "inputs": {
         "devshell": "devshell_3",
@@ -1973,6 +1993,7 @@
         "nixpkgs": "nixpkgs_11",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "nur": "nur",
+        "pi": "pi",
         "pins": "pins",
         "stylix": "stylix",
         "treefmt-nix": "treefmt-nix_7"

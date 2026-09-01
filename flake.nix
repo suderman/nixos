@@ -105,6 +105,11 @@
     # <https://github.com/numtide/llm-agents.nix>
     llm-agents.url = "github:numtide/llm-agents.nix";
 
+    # Pi package and default configuration
+    # <https://github.com/suderman/pi>
+    pi.url = "github:suderman/pi";
+    pi.inputs.llm-agents.follows = "llm-agents";
+
     # Hermes Agent
     # <https://github.com/NousResearch/hermes-agent>
     hermes-agent.url = "github:NousResearch/hermes-agent/v2026.8.31";
