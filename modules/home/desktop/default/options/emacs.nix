@@ -47,7 +47,7 @@ in {
     # tui emacs
     home.shellAliases.em = "emacsclient --tty";
 
-    # Native build tools for vterm, modules, and day-to-day Emacs experiments.
+    # Native build tools for Emacs modules and day-to-day experiments.
     toolchains.native.enable = true;
 
     # Mutable Emacs config belongs in storage with snapshots/backups.
