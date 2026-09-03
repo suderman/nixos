@@ -378,16 +378,17 @@
       "inputs": {
         "blueprint": "blueprint_2",
         "emacs-overlay": "emacs-overlay",
+        "kitty-graphics": "kitty-graphics",
         "nixpkgs": [
           "nixpkgs-unstable"
         ]
       },
       "locked": {
-        "lastModified": 1788385326,
-        "narHash": "sha256-A8KZjDLPrtUzCfdxsGAWSuZ86dnSNQ3HRwOYA5QjvfM=",
+        "lastModified": 1788475601,
+        "narHash": "sha256-ptfTrxQ0ilwmKUqomR9vr0Kb0OB1d9Mm36IYnAHVW7g=",
         "owner": "suderman",
         "repo": "emacs",
-        "rev": "77e066cfbda390b36cf03d9f89c89745e2fec4da",
+        "rev": "b8c194c979e5ad191c94b104e2ef8eb586d727ce",
         "type": "github"
       },
       "original": {
@@ -1373,6 +1374,22 @@
       "original": {
         "owner": "vic",
         "repo": "import-tree",
+        "type": "github"
+      }
+    },
+    "kitty-graphics": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1784999277,
+        "narHash": "sha256-3P4NQJpC0R1DRQ1oV1vbN1VD+Tb0wcMIvN1yA/pa/Rc=",
+        "owner": "cashmeredev",
+        "repo": "kitty-graphics.el",
+        "rev": "13666d4eb2ef4eeed24697c0326368eff3667dce",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cashmeredev",
+        "repo": "kitty-graphics.el",
         "type": "github"
       }
     },
