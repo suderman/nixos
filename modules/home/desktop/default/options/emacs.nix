@@ -19,8 +19,18 @@
         --run 'config_dir="''${XDG_CONFIG_HOME:-$HOME/.config}/emacs"; if [ -f "$config_dir/init.el" ]; then set -- --init-directory "$config_dir" "$@"; fi'
     '';
   };
+  terminalSetup = ''
+    if [[ -n "''${SSH_TTY-}" && "''${TERM-}" == xterm-256color ]]; then
+      export TERM=xterm-direct2
+    fi
+  '';
   terminalEditor = pkgs.writeShellScript "emacs-editor" ''
-    exec ${lib.getBin cfg.package}/bin/emacs --no-window-system "$@"
+    ${terminalSetup}
+    exec ${lib.getBin cfg.finalPackage}/bin/emacs --no-window-system "$@"
+  '';
+  terminalClient = pkgs.writeShellScript "emacs-client" ''
+    ${terminalSetup}
+    exec ${lib.getBin cfg.finalPackage}/bin/emacsclient --tty "$@"
   '';
 in {
   config = mkIf cfg.enable {
@@ -45,7 +55,10 @@ in {
     };
 
     # tui emacs
-    home.shellAliases.em = "emacsclient --tty";
+    home.shellAliases = {
+      em = "${terminalClient}";
+      emd = ''${terminalEditor} --init-directory "$PWD"'';
+    };
 
     # Native build tools for Emacs modules and day-to-day experiments.
     toolchains.native.enable = true;
