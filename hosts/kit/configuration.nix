@@ -70,6 +70,15 @@
 
   services.open-webui.enable = true;
 
+  services.nojoin = {
+    enable = true;
+    apiKeys = ./apikeys-env.age;
+    openai = {
+      baseUrl = "https://codex-lb.kit/v1";
+      apiKeyEnv = "CODEX_LB_API_KEY";
+    };
+  };
+
   services.honcho = {
     enable = true;
     apiKeys = ./apikeys-env.age;

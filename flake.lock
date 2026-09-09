@@ -1898,11 +1898,11 @@
         "treefmt-nix": "treefmt-nix_6"
       },
       "locked": {
-        "lastModified": 1788702111,
-        "narHash": "sha256-mG9fXpC5uv3e9xXN7POURZry6XepQ6KWbnsrwUS9WtE=",
+        "lastModified": 1788986922,
+        "narHash": "sha256-UuJCSiEPrNWQQ05opLeUeC2ROUeD/1qrnkPdGZ7p9is=",
         "owner": "suderman",
         "repo": "pins",
-        "rev": "fdb40531ac9e75017a81965c9578a74de94ac963",
+        "rev": "078402d46186b7fa0c33c5165545c146f4751786",
         "type": "github"
       },
       "original": {
