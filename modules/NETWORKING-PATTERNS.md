@@ -44,6 +44,10 @@ zone map:
 Practical rule: when you change a host's main network identity, update its
 `networking.domain` and the matching zone data.
 
+Fixed hosts use their permanent location, such as `home` or `work`, as the
+primary domain. Reserve `tail` as the primary domain for mobile devices such as
+laptops, phones, and tablets that are not fixed to one location.
+
 ## Blocky is the internal DNS layer
 
 Blocky is what makes internal URLs resolve.
@@ -140,6 +144,21 @@ devices outside the local LAN. The common path is:
 Without Tailscale or equivalent routing, internal names may resolve but not be
 reachable from outside the LAN.
 
+### Subnet-router redundancy
+
+Private records point to each fixed host's permanent LAN address. Remote access
+therefore depends on a Tailscale subnet router even when the destination host
+also runs Tailscale. For example, `kit` and `codex-lb.kit` resolve to `10.1.0.6`,
+not `kit.tail`.
+
+Hub and Kit both advertise the exact `10.1.0.0/16` prefix. Tailscale keeps one
+as a standby and fails over when the active router disconnects. Both routes must
+remain approved in the Tailscale admin console. Fixed home hosts set
+`services.tailscale.preferLocalRoute = "10.1.0.0/16"` so the main routing table
+wins over an accepted copy of the same route from the active subnet router.
+Without that policy rule, a standby router can send replies to local clients
+back through the active router and make its LAN services unreachable.
+
 ## User-level services
 
 `modules/nixos/default/options/traefik/users.nix` integrates Home Manager users
@@ -164,3 +183,5 @@ same DNS + Traefik + CA system.
   and let the `local` middleware protect it.
 - If a service should be public, use an external hostname and let Traefik manage
   Cloudflare DNS + Let's Encrypt.
+- Keep at least two approved Tailscale advertisers for a subnet used by private
+  DNS records. Failover requires the route prefixes to match exactly.

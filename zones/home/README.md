@@ -53,7 +53,10 @@
 | DHCP Mode       | `DHCP Server`                                          |
 | DHCP Range      | `10.1.0.1` to `10.1.255.254`                           |
 | Default Gateway | `Auto`                                                 |
-| DNS Server      | `10.1.0.4`                                             |
+| DNS Server 1    | `10.1.0.4` _(hub)_                                     |
+| DNS Server 2    | `10.1.0.5` _(lux)_                                     |
+| DNS Server 3    | `8.8.8.8` _(public fallback)_                           |
+| DNS Server 4    | `8.8.4.4` _(public fallback)_                           |
 | Domain Name     | `home`                                                 |
 
 </details>

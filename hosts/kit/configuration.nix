@@ -23,8 +23,11 @@
   # Always at home in my office
   networking.domain = "home";
 
-  # Remove undesired route
-  services.tailscale.deleteRoute = "10.1.0.0/16";
+  # Back up hub's home subnet route without routing local LAN traffic through it.
+  services.tailscale = {
+    preferLocalRoute = "10.1.0.0/16";
+    extraSetFlags = ["--advertise-routes=10.1.0.0/16"];
+  };
 
   # Allow powerkey to be intercepted, but still poweroff for longpress
   services.logind.settings.Login = {

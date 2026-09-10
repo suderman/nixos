@@ -20,7 +20,10 @@
   networking.domain = "home";
 
   # Allow other devices on my LAN to access my tailnet
-  services.tailscale.extraSetFlags = ["--advertise-routes=10.1.0.0/16"];
+  services.tailscale = {
+    preferLocalRoute = "10.1.0.0/16";
+    extraSetFlags = ["--advertise-routes=10.1.0.0/16"];
+  };
 
   # Snapshots and backups
   services.btrbk.volumes = {

@@ -19,8 +19,8 @@
   # Always at home in my laundry room
   networking.domain = "home";
 
-  # Remove undesired route
-  services.tailscale.deleteRoute = "10.1.0.0/16";
+  # Keep local LAN traffic off Tailscale.
+  services.tailscale.preferLocalRoute = "10.1.0.0/16";
 
   # Snapshots and backups
   services.btrbk.volumes = {

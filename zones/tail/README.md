@@ -25,7 +25,11 @@
 |     | https://login.tailscale.com/admin/machines |
 | --- | ------------------------------------------ |
 | hub | `10.1.0.0/16`                              |
+| kit | `10.1.0.0/16` _(standby)_                  |
 | eve | `10.2.0.0/16`                              |
+
+Approve both identical home routes. Tailscale uses one advertiser and fails
+over to the other when it disconnects.
 
 </details>
 

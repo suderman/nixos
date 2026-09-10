@@ -9,9 +9,10 @@
   inherit (lib) mkIf mkOption types;
 in {
   options.services.tailscale = {
-    deleteRoute = mkOption {
+    preferLocalRoute = mkOption {
       type = types.str;
       default = "";
+      description = "Subnet that should use the main routing table before Tailscale routes.";
     };
   };
 
@@ -29,25 +30,22 @@ in {
     # https://github.com/tailscale/tailscale/issues/4432
     networking.firewall.checkReversePath = "loose";
 
-    systemd.services."tailscale-delete-route" = {
-      serviceConfig.Type = "simple";
+    # Keep a directly connected LAN preferred when another Tailscale subnet
+    # router advertises the same prefix for high availability.
+    systemd.services.tailscale-prefer-local-route = mkIf (cfg.preferLocalRoute != "") {
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
       wantedBy = ["multi-user.target"];
-      after = ["tailscaled.service"];
-      path = with pkgs; [gnugrep iproute2];
-      script = let
-        route =
-          if cfg.deleteRoute == ""
-          then "SKIP"
-          else cfg.deleteRoute;
-      in ''
-        while [[ -z $(ip route show table all | grep "table 52") ]]; do
-          echo "Table 52 is empty. Waiting for 10 seconds..."
-          sleep 10
-        done
-        if [[ ! -z "$(ip route show table 52 | grep ${route})" ]]; then
-          echo "Delete route ${route} from table 52"
-          ip route del ${route} dev tailscale0 table 52
-        fi
+      before = ["tailscaled.service"];
+      path = [pkgs.iproute2];
+      script = ''
+        ip rule del to ${cfg.preferLocalRoute} priority 2500 lookup main 2>/dev/null || true
+        ip rule add to ${cfg.preferLocalRoute} priority 2500 lookup main
+      '';
+      preStop = ''
+        ip rule del to ${cfg.preferLocalRoute} priority 2500 lookup main 2>/dev/null || true
       '';
     };
     systemd.settings.Manager.DefaultTimeoutStopSec = "30s";
