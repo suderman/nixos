@@ -4,6 +4,16 @@
   pkgs,
   ...
 }: {
+  # Keep the shared agent skills as a writable Git checkout.
+  persist.storage.directories = [".agents/skills"];
+  home.activation.agentSkills = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    skills="$HOME/.agents/skills"
+    mkdir -p "$HOME/.agents"
+    if [[ ! -d "$skills/.git" ]]; then
+      ${pkgs.git}/bin/git clone https://github.com/suderman/skills.git "$skills"
+    fi
+  '';
+
   # Preload OpenCode with my API keys
   programs.opencode.apiKeys = ./apikeys-env.age;
 
