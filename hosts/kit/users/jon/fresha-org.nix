@@ -1,11 +1,12 @@
 {
   config,
   lib,
+  osConfig,
   perSystem,
   pkgs,
   ...
 }: let
-  orgFile = "${config.home.homeDirectory}/org/fresha.org";
+  orgFile = "${config.home.homeDirectory}/org/calendar/fresha.org";
   sync = perSystem.self.mkScript {
     name = "fresha-org-sync";
     path = [pkgs.curl];
@@ -22,7 +23,7 @@
       }
 
       if ! cdp_ready; then
-        ${config.home.profileDirectory}/bin/hyprctl dispatch 'hl.dsp.exec_cmd("chromium-agent")'
+        ${lib.getExe' osConfig.programs.hyprland.package "hyprctl"} dispatch 'hl.dsp.exec_cmd("chromium-agent")'
         for _ in {1..40}; do
           cdp_ready && break
           sleep 0.25
