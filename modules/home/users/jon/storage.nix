@@ -14,7 +14,7 @@
       enable = true;
     };
     DOWNLOAD = {
-      path = "downloads";
+      path = "inbox";
       persist = "scratch";
       sync = false;
       enable = true;
@@ -75,11 +75,22 @@
       sync = false;
       enable = true;
     };
-    PROJECTS = {
-      path = "projects";
+    WORK = {
+      path = "work";
       persist = "storage";
       sync = true;
-      syncDevices = ["kit" "cog"];
+      enable = true;
+    };
+    APP = {
+      path = "app";
+      persist = "storage";
+      sync = true;
+      enable = true;
+    };
+    MEDIA = {
+      path = "media";
+      persist = "storage";
+      sync = true;
       enable = true;
     };
   };
