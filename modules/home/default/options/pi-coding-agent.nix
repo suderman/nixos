@@ -156,6 +156,12 @@
         pi_env_init
         pi_env_load
 
+        # Keep Lens configuration in storage and its mixed runtime data in
+        # scratch, using Pi's existing persistence roots.
+        export PI_LENS_CONFIG_PATH="''${PI_LENS_CONFIG_PATH:-$PI_CONFIG_DIR/pi-lens.json}"
+        export PI_LENS_HOME="''${PI_LENS_HOME:-$PI_STATE_DIR/pi-lens}"
+        export PILENS_DATA_DIR="''${PILENS_DATA_DIR:-$PI_LENS_HOME/projects}"
+
         exec "$PI_BIN" "$@"
       '';
   };
