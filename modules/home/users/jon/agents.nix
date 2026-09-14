@@ -6,13 +6,38 @@
 }: {
   # Keep the shared agent skills as a writable Git checkout.
   persist.storage.directories = [".agents/skills"];
-  home.activation.agentSkills = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    skills="$HOME/.agents/skills"
-    mkdir -p "$HOME/.agents"
-    if [[ ! -d "$skills/.git" ]]; then
-      ${pkgs.git}/bin/git clone https://github.com/suderman/skills.git "$skills"
-    fi
-  '';
+
+  systemd.user.timers.agent-skills-sync = {
+    Unit.Description = "Best-effort sync of agent skills";
+    Timer = {
+      OnStartupSec = "1min";
+      OnUnitActiveSec = "1d";
+    };
+    Install.WantedBy = ["timers.target"];
+  };
+
+  systemd.user.services.agent-skills-sync = {
+    Unit.Description = "Best-effort sync of agent skills";
+    Service = {
+      Type = "oneshot";
+      ExecStart = lib.getExe (pkgs.writeShellApplication {
+        name = "agent-skills-sync";
+        runtimeInputs = [pkgs.coreutils pkgs.git];
+        text = ''
+          skills="$HOME/.agents/skills"
+          mkdir -p "$(dirname "$skills")"
+
+          if [[ -d "$skills/.git" ]]; then
+            git -C "$skills" pull --ff-only || echo "Agent skills update failed; keeping existing checkout" >&2
+          elif [[ ! -e "$skills" || -z "$(ls -A "$skills")" ]]; then
+            git clone https://github.com/suderman/skills.git "$skills" || echo "Agent skills clone failed; retrying later" >&2
+          else
+            echo "Agent skills path is not an empty directory or Git checkout; skipping sync" >&2
+          fi
+        '';
+      });
+    };
+  };
 
   # Preload OpenCode with my API keys
   programs.opencode.apiKeys = ./apikeys-env.age;
