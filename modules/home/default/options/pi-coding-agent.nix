@@ -162,6 +162,10 @@
         export PI_LENS_HOME="''${PI_LENS_HOME:-$PI_STATE_DIR/pi-lens}"
         export PILENS_DATA_DIR="''${PILENS_DATA_DIR:-$PI_LENS_HOME/projects}"
 
+        # FFF's frecency and query history databases are persistent Pi state.
+        export FFF_FRECENCY_DB="''${FFF_FRECENCY_DB:-$PI_STATE_DIR/fff/frecency}"
+        export FFF_HISTORY_DB="''${FFF_HISTORY_DB:-$PI_STATE_DIR/fff/history}"
+
         exec "$PI_BIN" "$@"
       '';
   };
