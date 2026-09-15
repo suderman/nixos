@@ -9,8 +9,8 @@
   inherit (config.networking) hostName;
   dir = with config.xdg.userDirs; rec {
     home = config.home.homeDirectory;
-    screenshots = "${extraConfig.PICTURES or "${home}/Pictures"}/Screenshots";
-    screencasts = "${extraConfig.VIDEOS or "${home}/Videos"}/Screencasts";
+    screenshots = "${extraConfig.MEDIA or "${home}/media"}/screenshots";
+    screencasts = "${extraConfig.MEDIA or "${home}/media"}/screencasts";
     icons = "${pkgs.papirus-icon-theme}/share/icons/Papirus-Dark/16x16/devices";
     cache = config.xdg.cacheHome;
   };

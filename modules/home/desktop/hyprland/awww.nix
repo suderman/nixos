@@ -15,7 +15,7 @@
   home.packages = let
     inherit (config.home) homeDirectory;
     inherit (config.xdg.userDirs) extraConfig;
-    dir = "${extraConfig.PICTURES or "${homeDirectory}/Pictures"}/Wallpapers";
+    dir = "${extraConfig.APP or "${homeDirectory}/app"}/Wallpapers/Desktop";
   in [
     (pkgs.self.mkScript {
       name = "wallpaper";
