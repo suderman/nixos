@@ -75,12 +75,6 @@
       sync = false;
       enable = true;
     };
-    WORK = {
-      path = "work";
-      persist = "storage";
-      sync = true;
-      enable = true;
-    };
     APP = {
       path = "app";
       persist = "storage";
