@@ -62,6 +62,17 @@ in {
   users.defaultUserShell = pkgs.zsh;
   programs.zsh.enable = true;
 
+  # Allow local agents running as Jon to rebuild without an interactive prompt.
+  security.sudo.extraRules = lib.optional (builtins.elem "jon" userNames) {
+    users = ["jon"];
+    commands = [
+      {
+        command = "/run/current-system/sw/bin/nixos-rebuild";
+        options = ["NOPASSWD"];
+      }
+    ];
+  };
+
   # Include all user password.age files as an agenix secret as user-password
   age.secrets =
     lib.genAttrs
