@@ -45,8 +45,11 @@
   # Preload mmx-cli with my API keys
   programs.mmx-cli.apiKeys = ./apikeys-env.age;
 
-  # Preload pi with my API keys
-  programs.pi-coding-agent.apiKeys = ./apikeys-env.age;
+  # Preload pi with my API keys and watch the downloads task drop zones.
+  programs.pi-coding-agent = {
+    apiKeys = ./apikeys-env.age;
+    taskDropZones.enable = true;
+  };
 
   # Set my API keys and preferred models for hermes agent
   services.hermes-agent = {
