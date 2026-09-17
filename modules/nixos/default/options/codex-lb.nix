@@ -74,6 +74,7 @@ in {
       environment =
         {
           CODEX_LB_DASHBOARD_BOOTSTRAP_TOKEN = "bootstrap";
+          CODEX_LB_MODEL_REGISTRY_CLIENT_VERSION = "0.153.4";
           CODEX_LB_OAUTH_CALLBACK_HOST = "0.0.0.0";
           CODEX_LB_OAUTH_REDIRECT_URI = "http://localhost:1455/auth/callback";
           CODEX_LB_UPSTREAM_CONNECT_TIMEOUT_SECONDS = "60"; # default 30
