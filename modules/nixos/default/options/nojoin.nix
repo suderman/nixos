@@ -243,7 +243,8 @@ in {
       }
       {
         target = "${cfg.dataDir}/postgres";
-        mode = "0700";
+        # PostgreSQL 18 keeps PGDATA below this mount and needs to traverse it after dropping privileges.
+        mode = "0711";
       }
       {
         target = "${cfg.dataDir}/redis";
