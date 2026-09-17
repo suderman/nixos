@@ -71,46 +71,6 @@
         >/dev/null 2>&1 || true
     }
 
-    refresh_emacs_theme() {
-      local emacs emacsclient emacs_bin emacs_pkg theme_file ref candidate result
-
-      emacs="$(command -v emacs || true)"
-      emacsclient="$(command -v emacsclient || true)"
-
-      if [ -z "$emacs" ] || [ -z "$emacsclient" ]; then
-        return 0
-      fi
-
-      emacs_bin="$(${pkgs.coreutils}/bin/readlink -f "$emacs")"
-      case "$emacs_bin" in
-        */bin/emacs) emacs_pkg="''${emacs_bin%/bin/emacs}" ;;
-        *) return 0 ;;
-      esac
-
-      theme_file=""
-      while IFS= read -r ref; do
-        candidate="$ref/share/emacs/site-lisp/base16-stylix-theme.el"
-        if [ -r "$candidate" ]; then
-          theme_file="$candidate"
-          break
-        fi
-      done < <(${pkgs.nix}/bin/nix-store -q --references "$emacs_pkg" 2>/dev/null || true)
-
-      if [ -z "$theme_file" ]; then
-        return 0
-      fi
-
-      if ! result="$($emacsclient --eval "
-        (let ((theme-file \"$theme_file\"))
-          (mapc #'disable-theme custom-enabled-themes)
-          (load-file theme-file)
-          (setq base16-theme-256-color-source 'colors)
-          (load-theme 'base16-stylix t))
-      " 2>&1)"; then
-        printf 'warning: could not refresh Emacs theme: %s\n' "$result" >&2
-      fi
-    }
-
     if [ "$#" -ne 0 ]; then
       printf 'usage: stylix-theme-toggle\n' >&2
       exit 64
@@ -118,7 +78,7 @@
 
     notify_theme_switch
     /run/wrappers/bin/sudo ${activate}/bin/stylix-theme-activate
-    refresh_emacs_theme
+    # Emacs follows GTK's appearance event, including non-daemon sessions.
   '';
 in
   lib.mkMerge [
@@ -148,6 +108,8 @@ in
       ];
 
       specialisation.light.configuration = {
+        # Keep the exported pair unchanged when the active scheme changes.
+        programs.stylix-theme-toggle.darkScheme = lib.mkForce cfg.darkScheme;
         stylix.polarity = lib.mkForce "light";
         stylix.base16Scheme = lib.mkForce cfg.lightScheme;
       };

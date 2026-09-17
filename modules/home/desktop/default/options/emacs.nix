@@ -3,6 +3,7 @@
   config,
   lib,
   perSystem,
+  osConfig,
   pkgs,
   ...
 }: let
@@ -11,6 +12,11 @@
   configDir = ".config/emacs";
   fonts = config.stylix.fonts;
   paletteKeys = map (suffix: "base${suffix}") ["00" "01" "02" "03" "04" "05" "06" "07" "08" "09" "0A" "0B" "0C" "0D" "0E" "0F"];
+  # Resolve both schemes with the same Base16 parser and overrides as Stylix.
+  palette = scheme: let
+    colors = (config.stylix.base16.mkSchemeAttrs scheme).override config.stylix.override;
+  in "(${lib.concatMapStringsSep "\n                 " (key: ":${key} ${builtins.toJSON colors.withHashtag.${key}}") paletteKeys})";
+  schemes = osConfig.programs.stylix-theme-toggle;
   style = pkgs.writeText "emacs-style.el" ''
     ;;; style.el --- Generated from Nix/Stylix. Do not edit. -*- lexical-binding: t; -*-
     (setq suderman/system-style
@@ -18,8 +24,10 @@
             :variable-font ${builtins.toJSON fonts.serif.name}
             :icon-font "Symbols Nerd Font Mono"
             :font-size ${toString (fonts.sizes.terminal * 1.0)}
-            :palette (${lib.concatMapStringsSep "\n                " (key: ":${key} ${builtins.toJSON config.lib.stylix.colors.withHashtag.${key}}") paletteKeys})))
+            :palettes (:light ${palette schemes.lightScheme}
+                       :dark ${palette schemes.darkScheme})))
   '';
+  # Syncthing needs portable contents, not a /nix/store symlink. Rename atomically.
   exportStyle = pkgs.writeShellScript "export-emacs-style" ''
     set -eu
     dest="$HOME/org/.generated/emacs/style.el"
@@ -64,6 +72,9 @@ in {
       $DRY_RUN_CMD ${exportStyle}
     '');
     programs.emacs.package = mkDefault emacsPackage;
+    # Shared Lisp owns both variants and follows toolkit-theme on both platforms.
+    stylix.targets.emacs.enable = false;
+    programs.emacs.extraPackages = epkgs: [epkgs.base16-theme];
 
     services.emacs = {
       enable = mkDefault true;
