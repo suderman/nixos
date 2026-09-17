@@ -62,8 +62,8 @@ in {
       };
 
       monospace = mkDefault {
-        package = pkgs.nerd-fonts.jetbrains-mono;
-        name = "JetBrains Mono";
+        package = pkgs.ioskeley-mono.normal;
+        name = "Ioskeley Mono";
       };
 
       sansSerif = mkDefault {
@@ -72,8 +72,8 @@ in {
       };
 
       serif = mkDefault {
-        package = pkgs.dejavu_fonts;
-        name = "DejaVu Serif";
+        package = pkgs.literata;
+        name = "Literata";
       };
 
       emoji = mkDefault {

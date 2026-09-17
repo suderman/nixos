@@ -11,6 +11,9 @@
     ]
     ++ flake.lib.ls ./.;
 
+  # Only kit writes the shared appearance file; other machines consume it.
+  programs.emacs.exportStyle = true;
+
   # Programs
   programs.davinci-resolve.enable = true;
   programs.sparrow.enable = true;

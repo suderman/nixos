@@ -9,6 +9,30 @@
   cfg = config.programs.emacs;
   inherit (lib) mkDefault mkIf;
   configDir = ".config/emacs";
+  fonts = config.stylix.fonts;
+  paletteKeys = map (suffix: "base${suffix}") ["00" "01" "02" "03" "04" "05" "06" "07" "08" "09" "0A" "0B" "0C" "0D" "0E" "0F"];
+  style = pkgs.writeText "emacs-style.el" ''
+    ;;; style.el --- Generated from Nix/Stylix. Do not edit. -*- lexical-binding: t; -*-
+    (setq suderman/system-style
+          '(:mono-font ${builtins.toJSON fonts.monospace.name}
+            :variable-font ${builtins.toJSON fonts.serif.name}
+            :icon-font "Symbols Nerd Font Mono"
+            :font-size ${toString (fonts.sizes.terminal * 1.0)}
+            :palette (${lib.concatMapStringsSep "\n                " (key: ":${key} ${builtins.toJSON config.lib.stylix.colors.withHashtag.${key}}") paletteKeys})))
+  '';
+  exportStyle = pkgs.writeShellScript "export-emacs-style" ''
+    set -eu
+    dest="$HOME/org/.generated/emacs/style.el"
+    mkdir -p "$(dirname "$dest")"
+    if [ ! -L "$dest" ] && cmp -s ${style} "$dest"; then
+      exit 0
+    fi
+    tmp=$(mktemp "$dest.XXXXXX")
+    trap 'rm -f "$tmp"' EXIT
+    cp ${style} "$tmp"
+    chmod 644 "$tmp"
+    mv -fT "$tmp" "$dest"
+  '';
   # Prefer a writable checkout without losing the flake's bundled fallback.
   emacsPackage = pkgs.symlinkJoin {
     inherit (perSystem.emacs.default) name meta;
@@ -33,7 +57,12 @@
     exec ${lib.getBin cfg.finalPackage}/bin/emacsclient --tty "$@"
   '';
 in {
+  options.programs.emacs.exportStyle = lib.mkEnableOption "exporting shared Emacs appearance to the synced Org tree (enable on one host only)";
+
   config = mkIf cfg.enable {
+    home.activation.emacsStyle = mkIf cfg.exportStyle (lib.hm.dag.entryAfter ["writeBoundary"] ''
+      $DRY_RUN_CMD ${exportStyle}
+    '');
     programs.emacs.package = mkDefault emacsPackage;
 
     services.emacs = {
