@@ -21,6 +21,7 @@
     ;;; style.el --- Generated from Nix/Stylix. Do not edit. -*- lexical-binding: t; -*-
     (setq suderman/system-style
           '(:mono-font ${builtins.toJSON fonts.monospace.name}
+            :fallback-font "Ioskeley Mono"
             :variable-font ${builtins.toJSON fonts.serif.name}
             :icon-font "Symbols Nerd Font Mono"
             :font-size ${toString (fonts.sizes.terminal * 1.0)}

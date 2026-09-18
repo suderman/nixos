@@ -22,8 +22,8 @@ in {
       strip_trailing_spaces = "smart";
       clear_selection_on_clipboard_loss = "yes";
 
-      # disable ligatures when cursor is on them
-      disable_ligatures = "cursor";
+      # Keep programming ligatures visible while editing.
+      disable_ligatures = "never";
       bold_italic_font = "auto";
       adjust_line_height = "100%";
 

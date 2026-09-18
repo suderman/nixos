@@ -13,6 +13,22 @@ in {
   # Import stylix module
   imports = [flake.inputs.stylix.nixosModules.stylix];
 
+  # Keep the previous choice available during the Commit Mono trial.
+  config.fonts.packages = [pkgs.ioskeley-mono.normal];
+
+  # Upstream 1.143 gives its italic faces a separate primary family, which
+  # makes Kitty synthesize regular text instead of selecting the italic files.
+  config.fonts.fontconfig.localConf = ''
+    <match target="scan">
+      <test name="family" compare="eq">
+        <string>CommitMonoV143</string>
+      </test>
+      <edit name="family" mode="assign_replace">
+        <string>CommitMono</string>
+      </edit>
+    </match>
+  '';
+
   config.stylix = {
     enable = mkDefault true;
     autoEnable = mkDefault cfg.enable;
@@ -62,8 +78,8 @@ in {
       };
 
       monospace = mkDefault {
-        package = pkgs.ioskeley-mono.normal;
-        name = "Ioskeley Mono";
+        package = pkgs.commit-mono;
+        name = "CommitMono";
       };
 
       sansSerif = mkDefault {
