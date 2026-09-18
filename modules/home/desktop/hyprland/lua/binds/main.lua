@@ -116,7 +116,7 @@ function M.apply(_, _)
 	hl.bind("SUPER + SHIFT + Q", hl.dsp.exit())
 
 	util.exec("SUPER + RETURN", "kitty")
-	util.exec("SUPER + Y", "kitty --class Yazi yazi")
+	util.exec("SUPER + Y", "thunar")
 	util.exec("SUPER + ALT + Y", "nautilus --new-window")
 	-- util.exec("SUPER + E", "kitty --class Neovim nvim")
 	util.exec("SUPER + E", "emacsclient --create-frame")

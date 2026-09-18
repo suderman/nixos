@@ -64,6 +64,11 @@
     # Quick Look
     services.gnome.sushi.enable = true;
 
+    programs.thunar = {
+      enable = true;
+      plugins = with pkgs; [thunar-archive-plugin thunar-volman];
+    };
+
     # Thumbnail support for images
     services.tumbler.enable = true;
 
@@ -71,6 +76,7 @@
       alsa-utils # provides amixer/alsamixer/...
       brightnessctl # screen brightness control
       networkmanagerapplet # provide GUI app: nm-connection-editor
+      engrampa # Thunar archive actions
       wl-clipboard
       vulkan-tools
     ];
