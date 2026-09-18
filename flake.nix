@@ -94,7 +94,8 @@
     # Emacs flake
     # <https://github.com/suderman/emacs>
     emacs.url = "github:suderman/emacs";
-    emacs.inputs.nixpkgs.follows = "nixpkgs-unstable";
+    # Temporary: newer nixpkgs hashes the mutable tree-sitter-cuda v0.21.2 tag incorrectly.
+    emacs.inputs.nixpkgs.url = "github:NixOS/nixpkgs/b1b875982b17dabde9b4a37f3e229e74913e6db3";
 
     # Manually tracked release pins
     # <https://github.com/suderman/pins>
@@ -112,18 +113,18 @@
 
     # Hermes Agent
     # <https://github.com/NousResearch/hermes-agent>
-    hermes-agent.url = "github:NousResearch/hermes-agent/v2026.8.31";
+    hermes-agent.url = "github:NousResearch/hermes-agent/v2026.9.14";
 
     # Speech-to-text
     # <https://github.com/cjpais/Handy>
-    handy.url = "github:cjpais/Handy/v0.9.6";
+    handy.url = "github:cjpais/Handy/v0.9.7";
     handy.inputs.nixpkgs.follows = "nixpkgs-unstable";
     # bun2nix evaluates Darwin formatters, unsupported by current unstable.
     handy.inputs.bun2nix.inputs.nixpkgs.follows = "nixpkgs";
 
     # Tmux replacement
     # <https://github.com/herdrdev/herdr>
-    herdr.url = "github:herdrdev/herdr/v0.8.2";
+    herdr.url = "github:herdrdev/herdr/v0.9.1";
     herdr.inputs.nixpkgs.follows = "nixpkgs";
 
     # Buzz desktop client
