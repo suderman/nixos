@@ -62,8 +62,6 @@ in {
 
       # https://github.com/JonathanTreffler/backblaze-personal-wine-container#environment-variables
       environment = {
-        DISPLAY_WIDTH = "660";
-        DISPLAY_HEIGHT = "476";
         USER_ID = "0"; # run as root
         GROUP_ID = "0"; # run as root
         DISABLE_AUTOUPDATE = "true";
