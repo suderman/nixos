@@ -26,6 +26,10 @@ in {
       type = types.path;
       default = "/var/lib/backblaze";
     };
+    autoUpdate = mkOption {
+      type = types.bool;
+      default = false;
+    };
     driveD = mkOption {
       type = types.nullOr types.str;
       default = null;
@@ -64,7 +68,7 @@ in {
       environment = {
         USER_ID = "0"; # run as root
         GROUP_ID = "0"; # run as root
-        DISABLE_AUTOUPDATE = "true";
+        DISABLE_AUTOUPDATE = lib.boolToString (!cfg.autoUpdate);
         TZ = config.time.timeZone;
       };
 

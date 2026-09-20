@@ -38,9 +38,10 @@
   # Send everything to backblaze
   services.backblaze = {
     enable = true;
-    driveD = "/mnt/main/storage";
-    driveE = "/mnt/data/storage";
-    driveF = "/mnt/pool/storage";
+    driveD = "/mnt/main/storage/home";
+    driveE = "/mnt/main/storage/var/lib";
+    driveF = "/mnt/data/storage";
+    driveG = "/mnt/pool/storage";
   };
 
   # Services
