@@ -12,6 +12,9 @@
     flake.nixosModules.desktop.hyprland
   ];
 
+  # Ensure Wi-Fi survives an occasional missed udev coldplug event.
+  boot.kernelModules = ["iwlwifi"];
+
   # Boot with good ol' grub
   boot.loader = {
     grub.enable = true;
