@@ -102,29 +102,24 @@
     pins.url = "github:suderman/pins";
     pins.inputs.nixpkgs.follows = "nixpkgs";
 
-    # AI coding agents
-    # <https://github.com/numtide/llm-agents.nix>
-    llm-agents.url = "github:numtide/llm-agents.nix";
-
     # Pi package and default configuration
     # <https://github.com/suderman/pi>
     pi.url = "github:suderman/pi";
-    pi.inputs.llm-agents.follows = "llm-agents";
 
     # Hermes Agent
     # <https://github.com/NousResearch/hermes-agent>
-    hermes-agent.url = "github:NousResearch/hermes-agent/v2026.9.14";
+    hermes-agent.url = "github:NousResearch/hermes-agent";
 
     # Speech-to-text
     # <https://github.com/cjpais/Handy>
-    handy.url = "github:cjpais/Handy/v0.9.7";
+    handy.url = "github:cjpais/Handy";
     handy.inputs.nixpkgs.follows = "nixpkgs-unstable";
     # bun2nix evaluates Darwin formatters, unsupported by current unstable.
     handy.inputs.bun2nix.inputs.nixpkgs.follows = "nixpkgs";
 
     # Tmux replacement
     # <https://github.com/herdrdev/herdr>
-    herdr.url = "github:herdrdev/herdr/v0.9.1";
+    herdr.url = "github:herdrdev/herdr";
     herdr.inputs.nixpkgs.follows = "nixpkgs";
 
     # Buzz desktop client
