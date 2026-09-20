@@ -24,6 +24,17 @@
     '';
   };
 
+  services.pipewire.wireplumber.extraConfig."51-alc4082-spdif" = {
+    "monitor.alsa.rules" = [
+      {
+        matches = [
+          {"node.name" = "alsa_output.usb-Generic_USB_Audio-00.HiFi__SPDIF__sink";}
+        ];
+        actions.update-props."session.suspend-timeout-seconds" = 0;
+      }
+    ];
+  };
+
   systemd.user.services.audioProfiles = {
     description = "Set default audio profiles";
     after = ["graphical-session.target"];
