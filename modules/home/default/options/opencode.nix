@@ -237,6 +237,8 @@ in {
             ];
         in [
           "PATH=${lib.concatStringsSep ":" path}"
+          "NPM_CONFIG_PREFIX=${config.home.sessionVariables.NPM_CONFIG_PREFIX}"
+          "NPM_CONFIG_CACHE=${config.home.sessionVariables.NPM_CONFIG_CACHE}"
           "XDG_CACHE_HOME=%h/.cache/opencode-serve" # give the service a separate cache
         ];
         ExecStart = toString [
