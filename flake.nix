@@ -94,8 +94,6 @@
     # Emacs flake
     # <https://github.com/suderman/emacs>
     emacs.url = "github:suderman/emacs";
-    # Temporary: newer nixpkgs hashes the mutable tree-sitter-cuda v0.21.2 tag incorrectly.
-    emacs.inputs.nixpkgs.url = "github:NixOS/nixpkgs/b1b875982b17dabde9b4a37f3e229e74913e6db3";
 
     # Manually tracked release pins
     # <https://github.com/suderman/pins>
