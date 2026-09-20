@@ -5,7 +5,7 @@
   ...
 }: let
   inherit (builtins) attrNames baseNameOf mapAttrs;
-  inherit (lib) genAttrs mkAfter mkOption mkMerge types unique;
+  inherit (lib) genAttrs mkOption mkMerge types unique;
   users = config.home-manager.users or {};
 in {
   # Import impermanence module
@@ -161,38 +161,50 @@ in {
       }
     ];
 
-    # This will default to true in 26.05
-    boot.initrd.systemd.enable = false;
+    # Wipe the root subvolume after resume and before mounting it.
+    boot.initrd.systemd.services.reset-root = {
+      description = "Reset Btrfs root subvolume";
+      requiredBy = ["sysroot.mount"];
+      after = [
+        "initrd-root-device.target"
+        "local-fs-pre.target"
+      ];
+      before = ["sysroot.mount"];
+      unitConfig.DefaultDependencies = false;
+      serviceConfig = {
+        Type = "oneshot";
+        # Keep the unit active so initrd shutdown cannot start the reset again.
+        RemainAfterExit = true;
+      };
+      script =
+        # bash
+        ''
+          cleanup() {
+            status=$?
+            trap - EXIT
+            if ! umount /mnt; then
+              echo "Failed to unmount temporary Btrfs mount /mnt" >&2
+              ((status != 0)) || status=1
+            fi
+            exit "$status"
+          }
 
-    # Script to wipe the root subvolume at boot
-    boot.initrd.postResumeCommands =
-      mkAfter
-      # bash
-      ''
-        # Mount btrfs disk to /mnt
-        mkdir -p /mnt
-        mount /dev/disk/by-label/main /mnt
+          mkdir -p /mnt
+          mount -t btrfs -o subvolid=5 ${lib.escapeShellArg config.fileSystems."${config.persist.path}".device} /mnt
+          trap cleanup EXIT
 
-        # Check if root subvolume exists
-        if btrfs subvolume show /mnt/root &>/dev/null; then
+          # Refuse to operate anywhere except the configured Btrfs top level.
+          test "$(btrfs inspect-internal rootid /mnt)" = 5
 
-          # Delete all of root's subvolumes
-          btrfs subvolume list -o /mnt/root |
-          cut -f9 -d' ' |
-          while read subvolume; do
-            btrfs subvolume delete "/mnt/$subvolume"
-          done
+          if test -e /mnt/root; then
+            test ! -L /mnt/root
+            btrfs subvolume show /mnt/root >/dev/null
+            btrfs subvolume delete --commit-after --recursive /mnt/root
+          fi
 
-          # Delete root itself
-          btrfs subvolume delete /mnt/root
-
-        fi
-
-        # Create a new blank subvolume at the same path
-        btrfs subvolume create /mnt/root
-
-        # Clean up
-        umount /mnt
-      '';
+          btrfs subvolume create /mnt/root
+          mkdir -p /mnt/root/var/log /mnt/root/var/lib/nixos
+        '';
+    };
   };
 }
