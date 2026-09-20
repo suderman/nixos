@@ -11,6 +11,9 @@
   package = flake.inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default;
   tomlFormat = pkgs.formats.toml {};
 in {
+  # Avoid duplicate options when release-26.11 imports the upstream module.
+  disabledModules = ["programs/herdr.nix"];
+
   # Backported from Home Manager master at 1944398834e2b9677ee6081e11e42c32d7c1eb5d.
   # Remove after moving to release-26.11.
   meta.maintainers = [lib.maintainers.amadejkastelic];
@@ -66,6 +69,40 @@ in {
 
   config = mkIf cfg.enable {
     home.packages = mkIf (cfg.package != null) [cfg.package];
+
+    # Herdr stores mutable local data beside Home Manager's generated config.toml.
+    persist.storage.directories = [".config/herdr"];
+
+    # Match the direct shortcuts in tmux.conf.
+    programs.herdr.settings.keys = {
+      prefix = "alt+slash";
+
+      new_workspace = "alt+n";
+      workspace_picker = "alt+a";
+      detach = "alt+d";
+
+      new_tab = "alt+t";
+      previous_tab = "alt+comma";
+      next_tab = "alt+period";
+      move_tab_previous = "ctrl+alt+comma";
+      move_tab_next = "ctrl+alt+period";
+      indexed.tabs = "alt";
+
+      split_horizontal = "alt+u";
+      split_vertical = "alt+i";
+      close_pane = "alt+w";
+      last_pane = "alt+o";
+
+      focus_pane_left = "alt+h";
+      focus_pane_down = "alt+j";
+      focus_pane_up = "alt+k";
+      focus_pane_right = "alt+l";
+
+      resize_pane_left = "alt+shift+h";
+      resize_pane_down = "alt+shift+j";
+      resize_pane_up = "alt+shift+k";
+      resize_pane_right = "alt+shift+l";
+    };
 
     xdg.configFile."herdr/config.toml" = mkIf (cfg.settings != {}) {
       source = tomlFormat.generate "herdr-config.toml" cfg.settings;
