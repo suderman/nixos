@@ -79,6 +79,8 @@ in {
         ++ lib.optional (cfg.driveG != null) "${cfg.driveG}:/drive_g";
     };
 
+    systemd.services.docker-backblaze.unitConfig.RequiresMountsFor = [cfg.dataDir];
+
     # Enable reverse proxy
     services.traefik.enable = true;
   };
