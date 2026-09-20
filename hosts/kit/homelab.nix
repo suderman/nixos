@@ -37,8 +37,8 @@
 
   systemd.user.services.audioProfiles = {
     description = "Set default audio profiles";
-    after = ["graphical-session.target"];
-    requires = ["graphical-session.target"];
+    after = ["graphical-session.target" "wireplumber.service"];
+    requires = ["graphical-session.target" "wireplumber.service"];
     wantedBy = ["default.target"];
     serviceConfig = {
       Type = "oneshot";
@@ -46,8 +46,19 @@
     };
     path = with pkgs; [pulseaudio];
     script = ''
-      pactl set-card-profile alsa_card.pci-0000_01_00.1 output:hdmi-stereo
-      pactl set-card-profile alsa_card.usb-Generic_USB_Audio-00 HiFi
+      for _ in {1..100}; do
+        cards=$(pactl list short cards 2>/dev/null || true)
+        if grep -Fq alsa_card.pci-0000_01_00.1 <<< "$cards" &&
+          grep -Fq alsa_card.usb-Generic_USB_Audio-00 <<< "$cards"; then
+          pactl set-card-profile alsa_card.pci-0000_01_00.1 output:hdmi-stereo
+          pactl set-card-profile alsa_card.usb-Generic_USB_Audio-00 HiFi
+          exit 0
+        fi
+        sleep 0.1
+      done
+
+      echo "Timed out waiting for audio cards" >&2
+      exit 1
     '';
   };
 
