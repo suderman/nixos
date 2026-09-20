@@ -73,6 +73,9 @@ in {
     # Herdr stores mutable local data beside Home Manager's generated config.toml.
     persist.storage.directories = [".config/herdr"];
 
+    # Home Manager owns config.toml, so Herdr cannot record onboarding itself.
+    programs.herdr.settings.onboarding = false;
+
     # Match the direct shortcuts in tmux.conf.
     programs.herdr.settings.keys = {
       prefix = "alt+slash";
