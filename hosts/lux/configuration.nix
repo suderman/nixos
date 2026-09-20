@@ -37,7 +37,7 @@
 
   # Send everything to backblaze
   services.backblaze = {
-    enable = false;
+    enable = true;
     driveD = "/mnt/main/storage";
     driveE = "/mnt/data/storage";
     driveF = "/mnt/pool/storage";

@@ -14,7 +14,7 @@
   # https://github.com/JonathanTreffler/backblaze-personal-wine-container
   cfg = config.services.backblaze;
   inherit (config.services.traefik.lib) mkLabels;
-  inherit (lib) mkIf mkOption mkBefore types;
+  inherit (lib) mkIf mkOption types;
 in {
   options.services.backblaze = {
     enable = lib.options.mkEnableOption "backblaze";
@@ -27,20 +27,20 @@ in {
       default = "/var/lib/backblaze";
     };
     driveD = mkOption {
-      type = types.str;
-      default = "drive_d";
+      type = types.nullOr types.str;
+      default = null;
     };
     driveE = mkOption {
-      type = types.str;
-      default = "drive_e";
+      type = types.nullOr types.str;
+      default = null;
     };
     driveF = mkOption {
-      type = types.str;
-      default = "drive_f";
+      type = types.nullOr types.str;
+      default = null;
     };
     driveG = mkOption {
-      type = types.str;
-      default = "drive_g";
+      type = types.nullOr types.str;
+      default = null;
     };
   };
 
@@ -66,33 +66,17 @@ in {
         DISPLAY_HEIGHT = "476";
         USER_ID = "0"; # run as root
         GROUP_ID = "0"; # run as root
+        DISABLE_AUTOUPDATE = "true";
         TZ = config.time.timeZone;
       };
 
       # Bind volumes
-      volumes = [
-        "${cfg.dataDir}:/config"
-        "${cfg.driveD}:/drive_d"
-        "${cfg.driveE}:/drive_e"
-        "${cfg.driveF}:/drive_f"
-        "${cfg.driveG}:/drive_g"
-      ];
-    };
-
-    # After installing Mono/Wine, stop at the email input and run:
-    # > docker restart backblaze
-    # This will ensure Backblaze can see the volumes/drive letters
-    systemd.services.docker-backblaze = {
-      postStart = let
-        dir = "${cfg.dataDir}/wine/dosdevices";
-      in
-        mkBefore ''
-          while [ ! -d "${dir}" ]; do sleep 1; done
-          [ -h "${dir}/d:" ] || ln -s /drive_d "${dir}/d:"
-          [ -h "${dir}/e:" ] || ln -s /drive_e "${dir}/e:"
-          [ -h "${dir}/f:" ] || ln -s /drive_f "${dir}/f:"
-          [ -h "${dir}/g:" ] || ln -s /drive_g "${dir}/g:"
-        '';
+      volumes =
+        ["${cfg.dataDir}:/config"]
+        ++ lib.optional (cfg.driveD != null) "${cfg.driveD}:/drive_d"
+        ++ lib.optional (cfg.driveE != null) "${cfg.driveE}:/drive_e"
+        ++ lib.optional (cfg.driveF != null) "${cfg.driveF}:/drive_f"
+        ++ lib.optional (cfg.driveG != null) "${cfg.driveG}:/drive_g";
     };
 
     # Enable reverse proxy

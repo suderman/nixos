@@ -1912,11 +1912,11 @@
         "treefmt-nix": "treefmt-nix_6"
       },
       "locked": {
-        "lastModified": 1789741958,
-        "narHash": "sha256-Xr9KcyPjn6+HmeY0s6zwsJWAWpOtNUKmGENXsLkqIpQ=",
+        "lastModified": 1789929519,
+        "narHash": "sha256-b8MV6rx489IyfZkBVJJRaoQX15fuTM2aLp0+5dxXiqU=",
         "owner": "suderman",
         "repo": "pins",
-        "rev": "99dd07a557b63fe0492a038bea7fe4559b6a5607",
+        "rev": "ccb39f7c3eb595ed89430753bb94b2139843cb54",
         "type": "github"
       },
       "original": {
