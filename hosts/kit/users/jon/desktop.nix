@@ -3,6 +3,8 @@ _: {
   wayland.windowManager.hyprland = {
     lua = {
       enable = true;
+      # Temporary workaround for hyprwm/hyprland-plugins#697 on NVIDIA.
+      rounding = 0;
       monitors = [
         {
           output = "DP-1";
@@ -18,6 +20,10 @@ _: {
     };
     enablePlugins = false; # dynamic cursors crash on lua path for now
     enableOfficialPlugins = true;
+    hyprbars = {
+      barBlur = false;
+      barPrecedenceOverBorder = true;
+    };
     waybar.codex-lb.enable = true;
     waybar.minimax-quota.enable = true;
   };

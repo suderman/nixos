@@ -2,7 +2,7 @@ local util = require("lib.util")
 local stylix = require("generated.stylix")
 local M = {}
 
-function M.apply(_, _)
+function M.apply(host, _)
 	hl.config({
 		general = {
 			snap = {
@@ -24,7 +24,7 @@ function M.apply(_, _)
 			resize_on_border = true,
 		},
 		decoration = {
-			rounding = 10,
+			rounding = host.rounding,
 			shadow = {
 				enabled = true,
 				range = 20,

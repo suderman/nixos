@@ -112,6 +112,7 @@
   in ''
     return {
       name = ${toJSON cfg.lua.host},
+      rounding = ${toJSON cfg.lua.rounding},
       monitors = ${toLuaMonitors cfg.lua.monitors},
       env = ${toLuaAttrs cfg.lua.env},
       exec_once = ${toLuaList cfg.lua.execOnce},

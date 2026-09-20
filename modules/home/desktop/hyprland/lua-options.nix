@@ -17,6 +17,12 @@ in {
       description = "Logical Hyprland host profile name exposed to Lua. Defaults to the current host name and only needs overriding if a host should reuse a different Hyprland profile.";
     };
 
+    rounding = mkOption {
+      type = types.int;
+      default = 10;
+      description = "Host-specific window corner radius.";
+    };
+
     execOnce = mkOption {
       type = types.listOf types.str;
       default = [];
