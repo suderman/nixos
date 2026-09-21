@@ -26,6 +26,7 @@ _: {
     };
     waybar.codex-lb.enable = true;
     waybar.minimax-quota.enable = true;
+    waybar.herdr.enable = true;
   };
 
   # Hide monitor speakers

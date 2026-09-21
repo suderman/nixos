@@ -15,6 +15,9 @@
       ++ lib.optionals config.wayland.windowManager.hyprland.waybar.minimax-quota.enable [
         "custom/minimax-quota"
       ]
+      ++ lib.optionals config.wayland.windowManager.hyprland.waybar.herdr.enable [
+        "custom/herdr"
+      ]
       ++ [
         "pulseaudio"
         "group/hardware"

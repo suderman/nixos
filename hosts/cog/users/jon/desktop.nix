@@ -16,6 +16,7 @@ _: {
     enableOfficialPlugins = true;
     waybar.codex-lb.enable = true;
     waybar.minimax-quota.enable = true;
+    waybar.herdr.enable = true;
   };
 
   # Record screen with CPU-based AV1 encoder

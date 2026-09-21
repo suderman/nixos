@@ -81,9 +81,28 @@ tooltip {
 }
 
 .modules-right #custom-codex-lb,
-.modules-right #custom-minimax-quota {
+.modules-right #custom-minimax-quota,
+.modules-right #custom-herdr {
   padding-left: 10px;
   padding-right: 10px;
+}
+
+.modules-right #custom-herdr.blocked,
+.modules-right #custom-herdr.offline {
+  color: @base08;
+}
+
+.modules-right #custom-herdr.done {
+  color: @base0A;
+}
+
+.modules-right #custom-herdr.working {
+  color: @base0B;
+}
+
+.modules-right #custom-herdr.idle,
+.modules-right #custom-herdr.unknown {
+  color: @base04;
 }
 
 .modules-center #custom-screencast.active {
