@@ -53,7 +53,7 @@
     '';
   };
   terminalSetup = ''
-    if [[ -n "''${SSH_TTY-}" && "''${TERM-}" == xterm-256color ]]; then
+    if [[ "''${TERM-}" == xterm-256color && ( -n "''${SSH_TTY-}" || "''${COLORTERM-}" == truecolor ) ]]; then
       export TERM=xterm-direct2
     fi
   '';
