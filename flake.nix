@@ -100,9 +100,9 @@
     pins.url = "github:suderman/pins";
     pins.inputs.nixpkgs.follows = "nixpkgs";
 
-    # Pi package and default configuration
-    # <https://github.com/suderman/pi>
-    pi.url = "github:suderman/pi";
+    # Personal agent packages and configuration
+    # <https://github.com/suderman/agents>
+    agents.url = "github:suderman/agents";
 
     # Hermes Agent
     # <https://github.com/NousResearch/hermes-agent>

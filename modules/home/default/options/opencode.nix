@@ -2,61 +2,26 @@
 {
   config,
   lib,
+  perSystem,
   pkgs,
   ...
 }: let
   cfg = config.programs.opencode;
   cfgDir = ".config/opencode";
 
-  opencode-init = pkgs.self.mkScript {
+  opencode-wrapper = pkgs.self.mkScript {
     name = "opencode";
-    path = [pkgs.coreutils];
     text =
       # bash
       ''
-        OPENCODE_BIN="''${OPENCODE_BIN:-${config.home.sessionVariables.NPM_CONFIG_PREFIX}/bin/opencode}"
         OPENCODE_DIR="''${OPENCODE_DIR:-${config.home.homeDirectory}/${cfgDir}}"
-        OPENCODE_INIT_STAMP="''${OPENCODE_INIT_STAMP:-${config.home.homeDirectory}/.local/state/opencode/init.timestamp}"
-        OPENCODE_INIT_INTERVAL="$((24 * 60 * 60))"
 
         set -a
         [[ -f "$OPENCODE_DIR/.env" ]] && . "$OPENCODE_DIR/.env"
         [[ -f "$OPENCODE_DIR/.env.local" ]] && . "$OPENCODE_DIR/.env.local"
         set +a
 
-        opencode_install() {
-          npm i -g opencode-ai
-
-          if [[ ! -x "$OPENCODE_BIN" ]]; then
-            echo "Failed to install OpenCode binary" >&2
-            exit 1
-          fi
-
-          mkdir -p "$(dirname "$OPENCODE_INIT_STAMP")"
-          date +%s >"$OPENCODE_INIT_STAMP"
-        }
-
-        opencode_install_stale() {
-          [[ ! -f "$OPENCODE_INIT_STAMP" ]] && return 0
-
-          local now last
-          now="$(date +%s)"
-          last="$(<"$OPENCODE_INIT_STAMP")"
-
-          [[ ! "$last" =~ ^[0-9]+$ ]] && return 0
-          ((now - last >= OPENCODE_INIT_INTERVAL))
-        }
-
-        if [[ $# -eq 1 && "$1" == init ]]; then
-          opencode_install
-          exit
-        fi
-
-        if [[ ! -x "$OPENCODE_BIN" ]] || opencode_install_stale; then
-          opencode_install
-        fi
-
-        exec "$OPENCODE_BIN" "$@"
+        exec ${perSystem.agents.opencode}/bin/opencode "$@"
       '';
   };
 in {
@@ -77,7 +42,7 @@ in {
     enable = lib.mkEnableOption "opencode";
     package = lib.mkOption {
       type = lib.types.package;
-      default = opencode-init;
+      default = opencode-wrapper;
     };
     name = lib.mkOption {
       type = lib.types.str;
@@ -98,9 +63,6 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    # Install OpenCode from npm and run with nodejs
-    toolchains.javascript.enable = true;
-
     # Persist the writable config, data, and state directories.
     persist.storage.directories = [cfgDir];
     persist.scratch.directories = [
@@ -215,8 +177,6 @@ in {
             ];
         in [
           "PATH=${lib.concatStringsSep ":" path}"
-          "NPM_CONFIG_PREFIX=${config.home.sessionVariables.NPM_CONFIG_PREFIX}"
-          "NPM_CONFIG_CACHE=${config.home.sessionVariables.NPM_CONFIG_CACHE}"
           "XDG_CACHE_HOME=%h/.cache/opencode-serve" # give the service a separate cache
         ];
         ExecStart = toString [

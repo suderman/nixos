@@ -24,7 +24,7 @@
     text =
       # bash
       ''
-        PI_BIN="''${PI_BIN:-${perSystem.pi.default}/bin/pi}"
+        PI_BIN="''${PI_BIN:-${perSystem.agents.pi}/bin/pi}"
         PI_DIR="''${PI_DIR:-''${PI_CODING_AGENT_DIR:-${config.home.homeDirectory}/${agentDir}}}"
         PI_STATE_DIR="''${PI_STATE_DIR:-${config.home.homeDirectory}/${stateDir}}"
 
