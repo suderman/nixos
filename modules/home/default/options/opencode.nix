@@ -10,56 +10,33 @@
 
   opencode-init = pkgs.self.mkScript {
     name = "opencode";
-    path = [pkgs.git];
+    path = [pkgs.coreutils];
     text =
       # bash
       ''
-        # Path to OpenCode binary managed by npm
         OPENCODE_BIN="''${OPENCODE_BIN:-${config.home.sessionVariables.NPM_CONFIG_PREFIX}/bin/opencode}"
         OPENCODE_DIR="''${OPENCODE_DIR:-${config.home.homeDirectory}/${cfgDir}}"
         OPENCODE_INIT_STAMP="''${OPENCODE_INIT_STAMP:-${config.home.homeDirectory}/.local/state/opencode/init.timestamp}"
         OPENCODE_INIT_INTERVAL="$((24 * 60 * 60))"
 
-        # Export environment variables
         set -a
         [[ -f "$OPENCODE_DIR/.env" ]] && . "$OPENCODE_DIR/.env"
         [[ -f "$OPENCODE_DIR/.env.local" ]] && . "$OPENCODE_DIR/.env.local"
         set +a
 
-        # Initialize OpenCode: install via npm
-        opencode_init() {
-
-          # Git clone OpenCode config repo into config directory
-          mkdir -p $OPENCODE_DIR
-          if [[ ! -d "$OPENCODE_DIR/.git" ]]; then
-            tmp="$(mktemp -d)"
-            git clone ${cfg.gitUrl} "$tmp"
-            cp -a "$tmp"/. "$OPENCODE_DIR"/
-            rm -rf "$tmp"
-          fi
-
-          # Ensure it was cloned before proceeding
-          if [[ ! -d $OPENCODE_DIR/.git ]]; then
-            echo "Failed to clone OpenCode configuration"
-            exit 1
-          fi
-
-          # Install/update opencode globally
-          # npm already enabled via toolchains.javascript.enable = true;
+        opencode_install() {
           npm i -g opencode-ai
 
-          # Ensure OpenCode is actually installed
-          if [[ ! -f $OPENCODE_BIN ]]; then
-            echo "Failed to install OpenCode binary"
+          if [[ ! -x "$OPENCODE_BIN" ]]; then
+            echo "Failed to install OpenCode binary" >&2
             exit 1
           fi
 
           mkdir -p "$(dirname "$OPENCODE_INIT_STAMP")"
           date +%s >"$OPENCODE_INIT_STAMP"
-
         }
 
-        opencode_init_stale() {
+        opencode_install_stale() {
           [[ ! -f "$OPENCODE_INIT_STAMP" ]] && return 0
 
           local now last
@@ -70,19 +47,16 @@
           ((now - last >= OPENCODE_INIT_INTERVAL))
         }
 
-        # If argument is "init", run the above script
-        if [[ "''${@-}" == "init" ]]; then
-          opencode_init
-
-        # Else, if the config or binary is missing/stale, run the above script first
-        elif [[ ! -d "$OPENCODE_DIR/.git" ]] || [[ ! -e $OPENCODE_BIN ]] || opencode_init_stale; then
-          opencode_init
-          $OPENCODE_BIN "$@"
-
-        # Otherwise, just passthrough to opencode
-        else
-          $OPENCODE_BIN "$@"
+        if [[ $# -eq 1 && "$1" == init ]]; then
+          opencode_install
+          exit
         fi
+
+        if [[ ! -x "$OPENCODE_BIN" ]] || opencode_install_stale; then
+          opencode_install
+        fi
+
+        exec "$OPENCODE_BIN" "$@"
       '';
   };
 in {
@@ -116,10 +90,6 @@ in {
       example = 4090;
       description = "Port number to run the OpenCode server";
     };
-    gitUrl = lib.mkOption {
-      type = lib.types.str;
-      default = "https://github.com/suderman/opencode";
-    };
     apiKeys = lib.mkOption {
       type = lib.types.nullOr lib.types.path;
       default = null;
@@ -131,12 +101,20 @@ in {
     # Install OpenCode from npm and run with nodejs
     toolchains.javascript.enable = true;
 
-    # Persist the config, data and state directories
+    # Persist the writable config, data, and state directories.
     persist.storage.directories = [cfgDir];
     persist.scratch.directories = [
       ".local/share/opencode"
       ".local/state/opencode"
     ];
+
+    home.activation.openCodeAgentConfiguration = lib.hm.dag.entryAfter ["agentConfigurationCheckout"] ''
+      $DRY_RUN_CMD env \
+        PATH=${lib.makeBinPath [pkgs.bash pkgs.coreutils]}:$PATH \
+        OPENCODE_CONFIG_DIR=${config.home.homeDirectory}/${cfgDir} \
+        XDG_STATE_HOME=${config.home.homeDirectory}/.local/state \
+        ${config.home.homeDirectory}/.agents/opencode/bootstrap
+    '';
 
     # Lazy typing
     home.shellAliases = rec {

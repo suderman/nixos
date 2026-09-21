@@ -3,41 +3,75 @@
   lib,
   pkgs,
   ...
-}: {
-  # Keep the shared agent skills as a writable Git checkout.
-  persist.storage.directories = [".agents/skills"];
+}: let
+  agentConfigurationCheckout = pkgs.writeShellApplication {
+    name = "agent-configuration-checkout";
+    runtimeInputs = [pkgs.coreutils pkgs.git];
+    text = ''
+      repository="$HOME/.agents"
+      remote=https://github.com/suderman/agents.git
+      legacy_skills="''${XDG_STATE_HOME:-$HOME/.local/state}/agents/legacy-skills"
 
-  systemd.user.timers.agent-skills-sync = {
-    Unit.Description = "Best-effort sync of agent skills";
-    Timer = {
-      OnStartupSec = "1min";
-      OnUnitActiveSec = "1d";
-    };
-    Install.WantedBy = ["timers.target"];
+      clone_replacing_symlink() {
+        local temporary
+
+        temporary="$(mktemp -d "$HOME/.agents.checkout.XXXXXX")"
+        trap 'rm -rf -- "$temporary"' RETURN
+        git clone "$remote" "$temporary"
+        rm -- "$repository"
+        mv -T -- "$temporary" "$repository"
+        trap - RETURN
+      }
+
+      retire_legacy_skills_checkout() {
+        local entries
+
+        shopt -s nullglob dotglob
+        entries=("$repository"/*)
+        shopt -u nullglob dotglob
+        [[ ''${#entries[@]} -eq 1 && "''${entries[0]}" == "$repository/skills" && -d "$repository/skills/.git" ]] || return 1
+
+        if [[ -e "$legacy_skills" || -L "$legacy_skills" ]]; then
+          echo "Cannot preserve legacy agent skills: $legacy_skills already exists" >&2
+          exit 1
+        fi
+
+        mkdir -p -- "$(dirname -- "$legacy_skills")"
+        mv -- "$repository/skills" "$legacy_skills"
+        echo "Preserved legacy agent skills at $legacy_skills" >&2
+      }
+
+      if [[ -L "$repository" ]]; then
+        resolved="$(readlink -f -- "$repository" || true)"
+        if [[ ! -d "$resolved/.git" ]]; then
+          echo "Refusing to replace agent configuration symlink: $repository -> $resolved" >&2
+          exit 1
+        fi
+        clone_replacing_symlink
+      elif [[ -d "$repository/.git" ]]; then
+        :
+      elif [[ ! -e "$repository" ]]; then
+        git clone "$remote" "$repository"
+      elif [[ -d "$repository" ]]; then
+        retire_legacy_skills_checkout || true
+        if [[ -n "$(ls -A "$repository")" ]]; then
+          echo "Agent configuration directory is not empty: $repository" >&2
+          exit 1
+        fi
+        git clone "$remote" "$repository"
+      else
+        echo "Agent configuration is not a Git checkout: $repository" >&2
+        exit 1
+      fi
+    '';
   };
+in {
+  # Keep the complete curated configuration as one writable Git checkout.
+  persist.storage.directories = [".agents"];
 
-  systemd.user.services.agent-skills-sync = {
-    Unit.Description = "Best-effort sync of agent skills";
-    Service = {
-      Type = "oneshot";
-      ExecStart = lib.getExe (pkgs.writeShellApplication {
-        name = "agent-skills-sync";
-        runtimeInputs = [pkgs.coreutils pkgs.git];
-        text = ''
-          skills="$HOME/.agents/skills"
-          mkdir -p "$(dirname "$skills")"
-
-          if [[ -d "$skills/.git" ]]; then
-            git -C "$skills" pull --ff-only || echo "Agent skills update failed; keeping existing checkout" >&2
-          elif [[ ! -e "$skills" || -z "$(ls -A "$skills")" ]]; then
-            git clone https://github.com/suderman/skills.git "$skills" || echo "Agent skills clone failed; retrying later" >&2
-          else
-            echo "Agent skills path is not an empty directory or Git checkout; skipping sync" >&2
-          fi
-        '';
-      });
-    };
-  };
+  home.activation.agentConfigurationCheckout = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    $DRY_RUN_CMD ${lib.getExe agentConfigurationCheckout}
+  '';
 
   # Preload OpenCode with my API keys
   programs.opencode.apiKeys = ./apikeys-env.age;
