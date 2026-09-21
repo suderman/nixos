@@ -1,7 +1,7 @@
 # Asana Org Home Manager module
 
 This directory defines the reusable `services.asana-org` Home Manager module.
-It mirrors incomplete Asana My Tasks into a managed block in an Org file.
+It mirrors incomplete Asana My Tasks into a dedicated Org file.
 
 ## Files
 
@@ -10,8 +10,8 @@ It mirrors incomplete Asana My Tasks into a managed block in an Org file.
 - `asana-org.py` contains the stdlib-only API client and Org renderer.
 
 Kit/Jon's concrete settings live in
-`hosts/kit/users/jon/asana-org.nix`. Keep host-specific workspace, Org path,
-heading, and secret values out of this shared module.
+`hosts/kit/users/jon/asana-org.nix`. Keep host-specific workspace, Org path, and
+secret values out of this shared module.
 
 ## Behavior to preserve
 
@@ -27,15 +27,13 @@ heading, and secret values out of this shared module.
   reopened in Asana must return to `TODO` instead of being completed again.
 - Missing completion state is legacy data and must be initialized without an
   Asana write.
-- Replace only the content between `# asana-org:begin` and `# asana-org:end` in
-  the configured Org file. The old `asana-to-org` markers are accepted only for
-  migration.
-- Require the configured Org heading path to exist exactly once. When the path
-  changes within the same file, move the complete managed block atomically.
-- Keep writes atomic and skip byte-identical updates. Jon's `~/org` is Syncthing
-  managed, so his timer must remain enabled on kit only.
-- Fetch and validate all required API data before writing. API, token, marker,
-  or parsing errors must leave `todo.org` unchanged.
+- Manage the complete configured Org file. Do not add block markers or require
+  a parent heading. Task headings are top-level headings.
+- Create the configured file when it does not exist. Keep writes atomic,
+  preserve its mode after creation, and skip byte-identical updates. Jon's
+  `~/org` is Syncthing managed, so his timer must remain enabled on kit only.
+- Fetch and validate all required API data before writing. API, token, or
+  parsing errors must leave the Org file unchanged.
 - Completion PUT requests must be safe to retry when an earlier request
   succeeds but a later request fails.
 - Do not add an Asana SDK or other Python dependency. The standard library is

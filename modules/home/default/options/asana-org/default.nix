@@ -6,13 +6,11 @@
   ...
 }: let
   cfg = config.services.asana-org;
-  headingArgs = lib.concatMapStringsSep " " (heading: "--org-heading ${lib.escapeShellArg heading}") cfg.orgHeading;
   asana-org = perSystem.self.mkScript {
     name = "asana-org";
     text = ''
       exec ${lib.getExe pkgs.python3} ${./asana-org.py} \
         --org-file ${lib.escapeShellArg cfg.orgFile} \
-        ${headingArgs} \
         --token-file ${lib.escapeShellArg config.age.secrets.asana-org-token.path} \
         --workspace ${lib.escapeShellArg cfg.workspace} "$@"
     '';
@@ -33,18 +31,8 @@ in {
 
     orgFile = lib.mkOption {
       type = lib.types.str;
-      default = "${config.home.homeDirectory}/org/todo.org";
-      description = "Org file that receives the managed Asana task block";
-    };
-
-    orgHeading = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = ["Asana"];
-      example = [
-        "work"
-        "Asana"
-      ];
-      description = "Exact Org heading path under which tasks are written";
+      default = "${config.home.homeDirectory}/org/asana.org";
+      description = "Dedicated Org file managed by the Asana task sync";
     };
   };
 
@@ -53,10 +41,6 @@ in {
       {
         assertion = cfg.orgFile != "";
         message = "services.asana-org.orgFile must not be empty";
-      }
-      {
-        assertion = cfg.orgHeading != [] && lib.all (heading: heading != "") cfg.orgHeading;
-        message = "services.asana-org.orgHeading must contain at least one non-empty heading";
       }
     ];
 

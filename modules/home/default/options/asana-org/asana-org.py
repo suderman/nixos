@@ -15,10 +15,6 @@ from pathlib import Path
 
 
 API_BASE = "https://app.asana.com/api/1.0"
-BEGIN_MARKER = "# asana-org:begin"
-END_MARKER = "# asana-org:end"
-LEGACY_BEGIN_MARKER = "# asana-to-org:begin"
-LEGACY_END_MARKER = "# asana-to-org:end"
 TASK_FIELDS = ",".join(
     (
         "gid",
@@ -253,92 +249,6 @@ def render_task(task, status, level):
     return "\n".join(lines)
 
 
-def find_managed_region(text):
-    marker_pairs = (
-        (BEGIN_MARKER, END_MARKER),
-        (LEGACY_BEGIN_MARKER, LEGACY_END_MARKER),
-    )
-    begins = []
-    ends = []
-    offset = 0
-    for line in text.splitlines(keepends=True):
-        value = line.rstrip("\r\n")
-        for pair_index, (begin, end) in enumerate(marker_pairs):
-            if value == begin:
-                begins.append((pair_index, offset, offset + len(line)))
-            elif value == end:
-                ends.append((pair_index, offset, offset + len(line)))
-        offset += len(line)
-
-    if not begins and not ends:
-        return None
-    if (
-        len(begins) != 1
-        or len(ends) != 1
-        or begins[0][0] != ends[0][0]
-        or begins[0][1] >= ends[0][1]
-    ):
-        raise SyncError("Org file contains invalid or duplicate Asana marker pairs")
-    if begins[0][2] == begins[0][1] + len(marker_pairs[begins[0][0]][0]):
-        raise SyncError("Asana begin marker must end with a newline")
-    return {
-        "start": begins[0][1],
-        "body_start": begins[0][2],
-        "body_end": ends[0][1],
-        "end": ends[0][2],
-        "body": text[begins[0][2] : ends[0][1]],
-    }
-
-
-def find_target_heading(text, path):
-    headings = []
-    offset = 0
-    for line in text.splitlines(keepends=True):
-        match = re.fullmatch(r"(\*+) +(.*?)\s*", line.rstrip("\r\n"))
-        if match and match.group(2):
-            headings.append(
-                {
-                    "level": len(match.group(1)),
-                    "title": match.group(2),
-                    "start": offset,
-                }
-            )
-        offset += len(line)
-
-    stack = []
-    matches = []
-    for index, heading in enumerate(headings):
-        while stack and stack[-1]["level"] >= heading["level"]:
-            stack.pop()
-        stack.append(heading)
-        if [item["title"] for item in stack] == path and [
-            item["level"] for item in stack
-        ] == list(range(1, len(path) + 1)):
-            section_end = len(text)
-            for later in headings[index + 1 :]:
-                if later["level"] <= heading["level"]:
-                    section_end = later["start"]
-                    break
-            matches.append({**heading, "section_end": section_end})
-
-    if len(matches) != 1:
-        rendered = " > ".join(path)
-        raise SyncError(f"Org file must contain exactly one heading path: {rendered}")
-    return matches[0]
-
-
-def insert_managed_region(text, target, body):
-    block = BEGIN_MARKER + "\n"
-    if body:
-        block += body.rstrip("\r\n") + "\n"
-    block += END_MARKER + "\n"
-    before = text[: target["section_end"]]
-    after = text[target["section_end"] :]
-    if before and not before.endswith(("\n", "\r")):
-        before += "\n"
-    return before + block + after
-
-
 def parse_entries(body):
     if not body.strip():
         return []
@@ -397,6 +307,8 @@ def update_retained_block(block, level):
         return block
     prefix = project.group(1).rstrip("\r") + " > "
     heading = re.match(r"^\*+ (?:TODO|PROG|EVAL|HOLD|DONE) (.+)", block)
+    if not heading:
+        raise SyncError("Managed Asana task has an invalid heading")
     if heading.group(1).startswith(prefix):
         return block
     return block[: heading.start(1)] + prefix + block[heading.start(1) :]
@@ -426,7 +338,7 @@ def merge_tasks(active, previous, fetch_task, complete_task, task_level):
         if (
             entry["gid"] in active_by_gid
             and entry["status"] == "DONE"
-            and entry["synced_completed"] is False
+            and entry["synced_completed"] in (False,)
         ):
             task = complete_task(entry["gid"])
             if task["gid"] != entry["gid"] or not task["completed"]:
@@ -512,34 +424,43 @@ def atomic_write(path, content, mode):
             temporary.unlink(missing_ok=True)
 
 
-def sync(org_file, org_heading, token_file, workspace):
+def sync(org_file, token_file, workspace):
     token = read_token(token_file)
+    org_file = org_file.expanduser()
     try:
-        org_file = org_file.expanduser().resolve(strict=True)
+        parent = org_file.parent.resolve(strict=True)
     except OSError as error:
-        raise SyncError(f"Org file is unavailable: {org_file}") from error
-    file_stat = org_file.stat()
-    if not stat.S_ISREG(file_stat.st_mode):
-        raise SyncError(f"Org path is not a regular file: {org_file}")
+        raise SyncError(
+            f"Org file directory is unavailable: {org_file.parent}"
+        ) from error
+    org_file = parent / org_file.name
 
-    runtime_dir = Path(os.environ.get("XDG_RUNTIME_DIR", "/tmp"))
+    runtime_dir = Path(os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}"))
     lock_path = runtime_dir / f"asana-org-{os.getuid()}.lock"
     with lock_path.open("a", encoding="utf-8") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
-        original = org_file.read_bytes()
         try:
-            text = original.decode("utf-8")
+            file_stat = org_file.stat()
+        except FileNotFoundError:
+            original = None
+            file_mode = 0o600
+        else:
+            if not stat.S_ISREG(file_stat.st_mode):
+                raise SyncError(f"Org path is not a regular file: {org_file}")
+            original = org_file.read_bytes()
+            file_mode = stat.S_IMODE(file_stat.st_mode)
+
+        try:
+            text = original.decode("utf-8") if original is not None else ""
         except UnicodeDecodeError as error:
             raise SyncError(f"Org file is not UTF-8: {org_file}") from error
-        region = find_managed_region(text)
-        if region is None:
-            previous = []
-            without_region = text
-        else:
-            previous = parse_entries(region["body"])
-            without_region = text[: region["start"]] + text[region["end"] :]
-        target = find_target_heading(without_region, org_heading)
-        task_level = target["level"] + 1
+        previous = parse_entries(text)
+
+        def current_contents():
+            try:
+                return org_file.read_bytes()
+            except FileNotFoundError:
+                return None
 
         asana = Asana(token)
         active = fetch_active_tasks(asana, workspace)
@@ -554,7 +475,7 @@ def sync(org_file, org_heading, token_file, workspace):
             return normalize_task(payload["data"])
 
         def complete_task(gid):
-            if org_file.read_bytes() != original:
+            if current_contents() != original:
                 raise SyncError(
                     "Org file changed during sync; refusing Asana writeback"
                 )
@@ -566,18 +487,18 @@ def sync(org_file, org_heading, token_file, workspace):
             return normalize_task(payload["data"])
 
         merged, todo_count, done_count, completed_count = merge_tasks(
-            active, previous, fetch_task, complete_task, task_level
+            active, previous, fetch_task, complete_task, 1
         )
-        updated = insert_managed_region(without_region, target, merged).encode("utf-8")
+        updated = (merged.rstrip("\r\n") + "\n" if merged else "").encode("utf-8")
         counts = f"{todo_count} TODO, {done_count} DONE"
         if completed_count:
             counts += f", {completed_count} completed in Asana"
         if updated == original:
             print(f"No changes to {org_file} ({counts})")
             return
-        if org_file.read_bytes() != original:
+        if current_contents() != original:
             raise SyncError("Org file changed during sync; refusing to overwrite it")
-        atomic_write(org_file, updated, stat.S_IMODE(file_stat.st_mode))
+        atomic_write(org_file, updated, file_mode)
         print(f"Updated {org_file} ({counts})")
 
 
@@ -713,32 +634,31 @@ def self_test():
     else:
         raise AssertionError("Completion error did not abort the sync")
 
-    source = (
-        "* Old\n"
-        f"{LEGACY_BEGIN_MARKER}\n{body}\n{LEGACY_END_MARKER}\n"
-        "* nonfiction\n"
-        "** Asana\n"
+    dedicated_body, todo_count, done_count, completed_count = merge_tasks(
+        [active],
+        parse_entries(body),
+        unexpected_call,
+        unexpected_call,
+        1,
     )
-    region = find_managed_region(source)
-    without_region = source[: region["start"]] + source[region["end"] :]
-    target = find_target_heading(without_region, ["nonfiction", "Asana"])
-    replaced = insert_managed_region(without_region, target, region["body"])
-    assert LEGACY_BEGIN_MARKER not in replaced
-    assert replaced.index(BEGIN_MARKER) > replaced.index("** Asana")
-    migrated = find_managed_region(replaced)
-    assert len(parse_entries(migrated["body"])) == 3
-    moved_again = replaced[: migrated["start"]] + replaced[migrated["end"] :]
-    target = find_target_heading(moved_again, ["nonfiction", "Asana"])
-    assert insert_managed_region(moved_again, target, migrated["body"]) == replaced
+    assert todo_count == 1 and done_count == 2 and completed_count == 0
+    assert len(parse_entries(dedicated_body)) == 3
+    assert "\n** TODO " not in "\n" + dedicated_body
+    assert "\n** DONE " not in "\n" + dedicated_body
+    try:
+        parse_entries("Unmanaged text\n" + dedicated_body)
+    except SyncError as error:
+        assert str(error) == "Managed Asana region contains unrecognized content"
+    else:
+        raise AssertionError("Unmanaged Org content was accepted")
     print("self-test passed")
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Mirror Asana My Tasks into an Org section"
+        description="Mirror Asana My Tasks into a dedicated Org file"
     )
     parser.add_argument("--org-file", type=Path)
-    parser.add_argument("--org-heading", action="append")
     parser.add_argument("--token-file", type=Path)
     parser.add_argument("--workspace")
     parser.add_argument("--self-test", action="store_true")
@@ -746,23 +666,11 @@ def main():
     if args.self_test:
         self_test()
         return
-    if (
-        not args.org_file
-        or not args.org_heading
-        or not args.token_file
-        or not args.workspace
-    ):
-        parser.error(
-            "--org-file, --org-heading, --token-file, and --workspace are required"
-        )
-    if any(
-        not heading.strip() or heading != heading.strip()
-        for heading in args.org_heading
-    ):
-        parser.error("--org-heading values must be non-empty and trimmed")
+    if not args.org_file or not args.token_file or not args.workspace:
+        parser.error("--org-file, --token-file, and --workspace are required")
     if not args.workspace.isdigit():
         parser.error("--workspace must be a numeric Asana gid")
-    sync(args.org_file, args.org_heading, args.token_file, args.workspace)
+    sync(args.org_file, args.token_file, args.workspace)
 
 
 if __name__ == "__main__":
