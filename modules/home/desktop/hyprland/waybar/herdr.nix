@@ -235,13 +235,40 @@
 
   jump = pkgs.self.mkScript {
     name = "herdr-agent-open";
-    path = with pkgs; [coreutils kitty];
+    path = with pkgs; [coreutils jq kitty];
     env.HERDR_STATUS_HERDR = herdr;
     text =
       # bash
       ''
         target="''${1:?Usage: herdr-agent-open PANE_ID}"
         "$HERDR_STATUS_HERDR" agent focus "$target" >/dev/null
+
+        # Direct attach is exclusive. Reuse its Kitty instead of opening an
+        # attachment that immediately exits.
+        window="$(
+          hyprctl -j clients | jq -r '
+            .[]
+            | select(.class == "HerdrAgent")
+            | [.address, .workspace.name, (.pid | tostring)]
+            | @tsv
+          ' | while IFS=$'\t' read -r address workspace pid; do
+            [[ -r "/proc/$pid/cmdline" ]] || continue
+            while IFS= read -r -d "" arg; do
+              if [[ "$arg" == "$target" ]]; then
+                printf '%s\t%s\n' "$address" "$workspace"
+                break 2
+              fi
+            done <"/proc/$pid/cmdline"
+          done
+        )"
+
+        if [[ -n "$window" ]]; then
+          IFS=$'\t' read -r address workspace <<<"$window"
+          hyprctl dispatch "hl.dsp.focus({ workspace = \"$workspace\" })" >/dev/null
+          hyprctl dispatch "hl.dsp.focus({ window = \"address:$address\" })" >/dev/null
+          exit 0
+        fi
+
         nohup kitty --class=HerdrAgent --title="Herdr agent" \
           "$HERDR_STATUS_HERDR" agent attach "$target" \
           >/dev/null 2>&1 &
