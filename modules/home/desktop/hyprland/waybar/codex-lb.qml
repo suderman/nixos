@@ -12,6 +12,12 @@ Scope {
   property var data: ({ ok: false, status: "idle", title: "codex-lb", message: "Open the popup to refresh quota data.", accounts: [], recentLogs: [] })
   readonly property var accounts: data.accounts || []
   readonly property var recentLogs: data.recentLogs || []
+  property string accountActionMessage: ""
+  property bool authPromptOpen: false
+  property bool authNeedsUsername: false
+  property var pendingAccount: null
+  property string pendingAction: ""
+  property string accountActionInput: ""
 
   readonly property string base00: "@BASE00@"
   readonly property string base01: "@BASE01@"
@@ -70,6 +76,13 @@ Scope {
 
   function hide() {
     pinned = false;
+    authPromptOpen = false;
+    authNeedsUsername = false;
+    pendingAccount = null;
+    pendingAction = "";
+    accountActionInput = "";
+    usernameInput.text = "";
+    passwordInput.text = "";
     dismiss();
   }
 
@@ -101,7 +114,7 @@ Scope {
   }
 
   function scheduleDismiss() {
-    if (!open || pinned) {
+    if (!open || pinned || authPromptOpen || accountAction.running) {
       dismissTimer.stop();
       return;
     }
@@ -120,6 +133,92 @@ Scope {
 
   function openDashboard() {
     if (!openUrl.running && (data.url || "") !== "") openUrl.running = true;
+  }
+
+  function startAccountAction(authenticate) {
+    if (accountAction.running || !pendingAccount || !pendingAccount.id) return;
+    accountAction.command = [
+      "@ACCOUNT_COMMAND@",
+      String(pendingAccount.id),
+      pendingAction,
+      authenticate ? "login" : "try"
+    ];
+    if (!authenticate) accountActionInput = "";
+    dismissTimer.stop();
+    accountAction.running = true;
+  }
+
+  function toggleAccount(account) {
+    if (accountAction.running || authPromptOpen || !account.id) return;
+    var status = String(account.status || "");
+    if (status !== "active" && status !== "paused") return;
+    pendingAccount = account;
+    pendingAction = status === "paused" ? "resume" : "pause";
+    accountActionMessage = pendingAction === "resume" ? "Resuming " + account.name + "…" : "Pausing " + account.name + "…";
+    startAccountAction(false);
+  }
+
+  function submitAccountAuth() {
+    if (accountAction.running) return;
+    var password = passwordInput.text;
+    var username = usernameInput.text;
+    if (password === "") {
+      accountActionMessage = "Dashboard password is required.";
+      passwordInput.forceActiveFocus();
+      return;
+    }
+    if (authNeedsUsername && username === "") {
+      accountActionMessage = "Dashboard username is required.";
+      usernameInput.forceActiveFocus();
+      return;
+    }
+
+    accountActionMessage = "Signing in to update " + pendingAccount.name + "…";
+    accountActionInput = JSON.stringify({ username: username, password: password });
+    passwordInput.text = "";
+    startAccountAction(true);
+  }
+
+  function cancelAccountAuth() {
+    if (accountAction.running) return;
+    authPromptOpen = false;
+    authNeedsUsername = false;
+    pendingAccount = null;
+    pendingAction = "";
+    accountActionInput = "";
+    usernameInput.text = "";
+    passwordInput.text = "";
+    accountActionMessage = "Account change cancelled.";
+    scheduleDismiss();
+  }
+
+  function applyAccountAction(text) {
+    try {
+      var result = JSON.parse(text);
+      accountActionMessage = result.message || "Account updated.";
+      if (result.authRequired === true) {
+        authNeedsUsername = result.usernameRequired === true;
+        authPromptOpen = true;
+        passwordInput.text = "";
+        Qt.callLater(function() {
+          if (root.authNeedsUsername) usernameInput.forceActiveFocus();
+          else passwordInput.forceActiveFocus();
+        });
+        return;
+      }
+
+      authPromptOpen = false;
+      authNeedsUsername = false;
+      pendingAccount = null;
+      pendingAction = "";
+      accountActionInput = "";
+      usernameInput.text = "";
+      passwordInput.text = "";
+      if (result.ok === true) refresh();
+    } catch (error) {
+      authPromptOpen = false;
+      accountActionMessage = "Could not read account action result: " + String(error);
+    }
   }
 
   function applyData(text) {
@@ -160,6 +259,23 @@ Scope {
     id: openUrl
     command: ["@OPEN_COMMAND@", root.data.url || ""]
     running: false
+  }
+
+  Process {
+    id: accountAction
+    running: false
+    stdinEnabled: true
+
+    onStarted: {
+      if (root.accountActionInput !== "") {
+        write(root.accountActionInput + "\n");
+        root.accountActionInput = "";
+      }
+    }
+
+    stdout: StdioCollector {
+      onStreamFinished: root.applyAccountAction(this.text)
+    }
   }
 
   Timer {
@@ -217,7 +333,10 @@ Scope {
       border.width: 1
       focus: true
 
-      Keys.onEscapePressed: root.hide()
+      Keys.onEscapePressed: {
+        if (root.authPromptOpen) root.cancelAccountAuth();
+        else root.hide();
+      }
 
       HoverHandler {
         onHoveredChanged: {
@@ -417,13 +536,28 @@ Scope {
             }
           }
 
-          Text {
+          Row {
             width: parent.width
-            color: root.base06
-            text: "Accounts"
-            font.pixelSize: 16
-            font.bold: true
+            spacing: 10
             visible: root.data.ok === true && root.accounts.length > 0
+
+            Text {
+              width: root.accountActionMessage === "" ? parent.width : Math.min(100, parent.width)
+              color: root.base06
+              text: "Accounts"
+              font.pixelSize: 16
+              font.bold: true
+            }
+
+            Text {
+              width: parent.width - 100 - parent.spacing
+              color: root.base04
+              text: root.accountActionMessage
+              horizontalAlignment: Text.AlignRight
+              elide: Text.ElideRight
+              font.pixelSize: 11
+              visible: root.accountActionMessage !== ""
+            }
           }
 
           Grid {
@@ -508,6 +642,163 @@ Scope {
                       log: modelData
                     }
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      Rectangle {
+        anchors.fill: parent
+        visible: root.authPromptOpen
+        z: 10
+        color: root.alpha(root.base00, "bb")
+
+        MouseArea {
+          anchors.fill: parent
+        }
+
+        Rectangle {
+          id: authDialog
+          anchors.centerIn: parent
+          width: parent.width - 100
+          height: authContent.implicitHeight + 32
+          radius: 16
+          color: root.base01
+          border.color: root.alpha(root.base0D, "88")
+          border.width: 1
+
+          Column {
+            id: authContent
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: 16
+            spacing: 10
+
+            Text {
+              width: parent.width
+              color: root.base07
+              text: "Dashboard login required"
+              font.pixelSize: 16
+              font.bold: true
+            }
+
+            Text {
+              width: parent.width
+              color: root.base04
+              text: "Authenticate once to " + root.pendingAction + " " + (root.pendingAccount ? root.pendingAccount.name : "this account") + "."
+              wrapMode: Text.WordWrap
+              font.pixelSize: 12
+            }
+
+            Text {
+              width: parent.width
+              color: root.base05
+              text: "Username"
+              visible: root.authNeedsUsername
+              font.pixelSize: 11
+            }
+
+            Rectangle {
+              width: parent.width
+              height: 38
+              radius: 8
+              color: root.base00
+              border.color: usernameInput.activeFocus ? root.base0D : root.alpha(root.base05, "44")
+              visible: root.authNeedsUsername
+
+              TextInput {
+                id: usernameInput
+                anchors.fill: parent
+                anchors.margins: 10
+                color: root.base07
+                selectionColor: root.base0D
+                selectedTextColor: root.base00
+                clip: true
+                font.pixelSize: 13
+                onAccepted: passwordInput.forceActiveFocus()
+              }
+            }
+
+            Text {
+              width: parent.width
+              color: root.base05
+              text: "Dashboard password"
+              font.pixelSize: 11
+            }
+
+            Rectangle {
+              width: parent.width
+              height: 38
+              radius: 8
+              color: root.base00
+              border.color: passwordInput.activeFocus ? root.base0D : root.alpha(root.base05, "44")
+
+              TextInput {
+                id: passwordInput
+                anchors.fill: parent
+                anchors.margins: 10
+                color: root.base07
+                selectionColor: root.base0D
+                selectedTextColor: root.base00
+                echoMode: TextInput.Password
+                clip: true
+                font.pixelSize: 13
+                onAccepted: root.submitAccountAuth()
+              }
+            }
+
+            Row {
+              width: parent.width
+              spacing: 10
+
+              Rectangle {
+                width: (parent.width - parent.spacing) / 2
+                height: 36
+                radius: 8
+                color: cancelAuthArea.containsMouse ? root.alpha(root.base05, "33") : root.alpha(root.base05, "22")
+
+                Text {
+                  anchors.centerIn: parent
+                  color: root.base06
+                  text: "Cancel"
+                  font.pixelSize: 12
+                  font.bold: true
+                }
+
+                MouseArea {
+                  id: cancelAuthArea
+                  anchors.fill: parent
+                  hoverEnabled: true
+                  cursorShape: Qt.PointingHandCursor
+                  enabled: !accountAction.running
+                  onClicked: root.cancelAccountAuth()
+                }
+              }
+
+              Rectangle {
+                width: (parent.width - parent.spacing) / 2
+                height: 36
+                radius: 8
+                color: accountAction.running ? root.alpha(root.base0D, "44") : (submitAuthArea.containsMouse ? root.base0D : root.alpha(root.base0D, "cc"))
+
+                Text {
+                  anchors.centerIn: parent
+                  color: root.base00
+                  text: accountAction.running ? "Working…" : "Continue"
+                  font.pixelSize: 12
+                  font.bold: true
+                }
+
+                MouseArea {
+                  id: submitAuthArea
+                  anchors.fill: parent
+                  hoverEnabled: true
+                  cursorShape: Qt.PointingHandCursor
+                  enabled: !accountAction.running
+                  onClicked: root.submitAccountAuth()
                 }
               }
             }
@@ -675,11 +966,12 @@ Scope {
 
   component AccountCard: Rectangle {
     property var account: ({})
+    readonly property bool actionable: account.status === "active" || account.status === "paused"
 
     implicitHeight: accountContent.implicitHeight + 28
     radius: 16
-    color: root.alpha(root.base01, "cc")
-    border.color: root.alpha(root.base05, "22")
+    color: accountArea.containsMouse && actionable ? root.alpha(root.base02, "dd") : root.alpha(root.base01, "cc")
+    border.color: root.alpha(root.base05, accountArea.containsMouse && actionable ? "66" : "22")
 
     Column {
       id: accountContent
@@ -709,7 +1001,13 @@ Scope {
           Text {
             width: parent.width
             color: root.base04
-            text: account.plan || "plan unknown"
+            text: (
+              (account.plan || "plan unknown")
+              + " · "
+              + (account.resetCredits === null || account.resetCredits === undefined ? "n/a" : account.resetCredits)
+              + " resets · "
+              + (account.resetCreditExpiryText || "n/a")
+            )
             elide: Text.ElideRight
             font.pixelSize: 11
           }
@@ -735,6 +1033,16 @@ Scope {
         metric: account.secondary || ({})
         accent: root.base0E
       }
+
+    }
+
+    MouseArea {
+      id: accountArea
+      anchors.fill: parent
+      enabled: parent.actionable
+      hoverEnabled: true
+      cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+      onClicked: root.toggleAccount(parent.account)
     }
   }
 

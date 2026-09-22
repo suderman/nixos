@@ -9,7 +9,7 @@
   colors = config.lib.stylix.colors;
   inherit (lib) mkIf mkMerge mkOption types;
 
-  icon = "󱙺";
+  icon = "󰊚";
 
   quotaData = pkgs.self.mkScript {
     name = "minimax-quota-data";

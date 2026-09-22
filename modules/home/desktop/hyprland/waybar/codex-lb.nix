@@ -9,12 +9,15 @@
   colors = config.lib.stylix.colors;
   inherit (lib) mkIf mkMerge mkOption types;
 
+  icon = "󰊚";
+
   script = pkgs.self.mkScript {
     name = "waybar-codex-lb";
     path = with pkgs; [curl jq];
     env = {
       CODEX_LB_URL = cfg.url;
       CODEX_LB_ALERT_COLOR = "#${colors.base08}";
+      CODEX_LB_ICON = icon;
     };
     text =
       # bash
@@ -34,7 +37,7 @@
         tmp="$(mktemp -d)"
         trap 'rm -rf "$tmp"' EXIT
         CODEX_LB_URL="''${CODEX_LB_URL%/}"
-        icon="󰚩"
+        icon="$CODEX_LB_ICON"
 
         fetch_failed() {
           local path="$1"
@@ -110,6 +113,7 @@
           --slurpfile request_logs "$request_logs" \
           --arg url "$CODEX_LB_URL" \
           --arg alert_color "$CODEX_LB_ALERT_COLOR" \
+          --arg icon "$CODEX_LB_ICON" \
           '
           def num_text($n):
             ($n | tonumber? // null) as $v |
@@ -180,6 +184,25 @@
           def window_reset($w):
             $w.resetAt // $w.reset_at // $w.resetsAt // $w.resets_at // null;
 
+          def primary_window_metric($accounts; $fallback):
+            [
+              $accounts[]
+              | (.windowMinutesPrimary // .window_minutes_primary // null | tonumber? // null) as $minutes
+              | (.usage.primaryRemainingPercent // .usage.primary_remaining_percent // null | tonumber? // null) as $percent
+              | select($minutes == 300 and $percent != null)
+            ] as $applicable |
+            ($applicable | map(.capacityCreditsPrimary // .capacity_credits_primary // null | tonumber? // 0) | add // 0) as $capacity |
+            ($applicable | map(.remainingCreditsPrimary // .remaining_credits_primary // null | tonumber? // 0) | add // 0) as $remaining |
+            if ($applicable | length) == 0 or $capacity <= 0 then
+              if ($accounts | length) == 0 then $fallback else {} end
+            else {
+              remainingPercent: ($remaining / $capacity * 100),
+              remainingCredits: $remaining,
+              capacityCredits: $capacity,
+              resetAt: ([$applicable[] | .resetAtPrimary // .reset_at_primary // empty] | min // null)
+            }
+            end;
+
           def credit_text($remaining; $capacity):
             if $remaining == null or $capacity == null then ""
             else ", " + num_text($remaining) + "/" + num_text($capacity) + " cr"
@@ -249,10 +272,11 @@
           $overview[0] as $o |
           $projections[0] as $p |
           ($request_logs[0].requests // []) as $requests |
-          ($o.summary.primaryWindow // $o.summary.primary_window // $o.windows.primary // {}) as $primary |
+          ($o.summary.primaryWindow // $o.summary.primary_window // $o.windows.primary // {}) as $primary_summary |
           ($o.summary.secondaryWindow // $o.summary.secondary_window // $o.windows.secondary // {}) as $secondary |
           ($p.weeklyCreditPace // $p.weekly_credit_pace // {}) as $pace |
           ($o.accounts // []) as $accounts |
+          (primary_window_metric($accounts; $primary_summary)) as $primary |
           (pace_status($pace)) as $status |
           (pace_delta($pace)) as $delta |
           (pace_gap($pace)) as $gap |
@@ -261,7 +285,7 @@
           (($pace.inactiveAccountCount // $pace.inactive_account_count // 0) | tonumber? // 0) as $inactive |
           (($requests[0].status // "ok") | tostring) as $latest_request_status |
           ($latest_request_status != "ok") as $latest_request_non_ok |
-          (if $latest_request_non_ok then "<span color=\"" + $alert_color + "\">󰚩</span>" else "󰚩" end) as $robot |
+          (if $latest_request_non_ok then "<span color=\"" + $alert_color + "\">" + $icon + "</span>" else $icon end) as $quota_icon |
           (if $status == "danger" then "danger"
            elif $confidence == "low" or $stale > 0 then "warning"
            elif $status == "behind" then "behind"
@@ -271,7 +295,7 @@
            end) as $class |
           {
             text: (
-              $robot
+              $quota_icon
               + "  "
               + pct_text(window_percent($primary))
               + " " + pct_text(window_percent($secondary))
@@ -295,6 +319,137 @@
         fi
 
         printf '%s\n' "$output"
+      '';
+  };
+
+  accountAction = pkgs.self.mkScript {
+    name = "codex-lb-account-action";
+    path = [pkgs.curl pkgs.jq];
+    env.CODEX_LB_URL = cfg.url;
+    text =
+      # bash
+      ''
+        set -u
+        umask 077
+
+        account_id="''${1:-}"
+        action="''${2:-}"
+        auth_mode="''${3:-}"
+        CODEX_LB_URL="''${CODEX_LB_URL%/}"
+        cookie_jar="''${XDG_RUNTIME_DIR:?}/codex-lb-dashboard.cookies"
+        tmp="$(mktemp -d)"
+        trap 'rm -rf "$tmp"' EXIT
+
+        result() {
+          local ok="$1"
+          local message="$2"
+          local auth_required="''${3:-false}"
+          local username_required="''${4:-false}"
+          jq -cn \
+            --argjson ok "$ok" \
+            --arg message "$message" \
+            --argjson authRequired "$auth_required" \
+            --argjson usernameRequired "$username_required" \
+            '{ok: $ok, message: $message, authRequired: $authRequired, usernameRequired: $usernameRequired}'
+        }
+
+        if [[ ! "$account_id" =~ ^[A-Za-z0-9._-]+$ ]]; then
+          result false "Invalid account id."
+          exit 0
+        fi
+
+        case "$action" in
+          pause) endpoint="pause" ;;
+          resume) endpoint="reactivate" ;;
+          *)
+            result false "Unknown account action."
+            exit 0
+            ;;
+        esac
+
+        touch "$cookie_jar"
+        chmod 600 "$cookie_jar"
+
+        request() {
+          local method="$1"
+          local path="$2"
+          local output="$3"
+          curl \
+            --silent \
+            --show-error \
+            --location \
+            --max-time 15 \
+            --connect-timeout 3 \
+            --request "$method" \
+            --cookie "$cookie_jar" \
+            --cookie-jar "$cookie_jar" \
+            --write-out '%{http_code}' \
+            --output "$output" \
+            "$CODEX_LB_URL$path"
+        }
+
+        perform_action() {
+          request POST "/api/accounts/$account_id/$endpoint" "$tmp/action.json"
+        }
+
+        action_code="$(perform_action 2>"$tmp/curl.err" || true)"
+        if [[ "$action_code" == "401" || "$action_code" == "403" ]]; then
+          if [[ "$auth_mode" != "login" ]]; then
+            result false "Dashboard login required." true
+            exit 0
+          fi
+
+          if ! IFS= read -r credentials \
+            || ! printf '%s' "$credentials" | jq -e \
+              'type == "object" and (.password | type == "string" and length > 0) and ((.username // "") | type == "string")' \
+              >/dev/null 2>&1; then
+            result false "Dashboard password is required." true
+            exit 0
+          fi
+
+          printf '%s' "$credentials" | jq -c \
+            'if (.username // "") == "" then {password} else {username, password} end' \
+            >"$tmp/login-request.json"
+          unset credentials
+
+          login_code="$(curl \
+            --silent \
+            --show-error \
+            --location \
+            --max-time 15 \
+            --connect-timeout 3 \
+            --header 'Content-Type: application/json' \
+            --cookie "$cookie_jar" \
+            --cookie-jar "$cookie_jar" \
+            --data-binary @"$tmp/login-request.json" \
+            --write-out '%{http_code}' \
+            --output "$tmp/login.json" \
+            "$CODEX_LB_URL/api/dashboard-auth/password/login" \
+            2>"$tmp/curl.err" || true)"
+
+          if [[ "$login_code" == "422" && "$(jq -r '.error.code // ""' "$tmp/login.json" 2>/dev/null)" == "username_required" ]]; then
+            result false "Dashboard username is also required." true true
+            exit 0
+          fi
+
+          if [[ ! "$login_code" =~ ^2 ]]; then
+            message="$(jq -r '.error.message // "Dashboard login failed."' "$tmp/login.json" 2>/dev/null || printf 'Dashboard login failed.')"
+            result false "$message" true
+            exit 0
+          fi
+
+          action_code="$(perform_action 2>"$tmp/curl.err" || true)"
+        fi
+
+        if [[ "$action_code" =~ ^2 ]]; then
+          status="$(jq -r '.status // empty' "$tmp/action.json" 2>/dev/null)"
+          result true "Account ''${status:-updated}."
+        elif [[ -s "$tmp/action.json" ]]; then
+          message="$(jq -r '.error.message // "Account change failed."' "$tmp/action.json" 2>/dev/null || printf 'Account change failed.')"
+          result false "$message"
+        else
+          result false "Failed to reach $CODEX_LB_URL: $(<"$tmp/curl.err")"
+        fi
       '';
   };
 
@@ -479,6 +634,25 @@
           def window_capacity($w): $w.capacityCredits // $w.capacity_credits // null;
           def window_reset($w): $w.resetAt // $w.reset_at // $w.resetsAt // $w.resets_at // null;
 
+          def primary_window_metric($accounts; $fallback):
+            [
+              $accounts[]
+              | (.windowMinutesPrimary // .window_minutes_primary // null | tonumber? // null) as $minutes
+              | (.usage.primaryRemainingPercent // .usage.primary_remaining_percent // null | tonumber? // null) as $percent
+              | select($minutes == 300 and $percent != null)
+            ] as $applicable |
+            ($applicable | map(.capacityCreditsPrimary // .capacity_credits_primary // null | tonumber? // 0) | add // 0) as $capacity |
+            ($applicable | map(.remainingCreditsPrimary // .remaining_credits_primary // null | tonumber? // 0) | add // 0) as $remaining |
+            if ($applicable | length) == 0 or $capacity <= 0 then
+              if ($accounts | length) == 0 then $fallback else {} end
+            else {
+              remainingPercent: ($remaining / $capacity * 100),
+              remainingCredits: $remaining,
+              capacityCredits: $capacity,
+              resetAt: ([$applicable[] | .resetAtPrimary // .reset_at_primary // empty] | min // null)
+            }
+            end;
+
           def credits_text($remaining; $capacity):
             if $remaining == null or $capacity == null then "n/a"
             else num_text($remaining) + "/" + num_text($capacity) + " cr"
@@ -545,11 +719,14 @@
 
           def account_card($account):
             {
+              id: account_id($account),
               name: account_name($account),
               status: (($account.status // "unknown") | tostring),
               plan: account_plan($account),
               primary: account_metric($account; "primary"),
-              secondary: account_metric($account; "secondary")
+              secondary: account_metric($account; "secondary"),
+              resetCredits: number($account.availableResetCredits // $account.available_reset_credits // null),
+              resetCreditExpiryText: time_text($account.resetCreditNearestExpiresAt // $account.reset_credit_nearest_expires_at // null)
             };
 
           def request_status_label($status):
@@ -600,10 +777,11 @@
           $overview[0] as $o |
           $projections[0] as $p |
           ($request_logs[0].requests // []) as $requests |
-          ($o.summary.primaryWindow // $o.summary.primary_window // $o.windows.primary // {}) as $primary |
+          ($o.summary.primaryWindow // $o.summary.primary_window // $o.windows.primary // {}) as $primary_summary |
           ($o.summary.secondaryWindow // $o.summary.secondary_window // $o.windows.secondary // {}) as $secondary |
           ($p.weeklyCreditPace // $p.weekly_credit_pace // {}) as $pace |
           ($o.accounts // []) as $accounts |
+          (primary_window_metric($accounts; $primary_summary)) as $primary |
           (pace_status($pace)) as $status |
           (pace_delta($pace)) as $delta |
           (pace_gap($pace)) as $gap |
@@ -668,6 +846,7 @@
   popupQml = pkgs.writeText "CodexLb.qml" (builtins.replaceStrings
     [
       "@DATA_COMMAND@"
+      "@ACCOUNT_COMMAND@"
       "@OPEN_COMMAND@"
       "@INTERVAL_MS@"
       "@BASE00@"
@@ -687,6 +866,7 @@
     ]
     [
       (lib.getExe popupData)
+      (lib.getExe accountAction)
       "${pkgs.xdg-utils}/bin/xdg-open"
       (toString (cfg.interval * 1000))
       "#${colors.base00}"
