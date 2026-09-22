@@ -1,12 +1,6 @@
 {config, ...}: {
-  home.directories = {
+  home.directories = rec {
     # Standard user directories
-    DESKTOP = {
-      path = "desktop";
-      persist = "storage";
-      sync = true;
-      enable = true;
-    };
     DOCUMENTS = {
       path = "documents";
       persist = "storage";
@@ -19,32 +13,30 @@
       sync = false;
       enable = true;
     };
-    MUSIC = {
-      path = "music";
-      persist = "storage";
-      sync = true;
-      enable = true;
-    };
-    PICTURES = {
-      path = "pictures";
-      persist = "storage";
-      sync = true;
-      enable = true;
-    };
     PUBLICSHARE = {
       path = "public";
       persist = "storage";
       sync = true;
       enable = true;
     };
+    MUSIC = {
+      path = "${MEDIA.path}/music";
+      sync = false;
+      enable = true;
+    };
+    PICTURES = {
+      path = "${MEDIA.path}/images";
+      sync = false;
+      enable = true;
+    };
     VIDEOS = {
-      path = "movies";
-      persist = "storage";
-      sync = true;
+      path = "${MEDIA.path}/videos";
+      sync = false;
       enable = true;
     };
 
     # Standard user directories (disabled)
+    DESKTOP.enable = false;
     TEMPLATES.enable = false;
 
     # Custom user directories

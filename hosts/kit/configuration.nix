@@ -46,6 +46,20 @@
   };
   services.btrbk.instances.snapshots.settings.volume."/mnt/game".snapshot_preserve = "7d";
 
+  fileSystems."/home/jon/data" = {
+    device = "/mnt/data/storage";
+    fsType = "none";
+    depends = ["/mnt/data"];
+    options = [
+      "bind"
+      "noauto"
+      "nofail"
+      "x-systemd.automount"
+      "x-systemd.idle-timeout=5m"
+      "x-gvfs-trash"
+    ];
+  };
+
   # Screen sharing
   services.sunshine = {
     enable = false;
