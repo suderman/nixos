@@ -76,19 +76,21 @@ in {
     # Home Manager owns config.toml, so Herdr cannot record onboarding itself.
     programs.herdr.settings.onboarding = false;
 
+    programs.herdr.settings.ui.toast.delivery = "herdr";
+
     # Match the direct shortcuts in tmux.conf.
     programs.herdr.settings.keys = {
-      prefix = "alt+slash";
+      prefix = "alt+z";
 
       new_workspace = "alt+n";
       workspace_picker = "alt+a";
       detach = "alt+d";
 
       new_tab = "alt+t";
-      previous_tab = "alt+comma";
-      next_tab = "alt+period";
-      move_tab_previous = "ctrl+alt+comma";
-      move_tab_next = "ctrl+alt+period";
+      previous_tab = "alt+[";
+      next_tab = "alt+]";
+      move_tab_previous = "ctrl+alt+[";
+      move_tab_next = "ctrl+alt+]";
       indexed.tabs = "alt";
 
       split_horizontal = "alt+u";
