@@ -10,6 +10,24 @@
   cfg = config.programs.herdr;
   package = flake.inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default;
   tomlFormat = pkgs.formats.toml {};
+  navigate = pkgs.self.mkScript {
+    name = "herdr-emacs-navigate";
+    path = [pkgs.jq];
+    env.HERDR_NAV_HERDR =
+      if cfg.package == null
+      then "herdr"
+      else lib.getExe cfg.package;
+    text = ''
+      pane="''${HERDR_ACTIVE_PANE_ID:?}"
+      direction="''${1:?}"
+      key="''${2:?}"
+      if "$HERDR_NAV_HERDR" pane process-info --pane "$pane" 2>/dev/null \
+        | jq -e 'any(.result.process_info.foreground_processes[]?.argv[0]?; test("/(emacs|emacsclient)$"))' >/dev/null; then
+        exec "$HERDR_NAV_HERDR" pane send-keys "$pane" "alt+$key"
+      fi
+      exec "$HERDR_NAV_HERDR" pane focus --direction "$direction" --pane "$pane"
+    '';
+  };
 in {
   # Avoid duplicate options when release-26.11 imports the upstream module.
   disabledModules = ["programs/herdr.nix"];
@@ -98,10 +116,35 @@ in {
       close_pane = "alt+w";
       last_pane = "alt+o";
 
-      focus_pane_left = "alt+h";
-      focus_pane_down = "alt+j";
-      focus_pane_up = "alt+k";
-      focus_pane_right = "alt+l";
+      focus_pane_left = "prefix+h";
+      focus_pane_down = "prefix+j";
+      focus_pane_up = "prefix+k";
+      focus_pane_right = "prefix+l";
+
+      command =
+        map (binding: {
+          key = "alt+${binding.key}";
+          type = "shell";
+          command = "${lib.getExe navigate} ${binding.direction} ${binding.key}";
+          description = "Navigate ${binding.direction} in Emacs or Herdr";
+        }) [
+          {
+            key = "h";
+            direction = "left";
+          }
+          {
+            key = "j";
+            direction = "down";
+          }
+          {
+            key = "k";
+            direction = "up";
+          }
+          {
+            key = "l";
+            direction = "right";
+          }
+        ];
 
       resize_pane_left = "alt+shift+h";
       resize_pane_down = "alt+shift+j";
