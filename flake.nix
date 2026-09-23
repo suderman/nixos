@@ -120,9 +120,8 @@
     handy.inputs.bun2nix.inputs.nixpkgs.follows = "nixpkgs";
 
     # Tmux replacement
-    # <https://github.com/herdrdev/herdr>
-    herdr.url = "github:herdrdev/herdr";
-    herdr.inputs.nixpkgs.follows = "nixpkgs";
+    # <https://github.com/herdrdev/herdr-nix>
+    herdr.url = "github:herdrdev/herdr-nix";
 
     # Buzz desktop client
     # <https://github.com/mulatta/buzz.nix>

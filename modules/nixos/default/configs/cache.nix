@@ -10,6 +10,11 @@
       url = "https://cache.numtide.com?priority=50";
       key = "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=";
     }
+    # herdr
+    {
+      url = "https://herdr.cachix.org?priority=50";
+      key = "herdr.cachix.org-1:3nH7IStRsS0ASfdonA0DCRR2ZrSCeWitZ7Kwew0cR4I=";
+    }
     # mulatta
     {
       url = "https://cache.mulatta.io?priority=50";
