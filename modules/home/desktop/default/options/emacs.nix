@@ -55,6 +55,8 @@
   terminalSetup = ''
     if [[ "''${TERM-}" == xterm-256color && ( -n "''${SSH_TTY-}" || "''${COLORTERM-}" == truecolor ) ]]; then
       export TERM=xterm-direct2
+    elif [[ "''${TERM-}" == tmux-256color && "''${COLORTERM-}" == truecolor ]]; then
+      export TERM=tmux-direct
     fi
   '';
   terminalEditor = pkgs.writeShellScript "emacs-editor" ''
@@ -63,7 +65,12 @@
   '';
   terminalClient = pkgs.writeShellScript "emacs-client" ''
     ${terminalSetup}
-    # The daemon does not inherit the terminal client's Herdr environment.
+    # The daemon does not inherit the terminal client's pane environment.
+    if [[ -n "''${TMUX_PANE-}" && -n "''${TMUX-}" ]]; then
+      params="$(${lib.getExe pkgs.jq} -nr --arg pane "$TMUX_PANE" --arg socket "$TMUX" \
+        '"((edger-tmux-pane-id . \($pane|tojson)) (edger-tmux-socket . \($socket|tojson)))"')"
+      exec ${lib.getBin cfg.finalPackage}/bin/emacsclient --tty -F "$params" "$@"
+    fi
     if [[ -n "''${HERDR_PANE_ID-}" && -n "''${HERDR_SOCKET_PATH-}" ]]; then
       # JSON quoted strings are also valid Lisp strings for frame parameters.
       params="$(${lib.getExe pkgs.jq} -nr --arg pane "$HERDR_PANE_ID" --arg socket "$HERDR_SOCKET_PATH" \
