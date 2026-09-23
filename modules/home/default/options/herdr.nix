@@ -10,23 +10,10 @@
   cfg = config.programs.herdr;
   package = flake.inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default;
   tomlFormat = pkgs.formats.toml {};
-  navigate = pkgs.self.mkScript {
-    name = "herdr-emacs-navigate";
-    path = [pkgs.jq];
-    env.HERDR_NAV_HERDR =
-      if cfg.package == null
-      then "herdr"
-      else lib.getExe cfg.package;
-    text = ''
-      pane="''${HERDR_ACTIVE_PANE_ID:?}"
-      direction="''${1:?}"
-      key="''${2:?}"
-      if "$HERDR_NAV_HERDR" pane process-info --pane "$pane" 2>/dev/null \
-        | jq -e 'any(.result.process_info.foreground_processes[]?.argv[0]?; test("/(emacs|emacsclient)$"))' >/dev/null; then
-        exec "$HERDR_NAV_HERDR" pane send-keys "$pane" "alt+$key"
-      fi
-      exec "$HERDR_NAV_HERDR" pane focus --direction "$direction" --pane "$pane"
-    '';
+  edger = pkgs.writeShellApplication {
+    name = "edger";
+    runtimeInputs = [pkgs.jq pkgs.procps] ++ lib.optional (cfg.package != null) cfg.package;
+    text = builtins.readFile "${flake.inputs.edger}/bin/edger";
   };
 in {
   # Avoid duplicate options when release-26.11 imports the upstream module.
@@ -86,7 +73,7 @@ in {
   };
 
   config = mkIf cfg.enable {
-    home.packages = mkIf (cfg.package != null) [cfg.package];
+    home.packages = [edger] ++ lib.optional (cfg.package != null) cfg.package;
 
     # Herdr stores mutable local data beside Home Manager's generated config.toml.
     persist.storage.directories = [".config/herdr"];
@@ -125,8 +112,8 @@ in {
         map (binding: {
           key = "alt+${binding.key}";
           type = "shell";
-          command = "${lib.getExe navigate} ${binding.direction} ${binding.key}";
-          description = "Navigate ${binding.direction} in Emacs or Herdr";
+          command = "EDGER_KEY_MODIFIER=alt ${lib.getExe edger} ${binding.direction}";
+          description = "Navigate ${binding.direction} across editor, pane, and outer layer";
         }) [
           {
             key = "h";

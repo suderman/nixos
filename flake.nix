@@ -95,6 +95,10 @@
     # <https://github.com/suderman/emacs>
     emacs.url = "github:suderman/emacs";
 
+    # Shared editor and multiplexer navigation
+    edger.url = "github:suderman/edger";
+    edger.flake = false;
+
     # Manually tracked release pins
     # <https://github.com/suderman/pins>
     pins.url = "github:suderman/pins";

@@ -67,7 +67,7 @@
     if [[ -n "''${HERDR_PANE_ID-}" && -n "''${HERDR_SOCKET_PATH-}" ]]; then
       # JSON quoted strings are also valid Lisp strings for frame parameters.
       params="$(${lib.getExe pkgs.jq} -nr --arg pane "$HERDR_PANE_ID" --arg socket "$HERDR_SOCKET_PATH" \
-        '"((suderman/herdr-pane-id . \($pane|tojson)) (suderman/herdr-socket-path . \($socket|tojson)))"')"
+        '"((edger-herdr-pane-id . \($pane|tojson)) (edger-herdr-socket-path . \($socket|tojson)))"')"
       exec ${lib.getBin cfg.finalPackage}/bin/emacsclient --tty -F "$params" "$@"
     fi
     exec ${lib.getBin cfg.finalPackage}/bin/emacsclient --tty "$@"

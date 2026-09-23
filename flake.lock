@@ -396,6 +396,22 @@
         "type": "github"
       }
     },
+    "edger": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790135711,
+        "narHash": "sha256-l7595aSQyHJvstzPnduBNcICMa23aDxiXpVGXDYh5pg=",
+        "owner": "suderman",
+        "repo": "edger",
+        "rev": "336abf12070e8ff6bdc8ec3dab23a08baea4a923",
+        "type": "github"
+      },
+      "original": {
+        "owner": "suderman",
+        "repo": "edger",
+        "type": "github"
+      }
+    },
     "emacs": {
       "inputs": {
         "blueprint": "blueprint_2",
@@ -2029,6 +2045,7 @@
         "buzz": "buzz",
         "devshell": "devshell_2",
         "disko": "disko",
+        "edger": "edger",
         "emacs": "emacs",
         "flake-registry": "flake-registry",
         "handy": "handy",
