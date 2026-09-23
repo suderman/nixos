@@ -1,7 +1,16 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  flake,
+  ...
+}: let
+  edger = pkgs.tmuxPlugins.mkTmuxPlugin {
+    pluginName = "edger";
+    version = "unstable";
+    src = flake.inputs.edger;
+  };
+in {
   # programs.tmux.enable = true;
   programs.tmux = {
-    # prefix = "M-/";
     # aggressiveResize = true;
     # baseIndex = 1;
     # customPaneNavigationAndResize = false;
@@ -51,7 +60,10 @@
           '';
       }
     ];
-    extraConfig = builtins.readFile ./tmux.conf;
+    extraConfig = ''
+      ${builtins.readFile ./tmux.conf}
+      run-shell ${edger}/share/tmux-plugins/edger/edger.tmux
+    '';
   };
 
   home.packages = with pkgs; [
