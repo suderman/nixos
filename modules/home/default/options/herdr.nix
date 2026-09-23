@@ -83,7 +83,7 @@ in {
 
     programs.herdr.settings.ui.toast.delivery = "herdr";
 
-    # Leave unshifted Alt+u/i/w/n/t for terminal applications.
+    # Keep shifted keys for direct Herdr actions; unshifted keys use Edger.
     programs.herdr.settings.keys = {
       prefix = "alt+z";
 
@@ -133,8 +133,53 @@ in {
             key = "l";
             direction = "right";
           }
+        ]
+        ++ map (binding: {
+          key = "alt+shift+${binding.key}";
+          type = "shell";
+          command = "EDGER_KEY_MODIFIER=alt ${lib.getExe edger} resize ${binding.direction}";
+          description = "Resize ${binding.direction} across editor or pane";
+        }) [
+          {
+            key = "h";
+            direction = "left";
+          }
+          {
+            key = "j";
+            direction = "down";
+          }
+          {
+            key = "k";
+            direction = "up";
+          }
+          {
+            key = "l";
+            direction = "right";
+          }
+        ]
+        ++ map (binding: {
+          key = "alt+${binding.key}";
+          type = "shell";
+          command = "EDGER_KEY_MODIFIER=alt ${lib.getExe edger} ${binding.action}";
+          description = "Edger ${binding.action}";
+        }) [
+          {
+            key = "t";
+            action = "tab";
+          }
+          {
+            key = "u";
+            action = "horizontal";
+          }
+          {
+            key = "i";
+            action = "vertical";
+          }
+          {
+            key = "w";
+            action = "close";
+          }
         ];
-
     };
 
     xdg.configFile."herdr/config.toml" = mkIf (cfg.settings != {}) {
