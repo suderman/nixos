@@ -32,19 +32,17 @@ in {
         extraConfig =
           # sh
           ''
-            # ⌥v (or ⌥y) Copy Mode (similar to Visual Mode in Vim)
-            bind-key -n M-v copy-mode
-            bind-key -n M-y copy-mode
+            # Match Herdr's prefix+m copy mode; keep Alt keys for pane apps.
+            bind-key m copy-mode
+            bind-key v paste-buffer
 
-            # ⌥p Paste buffer
-            bind-key -n M-p paste-buffer
-
-            # Use Vim keybindings in Copy Mode
             setw -g mode-keys vi
             unbind-key -T copy-mode-vi Escape
             bind-key -T copy-mode-vi Escape send-keys -X cancel
+            bind-key -T copy-mode-vi m send-keys -X begin-selection
             bind-key -T copy-mode-vi v send-keys -X begin-selection
-            bind-key -T copy-mode-vi M-v send-keys -X rectangle-toggle
+            # Use tmux-yank's y binding for both keys, including clipboard copy.
+            bind-key -T copy-mode-vi c send-keys -K y
           '';
       }
       {

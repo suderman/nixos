@@ -83,25 +83,27 @@ in {
 
     programs.herdr.settings.ui.toast.delivery = "herdr";
 
-    # Match the direct shortcuts in tmux.conf.
+    # Leave unshifted Alt+u/i/w/n/t for terminal applications.
     programs.herdr.settings.keys = {
       prefix = "alt+z";
 
-      new_workspace = "alt+n";
+      new_workspace = "alt+shift+n";
+      rename_workspace = "prefix+period";
       workspace_picker = "alt+a";
-      detach = "alt+d";
+      detach = "prefix+d";
 
-      new_tab = "alt+t";
-      previous_tab = "alt+[";
-      next_tab = "alt+]";
-      move_tab_previous = "ctrl+alt+[";
-      move_tab_next = "ctrl+alt+]";
-      indexed.tabs = "alt";
+      new_tab = "alt+shift+t";
+      rename_tab = "prefix+comma";
+      previous_tab = "prefix+[";
+      next_tab = "prefix+]";
+      move_tab_previous = "prefix+{";
+      move_tab_next = "prefix+}";
+      copy_mode = "prefix+m";
 
-      split_horizontal = "alt+u";
-      split_vertical = "alt+i";
-      close_pane = "alt+w";
-      last_pane = "alt+o";
+      split_horizontal = "alt+shift+u";
+      split_vertical = "alt+shift+i";
+      close_pane = "alt+shift+w";
+      last_pane = "prefix+o";
 
       focus_pane_left = "prefix+h";
       focus_pane_down = "prefix+j";
@@ -133,10 +135,6 @@ in {
           }
         ];
 
-      resize_pane_left = "alt+shift+h";
-      resize_pane_down = "alt+shift+j";
-      resize_pane_up = "alt+shift+k";
-      resize_pane_right = "alt+shift+l";
     };
 
     xdg.configFile."herdr/config.toml" = mkIf (cfg.settings != {}) {
