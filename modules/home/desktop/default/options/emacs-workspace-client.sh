@@ -61,7 +61,11 @@ if ! "$EMACS_CLIENT" -s "$name" -e t >/dev/null 2>&1; then
     # State includes history, autosaves, backups, and Custom. Package data stays
     # shared, while the mutable per-daemon state lives outside the config tree.
     export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}/emacs-workspaces/$name"
-    "$EMACS_SERVER" --daemon="$name"
+    install -d -m 700 "$XDG_STATE_HOME"
+    if ! "$EMACS_SERVER" --daemon="$name" >"$XDG_STATE_HOME/startup.log" 2>&1; then
+      cat "$XDG_STATE_HOME/startup.log" >&2
+      exit 1
+    fi
   fi
   flock -u 9
   exec 9>&-

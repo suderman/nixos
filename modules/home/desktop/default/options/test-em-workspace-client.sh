@@ -2,7 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 tmp=$(mktemp -d)
-export XDG_RUNTIME_DIR=$tmp EMACS_CLIENT=$tmp/client EMACS_SERVER=$tmp/server
+export XDG_RUNTIME_DIR=$tmp XDG_STATE_HOME=$tmp/state EMACS_CLIENT=$tmp/client EMACS_SERVER=$tmp/server
 mkdir "$tmp/bin"
 export PATH="$tmp/bin:$PATH"
 
@@ -28,6 +28,7 @@ cat >"$tmp/bin/herdr" <<'SH'
 case $HERDR_PANE_ID in
   old|moved) ws=w2; pane=moved;;
   other) ws=w3; pane=other;;
+  broken) ws=w4; pane=broken;;
   *) exit 1;;
 esac
 printf '{"result":{"pane":{"pane_id":"%s","workspace_id":"%s"}}}\n' "$pane" "$ws"
@@ -42,6 +43,11 @@ printf '%s\n' "$*" >>"$XDG_RUNTIME_DIR/clients"
 SH
 cat >"$tmp/server" <<'SH'
 #!/usr/bin/env bash
+printf 'daemon startup message\n' >&2
+if [[ ${EMACS_SERVER_FAIL-} == 1 ]]; then
+  printf 'daemon startup failed\n' >&2
+  exit 7
+fi
 sleep 0.1
 printf '%s\n' "$*" >>"$XDG_RUNTIME_DIR/servers"
 touch "$XDG_RUNTIME_DIR/server-${1#--daemon=}"
@@ -50,15 +56,17 @@ chmod +x "$tmp/bin/herdr" "$tmp/client" "$tmp/server"
 export HERDR_SOCKET_PATH=$tmp/socket HERDR_PANE_ID=old HERDR_WORKSPACE_ID=w1
 
 # Two simultaneous calls start once. Moved pane resolves w2, not stale w1.
-bash ./emacs-workspace-client.sh --gui --no-wait 'file with spaces' &
+bash ./emacs-workspace-client.sh --gui --no-wait 'file with spaces' >"$tmp/first.out" 2>"$tmp/first.err" &
 first=$!
-bash ./emacs-workspace-client.sh --gui --no-wait 'another file' &
+bash ./emacs-workspace-client.sh --gui --no-wait 'another file' >"$tmp/second.out" 2>"$tmp/second.err" &
 second=$!
 wait "$first" "$second"
 [[ $(wc -l <"$tmp/servers") == 1 ]]
 [[ $(wc -l <"$tmp/clients") == 2 ]]
 name=$(awk '{print $2}' "$tmp/clients" | sort -u)
 [[ $(wc -l <<<"$name") == 1 ]]
+[[ ! -s $tmp/first.out && ! -s $tmp/first.err && ! -s $tmp/second.out && ! -s $tmp/second.err ]]
+grep -q 'daemon startup message' "$tmp/state/emacs-workspaces/$name/startup.log"
 [[ $(grep -c -- '--create-frame' "$tmp/clients") == 2 ]]
 grep -q 'file with spaces' "$tmp/clients"
 
@@ -72,6 +80,10 @@ if HERDR_PANE_ID=gone bash ./emacs-workspace-client.sh --gui 2>"$tmp/error"; the
   echo 'unknown Herdr pane unexpectedly succeeded' >&2; exit 1
 fi
 grep -q 'cannot resolve current Herdr pane' "$tmp/error"
+if EMACS_SERVER_FAIL=1 HERDR_PANE_ID=broken bash ./emacs-workspace-client.sh --gui >"$tmp/fail.out" 2>"$tmp/fail.err"; then
+  echo 'failed daemon startup unexpectedly succeeded' >&2; exit 1
+fi
+grep -q 'daemon startup failed' "$tmp/fail.err"
 if env -u HERDR_PANE_ID -u HERDR_WORKSPACE_ID -u HERDR_SOCKET_PATH HERDR_ENV=1 \
     bash ./emacs-workspace-client.sh --gui 2>"$tmp/error"; then
   echo 'unresolved Herdr environment unexpectedly fell back' >&2; exit 1
