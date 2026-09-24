@@ -100,8 +100,8 @@ in {
       move_tab_next = "prefix+}";
       copy_mode = "prefix+m";
 
-      split_horizontal = "alt+shift+u";
-      split_vertical = "alt+shift+i";
+      split_horizontal = "prefix+u";
+      split_vertical = "prefix+i";
       close_pane = "alt+shift+w";
       last_pane = "prefix+o";
 
@@ -163,10 +163,6 @@ in {
           command = "EDGER_KEY_MODIFIER=alt ${lib.getExe edger} ${binding.action}";
           description = "Edger ${binding.action}";
         }) [
-          {
-            key = "t";
-            action = "tab";
-          }
           {
             key = "u";
             action = "horizontal";
