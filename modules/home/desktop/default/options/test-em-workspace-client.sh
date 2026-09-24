@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+unset HERDR_ENV TMUX TMUX_PANE
 cd "$(dirname "$0")"
 tmp=$(mktemp -d)
 export XDG_RUNTIME_DIR=$tmp XDG_STATE_HOME=$tmp/state EMACS_CLIENT=$tmp/client EMACS_SERVER=$tmp/server
@@ -69,12 +70,15 @@ name=$(awk '{print $2}' "$tmp/clients" | sort -u)
 grep -q 'daemon startup message' "$tmp/state/emacs-workspaces/$name/startup.log"
 [[ $(grep -c -- '--create-frame' "$tmp/clients") == 2 ]]
 grep -q 'file with spaces' "$tmp/clients"
+bash ./emacs-workspace-client.sh
+[[ $(tail -1 "$tmp/clients") == *' --tty -F '*'.' ]]
 
 HERDR_PANE_ID=moved bash ./emacs-workspace-client.sh --no-wait '+2:3' 'file with spaces'
 [[ $(wc -l <"$tmp/servers") == 1 ]]
 grep -q 'edger-herdr-pane-id . "moved"' "$tmp/clients"
 grep -q '+2:3 file with spaces' "$tmp/clients"
 HERDR_PANE_ID=other bash ./emacs-workspace-client.sh --gui
+[[ $(tail -1 "$tmp/clients") == *' --create-frame .' ]]
 [[ $(wc -l <"$tmp/servers") == 2 ]]
 if HERDR_PANE_ID=gone bash ./emacs-workspace-client.sh --gui 2>"$tmp/error"; then
   echo 'unknown Herdr pane unexpectedly succeeded' >&2; exit 1
@@ -110,5 +114,8 @@ HERDR_PANE_ID=moved bash ./emacs-workspace-client.sh --gui
 
 env -u HERDR_PANE_ID -u HERDR_WORKSPACE_ID -u HERDR_SOCKET_PATH bash ./emacs-workspace-client.sh --gui
 [[ $(wc -l <"$tmp/servers") == 3 ]]
-[[ $(tail -1 "$tmp/clients") == '--create-frame' ]]
+[[ $(tail -1 "$tmp/clients") == '--create-frame .' ]]
+env -u HERDR_PANE_ID -u HERDR_WORKSPACE_ID -u HERDR_SOCKET_PATH \
+  bash ./emacs-workspace-client.sh --gui --no-wait 'explicit file'
+[[ $(tail -1 "$tmp/clients") == '--create-frame --no-wait explicit file' ]]
 echo 'em workspace identity, movement, isolation, startup race, GUI and fallback: ok'

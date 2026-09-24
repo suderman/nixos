@@ -8,6 +8,7 @@ if [[ ${1-} == --gui ]]; then
   mode=--create-frame
   shift
 fi
+[[ $# -gt 0 ]] || set -- .
 
 params=
 identity=
