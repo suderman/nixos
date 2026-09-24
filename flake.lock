@@ -436,11 +436,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1790136358,
-        "narHash": "sha256-XDyh/pwsI0xLOgeM0fNTdWXqvdQeq6iyMXtTjSaySjA=",
+        "lastModified": 1790204926,
+        "narHash": "sha256-aaNkCDrMEs+mzwmfGt7UdwvFe1rJnFCmQteSct3wryE=",
         "owner": "suderman",
         "repo": "emacs",
-        "rev": "41e3de5d64af3f8ed477de06193a4b40290824f6",
+        "rev": "147732eac310d5d08165c430cfb63283c9bacd89",
         "type": "github"
       },
       "original": {
