@@ -111,8 +111,8 @@ in {
 
     # tui emacs
     home.shellAliases = {
-      em = "${terminalEditor}";
-      emc = "${terminalClient}";
+      em = "${terminalClient}";
+      ema = "${terminalEditor}";
       emd = ''${terminalEditor} --init-directory "$PWD"'';
     };
 
