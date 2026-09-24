@@ -1,70 +1,38 @@
 {
   config,
-  flake,
   lib,
   pkgs,
+  perSystem,
+  flake,
   ...
 }: let
   inherit (lib) mkIf mkOption;
 
   cfg = config.programs.herdr;
-  package = flake.inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default;
   tomlFormat = pkgs.formats.toml {};
-  edger = pkgs.writeShellApplication {
+
+  edger = pkgs.self.mkScript {
     name = "edger";
-    runtimeInputs = [pkgs.jq pkgs.procps] ++ lib.optional (cfg.package != null) cfg.package;
+    path = [cfg.package pkgs.jq pkgs.procps]; 
     text = builtins.readFile "${flake.inputs.edger}/bin/edger";
   };
+  
 in {
   # Avoid duplicate options when release-26.11 imports the upstream module.
   disabledModules = ["programs/herdr.nix"];
-
-  # Backported from Home Manager master at 1944398834e2b9677ee6081e11e42c32d7c1eb5d.
-  # Remove after moving to release-26.11.
-  meta.maintainers = [lib.maintainers.amadejkastelic];
 
   options.programs.herdr = {
     enable = lib.mkEnableOption "Herdr";
 
     package = mkOption {
       type = lib.types.nullOr lib.types.package;
-      default = package;
-      defaultText = lib.literalExpression "flake.inputs.herdr.packages.\${pkgs.stdenv.hostPlatform.system}.default";
+      default = perSystem.herdr.default;
       description = "The Herdr package to use.";
     };
 
     settings = mkOption {
       inherit (tomlFormat) type;
       default = {};
-      example = {
-        onboarding = false;
-        terminal = {
-          default_shell = "nu";
-          shell_mode = "auto";
-          new_cwd = "follow";
-        };
-        theme = {
-          name = "catppuccin";
-          auto_switch = true;
-          light_name = "catppuccin-latte";
-          dark_name = "catppuccin";
-        };
-        ui = {
-          sidebar_width = 32;
-          agent_panel_sort = "priority";
-          toast.delivery = "herdr";
-          sound.enabled = true;
-        };
-        keys.prefix = "ctrl+b";
-        keys.command = [
-          {
-            key = "prefix+l";
-            type = "plugin_action";
-            command = "example.layout.apply";
-            description = "apply layout";
-          }
-        ];
-      };
       description = ''
         Configuration written to {file}`$XDG_CONFIG_HOME/herdr/config.toml`.
         See <https://herdr.dev/docs/configuration/> for the full list of options.
@@ -73,119 +41,83 @@ in {
   };
 
   config = mkIf cfg.enable {
-    home.packages = [edger] ++ lib.optional (cfg.package != null) cfg.package;
+    home.packages = [cfg.package edger];
 
     # Herdr stores mutable local data beside Home Manager's generated config.toml.
     persist.storage.directories = [".config/herdr"];
 
     # Home Manager owns config.toml, so Herdr cannot record onboarding itself.
-    programs.herdr.settings.onboarding = false;
+    programs.herdr.settings = {
+      
+      onboarding = false;
+      ui.toast.delivery = "herdr";
 
-    programs.herdr.settings.ui.toast.delivery = "herdr";
+      keys = {
+        prefix = "alt+z";
 
-    # Keep shifted keys for direct Herdr actions; unshifted keys use Edger.
-    programs.herdr.settings.keys = {
-      prefix = "alt+z";
+        new_workspace = "alt+shift+n";
+        rename_workspace = "prefix+period";
+        workspace_picker = "alt+a";
+        detach = "prefix+d";
 
-      new_workspace = "alt+shift+n";
-      rename_workspace = "prefix+period";
-      workspace_picker = "alt+a";
-      detach = "prefix+d";
+        new_tab = "alt+shift+t";
+        rename_tab = "prefix+comma";
+        previous_tab = "prefix+[";
+        next_tab = "prefix+]";
+        move_tab_previous = "prefix+{";
+        move_tab_next = "prefix+}";
+        copy_mode = "prefix+m";
 
-      new_tab = "alt+shift+t";
-      rename_tab = "prefix+comma";
-      previous_tab = "prefix+[";
-      next_tab = "prefix+]";
-      move_tab_previous = "prefix+{";
-      move_tab_next = "prefix+}";
-      copy_mode = "prefix+m";
+        split_horizontal = "prefix+u";
+        split_vertical = "prefix+i";
+        close_pane = "alt+shift+w";
+        last_pane = "prefix+o";
 
-      split_horizontal = "prefix+u";
-      split_vertical = "prefix+i";
-      close_pane = "alt+shift+w";
-      last_pane = "prefix+o";
+        focus_pane_left = "prefix+h";
+        focus_pane_down = "prefix+j";
+        focus_pane_up = "prefix+k";
+        focus_pane_right = "prefix+l";
 
-      focus_pane_left = "prefix+h";
-      focus_pane_down = "prefix+j";
-      focus_pane_up = "prefix+k";
-      focus_pane_right = "prefix+l";
-
-      command =
-        map (binding: {
-          key = "alt+${binding.key}";
-          type = "shell";
-          command = "${lib.getExe edger} ${binding.direction}";
-          description = "Navigate ${binding.direction} across editor, pane, and outer layer";
-        }) [
-          {
-            key = "h";
-            direction = "left";
-          }
-          {
-            key = "j";
-            direction = "down";
-          }
-          {
-            key = "k";
-            direction = "up";
-          }
-          {
-            key = "l";
-            direction = "right";
-          }
-        ]
-        ++ map (binding: {
-          key = "alt+shift+${binding.key}";
-          type = "shell";
-          command = "${lib.getExe edger} resize ${binding.direction}";
-          description = "Resize ${binding.direction} across editor or pane";
-        }) [
-          {
-            key = "h";
-            direction = "left";
-          }
-          {
-            key = "j";
-            direction = "down";
-          }
-          {
-            key = "k";
-            direction = "up";
-          }
-          {
-            key = "l";
-            direction = "right";
-          }
-        ]
-        ++ map (binding: {
-          key = "alt+${binding.key}";
-          type = "shell";
-          command = "${lib.getExe edger} ${binding.action}";
-          description = "Edger ${binding.action}";
-        }) [
-          {
-            key = "u";
-            action = "horizontal";
-          }
-          {
-            key = "i";
-            action = "vertical";
-          }
-          {
-            key = "w";
-            action = "close";
-          }
-        ];
+        command = let
+          modifier = "alt";
+          binds.direction = {
+            left = "h";
+            down = "j";
+            up = "k";
+            right = "l";
+            };
+          binds.action = {
+            horizontal = "u";
+            vertical = "i";
+            close = "w";
+          };
+        in
+          lib.mapAttrsToList (direction: letter: {
+            key = "${modifier}+${letter}";
+            type = "shell";
+            command = "${lib.getExe edger} ${direction} ${modifier}+${letter}";
+            description = "Navigate ${direction} across editor, pane, and outer layer";
+          }) binds.direction
+          
+          ++ lib.mapAttrsToList (direction: letter: {
+            key = "${modifier}+shift+${letter}";
+            type = "shell";
+            command = "${lib.getExe edger} resize ${direction} ${modifier}+shift+${letter}";
+            description = "Navigate ${direction} across editor, pane, and outer layer";
+          }) binds.direction
+          
+          ++ lib.mapAttrsToList (action: letter: {
+            key = "${modifier}+${letter}";
+            type = "shell";
+            command = "${lib.getExe edger} ${action} ${modifier}+${letter}";
+            description = "Edger ${action}";
+          }) binds.action;
+      };
     };
 
     xdg.configFile."herdr/config.toml" = mkIf (cfg.settings != {}) {
       source = tomlFormat.generate "herdr-config.toml" cfg.settings;
-      onChange = let
-        binPath =
-          if cfg.package == null
-          then "herdr"
-          else lib.getExe cfg.package;
-      in "${binPath} server reload-config || true";
+      onChange = "${cfg.package} server reload-config || true";
     };
   };
 }
