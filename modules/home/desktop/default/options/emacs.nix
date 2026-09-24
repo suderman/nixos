@@ -63,22 +63,16 @@
     ${terminalSetup}
     exec ${lib.getBin cfg.finalPackage}/bin/emacs --no-window-system "$@"
   '';
-  terminalClient = pkgs.writeShellScript "emacs-client" ''
-    ${terminalSetup}
-    # The daemon does not inherit the terminal client's pane environment.
-    if [[ -n "''${TMUX_PANE-}" && -n "''${TMUX-}" ]]; then
-      params="$(${lib.getExe pkgs.jq} -nr --arg pane "$TMUX_PANE" --arg socket "$TMUX" \
-        '"((edger-tmux-pane-id . \($pane|tojson)) (edger-tmux-socket . \($socket|tojson)))"')"
-      exec ${lib.getBin cfg.finalPackage}/bin/emacsclient --tty -F "$params" "$@"
-    fi
-    if [[ -n "''${HERDR_PANE_ID-}" && -n "''${HERDR_SOCKET_PATH-}" ]]; then
-      # JSON quoted strings are also valid Lisp strings for frame parameters.
-      params="$(${lib.getExe pkgs.jq} -nr --arg pane "$HERDR_PANE_ID" --arg socket "$HERDR_SOCKET_PATH" \
-        '"((edger-herdr-pane-id . \($pane|tojson)) (edger-herdr-socket-path . \($socket|tojson)))"')"
-      exec ${lib.getBin cfg.finalPackage}/bin/emacsclient --tty -F "$params" "$@"
-    fi
-    exec ${lib.getBin cfg.finalPackage}/bin/emacsclient --tty "$@"
-  '';
+  workspaceClient = pkgs.writeShellApplication {
+    name = "em-workspace-client";
+    runtimeInputs = [cfg.finalPackage config.programs.herdr.package pkgs.tmux pkgs.jq pkgs.coreutils pkgs.util-linux];
+    text = ''
+      ${terminalSetup}
+      EMACS_CLIENT=${lib.getBin cfg.finalPackage}/bin/emacsclient
+      EMACS_SERVER=${lib.getBin cfg.finalPackage}/bin/emacs
+      ${builtins.readFile ./emacs-workspace-client.sh}
+    '';
+  };
 in {
   options.programs.emacs.exportStyle = lib.mkEnableOption "exporting shared Emacs appearance to the synced Org tree (enable on one host only)";
 
@@ -109,9 +103,10 @@ in {
       "super.r" = "f5"; # reload
     };
 
-    # tui emacs
+    # Disconnecting em's client keeps its daemon. In that frame,
+    # M-x save-buffers-kill-emacs shuts it down with Emacs's save prompts.
     home.shellAliases = {
-      em = "${terminalClient}";
+      em = "${lib.getExe workspaceClient}";
       ema = "${terminalEditor}";
       emd = ''${terminalEditor} --init-directory "$PWD"'';
     };
@@ -126,6 +121,7 @@ in {
     persist.scratch.directories = [
       ".local/share/emacs"
       ".local/state/emacs"
+      ".local/state/emacs-workspaces"
     ];
   };
 }
