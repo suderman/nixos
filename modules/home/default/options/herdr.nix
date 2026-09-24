@@ -114,7 +114,7 @@ in {
         map (binding: {
           key = "alt+${binding.key}";
           type = "shell";
-          command = "EDGER_KEY_MODIFIER=alt ${lib.getExe edger} ${binding.direction}";
+          command = "${lib.getExe edger} ${binding.direction}";
           description = "Navigate ${binding.direction} across editor, pane, and outer layer";
         }) [
           {
@@ -137,7 +137,7 @@ in {
         ++ map (binding: {
           key = "alt+shift+${binding.key}";
           type = "shell";
-          command = "EDGER_KEY_MODIFIER=alt ${lib.getExe edger} resize ${binding.direction}";
+          command = "${lib.getExe edger} resize ${binding.direction}";
           description = "Resize ${binding.direction} across editor or pane";
         }) [
           {
@@ -160,7 +160,7 @@ in {
         ++ map (binding: {
           key = "alt+${binding.key}";
           type = "shell";
-          command = "EDGER_KEY_MODIFIER=alt ${lib.getExe edger} ${binding.action}";
+          command = "${lib.getExe edger} ${binding.action}";
           description = "Edger ${binding.action}";
         }) [
           {
