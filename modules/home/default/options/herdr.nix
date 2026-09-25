@@ -13,8 +13,31 @@
 
   edger = pkgs.self.mkScript {
     name = "edger";
-    path = [cfg.package pkgs.jq pkgs.procps]; 
+    path = [cfg.package pkgs.jq pkgs.procps];
     text = builtins.readFile "${flake.inputs.edger}/bin/edger";
+  };
+
+  herdr = pkgs.self.mkScript {
+    name = "herdr";
+    path = with pkgs; [coreutils gawk gnugrep procps];
+    text =
+      # bash
+      ''
+        if [[ $# -eq 2 && $1 == server && $2 == stop ]]; then
+          socket=$(${lib.getExe cfg.package} status server | awk '$1 == "socket:" {print $2}')
+          [[ -n $socket ]] || { echo 'herdr: cannot find server socket; refusing to stop' >&2; exit 1; }
+
+          # The pane exits during stop, so terminate its detached Emacs daemons first.
+          for pid in $(pgrep -u "$(id -u)" -f -- '--daemon=em-' || true); do
+            grep -zFxq "HERDR_SOCKET_PATH=$socket" "/proc/$pid/environ" 2>/dev/null || continue
+            grep -zEq '^(TMUX|TMUX_PANE)=' "/proc/$pid/environ" 2>/dev/null && continue
+            grep -zEq '^--daemon=em-[[:xdigit:]]{24}$' "/proc/$pid/cmdline" 2>/dev/null || continue
+            kill "$pid" 2>/dev/null || true
+          done
+        fi
+
+        exec ${lib.getExe cfg.package} "$@"
+      '';
   };
 
   ntfyPlugin = pkgs.buildGoModule {
@@ -56,7 +79,7 @@ in {
   };
 
   config = mkIf cfg.enable {
-    home.packages = [cfg.package edger];
+    home.packages = [herdr edger];
 
     # Herdr stores mutable local data beside Home Manager's generated config.toml.
     persist.storage.directories = [".config/herdr"];
@@ -75,7 +98,6 @@ in {
 
     # Home Manager owns config.toml, so Herdr cannot record onboarding itself.
     programs.herdr.settings = {
-      
       onboarding = false;
       ui.toast.delivery = "herdr";
       ui.sidebar.spaces.rows = [["state_icon" "workspace" "branch"]];
@@ -113,7 +135,7 @@ in {
             down = "j";
             up = "k";
             right = "l";
-            };
+          };
           binds.action = {
             horizontal = "u";
             vertical = "i";
@@ -125,21 +147,22 @@ in {
             type = "shell";
             command = "${lib.getExe edger} ${direction} ${modifier}+${letter}";
             description = "Navigate ${direction} across editor, pane, and outer layer";
-          }) binds.direction
-          
+          })
+          binds.direction
           ++ lib.mapAttrsToList (direction: letter: {
             key = "${modifier}+shift+${letter}";
             type = "shell";
             command = "${lib.getExe edger} resize ${direction} ${modifier}+shift+${letter}";
             description = "Navigate ${direction} across editor, pane, and outer layer";
-          }) binds.direction
-          
+          })
+          binds.direction
           ++ lib.mapAttrsToList (action: letter: {
             key = "${modifier}+${letter}";
             type = "shell";
             command = "${lib.getExe edger} ${action} ${modifier}+${letter}";
             description = "Edger ${action}";
-          }) binds.action;
+          })
+          binds.action;
       };
     };
 
