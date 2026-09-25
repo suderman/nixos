@@ -16,7 +16,22 @@
     path = [cfg.package pkgs.jq pkgs.procps]; 
     text = builtins.readFile "${flake.inputs.edger}/bin/edger";
   };
-  
+
+  ntfyPlugin = pkgs.buildGoModule {
+    pname = "herdr-ntfysh";
+    version = "0.2.0";
+    src = pkgs.fetchFromGitHub {
+      owner = "cobanov";
+      repo = "herdr-ntfysh";
+      rev = "f07462439b7dde0ac08ffe90d30661520037d561";
+      hash = "sha256-0RjvBD/J53/iT5e9KQAoQomnnkxpQ+9EGgcS5Etvr7A=";
+    };
+    vendorHash = null;
+    postInstall = ''
+      install -Dm644 herdr-plugin.toml "$out/herdr-plugin.toml"
+      ln -s bin/herdr-ntfysh "$out/herdr-ntfysh"
+    '';
+  };
 in {
   # Avoid duplicate options when release-26.11 imports the upstream module.
   disabledModules = ["programs/herdr.nix"];
@@ -46,11 +61,24 @@ in {
     # Herdr stores mutable local data beside Home Manager's generated config.toml.
     persist.storage.directories = [".config/herdr"];
 
+    xdg.configFile."herdr/plugins/config/cobanov.herdr-ntfysh/.env" = {
+      text = ''
+        HERDR_NTFY_SERVER=https://ntfy.hub
+        HERDR_NTFY_TOPIC=herdr
+      '';
+      force = true;
+    };
+
+    home.activation.herdrNtfyPlugin = lib.hm.dag.entryAfter ["linkGeneration"] ''
+      $DRY_RUN_CMD ${lib.getExe cfg.package} plugin link ${ntfyPlugin}
+    '';
+
     # Home Manager owns config.toml, so Herdr cannot record onboarding itself.
     programs.herdr.settings = {
       
       onboarding = false;
       ui.toast.delivery = "herdr";
+      ui.sidebar.spaces.rows = [["state_icon" "workspace" "branch"]];
 
       keys = {
         prefix = "alt+z";
