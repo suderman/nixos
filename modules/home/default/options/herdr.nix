@@ -17,6 +17,7 @@
     text = builtins.readFile "${flake.inputs.edger}/bin/edger";
   };
 
+  # wrapped herdr to own workspace emacs servers
   herdr = pkgs.self.mkScript {
     name = "herdr";
     path = with pkgs; [coreutils gawk gnugrep procps];
@@ -38,22 +39,6 @@
 
         exec ${lib.getExe cfg.package} "$@"
       '';
-  };
-
-  ntfyPlugin = pkgs.buildGoModule {
-    pname = "herdr-ntfysh";
-    version = "0.2.0";
-    src = pkgs.fetchFromGitHub {
-      owner = "cobanov";
-      repo = "herdr-ntfysh";
-      rev = "f07462439b7dde0ac08ffe90d30661520037d561";
-      hash = "sha256-0RjvBD/J53/iT5e9KQAoQomnnkxpQ+9EGgcS5Etvr7A=";
-    };
-    vendorHash = null;
-    postInstall = ''
-      install -Dm644 herdr-plugin.toml "$out/herdr-plugin.toml"
-      ln -s bin/herdr-ntfysh "$out/herdr-ntfysh"
-    '';
   };
 in {
   # Avoid duplicate options when release-26.11 imports the upstream module.
@@ -84,23 +69,14 @@ in {
     # Herdr stores mutable local data beside Home Manager's generated config.toml.
     persist.storage.directories = [".config/herdr"];
 
-    xdg.configFile."herdr/plugins/config/cobanov.herdr-ntfysh/.env" = {
-      text = ''
-        HERDR_NTFY_SERVER=https://ntfy.hub
-        HERDR_NTFY_TOPIC=herdr
-      '';
-      force = true;
-    };
-
-    home.activation.herdrNtfyPlugin = lib.hm.dag.entryAfter ["linkGeneration"] ''
-      $DRY_RUN_CMD ${lib.getExe cfg.package} plugin link ${ntfyPlugin}
-    '';
-
     # Home Manager owns config.toml, so Herdr cannot record onboarding itself.
     programs.herdr.settings = {
       onboarding = false;
-      ui.toast.delivery = "herdr";
-      ui.sidebar.spaces.rows = [["state_icon" "workspace" "branch"]];
+      ui = {
+        toast.delivery = "herdr";
+        sidebar.spaces.rows = [["state_icon" "workspace" "branch"]];
+        prompt_new_tab_name = false;
+      };
 
       keys = {
         prefix = "alt+z";
@@ -170,5 +146,45 @@ in {
       source = tomlFormat.generate "herdr-config.toml" cfg.settings;
       onChange = "${cfg.package} server reload-config || true";
     };
+
+    # install herdr plugins
+    home.activation.herdr = let
+      herdr = lib.getExe cfg.package;
+    in
+      lib.hm.dag.entryAfter ["linkGeneration"]
+      # bash
+      ''
+        export PATH=${lib.makeBinPath [pkgs.git]}:$PATH
+
+        # https://github.com/horn553/herdr-ntfy
+        $DRY_RUN_CMD ${herdr} plugin install horn553/herdr-ntfy --yes
+        config_dir="$(${herdr} plugin config-dir horn553.herdr-ntfy)"
+        install -m 600 /dev/null "$config_dir/.env"
+        cat > "$config_dir/.env" <<'EOF'
+        NTFY_URL=https://ntfy.hub/herdr
+        NTFY_TITLE=Herdr
+        NTFY_LINES=12
+        NTFY_TOKEN=
+        COLLIE_URL=
+        EOF
+
+        # https://github.com/qu8n/herdr-automatic-rename
+        $DRY_RUN_CMD ${herdr} plugin install qu8n/herdr-automatic-rename --yes
+        mkdir -p "${config.xdg.configHome}/herdr-automatic-rename"
+        cat > "${config.xdg.configHome}/herdr-automatic-rename/config.sh" <<'EOF'
+        HOST_PREFIX=0
+        TAB_CONTEXT=1
+        SHOW_BRANCH=1
+        AGENT_TITLE=1
+        TITLE_STYLE=task # name_and_task
+        ICONS_ENABLED=1
+        EOF
+      '';
+
+    programs.zsh.initContent = lib.mkAfter ''
+      for _f in ${config.xdg.configHome}/herdr/plugins/github/herdr-automatic-rename-*/shell/hook.zsh(N); do
+        source $_f; break
+      done
+    '';
   };
 }
