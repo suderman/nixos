@@ -1508,11 +1508,11 @@
         "treefmt-nix": "treefmt-nix_5"
       },
       "locked": {
-        "lastModified": 1790443971,
-        "narHash": "sha256-KVEwXS12EL0WPAbFIk9zaaDUO3A94p4pUqD8Tt9SjEs=",
+        "lastModified": 1790451368,
+        "narHash": "sha256-JPUBpFr5iv3jtgBzrwR8xtYOYkyAZLAYifTstFLl9kw=",
         "owner": "suderman",
         "repo": "neovim",
-        "rev": "352da7e9a8bb7d1fcb02369c1ef326ad13672dbb",
+        "rev": "e0475d2cbdad8ad0a41e007681bd6220baeda5bc",
         "type": "github"
       },
       "original": {
