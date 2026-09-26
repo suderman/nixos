@@ -399,11 +399,11 @@
     "edger": {
       "flake": false,
       "locked": {
-        "lastModified": 1790440595,
-        "narHash": "sha256-zzLD9po/5zj9WUqYAfmdmAkeBmf0NTSz2XgDA9nlhKc=",
+        "lastModified": 1790443939,
+        "narHash": "sha256-lo0EHgXVD+GldGdP2QHj5ftlBDCfr/9w1YfCzOstMXQ=",
         "owner": "suderman",
         "repo": "edger",
-        "rev": "9815e53da75428f56e7d53d3eebdc6a612474db9",
+        "rev": "eb9781cc6dc9262096a2bfd4da49169afa5af817",
         "type": "github"
       },
       "original": {
@@ -415,11 +415,11 @@
     "edger_2": {
       "flake": false,
       "locked": {
-        "lastModified": 1790440595,
-        "narHash": "sha256-zzLD9po/5zj9WUqYAfmdmAkeBmf0NTSz2XgDA9nlhKc=",
+        "lastModified": 1790443939,
+        "narHash": "sha256-lo0EHgXVD+GldGdP2QHj5ftlBDCfr/9w1YfCzOstMXQ=",
         "owner": "suderman",
         "repo": "edger",
-        "rev": "9815e53da75428f56e7d53d3eebdc6a612474db9",
+        "rev": "eb9781cc6dc9262096a2bfd4da49169afa5af817",
         "type": "github"
       },
       "original": {
@@ -1508,11 +1508,11 @@
         "treefmt-nix": "treefmt-nix_5"
       },
       "locked": {
-        "lastModified": 1790440664,
-        "narHash": "sha256-w2GwNg3MZET9A/cQJNHtfJu2cLzorIcWIXjqSaY1htw=",
+        "lastModified": 1790443971,
+        "narHash": "sha256-KVEwXS12EL0WPAbFIk9zaaDUO3A94p4pUqD8Tt9SjEs=",
         "owner": "suderman",
         "repo": "neovim",
-        "rev": "2a84f51367e88b6f15d6568a7256e179e1b3993e",
+        "rev": "352da7e9a8bb7d1fcb02369c1ef326ad13672dbb",
         "type": "github"
       },
       "original": {
