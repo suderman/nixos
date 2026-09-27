@@ -75,6 +75,14 @@ in {
 
     programs.emacs.package = mkDefault emacsPackage;
     programs.emacs.extraPackages = epkgs: [epkgs.base16-theme];
+    home.packages = with pkgs; [
+      phpactor
+      nil
+      lua-language-server
+      vscode-langservers-extracted
+      typescript-language-server
+      typescript
+    ];
 
     # Emacs loads the generated palettes itself and follows toolkit-theme changes.
     stylix.targets.emacs.enable = false;
