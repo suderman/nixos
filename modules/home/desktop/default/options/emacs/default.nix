@@ -51,38 +51,34 @@ in {
         paletteKeys = map (suffix: "base${suffix}") ["00" "01" "02" "03" "04" "05" "06" "07" "08" "09" "0A" "0B" "0C" "0D" "0E" "0F"];
       in "(${concatMapStringsSep spacer (key: ":${key} ${toJSON colors.withHashtag.${key}}") paletteKeys})";
 
-      style = pkgs.writeText "emacs-style.el"
+      style =
+        pkgs.writeText "emacs-style.el"
         # elisp
         ''
-        ;;; style.el --- Generated from Nix/Stylix. Do not edit. -*- lexical-binding: t; -*-
-        (setq suderman/system-style
-              '(:mono-font ${builtins.toJSON fonts.monospace.name}
-                :fallback-font "Ioskeley Mono"
-                :variable-font ${builtins.toJSON fonts.serif.name}
-                :icon-font "Symbols Nerd Font Mono"
-                :font-size ${toString (fonts.sizes.terminal * 1.0)}
-                :palettes (:light ${palette schemes.lightScheme}
-                           :dark ${palette schemes.darkScheme})))
+          ;;; style.el --- Generated from Nix/Stylix. Do not edit. -*- lexical-binding: t; -*-
+          (setq suderman/system-style
+                '(:mono-font ${builtins.toJSON fonts.monospace.name}
+                  :fallback-font "Ioskeley Mono"
+                  :variable-font ${builtins.toJSON fonts.serif.name}
+                  :icon-font "Symbols Nerd Font Mono"
+                  :font-size ${toString (fonts.sizes.terminal * 1.0)}
+                  :palettes (:light ${palette schemes.lightScheme}
+                             :dark ${palette schemes.darkScheme})))
         '';
 
       exportStyle = pkgs.writeShellScript "export-emacs-style" ''
         style=${style}
         ${builtins.readFile ./export-style.sh}
       '';
-    in mkIf cfg.exportStyle (lib.hm.dag.entryAfter ["writeBoundary"] ''
-      $DRY_RUN_CMD ${exportStyle}
-    '');
+    in
+      mkIf cfg.exportStyle (lib.hm.dag.entryAfter ["writeBoundary"] ''
+        $DRY_RUN_CMD ${exportStyle}
+      '');
 
     programs.emacs.package = mkDefault emacsPackage;
     programs.emacs.extraPackages = epkgs: [epkgs.base16-theme];
-    home.packages = with pkgs; [
-      phpactor
-      nil
-      lua-language-server
-      vscode-langservers-extracted
-      typescript-language-server
-      typescript
-    ];
+    # Keep the compiler available in shells, not only inside wrapped Emacs.
+    home.packages = [pkgs.typescript];
 
     # Emacs loads the generated palettes itself and follows toolkit-theme changes.
     stylix.targets.emacs.enable = false;
