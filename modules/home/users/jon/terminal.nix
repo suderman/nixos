@@ -1,4 +1,6 @@
 {pkgs, ...}: {
+  programs.herdr.enable = true;
+
   home.packages = with pkgs; [
     yo # example script
     self.fetchgithub # fetch hash from repo
@@ -7,6 +9,8 @@
 
   # Aliases
   home.shellAliases = {
+    herdr-kit = "herdr --remote kit --remote-keybindings server";
+    herdr-cog = "herdr --remote cog --remote-keybindings server";
     neofetch = "fastfetch";
 
     # 5 second countdown until the clipboard gets typed out

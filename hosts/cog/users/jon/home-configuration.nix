@@ -17,7 +17,6 @@
   programs.sparrow.enable = true;
   programs.nf.enable = true;
   programs.buzz.enable = true;
-  programs.herdr.enable = true;
   programs.hermes-desktop = {
     enable = true;
     profile = "cid";
