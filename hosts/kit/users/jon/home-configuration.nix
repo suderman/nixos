@@ -1,6 +1,7 @@
 {
   config,
   flake,
+  lib,
   ...
 }: {
   imports =
@@ -10,6 +11,9 @@
       flake.homeModules.users.jon
     ]
     ++ flake.lib.ls ./.;
+
+  # The data disk supplies this bind mount, not main-disk impermanence storage.
+  home.directories.DATA.persist = lib.mkForce null;
 
   # Only kit writes the shared appearance file; other machines consume it.
   programs.emacs.exportStyle = true;
