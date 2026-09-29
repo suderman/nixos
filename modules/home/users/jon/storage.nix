@@ -2,9 +2,8 @@
   home.directories = rec {
     # Standard user directories
     DOCUMENTS = {
-      path = ".local/share/documents";
-      persist = "storage";
-      sync = true;
+      path = "${PROFILE.path}/apps/documents";
+      sync = false;
       enable = true;
     };
     DOWNLOAD = {
@@ -23,6 +22,11 @@
       sync = false;
       enable = true;
     };
+    PROJECTS = {
+      path = "${ORG.path}/work";
+      sync = false;
+      enable = true;
+    };
     VIDEOS = {
       path = "${MEDIA.path}/videos";
       sync = false;
@@ -31,7 +35,6 @@
 
     # Standard user directories (disabled)
     DESKTOP.enable = false;
-    PROJECTS.enable = false;
     PUBLICSHARE.enable = false;
     TEMPLATES.enable = false;
 
