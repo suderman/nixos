@@ -4,7 +4,7 @@
     DOCUMENTS = {
       path = ".local/share/documents";
       persist = "storage";
-      sync = false;
+      sync = true;
       enable = true;
     };
     DOWNLOAD = {
