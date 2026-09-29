@@ -94,6 +94,12 @@ in {
           sync = mkDefault false;
           enable = mkDefault true;
         };
+        PROJECTS = {
+          path = mkDefault "Projects";
+          persist = mkDefault null;
+          sync = mkDefault true;
+          enable = mkDefault true;
+        };
         TEMPLATES = {
           path = mkDefault "Templates";
           persist = mkDefault null;

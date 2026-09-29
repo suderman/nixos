@@ -5,6 +5,7 @@
     DOCUMENTS.persist = "storage";
     MUSIC.persist = "storage";
     PICTURES.persist = "storage";
+    PROJECTS.persist = "storage";
     VIDEOS.persist = "storage";
     PUBLICSHARE.enable = false;
     TEMPLATES.enable = false;

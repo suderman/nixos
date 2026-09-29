@@ -14,10 +14,11 @@
     documents = extraConfig.DOCUMENTS or "${home}/Documents";
     download = extraConfig.DOWNLOAD or "${home}/Downloads";
     games = extraConfig.GAMES or "${home}/Games";
+    media = extraConfig.MEDIA or "${home}/Media";
     music = extraConfig.MUSIC or "${home}/Music";
-    org = extraConfig.ORG or "${home}/org";
+    org = extraConfig.ORG or "${home}/Org";
     pictures = extraConfig.PICTURES or "${home}/Pictures";
-    projects = extraConfig.PROJECTS or "${home}/projects";
+    profile = extraConfig.PROFILE or "${home}/Profile";
     publicShare = extraConfig.PUBLICSHARE or "${home}/Public";
     source = extraConfig.SOURCE or "${home}/Source";
     templates = extraConfig.TEMPLATES or "${home}/Templates";
@@ -32,12 +33,6 @@ in {
         mount = pkgs.yaziPlugins.mount;
         chmod = pkgs.yaziPlugins.chmod;
         starship = pkgs.yaziPlugins.starship;
-        # gvfs = pkgs.fetchFromGitHub {
-        #   owner = "boydaihungst";
-        #   repo = "gvfs.yazi";
-        #   rev = "f07b496922c25c89c62305a292c6a53ccb4670cd";
-        #   hash = "sha256-s+fNoH5wuhk43qxPplYECSX/aWFG2UWEHkow32xsacM=";
-        # };
       };
 
       enableBashIntegration = true;
@@ -159,6 +154,11 @@ in {
         }
         {
           on = ["g" "h" "m"];
+          run = "cd ${dir.media}";
+          desc = "go media";
+        }
+        {
+          on = ["g" "h" "u"];
           run = "cd ${dir.music}";
           desc = "go music";
         }
@@ -173,14 +173,14 @@ in {
           desc = "go source";
         }
         {
-          on = ["g" "h" "n"];
+          on = ["g" "h" "o"];
           run = "cd ${dir.org}";
           desc = "go org";
         }
         {
           on = ["g" "h" "p"];
-          run = "cd ${dir.projects}";
-          desc = "go projects";
+          run = "cd ${dir.profile}";
+          desc = "go profile";
         }
         {
           on = ["g" "m"];
@@ -216,6 +216,10 @@ in {
           text = "";
         }
         {
+          name = baseNameOf dir.media;
+          text = "";
+        }
+        {
           name = baseNameOf dir.music;
           text = "";
         }
@@ -236,8 +240,8 @@ in {
           text = "";
         }
         {
-          name = baseNameOf dir.projects;
-          text = "";
+          name = baseNameOf dir.profile;
+          text = "";
         }
         {
           name = baseNameOf dir.videos;

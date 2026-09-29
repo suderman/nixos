@@ -31,16 +31,11 @@
 
     # Standard user directories (disabled)
     DESKTOP.enable = false;
+    PROJECTS.enable = false;
     PUBLICSHARE.enable = false;
     TEMPLATES.enable = false;
 
     # Custom user directories
-    APP = {
-      path = "app";
-      persist = "storage";
-      sync = true;
-      enable = true;
-    };
     DATA = {
       path = "data";
       persist = "storage";
