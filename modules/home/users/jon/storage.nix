@@ -2,21 +2,15 @@
   home.directories = rec {
     # Standard user directories
     DOCUMENTS = {
-      path = "documents";
+      path = ".local/share/documents";
       persist = "storage";
-      sync = true;
+      sync = false;
       enable = true;
     };
     DOWNLOAD = {
       path = "inbox";
       persist = "scratch";
       sync = false;
-      enable = true;
-    };
-    PUBLICSHARE = {
-      path = "public";
-      persist = "storage";
-      sync = true;
       enable = true;
     };
     MUSIC = {
@@ -37,14 +31,33 @@
 
     # Standard user directories (disabled)
     DESKTOP.enable = false;
+    PUBLICSHARE.enable = false;
     TEMPLATES.enable = false;
 
     # Custom user directories
-    BIN = {
-      path = "bin";
+    APP = {
+      path = "app";
+      persist = "storage";
+      sync = true;
+      enable = true;
+    };
+    DATA = {
+      path = "data";
+      persist = "storage";
+      sync = false;
+      enable = true;
+    };
+    GAMES = {
+      path = "games";
       persist = "storage";
       sync = true;
       syncDevices = ["kit" "cog"];
+      enable = true;
+    };
+    MEDIA = {
+      path = "media";
+      persist = "storage";
+      sync = true;
       enable = true;
     };
     ORG = {
@@ -53,30 +66,16 @@
       sync = true;
       enable = true;
     };
-    NOTES.enable = false;
-    GAMES = {
-      path = "games";
+    PROFILE = {
+      path = "profile";
       persist = "storage";
       sync = true;
-      syncDevices = ["kit" "cog"];
       enable = true;
     };
     SOURCE = {
       path = "src";
       persist = "storage";
       sync = false;
-      enable = true;
-    };
-    APP = {
-      path = "app";
-      persist = "storage";
-      sync = true;
-      enable = true;
-    };
-    MEDIA = {
-      path = "media";
-      persist = "storage";
-      sync = true;
       enable = true;
     };
   };
