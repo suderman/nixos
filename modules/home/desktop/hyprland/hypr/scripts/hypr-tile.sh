@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 mode="${1:-main}" # default/alt
 addr="$(hyprctl activewindow -j | jq -r .address)"
-layout="$(hyprctl -j activeworkspace | jq -r .tiledLayout)"
+layout="$(hypr-activeworkspace | jq -r .tiledLayout)"
 is_floating="$(hyprctl activewindow -j | jq -r .floating)"
 
 # Preserve the old shell entrypoint, but express the layout actions with

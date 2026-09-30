@@ -2,6 +2,96 @@
 
 This is my trusty desktop of choice! 💻
 
+## Configuration ownership
+
+Home Manager owns `hyprland.lua` through its native `configType = "lua"`
+module. It also owns the systemd startup hook. Do not add a second session
+bootstrap or a legacy `hyprland.conf`.
+
+- `lua.nix` renders host data and the sorted feature list with
+  `lib.generators.toLua`.
+- `lua/conf/`, `lua/binds/`, and `lua/rules/` hold shared compositor policy.
+- App and service modules contribute `wayland.windowManager.hyprland.lua.features`.
+  Keep their binds, rules, and event listeners beside the owning service.
+- `~/.config/hypr/local/init.lua` is the writable scratch hook. It may be absent.
+  Generated modules are required; broken modules and scratch code must report
+  errors rather than silently disappear.
+
+Hyprland clears Lua modules, bindings, and listeners on reload. Do not keep a
+second cache of compositor state. Workspace-rule changes settle on the next
+compositor turn, so tests must read them in a later IPC request.
+
+The Lua keyd mapper owns both window and layer mappings in Hyprland sessions.
+Keep the stock application-mapper service disabled there. It sends its own
+`keyd bind reset` commands and would overwrite the layer mappings.
+
+Use `lib.util.active_workspace()` for the visible workspace. Special workspaces
+are overlays and are not returned by `hl.get_active_workspace()`. Shell callers
+use `hypr-activeworkspace`, which adds a canonical `selector` to the workspace
+JSON. Main replaces Lua `config_name` with `addressable_name` and no longer gives
+named workspaces numeric IDs. Keep that version distinction in these helpers,
+not in each widget or bind.
+
+Declare plugins with `hl.plugin.load`. Hyprland reloads after loading them and
+registers their functions under `hl.plugin.<name>`. Configure Hyprbars when
+`hl.plugin.hyprbars` exists. A sleep cannot prove that a plugin is ready.
+Plugins must be built against the same Hyprland revision as the compositor.
+
+## Checks and release testing
+
+From the repository root, after adding new source files to the Git index:
+
+```sh
+nix develop --command nix build '.#checks.x86_64-linux.hyprland' -L
+```
+
+Git flakes omit untracked files. Do not work around that with raw `path:.` in
+this checkout: it includes ignored Sim disks and private keys. For unstaged
+experiments, build from a snapshot containing only tracked and non-ignored files.
+
+This runs Lua state tests, workspace JSON tests, and syntax checks. It renders
+Kit, Pow, Cog, and Sim configurations and verifies each with pinned Hyprland.
+The output contains each host's Lua files, Waybar JSON, and packaged helper
+scripts. Offline verification does not load plugins or prove that a desktop starts.
+
+Run candidate releases in Sim before changing the production lock. Use disposable
+QCOW2 overlays when testing an installed Sim disk. Stop Syncthing, Tailscale, and
+other services that could sync or publish the cloned machine's state. Do not run
+the identity-generation wrappers for compositor experiments.
+
+Copy the rendered check closure into Sim with `nix copy`, then copy its `sim/`
+directory into a writable guest directory. Start Hyprland as Jon in a real
+logind session. For serial-only QEMU, use a systemd transient service with
+`PAMName=login`, `TTYPath=/dev/tty1`, and `StandardInput=tty`. Set
+`HOME=/home/jon`, `XDG_RUNTIME_DIR=/run/user/1000`, and
+`LIBGL_ALWAYS_SOFTWARE=1` for the software-rendered test. Stop the guest display
+manager first so it does not compete for the seat. Stop or mask guest Hypridle
+for the test session so an unattended run does not lock halfway through.
+When using the exported `bin/` directory, prepend it to `PATH` in the launcher
+script after PAM setup. The login environment can override a transient service's
+`PATH` setting.
+
+Use an explicit wrapper that forwards every argument to `hyprctl -i 0` inside
+Sim as Jon. Never point this test at the physical desktop:
+
+```sh
+python3 modules/home/desktop/hyprland/test-runtime.py /path/to/sim-hyprctl
+```
+
+The test checks numbered, named, and visible special workspaces, floating-window
+hide/restore, fullscreen modes, groups, and repeated reloads. It invokes the real
+layout-bind callbacks. Add `--qemu-monitor /path/to/monitor.sock` before the
+wrapper argument to test Super+Slash and Super+Alt+Slash through QEMU keyboard
+events, including after reload. This still does not test a physical keyboard or
+touchpad. If Hyprbars is loaded, it checks that feature settings survive reloads.
+Test candidate Hyprland both without plugins and with matching official plugins.
+Check `hyprctl configerrors` and the guest journal after each run. Inject a broken
+feature once to confirm that configuration errors remain visible.
+
+Keep physical GPU, touchpad, multi-monitor scaling, and disabled dynamic-cursor
+plugin checks separate. Passing Sim proves the tested revision, not compatibility
+with an unreleased revision.
+
 ## Keyboard Bindings
 
 These are largely assigned within

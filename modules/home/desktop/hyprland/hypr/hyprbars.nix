@@ -28,6 +28,8 @@ in {
       # lua
       ''
         local stylix = require("generated.stylix")
+        hl.plugin.load(${toJSON hyprbars})
+        local hyprbars = hl.plugin.hyprbars
 
         local function button(icon, size, command)
           hyprbars.add_button({
@@ -66,15 +68,8 @@ in {
           button("", 17, "hypr-togglefloating")
         end
 
-        local function load_and_configure_hyprbars()
-          hl.exec_cmd("hyprctl plugin load ${hyprbars}")
-          hl.timer(configure_hyprbars, { timeout = 500, type = "oneshot" })
-        end
-
         if hyprbars and hyprbars.add_button then
           configure_hyprbars()
-        else
-          hl.on("hyprland.start", load_and_configure_hyprbars)
         end
 
         util.exec("ESCAPE", "hypr-toggletitlebars", { non_consuming = true, long_press = true })

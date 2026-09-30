@@ -1,9 +1,10 @@
+local util = require("lib.util")
 local M = {}
 
 function M.apply(_, _)
 	local function move_scrolling_column(command)
-		local ws = hl.get_active_workspace()
-		local layout = ws and (ws.tiled_layout or ws.layout)
+		local ws = util.active_workspace()
+		local layout = ws and ws.tiled_layout
 
 		if layout == "scrolling" and hl.get_active_window() then
 			hl.dispatch(hl.dsp.layout(command))

@@ -29,7 +29,10 @@ _: {
 
   programs.stylua = {
     enable = true;
-    includes = ["modules/home/desktop/hyprland/lua/**/*.lua"];
+    includes = [
+      "modules/home/desktop/hyprland/lua/**/*.lua"
+      "modules/home/desktop/hyprland/test.lua"
+    ];
   };
 
   programs.yamlfmt = {

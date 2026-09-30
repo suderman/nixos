@@ -44,6 +44,23 @@
   wayland.windowManager.hyprland.lua.features.waybar =
     # lua
     ''
+      local function refresh_layout()
+        hl.exec_cmd("pkill -RTMIN+8 waybar")
+      end
+      local function refresh_windows()
+        hl.exec_cmd("pkill -RTMIN+9 waybar")
+      end
+      hl.on("config.props_refreshed", refresh_layout)
+      for _, event in ipairs({ "workspace.active", "workspace.special_active", "monitor.focused", "config.reloaded" }) do
+        hl.on(event, function()
+          refresh_layout()
+          refresh_windows()
+        end)
+      end
+      for _, event in ipairs({ "window.active", "window.open", "window.close", "window.fullscreen", "window.move_to_workspace" }) do
+        hl.on(event, refresh_windows)
+      end
+
       hl.layer_rule({
         name = "waybar-blur",
         match = { namespace = "^waybar$" },

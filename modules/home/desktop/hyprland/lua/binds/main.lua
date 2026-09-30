@@ -9,52 +9,15 @@ function M.apply(_, _)
 		k = { dir = "u", x = 0, y = -40 },
 		l = { dir = "r", x = 40, y = 0 },
 	}
-	local layout_state = {}
-
-	-- Hyprland's runtime workspace rule updates do not always reflect back
-	-- immediately in activeworkspace JSON, so keep a tiny per-workspace cache
-	-- for layout cycling binds.
 	local function active_layout()
-		local ws = hl.get_active_workspace()
-		if not ws then
-			return nil
-		end
-
-		return ws.tiled_layout or ws.layout
+		local ws = util.active_workspace()
+		return ws and ws.tiled_layout
 	end
 
 	-- Workspace cycling intentionally uses open-workspace selectors (e+/-1)
 	-- so the old "step through existing or empty" behavior is preserved.
 	local function cycle_workspace(direction)
 		hl.dispatch(hl.dsp.focus({ workspace = direction == "prev" and "e-1" or "e+1" }))
-	end
-
-	local function cycle_layout(direction)
-		local ws = hl.get_active_workspace()
-		if not ws then
-			return
-		end
-
-		local layouts = { "dwindle", "master", "scrolling", "monocle" }
-		local current = layout_state[ws.id] or ws.tiled_layout or ws.layout or "dwindle"
-		local idx = 1
-
-		for i, layout in ipairs(layouts) do
-			if layout == current then
-				idx = i
-				break
-			end
-		end
-
-		if direction == "prev" then
-			idx = ((idx - 2) % #layouts) + 1
-		else
-			idx = (idx % #layouts) + 1
-		end
-
-		layout_state[ws.id] = layouts[idx]
-		hl.workspace_rule({ workspace = tostring(ws.id), layout = layouts[idx] })
-		hl.exec_cmd("pkill -RTMIN+8 waybar")
 	end
 
 	-- Respect each layout's own idea of "next" / "previous".
@@ -166,10 +129,10 @@ function M.apply(_, _)
 		cycle_window("next")
 	end, { repeating = true })
 	hl.bind("SUPER + SLASH", function()
-		cycle_layout("next")
+		util.cycle_layout("next")
 	end)
 	hl.bind("SUPER + ALT + SLASH", function()
-		cycle_layout("prev")
+		util.cycle_layout("prev")
 	end)
 
 	hl.bind("SUPER + I", function()

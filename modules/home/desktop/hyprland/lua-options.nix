@@ -8,7 +8,7 @@
   hostName = osConfig.networking.hostName or config.networking.hostName or "default";
 in {
   options.wayland.windowManager.hyprland.lua = {
-    enable = mkEnableOption "direct Hyprland Lua configuration";
+    enable = mkEnableOption "direct Hyprland Lua configuration" // {default = true;};
 
     host = mkOption {
       type = types.str;

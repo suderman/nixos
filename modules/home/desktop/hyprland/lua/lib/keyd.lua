@@ -87,7 +87,7 @@ function M.apply(keyd_bin, window_rules, layer_rules)
 		for _, entry in ipairs(layer_rules or {}) do
 			local normalized_section = normalize_glob(entry.section, normalize_class)
 
-			for namespace in pairs(active_layers) do
+			for _, namespace in pairs(active_layers) do
 				if matches(namespace, normalized_section) then
 					merge_into(merged, entry.bindings)
 					break
@@ -165,47 +165,40 @@ function M.apply(keyd_bin, window_rules, layer_rules)
 		reapply()
 	end
 
-	local function add_layer(namespace)
-		-- Hyprland 0.55+ passes a LayerSurface object here, not the legacy
-		-- raw namespace string from the old IPC event stream.
-		local layer = normalize_class(namespace and namespace.namespace or "")
-		if active_layers[layer] then
-			return
-		end
-
-		active_layers[layer] = true
+	local function add_layer(layer)
+		active_layers[layer.address] = normalize_class(layer.namespace)
 		reapply()
 	end
 
-	local function remove_layer(namespace)
-		-- Keep the same extraction path for close events so open/close track the
-		-- same normalized namespace key in active_layers.
-		local layer = normalize_class(namespace and namespace.namespace or "")
-		if not active_layers[layer] then
-			return
-		end
-
-		active_layers[layer] = nil
+	local function remove_layer(layer)
+		active_layers[layer.address] = nil
 		reapply()
 	end
 
-	hl.on("hyprland.start", function()
+	local function restore_context()
+		active_layers = {}
+		for _, layer in ipairs(hl.get_layers()) do
+			if layer.mapped then
+				active_layers[layer.address] = normalize_class(layer.namespace)
+			end
+		end
 		set_active_window(hl.get_active_window())
 		reapply()
+	end
+
+	hl.on("hyprland.start", restore_context)
+	hl.on("config.reloaded", restore_context)
+	hl.on("window.title", function()
+		set_active_window(hl.get_active_window())
 	end)
 
 	hl.on("window.active", function(window)
 		set_active_window(window)
 	end)
 
-	-- Lua mode uses layer.opened / layer.closed and passes LayerSurface.
-	hl.on("layer.opened", function(namespace)
-		add_layer(namespace)
-	end)
-
-	hl.on("layer.closed", function(namespace)
-		remove_layer(namespace)
-	end)
+	-- Track surface addresses, not namespaces: two monitors can share a layer.
+	hl.on("layer.opened", add_layer)
+	hl.on("layer.closed", remove_layer)
 end
 
 return M

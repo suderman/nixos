@@ -2,14 +2,15 @@
 {
   config,
   lib,
+  options,
   pkgs,
   ...
 }: let
   cfg = config.programs.bluetuith;
-  inherit (lib) mkIf options;
+  inherit (lib) mkIf mkEnableOption optionalAttrs;
 in {
   disabledModules = ["programs/bluetuith.nix"];
-  options.programs.bluetuith.enable = options.mkEnableOption "bluetuith";
+  options.programs.bluetuith.enable = mkEnableOption "bluetuith";
   config = mkIf cfg.enable {
     home.packages = [pkgs.bluetuith];
 
@@ -28,9 +29,10 @@ in {
       };
     };
 
-    wayland.windowManager.hyprland.settings.bind = [
-      # shift+media to manage bluetooth connections
-      "shift, XF86AudioMedia, exec, export addr=$(bluetoothctl devices | rofi-toggle -dmenu | cut -d' ' -f2); bluetoothctl unblock $addr; bluetoothctl connect $addr"
-    ];
+    wayland.windowManager.hyprland = optionalAttrs (options.wayland.windowManager.hyprland ? lua) {
+      lua.features.bluetuith = ''
+        util.exec("SHIFT + XF86AudioMedia", "export addr=$(bluetoothctl devices | rofi-toggle -dmenu | cut -d' ' -f2); bluetoothctl unblock $addr; bluetoothctl connect $addr")
+      '';
+    };
   };
 }

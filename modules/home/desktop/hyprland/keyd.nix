@@ -12,7 +12,8 @@ in {
   services.keyd = {
     enable = true;
     systemdTarget = config.wayland.systemd.target;
-    mapper.enable = lib.mkDefault true;
+    # Lua owns window and layer mappings. A second mapper would reset them.
+    mapper.enable = lib.mkDefault false;
     windows = {
       "*" = {
         # Map meta a/z to ctrl a/z
@@ -33,30 +34,15 @@ in {
   };
 
   wayland.windowManager.hyprland.lua.features.keyd = let
-    inherit (builtins) attrNames toJSON;
-    inherit (lib) concatMapStringsSep getExe';
-    toLuaBindings = bindings:
-      if (attrNames bindings) == []
-      then "{}"
-      else
-        "{\n"
-        + concatMapStringsSep "\n" (name: "  [${toJSON name}] = ${toJSON bindings.${name}},") (attrNames bindings)
-        + "\n}";
+    inherit (lib) getExe';
+    toLua = lib.generators.toLua {};
     toLuaRules = rules:
-      if (attrNames rules) == []
-      then "{}"
-      else
-        "{\n"
-        + lib.concatMapStringsSep "\n" (
-          name: "  { section = ${toJSON name}, bindings = ${toLuaBindings rules.${name}} },"
-        )
-        (attrNames rules)
-        + "\n}";
+      toLua (lib.mapAttrsToList (section: bindings: {inherit section bindings;}) rules);
   in
     # lua
     ''
       require("lib.keyd").apply(
-        ${toJSON (getExe' pkgs.keyd "keyd")},
+        ${toLua (getExe' pkgs.keyd "keyd")},
         ${toLuaRules expandedWindows},
         ${toLuaRules expandedLayers}
       )

@@ -6,27 +6,15 @@
   ...
 }: let
   cfg = config.wayland.windowManager.hyprland;
-  inherit (lib) concatMapStringsSep listToAttrs mkIf nameValuePair optionalString;
-  inherit (builtins) attrNames toJSON;
-
-  toLuaList = values:
-    if values == []
-    then "{}"
-    else "{\n${concatMapStringsSep "\n" (value: "  ${toJSON value},") values}\n}";
-
-  toLuaAttrs = attrs:
-    if (attrNames attrs) == []
-    then "{}"
-    else
-      "{\n"
-      + concatMapStringsSep "\n" (name: "  ${name} = ${toJSON attrs.${name}},") (attrNames attrs)
-      + "\n}";
+  inherit (lib) listToAttrs mkIf nameValuePair;
+  inherit (builtins) attrNames;
+  toLua = lib.generators.toLua {};
 
   generatedFeatureFiles = let
     # Render inline per-feature Lua snippets into standard modules that expose
     # `apply(host, features)`. This keeps feature ownership in the Nix module
     # while still letting Hyprland load each feature independently.
-    featureModule = _name: body: ''
+    featureModule = body: ''
       local util = require("lib.util")
       local M = {}
       function M.apply(_, _)
@@ -37,87 +25,29 @@
   in
     listToAttrs (map (name:
       nameValuePair ".config/hypr/features/${name}.lua" {
-        text = featureModule name cfg.lua.features.${name};
+        text = featureModule cfg.lua.features.${name};
       }) (attrNames cfg.lua.features));
 
   # Deterministic feature load order keeps runtime behavior predictable when
   # several modules contribute binds or rules.
   generatedFeatureList = ''
-    return ${toLuaList (attrNames cfg.lua.features)}
+    return ${toLua (attrNames cfg.lua.features)}
   '';
 
   # Runtime values shared by the Lua loader. Keep this as plain data so the
   # shared Lua files can stay boring and host-agnostic.
-  generatedFeatures = let
-    waybarWatcher = pkgs.self.mkScript {
-      path = [pkgs.socat pkgs.procps];
-      text =
-        # bash
-        ''
-          handle() {
-            case $1 in
-            workspacev2\>\>*)
-              pkill -RTMIN+8 waybar
-              ;;
-            esac
-          }
-          socat -U - UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock | while read -r line; do handle "$line"; done
-        '';
-    };
-  in
-    # lua
-    ''
-      return {
-        exec_once = ${toLuaList (
-        [
-          "${pkgs.dbus}/bin/dbus-update-activation-environment --systemd DISPLAY HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY XDG_CURRENT_DESKTOP && systemctl --user stop hyprland-session.target && systemctl --user start hyprland-session.target"
-          "${waybarWatcher}"
-        ]
-        ++ lib.optional cfg.enablePlugins "hyprctl plugin load ${perSystem.hypr-dynamic-cursors.default}/lib/libhypr-dynamic-cursors.so"
-      )},
-        exec = ${toLuaList [
-        "pkill -RTMIN+8 waybar"
-        "chromium --no-startup-window"
-        "chromium-agent --no-startup-window"
-      ]},
-        plugins = {
-          dynamic_cursors = {
-            enabled = ${
-        if cfg.enablePlugins
-        then "true"
-        else "false"
-      },
-            path = ${
-        if cfg.enablePlugins
-        then toJSON "${perSystem.hypr-dynamic-cursors.default}/lib/libhypr-dynamic-cursors.so"
-        else "nil"
-      },
-          },
-        },
-      }
-    '';
+  generatedFeatures = "return ${toLua {
+    exec_once = [
+      "chromium --no-startup-window"
+      "chromium-agent --no-startup-window"
+    ];
+  }}";
 
-  # Host-specific monitor/env/startup overrides selected from Home Manager.
-  generatedHost = let
-    toLuaMonitors = monitors:
-      if monitors == []
-      then "{}"
-      else
-        "{\n"
-        + concatMapStringsSep "\n" (
-          monitor: "  { output = ${toJSON monitor.output}, mode = ${toJSON monitor.mode}, position = ${toJSON monitor.position}, scale = ${toJSON monitor.scale}${optionalString monitor.disabled ", disabled = true"} },"
-        )
-        monitors
-        + "\n}";
-  in ''
-    return {
-      name = ${toJSON cfg.lua.host},
-      rounding = ${toJSON cfg.lua.rounding},
-      monitors = ${toLuaMonitors cfg.lua.monitors},
-      env = ${toLuaAttrs cfg.lua.env},
-      exec_once = ${toLuaList cfg.lua.execOnce},
-    }
-  '';
+  generatedHost = "return ${toLua {
+    name = cfg.lua.host;
+    inherit (cfg.lua) rounding monitors env;
+    exec_once = cfg.lua.execOnce;
+  }}";
 
   # Convert stylix colors from nix to lua variables
   stylixColor = name: let
@@ -166,12 +96,14 @@
   '';
 in {
   config = mkIf cfg.lua.enable {
-    # Hyprland chooses Lua mode at compositor startup if hyprland.lua exists,
-    # so keep this loader as a real Home Manager file rather than a writable
-    # local-store copy.
+    wayland.windowManager.hyprland = {
+      configType = "lua";
+      extraConfig = builtins.readFile ./lua/hyprland.lua;
+      settings."plugin.load" = lib.mkIf cfg.enablePlugins "${perSystem.hypr-dynamic-cursors.default}/lib/libhypr-dynamic-cursors.so";
+    };
+
     home.file =
       {
-        ".config/hypr/hyprland.lua".source = ./lua/hyprland.lua;
         ".config/hypr/lib/util.lua".source = ./lua/lib/util.lua;
         ".config/hypr/conf/session.lua".source = ./lua/conf/session.lua;
         ".config/hypr/conf/look.lua".source = ./lua/conf/look.lua;

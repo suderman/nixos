@@ -18,6 +18,7 @@
     hyprpicker
     jq
     libnotify
+    procps
     socat
     wl-clipboard
   ];

@@ -27,10 +27,6 @@ function M.apply(host, features)
 			hl.dispatch(hl.dsp.exec_cmd(command))
 		end
 
-		for _, command in ipairs(features.exec or {}) do
-			hl.dispatch(hl.dsp.exec_cmd(command))
-		end
-
 		for _, command in ipairs(host.exec_once or {}) do
 			hl.dispatch(hl.dsp.exec_cmd(command))
 		end
