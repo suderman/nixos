@@ -21,11 +21,7 @@
   helperPortFor = cfg: user: profile: deriveServicePort "camofox-vnc-helper" profile (cfg.helperBasePort + user.home.portOffset);
 in {
   identityRotation.verificationCommands = lib.concatMapStrings (user: let
-    hermesProfiles =
-      if user.services.hermes-agent.enable
-      then user.lib.hermes-agent.localProfiles
-      else [];
-    profiles = lib.unique (user.services.camofox-browser.profiles ++ hermesProfiles);
+    profiles = lib.unique user.services.camofox-browser.profiles;
     runDir = user.services.camofox-browser.runDir;
     seed = "camofox:${user.home.username}:${config.networking.hostName}";
   in
@@ -39,11 +35,7 @@ in {
   services.traefik.dynamicConfigOptions.http.middlewares = lib.mkMerge [
     (lib.listToAttrs (
       lib.concatMap (user: let
-        hermesProfiles =
-          if user.services.hermes-agent.enable
-          then user.lib.hermes-agent.localProfiles
-          else [];
-        profiles = lib.unique (user.services.camofox-browser.profiles ++ hermesProfiles);
+        profiles = lib.unique user.services.camofox-browser.profiles;
         cfg = user.services.camofox-browser;
       in
         map (profile: {
@@ -68,11 +60,7 @@ in {
 
     perUser = user: let
       inherit (user.home) username;
-      hermesProfiles =
-        if user.services.hermes-agent.enable
-        then user.lib.hermes-agent.localProfiles
-        else [];
-      profiles = lib.unique (user.services.camofox-browser.profiles ++ hermesProfiles);
+      profiles = lib.unique user.services.camofox-browser.profiles;
       runDir = user.services.camofox-browser.runDir;
       seed = "camofox:${user.home.username}:${config.networking.hostName}";
     in
@@ -117,11 +105,7 @@ in {
     lib.concatMap (
       user: let
         inherit (config.networking) hostName;
-        hermesProfiles =
-          if user.services.hermes-agent.enable
-          then user.lib.hermes-agent.localProfiles
-          else [];
-        profiles = lib.unique (user.services.camofox-browser.profiles ++ hermesProfiles);
+        profiles = lib.unique user.services.camofox-browser.profiles;
         cfg = user.services.camofox-browser;
         apiPortFor = profile: deriveServicePort "camofox" profile (cfg.apiBasePort + user.home.portOffset);
         vncPortFor = profile: deriveServicePort "camofox-vnc" profile (cfg.vncBasePort + user.home.portOffset);
@@ -142,11 +126,7 @@ in {
   services.traefik.dynamicConfigOptions.http.services = lib.mkMerge [
     (lib.listToAttrs (
       lib.concatMap (user: let
-        hermesProfiles =
-          if user.services.hermes-agent.enable
-          then user.lib.hermes-agent.localProfiles
-          else [];
-        profiles = lib.unique (user.services.camofox-browser.profiles ++ hermesProfiles);
+        profiles = lib.unique user.services.camofox-browser.profiles;
         cfg = user.services.camofox-browser;
       in
         lib.concatMap (profile: [
@@ -171,11 +151,7 @@ in {
     (lib.listToAttrs (
       lib.concatMap (user: let
         inherit (config.networking) hostName;
-        hermesProfiles =
-          if user.services.hermes-agent.enable
-          then user.lib.hermes-agent.localProfiles
-          else [];
-        profiles = lib.unique (user.services.camofox-browser.profiles ++ hermesProfiles);
+        profiles = lib.unique user.services.camofox-browser.profiles;
         cfg = user.services.camofox-browser;
         hostFor = profile: "${profile}.${cfg.name}.${hostName}";
       in

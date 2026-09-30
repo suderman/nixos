@@ -67,7 +67,12 @@
   };
 in {
   # Keep the complete curated configuration as one writable Git checkout.
-  persist.storage.directories = [".agents"];
+  persist.storage.directories = [
+    ".agents"
+    # Retain the retired fleet and Desktop homes for rollback.
+    ".local/share/hermes"
+    ".local/share/hermes-desktop"
+  ];
 
   home.activation.agentConfigurationCheckout = lib.hm.dag.entryAfter ["writeBoundary"] ''
     $DRY_RUN_CMD ${lib.getExe agentConfigurationCheckout}
@@ -85,131 +90,7 @@ in {
     taskDropZones.enable = true;
   };
 
-  # Set my API keys and preferred models for hermes agent
-  services.hermes-agent = {
-    apiKeys = ./apikeys-env.age;
-    models = {
-      minimax = extra:
-        {
-          provider = "minimax";
-          model = "MiniMax-M3";
-          base_url = "https://api.minimax.io/anthropic";
-          api_key = "\${MINIMAX_API_KEY}";
-        }
-        // extra;
-      gptsol = extra:
-        {
-          provider = "custom";
-          model = "gpt-5.6-sol";
-          base_url = "https://codex-lb.kit/v1";
-          api_key = "\${CODEX_LB_API_KEY}";
-          api_mode = "chat_completions";
-        }
-        // extra;
-      gptterra = extra:
-        {
-          provider = "custom";
-          model = "gpt-5.6-terra";
-          base_url = "https://codex-lb.kit/v1";
-          api_key = "\${CODEX_LB_API_KEY}";
-          api_mode = "chat_completions";
-        }
-        // extra;
-      gptluna = extra:
-        {
-          provider = "custom";
-          model = "gpt-5.6-luna";
-          base_url = "https://codex-lb.kit/v1";
-          api_key = "\${CODEX_LB_API_KEY}";
-          api_mode = "chat_completions";
-        }
-        // extra;
-    };
-
-    # Shared configuration
-    config = let
-      inherit (config.services.hermes-agent.models) minimax gptluna gptterra gptsol;
-    in {
-      model = {
-        inherit (gptluna {}) provider base_url api_key;
-        default = (gptluna {}).model;
-      };
-      auxiliary = {
-        # Image analysis (vision_analyze tool + browser screenshots)
-        vision = gptluna {
-          timeout = 120;
-          download_timeout = 30;
-        };
-
-        # Context compression timeout
-        compression = gptluna {
-          timeout = 120;
-        };
-
-        # Web page summarization + browser page text extraction
-        web_extract = gptluna {
-          timeout = 360;
-        };
-
-        # Smart command-approval classification
-        approval = gptluna {
-          timeout = 30;
-        };
-
-        # Past session summarization
-        session_search = gptluna {
-          timeout = 30;
-          max_concurrency = 3;
-        };
-
-        # Skill search and discovery
-        skills_hub = gptluna {
-          timeout = 30;
-        };
-
-        # MCP tool dispatch
-        mcp = gptluna {
-          timeout = 30;
-        };
-
-        # Session title summaries
-        title_generation = gptluna {
-          timeout = 30;
-        };
-
-        # Prune and tend to my skills garden
-        curator = gptluna {
-          timeout = 600;
-        };
-
-        # Before session disappears, decide what should be remembered
-        flush_memories = gptluna {
-          timeout = 30;
-        };
-
-        # Kanban triage specifier
-        triage_specifier = gptluna {
-          timeout = 120;
-        };
-      };
-
-      # Enable tools web_search and understand_image
-      mcp_servers = {
-        minimax = {
-          command = "uvx";
-          args = ["minimax-coding-plan-mcp" "-y"];
-          env = {
-            MINIMAX_API_KEY = (minimax {}).api_key;
-            MINIMAX_API_HOST = "https://api.minimax.io";
-          };
-          tools = {
-            prompts = false;
-            resources = false;
-          };
-        };
-      };
-    };
-  };
+  programs.hermes.apiKeys = ./apikeys-env.age;
 
   # Self-hosted webapps running from my kit desktop
   xdg = lib.optionalAttrs config.desktop.enable {

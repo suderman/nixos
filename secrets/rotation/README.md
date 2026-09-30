@@ -123,7 +123,7 @@ operator survives the reboot; a locally administered host can be installed and
 rebooted manually before `verify-next HOST`. The all-next verifier refuses a
 mere switched generation by requiring `/run/booted-system` and
 `/run/current-system` to match. It then validates the next host key pair,
-machine ID, enabled MQTT, Hermes, Camofox, and Arr/SABnzbd derived values, and
+machine ID, enabled MQTT, Camofox, and Arr/SABnzbd derived values, and
 the required services. Only then does it write
 `/run/identity-rotation/next-verified`. Every activation first removes any old
 token, preventing replay after a rollback or failed switch.

@@ -108,10 +108,6 @@
     # <https://github.com/suderman/agents>
     agents.url = "github:suderman/agents";
 
-    # Hermes Agent
-    # <https://github.com/NousResearch/hermes-agent>
-    hermes-agent.url = "github:NousResearch/hermes-agent";
-
     # Speech-to-text
     # <https://github.com/cjpais/Handy>
     handy.url = "github:cjpais/Handy";

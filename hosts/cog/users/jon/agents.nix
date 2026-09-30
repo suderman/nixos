@@ -1,21 +1,3 @@
 _: {
-  services.hermes-agent = {
-    enable = true;
-    gateway.enable = true;
-    dashboard.enable = true;
-
-    # Agents and their configuration overrides
-    agents = {
-      cid = {
-        client = true;
-        homeAssistant = true;
-      };
-      june.client = "kit";
-      pax.client = "kit";
-      dot.client = "gem";
-    };
-  };
-
-  # Ensure uvx is available for mcp servers
-  toolchains.python.enable = true;
+  programs.hermes.enable = true;
 }

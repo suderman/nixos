@@ -1,26 +1,10 @@
 _: {
-  services.hermes-agent = {
-    enable = true;
-    gateway.enable = true;
-    dashboard.enable = true;
+  programs.hermes.enable = true;
 
-    # Agents and their configuration overrides
-    agents = {
-      june = {
-        client = true;
-        homeAssistant = true;
-      };
-      pax.client = true;
-      cid.client = "cog";
-      dot.client = "gem";
-    };
-  };
-
-  # Ensure uvx is available for mcp servers
-  toolchains.python.enable = true;
-
+  # Keep the existing browser instances independent of Hermes profiles.
   services.camofox-browser = {
     enable = true;
     enableVnc = true;
+    profiles = ["june" "pax"];
   };
 }

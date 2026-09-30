@@ -15,16 +15,7 @@
   deriveServicePort = service: profile: base:
     derivePort "${service}:${profile}" base;
 
-  hermesProfiles =
-    if config.services.hermes-agent.enable
-    then config.lib.hermes-agent.localProfiles
-    else [];
-  hermesDataDir =
-    if config.services.hermes-agent.enable
-    then config.lib.hermes-agent.dataDir
-    else "${config.home.homeDirectory}/.local/share/hermes";
-
-  profiles = lib.unique (cfg.profiles ++ hermesProfiles);
+  profiles = lib.unique cfg.profiles;
   camofoxEnabled = cfg.enable && profiles != [];
   runFileFor = profile: kind: "${cfg.runDir}/camofox-${profile}-${kind}";
   shareDirFor = profile: "${config.home.homeDirectory}/${cfg.dataDir}/${profile}";
@@ -285,19 +276,6 @@ in {
         }
       ])
       profiles;
-
-    tmpfiles.files =
-      map (profile: {
-        target = lib.removePrefix "${config.home.homeDirectory}/" "${hermesDataDir}/profiles/${profile}/.env.camofox";
-        mode = 600;
-        text = ''
-          CAMOFOX_URL=http://127.0.0.1:${toString (apiPortFor profile)}
-          CAMOFOX_API_KEY_FILE=${runFileFor profile "api-key"}
-          CAMOFOX_ACCESS_KEY_FILE=${runFileFor profile "access-key"}
-          CAMOFOX_ADMIN_KEY_FILE=${runFileFor profile "admin-key"}
-        '';
-      })
-      hermesProfiles;
 
     home.file.".local/bin/camofox-browser".source = "${cfg.package}/bin/camofox-browser";
 
