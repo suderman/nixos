@@ -44,7 +44,7 @@ in {
 
     home.activation.hermesAgentConfiguration = lib.hm.dag.entryAfter ["agentConfigurationCheckout"] ''
       $DRY_RUN_CMD env \
-        PATH=${lib.makeBinPath [pkgs.bash pkgs.coreutils]}:$PATH \
+        PATH=${lib.makeBinPath [pkgs.bash pkgs.coreutils pkgs.yq-go]}:$PATH \
         HERMES_HOME=${home} \
         ${config.home.homeDirectory}/.agents/hermes/bootstrap
     '';
