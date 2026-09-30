@@ -17,7 +17,7 @@
 - Build one host: `nix build .#nixosConfigurations.<host>.config.system.build.toplevel`
 - Full repo check: `nix flake check`
 - Build installer ISO: `nix build .#nixosConfigurations.iso.config.system.build.isoImage`
-- Non-interactive deploy equivalent: `nixos-rebuild --flake .#<host> [switch|boot|test|build|repl]`
+- Non-interactive deploy: `sudo -n nixos-rebuild switch --flake .#<host>`. The shared sudo rule grants `jon` passwordless `nixos-rebuild` on all current host configurations. Use the current host name when activating local changes.
 
 ## Generated / secret-backed workflows
 

@@ -14,8 +14,7 @@
   # Set a wallpaper (random if none specified)
   home.packages = let
     inherit (config.home) homeDirectory;
-    inherit (config.xdg.userDirs) extraConfig;
-    dir = "${extraConfig.APP or "${homeDirectory}/app"}/Wallpapers/Desktop";
+    dir = "${homeDirectory}/profile/wallpapers/desktop";
   in [
     (pkgs.self.mkScript {
       name = "wallpaper";
