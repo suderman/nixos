@@ -1,6 +1,7 @@
 # programs.pi-coding-agent.enable = true;
 {
   config,
+  flake,
   lib,
   perSystem,
   pkgs,
@@ -15,6 +16,55 @@
   taskDropArchive = "${taskDropRoot}/.pi-tasks";
   taskDropPromptRoot = "${config.home.homeDirectory}/.agents/pi/task-drop-prompts";
   herdrPackage = config.programs.herdr.package;
+
+  piStylixTheme = pkgs.writeShellApplication {
+    name = "pi-stylix-theme";
+    runtimeInputs = [pkgs.coreutils];
+    text = let
+      palette = config.lib.stylix.colors.withHashtag;
+      template = builtins.fromJSON (builtins.readFile "${flake.inputs.agents}/pi/themes/catppuccin-mocha.json");
+      theme = pkgs.writeText "pi-stylix-theme.json" (builtins.toJSON (template
+        // {
+          name = "stylix";
+          vars = {
+            bg = palette.base00;
+            panel = palette.base00;
+            panelAlt = palette.base00;
+            selected = palette.base01;
+            border = palette.base02;
+            accent = palette.base0D;
+            cyan = palette.base0C;
+            green = palette.base0B;
+            red = palette.base08;
+            yellow = palette.base0A;
+            orange = palette.base09;
+            purple = palette.base0E;
+            text = palette.base05;
+            muted = palette.base04;
+            dim = palette.base03;
+            toolSuccessBg = palette.base01;
+            toolErrorBg = palette.base01;
+          };
+          export = {
+            pageBg = "bg";
+            cardBg = "panel";
+            infoBg = "selected";
+          };
+        }));
+    in ''
+      target_dir="''${PI_CODING_AGENT_DIR:-${config.home.homeDirectory}/${agentDir}}/themes"
+      target="$target_dir/stylix.json"
+      if [[ ! -L "$target" && -f "$target" && -w "$target" ]] && cmp -s ${theme} "$target"; then
+        exit 0
+      fi
+      mkdir -p -- "$target_dir"
+      temporary="$(mktemp "$target.tmp.XXXXXX")"
+      trap 'rm -f -- "$temporary"' EXIT
+      cp -- ${theme} "$temporary"
+      chmod 0644 -- "$temporary"
+      mv -fT -- "$temporary" "$target"
+    '';
+  };
 
   # Pi owns one writable home. This wrapper only loads machine-provided secrets
   # and keeps supported third-party state overrides in their persistence roots.
@@ -212,6 +262,13 @@ in {
         XDG_STATE_HOME=${config.home.homeDirectory}/.local/state \
         ${config.home.homeDirectory}/.agents/pi/bootstrap
     '';
+
+    # Preserve writable Pi theme files; bootstrap leaves this generated entry alone.
+    home.activation.piStylixTheme = lib.mkIf config.stylix.enable (
+      lib.hm.dag.entryAfter ["piAgentConfiguration"] ''
+        $DRY_RUN_CMD ${lib.getExe piStylixTheme}
+      ''
+    );
 
     home.activation.piHerdrIntegration = lib.mkIf (config.programs.herdr.enable && herdrPackage != null) (
       lib.hm.dag.entryAfter ["piAgentConfiguration"] ''
