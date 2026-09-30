@@ -3,16 +3,17 @@
   lib,
   ...
 }: {
-  # Home Manager writes into synced directories during activation. Wait for their
+  # Home Manager writes into these directories during activation. Wait for their
   # persistent bind mounts, or those writes will be hidden when mounts appear.
   systemd.services = lib.mkMerge [
     (lib.mapAttrs'
       (username: user:
         lib.nameValuePair "home-manager-${username}" {
           unitConfig.RequiresMountsFor =
-            lib.mapAttrsToList
-            (_: directory: "${user.home.homeDirectory}/${directory.path}")
-            (lib.filterAttrs (_: directory: directory.enable && directory.sync && directory.persist != null) (user.home.directories or {}));
+            (lib.mapAttrsToList
+              (_: directory: "${user.home.homeDirectory}/${directory.path}")
+              (lib.filterAttrs (_: directory: directory.enable && directory.sync && directory.persist != null) (user.home.directories or {})))
+            ++ lib.optionals (user.programs.hermes.enable or false) ["${user.home.homeDirectory}/.hermes"];
         })
       (config.home-manager.users or {}))
 
