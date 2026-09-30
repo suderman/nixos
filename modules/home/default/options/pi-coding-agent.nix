@@ -66,7 +66,13 @@
     '';
   };
 
-  # Pi owns one writable home. This wrapper only loads machine-provided secrets
+  piDcpPackageFix = pkgs.writeShellApplication {
+    name = "pi-fix-dcp-package";
+    runtimeInputs = [pkgs.coreutils pkgs.jq];
+    text = builtins.readFile "${flake.inputs.agents}/pi/fix-dcp-package";
+  };
+
+  # Pi owns one writable home. This wrapper loads secrets, fixes package metadata,
   # and keeps supported third-party state overrides in their persistence roots.
   pi-init = pkgs.self.mkScript {
     name = "pi";
@@ -79,6 +85,7 @@
         PI_STATE_DIR="''${PI_STATE_DIR:-${config.home.homeDirectory}/${stateDir}}"
 
         export PI_CODING_AGENT_DIR="$PI_DIR"
+        ${lib.getExe piDcpPackageFix}
         if [[ -z "''${PI_CODING_AGENT_SESSION_DIR:-}" ]]; then
           session_key="$(pwd -P)"
           session_key="''${session_key#/}"
