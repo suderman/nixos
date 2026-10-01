@@ -1,11 +1,14 @@
 {
   flake,
   pkgs,
+  trustedCertificates ? [flake.networking.ca],
   ...
 }: let
   serverPin = flake.inputs.pins.default.github.camofox-browser;
   enginePin = flake.inputs.pins.default.fetchurl.camoufox;
   engineVersion = pkgs.lib.splitString "-" enginePin.version;
+  # Node 24 cleanup hooks abort when GC collects native SQLite objects (#65446).
+  nodejs = pkgs.nodejs_22;
   runtimeLibs = with pkgs; [
     stdenv.cc.cc.lib
     alsa-lib
@@ -29,7 +32,7 @@
     src = pkgs.fetchurl {
       inherit (enginePin) url sha256;
     };
-    nativeBuildInputs = [pkgs.unzip pkgs.patchelf];
+    nativeBuildInputs = [pkgs.unzip pkgs.patchelf pkgs.jq];
     buildInputs = runtimeLibs;
     dontUnpack = true;
     # Rewriting bundled libraries breaks libxul's dynamic initializers.
@@ -48,6 +51,11 @@
         version = builtins.head engineVersion;
         release = builtins.elemAt engineVersion 1;
       }}' > "$out/version.json"
+      # Firefox on Linux does not import the system CA bundle automatically.
+      jq --argjson certificates '${builtins.toJSON trustedCertificates}' \
+        '.policies.Certificates.Install = $certificates' \
+        "$out/distribution/policies.json" > "$out/distribution/policies.json.tmp"
+      mv "$out/distribution/policies.json.tmp" "$out/distribution/policies.json"
       runHook postInstall
     '';
   };
@@ -55,6 +63,7 @@ in
   pkgs.buildNpmPackage {
     pname = "camofox-browser";
     inherit (serverPin) version npmDepsHash;
+    inherit nodejs;
     src = pkgs.fetchFromGitHub {
       inherit (serverPin) owner repo rev hash;
     };
@@ -76,7 +85,7 @@ in
         ln -sfnT "${engine}" "$HOME/.cache/camoufox"
       '
     '';
-    passthru = {inherit engine;};
+    passthru = {inherit engine nodejs;};
     meta = {
       description = "Camofox REST server with a compatible, pinned Camoufox browser";
       homepage = "https://github.com/redf0x1/camofox-browser";

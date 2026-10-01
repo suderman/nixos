@@ -7,11 +7,13 @@ from pathlib import Path
 import re
 import signal
 import socket
+import ssl
 import subprocess
 import sys
 import tempfile
 import threading
 import time
+import urllib.error
 import urllib.request
 
 
@@ -31,6 +33,16 @@ with tempfile.TemporaryDirectory() as directory:
     fixture = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Page)
     threading.Thread(target=fixture.serve_forever, daemon=True).start()
     url = f"http://127.0.0.1:{fixture.server_port}"
+    tls_servers = []
+    for name in ("server", "untrusted"):
+        tls_server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Page)
+        tls = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        tls.load_cert_chain(
+            Path(sys.argv[2]) / f"{name}.crt", Path(sys.argv[2]) / f"{name}.key"
+        )
+        tls_server.socket = tls.wrap_socket(tls_server.socket, server_side=True)
+        threading.Thread(target=tls_server.serve_forever, daemon=True).start()
+        tls_servers.append(tls_server)
     with socket.socket() as reservation:
         reservation.bind(("127.0.0.1", 0))
         port = reservation.getsockname()[1]
@@ -108,6 +120,21 @@ with tempfile.TemporaryDirectory() as directory:
             )
             assert stored["result"] is True, stored
             api("DELETE", "/sessions/package-check")
+            trusted_url = f"https://127.0.0.1:{tls_servers[0].server_port}"
+            tab = api("POST", "/tabs", identity | {"url": trusted_url})["tabId"]
+            assert (
+                "Browser check"
+                in api("GET", f"/tabs/{tab}/snapshot?userId=package-check")["snapshot"]
+            )
+            untrusted_url = f"https://127.0.0.1:{tls_servers[1].server_port}"
+            try:
+                api("POST", "/tabs", identity | {"url": untrusted_url})
+            except urllib.error.HTTPError as error:
+                assert "SEC_ERROR_UNKNOWN_ISSUER" in error.read().decode()
+            else:
+                raise AssertionError("Browser accepted an untrusted certificate")
+            api("DELETE", "/sessions/package-check")
+            print("Trusted HTTPS passed; untrusted HTTPS rejected")
             print(
                 "Pinned browser navigation, snapshot, click, and storage reopen passed"
             )
@@ -123,3 +150,5 @@ with tempfile.TemporaryDirectory() as directory:
                 os.killpg(server.pid, signal.SIGKILL)
                 server.wait()
             fixture.shutdown()
+            for tls_server in tls_servers:
+                tls_server.shutdown()
