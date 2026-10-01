@@ -33,7 +33,9 @@ in {
 
         local function button(icon, size, command)
           hyprbars.add_button({
-            bg_color = "rgba(00000000)",
+            -- Button colors are fixed by the plugin API. A dark neutral fill
+            -- keeps white hover glyphs readable in both appearance modes.
+            bg_color = "rgb(313244)",
             fg_color = "rgb(ffffff)",
             size = size,
             icon = icon,

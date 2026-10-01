@@ -37,6 +37,18 @@ registers their functions under `hl.plugin.<name>`. Configure Hyprbars when
 `hl.plugin.hyprbars` exists. A sleep cannot prove that a plugin is ready.
 Plugins must be built against the same Hyprland revision as the compositor.
 
+## Appearance and daily tools
+
+See [desktop appearance](../default/options/desktop-theme/README.md) for the
+prepared light/dark palettes, supported apps, and reload limits.
+
+- Super+Alt+Shift+T toggles appearance without a system activation.
+- Super+F1 searches live Hyprland and configured keyd shortcuts.
+- Super+Alt+Shift+U silences or resumes notifications; Waybar shows the mode.
+- Super+Print reads English screen text. Super+Shift+Print reads QR data into
+  the private clipboard without adding it to the configured Cliphist history.
+- Blezz retains the existing launcher and adds Appearance and Share entries.
+
 ## Checks and release testing
 
 From the repository root, after adding new source files to the Git index:

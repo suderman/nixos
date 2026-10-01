@@ -15,6 +15,7 @@
   };
 
   config = {
+    programs.desktop-theme.enable = lib.mkDefault true;
     wayland = {
       windowManager.hyprland = {
         enable = true;

@@ -44,6 +44,9 @@ in {
     dir(m, Media, audio-headphones)
     dir(i, Capture, camera)
     dir(t, Toggle, applications-system)
+    dir(a, Appearance, preferences-desktop-theme)
+    dir(s, Share, folder-publicshare)
+    act(h, Shortcuts ⌘F1, desktop-shortcuts, input-keyboard)
     act(r, run, rofi -show run)
 
     Programs:
@@ -72,9 +75,24 @@ in {
     Capture:
     act(i, Screenshot, bash -c "sleep 0.25 && printscreen image", camera)
     act(v, Screencast toggle, printscreen video, video)
+    act(t, Screen text ⌘Print, bash -c "sleep 0.25 && printscreen text", edit-copy)
+    act(q, QR to private clipboard ⌘⇧Print, bash -c "sleep 0.25 && printscreen qr", view-barcode-qr)
 
     Toggle:
     actReload(t, Title Bars, hypr-toggletitlebars, preferences-desktop)
+    actReload(n, Silence/resume notifications ⌘⌥⇧U, notification-mode toggle, notifications-disabled)
+    act(p, Presentation help: Waybar cup, notify-send "Presentation mode" "Click the cup in Waybar to inhibit automatic idle actions. Explicit lock and suspend still work.", video-display)
+
+    Appearance:
+    act(t, Toggle light/dark ⌘⌥⇧T, desktop-theme toggle, preferences-desktop-theme)
+    act(l, Light, desktop-theme light, weather-clear)
+    act(d, Dark, desktop-theme dark, weather-clear-night)
+    actReload(w, Random wallpaper, wallpaper, preferences-desktop-wallpaper)
+
+    Share:
+    act(l, LocalSend, localsend_app, folder-publicshare)
+    act(s, Screenshots, thunar "${config.xdg.userDirs.extraConfig.MEDIA or "${config.home.homeDirectory}/media"}/screenshots", camera)
+    act(v, Recordings, thunar "${config.xdg.userDirs.extraConfig.MEDIA or "${config.home.homeDirectory}/media"}/screencasts", video)
   '';
 
   # Use a real file for blezz to ease real-time tinkering

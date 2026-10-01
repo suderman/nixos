@@ -32,6 +32,7 @@ _: {
     includes = [
       "modules/home/desktop/hyprland/lua/**/*.lua"
       "modules/home/desktop/hyprland/test.lua"
+      "modules/home/desktop/default/options/desktop-theme/*.lua"
     ];
   };
 

@@ -76,7 +76,7 @@ function M.apply(_, _)
 		end
 	end
 
-	hl.bind("SUPER + SHIFT + Q", hl.dsp.exit())
+	util.bind("SUPER + SHIFT + Q", "Exit compositor", hl.dsp.exit())
 
 	util.exec("SUPER + RETURN", "kitty")
 	util.exec("SUPER + Y", "thunar")
@@ -88,66 +88,66 @@ function M.apply(_, _)
 	util.exec("SUPER + SHIFT + B", "chromium-browser --incognito")
 	util.exec("SUPER + ALT + B", "firefox")
 	util.exec("SUPER + ALT + SHIFT + B", "firefox --private-window")
-	util.exec("SUPER + ALT + SHIFT + T", "stylix-theme-toggle")
+	util.exec("SUPER + ALT + SHIFT + T", "desktop-theme toggle", { description = "Toggle light/dark appearance" })
 	util.exec("SUPER + CTRL + PERIOD", "1password")
 
-	hl.bind("SUPER + LEFT", function()
+	util.bind("SUPER + LEFT", "Previous workspace", function()
 		cycle_workspace("prev")
 	end)
-	hl.bind("SUPER + RIGHT", function()
+	util.bind("SUPER + RIGHT", "Next workspace", function()
 		cycle_workspace("next")
 	end)
-	hl.bind("SUPER + SEMICOLON", function()
+	util.bind("SUPER + SEMICOLON", "Previous workspace", function()
 		cycle_workspace("prev")
 	end)
-	hl.bind("SUPER + APOSTROPHE", function()
+	util.bind("SUPER + APOSTROPHE", "Next workspace", function()
 		cycle_workspace("next")
 	end)
-	hl.bind("SUPER + mouse_down", function()
+	util.bind("SUPER + mouse_down", "Previous workspace", function()
 		cycle_workspace("prev")
 	end)
-	hl.bind("SUPER + mouse_up", function()
+	util.bind("SUPER + mouse_up", "Next workspace", function()
 		cycle_workspace("next")
 	end)
-	hl.bind("SUPER + ALT + mouse_down", hl.dsp.layout("move -col"))
-	hl.bind("SUPER + ALT + mouse_up", hl.dsp.layout("move +col"))
+	util.bind("SUPER + ALT + mouse_down", "Previous scrolling column", hl.dsp.layout("move -col"))
+	util.bind("SUPER + ALT + mouse_up", "Next scrolling column", hl.dsp.layout("move +col"))
 
 	for i = 1, 9 do
 		util.workspace_bind(tostring(i), i)
 	end
 
-	hl.bind("SUPER + ALT + P", function()
+	util.bind("SUPER + ALT + P", "Previous workspace", function()
 		cycle_workspace("prev")
 	end)
-	hl.bind("SUPER + ALT + N", function()
+	util.bind("SUPER + ALT + N", "Next workspace", function()
 		cycle_workspace("next")
 	end)
-	hl.bind("SUPER + P", function()
+	util.bind("SUPER + P", "Previous window", function()
 		cycle_window("prev")
 	end, { repeating = true })
-	hl.bind("SUPER + N", function()
+	util.bind("SUPER + N", "Next window", function()
 		cycle_window("next")
 	end, { repeating = true })
-	hl.bind("SUPER + SLASH", function()
+	util.bind("SUPER + SLASH", "Next layout", function()
 		util.cycle_layout("next")
 	end)
-	hl.bind("SUPER + ALT + SLASH", function()
+	util.bind("SUPER + ALT + SLASH", "Previous layout", function()
 		util.cycle_layout("prev")
 	end)
 
-	hl.bind("SUPER + I", function()
+	util.bind("SUPER + I", "Tile or promote window", function()
 		tile_active(false)
 	end)
-	hl.bind("SUPER + ALT + I", function()
+	util.bind("SUPER + ALT + I", "Swap tiled split", function()
 		tile_active(true)
 	end)
-	hl.bind("SUPER + SHIFT + I", hl.dsp.window.cycle_next({ tiled = true }))
-	hl.bind("SUPER + ALT + M", hl.dsp.layout("addmaster"))
-	hl.bind("SUPER + ALT + SHIFT + M", hl.dsp.layout("removemaster"))
-	hl.bind("SUPER + W", hl.dsp.window.close())
-	hl.bind("SUPER + ALT + Q", hl.dsp.window.kill())
-	hl.bind("SUPER + U", hl.dsp.focus({ urgent_or_last = true }))
-	hl.bind("SUPER + BACKSLASH", hl.dsp.focus({ last = true }))
+	util.bind("SUPER + SHIFT + I", "Next tiled window", hl.dsp.window.cycle_next({ tiled = true }))
+	util.bind("SUPER + ALT + M", "Add master", hl.dsp.layout("addmaster"))
+	util.bind("SUPER + ALT + SHIFT + M", "Remove master", hl.dsp.layout("removemaster"))
+	util.bind("SUPER + W", "Close window", hl.dsp.window.close())
+	util.bind("SUPER + ALT + Q", "Force quit window", hl.dsp.window.kill())
+	util.bind("SUPER + U", "Focus urgent or last window", hl.dsp.focus({ urgent_or_last = true }))
+	util.bind("SUPER + BACKSLASH", "Focus last window", hl.dsp.focus({ last = true }))
 
 	util.exec("SUPER + TAB", "hypr-supertab")
 	util.exec("SUPER + ALT + TAB", "hypr-supertab next")
@@ -155,30 +155,39 @@ function M.apply(_, _)
 	util.exec("SUPER + M", "hypr-supertab mark")
 	util.exec("SUPER + M", "hypr-supertab clear", { long_press = true })
 
-	hl.bind("SUPER + ESCAPE", hl.dsp.workspace.toggle_special("special"))
+	util.bind("SUPER + ESCAPE", "Toggle special workspace", hl.dsp.workspace.toggle_special("special"))
 	util.exec("SUPER + ALT + ESCAPE", "hypr-togglespecial")
 
 	util.exec("SUPER + Q", "hypr-togglegrouporclose")
-	hl.bind("SUPER + COMMA", hl.dsp.group.prev())
-	hl.bind("SUPER + COMMA", hl.dsp.group.lock_active({ action = "lock" }))
-	hl.bind("SUPER + PERIOD", hl.dsp.group.next())
-	hl.bind("SUPER + PERIOD", hl.dsp.group.lock_active({ action = "lock" }))
-	hl.bind("SUPER + ALT + COMMA", hl.dsp.group.move_window({ forward = false }))
-	hl.bind("SUPER + ALT + COMMA", hl.dsp.group.lock_active({ action = "lock" }))
-	hl.bind("SUPER + ALT + PERIOD", hl.dsp.group.move_window({ forward = true }))
-	hl.bind("SUPER + ALT + PERIOD", hl.dsp.group.lock_active({ action = "lock" }))
+	util.bind("SUPER + COMMA", "Previous group window", hl.dsp.group.prev())
+	util.bind("SUPER + COMMA", "Lock group after selection", hl.dsp.group.lock_active({ action = "lock" }))
+	util.bind("SUPER + PERIOD", "Next group window", hl.dsp.group.next())
+	util.bind("SUPER + PERIOD", "Lock group after selection", hl.dsp.group.lock_active({ action = "lock" }))
+	util.bind("SUPER + ALT + COMMA", "Move window backward in group", hl.dsp.group.move_window({ forward = false }))
+	util.bind("SUPER + ALT + COMMA", "Lock group after selection", hl.dsp.group.lock_active({ action = "lock" }))
+	util.bind("SUPER + ALT + PERIOD", "Move window forward in group", hl.dsp.group.move_window({ forward = true }))
+	util.bind("SUPER + ALT + PERIOD", "Lock group after selection", hl.dsp.group.lock_active({ action = "lock" }))
 	util.exec("SUPER + ALT + mouse:272", "hypr-togglegrouporlock")
 	util.exec("SUPER + COMMA", "hypr-togglegrouporlock f", { long_press = true })
 	util.exec("SUPER + PERIOD", "hypr-togglegrouporlock b", { long_press = true })
 
-	hl.bind("SUPER + F", hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }))
-	hl.bind("SUPER + ALT + F", hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }))
-	hl.bind("SUPER + F", hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }), { long_press = true })
+	util.bind("SUPER + F", "Toggle maximized", hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }))
+	util.bind(
+		"SUPER + ALT + F",
+		"Toggle fullscreen",
+		hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" })
+	)
+	util.bind(
+		"SUPER + F",
+		"Toggle fullscreen",
+		hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }),
+		{ long_press = true }
+	)
 
-	hl.bind("SUPER + SHIFT + O", hl.dsp.window.cycle_next({ floating = true }))
-	hl.bind("SUPER + O", float_active)
+	util.bind("SUPER + SHIFT + O", "Next floating window", hl.dsp.window.cycle_next({ floating = true }))
+	util.bind("SUPER + O", "Float or unpin window", float_active)
 	util.exec("SUPER + ALT + O", "hypr-togglefullscreenorhidden")
-	hl.bind("SUPER + O", hl.dsp.window.pin(), { long_press = true })
+	util.bind("SUPER + O", "Pin floating window", hl.dsp.window.pin(), { long_press = true })
 
 	for i = 1, 9 do
 		util.exec("SUPER + SHIFT + " .. i, "hypr-resizefloating " .. i .. "0")
@@ -192,28 +201,48 @@ function M.apply(_, _)
 		)
 	end
 
-	hl.bind("SUPER + ALT + SHIFT + H", hl.dsp.layout("swapcol l"), { repeating = true })
-	hl.bind("SUPER + ALT + SHIFT + L", hl.dsp.layout("swapcol r"), { repeating = true })
-	hl.bind("SUPER + SHIFT + H", hl.dsp.window.resize({ x = -80, y = 0, relative = true }), { repeating = true })
-	hl.bind("SUPER + SHIFT + J", hl.dsp.window.resize({ x = 0, y = 80, relative = true }), { repeating = true })
-	hl.bind("SUPER + SHIFT + K", hl.dsp.window.resize({ x = 0, y = -80, relative = true }), { repeating = true })
-	hl.bind("SUPER + SHIFT + L", hl.dsp.window.resize({ x = 80, y = 0, relative = true }), { repeating = true })
-	hl.bind("SUPER + H", hl.dsp.focus({ direction = "left" }), { repeating = true })
-	hl.bind("SUPER + J", hl.dsp.focus({ direction = "down" }), { repeating = true })
-	hl.bind("SUPER + K", hl.dsp.focus({ direction = "up" }), { repeating = true })
-	hl.bind("SUPER + L", hl.dsp.focus({ direction = "right" }), { repeating = true })
+	util.bind("SUPER + ALT + SHIFT + H", "Swap column left", hl.dsp.layout("swapcol l"), { repeating = true })
+	util.bind("SUPER + ALT + SHIFT + L", "Swap column right", hl.dsp.layout("swapcol r"), { repeating = true })
+	util.bind(
+		"SUPER + SHIFT + H",
+		"Shrink window width",
+		hl.dsp.window.resize({ x = -80, y = 0, relative = true }),
+		{ repeating = true }
+	)
+	util.bind(
+		"SUPER + SHIFT + J",
+		"Grow window height",
+		hl.dsp.window.resize({ x = 0, y = 80, relative = true }),
+		{ repeating = true }
+	)
+	util.bind(
+		"SUPER + SHIFT + K",
+		"Shrink window height",
+		hl.dsp.window.resize({ x = 0, y = -80, relative = true }),
+		{ repeating = true }
+	)
+	util.bind(
+		"SUPER + SHIFT + L",
+		"Grow window width",
+		hl.dsp.window.resize({ x = 80, y = 0, relative = true }),
+		{ repeating = true }
+	)
+	util.bind("SUPER + H", "Focus left", hl.dsp.focus({ direction = "left" }), { repeating = true })
+	util.bind("SUPER + J", "Focus down", hl.dsp.focus({ direction = "down" }), { repeating = true })
+	util.bind("SUPER + K", "Focus up", hl.dsp.focus({ direction = "up" }), { repeating = true })
+	util.bind("SUPER + L", "Focus right", hl.dsp.focus({ direction = "right" }), { repeating = true })
 
-	hl.bind("SUPER + RETURN", float_active, { long_press = true })
-	hl.bind("SUPER + Y", float_active, { long_press = true })
-	hl.bind("SUPER + E", float_active, { long_press = true })
-	hl.bind("SUPER + B", float_active, { long_press = true })
-	hl.bind("SUPER + ALT + RETURN", float_active, { long_press = true })
-	hl.bind("SUPER + ALT + Y", float_active, { long_press = true })
-	hl.bind("SUPER + ALT + E", float_active, { long_press = true })
-	hl.bind("SUPER + ALT + B", float_active, { long_press = true })
+	util.bind("SUPER + RETURN", "Float or unpin window", float_active, { long_press = true })
+	util.bind("SUPER + Y", "Float or unpin window", float_active, { long_press = true })
+	util.bind("SUPER + E", "Float or unpin window", float_active, { long_press = true })
+	util.bind("SUPER + B", "Float or unpin window", float_active, { long_press = true })
+	util.bind("SUPER + ALT + RETURN", "Float or unpin window", float_active, { long_press = true })
+	util.bind("SUPER + ALT + Y", "Float or unpin window", float_active, { long_press = true })
+	util.bind("SUPER + ALT + E", "Float or unpin window", float_active, { long_press = true })
+	util.bind("SUPER + ALT + B", "Float or unpin window", float_active, { long_press = true })
 
-	hl.bind("SUPER + mouse:272", hl.dsp.window.drag(), { mouse = true })
-	hl.bind("SUPER + mouse:273", hl.dsp.window.resize(), { mouse = true })
+	util.bind("SUPER + mouse:272", "Drag window", hl.dsp.window.drag(), { mouse = true })
+	util.bind("SUPER + mouse:273", "Resize window", hl.dsp.window.resize(), { mouse = true })
 end
 
 return M

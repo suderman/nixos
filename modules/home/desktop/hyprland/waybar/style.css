@@ -17,7 +17,7 @@
 window#waybar {
   background: alpha(@base00, 0.8);
   border-radius: 10px 10px 0 0;
-  box-shadow: 0px -10px #000000;
+  box-shadow: 0px -10px @base00;
 }
 
 tooltip {
@@ -45,11 +45,11 @@ tooltip {
 }
 
 #workspaces .active .workspace-label {
-  color: @base0E;
+  color: @base0D;
 }
 
 #workspaces button:hover .workspace-label {
-  color: alpha(@base0E, 0.5);
+  color: alpha(@base0D, 0.5);
 }
 
 #layouts {
@@ -64,11 +64,11 @@ tooltip {
 }
 
 #layouts .text-button:hover {
-  color: alpha(@base0E, 0.5);
+  color: alpha(@base0D, 0.5);
 }
 
 #layouts .active {
-  color: @base0E;
+  color: @base0D;
 }
 
 #custom-windows.active {
@@ -154,9 +154,18 @@ tooltip {
   color: @base0B;
 }
 
-.modules-right #idle_inhibitor {
+.modules-right #idle_inhibitor,
+.modules-right #custom-notifications {
   padding-left: 10px;
   padding-right: 10px;
+}
+
+#idle_inhibitor.activated {
+  color: @base0D;
+}
+
+#custom-notifications.silenced {
+  color: @base09;
 }
 
 .modules-right #custom-power {

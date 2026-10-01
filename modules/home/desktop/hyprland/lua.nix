@@ -105,6 +105,15 @@ in {
     home.file =
       {
         ".config/hypr/lib/util.lua".source = ./lua/lib/util.lua;
+        ".config/hypr/lib/appearance.lua".source = ./lua/lib/appearance.lua;
+        ".config/hypr/generated/appearance.lua".text = "return ${toLua {
+          enabled = config.programs.desktop-theme.enable;
+          assets =
+            if config.programs.desktop-theme.enable
+            then toString config.programs.desktop-theme.assets
+            else "";
+          default_mode = config.programs.desktop-theme.defaultMode;
+        }}";
         ".config/hypr/conf/session.lua".source = ./lua/conf/session.lua;
         ".config/hypr/conf/look.lua".source = ./lua/conf/look.lua;
         ".config/hypr/conf/input.lua".source = ./lua/conf/input.lua;

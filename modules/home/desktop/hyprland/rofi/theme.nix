@@ -5,22 +5,26 @@
   ...
 }: let
   l = v: lib.mkDefault (config.lib.formats.rasi.mkLiteral v);
+  colors = config.lib.stylix.colors;
 in {
   home.packages = [
     pkgs.candy-icons
     pkgs.papirus-icon-theme
   ];
 
+  stylix.targets.rofi.enable = lib.mkIf config.programs.desktop-theme.enable false;
+
   programs.rofi = {
+    font = lib.mkDefault "${config.stylix.fonts.monospace.name} ${toString config.stylix.fonts.sizes.popups}";
     theme = {
       "*" = {
-        bg0 = l "#252034E6";
-        bg1 = l "#3C3B5480";
-        bg2 = l "#01fdfeCC";
-        fg0 = l "#DEDEDE";
-        fg1 = l "#EEFAF2";
-        fg2 = l "#252034";
-        fg3 = l "#70788080";
+        bg0 = l "#${colors.base00}F2";
+        bg1 = l "#${colors.base02}80";
+        bg2 = l "#${colors.base0D}";
+        fg0 = l "#${colors.base05}";
+        fg1 = l "#${colors.base06}";
+        fg2 = l "#${colors.base00}";
+        fg3 = l "#${colors.base04}";
         background-color = l "transparent";
         margin = 0;
         padding = 0;
@@ -44,6 +48,11 @@ in {
       };
 
       "element selected normal" = {
+        background-color = l "@bg2";
+        text-color = l "@fg2";
+      };
+
+      "button selected" = {
         background-color = l "@bg2";
         text-color = l "@fg2";
       };
@@ -106,6 +115,10 @@ in {
       };
     };
   };
+
+  xdg.dataFile."rofi/themes/custom.rasi".text = lib.mkIf config.programs.desktop-theme.enable (lib.mkAfter ''
+    @import "${config.xdg.stateHome}/desktop-theme/current/rofi.rasi"
+  '');
 
   # Use a real file for the rofi theme to ease real-time tinkering
   home.localStorePath = [".local/share/rofi/themes/custom.rasi"];

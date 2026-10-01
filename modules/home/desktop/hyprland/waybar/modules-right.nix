@@ -22,6 +22,7 @@
         "pulseaudio"
         "group/hardware"
         "idle_inhibitor"
+        "custom/notifications"
         "battery"
         "custom/power"
       ];
@@ -53,6 +54,15 @@
         activated = "󰅶";
         deactivated = "󰾪";
       };
+    };
+
+    "custom/notifications" = {
+      exec = "notification-mode status";
+      return-type = "json";
+      signal = 10;
+      interval = 30;
+      on-click = "notification-mode toggle";
+      on-click-right = "makoctl restore";
     };
 
     "group/hardware" = {

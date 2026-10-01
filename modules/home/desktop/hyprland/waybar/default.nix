@@ -35,9 +35,21 @@
       };
     };
 
-    style = builtins.readFile ./style.css;
+    style =
+      if config.programs.desktop-theme.enable
+      then
+        lib.mkForce ''
+          @import url("${config.xdg.stateHome}/desktop-theme/current/waybar.css");
+          * {
+            font-family: "${config.stylix.fonts.sansSerif.name}";
+            font-size: ${toString config.stylix.fonts.sizes.desktop}pt;
+          }
+          ${builtins.readFile ./style.css}
+        ''
+      else builtins.readFile ./style.css;
   };
 
+  stylix.targets.waybar.enable = lib.mkIf config.programs.desktop-theme.enable false;
   stylix.targets.waybar.addCss = false; # we'll write our own CSS
   stylix.targets.waybar.font = "sansSerif"; # not monospace
 

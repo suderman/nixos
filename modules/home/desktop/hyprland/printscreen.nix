@@ -26,6 +26,8 @@
       procps # pidof kill
       unstable.satty # annotate image
       slurp # crop screen selection
+      (tesseract.override {enableLanguages = ["eng"];}) # English screen text
+      zbar # QR codes
       wf-recorder # capture video
       wl-clipboard # wl-copy
     ];
@@ -115,6 +117,8 @@
           fi
         }
 
+        ${builtins.readFile ./capture-read.sh}
+
         case "''${1-}" in
           color | c)
             printscreen_color
@@ -125,6 +129,9 @@
           video | v)
             printscreen_video
             ;;
+          text | qr)
+            printscreen_read "$1"
+            ;;
           status | s)
             printscreen_status
             ;;
@@ -134,6 +141,8 @@
             echo "  color"
             echo "  image"
             echo "  video"
+            echo "  text (English OCR)"
+            echo "  qr (private clipboard)"
             echo "  status"
             echo "  help"
             ;;
@@ -177,6 +186,8 @@ in {
         util.exec("ALT + PRINT", "printscreen video")
         util.exec("SHIFT + PRINT", "printscreen video")
         util.exec("CTRL + PRINT", "printscreen color")
+        util.exec("SUPER + PRINT", "printscreen text", { description = "Read screen text" })
+        util.exec("SUPER + SHIFT + PRINT", "printscreen qr", { description = "Read QR to private clipboard" })
 
         hl.window_rule({
           name = "satty-fullscreen",

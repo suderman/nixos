@@ -1,5 +1,4 @@
 local util = require("lib.util")
-local stylix = require("generated.stylix")
 local M = {}
 
 function M.apply(host, _)
@@ -12,10 +11,6 @@ function M.apply(host, _)
 				border_overlap = true,
 			},
 			border_size = 0,
-			col = {
-				active_border = stylix.base0D.rgb,
-				inactive_border = stylix.base03.rgb,
-			},
 			extend_border_grab_area = 15,
 			gaps_in = { top = 10, right = 10, bottom = 5, left = 10 },
 			gaps_out = { top = 10, right = 20, bottom = 20, left = 20 },
@@ -30,7 +25,6 @@ function M.apply(host, _)
 				range = 20,
 				render_power = 3,
 				offset = "0 3",
-				color = stylix.base00.rgba(0.6),
 			},
 			dim_inactive = false,
 			dim_strength = 0.1,
@@ -47,7 +41,6 @@ function M.apply(host, _)
 		misc = {
 			animate_manual_resizes = true,
 			animate_mouse_windowdragging = false,
-			background_color = stylix.base00.rgb,
 			disable_hyprland_logo = true,
 			disable_splash_rendering = true,
 			enable_swallow = false,

@@ -1,14 +1,23 @@
 local M = {}
 
+function M.bind(keys, description, action, opts)
+	opts = opts or {}
+	opts.description = opts.description or description
+	return hl.bind(keys, action, opts)
+end
+
 function M.exec(keys, command, opts)
-	-- Shell out for app launchers and small helper scripts.
-	return hl.bind(keys, hl.dsp.exec_cmd(command), opts)
+	-- Native descriptions make the live shortcut list useful without parsing Lua.
+	return M.bind(keys, command, hl.dsp.exec_cmd(command), opts)
 end
 
 function M.workspace_bind(key, workspace)
-	-- Shared numeric workspace convention used across all hosts.
-	hl.bind("SUPER + " .. key, hl.dsp.focus({ workspace = tostring(workspace) }))
-	hl.bind("SUPER + ALT + " .. key, hl.dsp.window.move({ workspace = tostring(workspace) }))
+	M.bind("SUPER + " .. key, "Focus workspace " .. workspace, hl.dsp.focus({ workspace = tostring(workspace) }))
+	M.bind(
+		"SUPER + ALT + " .. key,
+		"Move to workspace " .. workspace,
+		hl.dsp.window.move({ workspace = tostring(workspace) })
+	)
 end
 
 function M.curve(name, p1, p2)
