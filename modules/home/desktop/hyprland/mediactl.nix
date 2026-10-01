@@ -4,16 +4,31 @@
   pkgs,
   ...
 }: let
+  qs = config.wayland.windowManager.hyprland.quickshell;
+  osdClient = pkgs.writeShellApplication {
+    name = "avizo-client";
+    text =
+      lib.replaceStrings ["@QS@" "@CONFIG@"]
+      [(lib.getExe qs.package) (lib.escapeShellArg qs.configName)]
+      (builtins.readFile ./quickshell/media-osd-client.sh);
+  };
+  osd = pkgs.replaceVars ./quickshell/MediaOsd.qml {
+    FONT = builtins.toJSON config.stylix.fonts.sansSerif.name;
+    FONT_SIZE = toString config.stylix.fonts.sizes.popups;
+  };
   mediactl = pkgs.self.mkScript {
     name = "mediactl";
-    path = with pkgs; [
-      brightnessctl
-      gnugrep
-      libnotify
-      mako
-      mpc
-      playerctl
-    ];
+    path =
+      lib.optional qs.enable osdClient
+      ++ (with pkgs; [
+        config.services.avizo.package
+        brightnessctl
+        gnugrep
+        libnotify
+        mako
+        mpc
+        playerctl
+      ]);
     text =
       # bash
       ''
@@ -140,13 +155,18 @@
   };
 in {
   home.packages = [mediactl];
+  wayland.windowManager.hyprland.quickshell = lib.mkIf qs.enable {
+    files."MediaOsd.qml" = osd;
+    components = ["MediaOsd {}"];
+  };
 
   services.playerctld = {
     enable = true; # playerctl playerctld
   };
 
   services.avizo = {
-    enable = true; # lightctl volumectl
+    # Keep the vendor controls on mediactl's PATH, but use one renderer.
+    enable = !qs.enable;
     settings = {
       # https://github.com/misterdanb/avizo/blob/master/config.ini
       default = {
@@ -183,7 +203,7 @@ in {
       util.exec("XF86AudioMute", "mediactl mute")
       util.exec("SHIFT + XF86MonBrightnessUp", "mediactl sunset")
       util.exec("SHIFT + XF86MonBrightnessDown", "mediactl sunset")
-      util.exec("XF86AudioMicMute", "mediactl sunset")
+      util.exec("XF86AudioMicMute", "mediactl mic")
 
       util.exec("XF86MonBrightnessUp", "mediactl light", { locked = true, repeating = true })
       util.exec("XF86MonBrightnessDown", "mediactl dark", { locked = true, repeating = true })

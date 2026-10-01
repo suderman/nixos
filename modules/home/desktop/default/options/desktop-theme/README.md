@@ -70,6 +70,20 @@ roles keep Latte headings readable without using pale accent slots as foreground
 With runtime appearance disabled, the same singleton reads static Stylix colors.
 This does not replace Waybar, Rofi, Mako, the lock screen, or the shell layout.
 
+On Quickshell hosts, `mediactl` uses a themed volume, microphone, and brightness
+OSD instead of the Avizo service. The existing vendor controls still choose the
+playing sink, support boost/unmute, toggle all sinks or microphones, and change
+backlight brightness. A private renderer adapter leaves those controls intact;
+it does not replace global commands. Hosts without Quickshell retain Avizo.
+
+The OSD follows the focused monitor, never takes keyboard focus, and dismisses
+one second after the last repeated action. It remains below the session lock.
+The gauge is capped at full scale and does not claim a numeric percentage when
+boost exceeds 100%. If Quickshell is unavailable, the control still applies and
+the command reports the missing feedback. `XF86AudioMicMute` now calls microphone
+mute instead of night light. Real laptop backlight and microphone hardware still
+need host acceptance.
+
 Only the portal Settings backend is selected here. Existing screencast and file
 chooser backend selection is left alone. Wallpaper selection remains independent.
 
@@ -152,6 +166,20 @@ For native popup tests, use `hyprland/quickshell/test-runtime.py` with its expor
 config, Quickshell binary, assets, and Sim user-command wrapper. The runner uses
 synthetic status data and never calls account actions or production status APIs.
 It checks open/pinned state, unchanged data and process ID, and compositor reload.
+
+For the media OSD, the same Sim wrapper can run:
+
+```sh
+python3 modules/home/desktop/hyprland/quickshell/test-media-runtime.py COMPILED_CONFIG QUICKSHELL_PACKAGE /path/to/sim-user-command-wrapper
+```
+
+This test owns a temporary shell, checks modes, palette changes, focus, focused
+and explicit monitors, repeated dismissal, and an actual Wayland test lock.
+It unlocks its own test lock before stopping. Run it only in disposable Sim.
+Optional `MEDIA_OSD_SCREENSHOTS` selects a guest output directory;
+`MEDIA_OSD_GRIM` selects the guest `grim` executable. Vendor mock and native IPC
+checks run with the Quickshell Nix check. Virtual audio and desktop gamma can be
+tested in Sim; real hardware brightness and mic behavior require host testing.
 
 Also test GTK3 and Emacs live events, GTK4 reopen behavior, Home Manager activation,
 and cold login. Capture checks need real screen content: decode a dummy QR, show
