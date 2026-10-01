@@ -1,7 +1,6 @@
 ---
 name: build-push-hosts
 description: Build NixOS host closures deterministically and push them to Attic.
-compatibility: opencode
 metadata:
   audience: maintainers
   repo: nixos

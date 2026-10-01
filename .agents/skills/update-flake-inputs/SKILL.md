@@ -1,7 +1,6 @@
 ---
 name: update-flake-inputs
 description: Update flake inputs in a Nix flake repo with minimal churn, validate the result, and report exactly what changed.
-compatibility: opencode
 metadata:
   audience: maintainers
   repo: nixos
