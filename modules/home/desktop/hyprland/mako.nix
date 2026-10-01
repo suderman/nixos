@@ -14,7 +14,8 @@
         case "''${1:-toggle}" in
           toggle)
             makoctl mode -t do-not-disturb
-            pkill -RTMIN+10 -u "$UID" -x waybar || true
+            # Nix wraps the executable; its process name is .waybar-wrapped.
+            pkill -RTMIN+10 -u "$UID" -x 'waybar|\.waybar-wrapped' || true
             ;;
           status)
             modes=$(makoctl mode)

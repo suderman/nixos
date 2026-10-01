@@ -24,8 +24,11 @@
         "idle_inhibitor"
         "custom/notifications"
         "battery"
-        "custom/power"
-      ];
+      ]
+      ++ lib.optionals config.wayland.windowManager.hyprland.quickshell.enable [
+        "custom/quick-settings"
+      ]
+      ++ ["custom/power"];
 
     pulseaudio = {
       format = "{icon}  {volume}%";

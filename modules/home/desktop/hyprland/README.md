@@ -49,6 +49,21 @@ prepared light/dark palettes, supported apps, and reload limits.
   the private clipboard without adding it to the configured Cliphist history.
 - Blezz retains the existing launcher and adds Appearance and Share entries.
 
+On Quickshell hosts, Super+backtick or Waybar's settings button opens quick settings
+on the focused monitor. The panel follows the current palette. Light/dark,
+notification silence, and night light keep it open. Theme choices sit in one row without an outer box; notification and night-light states appear beside their
+labels. Failed controls get a red border and an error tooltip, not footer text.
+Waybar keeps power at the far right, with settings beside it. The cog uses the
+accent color while the panel is open, including when opened by keyboard.
+Audio, Bluetooth, screenshot, recording, and LocalSend close it before launching
+the existing tool. Escape, the close button, or a click outside dismisses it.
+Leaving the panel dismisses it after 300 ms, like the quota popups. Returning
+before that delay cancels dismissal.
+
+Waybar's coffee cup remains the only presentation-mode control. It blocks
+automatic idle actions, including locking and screen-off. It does not block
+manual lock or suspend. The panel does not create another idle inhibitor.
+
 ## Checks and release testing
 
 From the repository root, after adding new source files to the Git index:
@@ -99,6 +114,29 @@ touchpad. If Hyprbars is loaded, it checks that feature settings survive reloads
 Test candidate Hyprland both without plugins and with matching official plugins.
 Check `hyprctl configerrors` and the guest journal after each run. Inject a broken
 feature once to confirm that configuration errors remain visible.
+
+The Quickshell check validates quick-settings action wiring on Kit and Cog and
+absence on Pow and Sim. For native rendering and focus tests, copy its closure
+into a disposable Sim session and run:
+
+```sh
+python3 modules/home/desktop/hyprland/quickshell/test-settings-runtime.py \
+  /nix/store/<quickshell-check>/kit/config \
+  /nix/store/<quickshell-package> /path/to/qemu-monitor.sock /path/to/sim-user-wrapper
+```
+
+The wrapper must run each command as the desktop user inside Sim with its
+Wayland and Hyprland environment. The test checks live theme, notification, and
+night-light actions, failed-command feedback, detached launches using mock
+commands, monitor selection, session-lock protection, and Escape/outside-click
+dismissal. Device pickers and capture commands still need user acceptance on
+real hardware. Set `QUICK_SETTINGS_WAYBAR` to the check output's
+`kit/waybar.json` and `QUICK_SETTINGS_GRIM` to the guest's absolute Grim path to
+add native cog/bell clicks, cog tint/reset, pointer-leave dismissal/cancel, and
+screenshot-based bell state checks. This test
+uses an isolated three-module Waybar with a one-hour status interval to prove
+signal refresh rather than polling. Its pointer coordinates require the
+1280x800 Sim display.
 
 Keep physical GPU, touchpad, multi-monitor scaling, and disabled dynamic-cursor
 plugin checks separate. Passing Sim proves the tested revision, not compatibility

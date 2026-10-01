@@ -13,16 +13,24 @@
     theme = cfg.programs.desktop-theme;
   in
     assert !cfg.services.avizo.enable;
-    assert cfg.wayland.windowManager.hyprland.quickshell.files ? "MediaOsd.qml"; ''
+    assert cfg.wayland.windowManager.hyprland.quickshell.files ? "MediaOsd.qml";
+    assert cfg.wayland.windowManager.hyprland.quickshell.files ? "QuickSettings.qml";
+    assert lib.takeEnd 2 cfg.programs.waybar.settings.bar.modules-right == ["custom/quick-settings" "custom/power"]; ''
       echo "Checking ${host} Quickshell appearance"
       python3 ${source}/test-theme.py ${qs.package} ${qs.configs.hyprland} ${theme.assets} --default-mode ${theme.defaultMode}
       python3 ${source}/test-media-ipc.py ${qs.package} ${source}/media-osd-client.sh
+      python3 ${source}/test-settings.py ${qs.configs.hyprland}
       mkdir -p "$out/${host}/bin"
       ln -s ${lib.getExe (lib.findFirst (p: (p.meta.mainProgram or "") == "mediactl") null cfg.home.packages)} "$out/${host}/bin/mediactl"
       ln -s ${qs.configs.hyprland} "$out/${host}/config"
+      ln -s ${pkgs.writeText "quick-settings-waybar.json" (builtins.toJSON cfg.programs.waybar.settings.bar)} "$out/${host}/waybar.json"
+      ln -s ${pkgs.writeText "quick-settings-waybar.css" cfg.programs.waybar.style} "$out/${host}/waybar.css"
       ln -s ${theme.assets} "$out/${host}/assets"
     '';
-  fallback = builtins.all (host: flake.nixosConfigurations.${host}.config.home-manager.users.jon.services.avizo.enable) ["pow" "sim"];
+  fallback = builtins.all (host: let
+    cfg = flake.nixosConfigurations.${host}.config.home-manager.users.jon;
+  in
+    cfg.services.avizo.enable && !(cfg.wayland.windowManager.hyprland.quickshell.files ? "QuickSettings.qml")) ["pow" "sim"];
   staticSystem = flake.nixosConfigurations.kit.extendModules {
     modules = [{home-manager.users.jon.programs.desktop-theme.enable = lib.mkForce false;}];
   };

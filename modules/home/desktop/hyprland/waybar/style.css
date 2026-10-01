@@ -155,12 +155,17 @@ tooltip {
 }
 
 .modules-right #idle_inhibitor,
-.modules-right #custom-notifications {
+.modules-right #custom-notifications,
+.modules-right #custom-quick-settings {
   padding-left: 10px;
   padding-right: 10px;
 }
 
 #idle_inhibitor.activated {
+  color: @base0D;
+}
+
+#custom-quick-settings.active {
   color: @base0D;
 }
 
