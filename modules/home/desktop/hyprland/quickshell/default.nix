@@ -6,6 +6,22 @@
 }: let
   cfg = config.wayland.windowManager.hyprland.quickshell;
   inherit (lib) concatStringsSep mapAttrsToList mkIf mkOption types;
+  appearance = config.programs.desktop-theme;
+  staticPalette = pkgs.writeText "quickshell-static-palette.json" (builtins.toJSON (lib.genAttrs
+    (map (n: "base${n}") ["00" "01" "02" "03" "04" "05" "06" "07" "08" "09" "0A" "0B" "0C" "0D" "0E" "0F"])
+    (n: "#${config.lib.stylix.colors.${n}}")));
+  theme = pkgs.replaceVars ./Theme.qml {
+    DYNAMIC = lib.boolToString appearance.enable;
+    DEFAULT_MODE = builtins.toJSON appearance.defaultMode;
+    MODE_PATH =
+      if appearance.enable
+      then ''(Quickshell.env("XDG_STATE_HOME") || ${builtins.toJSON config.xdg.stateHome}) + "/desktop-theme/mode"''
+      else ''""'';
+    PALETTE_PATH =
+      if appearance.enable
+      then ''${builtins.toJSON (toString appearance.assets)} + "/" + root.mode + "/palette.json"''
+      else builtins.toJSON (toString staticPalette);
+  };
 
   shell = pkgs.writeText "quickshell-hyprland-shell.qml" ''
     import Quickshell
@@ -58,6 +74,7 @@ in {
   };
 
   config = mkIf cfg.enable {
+    wayland.windowManager.hyprland.quickshell.files."Theme.qml" = theme;
     programs.quickshell = {
       enable = true;
       package = cfg.package;

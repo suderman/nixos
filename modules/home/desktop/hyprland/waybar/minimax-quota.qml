@@ -12,18 +12,16 @@ Scope {
   property var data: ({ ok: false, status: "idle", title: "MiniMax quota", message: "Open the popup to refresh quota data.", interval: {}, weekly: {} })
 
   readonly property string icon: "@ICON@"
-  readonly property string base00: "@BASE00@"
-  readonly property string base01: "@BASE01@"
-  readonly property string base02: "@BASE02@"
-  readonly property string base03: "@BASE03@"
-  readonly property string base04: "@BASE04@"
-  readonly property string base05: "@BASE05@"
-  readonly property string base06: "@BASE06@"
-  readonly property string base07: "@BASE07@"
-  readonly property string base08: "@BASE08@"
-  readonly property string base09: "@BASE09@"
-  readonly property string base0B: "@BASE0B@"
-  readonly property string base0D: "@BASE0D@"
+  readonly property string base00: Theme.colors.base00
+  readonly property string base01: Theme.colors.base01
+  readonly property string base02: Theme.colors.base02
+  readonly property string base03: Theme.colors.base03
+  readonly property string base04: Theme.colors.base04
+  readonly property string base05: Theme.colors.base05
+  readonly property string base08: Theme.colors.base08
+  readonly property string base09: Theme.colors.base09
+  readonly property string base0B: Theme.colors.base0B
+  readonly property string base0D: Theme.colors.base0D
 
   function alpha(hex, opacity) {
     return "#" + opacity + String(hex).replace("#", "");
@@ -226,7 +224,7 @@ Scope {
 
             Text {
               width: parent.width
-              color: root.base07
+              color: Theme.headingText
               text: "MiniMax quota"
               font.pixelSize: 22
               font.bold: true
@@ -234,7 +232,7 @@ Scope {
 
             Text {
               width: parent.width
-              color: root.base04
+              color: Theme.mutedText
               text: root.data.ok === true
                 ? "model " + (root.data.modelName || "general") + " - updated " + (root.data.generatedAtText || "n/a")
                 : (root.data.status || "idle")
@@ -248,11 +246,11 @@ Scope {
             width: 58
             height: 30
             radius: 15
-            color: root.pinned ? root.alpha(root.base0D, "66") : (pinArea.containsMouse ? root.alpha(root.base05, "33") : root.alpha(root.base05, "22"))
+            color: root.pinned ? root.base0D : (pinArea.containsMouse ? root.alpha(root.base05, "33") : root.alpha(root.base05, "22"))
 
             Text {
               anchors.centerIn: parent
-              color: root.pinned ? root.base00 : root.base06
+              color: root.pinned ? Theme.selectedText : Theme.detailText
               text: root.pinned ? "pinned" : "pin"
               font.pixelSize: 11
               font.bold: true
@@ -305,7 +303,7 @@ Scope {
 
             Text {
               width: parent.width
-              color: root.base06
+              color: Theme.detailText
               text: "Plan details"
               font.pixelSize: 15
               font.bold: true
@@ -390,7 +388,7 @@ Scope {
 
       Text {
         width: parent.width
-        color: root.base04
+        color: Theme.mutedText
         text: card.title
         font.pixelSize: 12
         font.bold: true
@@ -398,7 +396,7 @@ Scope {
 
       Text {
         width: parent.width
-        color: root.base07
+        color: Theme.headingText
         text: card.metric.percentText || "n/a"
         font.pixelSize: 30
         font.bold: true
@@ -429,7 +427,7 @@ Scope {
 
     Text {
       width: 94
-      color: root.base04
+      color: Theme.mutedText
       text: parent.label
       elide: Text.ElideRight
       font.pixelSize: 12

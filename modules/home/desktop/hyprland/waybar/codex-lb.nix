@@ -849,40 +849,12 @@
       "@ACCOUNT_COMMAND@"
       "@OPEN_COMMAND@"
       "@INTERVAL_MS@"
-      "@BASE00@"
-      "@BASE01@"
-      "@BASE02@"
-      "@BASE03@"
-      "@BASE04@"
-      "@BASE05@"
-      "@BASE06@"
-      "@BASE07@"
-      "@BASE08@"
-      "@BASE09@"
-      "@BASE0A@"
-      "@BASE0B@"
-      "@BASE0D@"
-      "@BASE0E@"
     ]
     [
       (lib.getExe popupData)
       (lib.getExe accountAction)
       "${pkgs.xdg-utils}/bin/xdg-open"
       (toString (cfg.interval * 1000))
-      "#${colors.base00}"
-      "#${colors.base01}"
-      "#${colors.base02}"
-      "#${colors.base03}"
-      "#${colors.base04}"
-      "#${colors.base05}"
-      "#${colors.base06}"
-      "#${colors.base07}"
-      "#${colors.base08}"
-      "#${colors.base09}"
-      "#${colors.base0A}"
-      "#${colors.base0B}"
-      "#${colors.base0D}"
-      "#${colors.base0E}"
     ]
     (builtins.readFile ./codex-lb.qml));
 

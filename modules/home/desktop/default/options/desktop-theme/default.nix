@@ -28,6 +28,10 @@
         path = pkgs.writeText "appearance-mode" mode;
       }
       {
+        name = "palette.json";
+        path = pkgs.writeText "appearance-palette.json" (builtins.toJSON (lib.genAttrs names (n: "#${colors.${n}}")));
+      }
+      {
         name = "palette.lua";
         path = pkgs.writeText "appearance-palette.lua" "return ${lib.generators.toLua {} (lib.genAttrs names (n: colors.${n}))}";
       }

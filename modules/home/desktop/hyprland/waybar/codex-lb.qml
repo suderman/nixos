@@ -19,20 +19,18 @@ Scope {
   property string pendingAction: ""
   property string accountActionInput: ""
 
-  readonly property string base00: "@BASE00@"
-  readonly property string base01: "@BASE01@"
-  readonly property string base02: "@BASE02@"
-  readonly property string base03: "@BASE03@"
-  readonly property string base04: "@BASE04@"
-  readonly property string base05: "@BASE05@"
-  readonly property string base06: "@BASE06@"
-  readonly property string base07: "@BASE07@"
-  readonly property string base08: "@BASE08@"
-  readonly property string base09: "@BASE09@"
-  readonly property string base0A: "@BASE0A@"
-  readonly property string base0B: "@BASE0B@"
-  readonly property string base0D: "@BASE0D@"
-  readonly property string base0E: "@BASE0E@"
+  readonly property string base00: Theme.colors.base00
+  readonly property string base01: Theme.colors.base01
+  readonly property string base02: Theme.colors.base02
+  readonly property string base03: Theme.colors.base03
+  readonly property string base04: Theme.colors.base04
+  readonly property string base05: Theme.colors.base05
+  readonly property string base08: Theme.colors.base08
+  readonly property string base09: Theme.colors.base09
+  readonly property string base0A: Theme.colors.base0A
+  readonly property string base0B: Theme.colors.base0B
+  readonly property string base0D: Theme.colors.base0D
+  readonly property string base0E: Theme.colors.base0E
 
   function alpha(hex, opacity) {
     return "#" + opacity + String(hex).replace("#", "");
@@ -369,7 +367,7 @@ Scope {
 
               Text {
                 width: parent.width
-                color: root.base07
+                color: Theme.headingText
                 text: "OpenAI Codex quota"
                 font.pixelSize: 22
                 font.bold: true
@@ -382,7 +380,7 @@ Scope {
                 Text {
                   id: urlLabel
                   width: Math.min(implicitWidth, parent.width * 0.5)
-                  color: urlArea.containsMouse ? root.base0D : root.base04
+                  color: urlArea.containsMouse ? root.base0D : Theme.mutedText
                   text: root.data.url || ""
                   elide: Text.ElideRight
                   font.pixelSize: 12
@@ -399,7 +397,7 @@ Scope {
 
                 Text {
                   width: parent.width - urlLabel.width - parent.spacing
-                  color: root.base04
+                  color: Theme.mutedText
                   text: "last sync " + (root.data.lastSyncText || "n/a")
                   elide: Text.ElideRight
                   font.pixelSize: 12
@@ -412,11 +410,11 @@ Scope {
               width: 58
               height: 30
               radius: 15
-              color: root.pinned ? root.alpha(root.base0D, "66") : (pinArea.containsMouse ? root.alpha(root.base05, "33") : root.alpha(root.base05, "22"))
+              color: root.pinned ? root.base0D : (pinArea.containsMouse ? root.alpha(root.base05, "33") : root.alpha(root.base05, "22"))
 
               Text {
                 anchors.centerIn: parent
-                color: root.pinned ? root.base00 : root.base06
+                color: root.pinned ? Theme.selectedText : Theme.detailText
                 text: root.pinned ? "pinned" : "pin"
                 font.pixelSize: 11
                 font.bold: true
@@ -470,7 +468,7 @@ Scope {
 
                 Text {
                   width: parent.width - pacePill.width - parent.spacing
-                  color: root.base07
+                  color: Theme.headingText
                   text: "Weekly pace"
                   font.pixelSize: 16
                   font.bold: true
@@ -494,7 +492,7 @@ Scope {
 
               Text {
                 width: parent.width
-                color: root.base04
+                color: Theme.mutedText
                 text: root.data.pace ? root.data.pace.summaryText : ""
                 elide: Text.ElideRight
                 font.pixelSize: 12
@@ -543,7 +541,7 @@ Scope {
 
             Text {
               width: root.accountActionMessage === "" ? parent.width : Math.min(100, parent.width)
-              color: root.base06
+              color: Theme.detailText
               text: "Accounts"
               font.pixelSize: 16
               font.bold: true
@@ -551,7 +549,7 @@ Scope {
 
             Text {
               width: parent.width - 100 - parent.spacing
-              color: root.base04
+              color: Theme.mutedText
               text: root.accountActionMessage
               horizontalAlignment: Text.AlignRight
               elide: Text.ElideRight
@@ -598,7 +596,7 @@ Scope {
 
                 Text {
                   width: parent.width - latestLogPill.width - parent.spacing
-                  color: root.base06
+                  color: Theme.detailText
                   text: "Recent logs"
                   font.pixelSize: 16
                   font.bold: true
@@ -613,7 +611,7 @@ Scope {
 
               Text {
                 width: parent.width
-                color: root.base04
+                color: Theme.mutedText
                 text: "No request logs returned."
                 visible: root.recentLogs.length === 0
                 font.pixelSize: 12
@@ -679,7 +677,7 @@ Scope {
 
             Text {
               width: parent.width
-              color: root.base07
+              color: Theme.headingText
               text: "Dashboard login required"
               font.pixelSize: 16
               font.bold: true
@@ -687,7 +685,7 @@ Scope {
 
             Text {
               width: parent.width
-              color: root.base04
+              color: Theme.mutedText
               text: "Authenticate once to " + root.pendingAction + " " + (root.pendingAccount ? root.pendingAccount.name : "this account") + "."
               wrapMode: Text.WordWrap
               font.pixelSize: 12
@@ -713,7 +711,7 @@ Scope {
                 id: usernameInput
                 anchors.fill: parent
                 anchors.margins: 10
-                color: root.base07
+                color: Theme.headingText
                 selectionColor: root.base0D
                 selectedTextColor: root.base00
                 clip: true
@@ -740,7 +738,7 @@ Scope {
                 id: passwordInput
                 anchors.fill: parent
                 anchors.margins: 10
-                color: root.base07
+                color: Theme.headingText
                 selectionColor: root.base0D
                 selectedTextColor: root.base00
                 echoMode: TextInput.Password
@@ -762,7 +760,7 @@ Scope {
 
                 Text {
                   anchors.centerIn: parent
-                  color: root.base06
+                  color: Theme.detailText
                   text: "Cancel"
                   font.pixelSize: 12
                   font.bold: true
@@ -863,7 +861,7 @@ Scope {
 
       Text {
         width: parent.width
-        color: root.base04
+        color: Theme.mutedText
         text: title
         font.pixelSize: 12
         font.bold: true
@@ -874,7 +872,7 @@ Scope {
 
         Text {
           width: parent.width / 2
-          color: root.base07
+          color: Theme.headingText
           text: metric.percentText || "n/a"
           font.pixelSize: 26
           font.bold: true
@@ -882,7 +880,7 @@ Scope {
 
         Text {
           width: parent.width / 2
-          color: root.base04
+          color: Theme.mutedText
           text: "reset " + (metric.resetText || "n/a")
           horizontalAlignment: Text.AlignRight
           elide: Text.ElideRight
@@ -914,7 +912,7 @@ Scope {
 
     Text {
       width: parent.width
-      color: root.base04
+      color: Theme.mutedText
       text: parent.label
       elide: Text.ElideRight
       font.pixelSize: 11
@@ -922,7 +920,7 @@ Scope {
 
     Text {
       width: parent.width
-      color: root.base07
+      color: Theme.headingText
       text: parent.value
       elide: Text.ElideRight
       font.pixelSize: 16
@@ -942,7 +940,7 @@ Scope {
 
       Text {
         width: 34
-        color: root.base04
+        color: Theme.mutedText
         text: parent.parent.label
         font.pixelSize: 12
         font.bold: true
@@ -991,7 +989,7 @@ Scope {
 
           Text {
             width: parent.width
-            color: root.base07
+            color: Theme.headingText
             text: account.name || "account"
             elide: Text.ElideRight
             font.pixelSize: 15
@@ -1000,7 +998,7 @@ Scope {
 
           Text {
             width: parent.width
-            color: root.base04
+            color: Theme.mutedText
             text: (
               (account.plan || "plan unknown")
               + " · "
@@ -1072,7 +1070,7 @@ Scope {
 
           Text {
             width: parent.width
-            color: root.base06
+            color: Theme.detailText
             text: log.timeText || "--"
             elide: Text.ElideRight
             font.pixelSize: 12
@@ -1081,7 +1079,7 @@ Scope {
 
           Text {
             width: parent.width
-            color: root.base04
+            color: Theme.mutedText
             text: log.dateText || "--"
             elide: Text.ElideRight
             font.pixelSize: 10
@@ -1098,7 +1096,7 @@ Scope {
 
         Text {
           width: parent.width - 82 - 92 - 70 - 58 - logStatusPill.width - parent.spacing * 5
-          color: root.base06
+          color: Theme.detailText
           text: log.model || "--"
           elide: Text.ElideRight
           font.pixelSize: 12
@@ -1134,7 +1132,7 @@ Scope {
 
       Text {
         width: parent.width
-        color: root.base04
+        color: Theme.mutedText
         text: ((log.errorCode || "") !== "" ? log.errorCode + ": " : "") + (log.errorMessage || "")
         visible: (log.status || "ok") !== "ok" && text !== ""
         wrapMode: Text.WordWrap

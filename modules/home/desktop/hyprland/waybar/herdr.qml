@@ -13,19 +13,17 @@ Scope {
   readonly property var agents: data.agents || []
 
   readonly property string icon: "@ICON@"
-  readonly property string base00: "@BASE00@"
-  readonly property string base01: "@BASE01@"
-  readonly property string base02: "@BASE02@"
-  readonly property string base03: "@BASE03@"
-  readonly property string base04: "@BASE04@"
-  readonly property string base05: "@BASE05@"
-  readonly property string base06: "@BASE06@"
-  readonly property string base07: "@BASE07@"
-  readonly property string base08: "@BASE08@"
-  readonly property string base09: "@BASE09@"
-  readonly property string base0A: "@BASE0A@"
-  readonly property string base0B: "@BASE0B@"
-  readonly property string base0D: "@BASE0D@"
+  readonly property string base00: Theme.colors.base00
+  readonly property string base01: Theme.colors.base01
+  readonly property string base02: Theme.colors.base02
+  readonly property string base03: Theme.colors.base03
+  readonly property string base04: Theme.colors.base04
+  readonly property string base05: Theme.colors.base05
+  readonly property string base08: Theme.colors.base08
+  readonly property string base09: Theme.colors.base09
+  readonly property string base0A: Theme.colors.base0A
+  readonly property string base0B: Theme.colors.base0B
+  readonly property string base0D: Theme.colors.base0D
 
   function alpha(hex, opacity) {
     return "#" + opacity + String(hex).replace("#", "");
@@ -250,7 +248,7 @@ Scope {
 
             Text {
               width: parent.width
-              color: root.base07
+              color: Theme.headingText
               text: "Herdr agents"
               font.pixelSize: 22
               font.bold: true
@@ -258,7 +256,7 @@ Scope {
 
             Text {
               width: parent.width
-              color: root.base04
+              color: Theme.mutedText
               text: root.data.ok === true
                 ? root.summaryText() + " · updated " + (root.data.generatedAtText || "n/a")
                 : "Herdr unavailable"
@@ -276,9 +274,10 @@ Scope {
 
             Text {
               anchors.centerIn: parent
-              color: root.base06
+              color: Theme.detailText
               text: "↻"
               font.pixelSize: 16
+              font.bold: true
             }
 
             MouseArea {
@@ -295,11 +294,11 @@ Scope {
             width: 58
             height: 30
             radius: 15
-            color: root.pinned ? root.alpha(root.base0D, "66") : (pinArea.containsMouse ? root.alpha(root.base05, "33") : root.alpha(root.base05, "22"))
+            color: root.pinned ? root.base0D : (pinArea.containsMouse ? root.alpha(root.base05, "33") : root.alpha(root.base05, "22"))
 
             Text {
               anchors.centerIn: parent
-              color: root.pinned ? root.base00 : root.base06
+              color: root.pinned ? Theme.selectedText : Theme.detailText
               text: root.pinned ? "pinned" : "pin"
               font.pixelSize: 11
               font.bold: true
@@ -338,7 +337,7 @@ Scope {
 
         Text {
           width: parent.width
-          color: root.base04
+          color: Theme.mutedText
           text: "No agents are connected to the local Herdr session."
           visible: root.data.ok === true && root.agents.length === 0
           wrapMode: Text.WordWrap
@@ -423,7 +422,7 @@ Scope {
 
         Text {
           width: parent.width
-          color: root.base07
+          color: Theme.headingText
           text: card.agent.workspace || "workspace"
           elide: Text.ElideRight
           font.pixelSize: 15
@@ -440,7 +439,7 @@ Scope {
 
         Text {
           width: parent.width
-          color: root.base04
+          color: Theme.mutedText
           text: card.agent.title || card.agent.cwd || ""
           visible: text !== ""
           elide: Text.ElideMiddle

@@ -39,6 +39,7 @@ selection without changing anything. `prepare` is the activation-only step.
 | Hyprland and Hyprbars | Live borders, groups, background, shadow, and titlebar colors. Geometry and plugin settings stay intact.                                                                                                  |
 | Waybar                | Reloads styles and config with USR2. No compositor restart.                                                                                                                                               |
 | Rofi and Blezz        | Read the current palette when opened. Existing popups must be reopened.                                                                                                                                   |
+| Quickshell popups     | Existing Herdr, MiniMax, and codex-lb popups update while open and pinned. No shell restart or data reset.                                                                                                |
 | Mako                  | Reloads palette colors without changing notification-silencing mode.                                                                                                                                      |
 | Kitty                 | Native light/dark theme files and portal events. USR1 also reloads changed assets without killing terminals or child shells. A fresh window uses the selected palette even before its first portal event. |
 | Emacs                 | Existing toolkit-theme hooks select the exported palette pair. The curated config and synced style export are required.                                                                                   |
@@ -62,6 +63,12 @@ remain static.
 Flatpak theme injection remains outside this module. The old forced GTK theme
 is no longer generated, but an override installed by an older generation can
 persist. See the targeted cleanup below.
+
+Quickshell uses one shared `Theme.qml` singleton. It watches atomic replacements
+of the selection file and reads the selected immutable `palette.json`. Its text
+roles keep Latte headings readable without using pale accent slots as foregrounds.
+With runtime appearance disabled, the same singleton reads static Stylix colors.
+This does not replace Waybar, Rofi, Mako, the lock screen, or the shell layout.
 
 Only the portal Settings backend is selected here. Existing screencast and file
 chooser backend selection is left alone. Wallpaper selection remains independent.
@@ -117,7 +124,7 @@ clipboard alone and stops only the capture's own freeze process.
 After adding new source files to the Git index:
 
 ```sh
-nix develop --command nix build '.#checks.x86_64-linux.desktop-theme' '.#checks.x86_64-linux.hyprland' -L
+nix develop --command nix build '.#checks.x86_64-linux.desktop-theme' '.#checks.x86_64-linux.hyprland' '.#checks.x86_64-linux.quickshell' -L
 ```
 
 The appearance check covers all four Hyprland hosts, rendered assets, GTK theme
@@ -138,6 +145,13 @@ its Wayland and D-Bus environment. The runner refuses another host. It checks
 Kitty startup and live colors, portal events, Rofi colors, DND, reloads, shortcut
 help, stable terminal PID, and unchanged system generation. It closes only its
 own probe window and restores the original appearance and notification mode.
+
+The Quickshell check exercises its actual FileView and IPC support without a
+compositor, including atomic selection changes, rapid updates, and static mode.
+For native popup tests, use `hyprland/quickshell/test-runtime.py` with its exported
+config, Quickshell binary, assets, and Sim user-command wrapper. The runner uses
+synthetic status data and never calls account actions or production status APIs.
+It checks open/pinned state, unchanged data and process ID, and compositor reload.
 
 Also test GTK3 and Emacs live events, GTK4 reopen behavior, Home Manager activation,
 and cold login. Capture checks need real screen content: decode a dummy QR, show

@@ -41,7 +41,7 @@ case "$action" in
 toggle) if [[ $mode == dark ]]; then mode=light; else mode=dark; fi ;;
 dark | light) mode=$action ;;
 esac
-for file in palette.lua kitty.conf gtk.css waybar.css rofi.rasi mako.conf qt/qt5ct.conf qt/qt6ct.conf qt/palette.conf qt/kvantum.kvconfig qt/Kvantum/Desktop-$mode/Desktop-$mode.kvconfig qt/Kvantum/Desktop-$mode/Desktop-$mode.svg; do
+for file in palette.lua palette.json kitty.conf gtk.css waybar.css rofi.rasi mako.conf qt/qt5ct.conf qt/qt6ct.conf qt/palette.conf qt/kvantum.kvconfig qt/Kvantum/Desktop-$mode/Desktop-$mode.kvconfig qt/Kvantum/Desktop-$mode/Desktop-$mode.svg; do
   [[ -r "$assets/$mode/$file" ]] || {
     printf 'Missing desktop theme asset: %s\n' "$file" >&2
     exit 1

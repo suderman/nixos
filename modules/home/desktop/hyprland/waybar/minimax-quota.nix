@@ -6,7 +6,6 @@
 }: let
   cfg = config.wayland.windowManager.hyprland.waybar.minimax-quota;
   qsCfg = config.wayland.windowManager.hyprland.quickshell;
-  colors = config.lib.stylix.colors;
   inherit (lib) mkIf mkMerge mkOption types;
 
   icon = "󰊚";
@@ -292,35 +291,11 @@
       "@DATA_COMMAND@"
       "@ICON@"
       "@INTERVAL_MS@"
-      "@BASE00@"
-      "@BASE01@"
-      "@BASE02@"
-      "@BASE03@"
-      "@BASE04@"
-      "@BASE05@"
-      "@BASE06@"
-      "@BASE07@"
-      "@BASE08@"
-      "@BASE09@"
-      "@BASE0B@"
-      "@BASE0D@"
     ]
     [
       (lib.getExe quotaData)
       icon
       (toString (cfg.interval * 1000))
-      "#${colors.base00}"
-      "#${colors.base01}"
-      "#${colors.base02}"
-      "#${colors.base03}"
-      "#${colors.base04}"
-      "#${colors.base05}"
-      "#${colors.base06}"
-      "#${colors.base07}"
-      "#${colors.base08}"
-      "#${colors.base09}"
-      "#${colors.base0B}"
-      "#${colors.base0D}"
     ]
     (builtins.readFile ./minimax-quota.qml));
 
