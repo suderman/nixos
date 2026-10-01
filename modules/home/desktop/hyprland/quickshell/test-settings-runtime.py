@@ -112,7 +112,46 @@ try:
         )
         registered_config = True
         instance = named_config
-    run("systemd-run", "--user", "--collect", "--unit=" + unit, qs, "-p", instance)
+    environment = []
+    if os.environ.get("QUICK_SETTINGS_GRIM"):
+        # Keep the compiled capture commands intact. Substitute only their
+        # printscreen owner inside Sim, and take a real compositor screenshot
+        # at handoff without starting annotation/recording or reading secrets.
+        capture = f"""import json, subprocess, sys
+from pathlib import Path
+mode = sys.argv[1]
+layers = json.loads(subprocess.check_output(['hyprctl', '-j', 'layers']))
+visible = any(layer['namespace'] == 'quickshell-quick-settings'
+    for monitor in layers.values() for level in monitor['levels'].values()
+    for layer in level)
+image = Path({fixture!r}) / (mode + '.png')
+subprocess.run([{os.environ["QUICK_SETTINGS_GRIM"]!r}, str(image)], check=True)
+assert image.read_bytes().startswith(b'\\x89PNG\\r\\n\\x1a\\n')
+with Path({(fixture + "/captures")!r}).open('a') as log:
+    log.write(json.dumps({{'mode': mode, 'panelVisible': visible}}) + '\\n')
+"""
+        interpreter = run("bash", "-c", "command -v python3").strip()
+        run("mkdir", fixture + "/bin")
+        run(
+            "python3",
+            "-c",
+            "from pathlib import Path; import sys; p=Path(sys.argv[1]); p.write_text(sys.argv[2]); p.chmod(0o755)",
+            fixture + "/bin/printscreen",
+            "#!" + interpreter + "\n" + capture,
+        )
+        environment = [
+            "--setenv=PATH=" + fixture + "/bin:" + run("printenv", "PATH").strip()
+        ]
+    run(
+        "systemd-run",
+        "--user",
+        "--collect",
+        "--unit=" + unit,
+        *environment,
+        qs,
+        "-p",
+        instance,
+    )
     for _ in range(40):
         ready = subprocess.run(
             [*wrapper, qs, "ipc", "-p", instance, "call", "settings-test", "snapshot"],
@@ -284,6 +323,57 @@ try:
     ipc("settings-test", "activate", "light")
     wait_for(lambda: state()["feedback"] == "Could not update Light")
     assert state()["open"]
+    if os.environ.get("QUICK_SETTINGS_GRIM"):
+        for id, mode in [
+            ("screenshot", "image"),
+            ("recording", "video"),
+            ("text", "text"),
+            ("qr", "qr"),
+            ("color", "color"),
+        ]:
+            if not state()["open"]:
+                ipc("quick-settings", "toggle")
+            p = parsed(ipc("settings-test", "audioPoint", "setting-" + id))
+            layers = parsed(run("hyprctl", "-j", "layers"))
+            layer = next(
+                layer
+                for monitor in layers.values()
+                for level in monitor["levels"].values()
+                for layer in level
+                if layer["namespace"] == "quickshell-quick-settings"
+            )
+            move(round(p["x"] + layer["x"]), round(p["y"] + layer["y"]))
+            run("ydotool", "click", "0xC0")
+            wait_for(lambda: not state()["open"])
+            wait_for(
+                lambda mode=mode: (
+                    mode
+                    in run(
+                        "python3",
+                        "-c",
+                        "from pathlib import Path; import sys; p=Path(sys.argv[1]); print(p.read_text() if p.exists() else '')",
+                        fixture + "/captures",
+                    )
+                )
+            )
+        captures = parsed(
+            "["
+            + ",".join(
+                run(
+                    "python3",
+                    "-c",
+                    "from pathlib import Path; import sys; print(Path(sys.argv[1]).read_text())",
+                    fixture + "/captures",
+                )
+                .strip()
+                .splitlines()
+            )
+            + "]"
+        )
+        assert len(captures) == 5 and all(not item["panelVisible"] for item in captures)
+        print(
+            "Five native capture buttons, compiled command handoff and panel-free compositor captures: passed"
+        )
     ipc("settings-test", "mockClosingActions", fixture + "/launches")
     for item in state()["actions"]:
         if not item["keepOpen"]:

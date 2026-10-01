@@ -21,6 +21,9 @@ expected = {
     "bluetooth": ["kitty", "--class", "Bluetuith", "bluetuith"],
     "screenshot": ["bash", "-c", "sleep 0.25 && printscreen image"],
     "recording": ["bash", "-c", "sleep 0.25 && printscreen video"],
+    "text": ["bash", "-c", "sleep 0.25 && printscreen text"],
+    "qr": ["bash", "-c", "sleep 0.25 && printscreen qr"],
+    "color": ["bash", "-c", "sleep 0.25 && printscreen color"],
     "localsend": ["localsend_app"],
 }
 assert len(actions) == len(expected)

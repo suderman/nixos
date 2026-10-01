@@ -63,6 +63,27 @@
       keepOpen = false;
     }
     {
+      id = "text";
+      glyph = "󰊄";
+      label = "OCR Text";
+      command = ["bash" "-c" "sleep 0.25 && printscreen text"];
+      keepOpen = false;
+    }
+    {
+      id = "qr";
+      glyph = "󰐳";
+      label = "QR Scan";
+      command = ["bash" "-c" "sleep 0.25 && printscreen qr"];
+      keepOpen = false;
+    }
+    {
+      id = "color";
+      glyph = "󰈋";
+      label = "Color Picker";
+      command = ["bash" "-c" "sleep 0.25 && printscreen color"];
+      keepOpen = false;
+    }
+    {
       id = "localsend";
       glyph = "󰒊";
       label = "LocalSend";

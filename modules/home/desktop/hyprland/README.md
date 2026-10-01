@@ -69,7 +69,12 @@ connects or disconnects it, with pending and failed-connection feedback. Externa
 BlueZ changes update the panel without polling. It does not scan, pair, unblock,
 or forget devices. "More Bluetooth settings..." closes the panel and opens
 Bluetuith. Audio and Bluetooth drawers close each other to keep the panel short.
-Screenshot, recording, and LocalSend close the panel before launching the tool.
+Screenshot, Record Screen, OCR Text, QR Scan, and Color Picker use the existing
+`printscreen` actions. Each closes the panel, then waits 250 ms before launching
+so the panel stays out of the capture. Screenshot opens Satty for cropping and
+annotation; Record Screen toggles recording. OCR reads English text; QR Scan
+uses the private clipboard without adding decoded data to Cliphist. Existing
+Print-key shortcuts remain unchanged. LocalSend also closes the panel.
 Escape, the close button, or a click outside dismisses it. Leaving the panel
 dismisses it after 300 ms, like the quota popups. Returning before that delay
 cancels dismissal.
@@ -149,7 +154,11 @@ Wayland and Hyprland environment. The test checks live theme, notification, and
 night-light actions, failed-command feedback, detached launches using mock
 commands, monitor selection, session-lock protection, and Escape/outside-click
 dismissal. Device pickers and capture commands still need user acceptance on
-real hardware. Set `QUICK_SETTINGS_WAYBAR` to the check output's
+real hardware. Set `QUICK_SETTINGS_GRIM` to the guest's absolute Grim path to
+also click all five capture buttons. That test substitutes only the `printscreen`
+command inside Sim and takes compositor screenshots at handoff, checking that
+the panel is absent. It does not start recording or change the clipboard.
+Set `QUICK_SETTINGS_WAYBAR` to the check output's
 `kit/waybar.json` and `QUICK_SETTINGS_GRIM` to the guest's absolute Grim path to
 add native cog/bell clicks, cog tint/reset, pointer-leave dismissal/cancel, and
 screenshot-based bell state checks. This test

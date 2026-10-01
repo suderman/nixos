@@ -62,6 +62,7 @@ Scope {
   component SettingButton: Button {
     id: control
     required property var item
+    objectName: "setting-" + item.id
     property bool segment: false
     readonly property bool selected: item.id === Theme.mode || (item.id === "notifications" && root.notifications === "silenced") || (item.id === "nightlight" && !isNaN(root.temperature) && root.temperature !== 6000)
     readonly property string stateLabel: root.stateText(item)

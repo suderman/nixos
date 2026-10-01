@@ -44,7 +44,7 @@ Scope {
         }
         return null;
       }
-      const item = find(settings.audio);
+      const item = find(settings.audio.parent);
       const point = item?.mapToGlobal(item.width / 2, item.height / 2);
       const bar = name === "audioOutputs" ? item.ScrollBar.vertical : null;
       return JSON.stringify(point ? {x: point.x, y: point.y, width: item.width, height: item.height, enabled: item.enabled,
