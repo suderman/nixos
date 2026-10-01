@@ -20,6 +20,8 @@ in {
       configPath = "${config.xdg.configHome}/mozilla/firefox";
       profiles.default = {
         settings = {
+          # Reader view follows the desktop instead of Stylix's static custom palette.
+          "reader.color_scheme" = lib.mkIf config.programs.desktop-theme.enable (lib.mkForce "auto");
           "ui.key.menuAccessKeyFocuses" = false; # don't toggle menu with alt key
           "browser.tabs.tabClipWidth" = 999; # hide close button on inactive tabs
           "middlemouse.paste" = false; # I don't use this

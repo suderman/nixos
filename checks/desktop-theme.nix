@@ -12,6 +12,8 @@
     theme = cfg.programs.desktop-theme;
   in
     assert theme.enable;
+    assert cfg.qt.enable && cfg.qt.platformTheme.name == "qtct" && cfg.qt.style.name == "kvantum";
+    assert !cfg.programs.firefox.enable || cfg.programs.firefox.profiles.default.settings."reader.color_scheme" == "auto";
     assert !cfg.stylix.targets.rofi.enable;
     assert !cfg.stylix.targets.waybar.enable;
     assert !cfg.stylix.targets.mako.enable;
@@ -19,6 +21,7 @@
     assert !(cfg.xdg.configFile ? "hypr/hyprland.conf"); ''
       echo "Checking ${host} appearance assets"
       bash ${source}/test.sh ${source} ${theme.assets}
+      python3 ${source}/test-qt.py ${theme.assets}
       lua ${source}/test-appearance.lua ${../modules/home/desktop/hyprland/lua} ${theme.assets}
       test ! -s ${cfg.xdg.configFile."gtk-3.0/gtk.css".source}
       for mode in dark light; do
@@ -36,7 +39,7 @@
     '';
 in
   pkgs.runCommand "desktop-theme-check" {
-    nativeBuildInputs = with pkgs; [bash coreutils gnugrep gawk gnused findutils util-linux lua5_4];
+    nativeBuildInputs = with pkgs; [bash coreutils gnugrep gawk gnused findutils util-linux lua5_4 python3];
   } ''
     bash ${../modules/home/desktop/hyprland/test-capture.sh} ${../modules/home/desktop/hyprland/capture-read.sh}
     ${lib.concatMapStringsSep "\n" checkHost hosts}

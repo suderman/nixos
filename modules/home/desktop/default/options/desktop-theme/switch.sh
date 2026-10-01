@@ -41,7 +41,7 @@ case "$action" in
 toggle) if [[ $mode == dark ]]; then mode=light; else mode=dark; fi ;;
 dark | light) mode=$action ;;
 esac
-for file in palette.lua kitty.conf gtk.css waybar.css rofi.rasi mako.conf; do
+for file in palette.lua kitty.conf gtk.css waybar.css rofi.rasi mako.conf qt/qt5ct.conf qt/qt6ct.conf qt/palette.conf qt/kvantum.kvconfig qt/Kvantum/Desktop-$mode/Desktop-$mode.kvconfig qt/Kvantum/Desktop-$mode/Desktop-$mode.svg; do
   [[ -r "$assets/$mode/$file" ]] || {
     printf 'Missing desktop theme asset: %s\n' "$file" >&2
     exit 1
@@ -91,6 +91,8 @@ fi
 if pgrep -u "$UID" -x mako >/dev/null; then
   refresh Mako makoctl reload
 fi
+# Qt apps read the selected assets on startup. Do not request a partial style
+# reload: pinned qtct/Kvantum can retain the old application palette.
 if pgrep -u "$UID" -x kitty >/dev/null; then
   # Reload also picks up new palette assets when the preference did not change.
   refresh Kitty pkill -USR1 -u "$UID" -x kitty

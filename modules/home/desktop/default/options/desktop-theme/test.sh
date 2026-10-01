@@ -40,5 +40,12 @@ mkdir "$work/incomplete"
 sed "s|$assets|$work/incomplete|g" "$work/switch" >"$work/missing"
 if bash "$work/missing" light; then exit 1; fi
 [[ $(run get) == dark ]]
+mkdir "$work/partial"
+cp -rL "$assets/light" "$work/partial/light"
+chmod -R u+w "$work/partial/light"
+rm "$work/partial/light/qt/qt6ct.conf"
+sed "s|$assets|$work/partial|g" "$work/switch" >"$work/missing-qt"
+if bash "$work/missing-qt" light; then exit 1; fi
+[[ $(run get) == dark ]]
 [[ -z $(find "$XDG_STATE_HOME/desktop-theme" -name '*.new.*' -print) ]]
 printf 'theme selection, activation, concurrency and failure handling: passed\n'

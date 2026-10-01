@@ -10,6 +10,7 @@
   names = map (n: "base${n}") ["00" "01" "02" "03" "04" "05" "06" "07" "08" "09" "0A" "0B" "0C" "0D" "0E" "0F"];
   state = "${config.xdg.stateHome}/desktop-theme";
   scheme = mode: (config.stylix.base16.mkSchemeAttrs pair."${mode}Scheme").override config.stylix.override;
+  qtAssets = import ./qt-assets.nix {inherit config lib pkgs;};
   theme = mode: let
     colors = scheme mode;
     gtkCss = colors {
@@ -18,6 +19,10 @@
     };
   in
     pkgs.linkFarm "desktop-theme-${mode}" [
+      {
+        name = "qt";
+        path = qtAssets mode colors;
+      }
       {
         name = "mode";
         path = pkgs.writeText "appearance-mode" mode;
@@ -119,6 +124,10 @@ in {
         assertion = config.stylix.enable && pair.enable;
         message = "desktop-theme requires Stylix and the configured dark/light scheme pair.";
       }
+      {
+        assertion = config.qt.enable && config.qt.platformTheme.name == "qtct" && config.qt.style.name == "kvantum";
+        message = "desktop-theme Qt integration requires the qtct platform and Kvantum style.";
+      }
     ];
     home.packages = [command];
     persist.storage.directories = [".local/state/desktop-theme"];
@@ -160,6 +169,17 @@ in {
     xdg.configFile."kitty/no-preference-theme.auto.conf" = lib.mkIf config.programs.kitty.enable {
       source = config.lib.file.mkOutOfStoreSymlink "${state}/current/kitty.conf";
     };
+    # Keep Stylix's Qt fonts and packages. Runtime owns the active color files.
+    qt.kvantum.themes = lib.mkForce [
+      (pkgs.linkFarm "desktop-kvantum-themes" (map (mode: {
+        name = "share/Kvantum/Desktop-${mode}";
+        path = "${assets}/${mode}/qt/Kvantum/Desktop-${mode}";
+      }) ["dark" "light"]))
+    ];
+    xdg.configFile."Kvantum/kvantum.kvconfig".source = lib.mkForce (config.lib.file.mkOutOfStoreSymlink "${state}/current/qt/kvantum.kvconfig");
+    xdg.configFile."qt5ct/qt5ct.conf".source = lib.mkForce (config.lib.file.mkOutOfStoreSymlink "${state}/current/qt/qt5ct.conf");
+    xdg.configFile."qt6ct/qt6ct.conf".source = lib.mkForce (config.lib.file.mkOutOfStoreSymlink "${state}/current/qt/qt6ct.conf");
+
     # Only select the Settings backend. Screencast and file chooser stay intact.
     xdg.configFile."xdg-desktop-portal/portals.conf".text = lib.generators.toINI {} {
       preferred = {
