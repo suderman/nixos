@@ -21,7 +21,7 @@
   # Gaming
   programs.steam.enable = true;
   programs.dolphin-emu.enable = true;
-  programs.citron.enable = true;
+  programs.citron.enable = false; # Disabled until the pinned AppImage hash is repaired.
   programs.prismlauncher.enable = true;
   programs.zwift.enable = true; # fitness
 
