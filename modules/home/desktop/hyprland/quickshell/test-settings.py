@@ -51,4 +51,13 @@ assert labels["recording"] == "Record Screen"
 assert "implicitHeight: 46" not in source
 assert source.count("verticalAlignment: Text.AlignVCenter") >= 4
 assert "segment: true" in source
-print("Quick settings command wiring and single idle-inhibitor ownership: passed")
+audio = Path(sys.argv[1]).joinpath("AudioControls.qml").read_text()
+assert "PwObjectTracker" in audio and "Pipewire.defaultAudioSink" in audio
+assert "Pipewire.defaultAudioSource" in audio
+assert "Pipewire.preferredDefaultAudioSink = modelData" in audio
+assert "onMoved:" in audio and "root.sink.audio.volume = value" in audio
+assert "from: 0" in audio and "to: 1" in audio
+assert "Timer" not in audio and "Process" not in audio
+print(
+    "Quick settings command wiring, native audio and single idle-inhibitor ownership: passed"
+)

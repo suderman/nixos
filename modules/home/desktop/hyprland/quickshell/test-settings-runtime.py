@@ -64,7 +64,13 @@ fixture = run(
 ).strip()
 qs = package + "/bin/qs"
 unit = f"settings-runtime-{os.getpid()}"
-run("cp", config + "/Theme.qml", config + "/QuickSettings.qml", fixture)
+run(
+    "cp",
+    config + "/Theme.qml",
+    config + "/QuickSettings.qml",
+    config + "/AudioControls.qml",
+    fixture,
+)
 run(
     "python3",
     "-c",
@@ -241,7 +247,7 @@ try:
         assert state()["open"]
         before = bell()
         notifications = state()["notifications"]
-        click(930, 180)  # Native popup button, not its test IPC method.
+        click(930, 274)  # Native notification button below inline audio controls.
         wait_for(lambda: state()["notifications"] != notifications)
         wait_for(lambda: bell() != before)
         ipc("quick-settings", "hide")

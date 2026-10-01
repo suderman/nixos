@@ -77,6 +77,11 @@
     FONT_SIZE = toString config.stylix.fonts.sizes.popups;
     WAYBAR_REFRESH = builtins.toJSON ["${pkgs.procps}/bin/pkill" "-RTMIN+11" "-u" config.home.username "-x" "waybar|\\.waybar-wrapped"];
   };
+  audio = pkgs.replaceVars ./quickshell/AudioControls.qml {
+    FONT = builtins.toJSON config.stylix.fonts.sansSerif.name;
+    ICON_FONT = builtins.toJSON config.stylix.fonts.monospace.name;
+    FONT_SIZE = toString config.stylix.fonts.sizes.popups;
+  };
   toggle = pkgs.writeShellApplication {
     name = "quick-settings";
     text = ''
@@ -98,6 +103,7 @@ in {
     home.packages = [toggle];
     wayland.windowManager.hyprland.quickshell = {
       files."QuickSettings.qml" = panel;
+      files."AudioControls.qml" = audio;
       components = ["QuickSettings {}"];
     };
     wayland.windowManager.hyprland.lua.features.quick_settings = ''

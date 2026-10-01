@@ -10,6 +10,7 @@ Scope {
   id: root
   property bool open: false
   property bool panelHovered: false
+  property alias audio: audioControls
   onOpenChanged: Quickshell.execDetached(@WAYBAR_REFRESH@)
   property var targetScreen: null
   property string notifications: "unknown"
@@ -29,6 +30,7 @@ Scope {
   function hide() {
     open = false;
     panelHovered = false;
+    audioControls.expanded = false;
     dismissTimer.stop();
   }
   function toggle() { if (open) hide(); else show(); }
@@ -236,13 +238,18 @@ Scope {
             }
           }
         }
+        AudioControls {
+          id: audioControls
+          Layout.fillWidth: true
+          onAdvancedRequested: root.activate("audio")
+        }
         GridLayout {
           Layout.fillWidth: true
           columns: 2
           columnSpacing: 8
           rowSpacing: 8
           Repeater {
-            model: root.actions.filter(item => item.id !== "light" && item.id !== "dark")
+            model: root.actions.filter(item => item.id !== "light" && item.id !== "dark" && item.id !== "audio")
             SettingButton {
               required property var modelData
               item: modelData

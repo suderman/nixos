@@ -21,6 +21,31 @@ Scope {
         if (!item.keepOpen) item.command = ["python3", "-c", "from pathlib import Path; import sys; p=Path(sys.argv[1]); p.write_text((p.read_text() if p.exists() else '') + sys.argv[2] + '\\n')", logfile, item.id];
       });
     }
+    function audioSnapshot(): string {
+      const audio = settings.audio;
+      return JSON.stringify({
+        sink: audio.sink?.name || null, source: audio.source?.name || null,
+        sinkReady: audio.sinkReady, sourceReady: audio.sourceReady,
+        volume: audio.sinkReady ? audio.sink.audio.volume : null,
+        muted: audio.sinkReady ? audio.sink.audio.muted : null,
+        micMuted: audio.sourceReady ? audio.source.audio.muted : null,
+        outputs: audio.outputs.map(node => ({name: node.name, id: node.id})),
+        expanded: audio.expanded, open: settings.open
+      });
+    }
+    function audioPoint(name: string): string {
+      function find(item) {
+        if (item.objectName === name) return item;
+        for (const child of item.children || []) {
+          const match = find(child);
+          if (match) return match;
+        }
+        return null;
+      }
+      const item = find(settings.audio);
+      const point = item?.mapToGlobal(item.width / 2, item.height / 2);
+      return JSON.stringify(point ? {x: point.x, y: point.y, width: item.width, enabled: item.enabled} : null);
+    }
     function snapshot(): string {
       return JSON.stringify({open: settings.open, mode: Theme.mode, background: Theme.colors.base00, notifications: settings.notifications, temperature: isNaN(settings.temperature) ? null : settings.temperature, feedback: settings.feedback, monitor: settings.targetScreen?.name, actions: settings.actions});
     }

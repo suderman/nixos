@@ -55,10 +55,23 @@ notification silence, and night light keep it open. Theme choices sit in one row
 labels. Failed controls get a red border and an error tooltip, not footer text.
 Waybar keeps power at the far right, with settings beside it. The cog uses the
 accent color while the panel is open, including when opened by keyboard.
-Audio, Bluetooth, screenshot, recording, and LocalSend close it before launching
-the existing tool. Escape, the close button, or a click outside dismisses it.
-Leaving the panel dismisses it after 300 ms, like the quota popups. Returning
-before that delay cancels dismissal.
+Audio stays inline. The speaker and microphone buttons toggle their default
+devices' mute state. The output slider sets 0-100%; an external boost above 100%
+is displayed without changing it. The current output row expands a scrollable
+list of connected outputs. Selection changes PipeWire's preferred default;
+WirePlumber handles stream routing. "More devices..." closes the panel and opens
+the existing Rofi picker, including its saved Bluetooth connection choices.
+Media keys and external changes update the panel through native PipeWire events.
+Missing devices disable their controls. Bluetooth, screenshot, recording, and
+LocalSend still close the panel before launching the existing tool.
+Escape, the close button, or a click outside dismisses it. Leaving the panel
+dismisses it after 300 ms, like the quota popups. Returning before that delay
+cancels dismissal.
+
+Pinned Quickshell 0.3.0 can stall when the PipeWire server stops. Device removal
+and reappearance work, but after restarting PipeWire, restart Quickshell too
+with `systemctl --user restart quickshell`. No watchdog or second audio state
+owner is added.
 
 Waybar's coffee cup remains the only presentation-mode control. It blocks
 automatic idle actions, including locking and screen-off. It does not block
@@ -137,6 +150,20 @@ screenshot-based bell state checks. This test
 uses an isolated three-module Waybar with a one-hour status interval to prove
 signal refresh rather than polling. Its pointer coordinates require the
 1280x800 Sim display.
+
+For inline audio, use the same disposable Sim wrapper:
+
+```sh
+python3 modules/home/desktop/hyprland/quickshell/test-audio-runtime.py \
+  /nix/store/<quickshell-check>/kit/config \
+  /nix/store/<quickshell-package> /path/to/sim-user-wrapper
+```
+
+This creates virtual speakers, headphones, and a microphone. It exercises native
+slider/mute clicks, media-key sync, external boost, output switching with an
+active stream, and device removal/reappearance. It never plays sound on physical
+hosts. PipeWire server restart is a separate upstream limitation, not covered by
+the passing device-loss check.
 
 Keep physical GPU, touchpad, multi-monitor scaling, and disabled dynamic-cursor
 plugin checks separate. Passing Sim proves the tested revision, not compatibility
