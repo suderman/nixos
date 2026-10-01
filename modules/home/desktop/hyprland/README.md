@@ -62,8 +62,14 @@ list of connected outputs. Selection changes PipeWire's preferred default;
 WirePlumber handles stream routing. "More devices..." closes the panel and opens
 the existing Rofi picker, including its saved Bluetooth connection choices.
 Media keys and external changes update the panel through native PipeWire events.
-Missing devices disable their controls. Bluetooth, screenshot, recording, and
-LocalSend still close the panel before launching the existing tool.
+Missing devices disable their controls. Bluetooth also stays inline. Its power
+button controls the default adapter; blocked or missing adapters disable it.
+The Bluetooth row expands a scrollable list of paired devices. Clicking a device
+connects or disconnects it, with pending and failed-connection feedback. External
+BlueZ changes update the panel without polling. It does not scan, pair, unblock,
+or forget devices. "More Bluetooth settings..." closes the panel and opens
+Bluetuith. Audio and Bluetooth drawers close each other to keep the panel short.
+Screenshot, recording, and LocalSend close the panel before launching the tool.
 Escape, the close button, or a click outside dismisses it. Leaving the panel
 dismisses it after 300 ms, like the quota popups. Returning before that delay
 cancels dismissal.
@@ -164,6 +170,22 @@ slider/mute clicks, media-key sync, external boost, output switching with an
 active stream, and device removal/reappearance. It never plays sound on physical
 hosts. PipeWire server restart is a separate upstream limitation, not covered by
 the passing device-loss check.
+
+For Bluetooth, use the test-only Python environment exported by the check:
+
+```sh
+python3 modules/home/desktop/hyprland/quickshell/test-bluetooth-runtime.py \
+  /nix/store/<quickshell-check>/kit/config \
+  /nix/store/<quickshell-package> /nix/store/<quickshell-check>/test-python \
+  /path/to/sim-user-wrapper
+```
+
+The test runs a private BlueZ D-Bus fixture, never the physical system bus. It
+checks native power/connect/disconnect clicks, pending states, failure/retry,
+external changes, paired-only filtering, adapter removal/reappearance, themes,
+drawer lifecycle, and the Bluetuith handoff with a mock launch. Real radio
+connections still need hardware acceptance. The pinned adapter API reports power
+through BlueZ state but exposes write errors only in Quickshell logs.
 
 Keep physical GPU, touchpad, multi-monitor scaling, and disabled dynamic-cursor
 plugin checks separate. Passing Sim proves the tested revision, not compatibility

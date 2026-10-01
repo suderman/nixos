@@ -11,6 +11,7 @@ Scope {
   property bool open: false
   property bool panelHovered: false
   property alias audio: audioControls
+  property alias bluetooth: bluetoothControls
   onOpenChanged: Quickshell.execDetached(@WAYBAR_REFRESH@)
   property var targetScreen: null
   property string notifications: "unknown"
@@ -31,6 +32,7 @@ Scope {
     open = false;
     panelHovered = false;
     audioControls.expanded = false;
+    bluetoothControls.expanded = false;
     dismissTimer.stop();
   }
   function toggle() { if (open) hide(); else show(); }
@@ -242,6 +244,13 @@ Scope {
           id: audioControls
           Layout.fillWidth: true
           onAdvancedRequested: root.activate("audio")
+          onExpandedChanged: { if (expanded) bluetoothControls.expanded = false; }
+        }
+        BluetoothControls {
+          id: bluetoothControls
+          Layout.fillWidth: true
+          onAdvancedRequested: root.activate("bluetooth")
+          onExpandedChanged: { if (expanded) audioControls.expanded = false; }
         }
         GridLayout {
           Layout.fillWidth: true
@@ -249,7 +258,7 @@ Scope {
           columnSpacing: 8
           rowSpacing: 8
           Repeater {
-            model: root.actions.filter(item => item.id !== "light" && item.id !== "dark" && item.id !== "audio")
+            model: root.actions.filter(item => item.id !== "light" && item.id !== "dark" && item.id !== "audio" && item.id !== "bluetooth")
             SettingButton {
               required property var modelData
               item: modelData

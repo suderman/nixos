@@ -69,6 +69,7 @@ run(
     config + "/Theme.qml",
     config + "/QuickSettings.qml",
     config + "/AudioControls.qml",
+    config + "/BluetoothControls.qml",
     fixture,
 )
 run(
@@ -247,7 +248,7 @@ try:
         assert state()["open"]
         before = bell()
         notifications = state()["notifications"]
-        click(930, 274)  # Native notification button below inline audio controls.
+        click(930, 324)  # Native notification button below audio/Bluetooth controls.
         wait_for(lambda: state()["notifications"] != notifications)
         wait_for(lambda: bell() != before)
         ipc("quick-settings", "hide")

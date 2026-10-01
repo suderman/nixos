@@ -58,6 +58,18 @@ assert "Pipewire.preferredDefaultAudioSink = modelData" in audio
 assert "onMoved:" in audio and "root.sink.audio.volume = value" in audio
 assert "from: 0" in audio and "to: 1" in audio
 assert "Timer" not in audio and "Process" not in audio
+assert "root.outputs.length > 4 ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff" in audio
+bluetooth = Path(sys.argv[1]).joinpath("BluetoothControls.qml").read_text()
+assert "import Quickshell.Bluetooth" in bluetooth
+assert "Bluetooth.defaultAdapter" in bluetooth
+assert "device.paired" in bluetooth and "modelData.connect()" in bluetooth
+assert "modelData.disconnect()" in bluetooth and "root.adapter.enabled =" in bluetooth
+assert "BluetoothAdapterState.Blocked" in bluetooth
+assert (
+    "BluetoothDeviceState.Connecting" in bluetooth and "Connection failed" in bluetooth
+)
+assert "Timer" not in bluetooth and "Process" not in bluetooth
+assert "discovering =" not in bluetooth and ".pair()" not in bluetooth
 print(
-    "Quick settings command wiring, native audio and single idle-inhibitor ownership: passed"
+    "Quick settings command wiring, native audio/Bluetooth and single idle-inhibitor ownership: passed"
 )

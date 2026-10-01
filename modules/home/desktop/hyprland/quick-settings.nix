@@ -82,6 +82,11 @@
     ICON_FONT = builtins.toJSON config.stylix.fonts.monospace.name;
     FONT_SIZE = toString config.stylix.fonts.sizes.popups;
   };
+  bluetooth = pkgs.replaceVars ./quickshell/BluetoothControls.qml {
+    FONT = builtins.toJSON config.stylix.fonts.sansSerif.name;
+    ICON_FONT = builtins.toJSON config.stylix.fonts.monospace.name;
+    FONT_SIZE = toString config.stylix.fonts.sizes.popups;
+  };
   toggle = pkgs.writeShellApplication {
     name = "quick-settings";
     text = ''
@@ -104,6 +109,7 @@ in {
     wayland.windowManager.hyprland.quickshell = {
       files."QuickSettings.qml" = panel;
       files."AudioControls.qml" = audio;
+      files."BluetoothControls.qml" = bluetooth;
       components = ["QuickSettings {}"];
     };
     wayland.windowManager.hyprland.lua.features.quick_settings = ''

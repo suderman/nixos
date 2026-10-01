@@ -146,6 +146,9 @@ ColumnLayout {
     }
   }
   ScrollView {
+    objectName: "audioOutputs"
+    // Keep overflow discoverable before hover or wheel input.
+    ScrollBar.vertical.policy: root.outputs.length > 4 ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
     visible: root.expanded && root.outputs.length > 0
     Layout.fillWidth: true
     Layout.preferredHeight: Math.min(root.outputs.length * 36, 144)

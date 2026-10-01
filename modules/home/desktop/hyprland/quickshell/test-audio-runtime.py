@@ -38,7 +38,12 @@ run(
     "cp",
     *[
         config + "/" + name
-        for name in ["Theme.qml", "QuickSettings.qml", "AudioControls.qml"]
+        for name in [
+            "Theme.qml",
+            "QuickSettings.qml",
+            "AudioControls.qml",
+            "BluetoothControls.qml",
+        ]
     ],
     fixture,
 )
@@ -102,7 +107,13 @@ def nodes():
 
 
 try:
-    for name in ["settings_speakers", "settings_headphones"]:
+    for name in [
+        "settings_speakers",
+        "settings_headphones",
+        "settings_hdmi",
+        "settings_spdif",
+        "settings_usb",
+    ]:
         modules.append(
             run(
                 "pactl",
@@ -218,6 +229,48 @@ try:
         )
     )
     assert state()["open"] and not state()["expanded"]
+    # Hotplug a sixth output after the panel started. It must be discoverable
+    # and selectable below the drawer's four-row viewport.
+    modules.append(
+        run(
+            "pactl",
+            "load-module",
+            "module-null-sink",
+            "sink_name=settings_buds",
+            "sink_properties=device.description=Sim_Pixel_Buds",
+        ).strip()
+    )
+    wait_for(lambda: any(n["name"] == "settings_buds" for n in state()["outputs"]))
+    assert (
+        next(
+            i for i, n in enumerate(state()["outputs"]) if n["name"] == "settings_buds"
+        )
+        >= 4
+    )
+    click("outputChooser")
+    viewport = point("audioOutputs")
+    assert viewport["persistentScrollBar"] and viewport["scrollBarOpacity"] > 0
+    move(viewport["x"], viewport["y"])
+    run("ydotool", "mousemove", "--wheel", "-x", "0", "-y", "4")
+    wait_for(
+        lambda: (
+            not point("audioOutputs")["scrollMoving"]
+            and viewport["y"] - viewport["height"] / 2 + 18
+            <= point("audioOutput-settings_buds")["y"]
+            <= viewport["y"] + viewport["height"] / 2 - 18
+        )
+    )
+    click("audioOutput-settings_buds")
+    wait_for(lambda: state()["sink"] == "settings_buds" and state()["sinkReady"])
+    buds = next(n["id"] for n in state()["outputs"] if n["name"] == "settings_buds")
+    wait_for(
+        lambda: any(
+            n.get("info", {}).get("input-node-id") == buds
+            for n in nodes()
+            if n["type"] == "PipeWire:Interface:Link"
+        )
+    )
+    assert state()["open"] and not state()["expanded"]
     run("pactl", "set-default-sink", "settings_speakers")
     wait_for(lambda: state()["sink"] == "settings_speakers")
     run("pactl", "set-sink-volume", "settings_speakers", "55%")
@@ -266,7 +319,7 @@ try:
         re.IGNORECASE,
     ), journal
     print(
-        "Native audio slider, mute/media-key sync, output/stream switching, external boost and device removal/reappearance: passed"
+        "Native audio slider, mute/media-key sync, six-output scrolling/hotplug, stream switching, external boost and device removal/reappearance: passed"
     )
 finally:
     subprocess.run(
