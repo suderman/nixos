@@ -101,62 +101,6 @@
         exec "${pkgs.python3Packages.websockify}/bin/websockify" "''${args[@]}"
       '';
   };
-
-  camofox-init = pkgs.self.mkScript {
-    name = "camofox-browser";
-    path = [pkgs.nodejs];
-    text =
-      # bash
-      ''
-        export NPM_CONFIG_PREFIX="${config.home.sessionVariables.NPM_CONFIG_PREFIX}"
-        export NPM_CONFIG_CACHE="${config.home.sessionVariables.NPM_CONFIG_CACHE}"
-
-        CAMOFOX_BIN="''${CAMOFOX_BIN:-${config.home.sessionVariables.NPM_CONFIG_PREFIX}/bin/camofox-browser}"
-        CAMOFOX_INIT_STAMP="''${CAMOFOX_INIT_STAMP:-${config.home.homeDirectory}/.local/state/camofox-browser/init.timestamp}"
-        CAMOFOX_INIT_INTERVAL="$((24 * 60 * 60))"
-
-        camofox_init() {
-          npm i -g camofox-browser
-
-          if [[ ! -f "$CAMOFOX_BIN" ]]; then
-            echo "Failed to install camofox-browser binary" >&2
-            exit 1
-          fi
-
-          mkdir -p "$(dirname "$CAMOFOX_INIT_STAMP")"
-          date +%s >"$CAMOFOX_INIT_STAMP"
-        }
-
-        camofox_init_stale() {
-          [[ ! -f "$CAMOFOX_INIT_STAMP" ]] && return 0
-
-          local now last
-          now="$(date +%s)"
-          last="$(<"$CAMOFOX_INIT_STAMP")"
-
-          [[ ! "$last" =~ ^[0-9]+$ ]] && return 0
-          ((now - last >= CAMOFOX_INIT_INTERVAL))
-        }
-
-        if [[ "''${1:-}" == "init" ]]; then
-          camofox_init
-          exit 0
-        fi
-
-        if [[ "''${1:-}" == "ensure" ]]; then
-          if [[ ! -e "$CAMOFOX_BIN" ]] || camofox_init_stale; then
-            camofox_init
-          fi
-          exit 0
-        fi
-
-        if [[ ! -e "$CAMOFOX_BIN" ]] || camofox_init_stale; then
-          camofox_init
-        fi
-
-        exec "$CAMOFOX_BIN" "$@"
-      '';
-  };
 in {
   options.services.camofox-browser = {
     enable = lib.mkEnableOption "camofox-browser";
@@ -168,15 +112,25 @@ in {
     };
 
     package = lib.mkOption {
-      type = lib.types.nullOr lib.types.package;
-      default = null;
-      description = "Wrapper package that installs and runs camofox-browser.";
+      type = lib.types.package;
+      default = pkgs.self.camofox-browser;
+      description = "Camofox server package with a pinned browser engine.";
     };
 
     profiles = lib.mkOption {
       type = with lib.types; listOf str;
       default = [];
       description = "Profile names to run as separate Camofox service instances.";
+    };
+
+    apiUrls = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      readOnly = true;
+      default =
+        if camofoxEnabled
+        then lib.genAttrs profiles (profile: "http://127.0.0.1:${toString (apiPortFor profile)}")
+        else {};
+      description = "Loopback REST endpoints for enabled Camofox profiles.";
     };
 
     apiBasePort = lib.mkOption {
@@ -241,7 +195,12 @@ in {
   };
 
   config = lib.mkIf camofoxEnabled {
-    services.camofox-browser.package = lib.mkDefault camofox-init;
+    persist.storage.directories = [
+      {
+        directory = cfg.dataDir;
+        mode = "0700";
+      }
+    ];
     toolchains.javascript.enable = true;
     persist.scratch.directories = [
       cfg.stateDir
@@ -280,24 +239,7 @@ in {
     home.file.".local/bin/camofox-browser".source = "${cfg.package}/bin/camofox-browser";
 
     systemd.user.services =
-      {
-        camofox-browser-init = {
-          Unit = {
-            Description = "Install or refresh camofox-browser";
-            Wants = ["network-online.target"];
-            After = ["network-online.target"];
-          };
-
-          Service = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            ExecStart = "${cfg.package}/bin/camofox-browser ensure";
-          };
-
-          Install.WantedBy = ["default.target"];
-        };
-      }
-      // lib.listToAttrs (
+      lib.listToAttrs (
         map (
           profile: let
             path =
@@ -347,7 +289,7 @@ in {
                     export CAMOFOX_ADMIN_KEY="$(cat '${runFileFor profile "admin-key"}')"
                   fi
 
-                  exec '${config.home.sessionVariables.NPM_CONFIG_PREFIX}/bin/camofox-browser'
+                  exec '${cfg.package}/bin/camofox-browser'
                 '';
             };
           in
@@ -355,16 +297,9 @@ in {
               Unit = {
                 Description = "Camofox browser server for profile ${profile}";
                 After =
-                  [
-                    "network-online.target"
-                    "camofox-browser-init.service"
-                  ]
+                  ["network-online.target"]
                   ++ lib.optionals cfg.enableVnc ["camofox-display-${profile}.service"];
-                Requires =
-                  [
-                    "camofox-browser-init.service"
-                  ]
-                  ++ lib.optionals cfg.enableVnc ["camofox-display-${profile}.service"];
+                Requires = lib.optionals cfg.enableVnc ["camofox-display-${profile}.service"];
                 Wants = ["network-online.target"];
               };
 

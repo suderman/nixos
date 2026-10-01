@@ -26,6 +26,11 @@ in {
       default = perSystem.agents.hermes-agent;
       description = "Stock Hermes package.";
     };
+    camofoxUrl = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "Camofox REST endpoint for the native browser backend.";
+    };
     apiKeys = lib.mkOption {
       type = lib.types.nullOr lib.types.path;
       default = null;
@@ -85,6 +90,9 @@ in {
               esac
               printf '%s\n' "$line"
             done <"${keysEnv}" >"$tmp"
+            ${lib.optionalString (cfg.camofoxUrl != null) ''
+              printf '%s\n' ${lib.escapeShellArg "CAMOFOX_URL=${cfg.camofoxUrl}"} >>"$tmp"
+            ''}
             chmod 600 "$tmp"
             mv -fT "$tmp" "${home}/.env"
           '';

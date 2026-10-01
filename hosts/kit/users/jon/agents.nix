@@ -1,10 +1,12 @@
-_: {
-  programs.hermes.enable = true;
+{config, ...}: {
+  programs.hermes = {
+    enable = true;
+    camofoxUrl = config.services.camofox-browser.apiUrls.hermes;
+  };
 
-  # Keep the existing browser instances independent of Hermes profiles.
   services.camofox-browser = {
     enable = true;
     enableVnc = true;
-    profiles = ["june" "pax"];
+    profiles = ["hermes"];
   };
 }
