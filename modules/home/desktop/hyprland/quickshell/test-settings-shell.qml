@@ -31,6 +31,10 @@ Scope {
     function sessionSnapshot(): string {
       return JSON.stringify({open: settings.open, options: settings.powerOptions, pending: settings.pendingSession?.id || null});
     }
+    function networkSnapshot(): string {
+      const net = settings.network;
+      return JSON.stringify({available: net.available, wifi: !!net.wifi, powered: net.powered, blocked: net.blocked, busy: net.busy, failed: net.failed, name: net.name, status: net.status, devices: net.devices.map(device => device.name), open: settings.open});
+    }
     function brightnessSnapshot(): string {
       return JSON.stringify({available: settings.brightness.available, percentage: settings.brightness.available ? settings.brightness.percentage : null, failed: settings.brightness.failed, active: settings.brightness.active, open: settings.open});
     }
@@ -58,7 +62,7 @@ Scope {
       const item = find(settings.audio.parent.parent);
       const point = item?.mapToGlobal(item.width / 2, item.height / 2);
       const bar = name === "audioOutputs" ? item.ScrollBar.vertical : null;
-      return JSON.stringify(point ? {x: point.x, y: point.y, width: item.width, height: item.height, enabled: item.enabled,
+      return JSON.stringify(point ? {x: point.x, y: point.y, width: item.width, height: item.height, enabled: item.enabled, visible: item.visible,
         persistentScrollBar: bar ? bar.policy === ScrollBar.AlwaysOn : null,
         scrollBarOpacity: bar ? bar.contentItem.opacity : null,
         scrollMoving: bar ? item.contentItem.moving : false} : null);

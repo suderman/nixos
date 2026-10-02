@@ -49,6 +49,13 @@
       keepOpen = false;
     }
     {
+      id = "network";
+      glyph = "󰤨";
+      label = "Network";
+      command = ["${lib.getExe pkgs.networkmanager_dmenu}"];
+      keepOpen = false;
+    }
+    {
       id = "screenshot";
       glyph = "󰹑";
       label = "Screenshot";
@@ -152,6 +159,12 @@
     ICON_FONT = builtins.toJSON config.stylix.fonts.monospace.name;
     FONT_SIZE = toString config.stylix.fonts.sizes.popups;
   };
+  network = pkgs.replaceVars ./quickshell/NetworkControls.qml {
+    FONT = builtins.toJSON config.stylix.fonts.sansSerif.name;
+    ICON_FONT = builtins.toJSON config.stylix.fonts.monospace.name;
+    FONT_SIZE = toString config.stylix.fonts.sizes.popups;
+    NMCLI = builtins.toJSON "${pkgs.networkmanager}/bin/nmcli";
+  };
   toggle = pkgs.writeShellApplication {
     name = "quick-settings";
     text = ''
@@ -176,6 +189,7 @@ in {
       files."AudioControls.qml" = audio;
       files."BluetoothControls.qml" = bluetooth;
       files."BrightnessControls.qml" = brightness;
+      files."NetworkControls.qml" = network;
       components = ["QuickSettings {}"];
     };
     wayland.windowManager.hyprland.lua.features.quick_settings = ''

@@ -105,8 +105,9 @@ ColumnLayout {
       }
     }
     AudioLabel {
+      objectName: "volumePercentage"
       Layout.preferredWidth: 44
-      horizontalAlignment: Text.AlignRight
+      horizontalAlignment: Text.AlignHCenter
       text: root.sinkReady ? Math.round(root.sink.audio.volume * 100) + "%" : "--"
     }
     AudioButton {

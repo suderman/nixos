@@ -13,6 +13,7 @@ Scope {
   property alias brightness: brightnessControls
   property alias audio: audioControls
   property alias bluetooth: bluetoothControls
+  property alias network: networkControls
   onOpenChanged: Quickshell.execDetached(@WAYBAR_REFRESH@)
   property var targetScreen: null
   property string notifications: "unknown"
@@ -291,13 +292,18 @@ Scope {
               onAdvancedRequested: root.activate("bluetooth")
               onExpandedChanged: { if (expanded) audioControls.expanded = false; }
             }
+            NetworkControls {
+              id: networkControls
+              Layout.fillWidth: true
+              onPickerRequested: root.activate("network")
+            }
             GridLayout {
               Layout.fillWidth: true
               columns: 2
               columnSpacing: 8
               rowSpacing: 8
               Repeater {
-                model: root.actions.filter(item => item.id !== "light" && item.id !== "dark" && item.id !== "audio" && item.id !== "bluetooth")
+                model: root.actions.filter(item => item.id !== "light" && item.id !== "dark" && item.id !== "audio" && item.id !== "bluetooth" && item.id !== "network")
                 SettingButton {
                   required property var modelData
                   item: modelData

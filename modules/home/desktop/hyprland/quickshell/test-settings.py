@@ -26,6 +26,10 @@ expected = {
     "color": ["bash", "-c", "sleep 0.25 && printscreen color"],
     "localsend": ["localsend_app"],
 }
+network_action = next(item for item in actions if item["id"] == "network")
+assert len(network_action["command"]) == 1
+assert network_action["command"][0].endswith("/bin/networkmanager_dmenu")
+expected["network"] = network_action["command"]
 assert len(actions) == len(expected)
 for item in actions:
     assert item["command"] == expected.pop(item["id"])
@@ -83,6 +87,8 @@ assert "onMoved:" in audio and "root.sink.audio.volume = value" in audio
 assert "from: 0" in audio and "to: 1" in audio
 assert "Timer" not in audio and "Process" not in audio
 assert "root.outputs.length > 4 ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff" in audio
+percentage = audio.split('objectName: "volumePercentage"', 1)[1].split("AudioButton", 1)[0]
+assert "horizontalAlignment: Text.AlignHCenter" in percentage
 bluetooth = Path(sys.argv[1]).joinpath("BluetoothControls.qml").read_text()
 assert "import Quickshell.Bluetooth" in bluetooth
 assert "Bluetooth.defaultAdapter" in bluetooth
@@ -100,6 +106,17 @@ assert '["mediactl", "brightness", "set", String(value)]' in brightness
 assert "from: 1" in brightness and "to: 100" in brightness
 assert "running: root.active" in brightness and "visible: available" in brightness
 assert "onMoved: root.request(value)" in brightness
+network = Path(sys.argv[1]).joinpath("NetworkControls.qml").read_text()
+assert "import Quickshell.Networking" in network
+assert "Networking.devices.values" in network
+assert "Networking.wifiHardwareEnabled" in network
+assert "textFormat: Text.PlainText" in network
+assert "radioMetrics.tightBoundingRect.width" in network
+assert "radioMetrics.tightBoundingRect.x" in network
+assert '"radio", "wifi", root.powered ? "off" : "on"' in network
+assert "root.failed = code !== 0" in network
+assert "Networking.wifiEnabled =" not in network
+assert "scannerEnabled =" not in network and "Timer" not in network
 print(
-    "Quick settings command wiring, native audio/Bluetooth and single idle-inhibitor ownership: passed"
+    "Quick settings command wiring, native device status and single idle-inhibitor ownership: passed"
 )

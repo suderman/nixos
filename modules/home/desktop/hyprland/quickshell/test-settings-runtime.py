@@ -71,6 +71,7 @@ run(
     config + "/AudioControls.qml",
     config + "/BluetoothControls.qml",
     config + "/BrightnessControls.qml",
+    config + "/NetworkControls.qml",
     fixture,
 )
 run(
@@ -290,7 +291,15 @@ with Path({(fixture + "/captures")!r}).open('a') as log:
         assert state()["open"]
         before = bell()
         notifications = state()["notifications"]
-        click(930, 324)  # Native notification button below audio/Bluetooth controls.
+        p = parsed(ipc("settings-test", "audioPoint", "setting-notifications"))
+        layer = next(
+            layer
+            for monitor in parsed(run("hyprctl", "-j", "layers")).values()
+            for level in monitor["levels"].values()
+            for layer in level
+            if layer["namespace"] == "quickshell-quick-settings"
+        )
+        click(round(p["x"] + layer["x"]), round(p["y"] + layer["y"]))
         wait_for(lambda: state()["notifications"] != notifications)
         wait_for(lambda: bell() != before)
         ipc("quick-settings", "hide")

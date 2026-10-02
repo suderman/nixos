@@ -74,6 +74,18 @@ connects or disconnects it, with pending and failed-connection feedback. Externa
 BlueZ changes update the panel without polling. It does not scan, pair, unblock,
 or forget devices. "More Bluetooth settings..." closes the panel and opens
 Bluetuith. Audio and Bluetooth drawers close each other to keep the panel short.
+The network row shows NetworkManager connection state and the current Wi-Fi name
+or Ethernet. Wi-Fi hardware gets an explicit radio toggle; wired-only hosts do
+not show it. Status follows native NetworkManager signals. Radio writes use one
+`nmcli radio wifi` command because the native setter cannot report denied writes.
+Failed commands keep the real radio state and show an error. Hardware blocks
+disable the toggle. Clicking the connection row closes the panel and opens the
+same NetworkManager picker as Waybar. No scan, password form, profile changes,
+or connectivity requests run when the panel opens. Connected means connected to
+a network, not verified internet access. Pinned Quickshell chooses its backend
+at startup and does not rebuild device state after a NetworkManager restart.
+If NetworkManager was absent at startup or restarted, restart `quickshell`
+after NetworkManager is running. No recovery watchdog is added.
 Screenshot, Record Screen, OCR Text, QR Scan, and Color Picker use the existing
 `printscreen` actions. Each closes the panel, then waits 250 ms before launching
 so the panel stays out of the capture. Screenshot opens Satty for cropping and
@@ -218,6 +230,22 @@ It applies the compiled process-specific rule, stops and restarts Sim's audio
 server twice, and verifies responsive IPC, isolated theme changes, restored
 output/volume state, and an unchanged shell PID. It also checks that an actual
 `pw-cat` stream still loads the realtime module under the same rule.
+
+For network controls, use a private NetworkManager fixture in disposable Sim:
+
+```sh
+python3 modules/home/desktop/hyprland/quickshell/test-network-runtime.py \
+  /nix/store/<quickshell-check> \
+  /nix/store/<quickshell-package> /path/to/sim-user-wrapper
+```
+
+It uses the compiled `nmcli` radio command against private D-Bus, checks denied
+writes without false success, hardware block, external changes, Wi-Fi/wired/no
+device states, hotplug, and picker handoff. It verifies no implicit scans,
+connections, credential requests, or profile writes. Missing-backend and
+service-loss probes document the native startup limit. It never changes Sim's
+real NetworkManager or any physical host's network. Cog hardware association
+and the real picker still need user acceptance.
 
 For laptop brightness, use the same disposable Sim wrapper:
 

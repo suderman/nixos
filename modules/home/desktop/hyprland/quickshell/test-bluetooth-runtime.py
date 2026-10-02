@@ -40,6 +40,7 @@ run(
             "AudioControls.qml",
             "BluetoothControls.qml",
             "BrightnessControls.qml",
+            "NetworkControls.qml",
         ]
     ],
     fixture,
