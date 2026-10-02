@@ -91,10 +91,13 @@ Escape, the close button, or a click outside dismisses it. Leaving the panel
 dismisses it after 300 ms, like the quota popups. Returning before that delay
 cancels dismissal.
 
-Pinned Quickshell 0.3.0 can stall when the PipeWire server stops. Device removal
-and reappearance work, but after restarting PipeWire, restart Quickshell too
-with `systemctl --user restart quickshell`. No watchdog or second audio state
-owner is added.
+Quickshell's PipeWire client disables the realtime module through a
+process-specific `client.conf` rule. The shell controls audio but does not process
+audio streams. This avoids blocking its main thread on RTKit during server
+reconnection; players keep their normal realtime support. No watchdog or second
+audio state owner is added. Theme selection keeps its file watcher alive while a
+separate reader loads the tiny mode file synchronously. Rapid atomic replacements
+cannot fall in a watcher reload gap or leave an older async read selected.
 
 Waybar's coffee cup remains the only presentation-mode control. It blocks
 automatic idle actions, including locking and screen-off. It does not block
@@ -203,8 +206,18 @@ python3 modules/home/desktop/hyprland/quickshell/test-audio-runtime.py \
 This creates virtual speakers, headphones, and a microphone. It exercises native
 slider/mute clicks, media-key sync, external boost, output switching with an
 active stream, and device removal/reappearance. It never plays sound on physical
-hosts. PipeWire server restart is a separate upstream limitation, not covered by
-the passing device-loss check.
+hosts. Server restart recovery has a separate check:
+
+```sh
+python3 modules/home/desktop/hyprland/quickshell/test-pipewire-runtime.py \
+  /nix/store/<quickshell-check> \
+  /nix/store/<quickshell-package> /path/to/sim-user-wrapper
+```
+
+It applies the compiled process-specific rule, stops and restarts Sim's audio
+server twice, and verifies responsive IPC, isolated theme changes, restored
+output/volume state, and an unchanged shell PID. It also checks that an actual
+`pw-cat` stream still loads the realtime module under the same rule.
 
 For laptop brightness, use the same disposable Sim wrapper:
 

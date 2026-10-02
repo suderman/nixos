@@ -75,6 +75,18 @@ in {
 
   config = mkIf cfg.enable {
     wayland.windowManager.hyprland.quickshell.files."Theme.qml" = theme;
+    # This shell controls audio but does not process audio streams. Its client
+    # must not wait for RTKit during PipeWire context teardown/reconnection.
+    # Match only Quickshell's Nix-wrapped binary; players keep realtime support.
+    xdg.configFile."pipewire/client.conf.d/90-quickshell.conf".text = ''
+      context.properties.rules = [
+        {
+          matches = [ { application.process.binary = ".quickshell-wrapped" } ]
+          actions = { update-props = { module.rt = false } }
+        }
+      ]
+    '';
+
     programs.quickshell = {
       enable = true;
       package = cfg.package;

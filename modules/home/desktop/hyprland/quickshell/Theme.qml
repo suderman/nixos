@@ -14,12 +14,21 @@ Singleton {
   readonly property string mutedText: mode === "light" ? colors.base05 : colors.base04
   readonly property string selectedText: mode === "light" ? "#ffffff" : colors.base00
 
+  // Reloading a FileView also rebuilds its watcher. Keep this watcher alive
+  // while the separate reader reloads, so rapid renames cannot fall in a gap.
+  FileView {
+    path: @MODE_PATH@
+    preload: false
+    watchChanges: @DYNAMIC@
+    onFileChanged: selection.reload()
+  }
+
   FileView {
     id: selection
     path: @MODE_PATH@
-    blockLoading: true
-    watchChanges: @DYNAMIC@
-    onFileChanged: reload()
+    // The selection is one word. Avoid an older in-flight async read winning.
+    preload: false
+    blockAllReads: true
   }
 
   FileView {

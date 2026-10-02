@@ -3,10 +3,10 @@
 import argparse
 import json
 import os
-from pathlib import Path
 import subprocess
 import tempfile
 import time
+from pathlib import Path
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("package")
@@ -77,6 +77,7 @@ Scope {
                         capture_output=True,
                         text=True,
                         timeout=5,
+                        check=False,
                     )
                     if result.returncode == 0 and json.loads(result.stdout) == expected:
                         break
@@ -93,9 +94,18 @@ Scope {
                 (state / "next").write_text(mode + "\n")
                 (state / "next").replace(state / "mode")
                 expect(mode)
-            for mode in ["dark", "light"] * 10:
-                (state / "next").write_text(mode + "\n")
-                (state / "next").replace(state / "mode")
+            # Repeat bursts without waiting between writes. A reload must not
+            # leave an earlier async read as the final selected mode.
+            for burst in range(20):
+                final = "light" if burst % 2 == 0 else "dark"
+                for mode in ["dark", "light"] * 10 + [final]:
+                    (state / "next").write_text(mode + "\n")
+                    (state / "next").replace(state / "mode")
+                expect(final)
+            (state / "mode").unlink()
+            expect(args.default_mode)
+            (state / "next").write_text("light\n")
+            (state / "next").replace(state / "mode")
             expect("light")
             kind = "static" if args.static else "dynamic"
             print(

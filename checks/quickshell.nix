@@ -30,6 +30,7 @@
       mkdir -p "$out/${host}/bin"
       ln -s ${lib.getExe (lib.findFirst (p: (p.meta.mainProgram or "") == "mediactl") null cfg.home.packages)} "$out/${host}/bin/mediactl"
       ln -s ${qs.configs.hyprland} "$out/${host}/config"
+      ln -s ${cfg.xdg.configFile."pipewire/client.conf.d/90-quickshell.conf".source} "$out/${host}/pipewire-client.conf"
       ln -s ${cfg.xdg.configFile."hypr/hypridle.conf".source} "$out/${host}/hypridle.conf"
       ln -s ${cfg.services.hypridle.package}/bin/hypridle "$out/${host}/bin/hypridle"
       ln -s ${pkgs.writeText "quick-settings-waybar.json" (builtins.toJSON cfg.programs.waybar.settings.bar)} "$out/${host}/waybar.json"
