@@ -80,6 +80,13 @@ so the panel stays out of the capture. Screenshot opens Satty for cropping and
 annotation; Record Screen toggles recording. OCR reads English text; QR Scan
 uses the private clipboard without adding decoded data to Cliphist. Existing
 Print-key shortcuts remain unchanged. LocalSend also closes the panel.
+Lock and Suspend close the panel and use the configured locker and systemd.
+Power opens logout, reboot, and shutdown choices. Each needs a second
+confirmation; Cancel gets keyboard focus. Escape, closing, and pointer-leave
+clear the choice. Lock/logout/reboot/shutdown commands come from the existing
+wlogout layout. Waybar power and XF86PowerOff still open that menu.
+Hypridle locks before sleep and delays suspend until the compositor confirms
+locking. Idle timeouts and Cog's lid policy stay unchanged.
 Escape, the close button, or a click outside dismisses it. Leaving the panel
 dismisses it after 300 ms, like the quota popups. Returning before that delay
 cancels dismissal.
@@ -158,7 +165,10 @@ The wrapper must run each command as the desktop user inside Sim with its
 Wayland and Hyprland environment. The test checks live theme, notification, and
 night-light actions, failed-command feedback, detached launches using mock
 commands, monitor selection, session-lock protection, and Escape/outside-click
-dismissal. Device pickers and capture commands still need user acceptance on
+dismissal. Native session tests substitute all five session commands before
+clicking them. They verify direct lock/suspend handoff, cancellation, confirmation,
+and clearing pending choices without ending or sleeping the test session.
+Device pickers and capture commands still need user acceptance on
 real hardware. Set `QUICK_SETTINGS_GRIM` to the guest's absolute Grim path to
 also click all five capture buttons. That test substitutes only the `printscreen`
 command inside Sim and takes compositor screenshots at handoff, checking that
@@ -170,6 +180,17 @@ screenshot-based bell state checks. This test
 uses an isolated three-module Waybar with a one-hour status interval to prove
 signal refresh rather than polling. Its pointer coordinates require the
 1280x800 Sim display.
+
+To verify the compiled Hypridle configuration and real locker in Sim:
+
+```sh
+python3 modules/home/desktop/hyprland/quickshell/test-session-lock.py \
+  /nix/store/<quickshell-check> /path/to/sim-user-wrapper
+```
+
+This verifies lock-notify inhibition and a real logind lock request, then unlocks
+only the disposable guest. It does not suspend. Actual suspend/resume and power
+operations still need user acceptance on the target host.
 
 For inline audio, use the same disposable Sim wrapper:
 

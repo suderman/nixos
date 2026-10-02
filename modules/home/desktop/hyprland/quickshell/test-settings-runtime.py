@@ -164,6 +164,8 @@ with Path({(fixture + "/captures")!r}).open('a') as log:
         time.sleep(0.1)
     else:
         raise AssertionError(run("journalctl", "--user", "-u", unit, "--no-pager"))
+    # Substitute dangerous commands before any native session-button input.
+    ipc("settings-test", "mockSessions", fixture + "/sessions")
     pid = run("systemctl", "--user", "show", "-p", "MainPID", "--value", unit)
     ipc("quick-settings", "toggle")
     wait_for(lambda: state()["open"])
@@ -375,6 +377,102 @@ with Path({(fixture + "/captures")!r}).open('a') as log:
         print(
             "Five native capture buttons, compiled command handoff and panel-free compositor captures: passed"
         )
+
+    def sessions():
+        return parsed(ipc("settings-test", "sessionSnapshot"))
+
+    def session_log():
+        return (
+            run(
+                "python3",
+                "-c",
+                "from pathlib import Path; import sys; p=Path(sys.argv[1]); print(p.read_text() if p.exists() else '')",
+                fixture + "/sessions",
+            )
+            .strip()
+            .splitlines()
+        )
+
+    def native_button(name):
+        p = parsed(ipc("settings-test", "audioPoint", name))
+        assert p and p["enabled"]
+        layers = parsed(run("hyprctl", "-j", "layers"))
+        layer = next(
+            layer
+            for monitor in layers.values()
+            for level in monitor["levels"].values()
+            for layer in level
+            if layer["namespace"] == "quickshell-quick-settings"
+        )
+        move(round(p["x"] + layer["x"]), round(p["y"] + layer["y"]))
+        run("ydotool", "click", "0xC0")
+
+    def open_panel():
+        if not state()["open"]:
+            ipc("quick-settings", "toggle")
+        wait_for(lambda: state()["open"])
+
+    for id in ["lock", "suspend"]:
+        open_panel()
+        native_button("setting-" + id)
+        wait_for(lambda: not state()["open"])
+        wait_for(lambda id=id: id in session_log())
+    assert session_log() == ["lock", "suspend"], session_log()
+    for id in ["logout", "reboot", "shutdown"]:
+        open_panel()
+        native_button("setting-power-options")
+        time.sleep(0.6)
+        assert sessions()["open"] and sessions()["options"]
+        if id == "reboot" and os.environ.get("QUICK_SETTINGS_SCREENSHOTS"):
+            run(
+                os.environ["QUICK_SETTINGS_GRIM"],
+                os.environ["QUICK_SETTINGS_SCREENSHOTS"] + "/power-options.png",
+            )
+        native_button("setting-" + id)
+        assert sessions()["pending"] == id
+        if id == "reboot" and os.environ.get("QUICK_SETTINGS_SCREENSHOTS"):
+            for mode in ["light", "dark"]:
+                run("desktop-theme", mode)
+                time.sleep(0.3)
+                run(
+                    os.environ["QUICK_SETTINGS_GRIM"],
+                    os.environ["QUICK_SETTINGS_SCREENSHOTS"]
+                    + "/confirm-"
+                    + mode
+                    + ".png",
+                )
+        assert session_log() == ["lock", "suspend"]
+        native_button("session-cancel")
+        assert sessions()["open"] and sessions()["pending"] is None
+    native_button("setting-reboot")
+    hmp("sendkey ret")
+    time.sleep(0.2)
+    assert sessions()["pending"] == "reboot"  # Enter must not confirm.
+    hmp("sendkey spc")  # Qt buttons activate with Space; Cancel starts focused.
+    wait_for(lambda: sessions()["pending"] is None)
+    assert session_log() == ["lock", "suspend"]
+    native_button("setting-shutdown")
+    hmp("sendkey esc")
+    wait_for(lambda: not sessions()["open"])
+    open_panel()
+    assert sessions()["pending"] is None and not sessions()["options"]
+    native_button("setting-power-options")
+    native_button("setting-logout")
+    move(200, 400)
+    wait_for(lambda: not sessions()["open"])
+    assert sessions()["pending"] is None
+    assert session_log() == ["lock", "suspend"]
+    for id in ["logout", "reboot", "shutdown"]:
+        open_panel()
+        native_button("setting-power-options")
+        native_button("setting-" + id)
+        native_button("session-confirm")
+        wait_for(lambda: not sessions()["open"])
+        wait_for(lambda id=id: id in session_log())
+    assert session_log() == ["lock", "suspend", "logout", "reboot", "shutdown"]
+    print(
+        "Native session clicks, cancel-first focus, confirmation, Escape/leave reset and command handoff: passed"
+    )
     ipc("settings-test", "mockClosingActions", fixture + "/launches")
     for item in state()["actions"]:
         if not item["keepOpen"]:

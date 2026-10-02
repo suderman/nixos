@@ -34,6 +34,27 @@ for item in actions:
         item["id"] in ["light", "dark", "notifications", "nightlight"]
     )
 assert not expected
+session_match = re.search(r"readonly property var sessionActions: (.+)", source)
+assert session_match, "Missing session model"
+try:
+    sessions = json.loads(session_match[1])
+except ValueError as error:
+    raise AssertionError("Invalid session model") from error
+assert [item["id"] for item in sessions] == [
+    "lock",
+    "suspend",
+    "logout",
+    "reboot",
+    "shutdown",
+]
+assert [item["confirm"] for item in sessions] == [False, False, True, True, True]
+assert all(item["command"][:2] == ["sh", "-c"] for item in sessions)
+assert sessions[1]["command"][2] == "systemctl suspend"
+assert sessions[2]["command"][2] == "hyprctl dispatch 'hl.dsp.exit()'"
+assert sessions[3]["command"][2] == "systemctl reboot"
+assert sessions[4]["command"][2] == "systemctl poweroff"
+assert "cancelButton.forceActiveFocus()" in source
+assert "pendingSession = null;" in source
 assert "WlrKeyboardFocus.OnDemand" in source
 assert "HyprlandFocusGrab" in source
 assert "HoverHandler" in source and "interval: 300" in source

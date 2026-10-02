@@ -13,6 +13,9 @@
     theme = cfg.programs.desktop-theme;
   in
     assert !cfg.services.avizo.enable;
+    assert cfg.services.hypridle.settings.general.before_sleep_cmd == "loginctl lock-session";
+    assert cfg.services.hypridle.settings.general.inhibit_sleep == 3;
+    assert cfg.programs.wlogout.enable;
     assert cfg.wayland.windowManager.hyprland.quickshell.files ? "MediaOsd.qml";
     assert cfg.wayland.windowManager.hyprland.quickshell.files ? "QuickSettings.qml";
     assert cfg.wayland.windowManager.hyprland.quickshell.files ? "AudioControls.qml";
@@ -27,6 +30,8 @@
       mkdir -p "$out/${host}/bin"
       ln -s ${lib.getExe (lib.findFirst (p: (p.meta.mainProgram or "") == "mediactl") null cfg.home.packages)} "$out/${host}/bin/mediactl"
       ln -s ${qs.configs.hyprland} "$out/${host}/config"
+      ln -s ${cfg.xdg.configFile."hypr/hypridle.conf".source} "$out/${host}/hypridle.conf"
+      ln -s ${cfg.services.hypridle.package}/bin/hypridle "$out/${host}/bin/hypridle"
       ln -s ${pkgs.writeText "quick-settings-waybar.json" (builtins.toJSON cfg.programs.waybar.settings.bar)} "$out/${host}/waybar.json"
       ln -s ${pkgs.writeText "quick-settings-waybar.css" cfg.programs.waybar.style} "$out/${host}/waybar.css"
       ln -s ${theme.assets} "$out/${host}/assets"

@@ -20,6 +20,22 @@ Scope {
   property string feedback: ""
   property string pendingLabel: ""
   readonly property var actions: @ACTIONS@
+  readonly property var sessionActions: @SESSION_ACTIONS@
+  property bool powerOptions: false
+  property var pendingSession: null
+
+  function session(id) {
+    const item = sessionActions.find(action => action.id === id);
+    if (!item) return;
+    if (item.confirm) {
+      pendingSession = item;
+      cancelButton.forceActiveFocus();
+    } else runSession(item);
+  }
+  function runSession(item) {
+    hide();
+    Quickshell.execDetached({ command: item.command });
+  }
 
   function show() {
     const name = Hyprland.focusedMonitor?.name;
@@ -34,6 +50,8 @@ Scope {
     panelHovered = false;
     audioControls.expanded = false;
     bluetoothControls.expanded = false;
+    pendingSession = null;
+    powerOptions = false;
     dismissTimer.stop();
   }
   function toggle() { if (open) hide(); else show(); }
@@ -71,7 +89,12 @@ Scope {
     implicitHeight: segment ? 38 : 48
     padding: 10
     enabled: !applyJob.running
-    onClicked: root.activate(item.id)
+    onClicked: {
+      if (item.id === "power-options") root.powerOptions = true;
+      else if (item.id === "back") root.powerOptions = false;
+      else if (root.sessionActions.some(action => action.id === item.id)) root.session(item.id);
+      else root.activate(item.id);
+    }
     Accessible.name: item.label
     Accessible.description: stateLabel
     ToolTip.visible: hovered && failed
@@ -228,49 +251,121 @@ Scope {
             }
           }
         }
-        RowLayout {
+        Item {
           Layout.fillWidth: true
-          spacing: 8
-          Repeater {
-            model: root.actions.filter(item => item.id === "light" || item.id === "dark")
-            SettingButton {
-              required property var modelData
-              item: modelData
-              segment: true
+          // Keep pointer-leave dismissal from firing when a shorter page opens.
+          implicitHeight: normalControls.implicitHeight
+          ColumnLayout {
+            id: normalControls
+            visible: !root.powerOptions && !root.pendingSession
+            width: parent.width
+            spacing: 12
+            RowLayout {
               Layout.fillWidth: true
-              Layout.preferredWidth: 1
+              spacing: 8
+              Repeater {
+                model: root.actions.filter(item => item.id === "light" || item.id === "dark")
+                SettingButton {
+                  required property var modelData
+                  item: modelData
+                  segment: true
+                  Layout.fillWidth: true
+                  Layout.preferredWidth: 1
+                }
+              }
+            }
+            BrightnessControls {
+              id: brightnessControls
+              active: root.open
+              Layout.fillWidth: true
+            }
+            AudioControls {
+              id: audioControls
+              Layout.fillWidth: true
+              onAdvancedRequested: root.activate("audio")
+              onExpandedChanged: { if (expanded) bluetoothControls.expanded = false; }
+            }
+            BluetoothControls {
+              id: bluetoothControls
+              Layout.fillWidth: true
+              onAdvancedRequested: root.activate("bluetooth")
+              onExpandedChanged: { if (expanded) audioControls.expanded = false; }
+            }
+            GridLayout {
+              Layout.fillWidth: true
+              columns: 2
+              columnSpacing: 8
+              rowSpacing: 8
+              Repeater {
+                model: root.actions.filter(item => item.id !== "light" && item.id !== "dark" && item.id !== "audio" && item.id !== "bluetooth")
+                SettingButton {
+                  required property var modelData
+                  item: modelData
+                  Layout.fillWidth: true
+                  Layout.preferredWidth: 1
+                }
+              }
+            }
+            RowLayout {
+              Layout.fillWidth: true
+              spacing: 8
+              Repeater {
+                model: root.sessionActions.filter(item => !item.confirm).concat([{id: "power-options", label: "Power", glyph: "󰐥"}])
+                SettingButton {
+                  required property var modelData
+                  item: modelData
+                  segment: true
+                  Layout.fillWidth: true
+                  Layout.preferredWidth: 1
+                }
+              }
             }
           }
-        }
-        BrightnessControls {
-          id: brightnessControls
-          active: root.open
-          Layout.fillWidth: true
-        }
-        AudioControls {
-          id: audioControls
-          Layout.fillWidth: true
-          onAdvancedRequested: root.activate("audio")
-          onExpandedChanged: { if (expanded) bluetoothControls.expanded = false; }
-        }
-        BluetoothControls {
-          id: bluetoothControls
-          Layout.fillWidth: true
-          onAdvancedRequested: root.activate("bluetooth")
-          onExpandedChanged: { if (expanded) audioControls.expanded = false; }
-        }
-        GridLayout {
-          Layout.fillWidth: true
-          columns: 2
-          columnSpacing: 8
-          rowSpacing: 8
-          Repeater {
-            model: root.actions.filter(item => item.id !== "light" && item.id !== "dark" && item.id !== "audio" && item.id !== "bluetooth")
-            SettingButton {
-              required property var modelData
-              item: modelData
+          GridLayout {
+            visible: root.powerOptions && !root.pendingSession
+            anchors.centerIn: parent
+            width: parent.width
+            columns: 2
+            columnSpacing: 8; rowSpacing: 8
+            Repeater {
+              model: root.sessionActions.filter(item => item.confirm).concat([{id: "back", label: "Back", glyph: "󰅁"}])
+              SettingButton {
+                required property var modelData
+                item: modelData
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
+              }
+            }
+          }
+          ColumnLayout {
+            visible: !!root.pendingSession
+            anchors.centerIn: parent
+            width: parent.width
+            spacing: 12
+            Text {
+              text: (root.pendingSession?.label || "") + "? Unsaved work may be lost."
+              color: Theme.headingText
+              font.family: @FONT@
+              font.pixelSize: @FONT_SIZE@
               Layout.fillWidth: true
-              Layout.preferredWidth: 1
+              wrapMode: Text.WordWrap
+            }
+            RowLayout {
+              Layout.fillWidth: true
+              spacing: 8
+              SettingButton {
+                id: cancelButton
+                objectName: "session-cancel"
+                item: ({id: "cancel", label: "Cancel", glyph: "󰅖"})
+                Layout.fillWidth: true
+                onClicked: root.pendingSession = null
+              }
+              SettingButton {
+                objectName: "session-confirm"
+                item: root.pendingSession || {id: "confirm", label: "Confirm", glyph: "󰄬"}
+                Layout.fillWidth: true
+                onClicked: { if (root.pendingSession) root.runSession(root.pendingSession); }
+              }
             }
           }
         }

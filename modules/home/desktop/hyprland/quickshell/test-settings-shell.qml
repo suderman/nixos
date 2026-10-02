@@ -23,6 +23,14 @@ Scope {
         if (!item.keepOpen) item.command = ["python3", "-c", "from pathlib import Path; import sys; p=Path(sys.argv[1]); p.write_text((p.read_text() if p.exists() else '') + sys.argv[2] + '\\n')", logfile, item.id];
       });
     }
+    function mockSessions(logfile: string): void {
+      settings.sessionActions.forEach(item => {
+        item.command = ["python3", "-c", "from pathlib import Path; import sys; p=Path(sys.argv[1]); p.write_text((p.read_text() if p.exists() else '') + sys.argv[2] + '\\n')", logfile, item.id];
+      });
+    }
+    function sessionSnapshot(): string {
+      return JSON.stringify({open: settings.open, options: settings.powerOptions, pending: settings.pendingSession?.id || null});
+    }
     function brightnessSnapshot(): string {
       return JSON.stringify({available: settings.brightness.available, percentage: settings.brightness.available ? settings.brightness.percentage : null, failed: settings.brightness.failed, active: settings.brightness.active, open: settings.open});
     }
@@ -47,7 +55,7 @@ Scope {
         }
         return null;
       }
-      const item = find(settings.audio.parent);
+      const item = find(settings.audio.parent.parent);
       const point = item?.mapToGlobal(item.width / 2, item.height / 2);
       const bar = name === "audioOutputs" ? item.ScrollBar.vertical : null;
       return JSON.stringify(point ? {x: point.x, y: point.y, width: item.width, height: item.height, enabled: item.enabled,

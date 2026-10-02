@@ -17,6 +17,8 @@ in {
       general = {
         ignore_dbus_inhibit = false;
         lock_cmd = "pidof ${cfg.lock} || ${cfg.lock}"; # avoid multiple instances
+        before_sleep_cmd = "loginctl lock-session";
+        inhibit_sleep = 3; # Wait for the compositor to confirm that the session is locked.
       };
 
       # Screenlock

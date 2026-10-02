@@ -91,8 +91,47 @@
       keepOpen = false;
     }
   ];
+  powerAction = label: (lib.findFirst (item: item.label == label) null config.programs.wlogout.layout).action;
+  sessionActions = map (item: builtins.removeAttrs item ["action"] // {command = ["sh" "-c" item.action];}) [
+    {
+      id = "lock";
+      label = "Lock";
+      glyph = "󰌾";
+      action = powerAction "lock";
+      confirm = false;
+    }
+    {
+      id = "suspend";
+      label = "Suspend";
+      glyph = "󰤄";
+      action = "systemctl suspend";
+      confirm = false;
+    }
+    {
+      id = "logout";
+      label = "Log out";
+      glyph = "󰍃";
+      action = powerAction "logout";
+      confirm = true;
+    }
+    {
+      id = "reboot";
+      label = "Reboot";
+      glyph = "󰜉";
+      action = powerAction "reboot";
+      confirm = true;
+    }
+    {
+      id = "shutdown";
+      label = "Shut down";
+      glyph = "󰐥";
+      action = powerAction "shutdown";
+      confirm = true;
+    }
+  ];
   panel = pkgs.replaceVars ./quickshell/QuickSettings.qml {
     ACTIONS = builtins.toJSON actions;
+    SESSION_ACTIONS = builtins.toJSON sessionActions;
     FONT = builtins.toJSON config.stylix.fonts.sansSerif.name;
     ICON_FONT = builtins.toJSON config.stylix.fonts.monospace.name;
     FONT_SIZE = toString config.stylix.fonts.sizes.popups;
