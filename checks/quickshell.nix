@@ -17,11 +17,13 @@
     assert cfg.wayland.windowManager.hyprland.quickshell.files ? "QuickSettings.qml";
     assert cfg.wayland.windowManager.hyprland.quickshell.files ? "AudioControls.qml";
     assert cfg.wayland.windowManager.hyprland.quickshell.files ? "BluetoothControls.qml";
+    assert cfg.wayland.windowManager.hyprland.quickshell.files ? "BrightnessControls.qml";
     assert lib.takeEnd 2 cfg.programs.waybar.settings.bar.modules-right == ["custom/quick-settings" "custom/power"]; ''
       echo "Checking ${host} Quickshell appearance"
       python3 ${source}/test-theme.py ${qs.package} ${qs.configs.hyprland} ${theme.assets} --default-mode ${theme.defaultMode}
       python3 ${source}/test-media-ipc.py ${qs.package} ${source}/media-osd-client.sh
       python3 ${source}/test-settings.py ${qs.configs.hyprland}
+      python3 ${source}/test-backlight.py ${lib.getExe (lib.findFirst (p: (p.meta.mainProgram or "") == "mediactl") null cfg.home.packages)}
       mkdir -p "$out/${host}/bin"
       ln -s ${lib.getExe (lib.findFirst (p: (p.meta.mainProgram or "") == "mediactl") null cfg.home.packages)} "$out/${host}/bin/mediactl"
       ln -s ${qs.configs.hyprland} "$out/${host}/config"
@@ -32,7 +34,7 @@
   fallback = builtins.all (host: let
     cfg = flake.nixosConfigurations.${host}.config.home-manager.users.jon;
   in
-    cfg.services.avizo.enable && !(cfg.wayland.windowManager.hyprland.quickshell.files ? "QuickSettings.qml") && !(cfg.wayland.windowManager.hyprland.quickshell.files ? "AudioControls.qml") && !(cfg.wayland.windowManager.hyprland.quickshell.files ? "BluetoothControls.qml")) ["pow" "sim"];
+    cfg.services.avizo.enable && !(cfg.wayland.windowManager.hyprland.quickshell.files ? "QuickSettings.qml") && !(cfg.wayland.windowManager.hyprland.quickshell.files ? "AudioControls.qml") && !(cfg.wayland.windowManager.hyprland.quickshell.files ? "BluetoothControls.qml") && !(cfg.wayland.windowManager.hyprland.quickshell.files ? "BrightnessControls.qml")) ["pow" "sim"];
   staticSystem = flake.nixosConfigurations.kit.extendModules {
     modules = [{home-manager.users.jon.programs.desktop-theme.enable = lib.mkForce false;}];
   };

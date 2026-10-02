@@ -70,6 +70,7 @@ run(
     config + "/QuickSettings.qml",
     config + "/AudioControls.qml",
     config + "/BluetoothControls.qml",
+    config + "/BrightnessControls.qml",
     fixture,
 )
 run(

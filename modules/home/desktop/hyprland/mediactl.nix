@@ -48,6 +48,7 @@
             echo "  dark"
             echo "  light"
             echo "  sunset"
+            echo "  brightness get | set PERCENT (1-100, backlight only)"
             echo "  help"
         }
 
@@ -142,8 +143,14 @@
           fi
         }
 
+        ${builtins.readFile ./backlight.sh}
+
         cmd="''${1-help}"
         case "$cmd" in
+          brightness)
+            shift
+            mediactl_brightness "$@"
+            ;;
           down | up | mute | mic | play | prev | next | rewind | forward | shift | light | dark | sunset)
             mediactl_$cmd
             ;;

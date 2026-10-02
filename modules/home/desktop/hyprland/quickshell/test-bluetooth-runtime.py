@@ -39,6 +39,7 @@ run(
             "QuickSettings.qml",
             "AudioControls.qml",
             "BluetoothControls.qml",
+            "BrightnessControls.qml",
         ]
     ],
     fixture,

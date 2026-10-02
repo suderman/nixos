@@ -10,6 +10,7 @@ Scope {
   id: root
   property bool open: false
   property bool panelHovered: false
+  property alias brightness: brightnessControls
   property alias audio: audioControls
   property alias bluetooth: bluetoothControls
   onOpenChanged: Quickshell.execDetached(@WAYBAR_REFRESH@)
@@ -240,6 +241,11 @@ Scope {
               Layout.preferredWidth: 1
             }
           }
+        }
+        BrightnessControls {
+          id: brightnessControls
+          active: root.open
+          Layout.fillWidth: true
         }
         AudioControls {
           id: audioControls

@@ -23,6 +23,9 @@ Scope {
         if (!item.keepOpen) item.command = ["python3", "-c", "from pathlib import Path; import sys; p=Path(sys.argv[1]); p.write_text((p.read_text() if p.exists() else '') + sys.argv[2] + '\\n')", logfile, item.id];
       });
     }
+    function brightnessSnapshot(): string {
+      return JSON.stringify({available: settings.brightness.available, percentage: settings.brightness.available ? settings.brightness.percentage : null, failed: settings.brightness.failed, active: settings.brightness.active, open: settings.open});
+    }
     function audioSnapshot(): string {
       const audio = settings.audio;
       return JSON.stringify({

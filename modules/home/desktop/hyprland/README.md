@@ -55,6 +55,11 @@ notification silence, and night light keep it open. Theme choices sit in one row
 labels. Failed controls get a red border and an error tooltip, not footer text.
 Waybar keeps power at the far right, with settings beside it. The cog uses the
 accent color while the panel is open, including when opened by keyboard.
+A brightness slider appears when a backlight device is available. It sets
+1-100% through `mediactl brightness set`, reusing `lightctl` and its OSD.
+Brightness keys keep their existing step behavior. While open, the panel reads
+the backlight every 500 ms to follow keys and external changes; reads stop when
+closed. Missing backlights hide the slider. Kit keeps its gamma controls.
 Audio stays inline. The speaker and microphone buttons toggle their default
 devices' mute state. The output slider sets 0-100%; an external boost above 100%
 is displayed without changing it. The current output row expands a scrollable
@@ -179,6 +184,20 @@ slider/mute clicks, media-key sync, external boost, output switching with an
 active stream, and device removal/reappearance. It never plays sound on physical
 hosts. PipeWire server restart is a separate upstream limitation, not covered by
 the passing device-loss check.
+
+For laptop brightness, use the same disposable Sim wrapper:
+
+```sh
+python3 modules/home/desktop/hyprland/quickshell/test-brightness-runtime.py \
+  /nix/store/<quickshell-check> \
+  /nix/store/<quickshell-package> /path/to/sim-user-wrapper
+```
+
+This substitutes only backlight hardware responses. Native slider clicks, drags,
+keyboard input, compiled media commands, and the Quickshell OSD remain real.
+It checks range limits, rapid writes, external changes, missing devices, failed
+writes, and polling only while open. Real backlight response and permissions
+still need acceptance on Cog.
 
 For Bluetooth, use the test-only Python environment exported by the check:
 

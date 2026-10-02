@@ -73,6 +73,12 @@ assert (
 )
 assert "Timer" not in bluetooth and "Process" not in bluetooth
 assert "discovering =" not in bluetooth and ".pair()" not in bluetooth
+brightness = Path(sys.argv[1]).joinpath("BrightnessControls.qml").read_text()
+assert '["mediactl", "brightness", "get"]' in brightness
+assert '["mediactl", "brightness", "set", String(value)]' in brightness
+assert "from: 1" in brightness and "to: 100" in brightness
+assert "running: root.active" in brightness and "visible: available" in brightness
+assert "onMoved: root.request(value)" in brightness
 print(
     "Quick settings command wiring, native audio/Bluetooth and single idle-inhibitor ownership: passed"
 )
