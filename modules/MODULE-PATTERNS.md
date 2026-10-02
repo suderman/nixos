@@ -98,6 +98,7 @@ This keeps:
 ## Authoring guidance
 
 - Follow the directory intent before creating new paths or abstractions.
+- A module with multiple files must use a named directory with `default.nix` as its entry point. Keep its helpers, assets, and tests inside that directory. Single-file modules may remain standalone `.nix` files. Flake check registrations stay in `checks/` and reference the module-owned tests.
 - Prefer adding a new optional module under `options/` instead of hardcoding feature config into `configs/`.
 - If a module only makes sense on graphical machines, put it under `desktop`, not under the always-on `default` tree.
 - If config is shared by the same user across hosts, prefer `modules/home/users/<name>` over duplicating it per host.

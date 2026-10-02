@@ -64,6 +64,13 @@
   services.sunshine = {
     enable = true;
     settings.encoder = "nvenc";
+    laptop = {
+      enable = true;
+      monitor = builtins.head config.home-manager.users.jon.wayland.windowManager.hyprland.lua.monitors;
+      # Use an advertised 16:9 mode until physical 3:2 support is resolved.
+      mode = "2560x1440@60Hz";
+      scale = "1.25";
+    };
   };
 
   # Enable ollama server

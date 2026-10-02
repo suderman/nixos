@@ -14,8 +14,43 @@
     runtimeInputs = [config.programs.hyprland.package pkgs.jq pkgs.coreutils];
     text = builtins.readFile ./sunshine-phone.sh;
   };
+  laptopProfiles = {
+    normal = lib.getAttrs ["output" "mode" "scale"] cfg.laptop.monitor;
+    laptop = laptopProfiles.normal // {inherit (cfg.laptop) mode scale;};
+  };
+  laptop = pkgs.writeShellApplication {
+    name = "sunshine-laptop";
+    runtimeInputs = [config.programs.hyprland.package pkgs.jq pkgs.coreutils];
+    text = ''
+      normalProfile=${lib.escapeShellArg (builtins.toJSON laptopProfiles.normal)}
+      laptopProfile=${lib.escapeShellArg (builtins.toJSON laptopProfiles.laptop)}
+      ${builtins.readFile ./sunshine-laptop.sh}
+    '';
+  };
 in {
+  options.services.sunshine.laptop = {
+    enable = lib.mkEnableOption "the Laptop application for the existing Hyprland output";
+    monitor = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.either lib.types.str lib.types.bool);
+      description = "Normal Home Manager Hyprland monitor declaration to restore.";
+    };
+    mode = lib.mkOption {
+      type = lib.types.str;
+      description = "Temporary physical output mode, such as 2560x1440@60Hz.";
+    };
+    scale = lib.mkOption {
+      type = lib.types.str;
+      description = "Temporary Hyprland output scale.";
+    };
+  };
+
   config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = !cfg.laptop.enable || config.programs.hyprland.enable;
+        message = "The Sunshine Laptop application requires Hyprland.";
+      }
+    ];
     services.sunshine = {
       package = lib.mkDefault pkgs.unstable.sunshine;
       settings = {
@@ -28,17 +63,28 @@ in {
       applications.apps =
         [{name = "Desktop";}]
         ++ lib.optional config.programs.hyprland.enable {
-          name = "Desktop (phone)";
+          name = "Phone";
           prep-cmd = [
             {
               do = "${phone}/bin/sunshine-phone start";
               undo = "${phone}/bin/sunshine-phone reset";
             }
           ];
+        }
+        ++ lib.optional cfg.laptop.enable {
+          name = "Laptop";
+          prep-cmd = [
+            {
+              do = "${laptop}/bin/sunshine-laptop start";
+              undo = "${laptop}/bin/sunshine-laptop reset";
+            }
+          ];
         };
     };
 
-    environment.systemPackages = lib.optional config.programs.hyprland.enable phone;
+    environment.systemPackages =
+      lib.optional config.programs.hyprland.enable phone
+      ++ lib.optional cfg.laptop.enable laptop;
 
     # FFmpeg loads driver libraries dynamically, including libcuda for NVENC.
     systemd.user.services.sunshine.environment.LD_LIBRARY_PATH = "/run/opengl-driver/lib";

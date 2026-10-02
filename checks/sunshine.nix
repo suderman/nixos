@@ -4,11 +4,18 @@
   ...
 }: let
   lib = pkgs.lib;
+  module = ../modules/nixos/desktop/default/options/sunshine;
   cfg = flake.nixosConfigurations.kit.config;
   sunshine = cfg.services.sunshine;
   firewall = cfg.networking.firewall;
   persistence = cfg.home-manager.users.jon.persist.storage.directories;
   phone = lib.findFirst (package: lib.getName package == "sunshine-phone") null cfg.environment.systemPackages;
+  laptop = lib.findFirst (package: lib.getName package == "sunshine-laptop") null cfg.environment.systemPackages;
+  normalMonitor = builtins.head cfg.home-manager.users.jon.wayland.windowManager.hyprland.lua.monitors;
+  profiles = {
+    normal = lib.getAttrs ["output" "mode" "scale"] normalMonitor;
+    laptop = profiles.normal // {inherit (sunshine.laptop) mode scale;};
+  };
 in
   assert sunshine.enable && sunshine.autoStart;
   assert !sunshine.capSysAdmin && !sunshine.openFirewall;
@@ -28,16 +35,28 @@ in
   };
   assert builtins.elem "sunshine.kit" cfg.services.traefik.internalHostNames;
   assert cfg.services.traefik.records."sunshine.kit" == cfg.networking.address;
-  assert phone != null;
+  assert phone != null && laptop != null;
+  assert sunshine.laptop.enable;
+  assert sunshine.laptop.monitor == normalMonitor;
+  assert profiles.laptop.output == normalMonitor.output;
   assert sunshine.applications.apps
   == [
     {name = "Desktop";}
     {
-      name = "Desktop (phone)";
+      name = "Phone";
       prep-cmd = [
         {
           do = "${phone}/bin/sunshine-phone start";
           undo = "${phone}/bin/sunshine-phone reset";
+        }
+      ];
+    }
+    {
+      name = "Laptop";
+      prep-cmd = [
+        {
+          do = "${laptop}/bin/sunshine-laptop start";
+          undo = "${laptop}/bin/sunshine-laptop reset";
         }
       ];
     }
@@ -60,6 +79,8 @@ in
     pkgs.runCommand "sunshine-check" {nativeBuildInputs = [pkgs.bash pkgs.jq pkgs.python3];} ''
       bash -n ${pkgs.writeText "sunshine-firewall.sh" firewall.extraCommands}
       test -x ${phone}/bin/sunshine-phone
-      python ${./sunshine-phone.py} ${../modules/nixos/desktop/default/options/sunshine-phone.sh}
+      test -x ${laptop}/bin/sunshine-laptop
+      python ${module}/sunshine-phone.py ${module}/sunshine-phone.sh
+      python ${module}/sunshine-laptop.py ${module}/sunshine-laptop.sh ${pkgs.writeText "sunshine-laptop-profiles.json" (builtins.toJSON profiles)}
       touch "$out"
     ''
