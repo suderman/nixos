@@ -14,7 +14,7 @@
   stateDir = ".local/state/pi";
   taskDropRoot = "${config.home.homeDirectory}/${config.home.directories.DOWNLOAD.path}";
   taskDropArchive = "${taskDropRoot}/.pi-tasks";
-  taskDropPromptRoot = "${config.home.homeDirectory}/.agents/pi/task-drop-prompts";
+  taskDropPromptRoot = "${config.home.homeDirectory}/.agents/harnesses/pi/task-drop-prompts";
   herdrPackage = config.programs.herdr.package;
 
   piStylixTheme = pkgs.writeShellApplication {
@@ -22,7 +22,7 @@
     runtimeInputs = [pkgs.coreutils];
     text = let
       palette = config.lib.stylix.colors.withHashtag;
-      template = builtins.fromJSON (builtins.readFile "${flake.inputs.agents}/pi/themes/catppuccin-mocha.json");
+      template = builtins.fromJSON (builtins.readFile "${flake.inputs.agents}/harnesses/pi/themes/catppuccin-mocha.json");
       theme = pkgs.writeText "pi-stylix-theme.json" (builtins.toJSON (template
         // {
           name = "stylix";
@@ -69,7 +69,7 @@
   piDcpPackageFix = pkgs.writeShellApplication {
     name = "pi-fix-dcp-package";
     runtimeInputs = [pkgs.coreutils pkgs.jq];
-    text = builtins.readFile "${flake.inputs.agents}/pi/fix-dcp-package";
+    text = builtins.readFile "${flake.inputs.agents}/harnesses/pi/fix-dcp-package";
   };
 
   # Pi owns one writable home. This wrapper loads secrets, fixes package metadata,
@@ -264,10 +264,10 @@ in {
 
     home.activation.piAgentConfiguration = lib.hm.dag.entryAfter ["agentConfigurationCheckout"] ''
       $DRY_RUN_CMD env \
-        PATH=${lib.makeBinPath [pkgs.bash pkgs.coreutils pkgs.jq]}:$PATH \
+        PATH=${lib.makeBinPath [pkgs.bash pkgs.coreutils pkgs.jq pkgs.python3]}:$PATH \
         PI_CODING_AGENT_DIR=${config.home.homeDirectory}/${agentDir} \
         XDG_STATE_HOME=${config.home.homeDirectory}/.local/state \
-        ${config.home.homeDirectory}/.agents/pi/bootstrap
+        ${config.home.homeDirectory}/.agents/harnesses/pi/bootstrap
     '';
 
     # Preserve writable Pi theme files; bootstrap leaves this generated entry alone.

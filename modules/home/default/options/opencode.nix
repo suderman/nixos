@@ -72,10 +72,10 @@ in {
 
     home.activation.openCodeAgentConfiguration = lib.hm.dag.entryAfter ["agentConfigurationCheckout"] ''
       $DRY_RUN_CMD env \
-        PATH=${lib.makeBinPath [pkgs.bash pkgs.coreutils]}:$PATH \
+        PATH=${lib.makeBinPath [pkgs.bash pkgs.coreutils pkgs.python3]}:$PATH \
         OPENCODE_CONFIG_DIR=${config.home.homeDirectory}/${cfgDir} \
         XDG_STATE_HOME=${config.home.homeDirectory}/.local/state \
-        ${config.home.homeDirectory}/.agents/opencode/bootstrap
+        ${config.home.homeDirectory}/.agents/harnesses/opencode/bootstrap
     '';
 
     # Lazy typing
