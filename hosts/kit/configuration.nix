@@ -60,12 +60,10 @@
     ];
   };
 
-  # Screen sharing
+  # Share the existing Hyprland desktop over LAN/Tailscale.
   services.sunshine = {
-    enable = false;
-    autoStart = true;
-    capSysAdmin = true; # only needed for Wayland -- omit this when using with Xorg
-    openFirewall = true;
+    enable = true;
+    settings.encoder = "nvenc";
   };
 
   # Enable ollama server

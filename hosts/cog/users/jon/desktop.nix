@@ -1,4 +1,12 @@
-_: {
+{pkgs, ...}: {
+  home.packages = [pkgs.moonlight-qt];
+  persist.storage.directories = [
+    {
+      directory = ".config/Moonlight Game Streaming Project";
+      mode = "0700";
+    }
+  ];
+
   # Hyprland embedded display (laptop)
   wayland.windowManager.hyprland = {
     lua = {
