@@ -13,7 +13,8 @@
             (lib.mapAttrsToList
               (_: directory: "${user.home.homeDirectory}/${directory.path}")
               (lib.filterAttrs (_: directory: directory.enable && directory.sync && directory.persist != null) (user.home.directories or {})))
-            ++ lib.optionals (user.programs.hermes.enable or false) ["${user.home.homeDirectory}/.hermes"];
+            ++ lib.optionals (user.programs.hermes.enable or false) ["${user.home.homeDirectory}/.hermes"]
+            ++ lib.optionals (user.services.recall.enable or false) ["${user.home.homeDirectory}/.local/share/recall"];
         })
       (config.home-manager.users or {}))
 

@@ -108,6 +108,9 @@
     # <https://github.com/suderman/agents>
     agents.url = "github:suderman/agents";
 
+    # Recall capture and archive CLI, pinned to the reviewed implementation.
+    recall.url = "git+https://github.com/suderman/recall.git?rev=f4410e802fe7a71521e5d4738a2e26a1459d232f";
+
     # Speech-to-text
     # <https://github.com/cjpais/Handy>
     handy.url = "github:cjpais/Handy";
