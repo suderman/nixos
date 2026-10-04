@@ -29,6 +29,12 @@ direct edit makes every managed transition fail validation.
 authoritative for target membership; the identity-rotation check rejects
 missing or stale NixOS, Home Manager, and user/service identity entries.
 
+A host with `hosts/<name>/fleet-root-independent` is not a fleet root target.
+The host-key generator skips it too. This is an explicit trust boundary, not a
+way to hide a normal fleet host from rotation. Such a host must not receive the
+fleet root, and needs its own documented key recovery and rotation procedure.
+See [dot's runbook](../../hosts/dot/README.md).
+
 The idle contract is:
 
 - `status` is `idle`

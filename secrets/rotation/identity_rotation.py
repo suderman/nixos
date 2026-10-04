@@ -88,6 +88,7 @@ def discover_targets(repository: Path) -> dict[str, set[str]]:
         if path.is_dir()
         and (path / "configuration.nix").is_file()
         and path.name != "iso"
+        and not (path / "fleet-root-independent").exists()
     }
     missing_host_keys = sorted(
         host_name

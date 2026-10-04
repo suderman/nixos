@@ -18,6 +18,8 @@ nixos add host
 
 - `cog`
   [Framework laptop](https://github.com/suderman/nixos/tree/main/hosts/cog) ⚙
+- `dot`
+  [Linode host preparation, bootstrap and recovery](dot/README.md)
 - `eve`
   [2009 Mac Pro (at work)](https://github.com/suderman/nixos/tree/main/hosts/eve)
   🌒
