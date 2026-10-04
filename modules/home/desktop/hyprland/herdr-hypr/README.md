@@ -16,6 +16,7 @@ herdr-hypr list                  # Show mappings, labels, and foreground cwd
 herdr-hypr goto                  # Explicitly switch to this context's placement
 herdr-hypr unpair                # Clear the pairing; leave windows untouched
 herdr-hypr cdp                   # Print this context's live CDP endpoint
+herdr-hypr cdp --start           # Start it if absent and wait for its endpoint
 ```
 
 Run `pair` again on another Hyprland workspace to move all existing owned
@@ -26,17 +27,23 @@ Herdr's temporary shortcut is **Alt+Z, then Alt+P** (`prefix+alt+p`). It runs
 `pair` with Herdr's selected pane context. No global Hyprland binding is added:
 a compositor-launched shell does not know which Herdr pane is the caller.
 
-Launch the owned browser before using browser tools in a new Pi session.
 The trial changes Pi's existing `chrome-devtools` MCP launcher to
-`herdr-hypr devtools --no-usage-statistics`. It connects to this context's
-endpoint inside Herdr and keeps port 9222 outside Herdr. Existing Pi sessions
-need `/reload` after activation. If tools connected before the owned browser
-started, launch `chromium-agent` and reconnect `chrome-devtools` through `/mcp`.
+`herdr-hypr devtools --no-usage-statistics`. Inside Herdr, it starts the owned
+browser if absent, waits up to 15 seconds for its endpoint, then connects MCP.
+Outside Herdr it keeps port 9222. Existing Pi sessions need `/reload` after
+activation. Reconnect `chrome-devtools` through `/mcp` if tools are unavailable
+or an existing Pi pane moves to a different Herdr workspace.
 Other MCP clients can use:
 
 ```sh
-npx -y chrome-devtools-mcp@latest --browser-url="$(herdr-hypr cdp)" --no-usage-statistics
+endpoint=$(herdr-hypr cdp --start) || exit 1
+npx -y chrome-devtools-mcp@latest --browser-url="$endpoint" --no-usage-statistics
 ```
+
+Direct CDP fallback must use that same resolved endpoint. Never read another
+workspace's port file or fall back to 9222 when an owned lookup fails.
+`chromium-agent --help` exits without starting a browser. Shared browser skills
+in `~/.agents` describe this ownership rule.
 
 ## Mechanism and state
 
@@ -103,7 +110,9 @@ herdr-hypr cdp
 `route` prints the address, Herdr ID, and destination when it moves a window.
 Read a browser's `/proc/<pid>/cmdline` and its runtime `herdr.sock` symlink to
 check server ownership. `cdp` checks the browser's singleton-lock PID and class
-before returning a port, rather than trusting a stale port file.
+before returning a port, rather than trusting a stale port file. Startup logs
+from `cdp --start` and `devtools` are in `<owned-profile>/launch.log`. Failed
+startup reports that path and never selects another browser.
 
 ## Restart boundaries and limits
 
@@ -118,6 +127,10 @@ before returning a port, rather than trusting a stale port file.
 - NixOS/Home Manager rebuild keeps live metadata and browser processes. Reload
   Hyprland after changing feature snippets. New Pi connections use the new
   launcher; already-connected MCP servers do not retarget themselves.
+- Cog's scheduled upgrade uses `github:suderman/nixos#cog`, not this local
+  checkout. Until the trial is published upstream, that upgrade can remove the
+  helper and restore global MCP settings. Reapply this checkout to resume the
+  trial. Publishing or changing upgrade policy requires a separate decision.
 - Closing/reopening an owned browser keeps its disposable runtime profile and
   current pairing. Closing a browser does not remove its profile.
 - Only local Wayland agent Chromium windows are tested. Other browsers, remote

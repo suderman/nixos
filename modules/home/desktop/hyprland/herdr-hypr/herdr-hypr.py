@@ -6,6 +6,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 
@@ -134,17 +135,53 @@ def browser_pid(directory):
 def cdp_endpoint(owned_class):
     directory = profile(owned_class)
     # Reject an old port file after the browser exits, even if its port is reused.
-    pid = browser_pid(directory)
-    cmdline = Path(f"/proc/{pid}/cmdline").read_bytes().replace(b"\0", b" ")
-    if (
-        f" --class={owned_class} ".encode() not in cmdline
-        or f" --user-data-dir={directory} ".encode() not in cmdline
-    ):
-        raise Error("owned agent browser is not running; launch chromium-agent first")
-    port = (directory / "DevToolsActivePort").read_text().splitlines()[0]
+    try:
+        pid = browser_pid(directory)
+        cmdline = Path(f"/proc/{pid}/cmdline").read_bytes().replace(b"\0", b" ")
+        if (
+            f" --class={owned_class} ".encode() not in cmdline
+            or f" --user-data-dir={directory} ".encode() not in cmdline
+        ):
+            raise Error(
+                "owned agent browser is not running; launch chromium-agent first"
+            )
+        port = (directory / "DevToolsActivePort").read_text().splitlines()[0]
+    except (OSError, ValueError, IndexError) as error:
+        raise Error(
+            f"chromium-agent for {owned_class.rsplit('-', 1)[1]} is not ready; "
+            "run herdr-hypr cdp --start"
+        ) from error
     if not port.isascii() or not port.isdigit() or not 1 <= int(port) <= 65535:
         raise Error("invalid DevToolsActivePort")
     return f"http://127.0.0.1:{port}"
+
+
+def start_browser(owned_class):
+    try:
+        return cdp_endpoint(owned_class)
+    except Error:
+        pass
+    directory = profile(owned_class)
+    directory.mkdir(parents=True, exist_ok=True, mode=0o700)
+    log = directory / "launch.log"
+    with log.open("w") as output:
+        process = subprocess.Popen(
+            ["chromium-agent", "--new-window"],
+            stdout=output,
+            stderr=output,
+            start_new_session=True,
+        )
+    deadline = time.monotonic() + 15
+    while time.monotonic() < deadline:
+        try:
+            return cdp_endpoint(owned_class)
+        except Error:
+            if process.poll() not in (None, 0):
+                break
+            time.sleep(0.1)
+    raise Error(
+        f"owned browser did not start; inspect {log}; no other browser was used"
+    )
 
 
 def main(args):
@@ -153,7 +190,7 @@ def main(args):
         endpoint = "http://127.0.0.1:9222"
         if os.environ.get("HERDR_WORKSPACE_ID"):
             _, owned_class, _ = context()
-            endpoint = cdp_endpoint(owned_class)
+            endpoint = start_browser(owned_class)
         # Keep the existing MCP server and its flags, only select its browser.
         # pi-lens-ignore: B606
         os.execvp(
@@ -190,10 +227,10 @@ def main(args):
                 )
         return
     if command not in ("pair", "unpair", "goto", "cdp", "launch") or (
-        command != "launch" and len(args) != 1
+        command != "launch" and len(args) != 1 and args != ["cdp", "--start"]
     ):
         raise Error(
-            "usage: herdr-hypr pair|unpair|goto|list|cdp|devtools (launch/route are internal)"
+            "usage: herdr-hypr pair|unpair|goto|list|cdp [--start]|devtools (launch/route are internal)"
         )
     workspace, owned_class, socket = context()
     wid = workspace["workspace_id"]
@@ -221,7 +258,11 @@ def main(args):
         # pi-lens-ignore: B606
         os.execvp(args[1], args[1:] + flags)  # nosec B606
     if command == "cdp":
-        print(cdp_endpoint(owned_class))
+        print(
+            start_browser(owned_class)
+            if "--start" in args
+            else cdp_endpoint(owned_class)
+        )
         return
     if command == "unpair":
         herdr(

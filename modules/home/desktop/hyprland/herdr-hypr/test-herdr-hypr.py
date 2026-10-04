@@ -212,6 +212,81 @@ class PairingTest(unittest.TestCase):
         ):
             bridge.cdp_endpoint(self.owner)
 
+    def test_missing_browser_explains_owned_startup(self):
+        with (
+            patch.object(bridge, "browser_pid", side_effect=FileNotFoundError),
+            self.assertRaisesRegex(bridge.Error, "chromium-agent.*wA.*cdp --start"),
+        ):
+            bridge.cdp_endpoint(self.owner)
+
+    def test_start_launches_only_current_context_and_waits_for_endpoint(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with (
+                patch.object(bridge, "profile", return_value=Path(directory)),
+                patch.object(
+                    bridge,
+                    "cdp_endpoint",
+                    side_effect=[bridge.Error("not running"), "http://127.0.0.1:34567"],
+                ),
+                patch.object(bridge.subprocess, "Popen") as launch,
+            ):
+                self.assertEqual(
+                    bridge.start_browser(self.owner), "http://127.0.0.1:34567"
+                )
+            self.assertEqual(
+                launch.call_args.args[0], ["chromium-agent", "--new-window"]
+            )
+            self.assertTrue(launch.call_args.kwargs["start_new_session"])
+
+    def test_start_reuses_live_owned_endpoint_without_launch(self):
+        with (
+            patch.object(bridge, "cdp_endpoint", return_value="http://127.0.0.1:34567"),
+            patch.object(bridge.subprocess, "Popen") as launch,
+        ):
+            self.assertEqual(bridge.start_browser(self.owner), "http://127.0.0.1:34567")
+        launch.assert_not_called()
+
+    def test_failed_start_reports_owned_log(self):
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            patch.object(bridge, "profile", return_value=Path(directory)),
+            patch.object(bridge, "cdp_endpoint", side_effect=bridge.Error("not ready")),
+            patch.object(bridge.subprocess, "Popen") as launch,
+            self.assertRaisesRegex(
+                bridge.Error, "launch.log; no other browser was used"
+            ),
+        ):
+            launch.return_value.poll.return_value = 1
+            bridge.start_browser(self.owner)
+        launch.assert_called_once()
+
+    def test_devtools_failed_start_never_connects_elsewhere(self):
+        os.environ["HERDR_WORKSPACE_ID"] = "wA"
+        with (
+            patch.object(
+                bridge, "context", return_value=(self.workspace, self.owner, "/socket")
+            ),
+            patch.object(
+                bridge, "start_browser", side_effect=bridge.Error("start failed")
+            ),
+            patch.object(bridge.os, "execvp") as execute,
+            self.assertRaisesRegex(bridge.Error, "start failed"),
+        ):
+            bridge.main(["devtools"])
+        execute.assert_not_called()
+
+    def test_cdp_start_resolves_current_owner(self):
+        with (
+            patch.object(
+                bridge, "context", return_value=(self.workspace, self.owner, "/socket")
+            ),
+            patch.object(
+                bridge, "start_browser", return_value="http://127.0.0.1:34567"
+            ) as start,
+        ):
+            bridge.main(["cdp", "--start"])
+        start.assert_called_once_with(self.owner)
+
     def test_devtools_outside_herdr_keeps_global_port(self):
         with patch.object(bridge.os, "execvp") as execute:
             bridge.main(["devtools", "--no-usage-statistics"])
@@ -223,7 +298,9 @@ class PairingTest(unittest.TestCase):
             patch.object(
                 bridge, "context", return_value=(self.workspace, self.owner, "/socket")
             ),
-            patch.object(bridge, "cdp_endpoint", return_value="http://127.0.0.1:34567"),
+            patch.object(
+                bridge, "start_browser", return_value="http://127.0.0.1:34567"
+            ),
             patch.object(bridge.os, "execvp") as execute,
         ):
             bridge.main(["devtools", "--no-usage-statistics"])
