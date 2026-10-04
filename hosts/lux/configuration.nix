@@ -22,6 +22,23 @@
   # Keep local LAN traffic off Tailscale.
   services.tailscale.preferLocalRoute = "10.1.0.0/16";
 
+  # The RAID enclosure owns member health; monitor its logical device only.
+  services.storage-health = {
+    enable = true;
+    volumes = {
+      boot = {};
+      main = {};
+      data = {
+        mounts = ["/mnt/data" "/data"];
+        services = ["docker-backblaze.service" "docker-immich-server.service"];
+      };
+      pool = {
+        mounts = ["/mnt/pool" "/media"];
+        services = ["docker-backblaze.service" "samba-smbd.service" "nfs-server.service"];
+      };
+    };
+  };
+
   # Snapshots and backups
   services.btrbk.volumes = {
     "/mnt/main" = [

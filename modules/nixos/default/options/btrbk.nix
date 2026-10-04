@@ -3,6 +3,7 @@
   lib,
   pkgs,
   perSystem,
+  utils,
   flake,
   ...
 }: let
@@ -19,6 +20,7 @@
   # Enable if there are any volumes set (default true)
   enable = builtins.length (builtins.attrNames cfg.volumes) > 0;
 in {
+  options.services.btrbk.isolateVolumes = lib.mkEnableOption "independent bounded snapshot sources and backup destinations";
   options.services.btrbk.volumes = mkOption {
     type = types.attrs;
     default = {
@@ -54,48 +56,139 @@ in {
           then nextSshKey
           else sshKey;
       };
-    in {
-      # All snapshots are retained for at least 6 hours regardless of other policies.
-      "snapshots" = {
-        onCalendar = "*:00";
-        settings =
-          shared
-          // {
-            snapshot_create = "onchange";
-            snapshot_preserve_min = "6h";
-            snapshot_preserve = "48h 7d 4w";
-            volume =
-              builtins.mapAttrs (path: _targets: {
-                subvolume.storage.snapshot_name = builtins.baseNameOf path;
-              })
-              cfg.volumes;
-          };
+      split = lib.listToAttrs (lib.concatLists (lib.mapAttrsToList (path: targets: let
+        name = builtins.baseNameOf path;
+        volume = {"${path}".subvolume.storage.snapshot_name = name;};
+      in
+        [
+          (lib.nameValuePair "snapshots-${name}" {
+            onCalendar = "*:00";
+            settings =
+              shared
+              // {
+                snapshot_create = "onchange";
+                snapshot_preserve_min = "6h";
+                snapshot_preserve = "48h 7d 4w";
+                inherit volume;
+              };
+          })
+        ]
+        ++ lib.imap0 (index: target:
+          lib.nameValuePair "backups-${name}-${toString index}" {
+            onCalendar = "00:15";
+            settings =
+              shared
+              // {
+                stream_compress = "lz4";
+                snapshot_create = "no";
+                snapshot_preserve_min = "all";
+                target_preserve_min = "1d";
+                target_preserve = "7d 4w 6m";
+                volume = {"${path}" = volume.${path} // {target.${target} = {};};};
+              };
+          })
+        targets)
+      cfg.volumes));
+    in
+      (lib.optionalAttrs cfg.isolateVolumes split)
+      // {
+        # All snapshots are retained for at least 6 hours regardless of other policies.
+        "snapshots" = {
+          onCalendar =
+            if cfg.isolateVolumes
+            then null
+            else "*:00";
+          settings =
+            shared
+            // {
+              snapshot_create = "onchange";
+              snapshot_preserve_min = "6h";
+              snapshot_preserve = "48h 7d 4w";
+              volume =
+                builtins.mapAttrs (path: _targets: {
+                  subvolume.storage.snapshot_name = builtins.baseNameOf path;
+                })
+                cfg.volumes;
+            };
+        };
+
+        # Send snapshots to backup targets (none declared here) at 12:15 every night.
+        "backups" = {
+          onCalendar =
+            if cfg.isolateVolumes
+            then null
+            else "00:15";
+          settings =
+            shared
+            // {
+              stream_compress = "lz4";
+              snapshot_create = "no";
+              snapshot_preserve_min = "all";
+              target_preserve_min = "1d";
+              target_preserve = "7d 4w 6m";
+              volume =
+                builtins.mapAttrs (path: targets: {
+                  subvolume.storage.snapshot_name = builtins.baseNameOf path;
+                  target = builtins.listToAttrs (map (t: {
+                      name = t;
+                      value = {};
+                    })
+                    targets);
+                })
+                cfg.volumes;
+            };
+        };
       };
 
-      # Send snapshots to backup targets (none declared here) at 12:15 every night.
-      "backups" = {
-        onCalendar = "00:15";
-        settings =
-          shared
-          // {
-            stream_compress = "lz4";
-            snapshot_create = "no";
-            snapshot_preserve_min = "all";
-            target_preserve_min = "1d";
-            target_preserve = "7d 4w 6m";
-            volume =
-              builtins.mapAttrs (path: targets: {
-                subvolume.storage.snapshot_name = builtins.baseNameOf path;
-                target = builtins.listToAttrs (map (t: {
-                    name = t;
-                    value = {};
-                  })
-                  targets);
-              })
-              cfg.volumes;
-          };
+    # Oct 3, 2026: one failed source/destination must not hold unrelated backups.
+    systemd.services = lib.mkIf cfg.isolateVolumes (lib.mapAttrs' (name: instance: let
+      path = builtins.head (builtins.attrNames instance.settings.volume);
+      volumeName = builtins.baseNameOf path;
+      hosts = "{" + lib.concatStringsSep "," (builtins.attrNames flake.nixosConfigurations) + "}";
+      directories = pkgs.writeShellScript "btrbk-directories-${volumeName}" ''
+        set -e
+        ${pkgs.systemd}/bin/systemctl start ${lib.escapeShellArg "${utils.escapeSystemdPath path}.mount"}
+        exec ${pkgs.coreutils}/bin/mkdir -p ${path}/backups/${hosts}
+      '';
+    in
+      lib.nameValuePair "btrbk-${name}" {
+        unitConfig.ConditionPathExists = "!/run/storage-health/blocked/${volumeName}";
+        serviceConfig = {
+          Slice = "btrbk.slice";
+          TimeoutStartSec =
+            if lib.hasPrefix "snapshots-" name
+            then "10min"
+            else "6h";
+          TimeoutStopSec = "15s";
+          MemoryMax = "1G";
+          MemorySwapMax = "128M";
+          TasksMax = 128;
+          CPUWeight = 20;
+          IOWeight = 20;
+          # Mount only after ConditionPathExists passes. RequiresMountsFor would
+          # queue mount dependencies before the failed-volume guard is checked.
+          # Directory setup belongs to the bounded job, not system activation.
+          ExecStartPre = ["+${directories}"];
+        };
+      }) (lib.filterAttrs (_: instance: instance.onCalendar != null) cfg.instances));
+    systemd.slices.btrbk = lib.mkIf cfg.isolateVolumes {
+      sliceConfig = {
+        MemoryHigh = "1G";
+        MemoryMax = "2G";
+        MemorySwapMax = "128M";
+        TasksMax = 256;
+        CPUWeight = 20;
+        IOWeight = 20;
       };
     };
+    programs.ssh.extraConfig = lib.mkIf cfg.isolateVolumes (lib.mkAfter ''
+      Match user btrbk
+        BatchMode yes
+        ConnectTimeout 10
+        ServerAliveInterval 15
+        ServerAliveCountMax 2
+      Match all
+    '');
 
     # Point default btrbk.conf to backup config
     environment.etc."btrbk.conf".source = "/etc/btrbk/backups.conf";
@@ -106,7 +199,9 @@ in {
       disks = attrNames config.services.btrbk.volumes;
       hosts = "{" + (concatStringsSep "," (attrNames flake.nixosConfigurations)) + "}";
     in
-      concatStringsSep "\n" (map (dir: "mkdir -p ${dir}/backups/${hosts}") disks);
+      if cfg.isolateVolumes
+      then ""
+      else concatStringsSep "\n" (map (dir: "mkdir -p ${dir}/backups/${hosts}") disks);
 
     # Write btrbk ssh keys to /etc/btrbk
     system.activationScripts.users.text = let

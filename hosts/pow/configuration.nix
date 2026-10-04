@@ -27,6 +27,19 @@
   # Bigger banana
   stylix.cursor.size = 46;
 
+  # Single-profile capacity is intentional; separate-site copies provide redundancy.
+  services.storage-health = {
+    enable = true;
+    volumes = {
+      boot = {};
+      main = {};
+      pool.devices = [
+        "${config.disko.devices.disk.hdd1.device}-part1"
+        "${config.disko.devices.disk.hdd2.device}-part1"
+      ];
+    };
+  };
+
   # Snapshots and backups
   services.btrbk.volumes = {
     "/mnt/main" = ["ssh://pow/eve/pool/backups/${config.networking.hostName}"];

@@ -42,9 +42,22 @@
       "ssh://eve/mnt/pool/backups/${hostName}"
     ];
     "/mnt/data" = ["ssh://pow/mnt/pool/backups/${hostName}"];
-    "/mnt/game" = [];
   };
-  services.btrbk.instances.snapshots.settings.volume."/mnt/game".snapshot_preserve = "7d";
+
+  # Oct 3, 2026: protect every secondary filesystem, not only disposable games.
+  services.storage-health = {
+    enable = true;
+    desktopUser = "jon";
+    volumes = {
+      boot = {};
+      main = {};
+      data = {
+        mounts = ["/mnt/data" "/data" "/home/jon/data"];
+        services = ["ollama.service"];
+      };
+      game.mounts = ["/mnt/game" "/game"];
+    };
+  };
 
   fileSystems."/home/jon/data" = {
     device = "/mnt/data/storage";

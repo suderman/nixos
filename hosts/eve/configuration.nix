@@ -26,6 +26,19 @@
   # Use freshest kernel
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
+  # Single-profile capacity is intentional; separate-site copies provide redundancy.
+  services.storage-health = {
+    enable = true;
+    volumes = {
+      boot = {};
+      main = {};
+      pool.devices = [
+        "${config.disko.devices.disk.hdd1.device}-part1"
+        "${config.disko.devices.disk.hdd2.device}-part1"
+      ];
+    };
+  };
+
   # Snapshots and backups
   services.btrbk.volumes = {
     "/mnt/main" = ["ssh://pow/mnt/pool/backups/${config.networking.hostName}"];

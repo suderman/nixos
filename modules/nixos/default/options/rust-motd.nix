@@ -23,9 +23,13 @@ in {
       global = {};
       banner = {
         color = "red";
-        command = ''
-          ${pkgs.inetutils}/bin/hostname | ${pkgs.figlet}/bin/figlet -f slant
-        '';
+        command =
+          ''
+            ${pkgs.inetutils}/bin/hostname | ${pkgs.figlet}/bin/figlet -f slant
+          ''
+          + lib.optionalString config.services.storage-health.enable ''
+            ${pkgs.coreutils}/bin/cat /run/storage-health-motd/status.txt 2>/dev/null || true
+          '';
       };
       uptime.prefix = "Up";
       memory.swap_pos = "beside";
