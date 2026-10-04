@@ -24,7 +24,13 @@ in {
         icon = "chromium";
         path = [pkgs.procps];
         text =
+          lib.optionalString (config.programs.herdr-hypr.enable or false) ''
+            if [[ -n "''${HERDR_WORKSPACE_ID:-}" ]]; then
+              exec ${lib.getExe config.programs.herdr-hypr.package} launch \
+                ${lib.getExe cfg.package} ${lib.escapeShellArgs switches} "$@"
+            fi
           ''
+          + ''
             data_dir="${cfg.dataDir}-agent"
             profile_pattern="[c]hromium.*--user-data-dir=$data_dir"
 
