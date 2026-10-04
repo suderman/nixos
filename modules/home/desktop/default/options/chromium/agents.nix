@@ -48,6 +48,7 @@ in {
           + toString (
             switches
             ++ [
+              "--class=chromium-agent"
               ''--user-data-dir=${cfg.dataDir}-agent''
               ''--disk-cache-dir=${cfg.runDir}-agent''
               ''--profile-directory=Default''
@@ -57,5 +58,17 @@ in {
           + " \"$@\"";
       })
     ];
+
+    # Agent windows share one profile/CDP endpoint and open on workspace 8.
+    wayland.windowManager.hyprland.lua.features.chromium-agent = ''
+      hl.window_rule({
+        name = "chromium-agent-workspace",
+        match = { class = "^chromium-agent.*$" },
+        workspace = "8 silent",
+        no_initial_focus = true,
+        suppress_event = "activate activatefocus",
+        tag = "+web",
+      })
+    '';
   };
 }
