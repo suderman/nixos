@@ -29,7 +29,6 @@
   programs.opencode.enable = true;
   programs.pi-coding-agent.enable = true;
   programs.mmx-cli.enable = true;
-  programs.herdr-hypr.enable = true;
 
   # User services
   services.handy.enable = true;
