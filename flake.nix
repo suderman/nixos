@@ -109,7 +109,7 @@
     agents.url = "github:suderman/agents";
 
     # Recall capture and archive CLI.
-    recall.url = "git+https://github.com/suderman/recall.git?ref=main";
+    recall.url = "github:suderman/recall/main";
 
     # Speech-to-text
     # <https://github.com/cjpais/Handy>
