@@ -5,13 +5,15 @@
 }: mode: colors: let
   # QPalette roles 0..20, shared by Qt5 and Qt6. qt6ct derives Accent from Highlight.
   roles = ["05" "01" "06" "04" "03" "02" "05" "07" "05" "00" "00" "02" "0D" "00" "0D" "0E" "01" "00" "00" "05" "04"];
-  palette = disabled: lib.concatStringsSep ", " (lib.imap0 (index: role: "#${colors.${
-    "base${
-      if disabled && builtins.elem index [0 6 8 19]
-      then "04"
-      else role
-    }"
-  }}") roles);
+  palette = disabled:
+    lib.concatStringsSep ", " (lib.imap0 (index: role: "#${colors.${
+        "base${
+          if disabled && builtins.elem index [0 6 8 19]
+          then "04"
+          else role
+        }"
+      }}")
+      roles);
   format = pkgs.formats.ini {listToValue = values: lib.concatStringsSep ", " values;};
   paletteFile = format.generate "desktop-qt-palette-${mode}.conf" {
     ColorScheme = {

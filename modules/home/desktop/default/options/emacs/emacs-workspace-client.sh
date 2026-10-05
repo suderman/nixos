@@ -14,27 +14,41 @@ params=
 identity=
 if [[ -n ${TMUX_PANE-}${TMUX-} ]]; then
   [[ -n ${TMUX_PANE-} && -n ${TMUX-} ]] || {
-    echo 'em: tmux pane or socket is missing' >&2; exit 1;
+    echo 'em: tmux pane or socket is missing' >&2
+    exit 1
   }
   socket=${TMUX%%,*}
-  [[ -S $socket ]] || { echo "em: tmux socket is unavailable: $socket" >&2; exit 1; }
-  session=$(tmux display-message -p -t "$TMUX_PANE" '#{session_id}') || {
-    echo "em: cannot resolve tmux session for pane $TMUX_PANE" >&2; exit 1;
+  [[ -S $socket ]] || {
+    echo "em: tmux socket is unavailable: $socket" >&2
+    exit 1
   }
-  [[ -n $session ]] || { echo "em: tmux returned no session for $TMUX_PANE" >&2; exit 1; }
+  session=$(tmux display-message -p -t "$TMUX_PANE" '#{session_id}') || {
+    echo "em: cannot resolve tmux session for pane $TMUX_PANE" >&2
+    exit 1
+  }
+  [[ -n $session ]] || {
+    echo "em: tmux returned no session for $TMUX_PANE" >&2
+    exit 1
+  }
   identity="tmux:$socket:$session"
   params=$(jq -nr --arg pane "$TMUX_PANE" --arg socket "$TMUX" \
     '"((edger-tmux-pane-id . \($pane|tojson)) (edger-tmux-socket . \($socket|tojson)))"')
 elif [[ ${HERDR_ENV-} == 1 || -n ${HERDR_PANE_ID-}${HERDR_SOCKET_PATH-}${HERDR_WORKSPACE_ID-} ]]; then
   [[ -n ${HERDR_PANE_ID-} && -n ${HERDR_SOCKET_PATH-} && -S $HERDR_SOCKET_PATH ]] || {
-    echo 'em: Herdr pane or socket is missing' >&2; exit 1;
+    echo 'em: Herdr pane or socket is missing' >&2
+    exit 1
   }
-  pane=$(herdr pane current --current) || { echo 'em: cannot resolve current Herdr pane' >&2; exit 1; }
+  pane=$(herdr pane current --current) || {
+    echo 'em: cannot resolve current Herdr pane' >&2
+    exit 1
+  }
   workspace=$(jq -er '.result.pane.workspace_id | select(type == "string" and length > 0)' <<<"$pane") || {
-    echo 'em: Herdr returned no workspace for calling pane' >&2; exit 1;
+    echo 'em: Herdr returned no workspace for calling pane' >&2
+    exit 1
   }
   pane_id=$(jq -er '.result.pane.pane_id | select(type == "string" and length > 0)' <<<"$pane") || {
-    echo 'em: Herdr returned no calling pane ID' >&2; exit 1;
+    echo 'em: Herdr returned no calling pane ID' >&2
+    exit 1
   }
   socket=$HERDR_SOCKET_PATH
   identity="herdr:$socket:$workspace"
@@ -49,8 +63,11 @@ fi
 # Herdr and tmux reuse short IDs when their servers restart. Socket birth time
 # and boot ID keep a surviving Emacs daemon from being mistaken for a new one.
 birth=$(stat -Lc '%d:%i:%w' -- "$socket")
-[[ $birth != *:- ]] || { echo "em: socket creation time unavailable: $socket" >&2; exit 1; }
-boot=$(< /proc/sys/kernel/random/boot_id)
+[[ $birth != *:- ]] || {
+  echo "em: socket creation time unavailable: $socket" >&2
+  exit 1
+}
+boot=$(</proc/sys/kernel/random/boot_id)
 name=em-$(printf '%s\n' "$boot:$birth:$identity" | sha256sum)
 name=${name:0:27}
 

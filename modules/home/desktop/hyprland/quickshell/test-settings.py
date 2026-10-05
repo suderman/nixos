@@ -87,7 +87,9 @@ assert "onMoved:" in audio and "root.sink.audio.volume = value" in audio
 assert "from: 0" in audio and "to: 1" in audio
 assert "Timer" not in audio and "Process" not in audio
 assert "root.outputs.length > 4 ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff" in audio
-percentage = audio.split('objectName: "volumePercentage"', 1)[1].split("AudioButton", 1)[0]
+percentage = audio.split('objectName: "volumePercentage"', 1)[1].split(
+    "AudioButton", 1
+)[0]
 assert "horizontalAlignment: Text.AlignHCenter" in percentage
 bluetooth = Path(sys.argv[1]).joinpath("BluetoothControls.qml").read_text()
 assert "import Quickshell.Bluetooth" in bluetooth

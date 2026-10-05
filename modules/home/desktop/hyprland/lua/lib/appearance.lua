@@ -49,10 +49,12 @@ function M.apply()
 	})
 	if hl.plugin.hyprbars then
 		hl.config({
-			plugin = { hyprbars = {
-				bar_color = colors.base00.rgba(0.9),
-				["col.text"] = colors.base05.rgb,
-			} },
+			plugin = {
+				hyprbars = {
+					bar_color = colors.base00.rgba(0.9),
+					["col.text"] = colors.base05.rgb,
+				},
+			},
 		})
 	end
 end
