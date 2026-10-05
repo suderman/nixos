@@ -1,0 +1,10 @@
+diff --git a/src/platform/linux/wlgrab.cpp b/src/platform/linux/wlgrab.cpp
+--- a/src/platform/linux/wlgrab.cpp
++++ b/src/platform/linux/wlgrab.cpp
+@@ -177,2 +177,5 @@ namespace wl {
++      if (dmabuf.status != dmabuf_t::WAITING) {
++        dmabuf.listen(interface.screencopy_manager, interface.dmabuf_interface, &interface.supported_modifiers, output, cursor);
++      }
++
+       // Dispatch events until we get a new frame or the timeout expires
+-      dmabuf.listen(interface.screencopy_manager, interface.dmabuf_interface, &interface.supported_modifiers, output, cursor);

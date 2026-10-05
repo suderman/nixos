@@ -76,6 +76,10 @@
   # Share the existing Hyprland desktop over LAN/Tailscale.
   services.sunshine = {
     enable = true;
+    # Guard-only backport of LizardByte/Sunshine#5748; remove after an upstream fix.
+    package = pkgs.unstable.sunshine.overrideAttrs (old: {
+      patches = (old.patches or []) ++ [../../modules/nixos/desktop/default/options/sunshine/wlr-pending-frame.patch];
+    });
     settings.encoder = "nvenc";
     laptop = {
       enable = true;

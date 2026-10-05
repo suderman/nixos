@@ -76,11 +76,17 @@ in
     mode = "0700";
   }
   persistence;
-    pkgs.runCommand "sunshine-check" {nativeBuildInputs = [pkgs.bash pkgs.jq pkgs.python3];} ''
+  assert builtins.elem (module + "/wlr-pending-frame.patch") sunshine.package.patches;
+    pkgs.runCommand "sunshine-check" {nativeBuildInputs = [pkgs.bash pkgs.jq pkgs.python3 pkgs.patch pkgs.stdenv.cc];} ''
       bash -n ${pkgs.writeText "sunshine-firewall.sh" firewall.extraCommands}
       test -x ${phone}/bin/sunshine-phone
       test -x ${laptop}/bin/sunshine-laptop
       python ${module}/sunshine-phone.py ${module}/sunshine-phone.sh
       python ${module}/sunshine-laptop.py ${module}/sunshine-laptop.sh ${pkgs.writeText "sunshine-laptop-profiles.json" (builtins.toJSON profiles)}
+      cp -r ${sunshine.package.src} source
+      chmod -R u+w source
+      cd source
+      patch -p1 --fuzz=0 < ${module}/wlr-pending-frame.patch
+      python ${module}/sunshine-wlr-pending-frame.py src/platform/linux/wlgrab.cpp
       touch "$out"
     ''
