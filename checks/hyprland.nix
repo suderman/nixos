@@ -40,7 +40,7 @@
       '';
 in
   pkgs.runCommand "hyprland-check" {
-    nativeBuildInputs = [pkgs.lua5_4 pkgs.bash pkgs.jq hyprland];
+    nativeBuildInputs = [pkgs.lua5_4 pkgs.bash pkgs.jq (lib.getBin hyprland)];
   } ''
     lua ${source}/test.lua ${source}/lua
     bash ${source}/test-workspace.sh ${source}/hypr/scripts/hypr-activeworkspace.sh
