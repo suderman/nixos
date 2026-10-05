@@ -6,6 +6,7 @@ waits cannot be made killable by systemd timeouts or cgroup limits.
 
 import fcntl
 import json
+import math
 import os
 import re
 import shutil
@@ -93,6 +94,7 @@ def mount_records():
                 "id": fields[0],
                 "dev": fields[2],
                 "type": fields[fields.index("-") + 1],
+                "source": fields[fields.index("-") + 2],
                 "ro": "ro" in fields[5].split(",") or "ro" in fields[-1].split(","),
             }
     return records
@@ -224,26 +226,100 @@ def emit(cfg, state, message, capture=True):
     state["notify_after"] = 0
 
 
+def capacity(value):
+    for unit in ["B", "KiB", "MiB", "GiB", "TiB", "PiB"]:
+        if value < 1024 or unit == "PiB":
+            return f"{value:.1f} {unit}"
+        value /= 1024
+
+
 def public_status(cfg, state):
-    lines = ["Storage (cached, no login-time disk probes):"]
-    for name in cfg["volumes"]:
+    header = ["Filesystems", "Device", "Mount", "Type", "Used", "Total"]
+    entries, warnings, timestamps = [], [], []
+    for name, policy in cfg["volumes"].items():
         volume = state.get("volumes", {}).get(name, {})
         status = volume.get("status", "not checked")
         if volume.get("failure"):
             status += "/quarantined" if volume.get("contained") else "/jobs suspended"
-        path = PUBLIC / f"{name}.json"
         sample = None
         space = "space not sampled"
+        path = PUBLIC / f"{name}.json"
         if path.exists():
             try:
-                sample = json.loads(path.read_text())
-            except (OSError, json.JSONDecodeError):
+                cached = json.loads(path.read_text())
+                valid = all(
+                    isinstance(cached[key], (int, float)) and math.isfinite(cached[key])
+                    for key in ["total", "available", "sampled"]
+                )
+                if (
+                    not valid
+                    or not 0 <= cached["available"] <= cached["total"]
+                    or cached["total"] <= 0
+                ):
+                    raise ValueError("Invalid capacity")
+                sample = cached
+            except (OSError, ValueError, KeyError, TypeError):
                 # Broken display cache must not disable storage failure detection.
                 space = "space cache invalid"
+        used, total, ratio = "?", "?", None
+        device = policy["devices"][0]
+        mount, kind = policy["mountPoint"], policy.get("fsType", "?")
         if sample:
-            age = max(0, int(time.time() - sample["sampled"]))
-            space = f"{sample['available'] / 2**30:.1f} GiB free / {sample['total'] / 2**30:.1f} GiB total; sample {age}s old"
-        lines.append(f"  {name:8} {status:30} {space}")
+            total = capacity(sample["total"])
+            used = capacity(sample["total"] - sample["available"])
+            ratio = (sample["total"] - sample["available"]) / sample["total"]
+            device = sample.get("device", device)
+            mount, kind = sample.get("mount", mount), sample.get("type", kind)
+            timestamps.append(sample["sampled"])
+            stamp = time.strftime(
+                "%Y-%m-%d %H:%M:%S %Z", time.localtime(sample["sampled"])
+            )
+            space = f"last known sample: {stamp}"
+            # Two missed five-minute samples warrant a visible stale warning.
+            if time.time() - sample["sampled"] > 600:
+                space = f"stale sample from {stamp}"
+        if len(device) > 26:
+            device = device[:25] + "…"
+        entries.append(([f"  {name}", device, mount, kind, used, total], ratio))
+        if status != "mounted" or sample is None or space.startswith("stale"):
+            reason = volume.get("failure") or volume.get("reason")
+            detail = f"; {reason}" if reason else ""
+            color = (
+                31
+                if volume.get("failure")
+                or status in ["read-only", "unavailable", "degraded"]
+                else 33
+            )
+            warnings.append(f"  \033[{color}m{name}: {status}{detail}; {space}\033[0m")
+    widths = [
+        max(len(row[i]) for row in [header] + [entry[0] for entry in entries])
+        for i in range(6)
+    ]
+    # Match rust-motd's two-space columns and bars spanning the indented rows.
+    bar_width = sum(widths) + 8 - 2
+    lines = [
+        "\033[0m"
+        + "  ".join(
+            item.ljust(width) for item, width in zip(header, widths, strict=True)
+        )
+    ]
+    for row, ratio in entries:
+        lines.append(
+            "  ".join(
+                item.ljust(width) for item, width in zip(row, widths, strict=True)
+            )
+        )
+        if ratio is not None:
+            full = int(bar_width * ratio)
+            percent = int(ratio * 100)
+            color = 32 if percent <= 75 else 33 if percent <= 95 else 31
+            lines.append(
+                f"  [\033[{color}m{'=' * full}\033[90m{'=' * (bar_width - full)}\033[0m]"
+            )
+    if timestamps:
+        stamp = time.strftime("%Y-%m-%d %H:%M:%S %Z", time.localtime(min(timestamps)))
+        lines.append(f"\033[90mStorage cached; oldest sample: {stamp}\033[0m")
+    lines.extend(warnings)
     PUBLIC.mkdir(mode=0o755, exist_ok=True)
     atomic(PUBLIC / "status.txt", "\n".join(lines) + "\n")
     (PUBLIC / "status.txt").chmod(0o644)
@@ -288,6 +364,9 @@ def sample_space(cfg, name):
                     "sampled": time.time(),
                     "total": space.f_blocks * space.f_frsize,
                     "available": space.f_bavail * space.f_frsize,
+                    "device": record["source"],
+                    "mount": volume["mountPoint"],
+                    "type": record["type"],
                 }
             ),
         )

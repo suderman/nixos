@@ -88,12 +88,18 @@ memory ceiling and no swap. It never holds the detector lock. If it sticks in
 kernel I/O, that volume loses fresh samples rather than blocking the detector or
 other volumes. No sampling runs while its failure latch is set.
 
-The guard publishes status and last-known free/total space to
-`/run/storage-health-motd/status.txt`, with sample age. Rust MOTD reads only that
-cache. Login reads its usual pre-generated MOTD. The displayed state can be up
-to one MOTD refresh behind; `storage-health status` reads the newer status cache
-without sudo. Caches are cleared at reboot, so an idle disk can initially say
-`space not sampled` until normal use mounts it. No periodic mount just for display.
+The guard publishes the original-style filesystem table to
+`/run/storage-health-motd/status.txt`: device, mount, type, used/total capacity,
+and green/yellow/red usage bars. Device and type come from cached mount metadata.
+Unmounted, quarantined, read-only and unsampled volumes remain visible. Warnings
+label last-known capacity and samples older than ten minutes.
+
+Rust MOTD reads only that cache. Login reads its usual pre-generated MOTD.
+The footer shows an absolute sample timestamp, not an age that would freeze
+between MOTD refreshes. The displayed state can be up to one MOTD refresh behind;
+`storage-health status` reads the newer status cache without sudo. Caches are
+cleared at reboot, so an idle disk can initially say `space not sampled` until
+normal use mounts it. No periodic mount just for display.
 
 ## Independent backup jobs
 

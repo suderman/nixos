@@ -3,6 +3,7 @@
 import importlib.util
 import json
 import os
+import re
 import subprocess
 import tempfile
 from pathlib import Path
@@ -331,7 +332,13 @@ with (
         health,
         "mount_records",
         return_value={
-            "/mnt/data": {"id": "42", "dev": "0:42", "type": "btrfs", "ro": False}
+            "/mnt/data": {
+                "id": "42",
+                "dev": "0:42",
+                "source": "/dev/nvme7n1p1",
+                "type": "btrfs",
+                "ro": False,
+            }
         },
     ),
     patch.object(health.os, "open", return_value=7) as opened,
@@ -374,12 +381,78 @@ with (
         },
     )
     text = (health.PUBLIC / "status.txt").read_text()
-    assert (
-        "quarantined" in text and "sample" in text and "free" in text and "main" in text
-    )
+    assert "quarantined" in text and "lost" in text and "last known" in text
+    assert "Filesystems" in text and "Used" in text and "Total" in text
+    assert "/dev/nvme7n1p1" in text and "/mnt/data" in text and "btrfs" in text
+    assert "60.0 KiB" in text and "100.0 KiB" in text and "main" in text
+    assert "\033[32m" in text and "\033[90m" in text
+    assert "\033[31m" in text and text.startswith("\033[0m")
     (health.PUBLIC / "data.json").write_text("invalid JSON")
     health.public_status(cfg, {})
     assert "space cache invalid" in (health.PUBLIC / "status.txt").read_text()
+
+# Match rust-motd's table, units, alignment and capacity colors using cache only.
+with (
+    tempfile.TemporaryDirectory() as temporary,
+    patch.object(health, "PUBLIC", Path(temporary)),
+    patch.object(health.time, "time", return_value=1000),
+    patch.object(health.os, "open", side_effect=AssertionError("No mount access")),
+    patch.object(health.os, "statvfs", side_effect=AssertionError("No disk probe")),
+    patch.object(health.os, "fstatvfs", side_effect=AssertionError("No disk probe")),
+    patch.object(health, "mount_records", side_effect=AssertionError("Cache only")),
+):
+    sample = {
+        "sampled": 900,
+        "total": 4 * 2**40,
+        "available": 3 * 2**40,
+        "device": "/dev/sda1",
+        "mount": "/mnt/data",
+        "type": "btrfs",
+    }
+    path = health.PUBLIC / "data.json"
+    path.write_text(json.dumps(sample))
+    healthy = {"volumes": {"data": report(), "main": report("unmounted")}}
+    health.public_status(cfg, healthy)
+    text = (health.PUBLIC / "status.txt").read_text()
+    plain = re.sub(r"\033\[[0-9;]*m", "", text)
+    assert "1.0 TiB" in plain and "4.0 TiB" in plain
+    stamp = health.time.strftime("%Y-%m-%d %H:%M:%S %Z", health.time.localtime(900))
+    assert f"oldest sample: {stamp}" in plain and "space not sampled" in plain
+    assert "data: mounted" not in plain and "main: unmounted" in plain
+    header, row, bar = plain.splitlines()[:3]
+    for column in ["Device", "Mount", "Type", "Used", "Total"]:
+        value = {
+            "Device": "/dev/sda1",
+            "Mount": "/mnt/data",
+            "Type": "btrfs",
+            "Used": "1.0 TiB",
+            "Total": "4.0 TiB",
+        }[column]
+        assert header.index(column) == row.index(value)
+    assert len(bar) == len(row.rstrip()) and bar.startswith("  [")
+    width = len(bar) - 4
+    assert f"\033[32m{'=' * int(width * 0.25)}\033[90m" in text
+    for ratio, color in [(0, 32), (0.76, 33), (0.96, 31), (1, 31)]:
+        path.write_text(
+            json.dumps(sample | {"available": int(sample["total"] * (1 - ratio))})
+        )
+        health.public_status(cfg, healthy)
+        assert f"\033[{color}m" in (health.PUBLIC / "status.txt").read_text()
+    path.write_text(json.dumps(sample | {"sampled": 100}))
+    health.public_status(cfg, healthy)
+    assert (
+        "data: mounted; stale sample from" in (health.PUBLIC / "status.txt").read_text()
+    )
+    assert "s old" not in (health.PUBLIC / "status.txt").read_text()
+    for broken in [{}, {"total": 1}, sample | {"total": 0}, sample | {"available": -1}]:
+        path.write_text(json.dumps(broken))
+        health.public_status(cfg, healthy)
+        assert "space cache invalid" in (health.PUBLIC / "status.txt").read_text()
+    path.write_text(json.dumps(sample))
+    health.public_status(
+        cfg, {"volumes": {"data": report("read-only", "filesystem read-only")}}
+    )
+    assert "read-only" in (health.PUBLIC / "status.txt").read_text()
 
 # Hub outage retries do not repeat desktop notifications; server-only hosts
 # never need a desktop user. ntfy success clears only the message sent.

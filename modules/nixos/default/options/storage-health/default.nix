@@ -40,6 +40,7 @@
   volumes = lib.mapAttrs (name: volume:
     volume
     // {
+      fsType = config.fileSystems.${volume.mountPoint}.fsType;
       units =
         if volume.quarantine
         then
