@@ -5,7 +5,12 @@
 }: let
   pin = flake.inputs.pins.default.fetchurl.citron;
   src = pkgs.fetchurl {
-    inherit (pin) url sha256;
+    inherit (pin) url;
+    # The central pin has the wrong hash for this nightly's v3 AppImage.
+    sha256 =
+      if pin.version == "nightly-40212aa3e"
+      then "sha256-5CbKZoCXT1LhZaf2zG1VmsHzQKPDzDNQf1T5k9vwP2M="
+      else pin.sha256;
   };
 in
   pkgs.stdenvNoCC.mkDerivation {
