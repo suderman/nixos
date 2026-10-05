@@ -2,61 +2,59 @@
   config,
   lib,
   pkgs,
-  flake,
+  perSystem,
   ...
 }: let
   cfg = config.services.recall;
-  root = "${config.home.homeDirectory}/.local/share/recall";
-  storageRoot = "${config.persist.storage.path}/.local/share/recall";
-  bluebubblesRoot = "${root}/bluebubbles";
-  hardening = {
-    UMask = "0077";
-    NoNewPrivileges = true;
-    PrivateTmp = true;
-    ProtectSystem = "strict";
-    ProtectHome = "read-only";
-  };
 in {
   options.services.recall = {
     enable = lib.mkEnableOption "Recall BlueBubbles capture";
     package = lib.mkOption {
       type = lib.types.package;
-      default = flake.inputs.recall.packages.${pkgs.stdenv.hostPlatform.system}.default;
+      default = perSystem.recall.default;
       description = "Pinned Recall CLI used by the receiver and kept in the home generation.";
+    };
+    dataDir = lib.mkOption {
+      type = lib.types.str;
+      default = ".local/share/recall";
     };
   };
 
   config = lib.mkIf cfg.enable {
     home.packages = [cfg.package];
-    persist.storage.directories = [
-      {
-        directory = ".local/share/recall";
-        mode = "0700";
-      }
-    ];
+    persist.storage.directories = [{directory = cfg.dataDir; mode = "0700";}];
 
     # Keep the private source config and acquired bytes outside the Nix store.
     # The existing config must bind to 127.0.0.1:8042 and require its webhook token.
-    systemd.user.services = {
+    systemd.user.services = let
+      hardening = {
+        UMask = "0077";
+        NoNewPrivileges = true;
+        PrivateTmp = true;
+        ProtectSystem = "strict";
+        ProtectHome = "read-only";
+      };
+    in {
       recall-bluebubbles = {
         Unit = {
           Description = "Recall BlueBubbles webhook receiver";
           After = ["network-online.target"];
           Wants = ["network-online.target"];
-          ConditionPathExists = "${bluebubblesRoot}/config/sources/bluebubbles.toml";
+          ConditionPathExists = "${config.home.homeDirectory}/${cfg.dataDir}/config/sources/bluebubbles.toml";
           StartLimitIntervalSec = 60;
           StartLimitBurst = 5;
         };
         Service =
           hardening
-          // {
+          // rec {
             Type = "simple";
-            WorkingDirectory = bluebubblesRoot;
-            ExecStart = "${cfg.package}/bin/recall capture bluebubbles serve --skip-recovery --root ${bluebubblesRoot}";
+            WorkingDirectory = "${config.home.homeDirectory}/${cfg.dataDir}";
+            ExecStart = "${cfg.package}/bin/recall capture bluebubbles serve --skip-recovery --root ${WorkingDirectory}";
             UnsetEnvironment = "PYTHONPATH";
             Restart = "on-failure";
             RestartSec = 5;
-            ReadWritePaths = [storageRoot];
+            # Persistence bind mounts need both paths writable inside the sandbox.
+            ReadWritePaths = [ WorkingDirectory "${config.persist.storage.path}/${cfg.dataDir}"];
           };
         Install.WantedBy = ["default.target"];
       };
