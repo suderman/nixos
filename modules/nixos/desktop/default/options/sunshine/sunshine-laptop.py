@@ -3,13 +3,22 @@
 import json
 import os
 import re
+import shlex
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
 script = Path(sys.argv[1]).resolve()
-profiles = json.loads(Path(sys.argv[2]).read_text())
+apps = json.loads(Path(sys.argv[2]).read_text())
+hooks = next(app for app in apps if app["name"] == "Laptop")["prep-cmd"][0]
+start = shlex.split(hooks["do"])
+reset = shlex.split(hooks["undo"])
+assert start[:2] == ["/run/current-system/sw/bin/sunshine-laptop", "start"]
+assert reset[:2] == [start[0], "reset"]
+assert len(start) == 4 and len(reset) == 3
+assert reset[2] == start[2]
+profiles = {"normal": json.loads(start[2]), "laptop": json.loads(start[3])}
 with tempfile.TemporaryDirectory() as directory:
     root = Path(directory)
     monitors = root / "monitors.json"
@@ -64,13 +73,17 @@ with tempfile.TemporaryDirectory() as directory:
         "PATH": f"{root}:{os.environ['PATH']}",
         "MOCK_MONITORS": str(monitors),
         "MOCK_CALLS": str(calls),
-        "normalProfile": json.dumps(profiles["normal"]),
         "laptopProfile": json.dumps(profiles["laptop"]),
     }
 
     def run(action, **overrides):
         return subprocess.run(
-            ["bash", str(script), action],
+            [
+                "bash",
+                str(script),
+                action,
+                *(start[2:] if action == "start" else reset[2:]),
+            ],
             env=env | overrides,
             capture_output=True,
             text=True,
@@ -81,6 +94,7 @@ with tempfile.TemporaryDirectory() as directory:
     assert result.returncode == 0, result.stderr
     laptop = json.loads(monitors.read_text())[0]
     target = re.fullmatch(r"(\d+)x(\d+)@([0-9.]+)Hz", profiles["laptop"]["mode"])
+    assert target is not None
     assert (
         laptop["width"],
         laptop["height"],
@@ -108,6 +122,17 @@ with tempfile.TemporaryDirectory() as directory:
     assert "3840x2160@160.00Hz" in calls.read_text().splitlines()[-1]
     assert run("unknown").returncode == 2
     before = calls.read_text()
+    for args in (
+        [],
+        ["start"],
+        ["start", start[2]],
+        ["reset"],
+        ["reset", reset[2], start[3]],
+    ):
+        result = subprocess.run(
+            ["bash", str(script), *args], env=env, capture_output=True, text=True
+        )
+        assert result.returncode == 2 and calls.read_text() == before
     monitors.write_text("[]")
     assert run("start").returncode != 0 and calls.read_text() == before
     monitors.write_text(json.dumps([original[0] | {"name": "HDMI-A-1"}]))

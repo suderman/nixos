@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# normalProfile and laptopProfile are generated from Nix, not saved runtime state.
+# Profiles come from the application preparation commands, not saved runtime state.
 apply() {
   local profile=$1 mode output rule reply width height refresh attempt
   mode=$(jq -r .mode <<<"$profile")
@@ -43,19 +43,21 @@ apply() {
   return 1
 }
 
-case "${1:-}" in
-start)
+case "${1:-}:$#" in
+start:3)
+  normalProfile=$2
+  laptopProfile=$3
   if ! apply "$laptopProfile"; then
     echo "Sunshine Laptop setup failed; restoring the normal output." >&2
-    apply "$normalProfile" || echo "Restore failed; run sunshine-laptop reset in Kit's graphical session." >&2
+    apply "$normalProfile" || printf "Restore failed; run sunshine-laptop reset %q in Kit's graphical session.\n" "$normalProfile" >&2
     exit 1
   fi
   ;;
-reset)
-  apply "$normalProfile"
+reset:2)
+  apply "$2"
   ;;
 *)
-  echo "Usage: sunshine-laptop start|reset" >&2
+  echo "Usage: sunshine-laptop start NORMAL_JSON LAPTOP_JSON | reset NORMAL_JSON" >&2
   exit 2
   ;;
 esac

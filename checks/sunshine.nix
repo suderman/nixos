@@ -14,7 +14,12 @@
   normalMonitor = builtins.head cfg.home-manager.users.jon.wayland.windowManager.hyprland.lua.monitors;
   profiles = {
     normal = lib.getAttrs ["output" "mode" "scale"] normalMonitor;
-    laptop = profiles.normal // {inherit (sunshine.laptop) mode scale;};
+    laptop =
+      profiles.normal
+      // {
+        mode = "2560x1440@60Hz";
+        scale = "1.25";
+      };
   };
 in
   assert sunshine.enable && sunshine.autoStart;
@@ -36,8 +41,7 @@ in
   assert builtins.elem "sunshine.kit" cfg.services.traefik.internalHostNames;
   assert cfg.services.traefik.records."sunshine.kit" == cfg.networking.address;
   assert phone != null && laptop != null;
-  assert sunshine.laptop.enable;
-  assert sunshine.laptop.monitor == normalMonitor;
+  assert !(sunshine ? laptop);
   assert profiles.laptop.output == normalMonitor.output;
   assert sunshine.applications.apps
   == [
@@ -55,8 +59,8 @@ in
       name = "Laptop";
       prep-cmd = [
         {
-          do = "${laptop}/bin/sunshine-laptop start";
-          undo = "${laptop}/bin/sunshine-laptop reset";
+          do = "/run/current-system/sw/bin/sunshine-laptop start ${lib.escapeShellArg (builtins.toJSON profiles.normal)} ${lib.escapeShellArg (builtins.toJSON profiles.laptop)}";
+          undo = "/run/current-system/sw/bin/sunshine-laptop reset ${lib.escapeShellArg (builtins.toJSON profiles.normal)}";
         }
       ];
     }
@@ -82,7 +86,7 @@ in
       test -x ${phone}/bin/sunshine-phone
       test -x ${laptop}/bin/sunshine-laptop
       python ${module}/sunshine-phone.py ${module}/sunshine-phone.sh
-      python ${module}/sunshine-laptop.py ${module}/sunshine-laptop.sh ${pkgs.writeText "sunshine-laptop-profiles.json" (builtins.toJSON profiles)}
+      python ${module}/sunshine-laptop.py ${module}/sunshine-laptop.sh ${pkgs.writeText "sunshine-apps.json" (builtins.toJSON sunshine.applications.apps)}
       cp -r ${sunshine.package.src} source
       chmod -R u+w source
       cd source
