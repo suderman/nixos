@@ -1974,14 +1974,14 @@
       "locked": {
         "lastModified": 1791146200,
         "narHash": "sha256-HnbdzbufFFiktxdaJkrsaHNeW8w6UNF3MP7H9lUE5FU=",
-        "ref": "refs/heads/main",
+        "ref": "main",
         "rev": "f4410e802fe7a71521e5d4738a2e26a1459d232f",
         "revCount": 97,
         "type": "git",
         "url": "https://github.com/suderman/recall.git"
       },
       "original": {
-        "rev": "f4410e802fe7a71521e5d4738a2e26a1459d232f",
+        "ref": "main",
         "type": "git",
         "url": "https://github.com/suderman/recall.git"
       }
