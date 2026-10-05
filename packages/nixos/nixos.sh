@@ -449,10 +449,12 @@ EOF
     esac
   done
 
-  mapfile -t all_hosts < <(
-    nix eval --raw 'path:.#nixosConfigurations' \
+  local host_list
+  host_list="$(
+    nix eval --raw '.#nixosConfigurations' \
       --apply 'attrs: builtins.concatStringsSep "\n" (builtins.attrNames attrs)'
-  )
+  )" || gum_exit "Failed to list nixosConfigurations"
+  mapfile -t all_hosts <<<"$host_list"
 
   if [[ ${#requested_hosts[@]} -eq 0 && $select_all -eq 1 ]]; then
     for host in "${all_hosts[@]}"; do
@@ -495,13 +497,13 @@ EOF
 
   for host in "${requested_hosts[@]}"; do
     if [[ $dry_run -eq 1 ]]; then
-      out_path="$(nix eval --raw "path:.#nixosConfigurations.${host}.config.system.build.toplevel.outPath")"
+      out_path="$(nix eval --raw ".#nixosConfigurations.${host}.config.system.build.toplevel.outPath")"
       gum_show "[dry-run] $host -> $out_path"
       continue
     fi
 
     gum_info "Building $host..."
-    out_path="$(nix build --print-out-paths --no-link "path:.#nixosConfigurations.${host}.config.system.build.toplevel")"
+    out_path="$(nix build --print-out-paths --no-link ".#nixosConfigurations.${host}.config.system.build.toplevel")"
     gum_show "$out_path"
 
     gum_info "Pushing $host to Attic cache $cache..."

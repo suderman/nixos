@@ -153,3 +153,73 @@ if [[ $(<"$rotation_args") != "$expected" ]]; then
   printf 'FAIL: nixos rotation finalization recovery dispatched unexpected arguments\n' >&2
   exit 1
 fi
+
+# Cache commands must use Git-filtered flakes and stop if enumeration fails.
+export CACHE_CALLS="$test_dir/cache.calls"
+printf '#!%s\n' "$bash_bin" >"$mock_bin/nix"
+cat >>"$mock_bin/nix" <<'EOF'
+set -euo pipefail
+printf 'nix %s\n' "$*" >>"$CACHE_CALLS"
+case "$*" in
+'eval --raw .#nixosConfigurations --apply '*)
+  printf '%s\n' kit iso
+  if [[ ${FAIL_HOST_ENUMERATION:-0} == "1" ]]; then
+    printf 'test host enumeration failed\n' >&2
+    exit 42
+  fi
+  ;;
+'eval --raw .#nixosConfigurations.kit.config.system.build.toplevel.outPath' | \
+'build --print-out-paths --no-link .#nixosConfigurations.kit.config.system.build.toplevel')
+  printf '%s\n' /nix/store/test-kit
+  ;;
+*)
+  printf 'FAIL: unexpected cache nix arguments: %s\n' "$*" >&2
+  exit 96
+  ;;
+esac
+EOF
+
+printf '#!%s\n' "$bash_bin" >"$mock_bin/gum"
+cat >>"$mock_bin/gum" <<'EOF'
+set -euo pipefail
+printf 'gum %s\n' "$*" >>"$CACHE_CALLS"
+case "$1" in
+style) printf '%s\n' "${*: -1}" ;;
+choose) printf '%s\n' kit ;;
+*) exit 97 ;;
+esac
+EOF
+
+printf '#!%s\n' "$bash_bin" >"$mock_bin/attic"
+cat >>"$mock_bin/attic" <<'EOF'
+set -euo pipefail
+printf 'attic %s\n' "$*" >>"$CACHE_CALLS"
+EOF
+chmod +x "$mock_bin/attic"
+
+run_nixos cache --dry-run kit >"$test_dir/cache.out" 2>&1
+grep -q '\[dry-run\] kit -> /nix/store/test-kit' "$test_dir/cache.out"
+if grep -q '^attic ' "$CACHE_CALLS"; then
+  printf 'FAIL: nixos cache dry run reached Attic\n' >&2
+  exit 1
+fi
+run_nixos cache --dry-run >"$test_dir/cache-interactive.out" 2>&1
+grep -q '\[dry-run\] kit -> /nix/store/test-kit' "$test_dir/cache-interactive.out"
+run_nixos cache kit >"$test_dir/cache-push.out" 2>&1
+grep -qx 'attic cache info main' "$CACHE_CALLS"
+grep -qx 'attic push main /nix/store/test-kit' "$CACHE_CALLS"
+
+for host in '' kit; do
+  args=()
+  [[ -z $host ]] || args=("$host")
+  : >"$CACHE_CALLS"
+  if FAIL_HOST_ENUMERATION=1 run_nixos cache "${args[@]}" >"$test_dir/cache-failure.out" 2>&1; then
+    printf 'FAIL: nixos cache ignored host-enumeration failure\n' >&2
+    exit 1
+  fi
+  grep -q 'Failed to list nixosConfigurations' "$test_dir/cache-failure.out"
+  if grep -Eq '^(gum choose|attic |nix build)|Unknown nixosConfiguration host' "$CACHE_CALLS" "$test_dir/cache-failure.out"; then
+    printf 'FAIL: nixos cache continued after host-enumeration failure\n' >&2
+    exit 1
+  fi
+done
