@@ -51,6 +51,7 @@ def volume(name, quarantine=True):
         "mounts": [f"/mnt/{name}", f"/{name}"],
         "devices": [f"/dev/{name}"],
         "quarantine": quarantine,
+        "startupGraceSec": 0,
         "units": [
             f"{name}.automount",
             f"mnt-{name}.automount",
@@ -162,6 +163,60 @@ with (
         health, "device_metadata", side_effect=[metadata, {"present": False}]
     ):
         assert health.volume_status(pool, {})["hard"]
+
+# A slow USB enclosure gets a boot-only grace period, not automatic recovery.
+with (
+    tempfile.TemporaryDirectory() as temporary,
+    patch.object(health, "RUN", Path(temporary) / "private"),
+    patch.object(health, "PUBLIC", Path(temporary) / "public"),
+    patch.object(
+        health.subprocess, "run", return_value=SimpleNamespace(returncode=0)
+    ) as run,
+    patch.object(health, "command", return_value=""),
+    patch.object(health.time, "monotonic", return_value=15) as clock,
+    patch.object(health, "device_metadata", return_value={"present": False}) as disk,
+    patch.object(health, "mount_records", return_value={}) as mounts,
+    patch.object(Path, "glob", return_value=[]),
+):
+    health.RUN.mkdir()
+    usb = volume("pool") | {"startupGraceSec": 60}
+    usb_cfg = cfg | {"volumes": {"pool": usb}}
+    state = {}
+    health.check(usb_cfg, state)
+    assert state["volumes"]["pool"]["status"] == "waiting for devices"
+    assert not state["volumes"]["pool"].get("failure") and not run.called
+    # Grace never permits manual rearm of an absent device.
+    try:
+        health.rearm(usb_cfg, state, "pool")
+    except SystemExit:
+        pass
+    else:
+        raise AssertionError("Absent USB device must not rearm during boot grace")
+    # Once observed, disappearance latches immediately, even before 60 seconds.
+    disk.return_value = metadata
+    clock.return_value = 25
+    health.check(usb_cfg, state)
+    assert state["volumes"]["pool"]["devices_seen"]
+    disk.return_value = {"present": False}
+    clock.return_value = 30
+    health.check(usb_cfg, state)
+    assert state["volumes"]["pool"]["contained"]
+    # An enclosure that never appears still fails at the boot deadline.
+    state = {}
+    clock.return_value = 60
+    health.check(usb_cfg, state)
+    assert state["volumes"]["pool"]["contained"]
+    # Grace cannot hide missing mounted devices, read-only mounts or dead controllers.
+    clock.return_value = 15
+    mounts.return_value = {"/mnt/pool": {"type": "btrfs", "ro": False}}
+    assert health.volume_status(usb, {})["hard"]
+    mounts.return_value["/mnt/pool"]["ro"] = True
+    assert health.volume_status(usb, {})["reason"] == "filesystem read-only"
+    mounts.return_value = {}
+    disk.return_value = metadata | {"controller_state": "dead"}
+    assert health.volume_status(usb, {})["hard"]
+    disk.return_value = {"present": False}
+    assert health.volume_status(volume("pool"), {})["hard"]
 
 # One filesystem fails: block and stop only its jobs/consumers; no reboot or kill.
 # Returning hardware never clears a latch. Manual rearm does not start services.

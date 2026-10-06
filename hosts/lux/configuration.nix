@@ -33,6 +33,9 @@
         services = ["docker-backblaze.service" "docker-immich-server.service"];
       };
       pool = {
+        # The USB enclosure appears late, and its Btrfs mount takes about 31 seconds.
+        startupGraceSec = 60;
+        mountTimeoutSec = 120;
         mounts = ["/mnt/pool" "/media"];
         services = ["docker-backblaze.service" "samba-smbd.service" "nfs-server.service"];
       };

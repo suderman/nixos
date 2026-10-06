@@ -25,6 +25,16 @@
         default = [cfg.volumes.${name}.mountPoint];
         description = "All mount/automount aliases to inhibit together. Include the sampling mount point.";
       };
+      mountTimeoutSec = lib.mkOption {
+        type = lib.types.ints.positive;
+        default = 15;
+        description = "Mount timeout for every quarantinable alias of this volume.";
+      };
+      startupGraceSec = lib.mkOption {
+        type = lib.types.ints.unsigned;
+        default = 0;
+        description = "Seconds after boot to wait for initially absent devices. Device loss after detection still fails immediately.";
+      };
       quarantine = lib.mkOption {
         type = lib.types.bool;
         default = name != "boot" && cfg.volumes.${name}.mountPoint != config.persist.path;
@@ -112,7 +122,7 @@ in {
     # Bounds apply to every secondary mount alias, including bind mounts.
     fileSystems = lib.listToAttrs (lib.concatLists (lib.mapAttrsToList (
         _: volume:
-          map (path: lib.nameValuePair path {options = lib.mkAfter ["x-systemd.mount-timeout=15s" "x-systemd.device-bound"];})
+          map (path: lib.nameValuePair path {options = lib.mkAfter ["x-systemd.mount-timeout=${toString volume.mountTimeoutSec}s" "x-systemd.device-bound"];})
           (
             if volume.quarantine
             then volume.mounts

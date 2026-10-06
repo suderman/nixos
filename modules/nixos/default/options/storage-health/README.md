@@ -71,7 +71,17 @@ without guessing which filesystem to stop.
 The latch survives healthy metadata returning. Acknowledgement is manual within
 this boot. A reboot clears `/run`; an absent device is detected again. Secondary
 mounts retain `nofail`, their existing device wait, and on-demand behavior. New
-mount attempts have a 15-second mount timeout and device-bound stop propagation.
+mount attempts have a per-volume `mountTimeoutSec` limit (15 seconds by default)
+and device-bound stop propagation. Lux pool uses 120 seconds because a read-only
+mount took 31 seconds during diagnosis.
+
+`startupGraceSec` defaults to zero. Lux pool uses 60 seconds after boot for its
+USB enclosure to appear. During this window, a never-seen, wholly absent and
+unmounted volume reports `waiting for devices` without latching a failure.
+Once any expected device has been observed, loss fails immediately. Mounted
+filesystems, offline controllers, kernel errors and expired grace periods still
+use normal detection. Manual rearm always rejects missing devices, even during
+boot grace. Grace does not clear an existing failure latch.
 
 ## MOTD without filesystem probes
 

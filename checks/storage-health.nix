@@ -28,7 +28,7 @@
     && lib.all (volume:
       lib.all (path:
         lib.all (option: lib.elem option config.fileSystems.${path}.options)
-        ["x-systemd.mount-timeout=15s" "x-systemd.device-bound"])
+        ["x-systemd.mount-timeout=${toString volume.mountTimeoutSec}s" "x-systemd.device-bound"])
       volume.mounts)
     (lib.attrValues (lib.filterAttrs (_: volume: volume.quarantine) config.services.storage-health.volumes));
 in
@@ -43,6 +43,10 @@ in
   assert lib.length flake.nixosConfigurations.pow.config.services.storage-health.volumes.pool.devices == 2;
   assert lib.length flake.nixosConfigurations.eve.config.services.storage-health.volumes.pool.devices == 2;
   assert lib.length flake.nixosConfigurations.lux.config.services.storage-health.volumes.pool.devices == 1;
+  assert flake.nixosConfigurations.lux.config.services.storage-health.volumes.pool.mountTimeoutSec == 120;
+  assert flake.nixosConfigurations.lux.config.services.storage-health.volumes.pool.startupGraceSec == 60;
+  assert cfg.services.storage-health.volumes.game.mountTimeoutSec == 15;
+  assert cfg.services.storage-health.volumes.game.startupGraceSec == 0;
   assert lib.length flake.nixosConfigurations.lux.config.systemd.services.docker-backblaze.unitConfig.ConditionPathExists == 2;
   assert !flake.nixosConfigurations.cog.config.services.storage-health.enable;
     pkgs.runCommand "storage-health-check" {nativeBuildInputs = [pkgs.python3];} ''

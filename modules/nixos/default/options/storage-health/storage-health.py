@@ -176,8 +176,18 @@ def volume_status(volume, previous):
     if any(record["ro"] for record in mounted):
         status, reason, hard = "read-only", "filesystem read-only", True
     elif len(present) != len(devices) or missing:
-        status = "degraded" if present else "unavailable"
-        reason, hard = "expected backing device missing", True
+        # Boot grace is only for an enclosure that has not appeared yet.
+        if (
+            not present
+            and not mounted
+            and not missing
+            and not previous.get("devices_seen")
+            and time.monotonic() < volume["startupGraceSec"]
+        ):
+            status = "waiting for devices"
+        else:
+            status = "degraded" if present else "unavailable"
+            reason, hard = "expected backing device missing", True
     elif any(
         device["offline"]
         or (device["controller"] and device["controller_state"] != "live")
@@ -194,6 +204,7 @@ def volume_status(volume, previous):
         "uuid": uuid,
         "tokens": tokens or previous.get("tokens", []),
         "counters_seen": counters_seen,
+        "devices_seen": bool(present) or previous.get("devices_seen", False),
     }
 
 
@@ -656,7 +667,8 @@ def rearm(cfg, state, name):
     previous = state.setdefault("volumes", {}).setdefault(name, {})
     acknowledged = previous.copy()
     acknowledged["errors_baseline"] = 2**63
-    report = volume_status(volume, acknowledged)
+    # Acknowledgement must never use the boot grace to accept missing hardware.
+    report = volume_status(volume | {"startupGraceSec": 0}, acknowledged)
     if report["reason"]:
         sys.exit(f"Not rearming {name}: {report['reason']}")
     if previous.get("contained"):
