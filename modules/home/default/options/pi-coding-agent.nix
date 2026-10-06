@@ -262,23 +262,15 @@ in {
     # implementation package name to callers.
     home.file.".local/bin/pi".source = "${cfg.package}/bin/pi";
 
-    home.activation.piAgentConfiguration = lib.hm.dag.entryAfter ["agentConfigurationCheckout"] ''
-      $DRY_RUN_CMD env \
-        PATH=${lib.makeBinPath [pkgs.bash pkgs.coreutils pkgs.jq pkgs.python3]}:$PATH \
-        PI_CODING_AGENT_DIR=${config.home.homeDirectory}/${agentDir} \
-        XDG_STATE_HOME=${config.home.homeDirectory}/.local/state \
-        ${config.home.homeDirectory}/.agents/harnesses/pi/bootstrap
-    '';
-
     # Preserve writable Pi theme files; bootstrap leaves this generated entry alone.
     home.activation.piStylixTheme = lib.mkIf config.stylix.enable (
-      lib.hm.dag.entryAfter ["piAgentConfiguration"] ''
+      lib.hm.dag.entryAfter ["writeBoundary"] ''
         $DRY_RUN_CMD ${lib.getExe piStylixTheme}
       ''
     );
 
     home.activation.piHerdrIntegration = lib.mkIf (config.programs.herdr.enable && herdrPackage != null) (
-      lib.hm.dag.entryAfter ["piAgentConfiguration"] ''
+      lib.hm.dag.entryAfter ["writeBoundary"] ''
         $DRY_RUN_CMD env \
           PI_CODING_AGENT_DIR=${config.home.homeDirectory}/${agentDir} \
           ${lib.getExe herdrPackage} integration install pi

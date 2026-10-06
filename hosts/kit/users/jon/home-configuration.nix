@@ -26,6 +26,8 @@
   programs.buzz.enable = true;
 
   # Agents
+  programs.agents.enable = true;
+  programs.claude-code.enable = true;
   programs.opencode.enable = true;
   programs.pi-coding-agent.enable = true;
   programs.mmx-cli.enable = true;

@@ -47,13 +47,6 @@ in {
     ];
     home.packages = [wrapper];
 
-    home.activation.hermesAgentConfiguration = lib.hm.dag.entryAfter ["agentConfigurationCheckout"] ''
-      $DRY_RUN_CMD env \
-        PATH=${lib.makeBinPath [pkgs.bash pkgs.coreutils pkgs.yq-go pkgs.python3]}:$PATH \
-        HERMES_HOME=${home} \
-        ${config.home.homeDirectory}/.agents/harnesses/hermes/bootstrap
-    '';
-
     age.secrets = lib.mkIf (cfg.apiKeys != null) {
       hermes-env.rekeyFile = cfg.apiKeys;
     };
