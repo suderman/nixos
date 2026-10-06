@@ -89,7 +89,7 @@ Usage: nixos [COMMAND]
   deploy            Deploy a NixOS host configuration
   rollback          Rollback this host to a previous generation
   activate          Activate the current system profile on a host
-  cache             Build host closures and push to Attic
+  cache             Build host closures and devshell environments, then push to Attic
     [HOST...]       Push selected hosts, or use --all for all hosts
   repl              Open a nixos-rebuild repl for a host
   rotation          Manage validated identity-rotation state
@@ -398,9 +398,10 @@ nixos_cache() {
   local dry_run=0
   local select_all=0
   local include_iso=0
-  local host out_path
+  local host system out_path
   local -a requested_hosts=()
   local -a all_hosts=()
+  local -a systems=()
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -425,10 +426,12 @@ nixos_cache() {
       cat <<EOF
 Usage: nixos cache [options] [HOST...]
 
+Build and push host closures plus devshell environments once per host architecture.
+
 Options:
   --cache <name>   Attic cache name to push to (default: main)
   --all            Select all hosts without prompting
-  --dry-run        Print host list and output paths without pushing
+  --dry-run        Print host output paths and devshell targets without building or pushing
   --include-iso    Include the iso configuration when auto-selecting hosts
   -h, --help       Show this help
 EOF
@@ -483,9 +486,13 @@ EOF
     if [[ ! " ${all_hosts[*]} " =~ [[:space:]]${host}[[:space:]] ]]; then
       gum_exit "Unknown nixosConfiguration host: $host"
     fi
+    system="$(nix eval --raw ".#nixosConfigurations.${host}.config.nixpkgs.hostPlatform.system")" || gum_exit "Failed to determine architecture for $host"
+    if [[ ! " ${systems[*]} " =~ [[:space:]]${system}[[:space:]] ]]; then
+      systems+=("$system")
+    fi
   done
 
-  gum_head "Build host closures and push to Attic:"
+  gum_head "Build host closures and devshell environments, then push to Attic:"
   gum_show "cache: $cache"
   for host in "${requested_hosts[@]}"; do
     gum_show "host: $host"
@@ -508,6 +515,26 @@ EOF
 
     gum_info "Pushing $host to Attic cache $cache..."
     attic push "$cache" "$out_path"
+  done
+
+  for system in "${systems[@]}"; do
+    if [[ $dry_run -eq 1 ]]; then
+      gum_show "[dry-run] devshell $system -> .#devShells.${system}.default (nix print-dev-env)"
+      continue
+    fi
+
+    # nix-direnv uses print-dev-env, whose environment output differs from nix build.
+    (
+      local tmp
+      tmp="$(mktemp -d)"
+      trap 'rm -rf "$tmp"' EXIT
+      gum_info "Preparing devshell environment for $system..."
+      nix print-dev-env --profile "$tmp/devshell" ".#devShells.${system}.default" >/dev/null
+      out_path="$(readlink -f "$tmp/devshell")"
+      gum_show "$out_path"
+      gum_info "Pushing devshell $system to Attic cache $cache..."
+      attic push "$cache" "$out_path"
+    )
   done
 }
 
