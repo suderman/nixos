@@ -1,3 +1,0 @@
-Host-only trust. Do not deploy the fleet root or include dot in fleet key regeneration or root rotation.
-Recover the host key on a trusted operator using the original root, index 1, and salt dot.
-See README.md for explicit host-key rotation and recovery.

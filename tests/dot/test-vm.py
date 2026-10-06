@@ -62,17 +62,14 @@ with (
     ]
     stage = work / "stage"
     storage = stage / "mnt/main/storage"
-    for name, destination in (
-        ("host", "etc/ssh/ssh_host_ed25519_key"),
-        ("recovery.hash", "etc/dot/recovery.hash"),
-        ("machine-id", "etc/machine-id"),
-    ):
-        target = storage / destination
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(f"{fixtures}/{name}", target)
-        target.chmod(0o600 if name != "machine-id" else 0o444)
+    target = storage / "etc/ssh/ssh_host_ed25519_key"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(f"{fixtures}/host", target)
+    target.chmod(0o600)
+    shutil.copytree(f"{fixtures}/agents", storage / "home/jon/.agents")
+    run("chmod", "-R", "u+w", str(storage / "home/jon"))
     stage.chmod(0o700)
-    run("qemu-img", "create", "-f", "qcow2", "system.qcow2", "16G")
+    run("qemu-img", "create", "-f", "qcow2", "system.qcow2", "32G")
     vm = None
     tunnel = None
     try:
@@ -94,7 +91,9 @@ with (
         vm.expect_exact(fingerprint)
         for _ in range(60):
             probe = subprocess.run(
-                ssh + ["-p", "22281", "root@127.0.0.1", "true"], capture_output=True
+                ssh + ["-p", "22281", "root@127.0.0.1", "true"],
+                capture_output=True,
+                check=False,
             )
             if probe.returncode == 0:
                 break
@@ -130,6 +129,9 @@ with (
             "disko,install",
             "--extra-files",
             str(stage),
+            "--chown",
+            "/mnt/main/storage/home/jon",
+            "1000:100",
             "-i",
             str(key),
             "-p",
@@ -143,7 +145,6 @@ with (
             "root@127.0.0.1",
             "test -s /mnt/boot/grub/grub.cfg && "
             "test -s /mnt/mnt/main/storage/etc/ssh/ssh_host_ed25519_key && "
-            "test -s /mnt/mnt/main/storage/etc/dot/recovery.hash && "
             "lsblk -f; sync; umount -R /mnt; swapoff -a",
         )
         tunnel.terminate()
@@ -184,7 +185,7 @@ with (
             guest.sendline("root")
             guest.expect("Password:")
             guest.sendline("dot-test-only")
-            guest.expect(r"]#")
+            guest.expect("root@dot:")
             guest.sendline(
                 "test \"$(id -u)\" = 0 && printf '\\nDOT_SERIAL_LOGIN_OK\\n'"
             )
@@ -198,33 +199,61 @@ with (
 
         vm = start_installed()
         host(
-            "set -e; systemctl is-active sshd tailscaled; systemctl show --value -p Result dot-identity | grep -qx success"
+            "set -e; systemctl is-active sshd tailscaled; "
+            'test "$(systemctl show --value -p Result sshed)" = success; '
+            'test "$(systemctl show --value -p Result home-manager-jon)" = success; '
+            "test \"$(stat -Lc '%U %G %a' /run/agenix/hex)\" = 'root root 400'"
         )
         print(host("free -m; df -h /boot /mnt/main; systemctl --failed --no-pager"))
-        host(
-            "if systemctl start dot-health; then exit 1; fi; systemctl reset-failed dot-health"
+        # Starting the real user secret unit verifies the derived age identity.
+        user_secret = run(
+            *ssh,
+            "-p",
+            "22282",
+            "jon@127.0.0.1",
+            "systemctl --user start agenix && cat /run/user/1000/agenix/gh-token",
+            capture_output=True,
+        ).stdout
+        assert user_secret.strip() == "dot-test-secret"
+        assert (
+            host("cat /run/agenix/hex").strip()
+            == Path(fixtures, "root.hex").read_text().strip()
         )
+        # Re-activate after persistence mounts, as on a fresh normal fleet install.
+        host(f"nixos-rebuild switch --no-reexec --store-path {system}")
+        host("cmp /mnt/main/storage/home/jon/.ssh/id_ed25519 /home/jon/.ssh/id_ed25519")
         assert host("cat /run/agenix/dot-vm-probe").strip() == "dot-test-secret"
         machine = host("cat /etc/machine-id").strip()
-        assert machine == "9dbbfc8683d44058b9a2f2f837430168"
+        assert machine == Path(fixtures, "machine-id").read_text().strip()
         host(
-            "set -e; touch /dot-ephemeral /home/jon/dot-home /var/lib/nixos/dot-state "
+            "set -e; touch /dot-ephemeral /home/jon/.ssh/dot-home /var/lib/nixos/dot-state "
             "/var/lib/tailscale/dot-state; logger dot-vm-first-boot; "
-            "systemctl start btrbk-dot; btrfs subvolume list /mnt/main"
+            "systemctl start btrbk-snapshots; btrfs subvolume list /mnt/main"
         )
-        backup = ssh + ["-p", "22282", "dot-backup@127.0.0.1"]
-        snapshot = run(*backup, "list", capture_output=True).stdout.splitlines()[-1]
-        for denied in (
-            "id",
-            "send storage.20000101T000000/../../root",
-            "send storage.20000101T000000; id",
-        ):
+        snapshot = host(
+            "find /mnt/main/snapshots -maxdepth 1 -type d -name 'main.*' | sort | tail -n1"
+        ).strip()
+        assert snapshot.startswith("/mnt/main/snapshots/main.")
+        # Exercise the normal fleet's restricted btrbk account.
+        backup_key = work / "btrbk"
+        shutil.copyfile(f"{fixtures}/users/btrbk/id_ed25519", backup_key)
+        backup_key.chmod(0o600)
+        backup = ssh.copy()
+        backup[backup.index(str(key))] = str(backup_key)
+        for command in ("id", f"sudo -n btrfs send {snapshot}; id"):
             assert (
-                subprocess.run(backup + [denied], capture_output=True).returncode != 0
+                subprocess.run(
+                    backup + ["-p", "22282", "btrbk@127.0.0.1", command],
+                    capture_output=True,
+                    check=False,
+                ).returncode
+                != 0
             )
-        # Receive a stream obtained through the restricted backup account, not root SSH.
         stream = subprocess.run(
-            backup + [f"send {snapshot}"], check=True, capture_output=True
+            backup
+            + ["-p", "22282", "btrbk@127.0.0.1", f"sudo -n btrfs send {snapshot}"],
+            check=True,
+            capture_output=True,
         ).stdout
         host("mkdir /mnt/main/scratch/restore")
         subprocess.run(
@@ -239,13 +268,11 @@ with (
             check=True,
         )
         host(
-            "set -e; cmp /etc/machine-id /mnt/main/scratch/restore/*/etc/machine-id; "
-            "cmp /mnt/main/storage/etc/ssh/ssh_host_ed25519_key /mnt/main/scratch/restore/*/etc/ssh/ssh_host_ed25519_key; "
-            "cmp /mnt/main/storage/etc/dot/recovery.hash /mnt/main/scratch/restore/*/etc/dot/recovery.hash; "
+            "set -e; cmp /mnt/main/storage/etc/ssh/ssh_host_ed25519_key "
+            "/mnt/main/scratch/restore/*/etc/ssh/ssh_host_ed25519_key; "
+            "test -e /mnt/main/scratch/restore/*/home/jon/.ssh/dot-home; "
             "btrfs subvolume delete /mnt/main/scratch/restore/*; rmdir /mnt/main/scratch/restore"
         )
-        run(*backup, "acknowledge", capture_output=True)
-        host("systemctl start dot-health")
         env = os.environ.copy()
         env["NIX_SSHOPTS"] = " ".join(ssh[1:] + ["-p", "22282"])
         run("nix", "copy", "--to", "ssh://root@127.0.0.1", second, env=env)
@@ -262,10 +289,12 @@ with (
         vm.terminate(force=True)
         vm = start_installed()
         host(
-            "set -e; test ! -e /dot-ephemeral; test -e /home/jon/dot-home; "
+            "set -e; test ! -e /dot-ephemeral; test -e /home/jon/.ssh/dot-home; "
             "test -e /var/lib/nixos/dot-state; test -e /var/lib/tailscale/dot-state; "
             "test ! -e /etc/dot-vm-generation; journalctl --no-pager -b -1 | grep dot-vm-first-boot; "
-            "systemctl start dot-health; systemctl is-active sshd tailscaled"
+            "systemctl is-active sshd tailscaled; "
+            'test "$(systemctl show --value -p Result sshed)" = success; '
+            'test "$(systemctl show --value -p Result home-manager-jon)" = success'
         )
         assert host("cat /etc/machine-id").strip() == machine
         assert host("cat /run/agenix/dot-vm-probe").strip() == "dot-test-secret"
@@ -301,15 +330,15 @@ with (
         vm = start_installed()
         assert host("cat /etc/machine-id").strip() == machine
         assert host("cat /run/agenix/dot-vm-probe").strip() == "dot-test-secret"
-        host("test -e /home/jon/dot-home && test -e /var/lib/tailscale/dot-state")
+        host("test -e /home/jon/.ssh/dot-home && test -e /var/lib/tailscale/dot-state")
         print(
             "PASS: authenticated tunnel, destructive dummy install, BIOS GRUB, password serial login,"
         )
         print(
-            "agenix activation, SSH host identity, persistent state/logs, root reset, snapshot restore,"
+            "fleet root and user agenix activation, derived identities, Home Manager persistence/logs,"
         )
         print(
-            "restricted backup pull/restore, runtime rollback, repeat cold boots and mount-only repair (2 GiB RAM)."
+            "normal btrbk access/restore, root reset, rollback, repeat cold boots and mount-only repair (2 GiB RAM)."
         )
     except BaseException as error:
         if isinstance(error, subprocess.CalledProcessError):

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regression checks for host-only exclusions, without generating real keys."""
+"""Check that dot participates in normal fleet generation and rotation."""
 
 import importlib.util
 import subprocess
@@ -9,14 +9,12 @@ from pathlib import Path
 
 repository = Path(__file__).resolve().parents[2]
 sys.dont_write_bytecode = True
-# Load the repository tool without relying on the operator's PYTHONPATH.
 spec = importlib.util.spec_from_file_location(
     "identity_rotation", repository / "secrets/rotation/identity_rotation.py"
 )
 assert spec is not None and spec.loader is not None
 rotation = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(rotation)
-discover_targets = rotation.discover_targets
 
 with tempfile.TemporaryDirectory(prefix="dot-identity-scope-") as temporary:
     root = Path(temporary)
@@ -26,12 +24,7 @@ with tempfile.TemporaryDirectory(prefix="dot-identity-scope-") as temporary:
         host.mkdir(parents=True)
         (host / "configuration.nix").touch()
         (host / "ssh_host_ed25519_key.pub").write_text("keep-me\n")
-    marker = root / "hosts/dot/fleet-root-independent"
-    marker.touch()
-    assert discover_targets(root)["nixos"] == {"fleet"}
-    marker.unlink()
-    assert discover_targets(root)["nixos"] == {"fleet", "dot"}
-    marker.touch()
+    assert rotation.discover_targets(root)["nixos"] == {"fleet", "dot"}
 
     # Run the actual wrapper's host loop with inert tool stubs.
     source = (repository / "packages/nixos/nixos.sh").read_text()
@@ -48,12 +41,12 @@ with tempfile.TemporaryDirectory(prefix="dot-identity-scope-") as temporary:
     gum_show() { :; }
     """ + source[start:end]
     subprocess.run(["bash", "-c", script], cwd=root, check=True)
-    assert (root / "hosts/dot/ssh_host_ed25519_key.pub").read_text() == "keep-me\n"
-    assert (
-        root / "hosts/fleet/ssh_host_ed25519_key.pub"
-    ).read_text() == "dummy-public\n"
+    for name in ("fleet", "dot"):
+        assert (
+            root / "hosts" / name / "ssh_host_ed25519_key.pub"
+        ).read_text() == "dummy-public\n"
 
-assert "dot" not in discover_targets(repository)["nixos"]
-print(
-    "PASS: host-only keys excluded from fleet generation and rotation; fleet behavior preserved"
-)
+targets = rotation.discover_targets(repository)
+assert "dot" in targets["nixos"]
+assert "dot-jon" in targets["home"]
+print("PASS: dot host generation and dot/dot-jon fleet rotation membership")

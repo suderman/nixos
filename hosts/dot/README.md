@@ -1,6 +1,6 @@
 # dot on Linode
 
-`dot` is a host-only-trust NixOS server, not a migration of sol. This runbook
+`dot` is a normal headless fleet member on Linode, not a migration of sol. This runbook
 covers a new installation and repair separately. Do not run installation commands
 against an existing filesystem. Provisioning, disk writes, deployment and public
 services require Jon's explicit deployment mandate.
@@ -12,13 +12,15 @@ on GPT, a 1 MiB BIOS boot partition, 1 GiB ext4 `/boot`, 2 GiB swap and Btrfs.
 `root` is erased at each boot. `/nix` and the top-level `/mnt/main` are persistent.
 `storage`, `scratch` and `snapshots` are subvolumes below `/mnt/main`.
 
-Only SSH, Tailscale, logging, local snapshots and health checks are enabled.
-There is no Home Manager, NetworkManager, Blocky, Traefik, Docker, keyd or app.
-DHCP runs on `eth0`; IPv6 SLAAC is enabled with privacy addresses disabled.
-Resolvers are `1.1.1.1` and `9.9.9.9`. IPv6 is provisional until provider tests.
-Do not publish an AAAA record before it works. No home subnet routes are accepted.
-Automatic upgrades, reboots and garbage collection are off during commissioning.
-`stateVersion = "26.05"` is a new-host compatibility choice, not a fleet change.
+The host imports `flake.nixosModules.default` and Jon's normal headless Home
+Manager configuration. Shared accounts, secrets, identities, terminal tools,
+snapshots and earlyoom apply. No desktop, NetworkManager, Blocky, Traefik, keyd
+or public application is enabled. DHCP runs on `eth0`; IPv6 SLAAC is enabled
+with privacy addresses disabled. Resolvers are `1.1.1.1` and `9.9.9.9`.
+IPv6 is provisional until provider tests. Do not publish an AAAA record before
+it works. No home subnet routes are accepted. Automatic upgrades, reboots and
+GC are off during commissioning. `stateVersion = "26.05"` is a new-host
+compatibility choice, not a fleet change.
 
 Toronto and a 2 GiB shared-CPU plan are provisional. Public catalog checks on
 2026-10-04 confirmed [Toronto `ca-central`](https://api.linode.com/v4/regions/ca-central)
@@ -46,26 +48,30 @@ separate operations. Do not resize as part of bootstrap.
 
 ### Trust boundary
 
-The host deliberately does not import `flake.nixosModules.default`. It reuses
-shared persistence and tmpfiles, Linode hardware, Disko, agenix and agenix-rekey.
-It receives only its own private host key and host-specific console password
-hash. Jon's login keys are public authorization, not private user identities.
-It receives no fleet root hex, CA signing key, user private key or shared btrbk
-key. There are **no initial encrypted service secrets** to rekey.
+Dot uses the same trust model as other regular hosts. Agenix deploys the fleet
+root as host-encrypted ciphertext and decrypts it to root-owned
+`/run/agenix/hex` at activation. Shared modules derive machine ID, user
+identities and the btrbk identity from that root. Shared CA and user-password
+secrets also apply. Jon's Home Manager secrets decrypt with his derived age
+identity. The passphrase-protected master identity stays on the operator.
 
-`fleet-root-independent` keeps dot out of `nixos generate` and the fleet root
-rotation target scanner. Keep it. Neither command rotates dot's independent
-host key. The initial host key was derived on a trusted operator with salt `dot`
-and BIP-85 hex32 index 1. Its committed fingerprint is:
+Root access on dot has the same fleet-wide consequences as root access on any
+other host. Cloud hosting does not create a separate identity lifecycle.
+`nixos generate` includes dot, and managed rotation includes both `dot`
+and `dot-jon`. Use [fleet recovery](../../secrets/README.md) and
+[managed rotation](../../secrets/rotation/README.md), not a dot-only key rotation.
+
+The committed host fingerprint is:
 
 ```text
 SHA256:2ufHWpYkMZ76p2VFxZ05L/3XprZABp7lMmqliZHA0tY
 ```
 
-Keep the original seed and index metadata offline, including after later fleet
-root rotation. Possession of dot's private key cannot derive the root. A trusted
-operator can recover dot's key from the original root. If this trust policy needs
-broader fleet identity changes, review those separately before deployment.
+Bootstrap still differs from a local machine. Stage the matching host key over
+verified installer SSH before first activation. Keep TCP 12345 closed in the
+provider firewall; do not send private keys through the shared unencrypted
+`sshed receive` fallback on a public network. With a staged matching key,
+`sshed` only verifies it.
 
 ## New installation
 
@@ -107,7 +113,6 @@ NIXPKGS_NODE=$(jq -er '.nodes.root.inputs.nixpkgs | select(type == "string")' fl
 jq -r --arg node "$NIXPKGS_NODE" '.nodes[$node].locked.rev' flake.lock
 jq -r '.nodes.disko.locked.rev' flake.lock
 ANYWHERE=$(nix build .#nixosConfigurations.dot.pkgs.nixos-anywhere --no-link --print-out-paths)/bin/nixos-anywhere
-OPENSSL=$(nix build .#nixosConfigurations.dot.pkgs.openssl --no-link --print-out-paths)/bin/openssl
 "$ANYWHERE" --help
 ```
 
@@ -297,22 +302,35 @@ SSH=(ssh -F /dev/null -i "$BOOTSTRAP_KEY" -o IdentitiesOnly=yes -o BatchMode=yes
 Expected result: root-capable, host-key-checked installer SSH, with password and
 keyboard-interactive authentication disabled and public ingress source-restricted.
 
-### 5. Prepare final identity and recovery files before building
+### 5. Prepare normal fleet secrets and stage the host identity
 
-Operator: recover the **original index-1** root on a trusted machine. Do not
-change the repository master seed or run `agenix import` over existing master
-files merely to recover dot. The command below assumes the original canonical
-root is still `/run/agenix/hex` on that trusted machine. If it has rotated, use
-an offline private file containing the original root and adapt only the input
-redirection. Verify the public key before using it. Do not print the root.
+Operator: use the current fleet root for the reviewed revision. Do not replace
+master files or derive dot from an obsolete index. Refuse bootstrap during an
+active rotation. Recover/unlock the existing master through the normal workflow
+if necessary, then rekey all configured targets:
 
 ```sh
 test ! -e secrets/rotation/ACTIVE
+agenix unlock
+agenix hex --check
+agenix rekey -a
+```
+
+The pinned rekey command has no host selector. Inspect its complete Git diff;
+it creates required dot and dot-jon ciphertext and may refresh other targets.
+Include generated ciphertext in the reviewed source before the production build.
+Never stage plaintext root/master material in Git or a derivation. Tailscale
+enrolment remains interactive in step 9.
+
+Derive only the final private host key into private staging. The example uses a
+trusted fleet machine's root-owned current root. If running on another trusted
+operator, use a private offline file or `agenix hex | derive hex dot | derive ssh`
+with output redirected to `HOST_KEY`. Do not print the root or key:
+
+```sh
 HOST_KEY="$STAGING/mnt/main/storage/etc/ssh/ssh_host_ed25519_key"
-RECOVERY_HASH="$STAGING/mnt/main/storage/etc/dot/recovery.hash"
-MACHINE_ID="$STAGING/mnt/main/storage/etc/machine-id"
-install -d -m700 "$(dirname "$HOST_KEY")" "$(dirname "$RECOVERY_HASH")"
-sudo -n bash -c '"$1" hex dot </run/agenix/hex' bash "$(command -v derive)" \
+install -d -m700 "$(dirname "$HOST_KEY")"
+sudo bash -c '"$1" hex dot </run/agenix/hex' bash "$(command -v derive)" \
   | derive ssh >"$HOST_KEY"
 chmod 600 "$HOST_KEY"
 ssh-keygen -y -f "$HOST_KEY" >"$WORK/final-host.pub"
@@ -321,24 +339,10 @@ test "$(cut -d ' ' -f 1,2 "$WORK/final-host.pub")" = \
 ssh-keygen -lf "$WORK/final-host.pub"
 ```
 
-Generate a long host-specific recovery password in a password manager, save it
-offline and enter it at OpenSSL's password prompt. The same host-local hash is
-used for root console login and Jon's sudo/password recovery. It is never used
-for public SSH password authentication. Do not use a fleet password here.
-
-```sh
-"$OPENSSL" passwd -6 >"$RECOVERY_HASH"
-chmod 600 "$RECOVERY_HASH"
-grep -Eq '^\$6\$[^:[:space:]]+$' "$RECOVERY_HASH"
-"$OPENSSL" rand -hex 16 >"$MACHINE_ID"
-chmod 444 "$MACHINE_ID"
-grep -Eq '^[0-9a-f]{32}$' "$MACHINE_ID"
-test "$(cat "$MACHINE_ID")" != 00000000000000000000000000000000
-```
-
-Keep the machine-id with the recovery record or restore it from backup. A new
-replacement may use a new ID if no old state is restored, but it must not be
-zero. Do not put password hashes in git/store. Final paths have three views:
+Do not stage a random machine ID or a host-specific password hash. Activation
+derives machine ID and hashes the normal fleet root/Jon passwords. Keep those
+passwords and the seed/index recovery metadata in protected offline storage.
+No plaintext root is copied through `--extra-files`.
 
 | View           | Host private key                                        |
 | -------------- | ------------------------------------------------------- |
@@ -346,29 +350,27 @@ zero. Do not put password hashes in git/store. Final paths have three views:
 | installer      | `/mnt/mnt/main/storage/etc/ssh/ssh_host_ed25519_key`    |
 | installed host | `/mnt/main/storage/etc/ssh/ssh_host_ed25519_key`        |
 
-The hash is beside `storage/etc/dot/recovery.hash`, machine-id at
-`storage/etc/machine-id`. `/var/lib/nixos`, `/home/jon` and `/var/lib/tailscale`
-persist in `storage`; `/var/log` and coredumps persist in `scratch`. `/boot` and
-`/nix/var/nix/profiles/system*` retain boot entries and generations. Local storage
-snapshots do **not** include scratch logs or future Docker state.
+Shared persistence covers NixOS state, Jon's declared Home Manager data and
+Tailscale state in `storage`. Logs and coredumps are in `scratch`.
+Machine ID is regenerated from the root at each activation, not restored from
+a random persistent file. Local storage snapshots exclude scratch logs and
+any future application state not explicitly placed in storage.
 
-Check secrets and recipient before building:
+Check secret names, root ownership and recipient before building:
 
 ```sh
-nix eval --json .#nixosConfigurations.dot.config.age.secrets
+nix eval --json .#nixosConfigurations.dot.config.age.secrets \
+  --apply 'secrets: builtins.mapAttrs (_: s: { inherit (s) owner group mode; }) secrets'
 nix eval --json .#nixosConfigurations.dot.config.age.identityPaths
 nix eval --raw .#nixosConfigurations.dot.config.age.rekey.hostPubkey
+nix eval --json .#nixosConfigurations.dot.config.home-manager.users.jon.age.secrets \
+  --apply builtins.attrNames
 ```
 
-Expected result: `{}` secrets, exact persistent host-key identity path and the
-committed dot public recipient. No missing-key fallback. For a future specific
-service credential, declare only that secret's `rekeyFile`, encrypt its source
-with the existing master workflow and run `agenix rekey -a` on the trusted
-operator before building. This command considers all configured nodes and
-stages changed ciphertext. Inspect its complete git diff and include required
-ciphertext in the reviewed source. It has no host selector at this pin. Never
-run it on dot or deploy the master identity there. No such secret is needed
-for this initial installation; Tailscale enrolment is interactive in step 9.
+Expected system secrets include `hex`, `ca` and normal user passwords.
+`hex` must be root-owned mode `0400`, and the system identity path and
+recipient must match dot's committed host key. No missing-key fallback is part
+of this route. Stop on missing ciphertext, failed decryption or key mismatch.
 
 ### 6. Evaluate and build locally
 
@@ -390,6 +392,8 @@ nix eval --json .#nixosConfigurations.dot.config.services.openssh.settings
 ```
 
 Expected GRUB devices: exactly `["/dev/sda"]`, no `nodev` and no forced install.
+Public firewall permits TCP 22 and UDP 41641 only. The normal Beszel agent is
+reachable through `tailscale0`, not the public interface.
 Review build logs, enabled services, serial console and staged file permissions.
 All needed source files must be committed or deliberately added to git before
 flake evaluation; untracked files are not included. Never add `STAGING`.
@@ -435,7 +439,7 @@ exercises this authenticated-tunnel and extra-files route separately from the
 upstream `--vm-test` flag, which rejects `--extra-files` in 1.13.0.
 
 Expected result: Disko filesystems mounted below `/mnt`, final system installed,
-private identity/hash/ID staged in persistent storage, GRUB installed, installer
+private host key staged in persistent storage, GRUB installed, installer
 still running. Installation output alone does not prove final boot works.
 
 ### 8. Inspect, stop, select the final profile
@@ -449,15 +453,12 @@ Operator, through authenticated outer SSH:
   test -s /mnt/boot/grub/grub.cfg
   grep -F "console=ttyS0,19200n8" /mnt/boot/grub/grub.cfg
   ssh-keygen -lf /mnt/mnt/main/storage/etc/ssh/ssh_host_ed25519_key
-  stat -c "%a %U %n" /mnt/mnt/main/storage/etc/ssh/ssh_host_ed25519_key \
-    /mnt/mnt/main/storage/etc/dot/recovery.hash
-  test -s /mnt/mnt/main/storage/etc/machine-id
+  stat -c "%a %U %n" /mnt/mnt/main/storage/etc/ssh/ssh_host_ed25519_key
   readlink -f /mnt/nix/var/nix/profiles/system
   sync'
 ```
 
-Match final key fingerprint with step 5; private key and hash must be root-owned
-mode 600. Keep the password in the password manager. Stop here on any GRUB error,
+Match final key fingerprint with step 5; private key must be root-owned mode 600. Keep the normal fleet passwords in protected recovery storage. Stop here on any GRUB error,
 wrong mapping or identity mismatch. Do not set `forceInstall` to suppress it.
 
 Installer console: `sync; umount -R /mnt; swapoff -a; poweroff`.
@@ -471,7 +472,7 @@ Expected result: boot from guest BIOS GRUB on system disk, not ISO.
 ### 9. Verify first boot and enrol Tailscale before closing public SSH
 
 Provider LISH: interact with GRUB at 19200 baud, boot the selected generation,
-then log in as root with the host-specific recovery password. Verify `id -u`
+then log in as root with the normal fleet root password. Verify `id -u`
 returns `0`. A login prompt alone is insufficient. Keep provider rescue access
 independent of both network and root mount. Check `systemctl --failed`.
 
@@ -487,11 +488,21 @@ FINAL_SSH=(ssh -F /dev/null -i "$JON_LOGIN_KEY" -o IdentitiesOnly=yes -o StrictH
 "${FINAL_SSH[@]}" "jon@$PUBLIC_IP" 'hostname; cat /etc/machine-id; ip -br address'
 ```
 
-Installed host, Jon SSH or root console:
+Installed host, Jon SSH. Use root console for system checks if SSH fails;
+the user agenix check needs Jon's session. Jon's first Home Manager activation
+clones `https://github.com/suderman/agents.git`, so verify DNS first. Re-activate
+the installed closure once after persistence mounts are up. Shared boot activation
+can write Jon's SSH identity before the `.ssh` bind mount hides that directory;
+this normal switch writes it into mounted storage and retries Home Manager:
 
 ```sh
+getent hosts github.com
+sudo nixos-rebuild switch --no-reexec --store-path "$(readlink -f /run/current-system)"
 sudo systemctl is-active sshd tailscaled
-sudo systemctl show dot-identity -p Result -p ExecMainStatus --no-pager
+sudo systemctl show sshed home-manager-jon -p Result -p ExecMainStatus --no-pager
+systemctl --user show agenix -p Result -p ExecMainStatus --no-pager
+sudo stat -Lc "%U %G %a %n" /run/agenix/hex
+sudo test -s /run/agenix/hex
 for mount in / /boot /nix /mnt/main; do findmnt "$mount"; done
 getent hosts cache.nixos.org
 curl -4 --fail --head https://cache.nixos.org
@@ -520,85 +531,73 @@ OpenSSH key checks.
 
 Installed host: record machine-id, key fingerprint, Nix generation, password
 login, journal, Tailscale status and persistent-path inventory. Place a temporary
-marker in `/home/jon`, `/var/lib/nixos` and `/var/lib/tailscale`, and one disposable
+marker in `/home/jon/.ssh`, `/var/lib/nixos` and `/var/lib/tailscale`, and one disposable
 file on `/`. Reboot through the final profile. Verify persistent markers,
 unchanged key/ID, journal from previous boot and renewed tailnet SSH; root-only
 file must disappear. Remove all markers. Do not mark commissioning done until
 backup/restore and cold rollback below also pass.
 
-### 10. Set up independent backups and prove a restore
+### 10. Configure normal fleet backups and prove a restore
 
-Local hourly btrbk snapshots include `storage`, with a minimum 6 hours and
-24-hour/3-day retention. Journal is bounded to 128 MiB and 7 days in `scratch`.
-The health timer fails at 85% usage on `/boot` or `/mnt/main`, or if a verified
-off-host backup acknowledgement is missing/older than 48 hours. Failure is
-visible in systemd/journal; it deliberately fails before backups are configured.
-Arrange an external monitor to poll `dot-health`/SSH availability and alert Jon.
-An isolated local failed unit is not an off-host alert.
+Shared btrbk snapshots cover `storage` on `/mnt/main` hourly, with a minimum
+six hours and `48h 7d 4w` retention. Logs remain in scratch, bounded to 128 MiB
+and seven days. The default target list is empty: local snapshots are not an
+off-host backup. No custom backup account, pull script or acknowledgement timer
+is needed.
 
-Select an independent backup host and encrypted destination filesystem, with
-space, retention and monitoring. Generate a **dedicated** ed25519 backup key
-there. Its private key stays on the backup host, never on dot. Copy only its
-public key to `hosts/dot/backup-host.pub`, commit it and add to dot's configuration:
+Choose mounted, protected Btrfs destinations on existing backup hosts. Use the
+same volume declaration as other fleet members, for example after approving
+and checking Pow/Eve capacity and connectivity:
 
 ```nix
-dot.backupPublicKey = builtins.readFile ./backup-host.pub;
+services.btrbk.volumes."/mnt/main" = [
+  "ssh://pow/mnt/pool/backups/dot"
+  "ssh://eve/mnt/pool/backups/dot"
+];
 ```
 
-Rebuild dot from the operator. Null default means no backup account/key is active
-before this decision. Enabled access creates `dot-backup` with a forced command
-implemented by `backup-send.sh`: list storage snapshots, send an existing
-read-only storage snapshot, acknowledge successful backup. No remote shell,
-forwarding, snapshot deletion, other subvolume reads or destination writes.
-The source host holds no credential to write/delete backups anywhere. Keep
-snapshot directories root-owned; do not allow apps to create symlinks there.
+Rebuild dot from the operator. Shared modules derive the normal btrbk identity
+and configure restricted btrbk SSH access. That fleet credential has the same
+backup read/write/delete authority as on other hosts; it is not a dot-only
+read-only pull key. Sends run nightly at 00:15. Inspect generated configuration,
+check destination host keys and run the snapshot and backup units:
 
-Command template, backup host, using dot's verified host key and tail IP:
+```sh
+sudo systemctl start btrbk-snapshots
+sudo systemctl start btrbk-backups
+sudo systemctl show btrbk-snapshots btrbk-backups -p Result -p ExecMainStatus --no-pager
+sudo journalctl -u btrbk-backups --no-pager -n 100
+sudo btrbk -c /etc/btrbk/backups.conf list
+```
+
+Verify received snapshots on each destination. Arrange off-host monitoring for
+SSH availability, failed backup jobs, backup age and free space on `/boot`,
+`/mnt/main` and the destinations. Nothing in this baseline proves off-host
+backup freshness until destinations and monitoring are configured.
+
+Sample restore on a backup host, without overwriting live dot:
 
 ```sh
 set -euo pipefail
-: "${TAIL_IP:?Set the verified dot tail IP}"
-: "${BACKUP_LOGIN_KEY:?Set the dedicated private backup key on the backup host}"
-: "${BACKUP_KNOWN_HOSTS:?Set a file containing the verified dot SSH host key}"
-: "${BACKUP_DIR:?Set an encrypted, mounted Btrfs backup directory}"
-findmnt -T "$BACKUP_DIR"
-BSSH=(ssh -F /dev/null -i "$BACKUP_LOGIN_KEY" -o IdentitiesOnly=yes -o BatchMode=yes \
-  -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$BACKUP_KNOWN_HOSTS" "dot-backup@$TAIL_IP")
-SNAPSHOT=$("${BSSH[@]}" list | tail -1)
-[[ "$SNAPSHOT" =~ ^storage\.[0-9]{8}T[0-9]{4}$ ]]
-# Full sends avoid dependence on a base snapshot at either end.
-"${BSSH[@]}" "send $SNAPSHOT" | sudo btrfs receive "$BACKUP_DIR"
-sudo btrfs property get -ts "$BACKUP_DIR/$SNAPSHOT" ro
-sudo test -s "$BACKUP_DIR/$SNAPSHOT/etc/machine-id"
-"${BSSH[@]}" acknowledge
-```
-
-Schedule this from the backup host and alert on command failure, backup age,
-source/destination space and missing snapshots. Do not resend the same snapshot
-into an existing receive path. Destination retention/deletion is backup-host
-policy, not dot's authority. Set short initial retention and inspect actual space
-use on this small disk. Root/boot/Nix closures are reproducible from the selected
-revision; password hash, host key, machine-id and tail state need protected backup.
-
-Sample restore, backup host, without overwriting live dot:
-
-```sh
+: "${BACKUP_DIR:?Set the mounted Btrfs directory containing dot backups}"
+: "${SNAPSHOT:?Set a verified main.YYYYMMDDTHHMM snapshot name}"
 : "${RESTORE_DIR:?Set a new, empty directory on a mounted Btrfs test filesystem}"
+[[ "$SNAPSHOT" =~ ^main\.[0-9]{8}T[0-9]{4}$ ]]
 test -d "$RESTORE_DIR" && test -z "$(ls -A "$RESTORE_DIR")"
 sudo btrfs send "$BACKUP_DIR/$SNAPSHOT" | sudo btrfs receive "$RESTORE_DIR"
-sudo cmp "$BACKUP_DIR/$SNAPSHOT/etc/machine-id" "$RESTORE_DIR/$SNAPSHOT/etc/machine-id"
+sudo cmp "$BACKUP_DIR/$SNAPSHOT/etc/ssh/ssh_host_ed25519_key" \
+  "$RESTORE_DIR/$SNAPSHOT/etc/ssh/ssh_host_ed25519_key"
 sudo ssh-keygen -lf "$RESTORE_DIR/$SNAPSHOT/etc/ssh/ssh_host_ed25519_key"
-sudo test -s "$RESTORE_DIR/$SNAPSHOT/etc/dot/recovery.hash"
-# Delete ONLY this disposable restored subvolume after recording the result.
+# Delete only this disposable restored subvolume after recording the result.
 sudo btrfs subvolume delete "$RESTORE_DIR/$SNAPSHOT"
 ```
 
-The restored key must match dot, and recovered password must allow console login
-in a disposable restore VM or authorized replacement. Never boot two copies of
-one machine-id/Tailscale identity concurrently. Before adding apps, inventory
-persistent paths, use explicit storage bind mounts and application-consistent
-DB dumps. `/var/lib/docker` in scratch is not covered. Add resource limits and
-bounded restarts before enabling heavy workloads.
+The restored key must match dot. Machine ID, console password hashes and user
+identities are recreated by normal activation from the encrypted fleet secrets.
+Test restored user/Tailscale state in a disposable VM or authorized replacement.
+Never boot two copies of the same machine/Tailscale identity concurrently.
+Before adding apps, inventory persistent paths and application-consistent DB
+backups. Future state in scratch is not covered by storage snapshots.
 
 ### 11. Normal updates, rollback and repair
 
@@ -664,9 +663,10 @@ nix copy --to "ssh://root@$PUBLIC_IP?remote-store=local%3Froot=%2Fmnt" "$SYSTEM"
 ```
 
 This explicit Disko mount plus `nixos-install` repairs generation/GRUB state
-without repartitioning. If only the key/hash was lost, recover and stage those
-files at `/mnt/mnt/main/storage/...` over authenticated SSH, preserve the
-machine-id and reinstall as above. Repeat step 8 before explicit final-profile
+without repartitioning. If only the host key was lost, derive it from the
+current fleet root and stage it at `/mnt/mnt/main/storage/etc/ssh/` over
+authenticated SSH. Reinstall as above; normal activation recreates derived
+machine ID and account credentials. Repeat step 8 before explicit final-profile
 boot. Run offline read-only checks or restore from backup rather than guessing
 repair flags.
 
@@ -697,23 +697,21 @@ verified backup over that authenticated connection:
 : "${PUBLIC_IP:?Set the verified installer public IP}"
 : "${BACKUP_DIR:?Set the protected Btrfs backup directory}"
 : "${SNAPSHOT:?Set the previously verified storage snapshot name}"
-[[ "$SNAPSHOT" =~ ^storage\.[0-9]{8}T[0-9]{4}$ ]]
+[[ "$SNAPSHOT" =~ ^main\.[0-9]{8}T[0-9]{4}$ ]]
 set -o pipefail
 sudo btrfs send "$BACKUP_DIR/$SNAPSHOT" | \
   "${SSH[@]}" "root@$PUBLIC_IP" 'btrfs receive /mnt/dot-repair/incoming'
 ```
 
-Installer console: verify the received key/hash/ID, then explicitly choose to
+Installer console: verify the received host key, then explicitly choose to
 replace storage. This replaces persistent account/Tailscale state but does not
 format a disk. Keep the old storage for rollback:
 
 ```sh
 : "${SNAPSHOT:?Set the verified received storage snapshot name}"
-[[ "$SNAPSHOT" =~ ^storage\.[0-9]{8}T[0-9]{4}$ ]]
+[[ "$SNAPSHOT" =~ ^main\.[0-9]{8}T[0-9]{4}$ ]]
 TOP=/mnt/dot-repair
-test -s "$TOP/incoming/$SNAPSHOT/etc/machine-id"
 ssh-keygen -lf "$TOP/incoming/$SNAPSHOT/etc/ssh/ssh_host_ed25519_key"
-test -s "$TOP/incoming/$SNAPSHOT/etc/dot/recovery.hash"
 read -r -p 'Type RESTORE-DOT to replace stopped persistent state: ' confirmation
 test "$confirmation" = RESTORE-DOT
 OLD_STORAGE="$TOP/storage.before-restore.$(date +%Y%m%dT%H%M%S)"
@@ -736,24 +734,18 @@ authorized replacement after its new-disk install and before first boot.
 
 **Lost-instance replacement:** shut down/fence the old instance and preserve
 provider records. Obtain a separate explicit paid replacement mandate. Create a
-new empty `dot` with new recorded IDs/IPs, repeat steps 1-8 and restore only its
-last verified storage backup before first boot. Reuse the original host key,
-hash and machine-id when restoring old state. If no backup exists, recover the
-key from the original root, generate a fresh console hash and machine-id, and
-re-enrol Tailscale. Remove/fence the stale tail node first. Update zone data with
-the actual replacement address; never copy sol's address. Verify SSH fingerprint,
+new empty dot with new recorded IDs/IPs, repeat steps 1-8 and restore its last
+verified storage backup before first boot. Use the current fleet key and
+ciphertext for the selected revision. If an old snapshot predates fleet rotation,
+replace its host key through authenticated installer SSH before activation.
+If no backup exists, normal fleet recovery still recreates identities and
+account credentials; user/application data and Tailscale enrolment must be
+restored separately. Fence the stale tail node before re-enrolment. Update zone
+data with the actual replacement address; never copy sol's address. Verify SSH,
 console, Tailscale, second reboot, backups and rollback again.
 
-**Independent host-key rotation:** prepare a new dot-only key on the trusted
-operator, save its recovery metadata offline, and add its public key to operator
-known-hosts before changing the running host. Retain the old key/known-good
-closure for console-assisted rollback. Update dot's public key file, rekey any
-specific future service secrets to that recipient, build locally, securely stage
-the matching private key in persistent storage and switch while console is open.
-The identity guard prevents SSH starting with a mismatched key. A one-key change
-needs a maintenance window; do not pretend this is fleet dual-key rotation.
-Test new SSH/agenix activation, second boot and recovery, then revoke the old key.
-Do not remove `fleet-root-independent` to make the broad generator do this.
+Host-key changes use the normal managed fleet rotation workflow. Do not replace
+dot's key independently of its ciphertext and the fleet root.
 
 Public services/DNS are later work. For any future `*.suderman.org` endpoint,
 review Traefik's generated router, public visibility, TLS resolver, DNS, firewall
@@ -778,8 +770,8 @@ if [[ -n ${TUNNEL_PID-} ]]; then kill "$TUNNEL_PID" 2>/dev/null || true; fi
 [[ "$(basename "$WORK")" = dot-bootstrap.* ]]
 test -d "$WORK" && test "$(stat -c %u "$WORK")" = "$(id -u)"
 rm -rf -- "$WORK"
-unset HOST_KEY RECOVERY_HASH MACHINE_ID BOOTSTRAP_KEY NIX_SSHOPTS
-agenix lock # Only if you unlocked operator master identities for specific secrets.
+unset HOST_KEY BOOTSTRAP_KEY NIX_SSHOPTS
+agenix lock # If you unlocked the operator master for rekeying.
 ```
 
 Deletion is not secure erasure on SSD/Btrfs. Use encrypted operator storage for
@@ -789,20 +781,24 @@ provider disk-growth procedure. Preserve a verified external recovery ISO route.
 
 ## Local validation and helpers
 
-Run from the repository devshell. `test-identity-scope.py` runs the wrapper's
-actual host generation loop with inert stubs and checks the rotation scanner.
+Optional validation tooling lives in [`tests/dot/`](../../tests/dot/), separate
+from the production host configuration. Run from the repository devshell.
+`test-identity-scope.py` runs the wrapper's actual host generation loop with
+inert stubs and checks the rotation scanner.
 `vm-fixture.nix` uses public dummy keys/password/ciphertext, never production
 private identity. `test-vm.sh` builds that fixture with the checkout's lockfile;
 `test-vm.py` installs it into a private sparse temporary disk through the pinned
-tool and authenticated SSH tunnel, then BIOS-boots it with 2 GiB RAM. Ports
-22281-22283 must be unused and `/dev/kvm` writable. No physical disks or real
+tool and authenticated SSH tunnel, then BIOS-boots it with 2 GiB RAM and a
+32 GiB sparse disk. It stages an empty agent Git checkout so Jon's normal
+activation hook runs without fetching GitHub; the first real checkout still
+needs commissioning validation. Ports 22281-22283 must be unused and `/dev/kvm` writable. No physical disks or real
 provider are touched. Test temporary disks, keys, tunnels and processes are
 removed even on failure. Dummy fixture credentials may be in the Nix store;
 production credentials may not.
 
 ```sh
-nix develop --command python3 hosts/dot/test-identity-scope.py
-nix develop --command bash hosts/dot/test-vm.sh
+nix develop --command python3 tests/dot/test-identity-scope.py
+nix develop --command bash tests/dot/test-vm.sh
 nix develop --command nix build .#checks.x86_64-linux.identity-rotation --no-link -L
 ```
 
@@ -810,51 +806,46 @@ Use the Git-filtered flake reference above. A `path:.` reference also copies
 ignored operator files and can fail on unrelated unreadable scratch directories.
 Do not change their permissions to make a validation command pass.
 
-`backup-send.sh` is the host-specific restricted backup source command, installed
-only when an approved public backup key is configured. It has no destination
-credential. No general cloud orchestrator or custom interactive installer is
-added. The existing interactive disk picker is not part of this supported route.
+No cloud orchestrator or custom installer is added. The existing interactive
+disk picker is not part of this supported route.
 
 ### Evidence and remaining gates
 
-Local results on 2026-10-04, working patch based on `49b128f6`:
+The 2026-10-05 fleet-default pivot passed the host-generation/rotation regression,
+identity-tools and identity-rotation checks, and the updated BIOS VM test. The VM
+verified authenticated installer transport, serial root login, root-only fleet
+secret decryption, Jon's user secret decryption and persistent SSH identity,
+Home Manager, normal btrbk send/restore, remote switch/rollback, root reset,
+three cold boots and mount-only repair. All eight other non-ISO hosts evaluate.
+The runbook's 27 shell blocks parse. The original host-only results are superseded.
 
-- Evaluation/build: dot system, Disko destructive script and mount-only script
-  built with root nixpkgs `774debe7a0d1b496e35677ad955a1011c6ff74f3` and Disko
-  `725ea35e410ad83be4931d1bff7e090eacaf3563`. Production closure is 1.4 GiB.
-  Effective secrets are empty, host identity path matches the table, GRUB device
-  is only `/dev/sda`, forceInstall is false, and serial/emergency access is on.
-  All eight existing non-ISO hosts evaluate. Identity scope regression and the
-  rotation simulation/artifact/finalization check pass. All 27 Bash blocks parse;
-  touched-file formatting and whitespace checks pass.
-- Disposable BIOS VM: pinned 1.13.0 installation through a host-key-checked
-  outer tunnel passes with real `--extra-files` injection of dummy key/hash/ID
-  and an agenix probe. The installer is a QEMU fixture declaring
-  `VARIANT_ID=installer`, not the standard release ISO. It uses prebuilt fixture
-  store paths; production dot was built separately on the operator.
-  Verified BIOS GRUB interaction, password serial login, strict SSH identity,
-  agenix activation, root reset, persistent account/home/Tailscale-directory state
-  and previous-boot logs. Restricted backup pull/restore matches key/hash/ID;
-  shell/path-injection attempts fail. Missing backup acknowledgement fails health
-  checking; a verified-send acknowledgement passes it. Remote closure switch,
-  runtime rollback, three cold boots and mount-only Disko plus `nixos-install`
-  repair all pass. Installed guest has 2 GiB RAM; idle memory was about 297 MiB,
-  one generation used 52 MiB of `/boot`, and Btrfs used about 992 MiB on the
-  16 GiB test disk. These are fixture measurements, not provider guarantees.
-- Real provider: no authenticated provider access, instance creation, disk write,
-  deployment or service publication. Public catalog reads are not commissioning.
-  Standard release ISO download/write, actual disk/profile mapping, Direct Disk
-  boot, LISH, dual-stack networking, Tailscale enrolment/reboot, real remote updates,
-  backup destination and replacement restore await an explicit deployment mandate.
+The public-fixture closure is 14.3 GiB. First-boot output showed 369 MiB used
+out of 1970 MiB RAM, no swap use, 50 MiB used on `/boot` with 857 MiB available,
+and 7.5 GiB used on Btrfs with 22 GiB available. These are fixture measurements,
+not a workload capacity test. Fixture installation logs include a chroot
+`mktemp` failure in shared user activation; installed boot and the normal live
+activation passed the identity checks. Do not treat installer completion alone
+as proof that user activation succeeded.
 
-Repository evaluation/build, disposable-VM validation and real-provider
-commissioning are distinct. VM success is not evidence of provider results.
-The command templates and pinned tool flags were checked locally; a complete
-empty-Linode walkthrough cannot be tested without the authorized instance.
+Production rekeying and the real closure build passed on 2026-10-05. Normal
+`agenix rekey -a` added seven system ciphertexts under `secrets/nixos/dot` and
+two Home Manager ciphertexts under `secrets/home/dot-jon`; existing targets
+were unchanged. All nine decrypt with the intended derived target identity and
+match their source secrets. Verification kept plaintext in memory. The real
+closure measures 14.3 GiB. The operator master was relocked after verification.
+Rebuild the reviewed deployment revision before bootstrap.
 
-Remaining decisions are workload, plan/current price, final region, acceptance
-of this concrete host-only trust policy, backup host/encrypted destination and
-future public domains. Hostname `dot` is settled.
+No authenticated provider access, instance creation, disk write, deployment or
+service publication has occurred. Standard release ISO download/write, actual
+disk/profile mapping, Direct Disk boot, LISH, dual-stack networking, Tailscale
+enrolment/reboot, real remote updates, off-host backup and replacement restore
+await an explicit deployment mandate. A fixture installer declaring
+`VARIANT_ID=installer` does not test the standard release ISO or Linode itself.
+
+Remaining decisions are workload, plan/current price, final region, backup
+hosts/protected destinations and future public domains. Hostname dot and the
+normal fleet trust model are settled. Measure the production closure, idle memory
+and boot space during commissioning; fixture results are not provider results.
 
 References: [Direct Disk semantics](https://techdocs.akamai.com/cloud-computing/docs/manage-the-kernel-on-a-compute-instance),
 [custom distribution installation](https://www.akamai.com/cloud/guides/install-a-custom-distribution/),

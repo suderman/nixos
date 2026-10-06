@@ -620,8 +620,6 @@ nixos_generate() {
   # Generate missing SSH keys for hosts and users
   gum_info "Generating SSH keys..."
   for host in $(dirs hosts | grep -v iso); do
-    # Host-only keys have their own operator-managed recovery and rotation.
-    [[ -e "hosts/$host/fleet-root-independent" ]] && continue
     agenix hex |
       derive hex "$host" |
       derive ssh |

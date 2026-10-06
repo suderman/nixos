@@ -29,12 +29,6 @@ direct edit makes every managed transition fail validation.
 authoritative for target membership; the identity-rotation check rejects
 missing or stale NixOS, Home Manager, and user/service identity entries.
 
-A host with `hosts/<name>/fleet-root-independent` is not a fleet root target.
-The host-key generator skips it too. This is an explicit trust boundary, not a
-way to hide a normal fleet host from rotation. Such a host must not receive the
-fleet root, and needs its own documented key recovery and rotation procedure.
-See [dot's runbook](../../hosts/dot/README.md).
-
 The idle contract is:
 
 - `status` is `idle`
@@ -47,10 +41,10 @@ The idle contract is:
 
 An active transition requires the marker, a non-negative `nextIndex`, and a
 state for every target. `preparedHosts` records all-current remote attestations
-one host at a time. No target can move until all eight NixOS hosts are prepared.
+one host at a time. No target can move until all NixOS hosts are prepared.
 A target must then move through `current`, `bridge`, and `next` one step at a
 time. Moving backward one step supports rollback and clears all `nextHosts`
-attestations. Finalization requires every target at `next` and all eight hosts
+attestations. Finalization requires every target at `next` and all hosts
 remotely attested in `nextHosts` after booting the all-next generation.
 
 The indexes are operator-declared BIP-85 recovery metadata, not cryptographic
@@ -146,8 +140,8 @@ still valid and idle. Next artifacts remain until the reverted idle state has
 been deployed everywhere. `cleanup` then verifies every artifact and source
 hash before removing the next set and staging those deletions.
 
-`finalize` requires a clean worktree, every target at `next`, all eight prepared
-hosts, and all eight all-next runtime attestations. In an isolated tracked-tree
+`finalize` requires a clean worktree, every target at `next`, all prepared
+hosts, and all all-next runtime attestations. In an isolated tracked-tree
 copy it decrypts each source with the retained current/next identities,
 re-encrypts it only to the next master, promotes canonical public artifacts and
 `flake.derivationIndex`, regenerates exact final target ciphertext, and
@@ -248,7 +242,7 @@ instead removes the unused next key.
 
 Preparation commits the marker, active manifest, next public artifacts, and the
 union of current- and next-recipient generated ciphertext together. Deploy that
-all-current prepared state to every NixOS host and record all eight attestations
+all-current prepared state to every NixOS host and record all attestations
 before moving any NixOS, Home Manager, or identity target to `bridge`.
 
 The ISO configuration is intentionally outside the rotation target inventory.
@@ -263,6 +257,7 @@ snapshot, and the flake check enforces that they remain synchronized.
 NixOS secret targets:
 
 - `cog`
+- `dot`
 - `eve`
 - `hub`
 - `kit`
@@ -274,6 +269,7 @@ NixOS secret targets:
 Home Manager secret targets:
 
 - `cog-jon`
+- `dot-jon`
 - `eve-jon`
 - `hub-jon`
 - `kit-jon`

@@ -41,12 +41,6 @@ host therefore compromises every deterministic host, user, and service identity
 derived from it. It must be treated as fleet-wide root key material, not as a
 host-local secret.
 
-`dot` is an explicit exception. It uses a host-only identity and does not import
-these fleet-root-bearing defaults. Hosts with `hosts/<name>/fleet-root-independent`
-are excluded from broad host-key generation and the fleet root rotation ledger.
-Their key recovery and rotation are operator-managed. See
-[dot's runbook](../hosts/dot/README.md) before changing that marker or its key.
-
 ## Canonical root format
 
 The root stored in `secrets/hex.age` must be exactly 64 lowercase hexadecimal

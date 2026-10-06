@@ -17,7 +17,6 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-
 CATEGORIES = ("home", "identities", "nixos")
 TARGET_STATES = ("current", "bridge", "next")
 STATE_RANK = {state: rank for rank, state in enumerate(TARGET_STATES)}
@@ -88,7 +87,6 @@ def discover_targets(repository: Path) -> dict[str, set[str]]:
         if path.is_dir()
         and (path / "configuration.nix").is_file()
         and path.name != "iso"
-        and not (path / "fleet-root-independent").exists()
     }
     missing_host_keys = sorted(
         host_name
