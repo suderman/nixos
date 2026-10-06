@@ -45,6 +45,8 @@ in
   assert lib.length flake.nixosConfigurations.lux.config.services.storage-health.volumes.pool.devices == 1;
   assert flake.nixosConfigurations.lux.config.services.storage-health.volumes.pool.mountTimeoutSec == 120;
   assert flake.nixosConfigurations.lux.config.services.storage-health.volumes.pool.startupGraceSec == 60;
+  assert lib.all (path: lib.elem "x-systemd.device-timeout=60s" flake.nixosConfigurations.lux.config.fileSystems.${path}.options) ["/mnt/pool" "/media"];
+  assert lib.all (path: lib.elem "x-systemd.device-timeout=1ms" flake.nixosConfigurations.lux.config.fileSystems.${path}.options) ["/mnt/data" "/data"];
   assert cfg.services.storage-health.volumes.game.mountTimeoutSec == 15;
   assert cfg.services.storage-health.volumes.game.startupGraceSec == 0;
   assert lib.length flake.nixosConfigurations.lux.config.systemd.services.docker-backblaze.unitConfig.ConditionPathExists == 2;

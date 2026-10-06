@@ -34,7 +34,7 @@
   };
 
   # Extended mount options to support automount
-  automount = mountpoint: {
+  automount = mountpoint: deviceTimeout: {
     inherit mountpoint;
     mountOptions =
       (mount null).mountOptions
@@ -42,7 +42,7 @@
         "noauto" # do not mount on boot
         "nofail" # continue boot even if disk is missing
         "x-systemd.automount" # create automount unit to mount when accessed
-        "x-systemd.device-timeout=1ms" # assume device is already plugged in and do not wait
+        "x-systemd.device-timeout=${deviceTimeout}" # wait for the device before failing mount dependencies
         "x-systemd.idle-timeout=5m" # unmount after 5 min of inactivity
       ];
   };
@@ -108,12 +108,12 @@ in {
       part = {
         size = "100%";
         content =
-          automount "/mnt/data"
+          automount "/mnt/data" "1ms"
           // {
             type = "btrfs";
             extraArgs = ["-fL data"];
             subvolumes = {
-              storage = automount "/data";
+              storage = automount "/data" "1ms";
               snapshots = {};
               backups = {};
             };
@@ -126,12 +126,12 @@ in {
       part = {
         size = "100%";
         content =
-          automount "/mnt/pool"
+          automount "/mnt/pool" "60s"
           // {
             type = "btrfs";
             extraArgs = ["-fL pool"];
             subvolumes = {
-              storage = automount "/media";
+              storage = automount "/media" "60s";
               snapshots = {};
               backups = {};
             };
