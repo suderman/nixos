@@ -23,7 +23,13 @@
     assert cfg.programs.claude-code.package == perSystem.agents.claude-code;
     assert cfg.programs.claude-code.finalPackage == perSystem.agents.claude-code;
     assert lib.elem perSystem.agents.claude-code cfg.home.packages;
-    assert lib.all (path: lib.elem path directories) [".agents" ".claude"];
+    assert lib.all (path: lib.elem path directories) [".agents" ".claude" ".pi/agent" ".pi-lens"];
+    assert !(lib.elem ".pi/agent" cfg.persist.scratch.directories);
+    assert lib.elem ".local/state/pi" cfg.persist.scratch.directories;
+    assert cfg.programs.pi-coding-agent.taskDropZones.enable;
+    assert lib.all (name: builtins.hasAttr name cfg.systemd.user.services) ["pi-task-drop-todo" "pi-task-drop-prog" "pi-extension-update" "pi-coding-agent-env"];
+    assert cfg.systemd.user.paths.pi-task-drop-todo.Path.DirectoryNotEmpty == "${cfg.home.homeDirectory}/${cfg.home.directories.DOWNLOAD.path}/TODO";
+    assert cfg.systemd.user.paths.pi-task-drop-prog.Path.DirectoryNotEmpty == "${cfg.home.homeDirectory}/${cfg.home.directories.DOWNLOAD.path}/PROG";
     assert lib.elem ".claude.json" cfg.persist.storage.files;
     assert !(cfg.home.sessionVariables ? CLAUDE_CONFIG_DIR);
     assert lib.all (name: !(builtins.hasAttr name cfg.home.activation)) retired;
@@ -36,7 +42,11 @@
       echo "Checking ${host} agents installation and independent integrations"
       python3 ${../modules/home/default/options/agents/test.py} \
         ${checkout} ${lib.getExe command} ${stylix} ${herdr}
+      python3 -B ${../modules/home/default/options/pi-coding-agent}/test.py \
+        ${cfg.programs.pi-coding-agent.package}/bin/pi ${lib.getExe pkgs.python3}
       home=$(mktemp -d)
+      env -i HOME="$home" PATH=${lib.makeBinPath [pkgs.coreutils]} \
+        ${cfg.programs.pi-coding-agent.package}/bin/pi --version
       env -i HOME="$home" PATH=${lib.makeBinPath [pkgs.coreutils]} \
         ${perSystem.agents.claude-code}/bin/claude --version
       rm -rf -- "$home"
