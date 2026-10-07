@@ -32,10 +32,14 @@
     volumes = {
       boot = {};
       main = {};
-      pool.devices = [
-        "${config.disko.devices.disk.hdd1.device}-part1"
-        "${config.disko.devices.disk.hdd2.device}-part1"
-      ];
+      pool = {
+        # Allow the same mount time as Pow's similar two-HDD pool.
+        mountTimeoutSec = 120;
+        devices = [
+          "${config.disko.devices.disk.hdd1.device}-part1"
+          "${config.disko.devices.disk.hdd2.device}-part1"
+        ];
+      };
     };
   };
 

@@ -41,7 +41,11 @@ in
   assert units.storage-health-capture.serviceConfig.TimeoutStartSec == "75s";
   assert units.storage-space-data.serviceConfig.TimeoutStartSec == "10s";
   assert lib.length flake.nixosConfigurations.pow.config.services.storage-health.volumes.pool.devices == 2;
+  assert flake.nixosConfigurations.pow.config.services.storage-health.volumes.pool.mountTimeoutSec == 120;
+  assert flake.nixosConfigurations.pow.config.services.storage-health.volumes.pool.startupGraceSec == 0;
   assert lib.length flake.nixosConfigurations.eve.config.services.storage-health.volumes.pool.devices == 2;
+  assert flake.nixosConfigurations.eve.config.services.storage-health.volumes.pool.mountTimeoutSec == 120;
+  assert flake.nixosConfigurations.eve.config.services.storage-health.volumes.pool.startupGraceSec == 0;
   assert lib.length flake.nixosConfigurations.lux.config.services.storage-health.volumes.pool.devices == 1;
   assert flake.nixosConfigurations.lux.config.services.storage-health.volumes.pool.mountTimeoutSec == 120;
   assert flake.nixosConfigurations.lux.config.services.storage-health.volumes.pool.startupGraceSec == 60;

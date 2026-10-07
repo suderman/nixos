@@ -33,10 +33,14 @@
     volumes = {
       boot = {};
       main = {};
-      pool.devices = [
-        "${config.disko.devices.disk.hdd1.device}-part1"
-        "${config.disko.devices.disk.hdd2.device}-part1"
-      ];
+      pool = {
+        # A read-only mount of the two-disk pool takes about 42 seconds.
+        mountTimeoutSec = 120;
+        devices = [
+          "${config.disko.devices.disk.hdd1.device}-part1"
+          "${config.disko.devices.disk.hdd2.device}-part1"
+        ];
+      };
     };
   };
 
