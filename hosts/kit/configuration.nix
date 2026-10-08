@@ -75,30 +75,17 @@
   };
 
   # Share the existing Hyprland desktop over LAN/Tailscale.
-  services.sunshine = let
-    normal = lib.getAttrs ["output" "mode" "scale"] (builtins.head config.home-manager.users.jon.wayland.windowManager.hyprland.lua.monitors);
-    # Use an advertised 16:9 mode until physical 3:2 support is resolved.
-    laptop =
-      normal
-      // {
+  services.sunshine = {
+    enable = true;
+    settings.encoder = "nvenc";
+    laptopProfiles = {
+      normal = lib.getAttrs ["output" "mode" "scale"] (builtins.head config.home-manager.users.jon.wayland.windowManager.hyprland.lua.monitors);
+      # Use an advertised 16:9 mode until physical 3:2 support is resolved.
+      streaming = {
         mode = "2560x1440@60Hz";
         scale = "1.25";
       };
-    command = "/run/current-system/sw/bin/sunshine-laptop";
-  in {
-    enable = true;
-    settings.encoder = "nvenc";
-    applications.apps = lib.mkAfter [
-      {
-        name = "Laptop";
-        prep-cmd = [
-          {
-            do = "${command} start ${lib.escapeShellArg (builtins.toJSON normal)} ${lib.escapeShellArg (builtins.toJSON laptop)}";
-            undo = "${command} reset ${lib.escapeShellArg (builtins.toJSON normal)}";
-          }
-        ];
-      }
-    ];
+    };
   };
 
   # Enable ollama server

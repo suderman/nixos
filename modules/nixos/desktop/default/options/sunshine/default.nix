@@ -9,17 +9,34 @@
   tcpPorts = map (offset: cfg.settings.port + offset) [(-5) 0 21];
   udpPorts = map (offset: cfg.settings.port + offset) [9 10 11 13 21];
   portList = ports: lib.concatMapStringsSep "," toString ports;
-  phone = pkgs.writeShellApplication {
+  phone = pkgs.self.mkScript {
     name = "sunshine-phone";
-    runtimeInputs = [config.programs.hyprland.package pkgs.jq pkgs.coreutils];
-    text = builtins.readFile ./sunshine-phone.sh;
+    path = [config.programs.hyprland.package pkgs.jq];
+    text = ./sunshine-phone.sh;
   };
-  laptop = pkgs.writeShellApplication {
+  laptop = pkgs.self.mkScript {
     name = "sunshine-laptop";
-    runtimeInputs = [config.programs.hyprland.package pkgs.jq pkgs.coreutils];
-    text = builtins.readFile ./sunshine-laptop.sh;
+    path = [config.programs.hyprland.package pkgs.jq];
+    text = ./sunshine-laptop.sh;
   };
 in {
+  options.services.sunshine.laptopProfiles = lib.mkOption {
+    type = lib.types.nullOr (lib.types.submodule {
+      options = {
+        normal = lib.mkOption {
+          type = lib.types.attrsOf lib.types.str;
+          description = "Normal Hyprland monitor profile restored after Laptop streaming.";
+        };
+        streaming = lib.mkOption {
+          type = lib.types.attrsOf lib.types.str;
+          description = "Monitor settings that override the normal profile during Laptop streaming.";
+        };
+      };
+    });
+    default = null;
+    description = "Monitor profiles for the Laptop application, or null to omit it.";
+  };
+
   config = lib.mkIf cfg.enable {
     services.sunshine = {
       # Guard-only backport of LizardByte/Sunshine#5748; remove after an upstream fix.
@@ -35,15 +52,29 @@ in {
       };
       applications.apps =
         [{name = "Desktop";}]
-        ++ lib.optional config.programs.hyprland.enable {
-          name = "Phone";
-          prep-cmd = [
+        ++ lib.optionals config.programs.hyprland.enable (
+          [
             {
-              do = "${phone}/bin/sunshine-phone start";
-              undo = "${phone}/bin/sunshine-phone reset";
+              name = "Phone";
+              prep-cmd = [
+                {
+                  do = "${lib.getExe phone} start";
+                  undo = "${lib.getExe phone} reset";
+                }
+              ];
             }
-          ];
-        };
+          ]
+          ++ lib.optional (cfg.laptopProfiles != null) {
+            name = "Laptop";
+            prep-cmd = [
+              {
+                # Sunshine uses Boost.Process directly, not shell argument parsing.
+                do = "${lib.getExe laptop} start ${builtins.toJSON cfg.laptopProfiles.normal} ${builtins.toJSON (cfg.laptopProfiles.normal // cfg.laptopProfiles.streaming)}";
+                undo = "${lib.getExe laptop} reset ${builtins.toJSON cfg.laptopProfiles.normal}";
+              }
+            ];
+          }
+        );
     };
 
     environment.systemPackages = lib.optionals config.programs.hyprland.enable [phone laptop];
