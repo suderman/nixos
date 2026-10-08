@@ -113,7 +113,7 @@ in {
     toolchains.javascript.enable = true;
 
     persist.storage.directories = [agentDir ".pi-lens" ".config/pi"];
-    # Retain legacy state for manual migration and rollback, never activation-time moves.
+    # Retain legacy state for rollback, never activation-time moves.
     persist.scratch.directories = [".local/state/pi"];
 
     # Put the wrapper at the conventional user-bin path without exposing the

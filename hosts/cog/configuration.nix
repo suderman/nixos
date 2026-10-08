@@ -60,17 +60,6 @@
     };
   };
 
-  # Experiments
-  services.gitea.enable = false;
-  services.grafana.enable = false;
-  services.home-assistant = {
-    enable = false;
-    name = "hass";
-    ip = flake.networking.zones.tail.cog;
-  };
-  services.jellyfin.enable = false;
-  services.tandoor-recipes.enable = false;
-  services.whoogle.enable = false;
   services.tiddlywiki.enable = true;
 
   services.mysql = {

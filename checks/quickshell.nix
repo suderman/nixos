@@ -51,7 +51,6 @@ in
   assert fallback;
     pkgs.runCommand "quickshell-check" {nativeBuildInputs = [pkgs.python3 pkgs.bash];} ''
       mkdir -p "$out"
-      ln -s ${pkgs.python3.withPackages (p: [p.dbus-next])} "$out/test-python"
       python3 ${source}/test-media.py ${pkgs.avizo} ${source}/media-osd-client.sh
       ${lib.concatMapStringsSep "\n" checkHost hosts}
       echo "Checking Quickshell with runtime themes disabled"

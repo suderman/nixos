@@ -148,41 +148,8 @@ capture cancellation, and the QR sensitive hint. Git flakes omit
 untracked files. Never use raw `path:.` from this checkout; it includes ignored
 Sim disks and private keys. Use a Git-filtered source snapshot for unstaged work.
 
-For a running disposable Sim session:
-
-```sh
-python3 modules/home/desktop/default/options/desktop-theme/test-runtime.py /path/to/sim-user-command-wrapper
-```
-
-The wrapper must execute arbitrary command arguments as Sim's desktop user, with
-its Wayland and D-Bus environment. The runner refuses another host. It checks
-Kitty startup and live colors, portal events, Rofi colors, DND, reloads, shortcut
-help, stable terminal PID, and unchanged system generation. It closes only its
-own probe window and restores the original appearance and notification mode.
-
-The Quickshell check exercises its actual FileView and IPC support without a
-compositor, including atomic selection changes, rapid updates, and static mode.
-For native popup tests, use `hyprland/quickshell/test-runtime.py` with its exported
-config, Quickshell binary, assets, and Sim user-command wrapper. The runner uses
-synthetic status data and never calls account actions or production status APIs.
-It checks open/pinned state, unchanged data and process ID, and compositor reload.
-
-For the media OSD, the same Sim wrapper can run:
-
-```sh
-python3 modules/home/desktop/hyprland/quickshell/test-media-runtime.py COMPILED_CONFIG QUICKSHELL_PACKAGE /path/to/sim-user-command-wrapper
-```
-
-This test owns a temporary shell, checks modes, palette changes, focus, focused
-and explicit monitors, repeated dismissal, and an actual Wayland test lock.
-It unlocks its own test lock before stopping. Run it only in disposable Sim.
-Optional `MEDIA_OSD_SCREENSHOTS` selects a guest output directory;
-`MEDIA_OSD_GRIM` selects the guest `grim` executable. Vendor mock and native IPC
-checks run with the Quickshell Nix check. Virtual audio and desktop gamma can be
-tested in Sim; real hardware brightness and mic behavior require host testing.
-
-Also test GTK3 and Emacs live events, GTK4 reopen behavior, Home Manager activation,
-and cold login. Capture checks need real screen content: decode a dummy QR, show
+After appearance changes, check GTK3 and Emacs live events, GTK4 reopen
+behavior, Home Manager activation, and cold login. Capture checks need real screen content: decode a dummy QR, show
 that a normal clipboard value enters Cliphist while the QR does not, run screen
 OCR, and cancel a region selection. Mock checks alone cannot prove clipboard
 privacy or app integration.

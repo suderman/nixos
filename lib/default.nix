@@ -7,14 +7,7 @@
   inherit (inputs.nixpkgs) lib;
   args = {inherit flake inputs lib;};
 
-  inherit
-    (builtins)
-    attrNames
-    attrValues
-    filter
-    pathExists
-    readDir
-    ;
+  inherit (builtins) attrValues filter;
   inherit (lib) filterAttrs;
   # Personal helper library
 in rec {
@@ -28,9 +21,6 @@ in rec {
     inherit (flake) nixosConfigurations;
   };
 
-  # Bash script library
-  bash = ./bash.sh;
-
   # Inert identity-rotation state and selection policy
   identityRotationFor = import ./identityRotation.nix args;
   identityRotation = identityRotationFor (builtins.fromJSON (builtins.readFile ../secrets/rotation/state.json));
@@ -40,15 +30,6 @@ in rec {
 
   # Create attrs from list, attr names, or path
   genAttrs = import ./genAttrs.nix args;
-
-  # List of directory names
-  dirNames = path: attrNames (filterAttrs (_: v: v == "directory") (readDir path));
-
-  # Given an attr set and a value, fetch the attr name with that value
-  attrNameByValue = val: attr: toString (attrNames (filterAttrs (_: v: v == val) attr));
-
-  # List of directory names containing default.nix
-  moduleDirNames = path: filter (dir: pathExists "${path}/${dir}/default.nix") (dirNames path);
 
   # > config.users.users = flake.lib.extraGroups users [ "mygroup" ] ;
   extraGroups = cfg: extraGroups: let
@@ -68,12 +49,6 @@ in rec {
       lib.filterAttrs (_: user: user ? extraGroups && builtins.elem "wheel" user.extraGroups) users
     ));
 
-  # Filter only normal users (non-system users)
-  normies = users:
-    map (u: u.name) (builtins.attrValues (
-      lib.filterAttrs (_: user: user.isNormalUser) users
-    ));
-
   # List of home-manager users that match provided filter function
   filterUsers = cfg: pred: let
     users =
@@ -86,9 +61,6 @@ in rec {
   # Boolean if any use matches the above filter function
   anyUser = cfg: pred: (filterUsers cfg pred) != [];
 
-  # Format owner and group as "owner:group"
-  toOwnership = owner: group: "${toString owner}:${toString group}";
-
   helperPackageNames = packages:
     builtins.attrNames (filterAttrs (_: package: package.meta.isHelper or false) packages);
 
@@ -97,13 +69,4 @@ in rec {
 
   removeHelperChecks = packages: checks:
     builtins.removeAttrs checks (map (name: "pkgs-${name}") (helperPackageNames packages));
-
-  # lib.derivationPath "salt"
-  derivationPath = salt: let
-    prefix =
-      if salt == ""
-      then ""
-      else "${salt}@";
-  in
-    prefix + "bip85-hex32-index${toString flake.derivationIndex}";
 }
