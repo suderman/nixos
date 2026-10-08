@@ -88,6 +88,15 @@
     # > XDPH doesn’t implement a file picker. For that, I recommend installing xdg-desktop-portal-gtk alongside XDPH.
     xdg.portal.extraPortals = [pkgs.xdg-desktop-portal-gtk];
 
+    # Avoid qt6ct/Kvantum palette recursion in the portal's share picker.
+    systemd.user.services.xdg-desktop-portal-hyprland = {
+      overrideStrategy = "asDropin";
+      environment = {
+        QT_STYLE_OVERRIDE = "Fusion";
+        QT_QPA_PLATFORMTHEME = "";
+      };
+    };
+
     # https://www.reddit.com/r/NixOS/comments/199dm3j/how_do_i_retain_nextcloud_session_on_hyprland/
     services.gnome.gnome-keyring.enable = true;
     programs.seahorse.enable = true; # gui to manage keyring
