@@ -10,9 +10,10 @@
   switches = let
     # Convert extension names to comma-separated directories
     unpackedExtensionsDirs = lib.concatStringsSep "," (
-      map
-      (name: "${osConfig.programs.chromium.dataDir}/${name}/extension")
-      (builtins.attrNames cfg.unpackedExtensions)
+      (map
+        (name: "${osConfig.programs.chromium.dataDir}/${name}/extension")
+        (builtins.attrNames cfg.unpackedExtensions))
+      ++ ["${./copy-message-id}"]
     );
 
     # Enable these features in chromium

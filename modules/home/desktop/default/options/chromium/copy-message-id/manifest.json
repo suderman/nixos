@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Copy Message-ID",
+  "version": "1.1.0",
+  "description": "Copy each Gmail or Fastmail message's RFC Message-ID as a notmuch query.",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4t4X04T4XrB9Zgl/1tmamSY/7FJKa3eN/Lhue3mD8m9dGLRGQPWdVkCe4MB/Y/L05w2NSuH+SzuDjY3ktVMO6NZcPIMJRsbd3b5y3Ei1Xssa6hyHfKUZEzstvVuL5RqJngYKdYXMp/dLiesLEGuz1Dl98pYpM1sQxKY+NyZkwfokxsLyENIuaPa9TV6vOOT1nShbmdGrkVyH5Y+I/ccQS5t/cCmz4/x++CBkAWNeSgNGNRPOW8MY7BYguaZo3waLV9583LSMYClxHUjRJ19p/grwofaH8raxRH8c58Q33DcCTEXuykU6INds+t5ZLXEZfLs/u+aqZSf+oW1EkT+tewIDAQAB",
+  "permissions": ["clipboardWrite"],
+  "content_scripts": [
+    {
+      "matches": ["https://mail.google.com/mail/*"],
+      "js": ["gmail-main.js"],
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://mail.google.com/mail/*"],
+      "js": ["gmail.js"],
+      "css": ["gmail.css"]
+    },
+    {
+      "matches": ["https://app.fastmail.com/*"],
+      "js": ["fastmail-main.js"],
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://app.fastmail.com/*"],
+      "js": ["fastmail.js"],
+      "css": ["fastmail.css"]
+    }
+  ]
+}

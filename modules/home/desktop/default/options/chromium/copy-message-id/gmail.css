@@ -1,0 +1,23 @@
+.gmail-message-id-copy {
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  color: inherit;
+  cursor: pointer;
+  font: 500 11px/24px Arial, sans-serif;
+  margin: 0 4px;
+  min-width: 24px;
+  padding: 0 4px;
+  vertical-align: middle;
+}
+.gmail-message-id-copy:hover,
+.gmail-message-id-copy:focus-visible {
+  background: rgb(128 128 128 / 18%);
+}
+.gmail-message-id-copy:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+.gmail-message-id-copy:disabled {
+  cursor: wait;
+}
