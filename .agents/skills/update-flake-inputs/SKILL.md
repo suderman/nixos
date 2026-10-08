@@ -29,7 +29,7 @@ Do not use me for manual dependency pins handled by `inputs.pins`. Maintain thos
 - Prefer targeted updates over blanket updates unless the user explicitly asks for everything.
 - Never hand-edit `flake.lock`.
 - Minimize churn in unrelated inputs.
-- Read `AGENTS.md` and any repo-local docs that define the preferred validation flow.
+- Read `AGENTS.md` and `docs/conventions.org` before making changes.
 - Work from `nix develop` so repo wrappers and formatter are available.
 - In this repo, avoid the interactive `nixos` and `agenix` wrappers for unattended automation unless their side effects are explicitly wanted.
 - If the repo does not specify a preferred command, prefer targeted flake update commands rather than broad updates.
@@ -37,11 +37,7 @@ Do not use me for manual dependency pins handled by `inputs.pins`. Maintain thos
 
 ## Repo-specific context for this flake
 
-- This repo uses `blueprint`, so top-level directories map directly to flake outputs.
-- `hosts/<name>/configuration.nix` defines `nixosConfigurations.<name>`.
-- Shared system modules live under `modules/nixos/`; shared Home Manager modules live under `modules/home/`.
-- `modules/nixos/default/default.nix` imports `configs`, `options`, and `overlays`; the matching Home Manager default imports `configs` and `options`.
-- Desktop-only configuration lives under `modules/{home,nixos}/desktop/`; avoid assuming those modules apply to headless hosts.
+- Repository layout and module placement are defined in `docs/conventions.org`; do not duplicate or redefine them here.
 - `hosts/sim` is the VM/test host used for simulation and installer work. It is a useful targeted validation host when update fallout hits virtualization or installer-related options.
 - This flake intentionally filters builder helpers like `enableWayland`, `mkScript`, `mkApplication`, and `wrapWithFlags` out of exported `packages` and `checks`; do not treat their absence from flake outputs as an update regression.
 

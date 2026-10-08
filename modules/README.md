@@ -1,5 +1,9 @@
 # NixOS & Home Manager modules
 
+Module ownership, placement, and authoring rules live in
+[docs/conventions.org](../docs/conventions.org). This document describes the
+repository's extended options.
+
 Each of these directories are available under `flake.nixosModules.*` and
 `flake.homeModules.*`. The `flake.nixosModules.default` module should be
 imported into every `host` configuration and includes shared NixOS configuration

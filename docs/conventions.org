@@ -1,0 +1,207 @@
+#+TITLE: NixOS repository conventions
+
+* Standing conventions
+
+This is personal infrastructure configuration, not a general-purpose framework.
+Prefer direct declarations, few files, and existing mechanisms. These rules guide
+new work; they are not permission to refactor unrelated configuration.
+
+** Instructions and project records
+
+=AGENTS.md= is the entry point. This file owns standing authoring rules.
+Keep both stable. Change them when the owner adopts a lasting convention, not
+as a routine part of finishing a task.
+
+Active tasks, progress, verification results, migration history, and follow-up
+checklists belong in [[file:~/org/work/suderman/nixos/nixos.org][the NixOS project record]].
+Do not add session logs or task status to repository instructions or create
+repository-local plans. Technical READMEs explain how systems work and how to
+operate them; they are not agent work logs.
+
+** Lean hosts, fat modules
+
+- Hosts select modules and supply machine-specific values, paths, hardware
+  details, and small overrides.
+- Modules own feature behavior, including supporting scripts, services, timers,
+  persistence, and integration with other modules. Keep that behavior together.
+- Extend the existing owning module before adding another module or host-local
+  implementation. A feature belongs in its module even when only one host uses it.
+- Allow genuinely host-specific exceptions. The host where a problem was found
+  does not determine where its fix belongs.
+- Cohesive ownership does not require a configurable framework. Use upstream
+  options first. Add custom options for actual choices, not hypothetical reuse.
+
+For example, Backblaze's supporting services belong with its Backblaze module;
+Lux should supply only the required enable flags and machine-specific values.
+Do not split that behavior between =modules/= and =hosts/lux/=.
+
+** Placement and imports
+
+Blueprint supplies the top-level flake layout. Module exports are defined in
+[[file:../lib/homeModules.nix][lib/homeModules.nix]] and [[file:../lib/nixosModules.nix][lib/nixosModules.nix]].
+
+| Location | Purpose |
+|----------+---------|
+| =modules/{home,nixos}/default/configs/= | Always-imported shared policy |
+| =modules/{home,nixos}/default/options/= | Opt-in programs and services |
+| =modules/{home,nixos}/desktop/default/{configs,options}/= | Shared graphical baseline and GUI-only features |
+| =modules/{home,nixos}/desktop/<environment>= | Desktop-environment setup |
+| =modules/home/users/<user>= | Shared Home Manager configuration for a user |
+| =modules/nixos/hardware/= | Hardware-class modules that complement upstream hardware modules |
+| =hosts/<host>/= | Host composition and machine-specific choices |
+
+Regular hosts import =flake.nixosModules.default=; the installer ISO is an
+exception. Host-specific Home Manager files import =flake.homeModules.default=
+and compose desktop and shared user modules as needed. Those files live at
+=hosts/<host>/users/<user>.nix= or
+=hosts/<host>/users/<user>/home-configuration.nix=.
+
+The NixOS default imports =configs=, =options=, and =overlays=; the Home Manager
+default imports =configs= and =options=. Their directory entry points use
+=flake.lib.ls= to import contents automatically. Visible sibling =.nix= files
+and directories containing =default.nix= can therefore become imports. Keep
+helper expressions out of these auto-imported locations unless they are modules.
+
+Both desktop defaults import their =configs= and =options= and set
+=desktop.enable = true=. Environment modules compose that baseline. Keep
+headless-safe features outside the desktop tree.
+
+=users/= holds NixOS user and service identities, public keys, and encrypted
+passwords, not Home Manager configuration. =zones/*/default.nix= is the source
+of IP data; zone READMEs are router and administration runbooks.
+
+** Prefer repository helpers
+
+The owner chose or wrote the repository's helpers, flake library functions,
+and conventions. Inspect relevant existing helpers before inventing replacements.
+When a repository helper and a generic alternative fit equally well, use the
+repository helper. Use another approach when it has a concrete advantage;
+do not force a helper into a job it does not fit.
+
+This includes =self.mkScript=, accessed through =pkgs.self= or =perSystem.self=
+as appropriate, and =flake.lib= functions. [[file:../modules/README.md][modules/README.md]] documents
+extensions such as =persist=, =tmpfiles=, =networking.*=, =home.uid=, and
+=home.portOffset=. Prefer these over rebuilding their behavior locally.
+
+** Files, embedded text, and bindings
+
+- Prefer one =foo.nix= file per module.
+- Embed short scripts and text in the module, with language comments for syntax
+  highlighting, such as =# bash=, =# python=, or =# css=.
+- If separate files work better, convert =foo.nix= to =foo/default.nix= and keep
+  supporting scripts and assets in that directory. Extract long or complex
+  scripts when useful, especially when the module already has a directory.
+- Do not split files merely to shorten them or create a directory solely to
+  accommodate a test.
+- Inline custom expressions used once rather than introducing bindings that
+  make readers jump elsewhere. Familiar bindings such as =cfg= and conventional
+  library imports are exceptions. Bind reused expressions when useful.
+
+For a shell script, prefer the repository builder and inline text:
+
+#+begin_src nix
+pkgs.self.mkScript {
+  name = "example";
+  path = [pkgs.jq];
+  text =
+    # bash
+    ''
+      jq '.name' "$1"
+    '';
+}
+#+end_src
+
+Representative authoring examples:
+
+- [[file:../modules/home/users/jon/accounts/email.nix][User email configuration]]
+- [[file:../modules/nixos/default/options/jellyfin.nix][Jellyfin]]
+- [[file:../modules/nixos/default/options/syncthing.nix][Syncthing]]
+- [[file:../modules/nixos/default/options/keyd/default.nix][Keyd with module-owned supporting files]]
+- [[file:../modules/home/desktop/default/options/neomutt.nix][NeoMutt with embedded text and feature-local Lua]]
+
+** Hyprland ownership
+
+Keep app-specific rules, binds, and extensions in the owning feature module via
+=wayland.windowManager.hyprland.lua.features.<name>=. Prefer inline Lua unless
+separate files are warranted by the rules above. Shared compositor behavior
+belongs under =modules/home/desktop/hyprland/lua/=.
+
+=~/.config/hypr/local/init.lua= is the writable hook for quick experiments.
+A successful experiment is not permission to leave permanent runtime machinery.
+
+** Verification without test clutter
+
+Verification is required. Permanent test code is not the default for personal
+configuration. Do not turn every change into a test-development task.
+
+- Use the smallest relevant check. Declarative changes usually need focused
+  formatting, evaluation, or inspection of generated output. Documentation-only
+  changes need document checks, not host builds.
+- Use temporary probes to resolve uncertainty and prove behavior, then remove
+  agent-created probes, fixtures, and logs. Record useful results in the project
+  Org thread. Preserve supplied materials and existing user data.
+- Retain a test when it has a concrete maintenance or safety benefit, such as
+  protecting substantial custom logic, a recurring failure, or a dangerous
+  operation. A branch or loop alone does not justify a permanent suite.
+- Avoid assertions about source text, filenames, or incidental layout unless
+  those details are required behavior. Test outcomes rather than freezing the
+  current implementation.
+- Build the affected host or run a focused existing check when evaluation cannot
+  establish the result. Runtime claims need runtime evidence; synthetic checks
+  do not prove live behavior.
+- Full fleet checks and VM tests are escalation paths, not routine defaults.
+  Do not repeat expensive checks after prose-only edits or unaffected changes.
+- Do not delete existing tests merely because new ones are discouraged. Review
+  their value and scope first. Keep strong verification for identity recovery,
+  storage safety, and destructive operations.
+
+Work from =nix develop=. Useful commands, chosen according to scope:
+
+#+begin_src sh
+# Evaluate one host without building.
+nix eval .#nixosConfigurations.<host>.config.system.build.toplevel.outPath
+# Build one host when needed.
+nix build .#nixosConfigurations.<host>.config.system.build.toplevel
+# Broad output evaluation; no check builds.
+nix flake check --no-build
+# Full check builds, only when warranted.
+nix flake check
+#+end_src
+
+Use =treefmt= on changed supported files rather than formatting unrelated files.
+=nix fmt= formats the repository broadly. Installer builds use
+=nix build .#nixosConfigurations.iso.config.system.build.isoImage=.
+
+** Task-specific references and safety
+
+Read the relevant documentation before changing the system it describes:
+
+- [[file:networking.org][Networking, DNS, CA, Traefik, and Tailscale]]
+- [[file:../users/README.md][User and service identities]]
+- [[file:../secrets/README.md][Deterministic identity recovery and agenix]]
+- [[file:../modules/home/desktop/hyprland/README.md][Hyprland operation]]
+- [[file:../hosts/sim/README.md][Simulation and installer experiments]]
+
+=nixos= and =agenix= are repository wrappers from =packages/=, not stock CLIs.
+Many subcommands are interactive, auto-stage files, or mutate identities.
+Use them unattended only when those effects are intended.
+
+=nixos generate= unlocks =secrets/id_age.age= into =/tmp/id_age=, rewrites
+host/user public keys, ensures =zones/ca.{crt,age}= exists, and runs
+=agenix rekey -a=. =nixos add host|user= scaffolds and stages files before
+running generation. Neither is a routine validation command.
+
+=secrets/rotation/ACTIVE= blocks broad identity mutation. Do not manually bypass
+it with =IDENTITY_ROTATION_ALLOW=1=; that flag is reserved for managed rotation.
+=secrets/rotation/state.json= is a non-secret target ledger. The focused rotation
+check is =nix build 'path:.#checks.x86_64-linux.identity-rotation' -L=;
+test fixture roots must never be used outside that check.
+
+Edit secrets with =agenix edit <path>.age=. After recipient changes or secret
+addition/removal, run =agenix rekey -a= as part of that deliberate secret workflow.
+Never commit plaintext secrets.
+
+When deployment is requested, local non-interactive activation is
+=sudo -n nixos-rebuild switch --flake .#<current-host>=. Passwordless access does
+not authorize activation. =nixos sim up|rebuild|ssh= manages simulation disks
+under =hosts/sim/disk{1..4}.img= and derives its local SSH host identity.
