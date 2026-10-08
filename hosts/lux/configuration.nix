@@ -62,6 +62,7 @@
     driveE = "/mnt/main/storage/var/lib";
     driveF = "/mnt/data/storage";
     driveG = "/mnt/pool/storage";
+    coverageDir = "${config.services.backblaze.driveF}/backblaze-coverage";
   };
 
   # Services

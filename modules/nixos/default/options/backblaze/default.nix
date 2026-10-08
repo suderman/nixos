@@ -9,10 +9,12 @@
   config,
   flake,
   lib,
+  pkgs,
   ...
 }: let
   # https://github.com/JonathanTreffler/backblaze-personal-wine-container
   cfg = config.services.backblaze;
+  roots = [cfg.driveD cfg.driveE cfg.driveF cfg.driveG];
   inherit (config.services.traefik.lib) mkLabels;
   inherit (lib) mkIf mkOption types;
 in {
@@ -29,6 +31,11 @@ in {
     autoUpdate = mkOption {
       type = types.bool;
       default = false;
+    };
+    coverageDir = mkOption {
+      type = types.nullOr types.path;
+      default = null;
+      description = "Directory for supplemental archives of Windows-incompatible filenames; null disables archiving.";
     };
     driveD = mkOption {
       type = types.nullOr types.str;
@@ -50,7 +57,7 @@ in {
 
   config = mkIf cfg.enable {
     # Ensure data directory exists and is persisted
-    tmpfiles.directories = [cfg.dataDir];
+    tmpfiles.directories = [cfg.dataDir] ++ lib.optional (cfg.coverageDir != null) cfg.coverageDir;
     persist.storage.directories = [cfg.dataDir];
 
     # Docker container
@@ -82,6 +89,42 @@ in {
     };
 
     systemd.services.docker-backblaze.unitConfig.RequiresMountsFor = [cfg.dataDir];
+
+    assertions = lib.optional (cfg.coverageDir != null) {
+      assertion = builtins.all (root: root != null) roots;
+      message = "Backblaze supplemental archives require driveD through driveG.";
+    };
+
+    systemd.services.backblaze-coverage = mkIf (cfg.coverageDir != null) {
+      description = "Archive Linux-only filenames for Backblaze";
+      unitConfig.RequiresMountsFor = roots;
+      restartIfChanged = false;
+      serviceConfig = {
+        Type = "oneshot";
+        UMask = "0077";
+        Nice = 10;
+        IOSchedulingClass = "idle";
+        ReadOnlyPaths = roots;
+        ReadWritePaths = [cfg.coverageDir];
+        ExecStart = pkgs.self.mkScript {
+          path = [pkgs.python3];
+          text =
+            # bash
+            ''
+              exec python3 ${./coverage.py} ${lib.escapeShellArgs ([cfg.coverageDir] ++ roots)}
+            '';
+        };
+      };
+    };
+
+    systemd.timers.backblaze-coverage = mkIf (cfg.coverageDir != null) {
+      wantedBy = ["timers.target"];
+      timerConfig = {
+        OnCalendar = "*-*-* 00:15:00";
+        OnBootSec = "15min";
+        Persistent = true;
+      };
+    };
 
     # Enable reverse proxy
     services.traefik.enable = true;
