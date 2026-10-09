@@ -98,22 +98,9 @@ in {
       };
     };
 
+    # Targets: https://nix-community.github.io/stylix/options/platforms/nixos.html
     targets = {
-      # chromium.enable = false;
-      # console.enable = false;
-      # feh.enable = false;
-      # fish.enable = false;
-      # gnome.enable = false;
-      # grub.enable = false;
-      # gtk.enable = false;
       gtksourceview.enable = false; # Home Manager installs the theme without rebuilding dependents.
-      # kmscon.enable = false;
-      # lightdm.enable = false;
-      # nixos-icons.enable = false;
-      # nixvim.enable = false;
-      # plymouth.enable = false;
-      # regreet.enable = false;
-      # spicetify.enable = false;
     };
   };
 }
