@@ -2,7 +2,8 @@
 
 No root rotation is active. This directory contains the transition ledger,
 artifact transaction code, and public test fixtures. Production next-root
-material is created only by the managed preparation command.
+material is created only by the managed preparation command. The operator
+procedure is the [replacement seed rotation runbook](../../docs/seed-rotation.org).
 
 ## Safety marker
 

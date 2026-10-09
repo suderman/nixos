@@ -18,6 +18,10 @@ Do not add session logs or task status to repository instructions or create
 repository-local plans. Technical READMEs explain how systems work and how to
 operate them; they are not agent work logs.
 
+A directory =README.md= describes that directory. Put any other extensive
+repository documentation, such as runbooks and cross-cutting guides, in
+=docs/*.org=.
+
 ** Lean hosts, fat modules
 
 - Hosts select modules and supply machine-specific values, paths, hardware
@@ -181,6 +185,8 @@ Read the relevant documentation before changing the system it describes:
 - [[file:../secrets/README.md][Deterministic identity recovery and agenix]]
 - [[file:../modules/home/desktop/hyprland/README.md][Hyprland operation]]
 - [[file:../hosts/sim/README.md][Simulation and installer experiments]]
+- [[file:dot.org][Dot installation, repair, and restore on Linode]]
+- [[file:seed-rotation.org][Replacement seed rotation]]
 
 =nixos= and =agenix= are repository wrappers from =packages/=, not stock CLIs.
 Many subcommands are interactive, auto-stage files, or mutate identities.
