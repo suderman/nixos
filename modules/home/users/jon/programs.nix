@@ -3,24 +3,27 @@
   lib,
   ...
 }: {
-  # Personal browser extensions
-  programs = lib.optionalAttrs config.desktop.enable {
-    chromium.externalExtensions = {
-      inherit
-        (config.programs.chromium.registry)
-        auto-tab-discard-suspend
-        dark-reader
-        fake-data
-        floccus-bookmarks-sync
-        i-still-dont-care-about-cookies
-        one-password
-        return-youtube-dislike
-        sponsorblock
-        ublock-origin
-        ;
+  # Emacs follows Jon to every host; its graphical extras need the desktop layer.
+  programs =
+    {emacs.enable = true;}
+    // lib.optionalAttrs config.desktop.enable {
+      # Personal browser extensions
+      chromium.externalExtensions = {
+        inherit
+          (config.programs.chromium.registry)
+          auto-tab-discard-suspend
+          dark-reader
+          fake-data
+          floccus-bookmarks-sync
+          i-still-dont-care-about-cookies
+          one-password
+          return-youtube-dislike
+          sponsorblock
+          ublock-origin
+          ;
+      };
+      hrvst-cli.enable = true;
     };
-    hrvst-cli.enable = true;
-  };
 
   # Pixel Buds Pro
   sound.extraSinks = [

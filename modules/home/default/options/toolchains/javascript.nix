@@ -37,6 +37,7 @@ in {
       pkgs.nodejs # node npm npx
       pkgs.pnpm # pnpm pnpx
       pkgs.bun # bun bunx
+      pkgs.typescript # tsc
     ];
 
     # allow for native tooling too

@@ -1,6 +1,6 @@
 # Syncthing needs portable contents, not a /nix/store symlink. Rename atomically.
 set -eu
-dest="$HOME/org/.generated/emacs/style.el"
+dest="$HOME/profile/apps/emacs/style.el"
 mkdir -p "$(dirname "$dest")"
 if [ ! -L "$dest" ] && cmp -s "$style" "$dest"; then
   exit 0

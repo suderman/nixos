@@ -40,9 +40,10 @@
     '';
   };
 in {
-  options.programs.emacs.exportStyle = lib.mkEnableOption "exporting shared Emacs appearance to the synced Org tree (enable on one host only)";
+  options.programs.emacs.exportStyle = lib.mkEnableOption "exporting shared Emacs appearance to a synced file (enable on one desktop host only)";
 
   config = mkIf cfg.enable {
+    # Only desktop hosts have the light/dark Stylix toggle the exporter reads.
     home.activation.emacsStyle = let
       fonts = config.stylix.fonts;
       schemes = osConfig.programs.stylix-theme-toggle;
@@ -79,33 +80,34 @@ in {
           '';
       };
     in
-      mkIf cfg.exportStyle (lib.hm.dag.entryAfter ["writeBoundary"] ''
+      mkIf (cfg.exportStyle && config.desktop.enable) (lib.hm.dag.entryAfter ["writeBoundary"] ''
         $DRY_RUN_CMD ${exportStyle}
       '');
 
     programs.emacs.package = mkDefault emacsPackage;
-    programs.emacs.extraPackages = epkgs: [epkgs.base16-theme];
-    # Keep the compiler available in shells, not only inside wrapped Emacs.
-    home.packages = [pkgs.typescript];
 
     # Emacs loads the generated palettes itself and follows toolkit-theme changes.
     stylix.targets.emacs.enable = false;
-
-    services.emacs = {
-      enable = mkDefault true;
-      client.enable = mkDefault true;
-      startWithUserSession = mkDefault "graphical";
-    };
 
     home.sessionVariables = {
       EDITOR = terminalEditor;
       VISUAL = terminalEditor;
     };
 
-    services.keyd.windows."emacs" = {
-      "super.w" = "macro(C-x 0)"; # close window or tab
-      "super.t" = "macro(C-x t 2)"; # new tab
-      "super.r" = "f5"; # reload
+    # Graphical sessions get a shared daemon and keyd window shortcuts.
+    # Terminal sessions use em's per-workspace daemons instead. keyd's
+    # options exist only in the desktop layer, so mkIf cannot guard them.
+    services = lib.optionalAttrs config.desktop.enable {
+      emacs = {
+        enable = mkDefault true;
+        client.enable = mkDefault true;
+        startWithUserSession = mkDefault "graphical";
+      };
+      keyd.windows."emacs" = {
+        "super.w" = "macro(C-x 0)"; # close window or tab
+        "super.t" = "macro(C-x t 2)"; # new tab
+        "super.r" = "f5"; # reload
+      };
     };
 
     # Disconnecting em's client keeps its daemon. In that frame,
@@ -115,8 +117,6 @@ in {
       ema = "${terminalEditor}";
       emd = ''${terminalEditor} --init-directory "$PWD"'';
     };
-
-    toolchains.native.enable = true;
 
     # Back up the config, but keep package and runtime state in scratch storage.
     persist.storage.directories = [".config/emacs"];
