@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }: let
   cfg = config.services.arr;
@@ -14,10 +13,25 @@
   port = 8008; # package default is 8080
 in {
   config = mkIf cfg.enable {
+    # Generated settings are merged over the existing ini on every start
     services.${name} = {
       enable = true;
       user = name;
       group = "media";
+      configFile = null;
+      settings.misc = {
+        inherit port;
+        host_whitelist = "${name}.${config.networking.hostName}";
+        api_key = "@api_key@";
+        # Upstream defaults would reset these values set through the web UI
+        bandwidth_max = "100M";
+        bandwidth_perc = 80;
+        cache_limit = "1G";
+        inet_exposure = "api (full)";
+        config_conversion_version = 5;
+        notified_new_skin = 2;
+      };
+      secretValues."@api_key@" = "/etc/machine-id";
     };
 
     users.groups.media.members = [arr.user];
@@ -37,7 +51,7 @@ in {
         enable = true;
         servers = [
           {
-            baseUrl = "https://127.0.0.1:${toString port}";
+            baseUrl = "http://127.0.0.1:${toString port}";
             apiKeyFile = "/etc/machine-id";
           }
         ];
@@ -52,50 +66,10 @@ in {
       ];
     };
 
-    # Modify ini file with specified port and host name
-    systemd.services = let
-      ini = toString arr.configFile;
-      host = toString "${name}.${config.networking.hostName}";
-    in {
-      "${name}-config" = {
-        serviceConfig = {
-          User = "root";
-          Type = "oneshot";
-        };
-        path = with pkgs; [coreutils gnused systemd];
-        script = ''
-          # Give it 5 seconds to get going
-          sleep 5
-
-          # Make a copy of the config file and save the hash
-          cp -fp ${ini} ${ini}.txt
-          initial_hash=$(sha256sum ${ini}.txt)
-
-          # Update the port, host name and api_key with /etc/machine-id
-          sed -i '/^\[misc\]/,/^\[/ s/\(port\s*=\s*\)[0-9]\+/\1${toString port}/' ${ini}.txt
-          sed -i 's/^host_whitelist\s*=.*/host_whitelist = ${host}/' ${ini}.txt
-          sed -i "s/^api_key\s*=.*/api_key = $(cat /etc/machine-id)/" ${ini}.txt
-
-          # Check if these attempted changes have modified the hash
-          updated_hash=$(sha256sum ${ini}.txt)
-          if [[ "$initial_hash" != "$updated_hash" ]]; then
-
-            # If so, stop the service, replace the config, and start the service again
-            systemctl stop ${name}.service
-            mv ${ini}.txt ${ini}
-            systemctl start ${name}.service
-
-          fi
-        '';
-        wantedBy = ["${name}.service"];
-        after = ["${name}.service"];
-      };
-
-      # Extend exporter to require service
-      "prometheus-${name}-exporter" = {
-        requires = ["${name}.service"];
-        after = ["${name}.service"];
-      };
+    # Extend exporter to require service
+    systemd.services."prometheus-${name}-exporter" = {
+      requires = ["${name}.service"];
+      after = ["${name}.service"];
     };
   };
 }
