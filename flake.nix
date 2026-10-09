@@ -94,6 +94,7 @@
     # Emacs flake
     # <https://github.com/suderman/emacs>
     emacs.url = "github:suderman/emacs";
+    emacs.inputs.nixpkgs.follows = "nixpkgs-unstable";
 
     # Shared editor and multiplexer navigation
     edger.url = "github:suderman/edger";
