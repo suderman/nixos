@@ -59,17 +59,6 @@ in {
         ];
 
         search = {
-          # default = "Whoogle";
-          # force = true;
-          # engines."Whoogle" = let
-          #   whoogle = "g.sol";
-          # in {
-          #   urls = [{template = "https://${whoogle}/search?q={searchTerms}";}];
-          #   icon = "https://${whoogle}/static/img/favicon/apple-icon-144x144.png";
-          #   updateInterval = 24 * 60 * 60 * 1000; # every day
-          #   definedAliases = ["@wh"];
-          #   method = "POST";
-          # };
           # engines."Nix Code" = {
           #   urls = [{template = "https://github.com/search?type=code&q=lang%3Anix+{searchTerms}";}];
           #   icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";

@@ -38,7 +38,7 @@ then store the new value with =agenix edit=:
 | =modules/home/users/jon/nf-env.age=              | every credential inside                   |
 | =hosts/kit/users/jon/asana-org-token.age=        | Asana token                               |
 | =hosts/kit/users/jon/withings-sync.age=          | Withings credentials                      |
-| =modules/nixos/default/options/*/*.age=          | Forgejo, Gitea, FreshRSS, Tandoor, ISY    |
+| =modules/nixos/default/options/*/*.age=          | Forgejo, Gitea, FreshRSS, ISY             |
 
 =modules/home/users/jon/accounts/email-addresses.age= holds addresses, not
 credentials. Recheck this table against =git ls-files '*.age'=, excluding
