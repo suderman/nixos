@@ -11,7 +11,6 @@
     flake.nixosModules.hardware.rtx-4070-ti-super
     flake.nixosModules.default
     flake.nixosModules.desktop.hyprland
-    ./homelab.nix
   ];
 
   # Boot with newfangled systemd-boot
@@ -141,6 +140,27 @@
 
   # Garmin fenix 6 pro
   hardware.garmin.deviceId = "091e:4cda";
+
+  # Dynastream ANT USB-m stick for ANT+ sensors
+  services.udev.extraRules = ''
+    SUBSYSTEM=="usb", ATTRS{idVendor}=="0fcf", ATTRS{idProduct}=="1009", RUN+="${pkgs.kmod}/sbin/modprobe usbserial vendor=0x0fcf product=0x1009", MODE="0666", OWNER="root", GROUP="root"
+  '';
+
+  # GPU HDMI audio and the onboard ALC4082 (USB), whose SPDIF sink stays awake
+  services.pipewire.wireplumber.extraConfig."51-kit-audio"."monitor.alsa.rules" = [
+    {
+      matches = [{"device.name" = "alsa_card.pci-0000_01_00.1";}];
+      actions.update-props."device.profile" = "output:hdmi-stereo";
+    }
+    {
+      matches = [{"device.name" = "alsa_card.usb-Generic_USB_Audio-00";}];
+      actions.update-props."device.profile" = "HiFi";
+    }
+    {
+      matches = [{"node.name" = "alsa_output.usb-Generic_USB_Audio-00.HiFi__SPDIF__sink";}];
+      actions.update-props."session.suspend-timeout-seconds" = 0;
+    }
+  ];
 
   # Printer/scanner
   services.printing = {
