@@ -245,7 +245,7 @@ Scope {
 
   Process {
     id: fetch
-    command: ["@DATA_COMMAND@"]
+    command: ["@DATA_COMMAND@", "popup"]
     running: false
 
     stdout: StdioCollector {

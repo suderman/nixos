@@ -5,322 +5,64 @@
   ...
 }: let
   cfg = config.wayland.windowManager.hyprland.waybar.codex-lb;
-  colors = config.lib.stylix.colors;
   inherit (lib) mkIf mkMerge mkOption types;
+  open = "${pkgs.xdg-utils}/bin/xdg-open ${lib.escapeShellArg cfg.url}";
 
-  icon = "󰊚";
-
-  script = pkgs.self.mkScript {
-    name = "waybar-codex-lb";
-    path = with pkgs; [curl jq];
+  # Fetch the dashboard once and summarize it for the bar (default) or popup.
+  status = pkgs.self.mkScript {
+    name = "codex-lb-status";
+    path = [pkgs.curl pkgs.jq];
     env = {
       CODEX_LB_URL = cfg.url;
-      CODEX_LB_ALERT_COLOR = "#${colors.base08}";
-      CODEX_LB_ICON = icon;
+      CODEX_LB_ICON = "󰊚";
+      CODEX_LB_ALERT_COLOR = "#${config.lib.stylix.colors.base08}";
     };
     text =
       # bash
       ''
-        json() {
-          local text="$1"
-          local tooltip="$2"
-          local class="$3"
-
-          jq -cn \
-            --arg text "$text" \
-            --arg tooltip "$(printf '%b' "$tooltip")" \
-            --arg class "$class" \
-            '{text: $text, tooltip: $tooltip, class: $class}'
-        }
-
+        mode="''${1:-bar}"
+        limit=1
+        [[ $mode == popup ]] && limit=100
+        url="''${CODEX_LB_URL%/}"
         tmp="$(mktemp -d)"
         trap 'rm -rf "$tmp"' EXIT
-        CODEX_LB_URL="''${CODEX_LB_URL%/}"
-        icon="$CODEX_LB_ICON"
 
-        fetch_failed() {
-          local path="$1"
-          local error="$2"
+        summarize() {
+          jq -cn --arg mode "$mode" --arg url "$url" --arg icon "$CODEX_LB_ICON" \
+            --arg alert_color "$CODEX_LB_ALERT_COLOR" "$@" -f ${./codex-lb.jq}
+        }
 
-          json \
-            "$icon offline" \
-            "Failed to reach $CODEX_LB_URL$path\n$(<"$error")" \
-            "critical"
+        fail() {
+          summarize --arg failure "$1" --arg message "$2" \
+            --argjson overview '[]' --argjson projections '[]' --argjson logs '[]'
           exit 0
         }
 
         fetch() {
-          local path="$1"
-          local output="$2"
-          local error="$output.err"
           local code
-
-          if ! code="$(curl \
-            --silent \
-            --show-error \
-            --location \
-            --max-time 10 \
-            --connect-timeout 3 \
-            --write-out '%{http_code}' \
-            --output "$output" \
-            "$CODEX_LB_URL$path" \
-            2>"$error")"; then
-            return 1
-          fi
-
-          printf '%s' "$code"
+          code="$(curl --silent --show-error --location --max-time 10 --connect-timeout 3 \
+            --write-out '%{http_code}' --output "$tmp/$1.json" "$url$2" 2>"$tmp/error")" ||
+            fail offline "Failed to reach $url$2"$'\n'"$(<"$tmp/error")"
+          case "$code" in
+          2??) ;;
+          401 | 403) fail auth "Dashboard read access is required. Enable read-only guest access in codex-lb."$'\n\n'"URL: $url" ;;
+          *) fail http "codex-lb returned HTTP $code for $2."$'\n\n'"URL: $url" ;;
+          esac
         }
 
-        overview="$tmp/overview.json"
-        projections="$tmp/projections.json"
-        request_logs="$tmp/request-logs.json"
-        overview_path='/api/dashboard/overview?timeframe=7d'
-        projections_path='/api/dashboard/projections'
-        request_logs_path='/api/request-logs?limit=1'
+        fetch overview "/api/dashboard/overview?timeframe=7d"
+        fetch projections /api/dashboard/projections
+        fetch logs "/api/request-logs?limit=$limit"
 
-        if ! overview_code="$(fetch "$overview_path" "$overview")"; then
-          fetch_failed "$overview_path" "$overview.err"
-        fi
-
-        if ! projections_code="$(fetch "$projections_path" "$projections")"; then
-          fetch_failed "$projections_path" "$projections.err"
-        fi
-
-        if ! request_logs_code="$(fetch "$request_logs_path" "$request_logs")"; then
-          fetch_failed "$request_logs_path" "$request_logs.err"
-        fi
-
-        if [[ "$overview_code" == "401" || "$overview_code" == "403" || "$projections_code" == "401" || "$projections_code" == "403" || "$request_logs_code" == "401" || "$request_logs_code" == "403" ]]; then
-          json \
-            "$icon auth" \
-            "Dashboard read access is required. Enable read-only guest access in codex-lb or provide another dashboard auth path.\n\nURL: $CODEX_LB_URL" \
-            "warning"
-          exit 0
-        fi
-
-        if [[ ! "$overview_code" =~ ^2 ]] || [[ ! "$projections_code" =~ ^2 ]] || [[ ! "$request_logs_code" =~ ^2 ]]; then
-          json \
-            "$icon http" \
-            "codex-lb returned HTTP $overview_code for overview, HTTP $projections_code for projections, and HTTP $request_logs_code for request logs.\n\nURL: $CODEX_LB_URL" \
-            "critical"
-          exit 0
-        fi
-
-        if ! output="$(jq -cn \
-          --slurpfile overview "$overview" \
-          --slurpfile projections "$projections" \
-          --slurpfile request_logs "$request_logs" \
-          --arg url "$CODEX_LB_URL" \
-          --arg alert_color "$CODEX_LB_ALERT_COLOR" \
-          --arg icon "$CODEX_LB_ICON" \
-          '
-          def num_text($n):
-            ($n | tonumber? // null) as $v |
-            if $v == null then "n/a"
-            else
-              (($v * 10 | round) / 10 | tostring) as $s |
-              if ($s | contains(".")) then $s else $s + ".0" end
-            end;
-
-          def pct_text($n):
-            ($n | tonumber? // null) as $v |
-            if $v == null then "n/a"
-            else num_text($v) + "%"
-            end;
-
-          def signed_pct_text($n):
-            ($n | tonumber? // null) as $v |
-            if $v == null then "n/a"
-            else (if $v > 0 then "+" else "" end) + num_text($v) + "%"
-            end;
-
-          def signed_num_text($n):
-            ($n | tonumber? // null) as $v |
-            if $v == null then "n/a"
-            else (if $v > 0 then "+" else "" end) + num_text($v)
-            end;
-
-          def time_text($s):
-            if $s == null or $s == "" then "n/a"
-            else
-              ($s | tostring | sub("\\.[0-9]+"; "")) as $iso |
-              ($iso | fromdateiso8601? // null) as $epoch |
-              if $epoch == null then ($iso | sub("T"; " ") | sub("Z$"; "") | .[0:16])
-              else ($epoch | localtime | strftime("%b %-d %-I:%M%P"))
-              end
-            end;
-
-          def duration_text($seconds):
-            (if $seconds < 0 then 0 else $seconds end | floor) as $value |
-            ($value / 86400 | floor) as $days |
-            (($value % 86400) / 3600 | floor) as $hours |
-            (($value % 3600) / 60 | floor) as $minutes |
-            if $days > 0 then ($days | tostring) + "d " + ($hours | tostring) + "h"
-            elif $hours > 0 then ($hours | tostring) + "h " + ($minutes | tostring) + "m"
-            else ($minutes | tostring) + "m"
-            end;
-
-          def reset_text($s):
-            if $s == null or $s == "" then "n/a"
-            else
-              ($s | tostring | sub("\\.[0-9]+"; "")) as $iso |
-              ($iso | fromdateiso8601? // null) as $epoch |
-              if $epoch == null then "n/a" else "in " + duration_text($epoch - now) end
-            end;
-
-          def host_text($u):
-            $u | tostring | sub("^[A-Za-z][A-Za-z0-9+.-]*://"; "") | split("/")[0];
-
-          def window_percent($w):
-            $w.remainingPercent // $w.remaining_percent // null;
-
-          def window_remaining($w):
-            $w.remainingCredits // $w.remaining_credits // null;
-
-          def window_capacity($w):
-            $w.capacityCredits // $w.capacity_credits // null;
-
-          def window_reset($w):
-            $w.resetAt // $w.reset_at // $w.resetsAt // $w.resets_at // null;
-
-          def primary_window_metric($accounts; $fallback):
-            [
-              $accounts[]
-              | (.windowMinutesPrimary // .window_minutes_primary // null | tonumber? // null) as $minutes
-              | (.usage.primaryRemainingPercent // .usage.primary_remaining_percent // null | tonumber? // null) as $percent
-              | select($minutes == 300 and $percent != null)
-            ] as $applicable |
-            ($applicable | map(.capacityCreditsPrimary // .capacity_credits_primary // null | tonumber? // 0) | add // 0) as $capacity |
-            ($applicable | map(.remainingCreditsPrimary // .remaining_credits_primary // null | tonumber? // 0) | add // 0) as $remaining |
-            if ($applicable | length) == 0 or $capacity <= 0 then
-              if ($accounts | length) == 0 then $fallback else {} end
-            else {
-              remainingPercent: ($remaining / $capacity * 100),
-              remainingCredits: $remaining,
-              capacityCredits: $capacity,
-              resetAt: ([$applicable[] | .resetAtPrimary // .reset_at_primary // empty] | min // null)
-            }
-            end;
-
-          def credit_text($remaining; $capacity):
-            if $remaining == null or $capacity == null then ""
-            else ", " + num_text($remaining) + "/" + num_text($capacity) + " cr"
-            end;
-
-          def window_line($w):
-            pct_text(window_percent($w))
-            + credit_text(window_remaining($w); window_capacity($w))
-            + ", reset " + reset_text(window_reset($w));
-
-          def account_name($account):
-            $account.alias
-            // $account.displayName
-            // $account.display_name
-            // $account.email
-            // $account.accountId
-            // $account.account_id
-            // "account";
-
-          def account_window_line($account; $prefix):
-            ($account.usage // {}) as $usage |
-            if $prefix == "primary" then
-              pct_text($usage.primaryRemainingPercent // $usage.primary_remaining_percent // null)
-              + credit_text(
-                $account.remainingCreditsPrimary // $account.remaining_credits_primary // null;
-                $account.capacityCreditsPrimary // $account.capacity_credits_primary // null
-              )
-              + ", reset " + reset_text($account.resetAtPrimary // $account.reset_at_primary // null)
-            else
-              pct_text($usage.secondaryRemainingPercent // $usage.secondary_remaining_percent // null)
-              + credit_text(
-                $account.remainingCreditsSecondary // $account.remaining_credits_secondary // null;
-                $account.capacityCreditsSecondary // $account.capacity_credits_secondary // null
-              )
-              + ", reset " + reset_text($account.resetAtSecondary // $account.reset_at_secondary // null)
-            end;
-
-          def account_lines($account):
-            ($account.usage // {}) as $u |
-            [
-              "Account: " + account_name($account),
-              "status " + (($account.status // "unknown") | tostring),
-              "5h " + account_window_line($account; "primary"),
-              "7d " + account_window_line($account; "secondary"),
-              "plan " + ([
-                $account.planType // $account.plan_type,
-                $account.workspaceLabel // $account.workspace_label,
-                $account.seatType // $account.seat_type
-              ] | map(select(. != null and . != "") | tostring) | join(" / ")),
-              if ($u.resetCreditsRemaining // $u.reset_credits_remaining // null) != null then
-                "reset credits " + num_text($u.resetCreditsRemaining // $u.reset_credits_remaining)
-              else empty end
-            ] | join("\n");
-
-          def pace_status($pace):
-            $pace.status // "unknown";
-
-          def pace_delta($pace):
-            $pace.smoothedDeltaPercent // $pace.smoothed_delta_percent // $pace.deltaPercent // $pace.delta_percent // null;
-
-          def pace_gap($pace):
-            $pace.smoothedScheduleGapCredits // $pace.smoothed_schedule_gap_credits // $pace.scheduleGapCredits // $pace.schedule_gap_credits // null;
-
-          def optional_line($value; $line):
-            if $value == null then [] else [$line] end;
-
-          $overview[0] as $o |
-          $projections[0] as $p |
-          ($request_logs[0].requests // []) as $requests |
-          ($o.summary.primaryWindow // $o.summary.primary_window // $o.windows.primary // {}) as $primary_summary |
-          ($o.summary.secondaryWindow // $o.summary.secondary_window // $o.windows.secondary // {}) as $secondary |
-          ($p.weeklyCreditPace // $p.weekly_credit_pace // {}) as $pace |
-          ($o.accounts // []) as $accounts |
-          (primary_window_metric($accounts; $primary_summary)) as $primary |
-          (pace_status($pace)) as $status |
-          (pace_delta($pace)) as $delta |
-          (pace_gap($pace)) as $gap |
-          ($pace.confidence // "unknown") as $confidence |
-          (($pace.staleAccountCount // $pace.stale_account_count // 0) | tonumber? // 0) as $stale |
-          (($pace.inactiveAccountCount // $pace.inactive_account_count // 0) | tonumber? // 0) as $inactive |
-          (($requests[0].status // "ok") | tostring) as $latest_request_status |
-          ($latest_request_status != "ok") as $latest_request_non_ok |
-          (if $latest_request_non_ok then "<span color=\"" + $alert_color + "\">" + $icon + "</span>" else $icon end) as $quota_icon |
-          (if $status == "danger" then "danger"
-           elif $confidence == "low" or $stale > 0 then "warning"
-           elif $status == "behind" then "behind"
-           elif $status == "ahead" then "ahead"
-           elif $status == "on_track" then "on_track"
-           else "warning"
-           end) as $class |
-          {
-            text: (
-              $quota_icon
-              + "  "
-              + pct_text(window_percent($primary))
-              + " " + pct_text(window_percent($secondary))
-              + " " + signed_num_text($delta)
-            ),
-            tooltip: ([
-              host_text($url),
-              "5h " + window_line($primary),
-              "7d " + window_line($secondary),
-              "updated: " + time_text($o.lastSyncAt // $o.last_sync_at // null)
-            ]
-            | join("\n")),
-            class: $class
-          }
-          ' 2>"$tmp/jq.err")"; then
-          json \
-            "$icon parse" \
-            "Failed to parse codex-lb dashboard response.\n$(<"$tmp/jq.err")" \
-            "critical"
-          exit 0
-        fi
-
-        printf '%s\n' "$output"
+        summarize --arg failure "" --arg message "" \
+          --slurpfile overview "$tmp/overview.json" \
+          --slurpfile projections "$tmp/projections.json" \
+          --slurpfile logs "$tmp/logs.json" 2>"$tmp/error" ||
+          fail parse "Failed to parse codex-lb dashboard response."$'\n'"$(<"$tmp/error")"
       '';
   };
 
+  # Pause or resume an account, logging in to the dashboard when asked to.
   accountAction = pkgs.self.mkScript {
     name = "codex-lb-account-action";
     path = [pkgs.curl pkgs.jq];
@@ -328,534 +70,85 @@
     text =
       # bash
       ''
-        set -u
-        umask 077
-
         account_id="''${1:-}"
         action="''${2:-}"
         auth_mode="''${3:-}"
-        CODEX_LB_URL="''${CODEX_LB_URL%/}"
-        cookie_jar="''${XDG_RUNTIME_DIR:?}/codex-lb-dashboard.cookies"
+        url="''${CODEX_LB_URL%/}"
+        cookies="''${XDG_RUNTIME_DIR:?}/codex-lb-dashboard.cookies"
         tmp="$(mktemp -d)"
         trap 'rm -rf "$tmp"' EXIT
 
         result() {
-          local ok="$1"
-          local message="$2"
-          local auth_required="''${3:-false}"
-          local username_required="''${4:-false}"
-          jq -cn \
-            --argjson ok "$ok" \
-            --arg message "$message" \
-            --argjson authRequired "$auth_required" \
-            --argjson usernameRequired "$username_required" \
+          jq -cn --argjson ok "$1" --arg message "$2" \
+            --argjson authRequired "''${3:-false}" --argjson usernameRequired "''${4:-false}" \
             '{ok: $ok, message: $message, authRequired: $authRequired, usernameRequired: $usernameRequired}'
+          exit 0
         }
 
-        if [[ ! "$account_id" =~ ^[A-Za-z0-9._-]+$ ]]; then
-          result false "Invalid account id."
-          exit 0
-        fi
+        error_message() {
+          jq -r --arg fallback "$2" '.error.message // $fallback' "$1" 2>/dev/null || printf '%s' "$2"
+        }
 
+        # POST with the dashboard session cookie and print the HTTP status.
+        post() {
+          local path="$1" output="$2"
+          shift 2
+          curl --silent --show-error --location --max-time 15 --connect-timeout 3 \
+            --request POST --cookie "$cookies" --cookie-jar "$cookies" \
+            --write-out '%{http_code}' --output "$output" "$@" "$url$path" 2>"$tmp/error" || true
+        }
+
+        [[ $account_id =~ ^[A-Za-z0-9._-]+$ ]] || result false "Invalid account id."
         case "$action" in
-          pause) endpoint="pause" ;;
-          resume) endpoint="reactivate" ;;
-          *)
-            result false "Unknown account action."
-            exit 0
-            ;;
+        pause) endpoint=pause ;;
+        resume) endpoint=reactivate ;;
+        *) result false "Unknown account action." ;;
         esac
 
-        touch "$cookie_jar"
-        chmod 600 "$cookie_jar"
+        umask 077
+        touch "$cookies"
+        chmod 600 "$cookies"
 
-        request() {
-          local method="$1"
-          local path="$2"
-          local output="$3"
-          curl \
-            --silent \
-            --show-error \
-            --location \
-            --max-time 15 \
-            --connect-timeout 3 \
-            --request "$method" \
-            --cookie "$cookie_jar" \
-            --cookie-jar "$cookie_jar" \
-            --write-out '%{http_code}' \
-            --output "$output" \
-            "$CODEX_LB_URL$path"
-        }
+        code="$(post "/api/accounts/$account_id/$endpoint" "$tmp/action.json")"
+        if [[ $code == 401 || $code == 403 ]]; then
+          [[ $auth_mode == login ]] || result false "Dashboard login required." true
 
-        perform_action() {
-          request POST "/api/accounts/$account_id/$endpoint" "$tmp/action.json"
-        }
-
-        action_code="$(perform_action 2>"$tmp/curl.err" || true)"
-        if [[ "$action_code" == "401" || "$action_code" == "403" ]]; then
-          if [[ "$auth_mode" != "login" ]]; then
-            result false "Dashboard login required." true
-            exit 0
-          fi
-
-          if ! IFS= read -r credentials \
-            || ! printf '%s' "$credentials" | jq -e \
-              'type == "object" and (.password | type == "string" and length > 0) and ((.username // "") | type == "string")' \
-              >/dev/null 2>&1; then
-            result false "Dashboard password is required." true
-            exit 0
-          fi
-
-          printf '%s' "$credentials" | jq -c \
-            'if (.username // "") == "" then {password} else {username, password} end' \
-            >"$tmp/login-request.json"
+          # The popup writes {"username", "password"} on stdin; never pass it as an argument.
+          IFS= read -r credentials || true
+          printf '%s' "$credentials" |
+            jq -e 'type == "object" and (.password | type == "string" and length > 0) and ((.username // "") | type == "string")' \
+              >/dev/null 2>&1 || result false "Dashboard password is required." true
+          printf '%s' "$credentials" |
+            jq -c 'if (.username // "") == "" then {password} else {username, password} end' >"$tmp/login-request.json"
           unset credentials
 
-          login_code="$(curl \
-            --silent \
-            --show-error \
-            --location \
-            --max-time 15 \
-            --connect-timeout 3 \
-            --header 'Content-Type: application/json' \
-            --cookie "$cookie_jar" \
-            --cookie-jar "$cookie_jar" \
-            --data-binary @"$tmp/login-request.json" \
-            --write-out '%{http_code}' \
-            --output "$tmp/login.json" \
-            "$CODEX_LB_URL/api/dashboard-auth/password/login" \
-            2>"$tmp/curl.err" || true)"
-
-          if [[ "$login_code" == "422" && "$(jq -r '.error.code // ""' "$tmp/login.json" 2>/dev/null)" == "username_required" ]]; then
+          login="$(post /api/dashboard-auth/password/login "$tmp/login.json" \
+            --header 'Content-Type: application/json' --data-binary @"$tmp/login-request.json")"
+          if [[ $login == 422 && $(jq -r '.error.code // ""' "$tmp/login.json" 2>/dev/null) == username_required ]]; then
             result false "Dashboard username is also required." true true
-            exit 0
           fi
+          [[ $login == 2?? ]] || result false "$(error_message "$tmp/login.json" "Dashboard login failed.")" true
 
-          if [[ ! "$login_code" =~ ^2 ]]; then
-            message="$(jq -r '.error.message // "Dashboard login failed."' "$tmp/login.json" 2>/dev/null || printf 'Dashboard login failed.')"
-            result false "$message" true
-            exit 0
-          fi
-
-          action_code="$(perform_action 2>"$tmp/curl.err" || true)"
+          code="$(post "/api/accounts/$account_id/$endpoint" "$tmp/action.json")"
         fi
 
-        if [[ "$action_code" =~ ^2 ]]; then
-          status="$(jq -r '.status // empty' "$tmp/action.json" 2>/dev/null)"
-          result true "Account ''${status:-updated}."
-        elif [[ -s "$tmp/action.json" ]]; then
-          message="$(jq -r '.error.message // "Account change failed."' "$tmp/action.json" 2>/dev/null || printf 'Account change failed.')"
-          result false "$message"
+        if [[ $code == 2?? ]]; then
+          state="$(jq -r '.status // empty' "$tmp/action.json" 2>/dev/null || true)"
+          result true "Account ''${state:-updated}."
+        elif [[ -s $tmp/action.json ]]; then
+          result false "$(error_message "$tmp/action.json" "Account change failed.")"
         else
-          result false "Failed to reach $CODEX_LB_URL: $(<"$tmp/curl.err")"
+          result false "Failed to reach $url: $(<"$tmp/error")"
         fi
       '';
   };
 
-  popupData = pkgs.self.mkScript {
-    name = "codex-lb-popup-data";
-    path = with pkgs; [curl jq];
-    env.CODEX_LB_URL = cfg.url;
-    text =
-      # bash
-      ''
-        json_error() {
-          local status="$1"
-          local title="$2"
-          local message="$3"
-
-          jq -cn \
-            --arg status "$status" \
-            --arg title "$title" \
-            --arg message "$(printf '%b' "$message")" \
-            --arg url "$CODEX_LB_URL" \
-            '{
-              ok: false,
-              status: $status,
-              title: $title,
-              message: $message,
-              url: $url,
-              accounts: [],
-              recentLogs: []
-            }'
-        }
-
-        tmp="$(mktemp -d)"
-        trap 'rm -rf "$tmp"' EXIT
-        CODEX_LB_URL="''${CODEX_LB_URL%/}"
-
-        fetch_failed() {
-          local path="$1"
-          local error="$2"
-
-          json_error \
-            "offline" \
-            "codex-lb offline" \
-            "Failed to reach $CODEX_LB_URL$path\n$(<"$error")"
-          exit 0
-        }
-
-        fetch() {
-          local path="$1"
-          local output="$2"
-          local error="$output.err"
-          local code
-
-          if ! code="$(curl \
-            --silent \
-            --show-error \
-            --location \
-            --max-time 10 \
-            --connect-timeout 3 \
-            --write-out '%{http_code}' \
-            --output "$output" \
-            "$CODEX_LB_URL$path" \
-            2>"$error")"; then
-            return 1
-          fi
-
-          printf '%s' "$code"
-        }
-
-        overview="$tmp/overview.json"
-        projections="$tmp/projections.json"
-        request_logs="$tmp/request-logs.json"
-        overview_path='/api/dashboard/overview?timeframe=7d'
-        projections_path='/api/dashboard/projections'
-        request_logs_path='/api/request-logs?limit=100'
-
-        if ! overview_code="$(fetch "$overview_path" "$overview")"; then
-          fetch_failed "$overview_path" "$overview.err"
-        fi
-
-        if ! projections_code="$(fetch "$projections_path" "$projections")"; then
-          fetch_failed "$projections_path" "$projections.err"
-        fi
-
-        if ! request_logs_code="$(fetch "$request_logs_path" "$request_logs")"; then
-          fetch_failed "$request_logs_path" "$request_logs.err"
-        fi
-
-        if [[ "$overview_code" == "401" || "$overview_code" == "403" || "$projections_code" == "401" || "$projections_code" == "403" || "$request_logs_code" == "401" || "$request_logs_code" == "403" ]]; then
-          json_error \
-            "auth" \
-            "codex-lb auth required" \
-            "Dashboard read access is required. Enable read-only guest access in codex-lb.\n\nURL: $CODEX_LB_URL"
-          exit 0
-        fi
-
-        if [[ ! "$overview_code" =~ ^2 ]] || [[ ! "$projections_code" =~ ^2 ]] || [[ ! "$request_logs_code" =~ ^2 ]]; then
-          json_error \
-            "http" \
-            "codex-lb HTTP $overview_code/$projections_code/$request_logs_code" \
-            "codex-lb returned HTTP $overview_code for overview, HTTP $projections_code for projections, and HTTP $request_logs_code for request logs.\n\nURL: $CODEX_LB_URL"
-          exit 0
-        fi
-
-        if ! output="$(jq -cn \
-          --slurpfile overview "$overview" \
-          --slurpfile projections "$projections" \
-          --slurpfile request_logs "$request_logs" \
-          --arg url "$CODEX_LB_URL" \
-          '
-          def number($n): $n | tonumber? // null;
-
-          def num_text($n):
-            (number($n)) as $v |
-            if $v == null then "n/a"
-            else
-              (($v * 10 | round) / 10 | tostring) as $s |
-              if ($s | contains(".")) then $s else $s + ".0" end
-            end;
-
-          def pct_text($n):
-            (number($n)) as $v |
-            if $v == null then "n/a" else num_text($v) + "%" end;
-
-          def signed_num_text($n):
-            (number($n)) as $v |
-            if $v == null then "n/a" else (if $v > 0 then "+" else "" end) + num_text($v) end;
-
-          def signed_pct_text($n):
-            (number($n)) as $v |
-            if $v == null then "n/a" else signed_num_text($v) + "%" end;
-
-          def time_text($s):
-            if $s == null or $s == "" then "n/a"
-            else
-              ($s | tostring | sub("\\.[0-9]+"; "")) as $iso |
-              ($iso | fromdateiso8601? // null) as $epoch |
-              if $epoch == null then ($iso | sub("T"; " ") | sub("Z$"; "") | .[0:16])
-              else ($epoch | localtime | strftime("%b %-d %-I:%M%P"))
-              end
-            end;
-
-          def duration_text($seconds):
-            (if $seconds < 0 then 0 else $seconds end | floor) as $value |
-            ($value / 86400 | floor) as $days |
-            (($value % 86400) / 3600 | floor) as $hours |
-            (($value % 3600) / 60 | floor) as $minutes |
-            if $days > 0 then ($days | tostring) + "d " + ($hours | tostring) + "h"
-            elif $hours > 0 then ($hours | tostring) + "h " + ($minutes | tostring) + "m"
-            else ($minutes | tostring) + "m"
-            end;
-
-          def reset_text($s):
-            if $s == null or $s == "" then "n/a"
-            else
-              ($s | tostring | sub("\\.[0-9]+"; "")) as $iso |
-              ($iso | fromdateiso8601? // null) as $epoch |
-              if $epoch == null then "n/a" else "in " + duration_text($epoch - now) end
-            end;
-
-          def log_time_text($s):
-            if $s == null or $s == "" then "--"
-            else
-              ($s | tostring | sub("\\.[0-9]+"; "")) as $iso |
-              ($iso | fromdateiso8601? // null) as $epoch |
-              if $epoch == null then ($iso | sub("T"; " ") | sub("Z$"; "") | .[11:19])
-              else ($epoch | localtime | strftime("%-I:%M:%S%P"))
-              end
-            end;
-
-          def log_date_text($s):
-            if $s == null or $s == "" then "--"
-            else
-              ($s | tostring | sub("\\.[0-9]+"; "")) as $iso |
-              ($iso | fromdateiso8601? // null) as $epoch |
-              if $epoch == null then ($iso | sub("T"; " ") | sub("Z$"; "") | .[0:10])
-              else ($epoch | localtime | strftime("%m/%d/%Y"))
-              end
-            end;
-
-          def window_percent($w): $w.remainingPercent // $w.remaining_percent // null;
-          def window_remaining($w): $w.remainingCredits // $w.remaining_credits // null;
-          def window_capacity($w): $w.capacityCredits // $w.capacity_credits // null;
-          def window_reset($w): $w.resetAt // $w.reset_at // $w.resetsAt // $w.resets_at // null;
-
-          def primary_window_metric($accounts; $fallback):
-            [
-              $accounts[]
-              | (.windowMinutesPrimary // .window_minutes_primary // null | tonumber? // null) as $minutes
-              | (.usage.primaryRemainingPercent // .usage.primary_remaining_percent // null | tonumber? // null) as $percent
-              | select($minutes == 300 and $percent != null)
-            ] as $applicable |
-            ($applicable | map(.capacityCreditsPrimary // .capacity_credits_primary // null | tonumber? // 0) | add // 0) as $capacity |
-            ($applicable | map(.remainingCreditsPrimary // .remaining_credits_primary // null | tonumber? // 0) | add // 0) as $remaining |
-            if ($applicable | length) == 0 or $capacity <= 0 then
-              if ($accounts | length) == 0 then $fallback else {} end
-            else {
-              remainingPercent: ($remaining / $capacity * 100),
-              remainingCredits: $remaining,
-              capacityCredits: $capacity,
-              resetAt: ([$applicable[] | .resetAtPrimary // .reset_at_primary // empty] | min // null)
-            }
-            end;
-
-          def credits_text($remaining; $capacity):
-            if $remaining == null or $capacity == null then "n/a"
-            else num_text($remaining) + "/" + num_text($capacity) + " cr"
-            end;
-
-          def metric($percent; $remaining; $capacity; $reset):
-            (number($percent)) as $p |
-            (number($remaining)) as $r |
-            (number($capacity)) as $c |
-            {
-              percent: $p,
-              percentText: pct_text($p),
-              remaining: $r,
-              capacity: $c,
-              creditsText: credits_text($r; $c),
-              resetText: reset_text($reset)
-            };
-
-          def window_metric($w):
-            metric(window_percent($w); window_remaining($w); window_capacity($w); window_reset($w));
-
-          def account_name($account):
-            $account.alias
-            // $account.displayName
-            // $account.display_name
-            // $account.email
-            // $account.accountId
-            // $account.account_id
-            // "account";
-
-          def account_id($account):
-            $account.accountId // $account.account_id // null;
-
-          def account_label($accounts; $account_id):
-            if $account_id == null or $account_id == "" then "Unassigned"
-            else ([ $accounts[]? | select(account_id(.) == $account_id) | account_name(.) ][0] // $account_id)
-            end;
-
-          def account_plan($account):
-            ([
-              $account.planType // $account.plan_type,
-              $account.workspaceLabel // $account.workspace_label,
-              $account.seatType // $account.seat_type
-            ] | map(select(. != null and . != "") | tostring) | join(" / ")) as $plan |
-            if $plan == "" then "plan unknown" else $plan end;
-
-          def account_metric($account; $prefix):
-            ($account.usage // {}) as $usage |
-            if $prefix == "primary" then
-              metric(
-                $usage.primaryRemainingPercent // $usage.primary_remaining_percent // null;
-                $account.remainingCreditsPrimary // $account.remaining_credits_primary // null;
-                $account.capacityCreditsPrimary // $account.capacity_credits_primary // null;
-                $account.resetAtPrimary // $account.reset_at_primary // null
-              )
-            else
-              metric(
-                $usage.secondaryRemainingPercent // $usage.secondary_remaining_percent // null;
-                $account.remainingCreditsSecondary // $account.remaining_credits_secondary // null;
-                $account.capacityCreditsSecondary // $account.capacity_credits_secondary // null;
-                $account.resetAtSecondary // $account.reset_at_secondary // null
-              )
-            end;
-
-          def account_card($account):
-            {
-              id: account_id($account),
-              name: account_name($account),
-              status: (($account.status // "unknown") | tostring),
-              plan: account_plan($account),
-              primary: account_metric($account; "primary"),
-              secondary: account_metric($account; "secondary"),
-              resetCredits: number($account.availableResetCredits // $account.available_reset_credits // null),
-              resetCreditExpiryText: time_text($account.resetCreditNearestExpiresAt // $account.reset_credit_nearest_expires_at // null)
-            };
-
-          def request_status_label($status):
-            ($status | tostring) as $value |
-            if $value == "ok" then "OK"
-            elif $value == "rate_limit" then "Rate limit"
-            elif $value == "quota" then "Quota"
-            elif $value == "error" then "Error"
-            else ($value | gsub("_"; " "))
-            end;
-
-          def model_label($log):
-            (($log.model // "--") | tostring) as $model |
-            (($log.reasoningEffort // $log.reasoning_effort // "") | tostring) as $effort |
-            if $effort == "" then $model else $model + " (" + $effort + ")" end;
-
-          def tokens_text($tokens):
-            (number($tokens)) as $value |
-            if $value == null then "-- tok" else ($value | tostring) + " tok" end;
-
-          def cost_text($cost):
-            (number($cost)) as $value |
-            if $value == null then "$--"
-            else "$" + ((($value * 10000 | round) / 10000) | tostring)
-            end;
-
-          def request_log_card($log; $accounts):
-            (($log.status // "unknown") | tostring) as $status |
-            ($log.errorCode // $log.error_code // null) as $error_code |
-            ($log.errorMessage // $log.error_message // null) as $error_message |
-            {
-              timeText: log_time_text($log.requestedAt // $log.requested_at // null),
-              dateText: log_date_text($log.requestedAt // $log.requested_at // null),
-              account: account_label($accounts; $log.accountId // $log.account_id // null),
-              model: model_label($log),
-              tokensText: tokens_text($log.tokens // null),
-              costText: cost_text($log.costUsd // $log.cost_usd // null),
-              status: $status,
-              statusText: request_status_label($status),
-              errorCode: $error_code,
-              errorMessage: $error_message
-            };
-
-          def pace_status($pace): $pace.status // "unknown";
-          def pace_delta($pace): $pace.smoothedDeltaPercent // $pace.smoothed_delta_percent // $pace.deltaPercent // $pace.delta_percent // null;
-          def pace_gap($pace): $pace.smoothedScheduleGapCredits // $pace.smoothed_schedule_gap_credits // $pace.scheduleGapCredits // $pace.schedule_gap_credits // null;
-
-          $overview[0] as $o |
-          $projections[0] as $p |
-          ($request_logs[0].requests // []) as $requests |
-          ($o.summary.primaryWindow // $o.summary.primary_window // $o.windows.primary // {}) as $primary_summary |
-          ($o.summary.secondaryWindow // $o.summary.secondary_window // $o.windows.secondary // {}) as $secondary |
-          ($p.weeklyCreditPace // $p.weekly_credit_pace // {}) as $pace |
-          ($o.accounts // []) as $accounts |
-          (primary_window_metric($accounts; $primary_summary)) as $primary |
-          (pace_status($pace)) as $status |
-          (pace_delta($pace)) as $delta |
-          (pace_gap($pace)) as $gap |
-          ($pace.confidence // "unknown") as $confidence |
-          (($pace.staleAccountCount // $pace.stale_account_count // 0) | tonumber? // 0) as $stale |
-          (($pace.inactiveAccountCount // $pace.inactive_account_count // 0) | tonumber? // 0) as $inactive |
-          (if $status == "danger" then "danger"
-           elif $confidence == "low" or $stale > 0 then "warning"
-           elif $status == "behind" then "behind"
-           elif $status == "ahead" then "ahead"
-           elif $status == "on_track" then "on_track"
-           else "warning"
-           end) as $class |
-          {
-            ok: true,
-            status: "ok",
-            class: $class,
-            url: $url,
-            lastSyncText: time_text($o.lastSyncAt // $o.last_sync_at // null),
-            generatedAtText: time_text(now | todateiso8601),
-            primary: window_metric($primary),
-            secondary: window_metric($secondary),
-            pace: {
-              status: $status,
-              delta: (number($delta)),
-              deltaText: signed_pct_text($delta),
-              actualUsed: (number($pace.actualUsedPercent // $pace.actual_used_percent // null)),
-              actualUsedText: pct_text($pace.actualUsedPercent // $pace.actual_used_percent // null),
-              scheduledUsed: (number($pace.scheduledUsedPercent // $pace.scheduled_used_percent // null)),
-              scheduledUsedText: pct_text($pace.scheduledUsedPercent // $pace.scheduled_used_percent // null),
-              gap: (number($gap)),
-              gapText: signed_num_text($gap) + " cr",
-              shortfallText: num_text($pace.projectedShortfallCredits // $pace.projected_shortfall_credits // null) + " cr",
-              confidence: ($confidence | tostring),
-              stale: $stale,
-              inactive: $inactive,
-              summaryText: (
-                "gap " + signed_num_text($gap) + " cr"
-                + ", shortfall " + num_text($pace.projectedShortfallCredits // $pace.projected_shortfall_credits // null) + " cr"
-                + ", confidence " + ($confidence | tostring)
-                + ", stale " + ($stale | tostring)
-                + ", inactive " + ($inactive | tostring)
-              )
-            },
-            accounts: ($accounts | map(account_card(.))),
-            recentLogs: ($requests | map(request_log_card(.; $accounts))),
-            latestLogStatus: (($requests[0].status // "unknown") | tostring),
-            latestLogNonOk: ((($requests[0].status // "ok") | tostring) != "ok")
-          }
-          ' 2>"$tmp/jq.err")"; then
-          json_error \
-            "parse" \
-            "codex-lb parse error" \
-            "Failed to parse codex-lb dashboard response.\n$(<"$tmp/jq.err")"
-          exit 0
-        fi
-
-        printf '%s\n' "$output"
-      '';
+  popup = pkgs.replaceVars ./codex-lb.qml {
+    DATA_COMMAND = lib.getExe status;
+    ACCOUNT_COMMAND = lib.getExe accountAction;
+    OPEN_COMMAND = "${pkgs.xdg-utils}/bin/xdg-open";
+    INTERVAL_MS = toString (cfg.interval * 1000);
   };
-
-  popupQml = pkgs.writeText "CodexLb.qml" (builtins.replaceStrings
-    [
-      "@DATA_COMMAND@"
-      "@ACCOUNT_COMMAND@"
-      "@OPEN_COMMAND@"
-      "@INTERVAL_MS@"
-    ]
-    [
-      (lib.getExe popupData)
-      (lib.getExe accountAction)
-      "${pkgs.xdg-utils}/bin/xdg-open"
-      (toString (cfg.interval * 1000))
-    ]
-    (builtins.readFile ./codex-lb.qml));
 in {
   options.wayland.windowManager.hyprland.waybar.codex-lb = {
     enable = lib.mkEnableOption "codex-lb Waybar quota widget";
@@ -882,29 +175,27 @@ in {
 
   config = mkIf cfg.enable (mkMerge [
     {
-      programs.waybar.settings.bar = {
-        "custom/codex-lb" = {
-          return-type = "json";
-          exec = lib.getExe script;
-          format = "{text}";
-          escape = false;
-          max-length = 32;
-          interval = cfg.interval;
-          tooltip = true;
-          on-click-right = "${pkgs.xdg-utils}/bin/xdg-open ${lib.escapeShellArg cfg.url}";
-          on-click =
-            if cfg.popup.enable
-            then "${lib.getExe config.lib.quickshell.ipc} codex-lb toggle"
-            else "${pkgs.xdg-utils}/bin/xdg-open ${lib.escapeShellArg cfg.url}";
-        };
+      programs.waybar.settings.bar."custom/codex-lb" = {
+        return-type = "json";
+        exec = lib.getExe status;
+        format = "{text}";
+        escape = false;
+        max-length = 32;
+        inherit (cfg) interval;
+        tooltip = true;
+        on-click-right = open;
+        on-click =
+          if cfg.popup.enable
+          then "${lib.getExe config.lib.quickshell.ipc} codex-lb toggle"
+          else open;
       };
     }
 
     (mkIf cfg.popup.enable {
       wayland.windowManager.hyprland.quickshell = {
         enable = true;
-        components = [''CodexLb {}''];
-        files."CodexLb.qml" = popupQml;
+        components = ["CodexLb {}"];
+        files."CodexLb.qml" = popup;
       };
     })
   ]);
