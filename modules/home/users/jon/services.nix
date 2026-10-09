@@ -18,9 +18,9 @@
     Service = {
       Type = "oneshot";
       WorkingDirectory = "/etc/nixos";
-      ExecStart = lib.getExe (pkgs.writeShellApplication {
+      ExecStart = lib.getExe (pkgs.self.mkScript {
         name = "nixos-repo-sync";
-        runtimeInputs = [pkgs.git];
+        path = [pkgs.git];
         text = ''
           if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
             echo "Skipping /etc/nixos sync: not a git work tree"
@@ -47,27 +47,6 @@
           git pull --ff-only --quiet origin "$branch"
         '';
       });
-    };
-  };
-
-  # Custom user service
-  systemd.user.services.foobar-hm = {
-    Unit = {
-      Description = "Foobar Home-Manager";
-      After = ["graphical-session.target"];
-      Requires = ["graphical-session.target"];
-    };
-    Install.WantedBy = ["default.target"];
-    Service = {
-      Type = "oneshot";
-      RemainAfterExit = "yes";
-      Environment = ''"FOO=bar"'';
-      ExecStart = with pkgs;
-        writeShellScript "foobar-hm" ''
-          PATH=${lib.makeBinPath [coreutils]}
-          touch /tmp/foobar-hm.txt
-          date >>/tmp/foobar-hm.txt
-        '';
     };
   };
 }

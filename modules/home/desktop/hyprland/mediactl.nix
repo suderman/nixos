@@ -5,7 +5,7 @@
   ...
 }: let
   qs = config.wayland.windowManager.hyprland.quickshell;
-  osdClient = pkgs.writeShellApplication {
+  osdClient = pkgs.self.mkScript {
     name = "avizo-client";
     text =
       lib.replaceStrings ["@QS@" "@CONFIG@"]

@@ -72,9 +72,9 @@
       then null
       else config.users.users.${cfg.desktopUser}.uid;
   });
-  command = pkgs.writeShellApplication {
+  command = pkgs.self.mkScript {
     name = "storage-health";
-    runtimeInputs = [pkgs.python3 pkgs.systemd pkgs.procps pkgs.util-linux pkgs.curl pkgs.libnotify];
+    path = [pkgs.python3 pkgs.systemd pkgs.procps pkgs.util-linux pkgs.curl pkgs.libnotify];
     text = ''exec python3 ${./storage-health.py} ${settings} "$@"'';
   };
   bounded = {

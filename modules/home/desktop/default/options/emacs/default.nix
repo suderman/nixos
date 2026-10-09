@@ -20,14 +20,18 @@
     '';
   };
 
-  terminalEditor = pkgs.writeShellScript "emacs-editor" ''
-    ${builtins.readFile ./terminal-setup.sh}
-    exec ${lib.getBin cfg.finalPackage}/bin/emacs --no-window-system "$@"
-  '';
+  terminalEditor = pkgs.self.mkScript {
+    text =
+      # bash
+      ''
+        ${builtins.readFile ./terminal-setup.sh}
+        exec ${lib.getBin cfg.finalPackage}/bin/emacs --no-window-system "$@"
+      '';
+  };
 
-  workspaceClient = pkgs.writeShellApplication {
+  workspaceClient = pkgs.self.mkScript {
     name = "em-workspace-client";
-    runtimeInputs = [cfg.finalPackage config.programs.herdr.package pkgs.tmux pkgs.jq pkgs.coreutils pkgs.util-linux];
+    path = [cfg.finalPackage config.programs.herdr.package pkgs.tmux pkgs.jq pkgs.coreutils pkgs.util-linux];
     text = ''
       ${builtins.readFile ./terminal-setup.sh}
       EMACS_CLIENT=${lib.getBin cfg.finalPackage}/bin/emacsclient
@@ -66,10 +70,14 @@ in {
                              :dark ${palette schemes.darkScheme})))
         '';
 
-      exportStyle = pkgs.writeShellScript "export-emacs-style" ''
-        style=${style}
-        ${builtins.readFile ./export-style.sh}
-      '';
+      exportStyle = pkgs.self.mkScript {
+        text =
+          # bash
+          ''
+            style=${style}
+            ${builtins.readFile ./export-style.sh}
+          '';
+      };
     in
       mkIf cfg.exportStyle (lib.hm.dag.entryAfter ["writeBoundary"] ''
         $DRY_RUN_CMD ${exportStyle}

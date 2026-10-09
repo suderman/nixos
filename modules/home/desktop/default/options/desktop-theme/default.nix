@@ -89,9 +89,9 @@
       cat ${assets}/${mode}/gtk.css >> "$out/share/themes/desktop-${mode}/gtk-3.0/gtk.css"
     '') ["dark" "light"]}
   '';
-  command = pkgs.writeShellApplication {
+  command = pkgs.self.mkScript {
     name = "desktop-theme";
-    runtimeInputs = with pkgs; [coreutils util-linux dconf glib procps mako];
+    path = with pkgs; [coreutils util-linux dconf glib procps mako];
     text =
       lib.replaceStrings ["@assets@" "@default@" "@lightIcons@" "@darkIcons@"]
       ["${assets}" cfg.defaultMode (lib.escapeShellArg config.stylix.icons.light) (lib.escapeShellArg config.stylix.icons.dark)]

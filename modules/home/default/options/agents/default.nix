@@ -6,9 +6,9 @@
   ...
 }: let
   cfg = config.programs.agents;
-  command = pkgs.writeShellApplication {
+  command = pkgs.self.mkScript {
     name = "agents";
-    runtimeInputs = with pkgs; [bash coreutils git jq python3 yq-go];
+    path = with pkgs; [bash coreutils git jq python3 yq-go];
     text = ''
       if [[ ! -f "$HOME/.agents/agents" ]]; then
         echo "Missing agents checkout at $HOME/.agents; start agents-checkout.service or clone https://github.com/suderman/agents.git there." >&2
@@ -17,9 +17,9 @@
       exec python3 "$HOME/.agents/agents" "$@"
     '';
   };
-  checkout = pkgs.writeShellApplication {
+  checkout = pkgs.self.mkScript {
     name = "agents-checkout";
-    runtimeInputs = [pkgs.coreutils pkgs.git];
+    path = [pkgs.coreutils pkgs.git];
     text = ''
       repository="$HOME/.agents"
       if [[ -d "$repository/.git" || -f "$repository/.git" ]]; then

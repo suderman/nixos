@@ -63,10 +63,4 @@ in {
       run-shell ${edger}/share/tmux-plugins/edger/edger.tmux
     '';
   };
-
-  home.packages = with pkgs; [
-    # (writeScriptBin "tmux-popup" (builtins.readFile ./tmux-popup))
-    # (writeScriptBin "tmux-cleanup" (builtins.readFile ./tmux-cleanup))
-    # (writeScriptBin "yank" (builtins.readFile ./yank))
-  ];
 }

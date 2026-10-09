@@ -6,17 +6,23 @@
   ...
 }: let
   cfg = config.services.handy;
-  fastYdotool = pkgs.writeShellScriptBin "ydotool" ''
-    if [[ "''${1-}" == type ]]; then
-      shift
-      exec ${lib.getExe pkgs.ydotool} type --key-delay 1 --key-hold 1 "$@"
-    fi
-    exec ${lib.getExe pkgs.ydotool} "$@"
-  '';
-  launcher = pkgs.writeShellScript "handy" ''
-    export PATH=${fastYdotool}/bin:$PATH
-    exec ${cfg.package}/bin/handy --start-hidden
-  '';
+  # Type dictated text without ydotool's default per-key delays.
+  fastYdotool = pkgs.self.mkScript {
+    name = "ydotool";
+    text =
+      # bash
+      ''
+        if [[ "''${1-}" == type ]]; then
+          shift
+          exec ${lib.getExe pkgs.ydotool} type --key-delay 1 --key-hold 1 "$@"
+        fi
+        exec ${lib.getExe pkgs.ydotool} "$@"
+      '';
+  };
+  launcher = pkgs.self.mkScript {
+    path = [fastYdotool];
+    text = "exec ${cfg.package}/bin/handy --start-hidden";
+  };
   target = config.wayland.systemd.target;
   toggle = "${lib.getExe' pkgs.procps "pkill"} -USR2 -n handy";
 in {

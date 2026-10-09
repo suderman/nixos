@@ -145,11 +145,15 @@ in {
       path = builtins.head (builtins.attrNames instance.settings.volume);
       volumeName = builtins.baseNameOf path;
       hosts = "{" + lib.concatStringsSep "," (builtins.attrNames flake.nixosConfigurations) + "}";
-      directories = pkgs.writeShellScript "btrbk-directories-${volumeName}" ''
-        set -e
-        ${pkgs.systemd}/bin/systemctl start ${lib.escapeShellArg "${utils.escapeSystemdPath path}.mount"}
-        exec ${pkgs.coreutils}/bin/mkdir -p ${path}/backups/${hosts}
-      '';
+      directories = pkgs.self.mkScript {
+        path = [pkgs.systemd];
+        text =
+          # bash
+          ''
+            systemctl start ${lib.escapeShellArg "${utils.escapeSystemdPath path}.mount"}
+            exec mkdir -p ${path}/backups/${hosts}
+          '';
+      };
     in
       lib.nameValuePair "btrbk-${name}" {
         unitConfig.ConditionPathExists = "!/run/storage-health/blocked/${volumeName}";

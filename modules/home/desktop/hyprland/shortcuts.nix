@@ -20,9 +20,9 @@
   windows = mappings "app" (config.lib.keyd.expandHomeRowModifierRules config.services.keyd.windows);
   layers = mappings "layer" (config.lib.keyd.expandHomeRowModifierRules config.services.keyd.layers);
   keyd = pkgs.writeText "desktop-keyd-shortcuts.json" (builtins.toJSON (system ++ windows ++ layers));
-  command = pkgs.writeShellApplication {
+  command = pkgs.self.mkScript {
     name = "desktop-shortcuts";
-    runtimeInputs = [pkgs.jq config.programs.rofi.package];
+    path = [pkgs.jq config.programs.rofi.package];
     text = ''
       list() {
         hyprctl -j binds | jq -r '

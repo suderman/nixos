@@ -10,9 +10,9 @@
   taskDropPromptRoot = "${config.home.homeDirectory}/.agents/pi/task-drop-prompts";
   herdrPackage = config.programs.herdr.package;
 
-  taskDropHandler = pkgs.writeShellApplication {
+  taskDropHandler = pkgs.self.mkScript {
     name = "pi-task-drop";
-    runtimeInputs =
+    path =
       (with pkgs; [coreutils findutils gnugrep jq util-linux])
       ++ lib.optional (herdrPackage != null) herdrPackage;
     text = ''

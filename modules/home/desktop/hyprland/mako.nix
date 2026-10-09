@@ -7,9 +7,9 @@
   stylix.targets.mako.enable = lib.mkIf config.programs.desktop-theme.enable false;
 
   home.packages = [
-    (pkgs.writeShellApplication {
+    (pkgs.self.mkScript {
       name = "notification-mode";
-      runtimeInputs = [pkgs.mako pkgs.procps pkgs.jq];
+      path = [pkgs.mako pkgs.procps pkgs.jq];
       text = ''
         case "''${1:-toggle}" in
           toggle)

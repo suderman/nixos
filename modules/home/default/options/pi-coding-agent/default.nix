@@ -12,9 +12,9 @@
   agentDir = ".pi/agent";
   herdrPackage = config.programs.herdr.package;
 
-  piStylixTheme = pkgs.writeShellApplication {
+  piStylixTheme = pkgs.self.mkScript {
     name = "pi-stylix-theme";
-    runtimeInputs = [pkgs.coreutils];
+    path = [pkgs.coreutils];
     text = let
       palette = config.lib.stylix.colors.withHashtag;
       template = builtins.fromJSON (builtins.readFile "${flake.inputs.agents}/pi/themes/catppuccin-mocha.json");
@@ -61,9 +61,9 @@
     '';
   };
 
-  piDcpPackageFix = pkgs.writeShellApplication {
+  piDcpPackageFix = pkgs.self.mkScript {
     name = "pi-fix-dcp-package";
-    runtimeInputs = [pkgs.coreutils pkgs.jq];
+    path = [pkgs.coreutils pkgs.jq];
     text = builtins.readFile "${flake.inputs.agents}/pi/fix-dcp-package";
   };
 

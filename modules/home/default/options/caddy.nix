@@ -47,13 +47,17 @@ in {
           }
         '';
       in {
-        ExecStartPre = pkgs.writeShellScript "caddy-init" ''
-          mkdir -p "$(dirname ${Caddyfile})"
-          if [[ ! -f "${Caddyfile}" ]]; then
-            cp ${CaddyTemplate} "${Caddyfile}"
-            chmod 644 "${Caddyfile}"
-          fi
-        '';
+        ExecStartPre = pkgs.self.mkScript {
+          text =
+            # bash
+            ''
+              mkdir -p "$(dirname ${Caddyfile})"
+              if [[ ! -f "${Caddyfile}" ]]; then
+                cp ${CaddyTemplate} "${Caddyfile}"
+                chmod 644 "${Caddyfile}"
+              fi
+            '';
+        };
         ExecStart = "${caddy} run --config ${Caddyfile}";
         ExecReload = "${caddy} reload --config ${Caddyfile} --address 127.0.0.1:${toString (cfg.port + 1)}";
         Restart = "on-failure";

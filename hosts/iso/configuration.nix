@@ -62,9 +62,18 @@
     pkgs.gum
     pkgs.networkmanager
     pkgs.rsync
-    (pkgs.writeShellScriptBin "installer" (builtins.readFile ./downloader.sh))
-    (pkgs.writeShellScriptBin "lsblk" "${pkgs.util-linux}/bin/lsblk -o ID-LINK,NAME,FSTYPE,LABEL,SIZE,FSUSE%,MOUNTPOINTS --tree=ID-LINK")
-    (pkgs.writeShellScriptBin "wifi" "nmtui-connect")
+    (perSystem.self.mkScript {
+      name = "installer";
+      text = ./downloader.sh;
+    })
+    (perSystem.self.mkScript {
+      name = "lsblk";
+      text = "${pkgs.util-linux}/bin/lsblk -o ID-LINK,NAME,FSTYPE,LABEL,SIZE,FSUSE%,MOUNTPOINTS --tree=ID-LINK";
+    })
+    (perSystem.self.mkScript {
+      name = "wifi";
+      text = "nmtui-connect";
+    })
   ];
 
   # Update /etc/issue with custom info

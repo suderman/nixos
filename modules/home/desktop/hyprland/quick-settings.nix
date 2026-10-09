@@ -165,21 +165,22 @@
     FONT_SIZE = toString config.stylix.fonts.sizes.popups;
     NMCLI = builtins.toJSON "${pkgs.networkmanager}/bin/nmcli";
   };
-  toggle = pkgs.writeShellApplication {
+  toggle = pkgs.self.mkScript {
     name = "quick-settings";
-    text = ''
-      exec ${lib.getExe qs.package} ipc -c ${lib.escapeShellArg qs.configName} call quick-settings toggle
-    '';
+    text = "exec ${lib.getExe config.lib.quickshell.ipc} quick-settings toggle";
   };
-  status = pkgs.writeShellApplication {
+  status = pkgs.self.mkScript {
     name = "quick-settings-status";
-    text = ''
-      if state="$(${lib.getExe qs.package} ipc -c ${lib.escapeShellArg qs.configName} call quick-settings status 2>/dev/null)"; then
-        printf '%s\n' "$state"
-      else
-        printf '%s\n' '{"class":""}'
-      fi
-    '';
+    path = [qs.package];
+    text =
+      # bash
+      ''
+        if state="$(qs ipc -c ${lib.escapeShellArg qs.configName} call quick-settings status 2>/dev/null)"; then
+          printf '%s\n' "$state"
+        else
+          printf '%s\n' '{"class":""}'
+        fi
+      '';
   };
 in {
   config = lib.mkIf qs.enable {

@@ -124,9 +124,9 @@
       services: {}
     ''
   );
-  nojoinCompose = pkgs.writeShellApplication {
+  nojoinCompose = pkgs.self.mkScript {
     name = "nojoin-compose";
-    runtimeInputs = [pkgs.docker];
+    path = [pkgs.docker];
     text = ''
       set -a
       # shellcheck disable=SC1091
