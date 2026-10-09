@@ -5,7 +5,6 @@
   ...
 }: let
   cfg = config.wayland.windowManager.hyprland.waybar.minimax-quota;
-  qsCfg = config.wayland.windowManager.hyprland.quickshell;
   inherit (lib) mkIf mkMerge mkOption types;
 
   icon = "󰊚";
@@ -298,44 +297,6 @@
       (toString (cfg.interval * 1000))
     ]
     (builtins.readFile ./minimax-quota.qml));
-
-  popupToggle = pkgs.self.mkScript {
-    name = "minimax-quota-popup";
-    path = [qsCfg.package pkgs.systemd];
-    text =
-      # bash
-      ''
-        action="''${1:-toggle}"
-
-        call() {
-          qs ipc -c ${lib.escapeShellArg qsCfg.configName} call minimax-quota "$@"
-        }
-
-        case "$action" in
-          toggle | show | hide | refresh)
-            if call "$action" >/dev/null 2>&1; then
-              exit 0
-            fi
-
-            systemctl --user start quickshell.service >/dev/null 2>&1 || true
-
-            for _ in {1..10}; do
-              sleep 0.2
-              if call "$action" >/dev/null 2>&1; then
-                exit 0
-              fi
-            done
-
-            echo "minimax-quota-popup: quickshell IPC target unavailable" >&2
-            exit 1
-            ;;
-          *)
-            echo "Usage: minimax-quota-popup [toggle|show|hide|refresh]" >&2
-            exit 2
-            ;;
-        esac
-      '';
-  };
 in {
   options.wayland.windowManager.hyprland.waybar.minimax-quota = {
     enable = lib.mkEnableOption "MiniMax quota Waybar widget";
@@ -379,15 +340,13 @@ in {
           on-click-right = "${pkgs.xdg-utils}/bin/xdg-open https://platform.minimax.io/console/usage";
           on-click =
             if cfg.popup.enable
-            then "${lib.getExe popupToggle} toggle"
+            then "${lib.getExe config.lib.quickshell.ipc} minimax-quota toggle"
             else "${lib.getExe script}";
         };
       };
     }
 
     (mkIf cfg.popup.enable {
-      home.packages = [popupToggle];
-
       wayland.windowManager.hyprland.quickshell = {
         enable = true;
         components = [''MiniMaxQuota {}''];

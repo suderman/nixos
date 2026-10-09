@@ -34,6 +34,34 @@
     }
   '';
 
+  # Call a widget's IpcHandler, starting the shell on demand.
+  ipc = pkgs.self.mkScript {
+    name = "quickshell-ipc";
+    path = [cfg.package pkgs.systemd];
+    text =
+      # bash
+      ''
+        if (($# < 2)); then
+          echo "Usage: quickshell-ipc TARGET FUNCTION [ARGS...]" >&2
+          exit 2
+        fi
+
+        call() {
+          qs ipc -c ${lib.escapeShellArg cfg.configName} call "$@" >/dev/null 2>&1
+        }
+
+        call "$@" && exit 0
+        systemctl --user start quickshell.service >/dev/null 2>&1 || true
+        for _ in {1..10}; do
+          sleep 0.2
+          call "$@" && exit 0
+        done
+
+        echo "quickshell-ipc: Quickshell is not answering IPC" >&2
+        exit 1
+      '';
+  };
+
   configDir = pkgs.runCommand "quickshell-${cfg.configName}-config" {} (
     ''
       mkdir -p "$out"
@@ -74,6 +102,9 @@ in {
   };
 
   config = mkIf cfg.enable {
+    lib.quickshell = {inherit ipc;};
+    home.packages = [ipc];
+
     wayland.windowManager.hyprland.quickshell.files."Theme.qml" = theme;
     # This shell controls audio but does not process audio streams. Its client
     # must not wait for RTKit during PipeWire context teardown/reconnection.

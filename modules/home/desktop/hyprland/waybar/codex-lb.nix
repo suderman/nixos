@@ -5,7 +5,6 @@
   ...
 }: let
   cfg = config.wayland.windowManager.hyprland.waybar.codex-lb;
-  qsCfg = config.wayland.windowManager.hyprland.quickshell;
   colors = config.lib.stylix.colors;
   inherit (lib) mkIf mkMerge mkOption types;
 
@@ -857,44 +856,6 @@
       (toString (cfg.interval * 1000))
     ]
     (builtins.readFile ./codex-lb.qml));
-
-  popupToggle = pkgs.self.mkScript {
-    name = "codex-lb-popup";
-    path = [qsCfg.package pkgs.systemd];
-    text =
-      # bash
-      ''
-        action="''${1:-toggle}"
-
-        call() {
-          qs ipc -c ${lib.escapeShellArg qsCfg.configName} call codex-lb "$@"
-        }
-
-        case "$action" in
-          toggle | show | hide | refresh)
-            if call "$action" >/dev/null 2>&1; then
-              exit 0
-            fi
-
-            systemctl --user start quickshell.service >/dev/null 2>&1 || true
-
-            for _ in {1..10}; do
-              sleep 0.2
-              if call "$action" >/dev/null 2>&1; then
-                exit 0
-              fi
-            done
-
-            echo "codex-lb-popup: quickshell IPC target unavailable" >&2
-            exit 1
-            ;;
-          *)
-            echo "Usage: codex-lb-popup [toggle|show|hide|refresh]" >&2
-            exit 2
-            ;;
-        esac
-      '';
-  };
 in {
   options.wayland.windowManager.hyprland.waybar.codex-lb = {
     enable = lib.mkEnableOption "codex-lb Waybar quota widget";
@@ -933,15 +894,13 @@ in {
           on-click-right = "${pkgs.xdg-utils}/bin/xdg-open ${lib.escapeShellArg cfg.url}";
           on-click =
             if cfg.popup.enable
-            then "${lib.getExe popupToggle} toggle"
+            then "${lib.getExe config.lib.quickshell.ipc} codex-lb toggle"
             else "${pkgs.xdg-utils}/bin/xdg-open ${lib.escapeShellArg cfg.url}";
         };
       };
     }
 
     (mkIf cfg.popup.enable {
-      home.packages = [popupToggle];
-
       wayland.windowManager.hyprland.quickshell = {
         enable = true;
         components = [''CodexLb {}''];

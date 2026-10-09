@@ -15,9 +15,9 @@ Then write the schedule to an Org file manually:
 fresha-org > ~/org/calendar/fresha.org
 ```
 
-Jon's configuration on `kit` also runs the command at 04:00 and 16:00 through
+Set `programs.fresha-org.orgFile` to run the command at 04:00 and 16:00 through
 `fresha-org.timer`. The service renders into a temporary file and atomically
-replaces `~/org/calendar/fresha.org` only after a successful run. Browser, login,
+replaces that file only after a successful run. Browser, login,
 network, or Fresha errors leave the previous schedule in place. If Chromium's
 CDP port is not available, the service launches `chromium-agent` through Hyprland
 and waits for it before fetching the schedule.

@@ -5,7 +5,6 @@
   ...
 }: let
   cfg = config.wayland.windowManager.hyprland.waybar.herdr;
-  qsCfg = config.wayland.windowManager.hyprland.quickshell;
   herdrPackage = config.programs.herdr.package;
   herdr =
     if herdrPackage == null
@@ -299,44 +298,6 @@
       (toString (cfg.interval * 1000))
     ]
     (builtins.readFile ./herdr.qml));
-
-  popupToggle = pkgs.self.mkScript {
-    name = "herdr-popup";
-    path = [qsCfg.package pkgs.systemd];
-    text =
-      # bash
-      ''
-        action="''${1:-toggle}"
-
-        call() {
-          qs ipc -c ${lib.escapeShellArg qsCfg.configName} call herdr "$@"
-        }
-
-        case "$action" in
-          toggle | show | hide | refresh)
-            if call "$action" >/dev/null 2>&1; then
-              exit 0
-            fi
-
-            systemctl --user start quickshell.service >/dev/null 2>&1 || true
-
-            for _ in {1..10}; do
-              sleep 0.2
-              if call "$action" >/dev/null 2>&1; then
-                exit 0
-              fi
-            done
-
-            echo "herdr-popup: quickshell IPC target unavailable" >&2
-            exit 1
-            ;;
-          *)
-            echo "Usage: herdr-popup [toggle|show|hide|refresh]" >&2
-            exit 2
-            ;;
-        esac
-      '';
-  };
 in {
   options.wayland.windowManager.hyprland.waybar.herdr = {
     enable = lib.mkEnableOption "Herdr agent status Waybar widget";
@@ -386,15 +347,13 @@ in {
         tooltip = true;
         on-click =
           if cfg.popup.enable
-          then "${lib.getExe popupToggle} toggle"
+          then "${lib.getExe config.lib.quickshell.ipc} herdr toggle"
           else lib.getExe openHerdr;
         on-click-right = lib.getExe openHerdr;
       };
     }
 
     (mkIf cfg.popup.enable {
-      home.packages = [popupToggle];
-
       wayland.windowManager.hyprland.quickshell = {
         enable = true;
         components = [''Herdr {}''];
