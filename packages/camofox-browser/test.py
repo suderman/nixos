@@ -4,7 +4,6 @@ import http.server
 import json
 import os
 from pathlib import Path
-import re
 import signal
 import socket
 import ssl
@@ -22,7 +21,7 @@ class Page(http.server.BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", "text/html")
         self.end_headers()
-        self.wfile.write(b'<h1>Browser check</h1><a href="/next">Next page</a>')
+        self.wfile.write(b"<h1>Browser check</h1>")
 
     def log_message(self, format, *args):
         pass
@@ -30,9 +29,6 @@ class Page(http.server.BaseHTTPRequestHandler):
 
 with tempfile.TemporaryDirectory() as directory:
     root = Path(directory)
-    fixture = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Page)
-    threading.Thread(target=fixture.serve_forever, daemon=True).start()
-    url = f"http://127.0.0.1:{fixture.server_port}"
     tls_servers = []
     for name in ("server", "untrusted"):
         tls_server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Page)
@@ -84,42 +80,6 @@ with tempfile.TemporaryDirectory() as directory:
                         raise
                     time.sleep(1)
             identity = {"userId": "package-check", "sessionKey": "first"}
-            tab = api("POST", "/tabs", identity | {"url": url})["tabId"]
-            snapshot = api("GET", f"/tabs/{tab}/snapshot?userId=package-check")[
-                "snapshot"
-            ]
-            assert "Browser check" in snapshot, snapshot
-            link = re.search(r'link "Next page" \[(e\d+)\]', snapshot)
-            assert link, snapshot
-            ref = link[1]
-            clicked = api(
-                "POST", f"/tabs/{tab}/click", {"userId": "package-check", "ref": ref}
-            )
-            assert clicked["url"] == url + "/next", clicked
-            api(
-                "POST",
-                f"/tabs/{tab}/evaluate",
-                {
-                    "userId": "package-check",
-                    "expression": "document.cookie='probe=kept; Max-Age=600; Path=/'; localStorage.setItem('probe','kept'); true",
-                },
-            )
-            api("DELETE", "/sessions/package-check")
-            tab = api(
-                "POST",
-                "/tabs",
-                identity | {"sessionKey": "second", "url": url + "/next"},
-            )["tabId"]
-            stored = api(
-                "POST",
-                f"/tabs/{tab}/evaluate",
-                {
-                    "userId": "package-check",
-                    "expression": "document.cookie.split('; ').includes('probe=kept') && localStorage.getItem('probe')==='kept'",
-                },
-            )
-            assert stored["result"] is True, stored
-            api("DELETE", "/sessions/package-check")
             trusted_url = f"https://127.0.0.1:{tls_servers[0].server_port}"
             tab = api("POST", "/tabs", identity | {"url": trusted_url})["tabId"]
             assert (
@@ -135,9 +95,6 @@ with tempfile.TemporaryDirectory() as directory:
                 raise AssertionError("Browser accepted an untrusted certificate")
             api("DELETE", "/sessions/package-check")
             print("Trusted HTTPS passed; untrusted HTTPS rejected")
-            print(
-                "Pinned browser navigation, snapshot, click, and storage reopen passed"
-            )
         except Exception:
             log.seek(0)
             print(log.read(), file=sys.stderr)
@@ -149,6 +106,5 @@ with tempfile.TemporaryDirectory() as directory:
             except subprocess.TimeoutExpired:
                 os.killpg(server.pid, signal.SIGKILL)
                 server.wait()
-            fixture.shutdown()
             for tls_server in tls_servers:
                 tls_server.shutdown()

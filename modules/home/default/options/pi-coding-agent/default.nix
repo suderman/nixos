@@ -74,7 +74,6 @@
     text =
       # bash
       ''
-        PI_BIN="''${PI_BIN:-${perSystem.agents.pi}/bin/pi}"
         pi_dir="''${PI_CODING_AGENT_DIR:-$HOME/${agentDir}}"
         ${lib.getExe piDcpPackageFix}
 
@@ -87,7 +86,7 @@
         [[ -f "$pi_dir/.env.local" ]] && . "$pi_dir/.env.local"
         set +a
 
-        exec "$PI_BIN" "$@"
+        exec ${perSystem.agents.pi}/bin/pi "$@"
       '';
   };
 in {

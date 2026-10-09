@@ -127,7 +127,7 @@ Git flakes omit untracked files. Do not work around that with raw `path:.` in
 this checkout: it includes ignored Sim disks and private keys. For unstaged
 experiments, build from a snapshot containing only tracked and non-ignored files.
 
-This runs Lua state tests, workspace JSON tests, and syntax checks. It renders
+This checks Lua and script syntax and the QR clipboard-history hint. It renders
 Kit, Pow, Cog, and Sim configurations and verifies each with pinned Hyprland.
 Offline verification does not load plugins or prove that a desktop starts.
 

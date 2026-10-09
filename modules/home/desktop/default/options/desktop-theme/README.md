@@ -138,18 +138,16 @@ clipboard alone and stops only the capture's own freeze process.
 After adding new source files to the Git index:
 
 ```sh
-nix develop --command nix build '.#checks.x86_64-linux.desktop-theme' '.#checks.x86_64-linux.hyprland' '.#checks.x86_64-linux.quickshell' -L
+nix develop --command nix build '.#checks.x86_64-linux.desktop-theme' -L
 ```
 
-The appearance check covers all four Hyprland hosts, rendered assets, GTK theme
-ownership, concurrent selection, invalid state, missing assets, failed refreshes,
-Lua colors, Qt palette roles and rendered Kvantum assets, Firefox reader policy,
-capture cancellation, and the QR sensitive hint. Git flakes omit
-untracked files. Never use raw `path:.` from this checkout; it includes ignored
-Sim disks and private keys. Use a Git-filtered source snapshot for unstaged work.
+The check runs the switcher against Kit's prepared assets: concurrent selection,
+invalid state, missing assets, and failed refreshes. Git flakes omit untracked
+files. Never use raw `path:.` from this checkout; it includes ignored Sim disks
+and private keys. Use a Git-filtered source snapshot for unstaged work.
 
 After appearance changes, check GTK3 and Emacs live events, GTK4 reopen
-behavior, Home Manager activation, and cold login. Capture checks need real screen content: decode a dummy QR, show
-that a normal clipboard value enters Cliphist while the QR does not, run screen
-OCR, and cancel a region selection. Mock checks alone cannot prove clipboard
-privacy or app integration.
+behavior, Home Manager activation, and cold login. Capture checks need real
+screen content: decode a dummy QR, show that a normal clipboard value enters
+Cliphist while the QR does not, run screen OCR, and cancel a region selection.
+Mock checks alone cannot prove clipboard privacy or app integration.
