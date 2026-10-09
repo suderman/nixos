@@ -160,17 +160,13 @@ agenix rekey -a
 
 ## Root rotation
 
-Coordinated root rotation is not performed by `agenix import` or `nixos
-generate`. Do not bypass the recipient guard to rotate in place: generated host
-keys, user keys, service credentials, source master encryption, and deployed
-target ciphertext must move through the managed staged transition. Preparation,
-dual-key rollout, remote runtime attestation, rollback, recovery, and
-cryptographic finalization are documented in
-[`rotation/README.md`](rotation/README.md).
+Replacing the root is a fleet-wide, staged change made with `nixos rotation`,
+not `agenix import` or `nixos generate`. Hosts receive the next root while they
+still trust their current keys, switch to the next keys, and only then drop the
+current ones. Follow the [seed rotation runbook](../docs/seed-rotation.org).
 
-When `secrets/rotation/ACTIVE` exists, the repository wrappers block broad
-identity mutations. `IDENTITY_ROTATION_ALLOW=1` is reserved for isolated tests
-and managed workflow internals and must not be used to bypass those checks
-manually.
+While a rotation is in progress, `nixos generate`, `nixos add`, `agenix import`,
+and `agenix update-masterkeys` refuse to run. Editing and rekeying secrets still
+work.
 
 Never commit plaintext secrets.

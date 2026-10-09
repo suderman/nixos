@@ -1,22 +1,16 @@
-{lib, ...}: state: let
-  active = state.status == "active";
+# Fleet-wide identity rotation phase from secrets/rotation/state.json.
+# While rotating, every host holds and trusts both key generations; the switch
+# phase selects the next generation.
+{lib, ...}: let
+  inherit (builtins.fromJSON (builtins.readFile ../secrets/rotation/state.json)) phase;
+in
+  assert lib.assertOneOf "identity rotation phase" phase ["idle" "prepare" "switch"]; rec {
+    inherit phase;
+    active = phase != "idle";
+    useNext = phase == "switch";
 
-  targetState = category: name:
-    state.targets.${category}.${name}
-    or (throw "identity rotation target ${category}.${name} is missing");
-in {
-  inherit active state targetState;
+    nextPath = path: path + ".next";
 
-  useNext = category: name: targetState category name == "next";
-
-  select = category: name: current: next:
-    if targetState category name == "next"
-    then next
-    else current;
-
-  nextPath = path: path + ".next";
-
-  keyFiles = paths:
-    paths
-    ++ lib.optionals active (map (path: path + ".next") paths);
-}
+    keyFiles = paths:
+      paths ++ lib.optionals active (map nextPath paths);
+  }

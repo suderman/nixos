@@ -49,11 +49,11 @@ in {
       inherit (perSystem.self) mkScript;
       inherit (config.identityRotation) currentHexPath nextHexPath;
       selectedSshKey =
-        if identityRotation.useNext "identities" "beszel"
+        if identityRotation.useNext
         then nextSshKey
         else currentSshKey;
       selectedSshPubKey =
-        if identityRotation.useNext "identities" "beszel"
+        if identityRotation.useNext
         then "${nextSshKey}.pub"
         else sshPubKey;
 

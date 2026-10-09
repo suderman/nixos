@@ -116,11 +116,10 @@
   sshIdentityFiles = let
     current = "~/.ssh/id_ed25519";
     next = "~/.ssh/id_ed25519.next";
-    useNext = identityRotation.useNext "identities" username;
   in
     if !identityRotation.active
     then [current "~/.ssh/id_rsa"]
-    else if useNext
+    else if identityRotation.useNext
     then [next current "~/.ssh/id_rsa"]
     else [current next "~/.ssh/id_rsa"];
 in {

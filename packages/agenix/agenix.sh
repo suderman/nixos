@@ -15,31 +15,13 @@ secrets_dir="${AGENIX_SECRETS_DIR:-secrets}"
 runtime_dir="${AGENIX_RUNTIME_DIR:-/tmp}"
 identity_file="$runtime_dir/id_age"
 previous_identity_file="$runtime_dir/id_age_"
-rotation_marker="${IDENTITY_ROTATION_MARKER:-$secrets_dir/rotation/ACTIVE}"
-rotation_journal="${IDENTITY_ROTATION_JOURNAL:-$secrets_dir/rotation/PREPARE.json}"
-rotation_finalize_journal="${IDENTITY_FINALIZATION_JOURNAL:-$secrets_dir/rotation/FINALIZE.json}"
+rotation_state="$secrets_dir/rotation/state.json"
 
+# Replacing the master or root would race an in-progress identity rotation.
 identity_rotation_guard() {
-  if [[ ${IDENTITY_ROTATION_ALLOW:-0} != "1" && (-e $rotation_marker || -e $rotation_journal || -e $rotation_finalize_journal) ]]; then
-    gum_exit "Identity rotation is active; use the managed rotation workflow"
+  if [[ -f $rotation_state && $(jq -r .phase "$rotation_state") != idle ]]; then
+    gum_exit "An identity rotation is in progress; see docs/seed-rotation.org"
   fi
-}
-
-agenix_rotation_guard_command() {
-  local cmd="${1:-}"
-  shift || true
-
-  case "$cmd" in
-  edit)
-    identity_rotation_guard
-    ;;
-  update-masterkeys)
-    identity_rotation_guard
-    ;;
-  rekey)
-    identity_rotation_guard
-    ;;
-  esac
 }
 
 # ---------------------------------------------------------------------
@@ -73,8 +55,12 @@ main() {
     agenix_help
     exit 0
     ;;
+  update-masterkeys)
+    identity_rotation_guard
+    agenix_unlock quiet
+    agenix "$@"
+    ;;
   *)
-    agenix_rotation_guard_command "$@"
     agenix_unlock quiet
     agenix "$@"
     ;;
@@ -271,7 +257,7 @@ agenix_unlock() {
 
 # Delete decrypted /tmp/id_age
 agenix_lock() {
-  rm -f "$identity_file" "$previous_identity_file" "$runtime_dir/id_age_next"
+  rm -f "$identity_file" "$previous_identity_file"
   gum style \
     --border="rounded" \
     --border-foreground="124" \

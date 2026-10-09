@@ -14,22 +14,6 @@ dirs() { find "$1" -mindepth 1 -maxdepth 1 -type d -printf '%f\n'; }
 # If PRJ_ROOT is set, change to that directory
 [[ -n ${PRJ_ROOT-} ]] && cd "$PRJ_ROOT"
 
-rotation_marker="${IDENTITY_ROTATION_MARKER:-secrets/rotation/ACTIVE}"
-rotation_state="${IDENTITY_ROTATION_STATE:-secrets/rotation/state.json}"
-rotation_directory="${identity_rotation_directory:-secrets/rotation}"
-rotation_script="${IDENTITY_ROTATION_SCRIPT:-$rotation_directory/identity_rotation.py}"
-rotation_artifacts_script="${IDENTITY_ARTIFACTS_SCRIPT:-$rotation_directory/identity_artifacts.py}"
-rotation_finalization_script="${IDENTITY_FINALIZATION_SCRIPT:-$rotation_directory/identity_finalization.py}"
-rotation_journal="${IDENTITY_ROTATION_JOURNAL:-secrets/rotation/PREPARE.json}"
-rotation_finalize_journal="${IDENTITY_FINALIZATION_JOURNAL:-secrets/rotation/FINALIZE.json}"
-rotation_finalize_backup="${IDENTITY_FINALIZATION_BACKUP:-secrets/rotation/finalize-backup}"
-
-identity_rotation_guard() {
-  if [[ ${IDENTITY_ROTATION_ALLOW:-0} != "1" && (-e $rotation_marker || -e $rotation_journal || -e $rotation_finalize_journal) ]]; then
-    gum_exit "Identity rotation is active; use the managed rotation workflow"
-  fi
-}
-
 # ---------------------------------------------------------------------
 # MAIN
 # ---------------------------------------------------------------------
@@ -92,23 +76,13 @@ Usage: nixos [COMMAND]
   cache             Build host closures and devshell environments, then push to Attic
     [HOST...]       Push selected hosts, or use --all for all hosts
   repl              Open a nixos-rebuild repl for a host
-  rotation          Manage validated identity-rotation state
-    status          Validate and summarize the current state
-    prepare INDEX   Enter active state after artifact validation
-    deploy-prepared HOST
-                    Deploy and verify one host's prepared configuration
-    verify-prepared HOST
-                    Record one host's prepared runtime attestation
-    deploy-next HOST
-                    Boot one remote host into the all-next configuration
-    verify-next HOST
-                    Record one host's all-next runtime attestation
-    move TYPE NAME STATE
-                    Move one target through current/bridge/next
-    cancel          Leave active state after all targets return to current
-    cleanup         Remove verified next artifacts after cancellation
-    finalize        Promote the fully migrated generation transactionally
-    recover         Recover an interrupted preparation or finalization
+  rotation          Rotate the fleet root (see docs/seed-rotation.org)
+    status          Show the phase and each host's readiness
+    prepare INDEX   Stage the next root and identities beside the current ones
+    switch          Select the next identities once every host is prepared
+    finalize        Promote the next identities once every host booted them
+    back            Step back one phase
+                    switch and finalize accept --skip HOST for offline hosts
   add               Add a NixOS host or user
   generate          Generate missing files
   detect            Detect system devices to generate configuration   
@@ -129,239 +103,249 @@ EOF
 # ---------------------------------------------------------------------
 # IDENTITY ROTATION
 # ---------------------------------------------------------------------
-nixos_rotation() {
-  local command="${1:-status}"
-  shift || true
-  local -a common=(
-    "$rotation_state"
-    --repository .
-    --derivation-index "${derivation_index:?derivation_index is required}"
-    --marker "$rotation_marker"
-  )
+rotation_state="secrets/rotation/state.json"
+rotation_root="secrets/rotation/next/hex.age"
+master_identity="${AGENIX_RUNTIME_DIR:-/tmp}/id_age"
 
-  case "$command" in
+nixos_rotation() {
+  local cmd="${1:-status}"
+  shift || true
+
+  case "$cmd" in
   status | s)
-    [[ $# -eq 0 ]] || gum_exit "Usage: nixos rotation status"
-    python3 "$rotation_script" status "${common[@]}"
+    nixos_rotation_status
     ;;
   prepare | p)
-    [[ $# -eq 1 ]] || gum_exit "Usage: nixos rotation prepare INDEX"
+    [[ $# -eq 1 && $1 =~ ^[0-9]+$ ]] || gum_exit "Usage: nixos rotation prepare INDEX"
     nixos_rotation_prepare "$1"
-    nixos_rotation_stage_prepare
     ;;
-  deploy-prepared)
-    [[ $# -eq 1 ]] || gum_exit "Usage: nixos rotation deploy-prepared HOST"
-    nixos_rotation_deploy_prepared "$1"
-    ;;
-  verify-prepared)
-    [[ $# -eq 1 ]] || gum_exit "Usage: nixos rotation verify-prepared HOST"
-    nixos_rotation_verify_prepared "$1"
-    ;;
-  deploy-next)
-    [[ $# -eq 1 ]] || gum_exit "Usage: nixos rotation deploy-next HOST"
-    nixos_rotation_deploy_next "$1"
-    ;;
-  verify-next)
-    [[ $# -eq 1 ]] || gum_exit "Usage: nixos rotation verify-next HOST"
-    nixos_rotation_verify_next "$1"
-    ;;
-  move | m)
-    [[ $# -eq 3 ]] || gum_exit "Usage: nixos rotation move TYPE NAME STATE"
-    python3 "$rotation_script" move "${common[@]}" "$1" "$2" "$3"
-    git add -- "$rotation_state"
-    ;;
-  cancel | c)
-    [[ $# -eq 0 ]] || gum_exit "Usage: nixos rotation cancel"
-    python3 "$rotation_script" cancel "${common[@]}"
-    git add -A -- "$rotation_state" "$rotation_marker"
-    ;;
-  cleanup)
-    [[ $# -eq 0 ]] || gum_exit "Usage: nixos rotation cleanup"
-    local -a cleanup_paths
-    mapfile -t cleanup_paths < <(
-      python3 "$rotation_artifacts_script" paths secrets/rotation/next/artifacts.json
-    )
-    python3 "$rotation_artifacts_script" cleanup \
-      --repository . \
-      --state "$rotation_state" \
-      --marker "$rotation_marker" \
-      --journal "$rotation_journal" \
-      --runtime-next /tmp/id_age_next
-    git add -A -- "${cleanup_paths[@]}"
-    ;;
-  recover)
-    [[ $# -eq 0 ]] || gum_exit "Usage: nixos rotation recover"
-    if [[ -e $rotation_finalize_journal ]]; then
-      python3 "$rotation_finalization_script" recover \
-        --repository . \
-        --journal "$rotation_finalize_journal" \
-        --backup "$rotation_finalize_backup" \
-        --runtime-current /tmp/id_age \
-        --runtime-previous /tmp/id_age_ \
-        --runtime-next /tmp/id_age_next
-    else
-      python3 "$rotation_artifacts_script" recover \
-        --repository . \
-        --manifest "$rotation_state" \
-        --marker "$rotation_marker" \
-        --journal "$rotation_journal"
-    fi
+  switch)
+    nixos_rotation_switch "$@"
     ;;
   finalize | f)
-    [[ $# -eq 0 ]] || gum_exit "Usage: nixos rotation finalize"
-    nixos_rotation_finalize
+    nixos_rotation_finalize "$@"
     ;;
-  help | -h | --help)
-    nixos_help
+  back)
+    nixos_rotation_back
     ;;
   *)
-    gum_exit "Unknown identity rotation command: $command"
+    gum_exit "Unknown rotation command: $cmd"
     ;;
   esac
 }
 
-nixos_rotation_finalize() {
-  agenix unlock quiet
-  local paths_file
-  paths_file="$(mktemp)"
-  local status=0
-  python3 "$rotation_finalization_script" finalize \
-    --repository . \
-    --manifest "$rotation_state" \
-    --marker "$rotation_marker" \
-    --journal "$rotation_finalize_journal" \
-    --backup "$rotation_finalize_backup" \
-    --derivation-index "${derivation_index:?derivation_index is required}" \
-    --system "${identity_rotation_system:?identity_rotation_system is required}" \
-    --paths-output "$paths_file" \
-    --runtime-current /tmp/id_age \
-    --runtime-previous /tmp/id_age_ \
-    --runtime-next /tmp/id_age_next || status=$?
-  if [[ $status -eq 0 ]]; then
-    local -a finalized_paths
-    mapfile -t finalized_paths <"$paths_file"
-    ((${#finalized_paths[@]} > 0)) || gum_exit "Finalization did not report changed paths"
-    git add -A -- "${finalized_paths[@]}"
-  fi
-  rm -f "$paths_file"
+nixos_rotation_phase() {
+  jq -r .phase "$rotation_state"
+}
+
+# Commands that rewrite fleet identities would race an in-progress rotation.
+identity_rotation_guard() {
+  [[ $(nixos_rotation_phase) == idle ]] ||
+    gum_exit "An identity rotation is in progress; see docs/seed-rotation.org"
+}
+
+nixos_rotation_status() {
+  local phase
+  phase="$(nixos_rotation_phase)"
+  gum_info "Rotation phase: $phase"
+  [[ $phase != idle ]] || return 0
+  gum_info "Next derivation index: $(jq -r .nextIndex "$rotation_state")"
+  nixos_rotation_check || true
+}
+
+# Report whether each host, except those named, is ready for the current phase.
+nixos_rotation_check() {
+  local expected host actual status=0
+  expected="$(nixos_rotation_phase) $(sha256sum "$rotation_root" | cut -d ' ' -f 1)"
+  for host in $(dirs hosts | grep -v iso | sort); do
+    if [[ " $* " == *" $host "* ]]; then
+      gum_warn "$host skipped"
+      continue
+    fi
+    if [[ $host == "$(hostname)" ]]; then
+      actual="$(cat /run/identity-rotation/ready 2>/dev/null || true)"
+    else
+      actual="$(ssh -o ConnectTimeout=10 "$host" cat /run/identity-rotation/ready 2>/dev/null || true)"
+    fi
+    if [[ $actual == "$expected" ]]; then
+      gum_info "$host ready"
+    else
+      gum_warn "$host not ready"
+      status=1
+    fi
+  done
   return "$status"
 }
 
-nixos_rotation_prepare() (
-  local next_index="$1"
-  local root_file
-  if [[ -n ${IDENTITY_ROTATION_ROOT_FILE:-} ]]; then
-    root_file="$IDENTITY_ROTATION_ROOT_FILE"
-  else
-    umask 077
-    root_file="$(mktemp)"
-    trap 'rm -f -- "$root_file"' EXIT
-    trap 'exit 130' HUP INT TERM
-    local root=""
-    if [[ -n ${DISPLAY-} || -n ${WAYLAND_DISPLAY-} ]]; then
-      if [[ "$(gum choose "Scan QR code" "Enter manually")" == "Scan QR code" ]]; then
-        root="$(qr || true)"
-      fi
-    fi
-    [[ -n $root ]] || root="$(gum input --placeholder "Enter next 32-byte hex" | xargs)"
-    [[ $root =~ ^[0-9a-fA-F]{64}$ ]] || gum_exit "Failed to receive valid next hex"
-    printf '%s\n' "${root,,}" >"$root_file"
-    unset root
+# Require readiness before leaving the current phase, honouring --skip HOST.
+nixos_rotation_require_ready() {
+  local command="$1"
+  shift
+  local -a skip=()
+  while (($#)); do
+    [[ $1 == --skip && $# -ge 2 ]] || gum_exit "Usage: nixos rotation $command [--skip HOST]..."
+    skip+=("$2")
+    shift 2
+  done
+  nixos_rotation_check "${skip[@]}" ||
+    gum_exit "Every host must be ready before: nixos rotation $command"
+}
+
+# Compute a change in a disposable worktree and stage it as one atomic patch.
+nixos_rotation_apply() {
+  [[ -z $(git status --porcelain) ]] || gum_exit "Commit or stash changes first"
+  local work patch status
+  work="$(mktemp -d)"
+  patch="$(mktemp)"
+  git worktree add --quiet --detach "$work"
+  set +e
+  (
+    set -e
+    cd "$work"
+    export PRJ_ROOT="$work"
+    "$@"
+    git add -A
+    git diff --cached --binary >"$patch"
+  )
+  status=$?
+  set -e
+  git worktree remove --force "$work"
+  if ((status == 0)); then
+    git apply --index --whitespace=nowarn "$patch"
   fi
+  rm -f "$patch"
+  return "$status"
+}
+
+nixos_rotation_prepare() {
+  local index="$1" root confirm=""
+  identity_rotation_guard
+  gum confirm "Derive Seeds (BIP-85) > 32-bytes hex > Index Number $index (new seed)"
+
+  if [[ -n ${DISPLAY-}${WAYLAND_DISPLAY-} && $(gum choose "Scan QR code" "Enter manually") == "Scan QR code" ]]; then
+    root="$(qr || true)"
+    confirm="$root"
+  fi
+  if [[ -z ${root-} ]]; then
+    root="$(gum input --password --placeholder "Next 32-byte hex")"
+    confirm="$(gum input --password --placeholder "Repeat next 32-byte hex")"
+  fi
+  [[ $root == "$confirm" ]] || gum_exit "The two entries differ"
+  root="$(xargs <<<"${root,,}")"
+  [[ $root =~ ^[0-9a-f]{64}$ ]] || gum_exit "Expected 64 hexadecimal characters"
+  [[ $(derive age <<<"$root" | derive public) != "$(xargs <secrets/id_age.pub)" ]] ||
+    gum_exit "This is the current root"
 
   agenix unlock quiet
-  python3 "$rotation_artifacts_script" prepare \
-    --repository . \
-    --manifest "$rotation_state" \
-    --marker "$rotation_marker" \
-    --journal "$rotation_journal" \
-    --state-script "$rotation_script" \
-    --derivation-index "${derivation_index:?derivation_index is required}" \
-    --next-index "$next_index" \
-    --root-file "$root_file" \
-    --runtime-next /tmp/id_age_next \
-    --system "${identity_rotation_system:?identity_rotation_system is required}"
-)
-
-nixos_rotation_stage_prepare() {
-  local -a artifacts=("$rotation_state" "$rotation_marker")
-  mapfile -t prepared_paths < <(
-    python3 "$rotation_artifacts_script" paths secrets/rotation/next/artifacts.json
-  )
-  artifacts+=("${prepared_paths[@]}")
-  git add -- "${artifacts[@]}"
+  nixos_rotation_apply nixos_rotation_prepare_tree "$index" "$root"
+  gum_info "Prepared. Commit, deploy every host, then run: nixos rotation switch"
 }
 
-nixos_rotation_verify_prepared() {
-  local host="$1"
-  local manifest=secrets/rotation/next/artifacts.json
-  [[ -f $manifest ]] || gum_exit "Prepared artifact manifest is missing"
-  local expected actual
-  expected="$(sha256sum "$manifest" | cut -d ' ' -f 1)"
-  if [[ $host == "$(hostname)" ]]; then
-    actual="$(</etc/identity-rotation/prepared)"
-  else
-    actual="$(ssh "$host" cat /etc/identity-rotation/prepared)"
-  fi
-  [[ $actual == "$expected" ]] || gum_exit "$host is not running the prepared identity configuration"
-  python3 "$rotation_script" mark-prepared \
-    "$rotation_state" \
-    --repository . \
-    --derivation-index "${derivation_index:?derivation_index is required}" \
-    --marker "$rotation_marker" \
-    "$host"
-  git add -- "$rotation_state"
+nixos_rotation_prepare_tree() {
+  local index="$1" root="$2"
+  mkdir -p "$(dirname "$rotation_root")"
+  age -e -R secrets/id_age.pub -o "$rotation_root" <<<"$root"
+  nixos_write_identities "$root" "$index" .next
+  jq -n --argjson index "$index" '{phase: "prepare", nextIndex: $index}' >"$rotation_state"
+  git add -A
+  agenix rekey -a
 }
 
-nixos_rotation_deploy_prepared() {
-  local host="$1"
-  if [[ $host == "$(hostname)" ]]; then
-    sudo nixos-rebuild --flake ".#$host" switch
-  else
-    nixos-rebuild --target-host "$host" --sudo --ask-sudo-password --flake ".#$host" switch
-  fi
-  nixos_rotation_verify_prepared "$host"
+nixos_rotation_switch() {
+  [[ $(nixos_rotation_phase) == prepare ]] || gum_exit "Run nixos rotation prepare first"
+  nixos_rotation_require_ready switch "$@"
+  agenix unlock quiet
+  nixos_rotation_apply nixos_rotation_set_phase switch
+  gum_info "Switched. Commit, deploy every host with boot and reboot it, then run: nixos rotation finalize"
 }
 
-nixos_rotation_verify_next() {
-  local host="$1"
-  local expected actual
-  expected="$(nix eval --raw "path:.#nixosConfigurations.${host}.config.identityRotation.nextToken")" ||
-    gum_exit "Every rotation target must be next before host attestation"
-  if [[ $host == "$(hostname)" ]]; then
-    actual="$(</run/identity-rotation/next-verified)"
-  else
-    actual="$(ssh "$host" cat /run/identity-rotation/next-verified)"
-  fi
-  [[ $actual == "$expected" ]] || gum_exit "$host has not booted and verified the all-next identity configuration"
-  python3 "$rotation_script" mark-next \
-    "$rotation_state" \
-    --repository . \
-    --derivation-index "${derivation_index:?derivation_index is required}" \
-    --marker "$rotation_marker" \
-    "$host"
-  git add -- "$rotation_state"
+nixos_rotation_back() {
+  agenix unlock quiet
+  case "$(nixos_rotation_phase)" in
+  switch)
+    nixos_rotation_apply nixos_rotation_set_phase prepare
+    ;;
+  prepare)
+    nixos_rotation_apply nixos_rotation_cancel_tree
+    ;;
+  *)
+    gum_exit "No rotation in progress"
+    ;;
+  esac
+  gum_info "Stepped back to $(nixos_rotation_phase). Commit and deploy every host."
 }
 
-nixos_rotation_deploy_next() {
-  local host="$1"
-  [[ $host != "$(hostname)" ]] ||
-    gum_exit "Deploy the local all-next generation with boot, reboot, then run: nixos rotation verify-next $host"
+nixos_rotation_set_phase() {
+  jq --arg phase "$1" '.phase = $phase' "$rotation_state" >"$rotation_state.new"
+  mv "$rotation_state.new" "$rotation_state"
+  git add -A
+  agenix rekey -a
+}
 
-  nix eval --raw "path:.#nixosConfigurations.${host}.config.identityRotation.nextToken" >/dev/null ||
-    gum_exit "Every rotation target must be next before deployment"
-  nixos-rebuild --target-host "$host" --sudo --ask-sudo-password --flake ".#$host" boot
-  ssh -t "$host" sudo systemctl reboot || true
+nixos_rotation_cancel_tree() {
+  rm -r "$(dirname "$rotation_root")"
+  rm -f hosts/*/ssh_host_ed25519_key.pub.next users/*/id_*.pub.next
+  jq -n '{phase: "idle"}' >"$rotation_state"
+  git add -A
+  agenix rekey -a
+}
 
-  local attempt
-  for attempt in {1..60}; do
-    sleep 5
-    if ssh -o ConnectTimeout=5 "$host" true 2>/dev/null; then
-      nixos_rotation_verify_next "$host"
-      return
-    fi
+nixos_rotation_finalize() {
+  [[ $(nixos_rotation_phase) == switch ]] || gum_exit "Run nixos rotation switch first"
+  nixos_rotation_require_ready finalize "$@"
+  agenix unlock quiet
+
+  local master encrypted
+  umask 077
+  master="$(mktemp)"
+  encrypted="$(mktemp)"
+  # shellcheck disable=SC2064 # remove these exact files even after the function returns
+  trap "rm -f -- '$master' '$encrypted'" EXIT
+  age -d -i "$master_identity" "$rotation_root" | derive age >"$master"
+  gum_info "Choose a passphrase for the new master identity"
+  age -e -p -o "$encrypted" "$master"
+
+  nixos_rotation_apply nixos_rotation_finalize_tree "$master"
+
+  # Keep the previous master until every host runs the final generation.
+  mv secrets/id_age.age secrets/id_age.age.previous
+  mv "$encrypted" secrets/id_age.age
+  agenix lock >/dev/null
+  agenix unlock <"$master"
+  gum_info "Finalized. Commit and deploy every host, then delete secrets/id_age.age.previous"
+}
+
+nixos_rotation_finalize_tree() {
+  local master="$1" index root public source next
+  index="$(jq -r .nextIndex "$rotation_state")"
+  root="$(age -d -i "$master_identity" "$rotation_root")"
+  public="$(derive public <"$master")"
+
+  # Re-encrypt every source secret from the current master to the new one.
+  for source in $(git ls-files '*.age' | grep -Ev '^secrets/(nixos|home|rotation)/|^secrets/hex\.age$'); do
+    age -d -i "$master_identity" "$source" | age -e -r "$public" -o "$source.new"
+    age -d -i "$master" "$source.new" >/dev/null
+    mv "$source.new" "$source"
   done
-  gum_exit "$host did not return after reboot; run verify-next when it is available"
+  age -e -r "$public" -o secrets/hex.age <<<"$root"
+  printf '%s\n' "$public" >secrets/id_age.pub
+
+  # Derive canonical identities from the root and confirm prepare staged the same ones.
+  nixos_write_identities "$root" "$index"
+  for next in hosts/*/ssh_host_ed25519_key.pub.next users/*/id_*.pub.next; do
+    cmp -s "$next" "${next%.next}" || gum_exit "${next%.next} does not match its prepared identity"
+    rm "$next"
+  done
+
+  [[ $(grep -c 'derivationIndex = [0-9]*;' flake.nix) -eq 1 ]] || gum_exit "derivationIndex not found in flake.nix"
+  sed -i "s/derivationIndex = [0-9]*;/derivationIndex = $index;/" flake.nix
+  rm -r "$(dirname "$rotation_root")"
+  jq -n '{phase: "idle"}' >"$rotation_state"
+  git add -A
+
+  # Rekey with the new master in the previous-identity slot.
+  cp "$master" "${master_identity}_"
+  agenix rekey -a
 }
 
 # ---------------------------------------------------------------------
@@ -634,6 +618,24 @@ nixos_add_host() {
 # ---------------------------------------------------------------------
 # GENERATE
 # ---------------------------------------------------------------------
+# Write public identities for every host and user derived from a fleet root.
+nixos_write_identities() {
+  local root="$1" path="bip85-hex32-index$2" suffix="${3-}" host user
+  for host in $(dirs hosts | grep -v iso); do
+    derive hex "$host" <<<"$root" | derive ssh | derive public "$host@$path" \
+      >"hosts/$host/ssh_host_ed25519_key.pub$suffix"
+    gum_show "./hosts/$host/ssh_host_ed25519_key.pub$suffix"
+  done
+  for user in $(dirs users); do
+    derive hex "$user" <<<"$root" | derive ssh | derive public "$user@$path" \
+      >"users/$user/id_ed25519.pub$suffix"
+    derive hex "$user" <<<"$root" | derive age | derive public \
+      >"users/$user/id_age.pub$suffix"
+    gum_show "./users/$user/id_ed25519.pub$suffix"
+    gum_show "./users/$user/id_age.pub$suffix"
+  done
+}
+
 nixos_generate() {
 
   identity_rotation_guard
@@ -644,38 +646,10 @@ nixos_generate() {
   # Never rewrite fleet identities from a non-canonical root representation.
   agenix hex --check
 
-  # Generate missing SSH keys for hosts and users
-  gum_info "Generating SSH keys..."
-  for host in $(dirs hosts | grep -v iso); do
-    agenix hex |
-      derive hex "$host" |
-      derive ssh |
-      derive public "$host@${derivation_path-}" \
-        >"hosts/$host/ssh_host_ed25519_key.pub"
-    git add "hosts/$host/ssh_host_ed25519_key.pub" 2>/dev/null || true
-    gum_show "./hosts/$host/ssh_host_ed25519_key.pub"
-  done
-  for user in $(dirs users); do
-    agenix hex |
-      derive hex "$user" |
-      derive ssh |
-      derive public "$user@${derivation_path-}" \
-        >"users/$user/id_ed25519.pub"
-    git add "users/$user/id_ed25519.pub" 2>/dev/null || true
-    gum_show "./users/$user/id_ed25519.pub"
-  done
-
-  # Generate missing age identities for each user
-  gum_info "Generating age identities..."
-  for user in $(dirs users); do
-    agenix hex |
-      derive hex "$user" |
-      derive age |
-      derive public \
-        >"users/$user/id_age.pub"
-    git add "users/$user/id_age.pub" 2>/dev/null || true
-    gum_show "./users/$user/id_age.pub"
-  done
+  # Generate SSH keys and age identities for hosts and users
+  gum_info "Generating identities..."
+  nixos_write_identities "$(agenix hex)" "$derivation_index"
+  git add hosts/*/ssh_host_ed25519_key.pub users/*/id_ed25519.pub users/*/id_age.pub 2>/dev/null || true
 
   # Ensure Certificate Authority exists
   if [[ -s zones/ca.crt && -s zones/ca.age ]]; then

@@ -9,7 +9,7 @@
     mkdir -p "$out/hosts/dot" "$out/secrets" "$out/zones"
     # Exercise the normal checkout hook without fetching GitHub in the VM.
     git init --quiet "$out/agents"
-    cp ${../../secrets/rotation/fixtures/current.hex} "$out/root.hex"
+    cp ${./root.hex} "$out/root.hex"
     cp ${../../secrets/default.nix} "$out/secrets/default.nix"
     cp ${../../zones/ca.crt} "$out/zones/ca.crt"
     derive hex dot <"$out/root.hex" | derive ssh >"$out/host"

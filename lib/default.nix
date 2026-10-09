@@ -21,9 +21,8 @@ in rec {
     inherit (flake) nixosConfigurations;
   };
 
-  # Inert identity-rotation state and selection policy
-  identityRotationFor = import ./identityRotation.nix args;
-  identityRotation = identityRotationFor (builtins.fromJSON (builtins.readFile ../secrets/rotation/state.json));
+  # Fleet-wide identity rotation phase
+  identityRotation = import ./identityRotation.nix args;
 
   # List directories and files that can be imported by nix
   ls = import ./ls.nix args;

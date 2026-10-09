@@ -1,416 +1,157 @@
-#+TITLE: Replacement seed rotation runbook
+#+TITLE: Seed rotation
 
-* Replacement seed rotation runbook
+* Seed rotation
 
-This runbook rotates the fleet from =derivationIndex = 1= to index =0= derived
-from a replacement mnemonic.
+Replace the fleet root, the BIP-85 32-byte hex that every host, user, and
+service identity derives from, without locking any host out. The planned
+rotation moves from index =1= of the current mnemonic to index =0= of a new
+mnemonic recorded on new seed plates.
 
-The =1 -> 0= transition is supported. =derivationIndex= is recovery metadata,
-not a monotonic generation number. Use the index =0= hex derived from the new
-mnemonic.
+This is a routine rotation, not compromise response. During a rotation the next
+root travels through the public repository encrypted to keys that the current
+root can derive. If the current root may be compromised, follow
+[[file:compromise-response.org][compromise response]] instead.
 
-#+begin_quote
-Caution: If the old seed may be compromised, stop. This availability-first workflow
-deliberately trusts old and new identities together until finalization. It is
-not emergency compromise containment.
-#+end_quote
+** How it works
 
-** Critical rules
+=secrets/rotation/state.json= holds the fleet-wide phase. =nixos rotation=
+changes it; nothing else should.
 
-- Do not manually edit =flake.nix=; finalization changes
-  =derivationIndex = 1;= to =0=.
-- Do not manually create =secrets/rotation/ACTIVE=.
-- Enter only the 64-character BIP-85 hex, never the mnemonic.
-- Keep the old mnemonic and both master passphrases until the final idle
-  generation runs everywhere.
-- Do not run =agenix edit=, =agenix rekey=, =agenix import=, or
-  =nixos generate= during rotation.
-- The software cannot prove that the supplied hex belongs to the new mnemonic.
-  Derive index =0= twice and verify it independently.
+| Phase   | Hosts hold     | Hosts use | Generated ciphertext targets        |
+|---------+----------------+-----------+-------------------------------------|
+| idle    | current        | current   | current keys                        |
+| prepare | current + next | current   | current keys, plus the next root    |
+| switch  | current + next | next      | next keys                           |
 
-The expected inventory is 23 targets:
+- *prepare* encrypts the next root to the current master as
+  =secrets/rotation/next/hex.age=, writes next public keys beside the canonical
+  ones (=*.pub.next=), and rekeys. On activation each host decrypts the next
+  root with its current host key, derives its next host key and the next user,
+  Btrbk, and Beszel identities, checks them against the =.next= public keys,
+  and trusts both generations of host and login keys.
+- *switch* selects the next generation: the next root for machine IDs, password
+  hashes, and derived service credentials; the next host key first; the next
+  SSH, Btrbk, and Beszel identities; ciphertext encrypted to next keys. Hosts
+  still hold and trust current keys, so hosts on either side of a deployment
+  keep talking to each other.
+- *finalize* derives the new master from the next root, re-encrypts every source
+  secret to it, promotes the =.next= public keys, sets =derivationIndex=,
+  removes the next artifacts, and rekeys. On activation each host promotes its
+  prepared host key and deletes the =.next= files.
+- *back* steps one phase back: =switch= to =prepare=, or =prepare= to =idle=
+  (removing the next artifacts).
 
-#+begin_src text
-nixos:      cog eve hub kit lux pow sim wit
-home:       cog-jon cog-ness eve-jon hub-jon kit-jon
-            lux-jon pow-jon sim-jon wit-jon wit-ness
-identities: beszel btrbk jon ness root
-#+end_src
+Each host reports readiness in =/run/identity-rotation/ready=, written by
+=identity-rotation-ready.service= after it verifies the next host key pair. In
+the switch phase the service also requires the booted generation to be the
+current one and the next machine ID to be active. =nixos rotation switch= and
+=nixos rotation finalize= read that file from every host over SSH and refuse
+unless each reports the current phase. Pass =--skip HOST= for a host that is
+deliberately offline.
 
-** 1. Preflight
+Each command that changes the phase requires a clean Git tree, computes its
+change in a temporary worktree, and stages it with one =git apply --index=. An
+interrupted command leaves the tree unchanged; run =git worktree prune= and start
+again.
+Commands stage changes but do not commit or push.
 
-Enter the development shell and confirm the existing idle state:
+While the phase is not =idle=, =nixos generate=, =nixos add=, =agenix import=, and
+=agenix update-masterkeys= refuse to run. =agenix edit= and =agenix rekey= still
+work.
 
-#+begin_src sh
-nix develop
-git status --short
-nixos rotation status
-#+end_src
+** Before you start
 
-Expected:
+- Record the new mnemonic on the new seed plates. Keep the old plates and the
+  current master passphrase until the finalized generation runs on every host.
+- Derive /Derive Seeds (BIP-85) > 32-bytes hex > Index Number 0/ from the new
+  mnemonic twice, ideally on two devices, and confirm the results match. The
+  software cannot tell which mnemonic produced the hex you enter.
+- Rotate before provisioning Dot. Dot has never booted, so it holds no keys to
+  rotate: skip it with =--skip dot= and provision it afterwards from the new
+  root using [[file:dot.org][its runbook]]. Do not provision Dot during a rotation.
+- Every other host must be reachable over SSH from the operator machine and
+  deployable from it. Plan the rotation for one sitting; hosts upgrade
+  themselves from GitHub =main= at 04:00, so push a phase only when you mean to
+  deploy it.
+- Start from an up-to-date, clean =main= in =nix develop=, with
+  =nix flake check --no-build= passing.
 
-#+begin_src text
-status=idle
-currentIndex=1
-nextIndex=None
-current=23
-bridge=0
-next=0
-preparedHosts=0/8
-nextHosts=0/8
-#+end_src
-
-Run the checks before touching production:
-
-#+begin_src sh
-nix build 'path:.#checks.x86_64-linux.identity-rotation' -L
-nix build 'path:.#checks.x86_64-linux.identity-rotation-vm' -L
-nix flake check -L
-#+end_src
-
-Ensure every host is reachable, including =sim=. Commit and push any unrelated
-work first.
-
-** 2. Prepare index 0
-
-Run:
+** 1. Prepare
 
 #+begin_src sh
 nixos rotation prepare 0
 #+end_src
 
-The command will:
+Confirm the derivation path, then scan the QR code or type the hex twice. The
+command refuses the current root. Review the staged diff: =state.json=,
+=secrets/rotation/next/hex.age=, a =.pub.next= beside every host and user public
+key, and regenerated ciphertext including one =hex-next= per host. Commit and
+push.
 
-1. Unlock the current index-1 master.
-2. Ask for the new mnemonic's BIP-85 index-0 hex.
-3. Derive completely new master, host, user, and service identities.
-4. Ask for a passphrase to protect the new master identity.
-5. Generate current-compatible and next-compatible ciphertext.
-6. Evaluate every host in all-current and all-next configurations.
-7. Create =ACTIVE=, activate the transition ledger, and stage the artifacts.
-
-Afterward:
+Deploy every host except Dot, then check:
 
 #+begin_src sh
 nixos rotation status
-git diff --cached --check
-git diff --cached --stat
 #+end_src
 
-Expected status:
+Each host should report =ready=. A host that is not ready failed to derive or
+verify its next keys; read =systemctl status identity-rotation-ready= and the
+activation output on that host before going further.
 
-#+begin_src text
-status=active
-currentIndex=1
-nextIndex=0
-current=23
-preparedHosts=0/8
-#+end_src
-
-Review and commit the prepared generation:
+** 2. Switch
 
 #+begin_src sh
-git commit -m "feat(identity): prepare replacement seed generation"
+nixos rotation switch --skip dot
 #+end_src
 
-Do not commit if preparation leaves =PREPARE.json=; run
-=nixos rotation recover= first.
-
-** 3. Deploy the prepared configuration
-
-Deploy the all-current prepared generation to every host, preferably starting
-with =sim= and non-critical hosts:
-
-#+begin_src sh
-nixos rotation deploy-prepared sim
-nixos rotation deploy-prepared cog
-nixos rotation deploy-prepared eve
-nixos rotation deploy-prepared hub
-nixos rotation deploy-prepared kit
-nixos rotation deploy-prepared lux
-nixos rotation deploy-prepared pow
-nixos rotation deploy-prepared wit
-#+end_src
-
-Each command switches the host, verifies its exact prepared-artifact token, and
-stages the updated =state.json=.
-
-Commit each attestation as recommended by the rotation runbook:
-
-#+begin_src sh
-git commit -m "chore(identity): attest sim prepared"
-#+end_src
-
-Use the corresponding host name for each commit.
-
-If deployment succeeded but attestation failed, fix the problem and retry only:
-
-#+begin_src sh
-nixos rotation verify-prepared HOST
-#+end_src
-
-Completion should show:
-
-#+begin_src text
-current=23
-preparedHosts=8/8
-nextHosts=0/8
-#+end_src
-
-At this point every host still uses index 1, but has validated index-0 material
-available beside it.
-
-** 4. Move everything to bridge
-
-Every target must move through =bridge=; skipping directly to =next= is
-rejected.
-
-For each NixOS target:
-
-#+begin_src sh
-nixos rotation move nixos cog bridge
-git commit -m "chore(identity): bridge nixos cog"
-#+end_src
-
-Repeat for all eight NixOS names.
-
-For each Home Manager target:
-
-#+begin_src sh
-nixos rotation move home cog-jon bridge
-git commit -m "chore(identity): bridge home cog-jon"
-#+end_src
-
-Repeat for all ten Home Manager names.
-
-For each identity:
-
-#+begin_src sh
-nixos rotation move identities beszel bridge
-git commit -m "chore(identity): bridge identity beszel"
-#+end_src
-
-Repeat for all five identities.
-
-Status should now show:
-
-#+begin_src text
-current=0
-bridge=23
-next=0
-preparedHosts=8/8
-#+end_src
-
-Deploy this bridge configuration to every host using ordinary
-=nixos-rebuild=. There is deliberately no =deploy-bridge= wrapper:
-
-#+begin_src sh
-nixos-rebuild --target-host HOST --sudo --ask-sudo-password \
-  --flake ".#HOST" switch
-#+end_src
-
-For the local host:
-
-#+begin_src sh
-sudo nixos-rebuild --flake ".#$(hostname)" switch
-#+end_src
-
-Deploy one host at a time and verify SSH reconnection and important services.
-Bridge mode advertises both host-key generations with the current key first.
-
-** 5. Move everything to next
-
-Move the same 23 targets from =bridge= to =next=:
-
-#+begin_src sh
-nixos rotation move nixos cog next
-git commit -m "chore(identity): select next nixos cog"
-
-nixos rotation move home cog-jon next
-git commit -m "chore(identity): select next home cog-jon"
-
-nixos rotation move identities beszel next
-git commit -m "chore(identity): select next identity beszel"
-#+end_src
-
-Repeat using every target from the inventory.
-
-Do not deploy a next host until all 23 ledger entries are next. =deploy-next=
-enforces this.
-
-Expected status:
-
-#+begin_src text
-current=0
-bridge=0
-next=23
-preparedHosts=8/8
-nextHosts=0/8
-#+end_src
-
-Run the focused check and ensure the worktree is clean:
-
-#+begin_src sh
-nix build 'path:.#checks.x86_64-linux.identity-rotation' -L
-git status --short
-#+end_src
-
-** 6. Boot and verify every next host
-
-For remote hosts:
-
-#+begin_src sh
-nixos rotation deploy-next HOST
-#+end_src
-
-This installs the boot generation, reboots the host, waits for SSH, validates
-the new host key, machine ID, derived credentials, and services, then records
-the attestation.
-
-Commit each successful attestation:
-
-#+begin_src sh
-git commit -m "chore(identity): attest HOST at replacement seed"
-#+end_src
-
-=deploy-next= refuses to reboot the machine where it is currently running. For
-that local host:
-
-#+begin_src sh
-sudo nixos-rebuild --flake ".#HOST" boot
-sudo reboot
-#+end_src
-
-After returning:
-
-#+begin_src sh
-nix develop
-nixos rotation verify-next HOST
-git commit -m "chore(identity): attest HOST at replacement seed"
-#+end_src
-
-Start with =sim=, then less critical hosts, and leave the
-administrative/control host until last.
-
-Completion must show:
-
-#+begin_src text
-next=23
-preparedHosts=8/8
-nextHosts=8/8
-#+end_src
-
-Do not bypass any failed verifier.
-
-** 7. Finalize
-
-Finalization requires a clean worktree:
-
-#+begin_src sh
-git status --short
-nixos rotation status
-nix build 'path:.#checks.x86_64-linux.identity-rotation' -L
-#+end_src
-
-Then run:
-
-#+begin_src sh
-nixos rotation finalize
-#+end_src
-
-Finalization will:
-
-1. Unlock or recover both master identities.
-2. Re-encrypt every source secret exclusively to the new master.
-3. Promote all =.next= public artifacts to canonical paths.
-4. Change =flake.derivationIndex= from =1= to =0=.
-5. Return =state.json= to idle with =currentIndex=0=.
-6. Remove transition artifacts and =ACTIVE=.
-7. Promote =/tmp/id_age_next= to the current runtime master.
-8. Stage the complete finalization.
-
-If =/tmp/id_age_next= disappeared because the control machine rebooted,
-finalization decrypts =secrets/rotation/next/id_age.age= and asks for its
-passphrase.
-
-The existing devshell still contains the index-1 =nixos= wrapper. Exit and
-re-enter it after finalization:
-
-#+begin_src sh
-exit
-nix develop
-nixos rotation status
-#+end_src
-
-Expected:
-
-#+begin_src text
-status=idle
-currentIndex=0
-nextIndex=None
-current=23
-preparedHosts=0/8
-nextHosts=0/8
-#+end_src
-
-Validate and commit:
-
-#+begin_src sh
-agenix hex --check
-git diff --cached --check
-nix build 'path:.#checks.x86_64-linux.identity-rotation' -L
-nix flake check -L
-git commit -m "feat(identity): finalize replacement seed rotation"
-#+end_src
-
-Do not run =nixos rotation cleanup= after successful finalization; finalization
-already removes the next artifacts. =cleanup= is for a cancelled rollback.
-
-** 8. Deploy the final idle generation
-
-Every host is currently booted into the active all-next generation. Deploy the
-finalized idle configuration so =.next= identities become canonical and old
-fallback keys disappear.
-
-For each remote host:
-
-#+begin_src sh
-nixos-rebuild --target-host HOST --sudo --ask-sudo-password \
-  --flake ".#HOST" boot
-ssh -t HOST sudo systemctl reboot
-#+end_src
-
-For the local host:
-
-#+begin_src sh
-sudo nixos-rebuild --flake ".#HOST" boot
-sudo reboot
-#+end_src
-
-Verify SSH and important services after each reboot. When every host runs the
-final idle generation:
+The command stops unless every host except Dot is ready. Review the staged
+diff: =state.json= and ciphertext regenerated for next keys. Commit and push.
+
+Deploy every host with =nixos-rebuild boot= and reboot it. A reboot proves the
+host boots with the next machine ID and identities; =switch= without a reboot
+leaves =identity-rotation-ready= failed with "Reboot into this generation".
+Check that each host still accepts SSH, decrypts its secrets, and runs its
+services, then:
 
 #+begin_src sh
 nixos rotation status
-agenix hex --check
-agenix lock
 #+end_src
 
-Only then retire the old mnemonic and old master passphrase according to the
-backup policy.
+To undo, run =nixos rotation back=, commit, and deploy everywhere. Hosts return
+to current selection without recreating keys. A second =back= cancels the
+rotation entirely.
 
-** Recovery
-
-If preparation or finalization is interrupted, do not manually remove journals
-or artifacts:
+** 3. Finalize
 
 #+begin_src sh
-nixos rotation recover
-git status
-nixos rotation status
+nixos rotation finalize --skip dot
 #+end_src
 
-If the rotation must be abandoned before finalization, move every target
-backward through =next -> bridge -> current=, run =nixos rotation cancel=,
-deploy the reverted current generation everywhere, and then run
-=nixos rotation cleanup=.
+The command stops unless every host except Dot is ready in the switch phase.
+It asks for a passphrase for the new master identity, then stages:
+
+- every source secret re-encrypted to the new master, and =secrets/hex.age= as
+  the new root
+- the new =secrets/id_age.pub= and the promoted host and user public keys
+- =derivationIndex = 0;= in =flake.nix=
+- removal of =secrets/rotation/next/= and every =.pub.next=
+- =state.json= back to =idle=, and ciphertext for the new keys
+
+It replaces the ignored =secrets/id_age.age= with the new master, keeps the old
+one as =secrets/id_age.age.previous=, and leaves the new master unlocked.
+Review the diff, commit, push, and deploy every host. Each host promotes its
+prepared host key on activation.
+
+After every host runs the finalized generation:
+
+- rebuild or re-enter =nix develop= so the =nixos= and =agenix= wrappers carry
+  =derivationIndex = 0=
+- delete =secrets/id_age.age.previous= and run =agenix lock=
+- retire the old seed plates and the old master passphrase
+
+** Afterwards
+
+Provision Dot from the new root with [[file:dot.org][its runbook]]. A host that
+was skipped for any other reason never received the next keys and cannot
+decrypt the finalized configuration; restore it like a new host, staging its
+host key derived from the new root with =sshed send=.

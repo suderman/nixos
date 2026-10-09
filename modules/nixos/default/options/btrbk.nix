@@ -52,7 +52,7 @@ in {
         snapshot_dir = "snapshots";
         ssh_user = "btrbk";
         ssh_identity =
-          if identityRotation.useNext "identities" "btrbk"
+          if identityRotation.useNext
           then nextSshKey
           else sshKey;
       };

@@ -18,72 +18,43 @@
   # > import-id
   age.secrets.hex.rekeyFile = flake + /secrets/hex.age;
 
-  environment.etc = lib.optionalAttrs config.identityRotation.active {
-    "identity-rotation/prepared".text =
-      builtins.hashFile "sha256" (flake + /secrets/rotation/next/artifacts.json);
-  };
-
-  system.activationScripts.identity-rotation-attestation.text = ''
-    # A token is valid only after the verifier succeeds for this activation.
-    rm -f /run/identity-rotation/next-verified
+  # `nixos rotation` reads this token to confirm a host is ready for the next phase.
+  system.activationScripts.identity-rotation-ready = lib.mkIf (!config.identityRotation.active) ''
+    rm -rf /run/identity-rotation
   '';
 
-  systemd.services.identity-rotation-next-verify = lib.mkIf config.identityRotation.allNext {
-    description = "Verify the all-next identity rotation runtime";
+  systemd.services.identity-rotation-ready = lib.mkIf config.identityRotation.active {
+    description = "Report readiness for the ${flake.lib.identityRotation.phase} identity rotation phase";
     wantedBy = ["multi-user.target"];
-    after = ["sshed.service"] ++ config.identityRotation.verificationUnits;
-    wants = config.identityRotation.verificationUnits;
+    after = ["sshed.service"];
     requires = ["sshed.service"];
-    serviceConfig.Type = "oneshot";
-    path = [
-      perSystem.self.derive
-      perSystem.self.sshed
-      pkgs.coreutils
-      pkgs.systemd
-    ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    path = [perSystem.self.derive perSystem.self.sshed pkgs.coreutils];
     script = let
-      storage = config.persist.storage.path;
-      nextHostKey = "${storage}/etc/ssh/ssh_host_ed25519_key.next";
-      nextHostPublicKey = flake + /hosts/${hostName}/ssh_host_ed25519_key.pub.next;
-      nextHex = config.identityRotation.nextHexPath;
-      token = config.identityRotation.nextToken;
-    in ''
-      test "$(readlink -f /run/booted-system)" = "$(readlink -f /run/current-system)" || {
-        echo "The all-next configuration must be booted before attestation" >&2
-        exit 1
-      }
-
-      sshed verify-pair ${nextHostKey} ${nextHostPublicKey}
-      expected_machine_id="$(derive hex ${hostName} 32 <${nextHex})"
-      test "$(cat /etc/machine-id)" = "$expected_machine_id" || {
-        echo "Next machine ID is not active" >&2
-        exit 1
-      }
-
-      verify_derived() {
-        local salt="$1" output="$2" length="''${3:-}"
-        local expected
-        expected="$(mktemp)"
-        trap 'rm -f "$expected"' RETURN
-        if [[ -n $length ]]; then
-          derive hex "$salt" "$length" <${nextHex} >"$expected"
-        else
-          derive hex "$salt" <${nextHex} >"$expected"
-        fi
-        cmp -s "$expected" "$output" || {
-          echo "Next derived runtime value is not active: $output" >&2
-          exit 1
-        }
-        rm -f "$expected"
-        trap - RETURN
-      }
-
-      ${config.identityRotation.verificationCommands}
-
-      install -dm755 /run/identity-rotation
-      printf '%s\n' ${lib.escapeShellArg token} >/run/identity-rotation/next-verified
-      chmod 644 /run/identity-rotation/next-verified
-    '';
+      inherit (flake.lib.identityRotation) phase useNext;
+      nextHostKey = "${config.persist.storage.path}/etc/ssh/ssh_host_ed25519_key.next";
+      token = "${phase} ${builtins.hashFile "sha256" (flake + /secrets/rotation/next/hex.age)}";
+    in
+      # bash
+      ''
+        rm -f /run/identity-rotation/ready
+        sshed verify-pair ${nextHostKey} ${nextHostKey}.pub
+        ${lib.optionalString useNext ''
+          if [[ $(readlink -f /run/booted-system) != "$(readlink -f /run/current-system)" ]]; then
+            echo "Reboot into this generation to verify the next identity" >&2
+            exit 1
+          fi
+          if [[ $(</etc/machine-id) != "$(derive hex ${hostName} 32 <${config.identityRotation.nextHexPath})" ]]; then
+            echo "The next machine ID is not active" >&2
+            exit 1
+          fi
+        ''}
+        mkdir -p /run/identity-rotation
+        printf '%s\n' ${lib.escapeShellArg token} >/run/identity-rotation/ready
+      '';
   };
 
   # Add /mnt/main/storage/etc/ssh/ssh_host_ed25519_key.pub and /etc/machine-id
@@ -146,7 +117,6 @@
     lib.mkAfter "${perSystem.self.mkScript {inherit path text;}}";
 
   services.openssh.hostKeys = let
-    rotation = flake.lib.identityRotation // {inherit (config.identityRotation) active;};
     current = {
       # ed25519 derived from hex
       path = "${config.persist.storage.path}/etc/ssh/ssh_host_ed25519_key";
@@ -154,13 +124,11 @@
     };
     next = current // {path = "${current.path}.next";};
     ed25519 =
-      if !rotation.active
+      if !config.identityRotation.active
       then [current]
-      else if config.identityRotation.targetState == "current"
-      then [current]
-      else if config.identityRotation.targetState == "bridge"
-      then [current next]
-      else [next current];
+      else if flake.lib.identityRotation.useNext
+      then [next current]
+      else [current next];
   in
     ed25519
     ++ [

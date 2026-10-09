@@ -262,16 +262,6 @@ in {
       }
     ];
 
-    identityRotation.verificationCommands =
-      lib.concatMapStringsSep "\n" (secret: ''
-        verify_derived ${lib.escapeShellArg secret.salt} ${lib.escapeShellArg "${secretDir}/${secret.name}"} 32
-      '')
-      secretSpecs
-      + ''
-        systemctl is-active --quiet nojoin.service
-      '';
-    identityRotation.verificationUnits = ["nojoin.service"];
-
     system.activationScripts.nojoin-secrets = let
       inherit (perSystem.self) derive mkScript;
       hex = config.identityRotation.hexPath;

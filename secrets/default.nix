@@ -8,33 +8,23 @@
   isHome = builtins.hasAttr "home" config;
   hostName = config.networking.hostName;
   username = config.home.username or "";
-  targetCategory =
-    if isHome
-    then "home"
-    else "nixos";
-  targetName =
-    if isHome
-    then "${hostName}-${username}"
-    else hostName;
-  managedTarget = builtins.hasAttr targetName identityRotation.state.targets.${targetCategory};
-  rotationActive = identityRotation.active && managedTarget;
-  allNext =
-    rotationActive
-    && lib.all (state: state == "next") (
-      lib.concatMap builtins.attrValues (builtins.attrValues identityRotation.state.targets)
-    );
-  nextToken =
-    if allNext && !isHome
-    then
-      builtins.hashString "sha256" (builtins.toJSON {
-        artifactHash = builtins.hashFile "sha256" (flake + /secrets/rotation/next/artifacts.json);
-        inherit (identityRotation.state) currentIndex nextIndex targets;
-      })
-    else null;
-  targetState =
-    if managedTarget
-    then identityRotation.targetState targetCategory targetName
-    else "current";
+
+  # Public key that generated ciphertext is encrypted to
+  currentPub = let
+    agePub = flake + /users/${username}/id_age.pub;
+    sshPub = flake + /hosts/${hostName}/ssh_host_ed25519_key.pub;
+  in
+    if builtins.pathExists agePub
+    then agePub
+    else if builtins.pathExists sshPub
+    then sshPub
+    else flake + /secrets/id_age.pub;
+  nextPub = identityRotation.nextPath currentPub;
+
+  # Targets rotate when prepare has written their next public key
+  rotating = identityRotation.active && builtins.pathExists nextPub;
+  useNext = rotating && identityRotation.useNext;
+
   currentIdentity =
     if isHome
     then "${config.home.homeDirectory}/.config/age/id_age"
@@ -44,67 +34,38 @@ in {
     active = lib.mkOption {
       type = lib.types.bool;
       readOnly = true;
-      description = "Whether a managed identity rotation is active";
-    };
-    targetState = lib.mkOption {
-      type = lib.types.enum ["current" "bridge" "next"];
-      readOnly = true;
-      description = "Rotation state for this NixOS or Home Manager target";
+      description = "Whether this target holds both key generations during a rotation";
     };
     currentHexPath = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
       readOnly = true;
-      description = "Path to the current decrypted fleet root on NixOS targets";
+      description = "Decrypted current fleet root on NixOS targets";
     };
     nextHexPath = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
       readOnly = true;
-      description = "Path to the next decrypted fleet root during rotation";
+      description = "Decrypted next fleet root on NixOS targets during a rotation";
     };
     hexPath = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
       readOnly = true;
-      description = "Selected decrypted fleet root on NixOS targets";
-    };
-    allNext = lib.mkOption {
-      type = lib.types.bool;
-      readOnly = true;
-      description = "Whether every managed target selects the next generation";
-    };
-    nextToken = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      readOnly = true;
-      description = "All-next runtime attestation token for this NixOS target";
-    };
-    verificationCommands = lib.mkOption {
-      type = lib.types.lines;
-      default = "";
-      internal = true;
-      description = "Host-specific all-next runtime verification commands";
-    };
-    verificationUnits = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [];
-      internal = true;
-      description = "Units that must complete before all-next runtime verification";
+      description = "Selected fleet root for derived machine IDs and credentials";
     };
   };
 
   config = {
-    identityRotation = let
+    identityRotation = rec {
+      active = rotating;
       currentHexPath =
         if isHome
         then null
         else config.age.secrets.hex.path;
       nextHexPath =
-        if rotationActive && !isHome
+        if rotating && !isHome
         then config.age.secrets.hex-next.path
         else null;
-    in {
-      inherit allNext currentHexPath nextHexPath nextToken targetState;
-      active = rotationActive;
       hexPath =
-        if !isHome && targetState == "next"
+        if useNext && !isHome
         then nextHexPath
         else currentHexPath;
     };
@@ -114,15 +75,15 @@ in {
       # List of recipient keys (age or ssh) used to decrypt secrets
       identityPaths =
         [currentIdentity]
-        ++ lib.optional rotationActive "${currentIdentity}.next";
+        ++ lib.optional rotating (identityRotation.nextPath currentIdentity);
 
-      secrets = lib.optionalAttrs (rotationActive && !isHome) {
+      secrets = lib.optionalAttrs (rotating && !isHome) {
         hex-next.rekeyFile = flake + /secrets/rotation/next/hex.age;
       };
 
       # Directory where secrets are symlinked to by default
       secretsDir =
-        if builtins.hasAttr "home" config
+        if isHome
         then "/run/user/${toString config.home.uid}/agenix"
         else "/run/agenix";
 
@@ -132,28 +93,18 @@ in {
           if isHome
           then "home/${hostName}-${username}"
           else "nixos/${hostName}";
-        currentSshPub = flake + /hosts/${hostName}/ssh_host_ed25519_key.pub;
-        currentAgePub = flake + /users/${username}/id_age.pub;
-        currentPub =
-          if builtins.pathExists currentAgePub
-          then currentAgePub
-          else if builtins.pathExists currentSshPub
-          then currentSshPub
-          else flake + /secrets/id_age.pub;
-        selectedPub =
-          if rotationActive && targetState == "next"
-          then identityRotation.nextPath currentPub
-          else currentPub;
       in {
         # Master identity decrypted to /tmp/id_age for rekeying
         # > agenix unlock
-        masterIdentities =
-          [/tmp/id_age /tmp/id_age_]
-          ++ lib.optional rotationActive /tmp/id_age_next;
+        masterIdentities = [/tmp/id_age /tmp/id_age_];
 
-        # Public ssh host key derived from 32-byte hex
+        # Public ssh host key or user age identity derived from 32-byte hex
         # > nixos generate
-        hostPubkey = builtins.readFile selectedPub;
+        hostPubkey = builtins.readFile (
+          if useNext
+          then nextPub
+          else currentPub
+        );
 
         storageMode = "local";
         localStorageDir = flake + /secrets/${target};

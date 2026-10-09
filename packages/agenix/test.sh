@@ -152,28 +152,13 @@ if env \
 fi
 [[ $(artifact_hashes) == "$before_interruption" ]]
 
-# Broad identity mutations stop before doing any work during a managed rotation.
+# Master and root replacement stop before doing any work during a rotation.
 mkdir -p "$secrets_dir/rotation"
-touch "$secrets_dir/rotation/ACTIVE"
+printf '{"phase": "prepare", "nextIndex": 0}\n' >"$secrets_dir/rotation/state.json"
 before_rotation_guard="$(artifact_hashes)"
 
 if TEST_HEX="$root" run_agenix import >"$test_dir/rotation-import.out" 2>&1; then
   printf 'FAIL: import ran while identity rotation was active\n' >&2
-  exit 1
-fi
-
-if run_agenix rekey -a >"$test_dir/rotation-rekey.out" 2>&1; then
-  printf 'FAIL: all-target rekey ran while identity rotation was active\n' >&2
-  exit 1
-fi
-
-if run_agenix rekey secrets/hex.age >"$test_dir/rotation-single-rekey.out" 2>&1; then
-  printf 'FAIL: single-secret rekey ran while identity rotation was active\n' >&2
-  exit 1
-fi
-
-if run_agenix edit "$secrets_dir/hex.age" >"$test_dir/rotation-edit.out" 2>&1; then
-  printf 'FAIL: secret edit ran while identity rotation was active\n' >&2
   exit 1
 fi
 

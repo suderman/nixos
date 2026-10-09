@@ -11,6 +11,5 @@
 /secrets/id_age
 /secrets/id_age_
 /secrets/id_age.age
-/secrets/rotation/FINALIZE.json
-/secrets/rotation/finalize-backup/
+/secrets/id_age.age.previous
 ssh_host_ed25519_key

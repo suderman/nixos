@@ -12,6 +12,7 @@ perSystem.self.mkScript {
     perSystem.self.qr
     pkgs.age
     pkgs.git
+    pkgs.jq
     pkgs.gum
   ];
 

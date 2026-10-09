@@ -8,6 +8,7 @@ pkgs.runCommand "identity-tools-check" {
     pkgs.bash
     pkgs.coreutils
     pkgs.gnugrep
+    pkgs.jq
     pkgs.python3
     perSystem.self.derive
     perSystem.self.nixos
@@ -30,6 +31,6 @@ pkgs.runCommand "identity-tools-check" {
   bash ${../packages/nixos/test.sh}
   bash ${../packages/sshed/test.sh}
   PRJ_ROOT=${../.} ${perSystem.self.nixos}/bin/nixos rotation status |
-    grep -q 'status=idle currentIndex=1 nextIndex=None'
+    grep -q 'Rotation phase: idle'
   touch "$out"
 ''

@@ -1,0 +1,79 @@
+#+TITLE: Compromise response
+
+* Compromise response
+
+Use this when the fleet root may be exposed: the seed words, the 32-byte hex,
+=secrets/id_age.age= with its passphrase, an unlocked =/tmp/id_age=, or
+=/run/agenix/hex= on any host. Every host holds the root, so root access on one
+host compromises every host, user, and service identity.
+
+[[file:seed-rotation.org][Seed rotation]] does not contain a compromise. It
+publishes the next root encrypted to keys the old root can derive, and hosts
+keep trusting the old keys until finalize. Worse, the repository is public:
+anyone holding the old root can derive every host and user key and decrypt every
+secret in Git history. Treat every secret ever committed as exposed.
+
+** What changes by itself
+
+A new root re-derives these, so they need no separate action:
+
+- host SSH keys, user SSH and age identities, Btrbk and Beszel keys
+- machine IDs and the Arr API keys derived from them
+- password-hash salts, MQTT passwords, Nojoin secrets, Camofox keys
+
+** What you must reissue
+
+These are source secrets with independent values. Replace each at its source,
+then store the new value with =agenix edit=:
+
+| Secret                                         | Reissue                                   |
+|------------------------------------------------+-------------------------------------------|
+| =users/*/password.age=                           | new login passwords for every user        |
+| =zones/ca.age=                                   | new CA; reinstall it on clients            |
+| =modules/nixos/default/options/traefik/cloudflare.age= | Cloudflare API token                |
+| =modules/home/users/jon/gh-token.age=            | GitHub token                              |
+| =modules/home/users/jon/fj-token.age=            | Forgejo token                             |
+| =modules/home/users/jon/accounts/password-*.age= | Fastmail, Gmail, and iCloud app passwords |
+| =modules/home/users/jon/apikeys-env.age=, =hosts/kit/apikeys-env.age= | every API key inside |
+| =modules/home/users/jon/nf-env.age=              | every credential inside                   |
+| =hosts/kit/users/jon/asana-org-token.age=        | Asana token                               |
+| =hosts/kit/users/jon/withings-sync.age=          | Withings credentials                      |
+| =modules/nixos/default/options/*/*.age=          | Forgejo, Gitea, FreshRSS, Tandoor, ISY    |
+
+=modules/home/users/jon/accounts/email-addresses.age= holds addresses, not
+credentials. Recheck this table against =git ls-files '*.age'=, excluding
+=secrets/nixos/=, =secrets/home/=, and =secrets/rotation/=.
+
+** Procedure
+
+1. *Contain.* Take suspect hosts offline. Revoke the external credentials above
+   at their providers now; revocation does not depend on the repository.
+2. *New root.* Record a new mnemonic and derive index =0= twice, as in
+   [[file:seed-rotation.org][seed rotation]].
+3. *Build the new state locally, publishing nothing in between.* Run the
+   rotation with every host skipped, committing locally between steps:
+
+   #+begin_src sh
+   skip=$(for host in $(ls hosts | grep -v iso); do printf -- '--skip %s ' "$host"; done)
+   nixos rotation prepare 0 && git commit -m prepare
+   nixos rotation switch $skip && git commit -m switch
+   nixos rotation finalize $skip && git commit -m finalize
+   git reset --soft origin/main && git commit -m "Replace the fleet root"
+   #+end_src
+
+   Never push the intermediate commits: they hold the next root encrypted to
+   the compromised master. The squashed commit holds only the new state.
+4. *Replace secret values.* Re-enter =nix develop= so the wrappers carry
+   =derivationIndex = 0=, then =agenix edit= each reissued secret. For the CA,
+   remove =zones/ca.crt= and =zones/ca.age= and run =nixos generate=, which
+   creates a new CA and rekeys. Commit and push.
+5. *Deliver host keys out of band.* An attacker with the old root can impersonate
+   every host, so do not send new private keys over the network. For each host,
+   derive its key on the operator (=agenix hex | derive hex HOST | derive ssh=)
+   and install it at =/mnt/main/storage/etc/ssh/ssh_host_ed25519_key=, mode
+   =0600=, through a physical or provider console, or reinstall the host. Then
+   deploy and reboot. A host whose key does not match waits at boot for
+   =sshed send=, which is unencrypted; use it only on a network you trust.
+6. *Clean up.* Reinstall the new CA on clients (see the zone READMEs), re-enrol
+   Tailscale on any host where root was exposed, destroy the old seed plates,
+   and delete =secrets/id_age.age.previous=.

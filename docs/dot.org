@@ -54,9 +54,9 @@ identity. The passphrase-protected master identity stays on the operator.
 
 Root access on dot has the same fleet-wide consequences as root access on any
 other host. Cloud hosting does not create a separate identity lifecycle.
-=nixos generate= includes dot, and managed rotation includes both =dot=
+=nixos generate= includes dot, and a fleet rotation includes both =dot=
 and =dot-jon=. Use [[file:../secrets/README.md][fleet recovery]] and
-[[file:../secrets/rotation/README.md][managed rotation]], not a dot-only key rotation.
+[[file:seed-rotation.org][seed rotation]], not a dot-only key rotation.
 
 The committed host fingerprint is:
 
@@ -305,7 +305,7 @@ active rotation. Recover/unlock the existing master through the normal workflow
 if necessary, then rekey all configured targets:
 
 #+begin_src sh
-test ! -e secrets/rotation/ACTIVE
+test "$(jq -r .phase secrets/rotation/state.json)" = idle
 agenix unlock
 agenix hex --check
 agenix rekey -a
@@ -739,8 +739,8 @@ restored separately. Fence the stale tail node before re-enrolment. Update zone
 data with the actual replacement address; never copy sol's address. Verify SSH,
 console, Tailscale, second reboot, backups and rollback again.
 
-Host-key changes use the normal managed fleet rotation workflow. Do not replace
-dot's key independently of its ciphertext and the fleet root.
+Host-key changes use the normal fleet [[file:seed-rotation.org][seed rotation]].
+Do not replace dot's key independently of its ciphertext and the fleet root.
 
 Public services/DNS are later work. For any future =*.suderman.org= endpoint,
 review Traefik's generated router, public visibility, TLS resolver, DNS, firewall

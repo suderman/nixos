@@ -186,7 +186,8 @@ Read the relevant documentation before changing the system it describes:
 - [[file:../modules/home/desktop/hyprland/README.md][Hyprland operation]]
 - [[file:../hosts/sim/README.md][Simulation and installer experiments]]
 - [[file:dot.org][Dot installation, repair, and restore on Linode]]
-- [[file:seed-rotation.org][Replacement seed rotation]]
+- [[file:seed-rotation.org][Seed rotation]]
+- [[file:compromise-response.org][Compromise response]]
 
 =nixos= and =agenix= are repository wrappers from =packages/=, not stock CLIs.
 Many subcommands are interactive, auto-stage files, or mutate identities.
@@ -197,11 +198,9 @@ host/user public keys, ensures =zones/ca.{crt,age}= exists, and runs
 =agenix rekey -a=. =nixos add host|user= scaffolds and stages files before
 running generation. Neither is a routine validation command.
 
-=secrets/rotation/ACTIVE= blocks broad identity mutation. Do not manually bypass
-it with =IDENTITY_ROTATION_ALLOW=1=; that flag is reserved for managed rotation.
-=secrets/rotation/state.json= is a non-secret target ledger. The focused rotation
-check is =nix build 'path:.#checks.x86_64-linux.identity-rotation' -L=;
-test fixture roots must never be used outside that check.
+=secrets/rotation/state.json= records the fleet rotation phase. Outside =idle=,
+identity-rewriting commands refuse to run. Change the phase only with
+=nixos rotation=, following [[file:seed-rotation.org][the seed rotation runbook]].
 
 Edit secrets with =agenix edit <path>.age=. After recipient changes or secret
 addition/removal, run =agenix rekey -a= as part of that deliberate secret workflow.
