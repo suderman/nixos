@@ -32,8 +32,13 @@ case ${1-} in
   exit
   ;;
 --watch-tmux)
-  # tmux runs no hook when its last pane exits, so follow the server: PID NAME
-  tail --pid="$2" -s 10 -f /dev/null
+  # tmux runs no hook when its last pane exits, so follow the server: PID NAME.
+  # Stop watching once the daemon exits, such as through the session hook.
+  daemon=$("$EMACS_CLIENT" -s "$3" -e '(emacs-pid)')
+  while kill -0 "$2" 2>/dev/null; do
+    kill -0 "$daemon" 2>/dev/null || exit 0
+    sleep 10
+  done
   stop_daemon "$3"
   exit
   ;;
