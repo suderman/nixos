@@ -37,7 +37,7 @@
 
   workspaceClient = pkgs.self.mkScript {
     name = "em-workspace-client";
-    path = [cfg.finalPackage config.programs.herdr.package pkgs.tmux pkgs.jq pkgs.coreutils pkgs.util-linux];
+    path = [cfg.finalPackage config.programs.herdr.package pkgs.tmux pkgs.jq pkgs.coreutils pkgs.util-linux pkgs.procps pkgs.gnugrep];
     text = ''
       ${builtins.readFile ./terminal-setup.sh}
       EMACS_CLIENT=${lib.getBin cfg.finalPackage}/bin/emacsclient
@@ -45,6 +45,24 @@
       ${builtins.readFile ./emacs-workspace-client.sh}
     '';
   };
+
+  # Stops a workspace's daemon when Herdr closes it, and sweeps daemons left
+  # by an earlier server when one starts.
+  herdrPlugin = pkgs.writeTextDir "herdr-plugin.toml" ''
+    id = "em"
+    name = "em"
+    version = "0.1.0"
+    min_herdr_version = "0.9.0"
+    description = "Stop each workspace's Emacs daemon with its workspace"
+    platforms = ["linux"]
+
+    [[startup]]
+    command = ["${lib.getExe workspaceClient}", "--herdr-plugin"]
+
+    [[events]]
+    on = "workspace.closed"
+    command = ["${lib.getExe workspaceClient}", "--herdr-plugin"]
+  '';
 in {
   options.programs.emacs.exportStyle = lib.mkEnableOption "exporting shared Emacs appearance to a synced file (enable on one desktop host only)";
 
@@ -89,6 +107,21 @@ in {
       mkIf (cfg.exportStyle && config.desktop.enable) (lib.hm.dag.entryAfter ["writeBoundary"] ''
         $DRY_RUN_CMD ${exportStyle}
       '');
+
+    # Relinking the same plugin ID replaces the previous store path.
+    home.activation.emHerdrPlugin = mkIf (config.programs.herdr.enable && config.programs.herdr.package != null) (
+      lib.hm.dag.entryAfter ["writeBoundary"] ''
+        $DRY_RUN_CMD ${lib.getExe config.programs.herdr.package} plugin link ${herdrPlugin} >/dev/null
+      ''
+    );
+
+    # Stop a session's em daemon when tmux closes the session. setsid lets the
+    # stop outlive a server that exits with its last session.
+    programs.tmux.extraConfig = ''
+      set-hook -g session-closed[90] {
+        run-shell "${pkgs.util-linux}/bin/setsid -f ${lib.getExe workspaceClient} --stop-tmux '#{socket_path}' '#{hook_session}' >/dev/null 2>&1"
+      }
+    '';
 
     programs.emacs.package = mkDefault emacsPackage;
 
