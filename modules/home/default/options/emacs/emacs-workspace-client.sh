@@ -56,32 +56,37 @@ elif [[ ${HERDR_ENV-} == 1 || -n ${HERDR_PANE_ID-}${HERDR_SOCKET_PATH-}${HERDR_W
     '"((edger-herdr-pane-id . \($pane|tojson)) (edger-herdr-socket-path . \($socket|tojson)))"')
 fi
 
-if [[ -z $identity ]]; then
-  exec "$EMACS_CLIENT" "$mode" "$@"
+# Outside a multiplexer, use the default daemon. Desktop hosts start it with the
+# graphical session; other hosts start it here on first use.
+name=server
+if [[ -n $identity ]]; then
+  # Herdr and tmux reuse short IDs when their servers restart. Socket birth time
+  # and boot ID keep a surviving Emacs daemon from being mistaken for a new one.
+  birth=$(stat -Lc '%d:%i:%w' -- "$socket")
+  [[ $birth != *:- ]] || {
+    echo "em: socket creation time unavailable: $socket" >&2
+    exit 1
+  }
+  boot=$(</proc/sys/kernel/random/boot_id)
+  name=em-$(printf '%s\n' "$boot:$birth:$identity" | sha256sum)
+  name=${name:0:27}
 fi
-
-# Herdr and tmux reuse short IDs when their servers restart. Socket birth time
-# and boot ID keep a surviving Emacs daemon from being mistaken for a new one.
-birth=$(stat -Lc '%d:%i:%w' -- "$socket")
-[[ $birth != *:- ]] || {
-  echo "em: socket creation time unavailable: $socket" >&2
-  exit 1
-}
-boot=$(</proc/sys/kernel/random/boot_id)
-name=em-$(printf '%s\n' "$boot:$birth:$identity" | sha256sum)
-name=${name:0:27}
 
 if ! "$EMACS_CLIENT" -s "$name" -e t >/dev/null 2>&1; then
   runtime=${XDG_RUNTIME_DIR:?em: XDG_RUNTIME_DIR is required}
   exec 9>"$runtime/$name.lock"
   flock 9
   if ! "$EMACS_CLIENT" -s "$name" -e t >/dev/null 2>&1; then
-    # State includes history, autosaves, backups, and Custom. Package data stays
-    # shared, while the mutable per-daemon state lives outside the config tree.
-    export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}/emacs-workspaces/$name"
-    install -d -m 700 "$XDG_STATE_HOME"
-    if ! "$EMACS_SERVER" --daemon="$name" >"$XDG_STATE_HOME/startup.log" 2>&1; then
-      cat "$XDG_STATE_HOME/startup.log" >&2
+    log=${XDG_STATE_HOME:-$HOME/.local/state}/emacs/startup.log
+    if [[ $name != server ]]; then
+      # State includes history, autosaves, backups, and Custom. Package data stays
+      # shared, while the mutable per-daemon state lives outside the config tree.
+      export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}/emacs-workspaces/$name"
+      log=$XDG_STATE_HOME/startup.log
+    fi
+    install -d -m 700 "${log%/*}"
+    if ! "$EMACS_SERVER" --daemon="$name" >"$log" 2>&1; then
+      cat "$log" >&2
       exit 1
     fi
   fi
@@ -89,7 +94,7 @@ if ! "$EMACS_CLIENT" -s "$name" -e t >/dev/null 2>&1; then
   exec 9>&-
 fi
 
-if [[ $mode == --tty ]]; then
+if [[ $mode == --tty && -n $params ]]; then
   exec "$EMACS_CLIENT" -s "$name" "$mode" -F "$params" "$@"
 fi
 exec "$EMACS_CLIENT" -s "$name" "$mode" "$@"

@@ -9,10 +9,16 @@
   inherit (lib) mkDefault mkIf concatMapStringsSep;
   cfg = config.programs.emacs;
 
+  # Hosts without a desktop get the smaller terminal-only build.
+  emacs =
+    if config.desktop.enable
+    then perSystem.emacs.default
+    else perSystem.emacs.emacs-tty;
+
   # Use a writable checkout when one exists; otherwise use the bundled config.
   emacsPackage = pkgs.symlinkJoin {
-    inherit (perSystem.emacs.default) name meta;
-    paths = [perSystem.emacs.default];
+    inherit (emacs) name meta;
+    paths = [emacs];
     nativeBuildInputs = [pkgs.makeWrapper];
     postBuild = ''
       wrapProgram "$out/bin/emacs" \
