@@ -100,21 +100,29 @@ in {
       VISUAL = terminalEditor;
     };
 
-    # Graphical sessions get a shared daemon and keyd window shortcuts.
-    # Terminal sessions use em's per-workspace daemons instead. keyd's
-    # options exist only in the desktop layer, so mkIf cannot guard them.
-    services = lib.optionalAttrs config.desktop.enable {
-      emacs = {
-        enable = mkDefault true;
-        client.enable = mkDefault true;
-        startWithUserSession = mkDefault "graphical";
+    # Every host keeps a shared default daemon: desktops start it with the
+    # graphical session, headless hosts at boot through user lingering.
+    # tmux and Herdr sessions use em's per-workspace daemons instead.
+    services =
+      {
+        emacs = {
+          enable = mkDefault true;
+          client.enable = mkDefault config.desktop.enable;
+          startWithUserSession = mkDefault (
+            if config.desktop.enable
+            then "graphical"
+            else true
+          );
+        };
+      }
+      # keyd's options exist only in the desktop layer, so mkIf cannot guard them.
+      // lib.optionalAttrs config.desktop.enable {
+        keyd.windows."emacs" = {
+          "super.w" = "macro(C-x 0)"; # close window or tab
+          "super.t" = "macro(C-x t 2)"; # new tab
+          "super.r" = "f5"; # reload
+        };
       };
-      keyd.windows."emacs" = {
-        "super.w" = "macro(C-x 0)"; # close window or tab
-        "super.t" = "macro(C-x t 2)"; # new tab
-        "super.r" = "f5"; # reload
-      };
-    };
 
     # Disconnecting em's client keeps its daemon. In that frame,
     # M-x save-buffers-kill-emacs shuts it down with Emacs's save prompts.

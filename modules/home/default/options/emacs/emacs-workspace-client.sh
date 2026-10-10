@@ -56,8 +56,8 @@ elif [[ ${HERDR_ENV-} == 1 || -n ${HERDR_PANE_ID-}${HERDR_SOCKET_PATH-}${HERDR_W
     '"((edger-herdr-pane-id . \($pane|tojson)) (edger-herdr-socket-path . \($socket|tojson)))"')
 fi
 
-# Outside a multiplexer, use the default daemon. Desktop hosts start it with the
-# graphical session; other hosts start it here on first use.
+# Outside a multiplexer, use the default daemon. Its systemd user service
+# normally runs it; start it here when the service has not.
 name=server
 if [[ -n $identity ]]; then
   # Herdr and tmux reuse short IDs when their servers restart. Socket birth time
