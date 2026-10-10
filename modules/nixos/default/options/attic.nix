@@ -88,7 +88,10 @@ in {
           "localhost:${toString cfg.port}"
         ]
         ++ cfg.extraHostNames);
-      settings.require-proof-of-possession = mkDefault false;
+      # Without it, deduplicated uploads return before reading the body and
+      # hyper closes the keep-alive connection, so Traefik reuses a dead
+      # backend connection and fails the next upload with 500/502.
+      settings.require-proof-of-possession = mkDefault true;
       settings.database.url = mkDefault "sqlite://${cfg.dataDir}/server.db?mode=rwc";
       settings.storage = mkDefault {
         type = "local";
