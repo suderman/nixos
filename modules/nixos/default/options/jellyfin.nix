@@ -3,6 +3,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: let
   cfg = config.services.jellyfin;
@@ -22,6 +23,8 @@ in {
 
   config = mkIf cfg.enable {
     services.jellyfin = {
+      # Jellyfin 12 migrates the database on first start; back up /var/lib/jellyfin first
+      package = pkgs.unstable.jellyfin;
       user = "jellyfin";
       group = "media";
       openFirewall = true;
