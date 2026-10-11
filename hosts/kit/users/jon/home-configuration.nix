@@ -18,6 +18,9 @@
   # Only kit writes the shared appearance file; other machines consume it.
   programs.emacs.exportStyle = true;
 
+  # Only kit archives old finished Org headings, so Syncthing sees one writer.
+  programs.emacs.archiveOrg = true;
+
   # Programs
   programs.davinci-resolve.enable = true;
   programs.sparrow.enable = true;

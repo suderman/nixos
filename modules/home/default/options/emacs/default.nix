@@ -63,8 +63,25 @@
     on = "workspace.closed"
     command = ["${lib.getExe workspaceClient}", "--herdr-plugin"]
   '';
+
+  # Archive with the checkout's own suderman/org-archive-old-done, so the timer
+  # and SPC o A share one implementation. --dry-run lists without archiving.
+  orgArchive = pkgs.self.mkScript {
+    name = "org-archive-old";
+    path = [cfg.finalPackage];
+    text =
+      # bash
+      ''
+        dry=nil
+        [[ ''${1:-} == --dry-run ]] && dry=t
+        init="''${XDG_CONFIG_HOME:-$HOME/.config}/emacs/init.el"
+        [[ -f $init ]] || { echo "org-archive-old: no Emacs checkout at $init" >&2; exit 1; }
+        exec emacs --batch -l "$init" --eval "(suderman/org-archive-old-done 14 $dry)"
+      '';
+  };
 in {
   options.programs.emacs.exportStyle = lib.mkEnableOption "exporting shared Emacs appearance to a synced file (enable on one desktop host only)";
+  options.programs.emacs.archiveOrg = lib.mkEnableOption "nightly archiving of Org headings closed 14 or more days ago (enable on one host only, so Syncthing sees a single writer)";
 
   config = mkIf cfg.enable {
     # Only desktop hosts have the light/dark Stylix toggle the exporter reads.
@@ -124,6 +141,25 @@ in {
     '';
 
     programs.emacs.package = mkDefault emacsPackage;
+
+    home.packages = lib.optional cfg.archiveOrg orgArchive;
+
+    systemd.user.services.org-archive = mkIf cfg.archiveOrg {
+      Unit.Description = "Archive Org headings closed 14 or more days ago";
+      Service = {
+        Type = "oneshot";
+        ExecStart = lib.getExe orgArchive;
+      };
+    };
+
+    systemd.user.timers.org-archive = mkIf cfg.archiveOrg {
+      Unit.Description = "Archive old finished Org headings nightly";
+      Timer = {
+        OnCalendar = "*-*-* 04:00:00";
+        Persistent = true;
+      };
+      Install.WantedBy = ["timers.target"];
+    };
 
     # Emacs loads the generated palettes itself and follows toolkit-theme changes.
     stylix.targets.emacs.enable = false;
