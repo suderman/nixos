@@ -90,7 +90,7 @@
       '';
   };
 in {
-  imports = [./drop-zones.nix];
+  imports = [./drop-zones.nix ./org-dispatch.nix];
 
   options.programs.pi-coding-agent = {
     enable = lib.mkEnableOption "pi-coding-agent";

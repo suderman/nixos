@@ -16,10 +16,12 @@
   # Preload mmx-cli with my API keys
   programs.mmx-cli.apiKeys = ./apikeys-env.age;
 
-  # Preload pi with my API keys and watch the downloads task drop zones.
+  # Preload pi with my API keys, watch the downloads task drop zones, and run
+  # Org headings tagged with this host and :auto:.
   programs.pi-coding-agent = {
     apiKeys = ./apikeys-env.age;
     taskDropZones.enable = true;
+    orgDispatch.enable = true;
   };
 
   programs.hermes.apiKeys = ./apikeys-env.age;
