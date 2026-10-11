@@ -33,19 +33,48 @@ in {
       description = "Mount Garmin device via GVFS (gio)";
       wantedBy = ["default.target"];
       after = ["graphical.target"];
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = "yes";
-      };
+      serviceConfig.Type = "oneshot";
       path = with pkgs; [coreutils gawk glib];
       script =
         # bash
         ''
-          # Extract the activation_root by parsing the output of gio mount -li
-          uri="$(gio mount -li | awk '/activation_root=mtp:\/\/${idVendor}_${idProduct}/{print $1}' | cut -d= -f2)"
+          is_mounted() {
+            awk '
+              $1 ~ /^Mount\([0-9]+\):$/ && $(NF - 1) == "->" &&
+              $NF ~ /^mtp:\/\/${idVendor}_${idProduct}([_\/]|$)/ { mounted = 1 }
+              END { exit !mounted }
+            ' <<< "$1"
+          }
 
-          # Mount the device
-          gio mount "$uri"
+          # udev can run before GVFS lists the watch. Allow five discovery waits.
+          for attempt in {1..6}; do
+            listing="$(gio mount -li)"
+            if is_mounted "$listing"; then
+              exit 0
+            fi
+
+            uri="$(awk '/activation_root=mtp:\/\/${idVendor}_${idProduct}([_\/]|$)/ {sub(/^activation_root=/, "", $1); print $1; exit}' <<< "$listing")"
+            if [ -n "$uri" ]; then
+              if gio mount "$uri"; then
+                exit 0
+              else
+                status=$?
+              fi
+
+              # Another automounter may have won the race. Keep other failures.
+              if listing="$(gio mount -li)" && is_mounted "$listing"; then
+                exit 0
+              fi
+              exit "$status"
+            fi
+
+            if [ "$attempt" -lt 6 ]; then
+              sleep 1
+            fi
+          done
+
+          # No watch at login is normal; a later udev start can try again.
+          echo "No Garmin device listed; skipping mount after discovery retries."
         '';
     };
 
