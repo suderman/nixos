@@ -50,6 +50,9 @@ in {
     # Agents call org-dispatch finish, so it must be on PATH in Herdr panes.
     home.packages = [orgDispatch];
 
+    # Running tasks and settling headings must survive the root reset at boot.
+    persist.scratch.directories = [".local/state/org-dispatch"];
+
     systemd.user.services.org-dispatch = {
       Unit.Description = "Dispatch autonomous Org tasks to pi in Herdr";
       Service = {

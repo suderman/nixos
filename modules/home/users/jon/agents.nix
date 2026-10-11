@@ -10,6 +10,10 @@
     ".local/share/hermes-desktop"
   ];
 
+  # Agent runtime files: kept across reboots, but not synced, snapshotted, or
+  # in Git. project-org-tasks points agents here instead of ~/org.
+  persist.scratch.directories = [".local/state/agent-work"];
+
   # Preload OpenCode with my API keys
   programs.opencode.apiKeys = ./apikeys-env.age;
 
