@@ -204,17 +204,23 @@ New sections go before Dialog, which stays last."
   (format "- %s %s: %s" title (org-dispatch--stamp)
           (replace-regexp-in-string "\n" "\n  " (string-trim text))))
 
-(defun org-dispatch--project-dir (file)
-  "The project's only local repository, or the project directory."
+(defun org-dispatch--project-repos (file)
+  "Local repository links in FILE's preamble, in either the one-line
+=Repository:= form or the =Repositories:= list."
   (with-temp-buffer
     (insert-file-contents file)
     (let (repos (end (or (re-search-forward "^\\* " nil t) (point-max))))
       (goto-char (point-min))
-      (while (re-search-forward "^- [^:\n]+: \\[\\[file:\\([^]]+\\)\\]\\[local\\]\\]" end t)
-        (push (expand-file-name (match-string 1)) repos))
-      (if (= (length repos) 1)
-          (directory-file-name (car repos))
-        (directory-file-name (file-name-directory file))))))
+      (while (re-search-forward "\\[\\[file:\\([^]]+\\)\\]\\[local\\]\\]" end t)
+        (push (directory-file-name (expand-file-name (match-string 1))) repos))
+      (nreverse repos))))
+
+(defun org-dispatch--project-dir (file)
+  "The project's only local repository, or the project directory."
+  (let ((repos (org-dispatch--project-repos file)))
+    (if (= (length repos) 1)
+        (car repos)
+      (directory-file-name (file-name-directory file)))))
 
 (defun org-dispatch--task ()
   "Describe the first-level entry at point."
@@ -245,6 +251,7 @@ New sections go before Dialog, which stays last."
           :branch (org-entry-get nil "BRANCH")
           :model (or (org-entry-get nil "MODEL") org-dispatch-model)
           :dir (if dir (expand-file-name dir) (org-dispatch--project-dir buffer-file-name))
+          :repos (org-dispatch--project-repos buffer-file-name)
           :session (car sessions)
           :dialog (org-dispatch--new-dialog)
           :hash (secure-hash 'sha1 (org-dispatch--subtree-text)))))
@@ -313,12 +320,16 @@ New sections go before Dialog, which stays last."
           (if (plist-get task :review)
               "- Jon reviews this task. Finish with EVAL, never DONE."
             "- No review is needed. Finish with DONE once your verification passes.")
-          (cond ((not (org-dispatch--git-p (plist-get task :dir)))
-                 "- The working directory is not a Git repository; there is nothing to commit.")
-                ((plist-get task :branch)
-                 (format "- Commit your work and push it to the branch =%s=, not the default branch."
-                         (plist-get task :branch)))
-                (t "- Commit your work and push it to the current branch."))
+          (let ((where (if (org-dispatch--git-p (plist-get task :dir))
+                           "your work"
+                         "your work in each repository you change"))
+                (branch (plist-get task :branch)))
+            (if (or (org-dispatch--git-p (plist-get task :dir)) (plist-get task :repos))
+                (if branch
+                    (format "- Commit %s and push it to the branch =%s=, not the default branch."
+                            where branch)
+                  (format "- Commit %s and push it to the current branch." where))
+              "- No repository belongs to this task; there is nothing to commit."))
           (if (plist-get task :deploy)
               "- Deploying is allowed when the task calls for it."
             "- Do not deploy, activate, or install anything system-wide.")
