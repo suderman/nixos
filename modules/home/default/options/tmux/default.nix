@@ -63,4 +63,16 @@ in {
       run-shell ${edger}/share/tmux-plugins/edger/edger.tmux
     '';
   };
+
+  # Bare tmux attaches to the running server, as herdr does, and starts one
+  # when none is running. A shell function leaves scripts and plugins on the
+  # real binary, which they call constantly.
+  programs.zsh.initContent = ''
+    tmux() {
+      if (( $# )) || [[ -n $TMUX ]]; then command tmux "$@"
+      elif command tmux has-session 2>/dev/null; then command tmux attach-session
+      else command tmux new-session
+      fi
+    }
+  '';
 }
