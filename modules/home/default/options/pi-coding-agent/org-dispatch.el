@@ -5,7 +5,8 @@
 ;;   org-dispatch-scan     print the tasks this host would launch
 ;;   org-dispatch-finish   ID STATE [NOTE], used by the agent to end its task
 ;;
-;; A task is a first-level TODO heading tagged with this host and :auto:.
+;; A task is a TODO heading in Jon's Org agenda files with this host and :auto:
+;; in its own tags.
 ;; SCHEDULED delays it; a repeater makes it recur. Settings are properties:
 ;; REVIEW, DEPLOY, BRANCH, MODEL, DIR.
 
@@ -23,7 +24,11 @@
 (defvar org-dispatch-hosts
   (split-string (org-dispatch--env "ORG_DISPATCH_HOSTS" "kit cog")))
 (defvar org-dispatch-root
-  (expand-file-name (org-dispatch--env "ORG_DISPATCH_ROOT" "~/org/work")))
+  (expand-file-name (org-dispatch--env "ORG_DISPATCH_ROOT" "~/org/work"))
+  "Directory scanned when Jon's Emacs config cannot list agenda files.")
+(defvar org-dispatch-emacs-init
+  (expand-file-name (org-dispatch--env "ORG_DISPATCH_EMACS_INIT" "~/.config/emacs/init.el"))
+  "Jon's Emacs init file, loaded in batch to read `org-agenda-files'.")
 (defvar org-dispatch-state-dir
   (expand-file-name "org-dispatch" (org-dispatch--env "XDG_STATE_HOME" "~/.local/state")))
 (defvar org-dispatch-prompts
@@ -120,47 +125,73 @@
 
 ;;; Org
 
-(defun org-dispatch--files ()
-  "Org files under the root that mention :auto:."
+(defun org-dispatch--agenda-files ()
+  "Jon's `org-agenda-files', read by loading his Emacs config in batch.
+Cache the list, and reuse the last good one when the config fails to load,
+so a half-edited config does not stop dispatching."
+  (let ((cache (expand-file-name "agenda-files" org-dispatch-state-dir))
+        files)
+    (when (file-readable-p org-dispatch-emacs-init)
+      (with-temp-buffer
+        (when (eq 0 (call-process
+                     (expand-file-name invocation-name invocation-directory) nil '(t nil) nil
+                     "--batch" "-l" org-dispatch-emacs-init "--eval"
+                     "(dolist (f (org-agenda-files)) (princ (format \"\\norg-dispatch-file:%s\\n\" f)))"))
+          (goto-char (point-min))
+          (while (re-search-forward "^org-dispatch-file:\\(.+\\)$" nil t)
+            (push (match-string 1) files)))))
+    (if files
+        (progn
+          (setq files (nreverse files))
+          (make-directory org-dispatch-state-dir t)
+          (with-temp-file cache (insert (string-join files "\n"))))
+      (org-dispatch--log "could not read org-agenda-files from %s; using %s"
+                         org-dispatch-emacs-init
+                         (if (file-exists-p cache) "the cached list" org-dispatch-root))
+      (setq files (if (file-exists-p cache)
+                      (with-temp-buffer
+                        (insert-file-contents cache)
+                        (split-string (buffer-string) "\n" t))
+                    (directory-files-recursively
+                     org-dispatch-root "\\.org\\'" nil
+                     (lambda (dir) (not (string-prefix-p "." (file-name-nondirectory dir))))))))
+    (seq-filter (lambda (file)
+                  (and (file-regular-p file)
+                       (not (string-search ".sync-conflict-" file))))
+                files)))
+
+(defun org-dispatch--files (&optional agenda)
+  "AGENDA files, or Jon's agenda files, that mention :auto:."
   (seq-filter (lambda (file)
-                (and (not (string-search ".sync-conflict-" file))
-                     (with-temp-buffer
-                       (insert-file-contents file)
-                       (search-forward ":auto:" nil t))))
-              (directory-files-recursively
-               org-dispatch-root "\\.org\\'" nil
-               (lambda (dir) (not (string-prefix-p "." (file-name-nondirectory dir)))))))
+                (with-temp-buffer
+                  (insert-file-contents file)
+                  (search-forward ":auto:" nil t)))
+              (or agenda (org-dispatch--agenda-files))))
 
 (defun org-dispatch--edit (file id function &optional heading)
   "Call FUNCTION at the heading with ID in FILE, then save.
-Without an ID in the file yet, find the first-level HEADING instead. Visit
+Without an ID in the file yet, find the HEADING by its text instead. Visit
 the file fresh so concurrent edits by agents are not overwritten."
   (let ((buffer (find-file-noselect file t)))
     (unwind-protect
         (with-current-buffer buffer
           (org-mode)
           (let ((position (or (org-find-property "ID" id)
-                              (and heading
-                                   (let ((found (org-find-exact-headline-in-buffer heading)))
-                                     (and found (save-excursion
-                                                  (goto-char found)
-                                                  (= (org-current-level) 1))
-                                          found))))))
+                              (and heading (org-find-exact-headline-in-buffer heading)))))
             (unless position (error "no heading %s in %s" (or heading id) file))
             (goto-char position)
             (prog1 (funcall function)
               (when (buffer-modified-p) (save-buffer)))))
       (kill-buffer buffer))))
 
-(defun org-dispatch--find (id)
-  "Return the file holding the heading with ID."
+(defun org-dispatch--find (id &optional agenda)
+  "Return the file holding the heading with ID.
+Search AGENDA, or Jon's agenda files."
   (seq-find (lambda (file)
               (with-temp-buffer
                 (insert-file-contents file)
                 (re-search-forward (format "^[ \t]*:ID:[ \t]+%s[ \t]*$" (regexp-quote id)) nil t)))
-            (directory-files-recursively
-             org-dispatch-root "\\.org\\'" nil
-             (lambda (dir) (not (string-prefix-p "." (file-name-nondirectory dir)))))))
+            (or agenda (org-dispatch--agenda-files))))
 
 (defun org-dispatch--stamp ()
   (format-time-string (org-time-stamp-format t t)))
@@ -169,11 +200,18 @@ the file fresh so concurrent edits by agents are not overwritten."
   (buffer-substring-no-properties
    (point) (save-excursion (org-end-of-subtree t t) (point))))
 
+(defun org-dispatch--section-stars ()
+  "Stars for a direct child of the entry at point."
+  (make-string (1+ (org-current-level)) ?*))
+
 (defun org-dispatch--section-bounds (title)
-  "Return (BEGIN . END) of the second-level section TITLE in this entry."
+  "Return (BEGIN . END) of the child section TITLE of this entry."
   (save-excursion
     (let ((end (save-excursion (org-end-of-subtree t t) (point))))
-      (when (re-search-forward (format "^\\*\\* %s[ \t]*$" (regexp-quote title)) end t)
+      (when (re-search-forward (format "^%s %s[ \t]*$"
+                                       (regexp-quote (org-dispatch--section-stars))
+                                       (regexp-quote title))
+                               end t)
         (let ((begin (match-beginning 0)))
           (goto-char begin)
           (cons begin (save-excursion (org-end-of-subtree t t) (point))))))))
@@ -182,7 +220,8 @@ the file fresh so concurrent edits by agents are not overwritten."
   "Append TEXT to section TITLE of this entry, creating it when needed.
 New sections go before Dialog, which stays last."
   (save-excursion
-    (let ((section (org-dispatch--section-bounds title)))
+    (let ((section (org-dispatch--section-bounds title))
+          (stars (org-dispatch--section-stars)))
       (if section
           (goto-char (cdr section))
         (goto-char (or (and (not (equal title "Dialog"))
@@ -190,7 +229,7 @@ New sections go before Dialog, which stays last."
                        (save-excursion (org-end-of-subtree t t) (point)))))
       (skip-chars-backward " \t\n")
       (end-of-line)
-      (insert (if section "\n" (format "\n\n** %s\n\n" title)) text)
+      (insert (if section "\n" (format "\n\n%s %s\n\n" stars title)) text)
       (unless section
         (unless (looking-at-p "\n") (insert "\n"))
         (when (looking-at-p "\n\\*") (insert "\n"))))))
@@ -223,7 +262,7 @@ New sections go before Dialog, which stays last."
       (directory-file-name (file-name-directory file)))))
 
 (defun org-dispatch--task ()
-  "Describe the first-level entry at point."
+  "Describe the entry at point."
   (let* ((tags (org-get-tags nil t))
          (hosts (or (seq-intersection tags org-dispatch-hosts)
                     (seq-intersection org-file-tags org-dispatch-hosts)))
@@ -271,10 +310,12 @@ New sections go before Dialog, which stays last."
           (let ((text (string-trim (buffer-substring-no-properties start (cdr section)))))
             (unless (string-empty-p text) text)))))))
 
-(defun org-dispatch--tasks ()
-  "All first-level TODO tasks marked :auto: in the Org tree."
+(defun org-dispatch--tasks (&optional agenda)
+  "TODO headings marked :auto: in AGENDA, or Jon's agenda files.
+Org's matcher selects candidates; `org-dispatch--task' then requires :auto:
+among the heading's own tags, so subsections never inherit it."
   (let (tasks)
-    (dolist (file (org-dispatch--files))
+    (dolist (file (org-dispatch--files agenda))
       (let ((buffer (find-file-noselect file t)))
         (with-current-buffer buffer
           (org-mode)
@@ -283,7 +324,7 @@ New sections go before Dialog, which stays last."
              (let ((task (org-dispatch--task)))
                (when (and (plist-get task :auto) (equal (plist-get task :todo) "TODO"))
                  (push task tasks))))
-           "LEVEL=1"))
+           "+auto/TODO"))
         (kill-buffer buffer)))
     (nreverse tasks)))
 

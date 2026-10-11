@@ -37,7 +37,7 @@
       '';
   };
 in {
-  options.programs.pi-coding-agent.orgDispatch.enable = lib.mkEnableOption "pi runs for first-level Org TODO headings tagged with this host and :auto:";
+  options.programs.pi-coding-agent.orgDispatch.enable = lib.mkEnableOption "pi runs for Org agenda TODO headings tagged with this host and :auto:";
 
   config = lib.mkIf (cfg.enable && cfg.orgDispatch.enable) {
     assertions = [
