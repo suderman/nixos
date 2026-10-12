@@ -114,8 +114,8 @@ in {
     persist.storage.directories = [cfg.dataDir];
 
     # Postgres database configuration
-    # The "hass" role owns the database, but the container runs as root and
-    # connects through peer auth as the "root" role, which owns the tables.
+    # The container runs as root, so map that OS user to the "hass" role for
+    # the hass database only. configuration.yaml connects as hass.
     services.postgresql = {
       enable = true;
       ensureUsers = [
@@ -125,6 +125,12 @@ in {
         }
       ];
       ensureDatabases = ["hass"];
+      identMap = ''
+        hass root hass
+      '';
+      authentication = ''
+        local hass hass peer map=hass
+      '';
     };
   };
 }

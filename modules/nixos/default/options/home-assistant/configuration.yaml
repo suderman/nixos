@@ -2,7 +2,7 @@
 default_config:
 
 recorder:
-  db_url: postgresql://@/hass
+  db_url: postgresql://hass@/hass
   purge_keep_days: 365
   exclude:
     entity_globs:
@@ -15,6 +15,12 @@ recorder:
 
 homekit:
   advertise_ip: !env_var HOST_IP
+  filter:
+    include_domains:
+      - cover
+      - light
+      - lock
+      - switch
 
 panel_custom:
   - name: ha_automation
