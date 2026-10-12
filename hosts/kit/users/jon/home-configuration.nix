@@ -53,6 +53,10 @@
   services.recall = {
     enable = true;
     bluebubbles.enable = true;
+    nightly = {
+      enable = true;
+      author = "Jon Suderman";
+    };
   };
   services.handy.enable = true;
   services.syncthing.enable = true;
