@@ -289,6 +289,35 @@ in {
       onChange = "${cfg.package} server reload-config || true";
     };
 
+    # Run the server at login so it survives reboots and closed clients. Clients
+    # and the Org dispatcher attach to it.
+    systemd.user.services.herdr = let
+      # Skip when a client already started a server outside this unit.
+      notRunning = pkgs.self.mkScript {
+        name = "herdr-not-running";
+        path = [cfg.package pkgs.gnugrep];
+        text = ''
+          status=$(herdr status server)
+          ! grep -qx 'status: running' <<<"$status"
+        '';
+      };
+    in {
+      Unit = {
+        Description = "Herdr server";
+        After = ["graphical-session.target"];
+        # Restarting kills every pane and agent; new versions wait for login.
+        X-RestartIfChanged = false;
+      };
+      Service = {
+        ExecCondition = lib.getExe notRunning;
+        ExecStart = "${lib.getExe herdr} server";
+        ExecStop = "${lib.getExe herdr} server stop";
+        Restart = "on-failure";
+        RestartSec = 5;
+      };
+      Install.WantedBy = ["graphical-session.target"];
+    };
+
     # Plugin downloads must not block Home Manager activation during boot.
     systemd.user.services.herdr-plugins = let
       herdr = lib.getExe cfg.package;
