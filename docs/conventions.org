@@ -172,6 +172,14 @@ nix flake check --no-build
 nix flake check
 #+end_src
 
+To pick the host to evaluate, follow the changed inputs and paths. Use =cog=
+for the desktop stack (=home-manager=, =stylix=, =hyprland=, =nix-flatpak=, or
+desktop modules), =iso= for =disko= or =hosts/iso/=, =sim= for =hardware=,
+=hosts/sim/=, or =modules/nixos/hardware/=, and =hub= otherwise.
+
+A GitHub workflow refreshes all flake inputs nightly. Bump one input sooner
+with =nix flake update <input>=.
+
 Use =treefmt= on changed supported files rather than formatting unrelated files.
 =nix fmt= formats the repository broadly. Installer builds use
 =nix build .#nixosConfigurations.iso.config.system.build.isoImage=.
