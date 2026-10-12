@@ -1,6 +1,7 @@
 # services.immich.enable = true;
 # I wrote this custom module long before the official nixos module was
-# published and plan to migrate soon now that 2.0 stable release is out.
+# published. Migrate once nixpkgs packages a version at or above the pinned
+# containers, since Immich cannot downgrade its database.
 {
   config,
   lib,
@@ -11,7 +12,7 @@
   cfg = config.services.immich;
   pin = flake.inputs.pins.default.containers.immich;
 
-  inherit (lib) mkIf mkOption mkAfter options types;
+  inherit (lib) concatMapStrings mkEnableOption mkIf mkOption optional types;
   inherit (config.services.traefik.lib) mkAlias mkLabels;
 
   # Shared environment across Immich services
@@ -24,18 +25,24 @@
     REVERSE_GEOCODING_DUMP_DIRECTORY = "/usr/src/app/geocoding";
   };
   port = 3333; # machine learning port
+
+  # Containers are started by immich.service, which runs first
+  containerService = {
+    requires = ["immich.service"];
+
+    # Container will not stop gracefully, so kill it
+    serviceConfig = {
+      KillSignal = "SIGKILL";
+      SuccessExitStatus = "0 SIGKILL";
+    };
+  };
 in {
   # Service order reference:
   # https://github.com/immich-app/immich/blob/main/docker/docker-compose.yml
   disabledModules = ["services/web-apps/immich.nix"];
 
   options.services.immich = {
-    enable = options.mkEnableOption "immich";
-
-    version = mkOption {
-      type = types.str;
-      default = pin.version;
-    };
+    enable = mkEnableOption "immich";
 
     name = mkOption {
       type = types.str;
@@ -53,13 +60,13 @@ in {
     };
 
     photosDir = mkOption {
-      type = types.str;
-      default = ""; # Photos directory for the Immich instance
+      type = with types; nullOr str;
+      default = null; # Photos directory for the Immich instance
     };
 
     externalDir = mkOption {
-      type = types.str;
-      default = ""; # External library directory for the Immich instance
+      type = with types; nullOr str;
+      default = null; # External library directory for the Immich instance
     };
 
     cuda = mkOption {
@@ -140,58 +147,61 @@ in {
       settings.shared_preload_libraries = "vchord.so";
     };
 
-    # Immich expects its postgres user to be a "superuser"
-    # ...not ideal, but getting tired of fighting against this...
-    systemd.services.postgresql.postStart = mkAfter ''
-      ${config.services.postgresql.package}/bin/psql -tAc 'ALTER USER immich WITH SUPERUSER;'
-      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS unaccent;'
-      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'
-      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS cube;'
-      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS earthdistance CASCADE;'
-      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS pg_trgm;'
-      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS vector;'
-      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'CREATE EXTENSION IF NOT EXISTS vchord CASCADE;'
-      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'ALTER EXTENSION unaccent UPDATE;'
-      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'ALTER EXTENSION "uuid-ossp" UPDATE;'
-      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'ALTER EXTENSION cube UPDATE;'
-      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'ALTER EXTENSION earthdistance UPDATE;'
-      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'ALTER EXTENSION pg_trgm UPDATE;'
-      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'ALTER EXTENSION vector UPDATE;'
-      ${config.services.postgresql.package}/bin/psql -d immich -tAc 'ALTER EXTENSION vchord UPDATE;'
-    '';
+    # Run after postgresql-setup has created the immich role and database.
+    # Errors are logged without failing postgresql.target for other services.
+    systemd.services.postgresql-setup.serviceConfig.ExecStartPost = let
+      extensions = ["unaccent" "uuid-ossp" "cube" "earthdistance" "pg_trgm" "vector" "vchord"];
+      sql =
+        pkgs.writeText "immich-setup.sql"
+        # sql
+        ''
+          -- Immich expects its postgres user to be a "superuser"
+          -- ...not ideal, but getting tired of fighting against this...
+          ALTER USER immich WITH SUPERUSER;
 
-    # Init service
-    systemd.services.immich = let
-      service = config.systemd.services.immich;
-    in {
-      enable = true;
-      description = "Set up network & database";
-      wantedBy = ["multi-user.target"];
-      after = ["postgresql.service"]; # run this after db
-      before = [
-        # run this before the rest:
-        "docker-immich-machine-learning.service"
-        "docker-immich-server.service"
-      ];
-      wants = service.after ++ service.before;
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = "yes";
+          SELECT COALESCE(installed_version, ''') AS vchord_before FROM pg_available_extensions WHERE name = 'vchord' \gset
+          ${concatMapStrings (ext: "CREATE EXTENSION IF NOT EXISTS \"${ext}\" CASCADE;\n") extensions}
+          ${concatMapStrings (ext: "ALTER EXTENSION \"${ext}\" UPDATE;\n") extensions}
+          SELECT COALESCE(installed_version, ''') AS vchord_after FROM pg_available_extensions WHERE name = 'vchord' \gset
+
+          -- https://docs.immich.app/administration/postgres-standalone/#updating-vectorchord
+          SELECT (:'vchord_before' != ''' AND :'vchord_before' != :'vchord_after') AS vchord_updated \gset
+          \if :vchord_updated
+            REINDEX INDEX face_index;
+            REINDEX INDEX clip_index;
+          \endif
+        '';
+    in ["${lib.getExe' config.services.postgresql.finalPackage "psql"} -d immich -f ${sql}"];
+
+    systemd.services = {
+      # Init service
+      immich = let
+        containers = ["docker-immich-machine-learning.service" "docker-immich-server.service"];
+      in {
+        description = "Set up Immich network";
+        wantedBy = ["multi-user.target"];
+        after = ["docker.service" "postgresql.target"]; # run this after db
+        before = containers; # run this before the rest
+        wants = ["postgresql.target"] ++ containers;
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = "yes";
+        };
+        path = [pkgs.docker];
+        script =
+          # bash
+          ''
+            docker network inspect immich >/dev/null 2>&1 || docker network create immich
+          '';
       };
-      path = with pkgs; [docker postgresql sudo];
-      script = with config.virtualisation.oci-containers.containers; ''
-        docker pull ${immich-machine-learning.image};
-        docker pull ${immich-server.image};
-        docker network create immich 2>/dev/null || true
-      '';
+
+      docker-immich-server = containerService;
+      docker-immich-machine-learning = containerService;
     };
 
     # Server back-end
     virtualisation.oci-containers.containers.immich-server = {
-      image =
-        if cfg.version == pin.version
-        then pin.serverImage
-        else "ghcr.io/immich-app/immich-server:v${cfg.version}";
+      image = pin.serverImage;
       autoStart = false;
 
       # Run as immich user
@@ -208,20 +218,8 @@ in {
           "${cfg.dataDir}/geocoding:/usr/src/app/geocoding"
           "${cfg.dataDir}:/usr/src/app/upload"
         ]
-        ++ (
-          if cfg.photosDir == ""
-          then []
-          else [
-            "${cfg.photosDir}:/usr/src/app/upload/library"
-          ]
-        )
-        ++ (
-          if cfg.externalDir == ""
-          then []
-          else [
-            "${cfg.externalDir}:/external:ro"
-          ]
-        );
+        ++ optional (cfg.photosDir != null) "${cfg.photosDir}:/usr/src/app/upload/library"
+        ++ optional (cfg.externalDir != null) "${cfg.externalDir}:/external:ro";
 
       # Traefik labels
       extraOptions =
@@ -240,31 +238,12 @@ in {
       proxy = mkAlias cfg.name cfg.alias;
     };
 
-    # Extend systemd service
-    systemd.services.docker-immich-server = {
-      requires = ["immich.service"];
-
-      # Container will not stop gracefully, so kill it
-      serviceConfig = {
-        KillSignal = "SIGKILL";
-        SuccessExitStatus = "0 SIGKILL";
-      };
-    };
-
     # Machine learning
-    virtualisation.oci-containers.containers.immich-machine-learning = let
-      version =
-        if cfg.cuda
-        then "${cfg.version}-cuda"
-        else cfg.version;
-    in {
+    virtualisation.oci-containers.containers.immich-machine-learning = {
       image =
-        if cfg.version == pin.version
-        then
-          if cfg.cuda
-          then pin.machineLearningCudaImage
-          else pin.machineLearningImage
-        else "ghcr.io/immich-app/immich-machine-learning:v${version}";
+        if cfg.cuda
+        then pin.machineLearningCudaImage
+        else pin.machineLearningImage;
       autoStart = false;
 
       # Environment variables
@@ -284,22 +263,7 @@ in {
           ''--network=immich''
           ''--health-cmd=python3 -c "import socket; s = socket.create_connection(('127.0.0.1', 3003), 2); s.close()"''
         ]
-        ++ (
-          if cfg.cuda
-          then ["--device=nvidia.com/gpu=all"]
-          else []
-        ); # use nvidia gpu if present
-    };
-
-    # Extend systemd service
-    systemd.services.docker-immich-machine-learning = {
-      requires = ["immich.service"];
-
-      # Container will not stop gracefully, so kill it
-      serviceConfig = {
-        KillSignal = "SIGKILL";
-        SuccessExitStatus = "0 SIGKILL";
-      };
+        ++ optional cfg.cuda "--device=nvidia.com/gpu=all"; # use nvidia gpu if present
     };
 
     # Open firewall
