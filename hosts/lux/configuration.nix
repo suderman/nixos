@@ -67,7 +67,6 @@
 
   # Services
   services.prometheus.enable = true;
-  services.gitea.enable = true;
   services.jellyfin.enable = true;
   services.plex.enable = true;
   services.arr.enable = true;
