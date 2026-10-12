@@ -59,10 +59,7 @@
 
     # Hub for monitoring other machines
     services.beszel.enable = true;
-    services.postgresql = {
-      enable = true;
-      package = pkgs.postgresql_18; # upgraded with upgrade-pg-cluster
-    };
+    services.postgresql.enable = true;
     services.immich = {
       enable = true;
       # photosDir = "/data/photos/immich";
