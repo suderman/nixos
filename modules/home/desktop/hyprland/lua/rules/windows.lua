@@ -5,7 +5,7 @@ local function rule(name, opts)
 	return hl.window_rule(opts)
 end
 
-function M.apply(_, _)
+function M.apply()
 	rule("game-workspace", {
 		match = { tag = "game" },
 		workspace = "9",

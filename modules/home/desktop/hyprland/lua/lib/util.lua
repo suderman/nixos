@@ -57,6 +57,33 @@ function M.set_layout(layout)
 	hl.workspace_rule({ workspace = ws.addressable_name or ws.config_name, layout = layout })
 end
 
+-- Disperse a real group, otherwise close the active window.
+function M.toggle_group_or_close()
+	local window = hl.get_active_window()
+	if window and window.group and window.group.size > 1 then
+		hl.dispatch(hl.dsp.group.toggle())
+	else
+		hl.dispatch(hl.dsp.window.close())
+	end
+end
+
+-- Optionally step through the group, then toggle the lock of a real group
+-- or create/dissolve a group of one.
+function M.toggle_group_or_lock(direction)
+	local window = hl.get_active_window()
+	local grouped = window and window.group and window.group.size > 1
+	if direction == "b" then
+		hl.dispatch(hl.dsp.group.prev())
+	elseif direction == "f" then
+		hl.dispatch(hl.dsp.group.next())
+	end
+	if grouped then
+		hl.dispatch(hl.dsp.group.lock_active({ action = "toggle" }))
+	else
+		hl.dispatch(hl.dsp.group.toggle())
+	end
+end
+
 function M.toggle_fullscreen_or_hidden()
 	local window = hl.get_active_window()
 	if window and window.fullscreen ~= 0 then

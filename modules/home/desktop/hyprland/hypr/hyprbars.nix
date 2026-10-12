@@ -10,6 +10,8 @@
   inherit (lib) mkIf mkOption types;
 in {
   options.wayland.windowManager.hyprland.hyprbars = {
+    enable = lib.mkEnableOption "Hyprbars titlebars";
+
     barBlur = mkOption {
       type = types.bool;
       default = true;
@@ -23,11 +25,10 @@ in {
     };
   };
 
-  config = mkIf cfg.enableOfficialPlugins {
+  config = mkIf cfg.hyprbars.enable {
     wayland.windowManager.hyprland.lua.features.hyprbars =
       # lua
       ''
-        local stylix = require("generated.stylix")
         hl.plugin.load(${toJSON hyprbars})
         local hyprbars = hl.plugin.hyprbars
 
@@ -50,8 +51,7 @@ in {
                 enabled = true,
                 bar_blur = ${toJSON cfg.hyprbars.barBlur},
                 bar_button_padding = 4,
-                bar_color = stylix.base00.rgba(0.8),
-                ["col.text"] = stylix.base05.rgba(0.8),
+                -- lib/appearance.lua sets bar_color and col.text.
                 bar_height = 25,
                 bar_padding = 10,
                 bar_part_of_window = false,

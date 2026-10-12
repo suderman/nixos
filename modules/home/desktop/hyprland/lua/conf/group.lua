@@ -1,6 +1,6 @@
 local M = {}
 
-function M.apply(_, _)
+function M.apply()
 	hl.config({
 		group = {
 			merge_groups_on_drag = true,

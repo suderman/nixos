@@ -2,7 +2,6 @@ _: {
   # Hyprland on nvidia desktop
   wayland.windowManager.hyprland = {
     lua = {
-      enable = true;
       # Temporary workaround for hyprwm/hyprland-plugins#697 on NVIDIA.
       rounding = 0;
       monitors = [
@@ -18,9 +17,8 @@ _: {
         __GLX_VENDOR_LIBRARY_NAME = "nvidia";
       };
     };
-    enablePlugins = false; # dynamic cursors crash on lua path for now
-    enableOfficialPlugins = true;
     hyprbars = {
+      enable = true;
       barBlur = false;
       barPrecedenceOverBorder = true;
     };

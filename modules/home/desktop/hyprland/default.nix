@@ -1,25 +1,18 @@
 {
   lib,
   pkgs,
-  perSystem,
   flake,
   ...
 }: {
   imports =
-    [flake.homeModules.desktop.default ./lua-options.nix]
+    [flake.homeModules.desktop.default]
     ++ flake.lib.ls ./.;
-
-  options.wayland.windowManager.hyprland = {
-    enablePlugins = lib.mkEnableOption "enablePlugins";
-    enableOfficialPlugins = lib.mkEnableOption "enableOfficialPlugins";
-  };
 
   config = {
     programs.desktop-theme.enable = lib.mkDefault true;
     wayland = {
       windowManager.hyprland = {
         enable = true;
-        enableOfficialPlugins = lib.mkDefault false;
         package = null;
         portalPackage = null;
         systemd.enable = true;

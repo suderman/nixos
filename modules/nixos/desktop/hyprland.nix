@@ -1,17 +1,10 @@
 {
-  lib,
   pkgs,
   perSystem,
   flake,
   ...
 }: {
   imports = [flake.nixosModules.desktop.default];
-
-  # Set this to a username to automatically login at boot
-  options.programs.hyprland.autologin = lib.mkOption {
-    type = with lib.types; nullOr str;
-    default = null;
-  };
 
   config = {
     # Greeter
@@ -23,14 +16,11 @@
         animation = "matrix";
         bigclock = true;
         session_log = null;
-        login_cmd = "start-hyprland";
-        logout_cm = "clear && reset && chvt 1";
       };
     };
-    persist.scratch.files = [
-      "/etc/ly/save.ini"
-      "/etc/ly/save.txt"
-    ];
+    # Remembers the last user and session. Ly 1.4 prefers a legacy save.ini
+    # over this file and cannot delete a bind-mounted one, so never persist it.
+    persist.scratch.files = ["/etc/ly/save.txt"];
 
     # The one and only
     programs.hyprland = {
@@ -40,13 +30,9 @@
     };
 
     # Adjust this if system graphics drivers aren't compatible with hyprland's
-    hardware.graphics = let
-      hyprpkgs = flake.inputs.hyprland.inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system};
-    in {
+    hardware.graphics = {
       enable = true;
-      # package = hyprpkgs.mesa;
       enable32Bit = true;
-      # package32 = hyprpkgs.pkgsi686Linux.mesa;
     };
 
     # https://github.com/ArtsyMacaw/wlogout/issues/61

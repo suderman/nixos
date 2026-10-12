@@ -206,7 +206,6 @@ in {
   wayland.windowManager.hyprland.lua.features.mediactl =
     # lua
     ''
-      util.exec("XF86AudioMedia", "sinks")
       util.exec("XF86AudioMute", "mediactl mute")
       util.exec("SHIFT + XF86MonBrightnessUp", "mediactl sunset")
       util.exec("SHIFT + XF86MonBrightnessDown", "mediactl sunset")

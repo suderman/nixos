@@ -6,16 +6,23 @@
   lib = pkgs.lib;
   hyprland = flake.inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
   source = ../modules/home/desktop/hyprland;
-  hosts = ["kit" "pow" "cog" "sim"];
-  renderHost = host: let
-    cfg = flake.nixosConfigurations.${host}.config.home-manager.users.jon;
+  profiles = [
+    ["kit" "jon"]
+    ["pow" "jon"]
+    ["cog" "jon"]
+    ["cog" "ness"]
+    ["sim" "jon"]
+  ];
+  renderProfile = profile: let
+    host = lib.concatStringsSep "-" profile;
+    cfg = flake.nixosConfigurations.${builtins.head profile}.config.home-manager.users.${lib.last profile};
     files = lib.filterAttrs (_: file: lib.hasPrefix ".config/hypr/" file.target) cfg.home.file;
   in
     lib.concatStringsSep "\n" (lib.mapAttrsToList (_: file: let
         target = lib.removePrefix ".config/hypr/" file.target;
       in ''
         mkdir -p "$out/${host}/$(dirname ${lib.escapeShellArg target})"
-        cp ${lib.escapeShellArg (builtins.path {path = file.source;})} "$out/${host}/"${lib.escapeShellArg target}
+        cp -r ${lib.escapeShellArg (builtins.path {path = file.source;})} "$out/${host}/"${lib.escapeShellArg target}
       '')
       files)
     + ''
@@ -35,5 +42,5 @@ in
     export HOME="$TMPDIR/home" XDG_CONFIG_HOME="$TMPDIR/home/.config" XDG_RUNTIME_DIR="$TMPDIR/runtime"
     mkdir -p "$XDG_CONFIG_HOME" "$XDG_RUNTIME_DIR"
     chmod 700 "$XDG_RUNTIME_DIR"
-    ${lib.concatMapStringsSep "\n" renderHost hosts}
+    ${lib.concatMapStringsSep "\n" renderProfile profiles}
   ''

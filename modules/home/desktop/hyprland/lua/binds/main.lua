@@ -2,7 +2,7 @@ local util = require("lib.util")
 
 local M = {}
 
-function M.apply(_, _)
+function M.apply()
 	local move = {
 		h = { dir = "l", x = -40, y = 0 },
 		j = { dir = "d", x = 0, y = 40 },
@@ -54,8 +54,8 @@ function M.apply(_, _)
 		hl.dispatch(hl.dsp.window.center())
 	end
 
-	-- Reuse the old tile helper semantics: on master this promotes/cycles,
-	-- elsewhere it toggles or swaps the split depending on the modifier.
+	-- Tile a floating window. Tiled windows swap with master on master,
+	-- elsewhere toggle or swap the split depending on the modifier.
 	local function tile_active(alt_mode)
 		local win = hl.get_active_window()
 		if not win then
@@ -73,6 +73,44 @@ function M.apply(_, _)
 			hl.dispatch(hl.dsp.layout("swapwithmaster master"))
 		else
 			hl.dispatch(hl.dsp.layout(alt_mode and "swapsplit" or "togglesplit"))
+		end
+	end
+
+	-- Floating windows move by pixels. Tiled windows use the group-aware
+	-- directional move so unlocked groups still absorb windows.
+	local function move_active(spec)
+		local win = hl.get_active_window()
+		if win and win.floating then
+			hl.dispatch(hl.dsp.window.move({ x = spec.x, y = spec.y, relative = true }))
+		else
+			hl.dispatch(hl.dsp.window.move({ direction = spec.dir, group_aware = true }))
+		end
+	end
+
+	-- Resize only floating windows to a share of the monitor's logical size;
+	-- tiled windows keep their layout size. Resize takes pixels, not percents.
+	local function resize_floating(percent)
+		local win = hl.get_active_window()
+		if not (win and win.floating and win.monitor) then
+			return
+		end
+		local monitor = win.monitor
+		local width, height = monitor.width / monitor.scale, monitor.height / monitor.scale
+		if monitor.transform % 2 == 1 then
+			width, height = height, width
+		end
+		hl.dispatch(hl.dsp.window.resize({
+			x = math.floor(width * percent / 100),
+			y = math.floor(height * percent / 100),
+		}))
+		hl.dispatch(hl.dsp.window.center())
+	end
+
+	-- Move the active window into the special workspace, or back out of it.
+	local function toggle_special_window()
+		local win = hl.get_active_window()
+		if win and win.workspace then
+			hl.dispatch(hl.dsp.window.move({ workspace = win.workspace.special and "e+0" or "special" }))
 		end
 	end
 
@@ -156,9 +194,9 @@ function M.apply(_, _)
 	util.exec("SUPER + M", "hypr-supertab clear", { long_press = true })
 
 	util.bind("SUPER + ESCAPE", "Toggle special workspace", hl.dsp.workspace.toggle_special("special"))
-	util.exec("SUPER + ALT + ESCAPE", "hypr-togglespecial")
+	util.bind("SUPER + ALT + ESCAPE", "Move window to or from special workspace", toggle_special_window)
 
-	util.exec("SUPER + Q", "hypr-togglegrouporclose")
+	util.bind("SUPER + Q", "Ungroup or close window", util.toggle_group_or_close)
 	util.bind("SUPER + COMMA", "Previous group window", hl.dsp.group.prev())
 	util.bind("SUPER + COMMA", "Lock group after selection", hl.dsp.group.lock_active({ action = "lock" }))
 	util.bind("SUPER + PERIOD", "Next group window", hl.dsp.group.next())
@@ -167,9 +205,15 @@ function M.apply(_, _)
 	util.bind("SUPER + ALT + COMMA", "Lock group after selection", hl.dsp.group.lock_active({ action = "lock" }))
 	util.bind("SUPER + ALT + PERIOD", "Move window forward in group", hl.dsp.group.move_window({ forward = true }))
 	util.bind("SUPER + ALT + PERIOD", "Lock group after selection", hl.dsp.group.lock_active({ action = "lock" }))
-	util.exec("SUPER + ALT + mouse:272", "hypr-togglegrouporlock")
-	util.exec("SUPER + COMMA", "hypr-togglegrouporlock f", { long_press = true })
-	util.exec("SUPER + PERIOD", "hypr-togglegrouporlock b", { long_press = true })
+	util.bind("SUPER + ALT + mouse:272", "Toggle group or group lock", function()
+		util.toggle_group_or_lock()
+	end)
+	util.bind("SUPER + COMMA", "Next group window and toggle lock", function()
+		util.toggle_group_or_lock("f")
+	end, { long_press = true })
+	util.bind("SUPER + PERIOD", "Previous group window and toggle lock", function()
+		util.toggle_group_or_lock("b")
+	end, { long_press = true })
 
 	util.bind("SUPER + F", "Toggle maximized", hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }))
 	util.bind(
@@ -186,19 +230,19 @@ function M.apply(_, _)
 
 	util.bind("SUPER + SHIFT + O", "Next floating window", hl.dsp.window.cycle_next({ floating = true }))
 	util.bind("SUPER + O", "Float or unpin window", float_active)
-	util.exec("SUPER + ALT + O", "hypr-togglefullscreenorhidden")
+	util.bind("SUPER + ALT + O", "Exit fullscreen or hide floating windows", util.toggle_fullscreen_or_hidden)
 	util.bind("SUPER + O", "Pin floating window", hl.dsp.window.pin(), { long_press = true })
 
 	for i = 1, 9 do
-		util.exec("SUPER + SHIFT + " .. i, "hypr-resizefloating " .. i .. "0")
+		util.bind("SUPER + SHIFT + " .. i, "Resize floating window to " .. i .. "0%", function()
+			resize_floating(i * 10)
+		end)
 	end
 
 	for key, spec in pairs(move) do
-		util.exec(
-			"SUPER + ALT + " .. key:upper(),
-			string.format("hypr-movewindoworgrouporactive %s %d %d", spec.dir, spec.x, spec.y),
-			{ repeating = true }
-		)
+		util.bind("SUPER + ALT + " .. key:upper(), "Move window or group " .. spec.dir, function()
+			move_active(spec)
+		end, { repeating = true })
 	end
 
 	util.bind("SUPER + ALT + SHIFT + H", "Swap column left", hl.dsp.layout("swapcol l"), { repeating = true })

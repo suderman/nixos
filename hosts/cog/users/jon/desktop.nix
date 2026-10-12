@@ -10,7 +10,6 @@
   # Hyprland embedded display (laptop)
   wayland.windowManager.hyprland = {
     lua = {
-      enable = true;
       monitors = [
         {
           output = "eDP-1";
@@ -20,8 +19,7 @@
         }
       ];
     };
-    enablePlugins = false; # dynamic cursors crash on lua path for now
-    enableOfficialPlugins = true;
+    hyprbars.enable = true;
     waybar.codex-lb.enable = true;
     waybar.minimax-quota.enable = true;
     waybar.claude-quota.enable = true;

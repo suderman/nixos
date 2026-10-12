@@ -7,12 +7,8 @@
 
   # Hyprland on AMD desktop
   wayland.windowManager.hyprland = {
-    lua = {
-      enable = true;
-      execOnce = ["freetube" "zwift"];
-    };
-    enablePlugins = false; # dynamic cursors crash on lua path for now
-    enableOfficialPlugins = true;
+    lua.execOnce = ["freetube" "zwift"];
+    hyprbars.enable = true;
   };
 
   programs.zwift.enable = true; # fitness

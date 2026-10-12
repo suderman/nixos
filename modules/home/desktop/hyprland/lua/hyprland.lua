@@ -1,19 +1,17 @@
-local features = require("generated.features")
 local host = require("generated.host")
-local feature_list = require("generated.feature-list")
 
 -- Shared compositor behavior first...
-require("conf.session").apply(host, features)
-require("conf.look").apply(host, features)
-require("conf.input").apply(host, features)
-require("conf.layouts").apply(host, features)
-require("conf.group").apply(host, features)
-require("binds.main").apply(host, features)
-require("rules.windows").apply(host, features)
+require("conf.session").apply(host)
+require("conf.look").apply(host)
+require("conf.input").apply()
+require("conf.layouts").apply()
+require("conf.group").apply()
+require("binds.main").apply()
+require("rules.windows").apply()
 
 -- ...then feature-local extensions contributed from Nix modules.
-for _, feature in ipairs(feature_list) do
-	require("features." .. feature).apply(host, features)
+for _, feature in ipairs(require("generated.feature-list")) do
+	require("features." .. feature)
 end
 
 -- Colors refresh independently of binds, layouts, and local overrides.

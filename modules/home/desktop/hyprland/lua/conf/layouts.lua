@@ -1,6 +1,6 @@
 local M = {}
 
-function M.apply(_, _)
+function M.apply()
 	hl.config({
 		layout = {
 			single_window_aspect_ratio = "4 3",

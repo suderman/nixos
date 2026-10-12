@@ -25,7 +25,7 @@ in {
       listener = [
         {
           timeout = 600;
-          on-timeout = cfg.lock;
+          on-timeout = "loginctl lock-session";
         }
         {
           timeout = 1200;

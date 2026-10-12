@@ -1,10 +1,5 @@
 # powerkey
-{
-  config,
-  pkgs,
-  ...
-}: let
-in {
+{pkgs, ...}: {
   # Wrapper script for formatting and prevent multiple instances
   home.packages = [
     (
@@ -33,7 +28,7 @@ in {
     layout = [
       {
         label = "lock";
-        action = "${config.services.hypridle.lock}";
+        action = "loginctl lock-session";
         text = "lock";
         keybind = "l";
       }

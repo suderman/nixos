@@ -13,14 +13,8 @@
 
   path = with pkgs; [
     gawk
-    gnugrep
-    gnused
-    hyprpicker
     jq
     libnotify
-    procps
-    socat
-    wl-clipboard
   ];
 in {
   home.packages =

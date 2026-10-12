@@ -61,6 +61,9 @@ in {
 
     # Agent windows share one profile/CDP endpoint and open on workspace 8.
     wayland.windowManager.hyprland.lua.features.chromium-agent = ''
+      hl.on("hyprland.start", function()
+        hl.dispatch(hl.dsp.exec_cmd("chromium-agent --no-startup-window"))
+      end)
       hl.window_rule({
         name = "chromium-agent-workspace",
         match = { class = "^chromium-agent.*$" },

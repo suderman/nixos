@@ -69,10 +69,19 @@ in {
     wayland.windowManager.hyprland.lua.features.steam =
       # lua
       ''
-        hl.window_rule({ name = "steam-game-tag", match = { class = "[Ss]team" }, tag = "+game" })
-        hl.window_rule({ name = "steam-app-tag", match = { class = "^steam_app_(.*)$" }, tag = "+game" })
-        hl.window_rule({ name = "bin-x86-tag", match = { class = "^(.*).bin.x86$" }, tag = "+game" })
-        hl.window_rule({ name = "bin-x86_64-tag", match = { class = "^(.*)x86_64$" }, tag = "+game" })
+        -- Games, not the Steam client, go fullscreen on workspace 9.
+        hl.window_rule({
+          name = "steam-game-tag",
+          match = { class = "^(steam_app_.*|gamescope|.+\\.(bin\\.)?x86(_64)?)$" },
+          tag = "+game",
+        })
+        -- Keep the client's secondary windows out of the tiling layout.
+        hl.window_rule({
+          name = "steam-client-float",
+          match = { class = "^steam$", title = "^(Friends List|Steam Settings)$" },
+          float = true,
+          center = true,
+        })
       '';
   };
 }

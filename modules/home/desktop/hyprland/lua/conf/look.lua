@@ -1,7 +1,7 @@
 local util = require("lib.util")
 local M = {}
 
-function M.apply(host, _)
+function M.apply(host)
 	hl.config({
 		general = {
 			snap = {
@@ -43,13 +43,10 @@ function M.apply(host, _)
 			animate_mouse_windowdragging = false,
 			disable_hyprland_logo = true,
 			disable_splash_rendering = true,
-			enable_swallow = false,
 			focus_on_activate = false,
 			key_press_enables_dpms = true,
 			mouse_move_enables_dpms = true,
 			on_focus_under_fullscreen = 2,
-			swallow_exception_regex = "wev|^(*.Yazi.*)$|^(*.mpv.*)$|^(*.imv.*)$|^(*.nvim.*)$",
-			swallow_regex = "^(Alacritty|kitty|footclient)$",
 		},
 		animations = {
 			enabled = true,
@@ -62,19 +59,7 @@ function M.apply(host, _)
 	util.curve("overshot", { 0.05, 0.9 }, { 0.1, 1.05 })
 	util.curve("smoothOut", { 0.36, 0 }, { 0.66, -0.56 })
 	util.curve("smoothIn", { 0.25, 1 }, { 0.5, 1 })
-
-	util.curve("win", { 0.05, 0.9 }, { 0.1, 1.05 })
-	util.curve("winIn", { 0.1, 1.1 }, { 0.1, 1.1 })
-	util.curve("winOut", { 0.3, -0.3 }, { 0, 1 })
 	util.curve("liner", { 1, 1 }, { 1, 1 })
-
-	util.curve("md3_standard", { 0.2, 0.0 }, { 0, 1.0 })
-	util.curve("md3_decel", { 0.05, 0.7 }, { 0.1, 1 })
-	util.curve("md3_accel", { 0.3, 0 }, { 0.8, 0.15 })
-	util.curve("hyprnostretch", { 0.05, 0.9 }, { 0.1, 1.0 })
-	util.curve("win10", { 0, 0 }, { 0, 1 })
-	util.curve("gnome", { 0, 0.85 }, { 0.3, 1 })
-	util.curve("funky", { 0.46, 0.35 }, { -0.2, 1.2 })
 
 	hl.animation({ leaf = "windows", enabled = true, speed = 3, bezier = "overshot", style = "slide" })
 	hl.animation({ leaf = "windowsOut", enabled = true, speed = 3, bezier = "smoothOut", style = "slide" })

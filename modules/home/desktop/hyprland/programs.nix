@@ -9,6 +9,7 @@
   # Add these to my path
   home.packages = with pkgs; [
     brightnessctl
+    wdisplays # ad hoc output layout
 
     unstable.wiremix # sound control
     font-awesome # icon font

@@ -1,6 +1,6 @@
 local M = {}
 
-function M.apply(host, features)
+function M.apply(host)
 	hl.monitor({
 		output = "",
 		mode = "preferred",
@@ -23,10 +23,6 @@ function M.apply(host, features)
 	end
 
 	hl.on("hyprland.start", function()
-		for _, command in ipairs(features.exec_once or {}) do
-			hl.dispatch(hl.dsp.exec_cmd(command))
-		end
-
 		for _, command in ipairs(host.exec_once or {}) do
 			hl.dispatch(hl.dsp.exec_cmd(command))
 		end

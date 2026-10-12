@@ -1,22 +1,9 @@
-{
-  lib,
-  osConfig,
-  config,
-  ...
-}: let
-  inherit (lib) mkEnableOption mkOption types;
-  hostName = osConfig.networking.hostName or config.networking.hostName or "default";
+# Declared for every desktop so feature modules can contribute Lua
+# without checking which compositor imported them.
+{lib, ...}: let
+  inherit (lib) mkOption types;
 in {
   options.wayland.windowManager.hyprland.lua = {
-    enable = mkEnableOption "direct Hyprland Lua configuration" // {default = true;};
-
-    host = mkOption {
-      type = types.str;
-      default = hostName;
-      defaultText = lib.literalExpression "config.networking.hostName";
-      description = "Logical Hyprland host profile name exposed to Lua. Defaults to the current host name and only needs overriding if a host should reuse a different Hyprland profile.";
-    };
-
     rounding = mkOption {
       type = types.int;
       default = 10;
@@ -66,7 +53,7 @@ in {
     features = mkOption {
       type = types.attrsOf types.lines;
       default = {};
-      description = "Feature-local Lua bodies rendered into ~/.config/hypr/features/*.lua.";
+      description = "Feature-local Lua chunks rendered into ~/.config/hypr/features/*.lua.";
     };
   };
 }

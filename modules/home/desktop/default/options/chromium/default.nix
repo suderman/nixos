@@ -161,6 +161,9 @@ in {
     wayland.windowManager.hyprland.lua.features.chromium =
       # lua
       ''
+        hl.on("hyprland.start", function()
+          hl.dispatch(hl.dsp.exec_cmd("chromium --no-startup-window"))
+        end)
         hl.window_rule({
           name = "chromium-tag",
           match = { class = "${class}" },

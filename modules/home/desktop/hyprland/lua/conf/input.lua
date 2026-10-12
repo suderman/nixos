@@ -1,7 +1,7 @@
 local util = require("lib.util")
 local M = {}
 
-function M.apply(_, _)
+function M.apply()
 	local function move_scrolling_column(command)
 		local ws = util.active_workspace()
 		local layout = ws and ws.tiled_layout

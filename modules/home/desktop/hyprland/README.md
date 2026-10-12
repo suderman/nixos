@@ -9,10 +9,16 @@ module. It also owns the systemd startup hook. Do not add a second session
 bootstrap or a legacy `hyprland.conf`.
 
 - `lua.nix` renders host data and the sorted feature list with
-  `lib.generators.toLua`.
+  `lib.generators.toLua`. `lua-options.nix` declares the options for every
+  desktop, so feature modules need not check which compositor is active.
 - `lua/conf/`, `lua/binds/`, and `lua/rules/` hold shared compositor policy.
+  `lua/lib/util.lua` holds helpers shared by binds and shell wrappers.
 - App and service modules contribute `wayland.windowManager.hyprland.lua.features`.
-  Keep their binds, rules, and event listeners beside the owning service.
+  Each feature is a plain chunk with `util` in scope. Keep binds, rules, startup
+  commands, and event listeners beside the owning service.
+- Binds call Lua directly. Shell helpers in `hypr/scripts/` exist only for
+  callers that need a command, such as Hyprbars, Waybar, and Blezz; prefer a
+  thin `hyprctl eval` wrapper around a `lib.util` function.
 - `~/.config/hypr/local/init.lua` is the writable scratch hook. It may be absent.
   Generated modules are required; broken modules and scratch code must report
   errors rather than silently disappear.
@@ -36,6 +42,7 @@ Declare plugins with `hl.plugin.load`. Hyprland reloads after loading them and
 registers their functions under `hl.plugin.<name>`. Configure Hyprbars when
 `hl.plugin.hyprbars` exists. A sleep cannot prove that a plugin is ready.
 Plugins must be built against the same Hyprland revision as the compositor.
+Hosts opt in with `hyprbars.enable` and `dynamicCursors.enable`.
 
 ## Appearance and daily tools
 
@@ -128,7 +135,8 @@ this checkout: it includes ignored Sim disks and private keys. For unstaged
 experiments, build from a snapshot containing only tracked and non-ignored files.
 
 This checks Lua and script syntax and the QR clipboard-history hint. It renders
-Kit, Pow, Cog, and Sim configurations and verifies each with pinned Hyprland.
+Jon's Kit, Pow, Cog, and Sim configurations and Ness's Cog configuration, and
+verifies each with pinned Hyprland.
 Offline verification does not load plugins or prove that a desktop starts.
 
 Try candidate releases in Sim before changing the production lock, both without
