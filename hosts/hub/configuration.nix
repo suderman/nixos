@@ -1,6 +1,7 @@
 {
   config,
   flake,
+  pkgs,
   ...
 }: {
   imports = [
@@ -63,6 +64,9 @@
     isy = flake.networking.zones.home.isy;
     mqtt.enable = true;
   };
+
+  # Upgraded with upgrade-pg-cluster
+  services.postgresql.package = pkgs.postgresql_18;
 
   # Reverse proxy for termux syncthing webgui running on my phone
   services.traefik.proxy."syncthing-jon.gem" = "http://gem.tail:8384";
