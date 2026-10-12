@@ -56,6 +56,10 @@
   };
   services.handy.enable = true;
   services.syncthing.enable = true;
+  services.attic-cache = {
+    enable = true;
+    hosts = ["cog" "eve" "hub" "kit" "lux" "pow" "wit"];
+  };
   services.withings-sync = {
     enable = false;
     secret = ./withings-sync.age;
