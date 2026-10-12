@@ -1,18 +1,17 @@
 # Loads default set of integrations. Do not remove.
 default_config:
 
-http:
-  use_x_forwarded_for: true
-  trusted_proxies:
-    - 127.0.0.1/32
-    - 192.168.0.0/16
-    - 10.0.0.0/8
-    - 172.16.0.0/12
-    - 100.64.0.0/10
-
 recorder:
   db_url: postgresql://@/hass
   purge_keep_days: 365
+  exclude:
+    entity_globs:
+      - sensor.awtrix_*_current_app
+      - sensor.awtrix_*_free_ram
+      - sensor.awtrix_*_uptime
+      - sensor.awtrix_*_wifi_strength
+    entities:
+      - sensor.gem_active_notification_count
 
 homekit:
   advertise_ip: !env_var HOST_IP
@@ -36,24 +35,6 @@ panel_custom:
     require_admin: true
     config:
       ingress: core_configurator
-
-panel_iframe:
-  isy:
-    title: "ISY"
-    url: !env_var ISY_URL
-    icon: mdi:fridge
-  zwave:
-    title: "Z-Wave"
-    url: !env_var ZWAVE_URL
-    icon: mdi:chip
-
-# Load frontend themes from the themes folder
-frontend:
-  themes: !include_dir_merge_named themes
-
-# Text to speech
-tts:
-  - platform: google_translate
 
 # influxdb:
 #   api_version: 2

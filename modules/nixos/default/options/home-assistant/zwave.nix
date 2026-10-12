@@ -20,18 +20,13 @@ in {
         if cfg.zwaveVersion == pin.version
         then pin.image
         else "ghcr.io/zwave-js/zwave-js-ui:${cfg.zwaveVersion}";
-      autoStart = false;
+      devices = ["${cfg.zwave}:/dev/zwave"];
 
-      # Traefik labels
+      # Traefik labels and networking
       extraOptions =
         mkLabels [cfg.zwaveName 8091]
-        # Networking and devices
         ++ [
-          "--privileged"
           "--network=host"
-        ]
-        ++ [
-          "--device=${cfg.zwave}:/dev/zwave"
           "--stop-signal=SIGINT"
           "-t"
         ];
@@ -47,12 +42,7 @@ in {
       ];
     };
 
-    # Open firewall
-    networking.firewall = {
-      allowedTCPPorts = [
-        3000 # zwave websockets
-        8091 # zwave web interface
-      ];
-    };
+    # No firewall ports: Home Assistant reaches the websocket server (3000) on
+    # localhost, and the web interface (8091) is served through Traefik.
   };
 }

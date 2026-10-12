@@ -3,7 +3,6 @@
 {
   config,
   lib,
-  pkgs,
   flake,
   ...
 }: let
@@ -40,13 +39,13 @@ in {
     zigbee = mkOption {
       type = types.str;
       default = ""; # Path to Zigbee USB device
-      example = ["/dev/serial/by-id/usb-Nabu_Casa_SkyConnect_v1.0_28b77f55258dec11915068e883c5466d-if00-port0"];
+      example = "/dev/serial/by-id/usb-Nabu_Casa_ZBT-2_DCB4D90E3668-if00";
     };
 
     zwave = mkOption {
       type = types.str;
       default = ""; # Path to Z-Wave USB device
-      example = ["usb-Nabu_Casa_ZWA-2_80B54EE1C718-if00"];
+      example = "/dev/serial/by-id/usb-Nabu_Casa_ZWA-2_80B54EE1C718-if00";
     };
 
     zwaveName = mkOption {
@@ -86,7 +85,7 @@ in {
             uid = config.ids.uids.hass;
           };
         }
-        # Add sudoers to the immich group
+        # Add sudoers to the hass group
         // extraGroups (sudoers flake.users) ["hass"];
 
       # Create group
@@ -95,10 +94,10 @@ in {
       };
     };
 
-    # Ensure data directory exists
+    # Ensure data directory exists, closed to users outside the hass group
     tmpfiles.directories = let
       dir = {
-        mode = 775;
+        mode = 770;
         user = config.users.users.hass.uid;
         group = config.users.groups.hass.gid;
       };
@@ -115,9 +114,8 @@ in {
     persist.storage.directories = [cfg.dataDir];
 
     # Postgres database configuration
-    # This "hass" postgres user isn't actually being used to access the database.
-    # Since the docker is running the container as root, the "root" postgres user
-    # is what needs access, but that account already has access to all databases.
+    # The "hass" role owns the database, but the container runs as root and
+    # connects through peer auth as the "root" role, which owns the tables.
     services.postgresql = {
       enable = true;
       ensureUsers = [
@@ -127,38 +125,6 @@ in {
         }
       ];
       ensureDatabases = ["hass"];
-    };
-
-    # Init service
-    systemd.services.home-assistant = let
-      service = config.systemd.services.home-assistant;
-    in {
-      enable = true;
-      description = "Initiate home assistant services";
-      wantedBy = ["multi-user.target"];
-      after = ["postgresql.service"]; # run this after db
-      before = [
-        # run this before the rest:
-        "docker-home-assistant.service"
-        "docker-zwave.service"
-      ];
-      wants = service.after ++ service.before;
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = "yes";
-      };
-      path = with pkgs; [docker];
-      script = with config.virtualisation.oci-containers.containers;
-        ''
-          docker pull ${home-assistant.image};
-        ''
-        + (
-          if cfg.zwave == ""
-          then ""
-          else ''
-            docker pull ${zwave.image};
-          ''
-        );
     };
   };
 }

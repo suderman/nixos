@@ -2,13 +2,10 @@
   config,
   flake,
   lib,
-  pkgs,
   ...
 }: let
   cfg = config.services.home-assistant;
-  inherit (builtins) readFile;
-  inherit (lib) mkIf;
-  inherit (pkgs) writeText;
+  inherit (lib) mkIf optional;
   inherit (config.services.traefik.lib) mkLabels;
 in {
   config = mkIf cfg.enable {
@@ -23,43 +20,35 @@ in {
         if cfg.version == pin.version
         then pin.image
         else "ghcr.io/home-assistant/home-assistant:${cfg.version}";
-      autoStart = false;
+      devices = optional (cfg.zigbee != "") "${cfg.zigbee}:/dev/zigbee";
 
-      # Traefik labels
-      extraOptions =
-        mkLabels [cfg.name 8123]
-        # Networking and devices
-        ++ [
-          "--privileged"
-          "--network=host"
-        ]
-        ++ (
-          if cfg.zigbee == ""
-          then []
-          else [
-            "--device=${cfg.zigbee}:/dev/zigbee"
-          ]
-        );
+      # Traefik labels and networking
+      extraOptions = mkLabels [cfg.name 8123] ++ ["--network=host"];
 
       # Environment variables
       environment = {
         TZ = config.time.timeZone;
-        ISY_URL = "https://${cfg.isyName}";
-        ZWAVE_URL = "https://${cfg.zwaveName}";
         HOST_IP = cfg.ip;
       };
 
-      # Bind volume and db socket
+      # Bind volume, read-only configuration, and db socket
       volumes = [
         "${cfg.dataDir}:/config"
+        "${./configuration.yaml}:/config/configuration.yaml:ro"
         "/run/postgresql:/run/postgresql"
       ];
     };
 
-    # Copy configuration yaml and ensure includes exist
+    # The recorder connects through the postgres socket
+    systemd.services.docker-home-assistant = {
+      after = ["postgresql.service"];
+      wants = ["postgresql.service"];
+    };
+
+    # Ensure includes exist
     tmpfiles.files = let
       yaml = {
-        mode = 775;
+        mode = 660;
         user = config.users.users.hass.uid;
         group = config.users.groups.hass.gid;
       };
@@ -67,12 +56,6 @@ in {
       (yaml // {target = "${cfg.dataDir}/automations.yaml";})
       (yaml // {target = "${cfg.dataDir}/scripts.yaml";})
       (yaml // {target = "${cfg.dataDir}/scenes.yaml";})
-      (yaml
-        // {
-          target = "${cfg.dataDir}/configuration.yaml";
-          # source = writeText "configuration.yaml" (readFile ./configuration.yaml);
-          source = ./configuration.yaml;
-        })
     ];
 
     # Open firewall
