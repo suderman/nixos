@@ -1,0 +1,94 @@
+name: Update flake.lock
+
+on:
+  schedule:
+    # Daily at 16:17 MDT (UTC-6), 15:17 MST. Scheduled runs start up to
+    # about 7 hours late. Kit pulls and builds for Attic at 02:00, and hosts
+    # auto-upgrade from GitHub at 04:00.
+    - cron: '17 22 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-flake-lock
+
+jobs:
+  update-flake-lock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      # Needs secrets.UPSTREAM_DISPATCH_TOKEN: a fine-grained token with
+      # Actions read/write on these repositories. Failures only warn.
+      - name: Update upstream flakes
+        env:
+          GH_TOKEN: ${{ secrets.UPSTREAM_DISPATCH_TOKEN }}
+        run: |
+          update() {
+            local repo="suderman/$1" workflow="$2" since id=""
+            since="$(date -u -d '-30 sec' +%FT%TZ)"
+            if ! gh workflow run "$workflow" -R "$repo"; then
+              echo "::warning::$repo: could not start $workflow"
+              return 0
+            fi
+            for _ in {1..60}; do
+              id="$(gh run list -R "$repo" -w "$workflow" -e workflow_dispatch -L 5 \
+                --json databaseId,createdAt \
+                --jq "map(select(.createdAt >= \"$since\"))[-1].databaseId // empty")"
+              [[ -n "$id" ]] && break
+              sleep 5
+            done
+            if [[ -z "$id" ]]; then
+              echo "::warning::$repo: started $workflow but found no run"
+            elif gh run watch "$id" -R "$repo" --exit-status --interval 15 >/dev/null; then
+              echo "$repo: updated"
+            else
+              echo "::warning::$repo: https://github.com/$repo/actions/runs/$id failed"
+            fi
+          }
+
+          # Emacs takes pins as an input.
+          { update pins update-pins.yml; update emacs update-flake-lock.yml; } &
+          update agents update-flake-lock.yml &
+          if [[ "$(TZ=America/Edmonton date +%u)" == 7 ]]; then
+            update neovim update-flake-lock.yml &
+          fi
+          wait
+
+      - name: Checkout (v7.0.1)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Nix (v31.11.1)
+        uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24
+
+      - name: Update flake
+        run: nix flake update
+
+      - name: Evaluate every host
+        run: |
+          nix eval --json .#nixosConfigurations --apply \
+            'cs: builtins.mapAttrs (_: c: c.config.system.build.toplevel.drvPath) cs'
+
+      - name: Commit and push if flake.lock changed
+        run: |
+          # Kit has already built for this night's host upgrades.
+          case "$(TZ=America/Edmonton date +%H)" in
+            02 | 03 | 04)
+              echo "::warning::Not pushing between 02:00 and 05:00 Edmonton time"
+              exit 0
+              ;;
+          esac
+          if git diff --quiet -- flake.lock; then
+            echo "No changes to flake.lock"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add flake.lock
+          git commit -m "Automated flake.lock update"
+          git pull --rebase
+          git push
