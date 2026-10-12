@@ -1975,11 +1975,11 @@
         "nixpkgs": "nixpkgs_13"
       },
       "locked": {
-        "lastModified": 1791846543,
-        "narHash": "sha256-M8zthGitrt11nCQiSRx7AaO2l2tFXTJwyPhWaa1qO38=",
+        "lastModified": 1791847310,
+        "narHash": "sha256-GWMAHK5u3q0pHIV79b0T5/x/2W9pJB0qrIlKPKX0Hkk=",
         "owner": "suderman",
         "repo": "recall",
-        "rev": "e075598d84971df9521c8bbe25e4e137d1933570",
+        "rev": "b069519d2e40a29f6b1b56de9ffc55b8f298fe75",
         "type": "github"
       },
       "original": {
