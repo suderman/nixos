@@ -1,6 +1,7 @@
 {
   config,
   flake,
+  pkgs,
   ...
 }: {
   imports = [
@@ -77,6 +78,9 @@
     externalDir = "/data/photos/collections";
     alias = "immich.suderman.org";
   };
+
+  # Upgraded with upgrade-pg-cluster
+  services.postgresql.package = pkgs.postgresql_18;
 
   services.samba = {
     enable = true;
