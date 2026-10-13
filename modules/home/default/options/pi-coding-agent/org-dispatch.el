@@ -47,6 +47,9 @@
   "Seconds pi must stay idle in PROG before each nudge.")
 (defvar org-dispatch-time-limit
   (string-to-number (org-dispatch--env "ORG_DISPATCH_TIME_LIMIT" "14400")))
+(defvar org-dispatch-log-keep
+  (string-to-number (org-dispatch--env "ORG_DISPATCH_LOG_KEEP" "14"))
+  "Run entries a repeating task keeps in its LOGBOOK; older ones go to archive.org.")
 
 ;; Calgary time regardless of the host's zone; date-only SCHEDULED is midnight.
 (set-time-zone-rule "America/Edmonton")
@@ -238,6 +241,53 @@ New sections go before Dialog, which stays last."
   (let ((section (org-dispatch--section-bounds title)))
     (when section (delete-region (car section) (cdr section)))))
 
+(defun org-dispatch--trim-log (id)
+  "Move LOGBOOK entries of the entry at point past `org-dispatch-log-keep'
+to a run log heading for ID in archive.org beside this file, newest first."
+  (save-excursion
+    (let ((limit (save-excursion (outline-next-heading) (point)))
+          items)
+      (when (re-search-forward "^[ \t]*:LOGBOOK:[ \t]*\n" limit t)
+        (let ((end (save-excursion (re-search-forward "^[ \t]*:END:" limit) (match-beginning 0))))
+          (while (re-search-forward "^- " end t)
+            (push (match-beginning 0) items))
+          (setq items (nreverse items))
+          (when (> (length items) org-dispatch-log-keep)
+            (let ((cut (nth org-dispatch-log-keep items))
+                  (heading (org-get-heading t t t t))
+                  (olpath (save-excursion
+                            (goto-char (org-entry-beginning-position))
+                            (string-join (org-get-outline-path) "/")))
+                  (category (org-get-category))
+                  (source (abbreviate-file-name buffer-file-name)))
+              ;; Save the archive before deleting, so a failure loses nothing.
+              (org-dispatch--edit-archive
+               (expand-file-name "archive.org" (file-name-directory buffer-file-name))
+               id (buffer-substring-no-properties cut end)
+               (format ":ARCHIVE_FILE: %s\n:ARCHIVE_OLPATH: %s\n:ARCHIVE_CATEGORY: %s\n"
+                       source olpath category)
+               heading)
+              (delete-region cut end))))))))
+
+(defun org-dispatch--edit-archive (file id text properties heading)
+  "Insert TEXT at the top of ID's run log in FILE, creating it when needed."
+  (let ((buffer (find-file-noselect file t)))
+    (unwind-protect
+        (with-current-buffer buffer
+          (org-mode)
+          (let ((position (org-find-property "ARCHIVE_ID" id)))
+            (if position
+                (goto-char position)
+              (goto-char (point-max))
+              (unless (bolp) (insert "\n"))
+              (insert (format "\n* %s run log\n:PROPERTIES:\n:ARCHIVE_ID: %s\n%s:END:\n"
+                              heading id properties))
+              (forward-line -1)))
+          (org-end-of-meta-data)
+          (insert text)
+          (save-buffer))
+      (kill-buffer buffer))))
+
 (defun org-dispatch--entry (title text)
   "Format a Dialog entry by TITLE with TEXT, indenting continuation lines."
   (format "- %s %s: %s" title (org-dispatch--stamp)
@@ -376,8 +426,9 @@ among the heading's own tags, so subsections never inherit it."
             "- Do not deploy, activate, or install anything system-wide.")
           (when (plist-get task :repeat)
             (concat "- This task repeats. The heading body is standing instructions: do not edit it"
-                    " or add Scope, Checklist, or other sections. Put your one-line result in the"
-                    " finish note; it becomes the run's log entry."))))
+                    " or add Scope, Checklist, or other sections. The finish note becomes the run's"
+                    " log entry: one short sentence on what changed, or just \"No change.\""
+                    " Do not list the checks you ran."))))
    "\n"))
 
 (defun org-dispatch--render (name task &optional extra)
@@ -411,6 +462,9 @@ among the heading's own tags, so subsections never inherit it."
      (plist-get task :file) (plist-get task :id)
      (lambda ()
        (org-entry-put nil "ID" (plist-get task :id))
+       ;; Also trim here: a reviewed repeat is closed in Emacs, not by finish.
+       (when (plist-get task :repeat)
+         (org-dispatch--trim-log (plist-get task :id)))
        (org-todo "PROG")
        (unless (let ((section (org-dispatch--section-bounds "Sessions")))
                  (and section (string-search link (buffer-substring-no-properties
@@ -674,7 +728,8 @@ DRY-RUN marks waiting tasks with :waiting instead of recording progress."
                      (insert (format "- State %-12s from %-12s %s \\\\\n  %s\n"
                                      "\"DONE\"" (format "\"%s\"" (plist-get task :todo))
                                      (org-dispatch--stamp)
-                                     (string-trim (concat (string-join links " ") " " note))))))))
+                                     (string-trim (concat (string-join links " ") " " note)))))
+                   (org-dispatch--trim-log id))))
                (org-todo todo)
                (org-get-todo-state)))))
     (when state
