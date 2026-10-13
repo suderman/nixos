@@ -113,13 +113,6 @@
     # Recall capture and archive CLI.
     recall.url = "github:suderman/recall/main";
 
-    # Speech-to-text
-    # <https://github.com/cjpais/Handy>
-    handy.url = "github:cjpais/Handy";
-    handy.inputs.nixpkgs.follows = "nixpkgs-unstable";
-    # bun2nix evaluates Darwin formatters, unsupported by current unstable.
-    handy.inputs.bun2nix.inputs.nixpkgs.follows = "nixpkgs";
-
     # Tmux replacement
     # <https://github.com/herdrdev/herdr-nix>
     herdr.url = "github:herdrdev/herdr-nix";

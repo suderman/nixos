@@ -1,6 +1,5 @@
 {
   config,
-  flake,
   lib,
   pkgs,
   ...
@@ -26,7 +25,10 @@
   target = config.wayland.systemd.target;
   toggle = "${lib.getExe' pkgs.procps "pkill"} -USR2 -n handy";
 in {
-  imports = [flake.inputs.handy.homeManagerModules.default];
+  options.services.handy = {
+    enable = lib.mkEnableOption "Handy speech-to-text user service";
+    package = lib.mkPackageOption pkgs.unstable "handy" {};
+  };
 
   config = lib.mkIf cfg.enable {
     home.packages = [cfg.package];
@@ -37,14 +39,17 @@ in {
 
     systemd.user.services.handy = {
       Unit = {
-        After = lib.mkForce [target];
-        PartOf = lib.mkForce [target];
+        Description = "Handy speech-to-text";
+        After = [target];
+        PartOf = [target];
       };
       Service = {
         Environment = ["YDOTOOL_SOCKET=/run/ydotoold/socket"];
-        ExecStart = lib.mkForce launcher;
+        ExecStart = launcher;
+        Restart = "on-failure";
+        RestartSec = 5;
       };
-      Install.WantedBy = lib.mkForce [target];
+      Install.WantedBy = [target];
     };
 
     wayland.windowManager.hyprland.lua.features.handy =
