@@ -5,7 +5,8 @@
     # Nix Packages
     # <https://search.nixos.org/packages>
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # Pin until nixos-unstable includes the TypeScript pnpm hash fix (PR #572951).
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/ac7b1aaed03db4b794502641cdeed685ed777889";
 
     # Home Manager
     # <https://mipmip.github.io/home-manager-option-search>
