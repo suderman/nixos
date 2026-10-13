@@ -110,6 +110,7 @@ in {
       systemd.user.services.recall-nightly = {
         Unit = {
           Description = "Recall nightly capture, replay, index and journal draft";
+          OnFailure = ["recall-failure@%n.service"];
           After = ["network-online.target"];
           Wants = ["network-online.target"];
         };
@@ -122,7 +123,7 @@ in {
             [
               "PATH=${config.home.profileDirectory}/bin:/run/current-system/sw/bin"
               "RECALL_HOME=${home}"
-              "RECALL_AUTHOR=${cfg.nightly.author}"
+              "\"RECALL_AUTHOR=${cfg.nightly.author}\""
               "RECALL_RELOCATION_MAP=${home}/relocation.json"
               "RECALL_NODE_EXECUTABLE=${pkgs.nodejs-slim}/bin/node"
               "RECALL_PI_SDK=${perSystem.agents.pi}/lib/node_modules/@earendil-works/pi-coding-agent/dist/index.js"
@@ -130,6 +131,13 @@ in {
             ++ lib.optional (config.home.sessionVariables ? NOTMUCH_CONFIG)
             "NOTMUCH_CONFIG=${toString config.home.sessionVariables.NOTMUCH_CONFIG}";
           ExecStart = "${cfg.package}/bin/recall-nightly";
+        };
+      };
+      systemd.user.services."recall-failure@" = {
+        Unit.Description = "Notify Recall failure";
+        Service = {
+          Type = "oneshot";
+          ExecStart = "${pkgs.curl}/bin/curl --fail --silent --show-error --max-time 20 --output /dev/null --header 'Title: Recall failure' --header 'Priority: high' --data 'Recall %i failed on %H. Check journalctl --user -u %i.' https://ntfy.hub/herdr";
         };
       };
       systemd.user.timers.recall-nightly = {
