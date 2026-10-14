@@ -63,6 +63,7 @@
       org-log-into-drawer t
       org-log-done 'time
       org-log-repeat nil
+      org-auto-align-tags nil
       org-id-track-globally nil
       org-element-use-cache nil
       make-backup-files nil
