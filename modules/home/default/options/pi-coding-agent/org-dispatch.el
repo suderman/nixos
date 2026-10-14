@@ -488,9 +488,9 @@ with NOTE, moving the Sessions links into it, then trim the log."
 (defun org-dispatch--dialog-block (task resumed)
   (cond ((not resumed) "")
         ((plist-get task :dialog)
-         (concat "Jon set this task back to TODO. New Dialog entries since your last one:\n\n"
+         (concat "Jon set this task back to AUTO. New Dialog entries since your last one:\n\n"
                  "#+begin_quote\n" (plist-get task :dialog) "\n#+end_quote\n"))
-        (t "Jon set this task back to TODO without replying. Proceed with the default you stated.\n")))
+        (t "Jon set this task back to AUTO without replying. Proceed with the default you stated.\n")))
 
 ;;; Launching
 
