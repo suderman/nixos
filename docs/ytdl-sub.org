@@ -1,0 +1,219 @@
+#+TITLE: YouTube subscriptions for Jellyfin
+
+* YouTube subscriptions for Jellyfin
+
+Kit runs the pinned nixpkgs =ytdl-sub= package through the native
+=services.ytdl-sub.instances.youtube= module. The local
+[[file:../modules/nixos/default/options/ytdl-sub.nix][module]] adds shared download settings, persistence, and disk-backed temporary
+storage. [[file:../hosts/kit/configuration.nix][Kit]] enables it and owns the subscriptions and media mount. No other host
+runs the downloader.
+
+** Storage
+
+- Completed media goes to =/media/YouTube/<show>/Season <upload year>/=.
+  Kit mounts Lux's existing =lux.home:/media= NFS export at =/media=.
+  NFSv3 uses the existing export path without assuming an NFSv4 root layout.
+  Lux's =/media= is its persistent pool storage, already snapshotted and backed up.
+  Jellyfin reads those same files locally on Lux. No copying service is needed.
+- Each show contains its upstream
+  =.ytdl-sub-<subscription name>-download-archive.json=. Keep that file with
+  the media. It prevents duplicate downloads and preserves episode numbering.
+  Renaming a subscription changes its show directory and archive identity.
+- =/var/lib/ytdl-sub/youtube= is the native service's current directory and
+  contains working-directory locks. =/var/lib/ytdl-sub= persists through Kit's
+  existing =/mnt/main/storage= helper with owner =ytdl-sub:media=, mode =0750=.
+- =/var/cache/ytdl-sub/<subscription name>= holds videos during downloads and
+  post-processing. Systemd creates the cache directory on Kit's main Btrfs
+  disk. It is not =/run= tmpfs, not backed up, and disappears on a root reset.
+  Upstream removes each subscription's temporary directory after a run,
+  including on errors. An interrupted transfer may need to restart.
+- =/run/ytdl-sub/youtube= remains the native runtime directory, but does not
+  hold video downloads.
+
+With subscriptions present, =RequiresMountsFor=/media= orders the service after
+its NFS mount. =ProtectSystem=strict= remains enabled; only
+=/media/YouTube= is added to the native writable paths. Systemd makes its state,
+cache, and runtime directories writable. A missing mount or missing YouTube
+directory must fail the run rather than write into a local fallback directory.
+
+The export uses a hard mount. If Lux disappears during a write, the downloader
+can wait for Lux to return. Mount setup has a 30-second timeout; that does not
+limit recovery time after an established NFS connection is lost.
+
+** First subscription
+
+These are commissioning steps for Jon, not actions performed by the change.
+
+1. On Lux, confirm =/media= is mounted and create the library directory:
+
+   #+begin_src sh
+   findmnt -T /media
+   sudo install -d -o root -g media -m 2775 /media/YouTube
+   stat -c '%u:%g %a %n' /media/YouTube
+   id jellyfin
+   #+end_src
+
+   Check =media= is GID =901= and Jellyfin belongs to it. The setgid directory
+   preserves that group for new shows and seasons. Kit's service uses
+   =Group=media= and application/systemd umasks =002=/=0002=, so Jellyfin can
+   traverse directories and read videos, artwork, and NFO files.
+
+2. Add one real subscription to =hosts/kit/configuration.nix=. The existing
+   commented examples show both forms:
+
+   #+begin_src nix
+   services.ytdl-sub.instances.youtube.subscriptions = {
+     "Channel name" = "https://www.youtube.com/@CHANNEL/videos";
+     "Playlist name" = {
+       overrides.url = "https://www.youtube.com/playlist?list=PLAYLIST_ID";
+       date_range.after = "today-7days";
+     };
+   };
+   #+end_src
+
+   Replace the example URLs. Names become show names. Per-subscription settings
+   override the shared =YouTube= preset without another configuration layer.
+   Keep names stable after downloads begin.
+
+3. Evaluate and build the generated native unit before deploying through the
+   usual approved workflow:
+
+   #+begin_src sh
+   nix develop --command nix eval .#nixosConfigurations.kit.config.system.build.toplevel.outPath
+   nix develop --command nix build --no-link '.#nixosConfigurations.kit.config.systemd.units."ytdl-sub-youtube.service".unit'
+   #+end_src
+
+   Evaluation/building does not activate the configuration. No deployment or
+   activation was performed for this implementation.
+
+4. After activation on Kit, check the real mounted storage and service access:
+
+   #+begin_src sh
+   stat /media/YouTube
+   findmnt -T /media/YouTube
+   sudo -u ytdl-sub -g media test -w /media/YouTube
+   systemctl cat ytdl-sub-youtube.service
+   #+end_src
+
+   Expect an NFS source, not Kit's root disk. Check the displayed service has
+   =ReadWritePaths=/media/YouTube= and a mount dependency. Do not trigger a
+   download until this passes.
+
+5. In Jellyfin on Lux, add a separate TV shows library named =YouTube= with
+   folder =/media/YouTube=. Prefer local NFO metadata and local artwork; disable
+   internet series matching for this library to avoid unrelated TV matches.
+   Leave existing libraries alone. Scan after the first completed sync and
+   check season/year, episode dates, descriptions, thumbnails, and playback.
+
+** Download policy
+
+The shared preset inherits upstream =Jellyfin TV Show by Date= and
+=Max 1080p=. Upstream owns the filenames, same-day episode indexes, download
+archive, TV-show/episode NFO, MP4 tags, info JSON, episode thumbnails, and
+available channel avatar/banner artwork. Some playlists do not supply show
+artwork; missing source artwork is not synthesized.
+
+The format sorter favors H264 video and AAC audio. MP4 merging and metadata
+writing copy streams rather than routinely encoding video. If H264/AAC is
+unavailable, other codecs can be selected within the 1080p cap; Jellyfin client
+support still determines whether playback needs transcoding.
+
+SponsorBlock requests and removes only =sponsor= segments. Intros, outros,
+self-promotion, and other categories are untouched. Upstream leaves
+=force_key_frames=false=, so cuts do not force a video re-encode. Cuts may be
+less exact at keyframes, and SponsorBlock coverage is not guaranteed.
+
+Only uploads from the last 30 days qualify by default. This bounds download
+history, not disk usage or the number of videos in a busy channel. Override
+=date_range.after= per subscription to request a smaller window or a deliberate
+backfill. Date filtering does not delete existing files. No retention or
+maximum-file deletion policy is configured. An outage longer than the window
+needs an explicit backfill. Metadata inspection can traverse older playlist
+entries because playlists need not be ordered by upload date.
+
+Keep upstream throttle protection enabled. The pinned preset sleeps about
+14-28 seconds between videos, 16-26 seconds between subscriptions, and adds
+0.75 seconds per metadata request. Its low-resolution assertion can stop a run
+when it suspects throttling. Public YouTube extraction can still fail because
+of rate limits, bot checks, unavailable videos, or extractor changes.
+
+** Operation
+
+The native timer runs at 00:00, 06:00, 12:00, and 18:00 in Kit's local timezone.
+It does not replay missed calendar runs. Empty subscriptions skip through
+=ExecCondition= without mounting Lux or contacting YouTube. No example channel
+is active in the committed configuration.
+
+After commissioning:
+
+#+begin_src sh
+systemctl list-unit-files 'ytdl-sub-*'
+systemctl list-timers --all ytdl-sub-youtube.timer
+systemctl status ytdl-sub-youtube.service ytdl-sub-youtube.timer
+sudo systemctl start ytdl-sub-youtube.service
+journalctl -u ytdl-sub-youtube.service --since '24 hours ago'
+systemctl --failed
+#+end_src
+
+To pause automatic updates, stop the timer. Stopping a timer does not stop an
+already-running download. Inspect the service before stopping it separately.
+
+#+begin_src sh
+sudo systemctl stop ytdl-sub-youtube.timer
+sudo systemctl start ytdl-sub-youtube.timer
+#+end_src
+
+Edit subscriptions in the flake, then deploy through the usual approved
+workflow. Do not edit generated YAML in the Nix store.
+
+*** Dry-run
+
+=ytdl-sub --dry-run= fetches metadata and previews output paths without
+writing media or changing output archives. It is not an offline validator:
+it contacts YouTube and may create temporary files and working-directory locks.
+
+Use =systemctl cat ytdl-sub-youtube.service= to obtain its exact =ExecStart=
+command and generated config/subscription paths. Run that command with
+=--dry-run= added before =sub=, as =ytdl-sub:media=, with current directory
+=/var/lib/ytdl-sub/youtube=. For example, open a shell with
+=sudo -u ytdl-sub -g media sh=, change directory, then paste the adjusted command.
+The application lock prevents overlapping runs that share this cache and
+current directory. Add =--match 'Show name'= after the subscription file argument
+to preview one show.
+
+Never run the generated command as root or from an arbitrary current directory.
+Do not use =--update-with-info-json= as a validation command; it can rewrite
+existing files. Pure Nix evaluation checks structure, not application schema
+or live extraction. An empty CLI run validates shared settings but does not
+validate a real URL.
+
+** Optional authentication
+
+No cookies are configured. Start with public URLs; live public extraction was
+not tested during implementation. Add cookies only if a selected subscription
+needs them. Cookies do not guarantee access or remove all YouTube bot checks.
+
+Use the repository's existing agenix mechanism. The decrypted cookie file must
+be owned by =ytdl-sub=, mode =0400=, under its runtime secret path. Reference
+=config.age.secrets.<name>.path= as
+=services.ytdl-sub.instances.youtube.config.presets.YouTube.ytdl_options.cookiefile=.
+That reference is a runtime path string, not cookie contents. Do not use
+=builtins.readFile=, a Nix path literal to plaintext cookies, or an inline cookie
+string. The native sandbox can read service-owned secrets outside protected
+home directories; verify access after provisioning.
+
+** Verification limits
+
+Implementation checks included Kit evaluation, kit-only enablement, generated
+YAML and unit builds, systemd syntax/calendar checks, and the pinned application's
+schema. Disposable local fixtures exercised format selection, date filters,
+NFO/tags/thumbnails/info JSON, two distinct same-day filenames, and archive
+reload/skip behavior. Fixture media was generated locally; it was not downloaded
+from YouTube. SponsorBlock options were checked, but no live SponsorBlock cut
+was performed. A separately named user-unit probe verified empty
+=ExecCondition= skips without executing the command.
+
+Lux resolved to =10.1.0.5= and advertised the expected NFS export. SSH inspection
+failed with =Permission denied= and sudo required a password. The real NFS
+mount/write, media ownership on Lux, production systemd sandbox, live YouTube
+extraction, and Jellyfin scan/playback remain Jon's commissioning checks.
