@@ -27,6 +27,8 @@ secret values out of this shared module.
   reopened in Asana must return to `TODO` instead of being completed again.
 - Missing completion state is legacy data and must be initialized without an
   Asana write.
+- Give each rendered task `:ID: asana-<gid>` so other Org files can link to it
+  with `[[id:asana-<gid>]]`. Retained `DONE` blocks keep their existing drawer.
 - Manage the complete configured Org file. Do not add block markers or require
   a parent heading. Task headings are top-level headings.
 - Create the configured file when it does not exist. Keep writes atomic,

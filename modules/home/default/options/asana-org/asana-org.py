@@ -232,6 +232,7 @@ def render_task(task, status, level):
     lines.extend(
         (
             ":PROPERTIES:",
+            f":ID: asana-{task['gid']}",
             f":ASANA_ID: {task['gid']}",
             f":ASANA_COMPLETED: {completed}",
             ":END:",
@@ -560,6 +561,7 @@ def self_test():
     )
     assert "\n  * not a heading\n" in body
     assert "\n  #+title: not a directive" in body
+    assert "\n:ID: asana-1\n:ASANA_ID: 1\n" in body
     assert all(entry["synced_completed"] is not None for entry in parse_entries(body))
 
     completed_active = {
