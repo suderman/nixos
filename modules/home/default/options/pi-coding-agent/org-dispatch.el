@@ -4,10 +4,12 @@
 ;;   org-dispatch-run      watch running tasks, then launch eligible ones
 ;;   org-dispatch-scan     print the tasks this host would launch
 ;;   org-dispatch-finish   ID STATE [NOTE], used by the agent to end its task
+;;   org-dispatch-retry    ID WHEN NOTE, used by the agent to try again later
 ;;
 ;; A task is an AUTO heading in Jon's Org agenda files tagged with this host.
 ;; SCHEDULED delays it; a repeater makes it recur. Settings are properties:
-;; REVIEW, DEPLOY, BRANCH, MODEL, DIR.
+;; REVIEW, DEPLOY, BRANCH, MODEL, DIR, and RETRY, the number of times an agent
+;; may return the task to AUTO at a later date.
 
 (require 'org)
 (require 'org-id)
@@ -49,6 +51,9 @@
 (defvar org-dispatch-log-keep
   (string-to-number (org-dispatch--env "ORG_DISPATCH_LOG_KEEP" "14"))
   "Run entries a repeating task keeps in its LOGBOOK; older ones go to archive.org.")
+(defvar org-dispatch-retry-min
+  (string-to-number (org-dispatch--env "ORG_DISPATCH_RETRY_MIN" "900"))
+  "Seconds ahead a retry must be scheduled, so a task cannot spin.")
 
 ;; Calgary time regardless of the host's zone; date-only SCHEDULED is midnight.
 (set-time-zone-rule "America/Edmonton")
@@ -269,6 +274,26 @@ to a run log heading for ID in archive.org beside this file, newest first."
                heading)
               (delete-region cut end))))))))
 
+(defun org-dispatch--log-run (id to from note)
+  "Log this run in the LOGBOOK of the entry at point as a change FROM to TO
+with NOTE, moving the Sessions links into it, then trim the log."
+  (let ((links (save-excursion
+                 (let ((section (org-dispatch--section-bounds "Sessions")) found)
+                   (when section
+                     (goto-char (car section))
+                     (while (re-search-forward "\\[\\[herdr:[^]]+\\]\\[[^]]+\\]\\]"
+                                               (cdr section) t)
+                       (push (match-string 0) found)))
+                   (nreverse found)))))
+    (org-dispatch--remove-section "Sessions")
+    (save-excursion
+      (goto-char (org-log-beginning t))
+      (insert (format "- State %-12s from %-12s %s \\\\\n  %s\n"
+                      (format "\"%s\"" to) (format "\"%s\"" from)
+                      (org-dispatch--stamp)
+                      (string-trim (concat (string-join links " ") " " note)))))
+    (org-dispatch--trim-log id)))
+
 (defun org-dispatch--edit-archive (file id text properties heading)
   "Insert TEXT at the top of ID's run log in FILE, creating it when needed."
   (let ((buffer (find-file-noselect file t)))
@@ -334,6 +359,7 @@ to a run log heading for ID in archive.org beside this file, newest first."
           :hosts hosts
           :scheduled (org-get-scheduled-time (point))
           :repeat (org-get-repeat)
+          :retry (string-to-number (or (org-entry-get nil "RETRY") "0"))
           :review (not (equal (downcase (or (org-entry-get nil "REVIEW") "yes")) "no"))
           :deploy (equal (downcase (or (org-entry-get nil "DEPLOY") "no")) "yes")
           :branch (org-entry-get nil "BRANCH")
@@ -428,6 +454,21 @@ to a run log heading for ID in archive.org beside this file, newest first."
                     " Do not list the checks you ran."))))
    "\n"))
 
+(defun org-dispatch--retry-rule (task)
+  "Prompt text offering a retry when Jon allowed one on TASK."
+  (if (or (plist-get task :repeat) (< (or (plist-get task :retry) 0) 1))
+      ""
+    (format (concat "- The task waits on something outside your control that a later run can\n"
+                    "  check, or it asks you to reschedule: run\n"
+                    "  =org-dispatch retry %s WHEN \"what it waits for\"=. WHEN is an Org\n"
+                    "  date such as =+1d 06:00= or =2026-10-20 06:00=. This sets SCHEDULED and\n"
+                    "  returns the task to AUTO, and a fresh session picks it up then; Jon\n"
+                    "  allowed %d more retr%s. Do not edit SCHEDULED by hand, since that\n"
+                    "  leaves the task out of the queue. Update the task record in place\n"
+                    "  rather than adding a section per run.\n")
+            (plist-get task :id) (plist-get task :retry)
+            (if (= (plist-get task :retry) 1) "y" "ies"))))
+
 (defun org-dispatch--render (name task &optional extra)
   "Fill prompt template NAME for TASK. EXTRA is an alist of more placeholders."
   (let ((text (with-temp-buffer
@@ -438,7 +479,8 @@ to a run log heading for ID in archive.org beside this file, newest first."
                    ("FILE" . ,(abbreviate-file-name (plist-get task :file)))
                    ("HEADING" . ,(plist-get task :heading))
                    ("DIR" . ,(abbreviate-file-name (plist-get task :dir)))
-                   ("POLICY" . ,(org-dispatch--policy task)))
+                   ("POLICY" . ,(org-dispatch--policy task))
+                   ("RETRY" . ,(org-dispatch--retry-rule task)))
                  extra)))
     (dolist (pair values text)
       (setq text (string-replace (format "{{%s}}" (car pair)) (or (cdr pair) "") text)))))
@@ -712,23 +754,8 @@ DRY-RUN marks waiting tasks with :waiting instead of recording progress."
                 ((equal todo "HOLD")
                  (org-dispatch--append "Dialog" (org-dispatch--entry "Agent" note)))
                 ((and (equal todo "DONE") (plist-get task :repeat))
-                 (let ((links (save-excursion
-                                (let ((section (org-dispatch--section-bounds "Sessions")) found)
-                                  (when section
-                                    (goto-char (car section))
-                                    (while (re-search-forward "\\[\\[herdr:[^]]+\\]\\[[^]]+\\]\\]"
-                                                              (cdr section) t)
-                                      (push (match-string 0) found)))
-                                  (nreverse found)))))
-                   (org-dispatch--remove-section "Dialog")
-                   (org-dispatch--remove-section "Sessions")
-                   (save-excursion
-                     (goto-char (org-log-beginning t))
-                     (insert (format "- State %-12s from %-12s %s \\\\\n  %s\n"
-                                     "\"DONE\"" (format "\"%s\"" (plist-get task :todo))
-                                     (org-dispatch--stamp)
-                                     (string-trim (concat (string-join links " ") " " note)))))
-                   (org-dispatch--trim-log id))))
+                 (org-dispatch--remove-section "Dialog")
+                 (org-dispatch--log-run id "DONE" (plist-get task :todo) note)))
                (org-todo todo)
                (org-get-todo-state)))))
     (when state
@@ -738,6 +765,53 @@ DRY-RUN marks waiting tasks with :waiting instead of recording progress."
     (princ (format "%s is now %s\n" id result))
     (when (equal result "AUTO")
       (princ "The repeat was logged and the next run is scheduled.\n"))))
+
+;; Only Jon sets AUTO. His RETRY property lets a run hand the task back to a
+;; later date, a set number of times, when it waits on something it cannot change.
+(defun org-dispatch-retry ()
+  "Reschedule a running task: ID WHEN NOTE from the command line."
+  (let* ((id (pop command-line-args-left))
+         (when-text (string-trim (or (pop command-line-args-left) "")))
+         (note (string-trim (string-join command-line-args-left " ")))
+         (file (or (org-dispatch--find id) (error "no heading with ID %s" id)))
+         (state-file (org-dispatch--state-file id))
+         (state (and (file-exists-p state-file)
+                     (with-temp-buffer
+                       (insert-file-contents state-file)
+                       (json-parse-buffer :object-type 'plist :null-object nil :false-object nil))))
+         (time (if (string-empty-p when-text)
+                   (error "WHEN is missing, such as +1d 06:00")
+                 (org-read-date nil t when-text)))
+         ;; Batch org-read-date never sets this; without a time, use the date.
+         (org-time-was-given (string-match-p "[0-9]:[0-5][0-9]" when-text))
+         (time (if org-time-was-given time (org-read-date nil t (format-time-string "%F" time))))
+         (stamp (format-time-string (if org-time-was-given "%F %a %H:%M" "%F %a") time))
+         left)
+    (setq command-line-args-left nil)
+    (when (string-empty-p note)
+      (error "retry needs a note saying what the task waits for"))
+    (when (time-less-p time (time-add nil org-dispatch-retry-min))
+      (error "<%s> is less than %d minutes away" stamp (/ org-dispatch-retry-min 60)))
+    (org-dispatch--edit
+     file id
+     (lambda ()
+       (let ((task (org-dispatch--task)))
+         (unless (equal (plist-get task :todo) "PROG")
+           (error "only a running task can retry; this one is %s" (plist-get task :todo)))
+         (when (plist-get task :repeat)
+           (error "a repeating task recurs on its own; finish it with DONE"))
+         (when (< (plist-get task :retry) 1)
+           (error "Jon allowed no more retries; finish with HOLD instead"))
+         (setq left (1- (plist-get task :retry)))
+         (org-entry-put nil "RETRY" (number-to-string left))
+         (org-add-planning-info 'scheduled time)
+         (org-dispatch--log-run id "AUTO" "PROG" (format "Retry <%s>: %s" stamp note))
+         (org-todo "AUTO"))))
+    (when state
+      (org-dispatch--save-state (plist-put state :status "finished")))
+    (org-dispatch--log "retry %s at <%s>, %d left: %s" id stamp left note)
+    (princ (format "%s is now AUTO, scheduled for <%s> with %d retr%s left\n"
+                   id stamp left (if (= left 1) "y" "ies")))))
 
 (provide 'org-dispatch)
 ;;; org-dispatch.el ends here

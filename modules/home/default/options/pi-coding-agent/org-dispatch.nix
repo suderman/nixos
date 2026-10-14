@@ -22,6 +22,7 @@
         #   org-dispatch [run]                 watch running tasks, then launch eligible ones
         #   org-dispatch scan                  list tasks this host would launch now
         #   org-dispatch finish ID STATE NOTE  end a task as EVAL, HOLD, or DONE
+        #   org-dispatch retry ID WHEN NOTE    return a task Jon allowed to retry to AUTO at WHEN
         batch=(emacs -Q --batch -l "$ORG_DISPATCH_EL")
 
         case ''${1:-run} in
@@ -32,12 +33,17 @@
             shift
             exec "''${batch[@]}" -f org-dispatch-finish "$@"
             ;;
-          *) echo "usage: org-dispatch [run|scan|finish ID STATE [NOTE]]" >&2; exit 2 ;;
+          retry)
+            [[ $# -ge 4 ]] || { echo "usage: org-dispatch retry ID WHEN NOTE" >&2; exit 2; }
+            shift
+            exec "''${batch[@]}" -f org-dispatch-retry "$@"
+            ;;
+          *) echo "usage: org-dispatch [run|scan|finish ID STATE [NOTE]|retry ID WHEN NOTE]" >&2; exit 2 ;;
         esac
       '';
   };
 in {
-  options.programs.pi-coding-agent.orgDispatch.enable = lib.mkEnableOption "pi runs for Org agenda TODO headings tagged with this host and :auto:";
+  options.programs.pi-coding-agent.orgDispatch.enable = lib.mkEnableOption "pi runs for Org agenda AUTO headings tagged with this host";
 
   config = lib.mkIf (cfg.enable && cfg.orgDispatch.enable) {
     assertions = [
