@@ -20,11 +20,9 @@
   # Preload mmx-cli with my API keys
   programs.mmx-cli.apiKeys = ./apikeys-env.age;
 
-  # Preload pi with my API keys, watch the downloads task drop zones, and run
-  # Org headings tagged with this host and :auto:.
+  # Preload pi with my API keys, and run AUTO Org headings tagged with this host.
   programs.pi-coding-agent = {
     apiKeys = ./apikeys-env.age;
-    taskDropZones.enable = true;
     orgDispatch.enable = true;
   };
 
