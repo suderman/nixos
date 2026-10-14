@@ -5,8 +5,9 @@
 Lux runs the pinned nixpkgs =ytdl-sub= package through the native
 =services.ytdl-sub.instances.youtube= module. The local
 [[file:../modules/nixos/default/options/ytdl-sub.nix][module]] adds shared download settings, persistence, and disk-backed temporary
-storage. [[file:../hosts/lux/configuration.nix][Lux]] enables it and owns the subscriptions. Downloads and Jellyfin
-use Lux's local media pool. No other host runs the downloader.
+storage. [[file:../hosts/lux/configuration.nix][Lux]] enables it. Private subscriptions live only in a local YAML file
+on Lux, not in Git or the Nix store. Downloads and Jellyfin use Lux's local
+media pool. No other host runs the downloader.
 
 ** Storage
 
@@ -19,6 +20,10 @@ use Lux's local media pool. No other host runs the downloader.
   =.ytdl-sub-<subscription name>-download-archive.json=. Keep that file with
   the media. It prevents duplicate downloads and preserves episode numbering.
   Renaming a subscription changes its show directory and archive identity.
+- =/var/lib/ytdl-sub/subscriptions.yaml= is the private runtime subscription
+  list. Keep it owned by =ytdl-sub:media=, mode =0600=. The parent directory
+  already persists through the existing helper and is covered by Lux's backups.
+  Never import this file into Nix or copy it into the public repository.
 - =/var/lib/ytdl-sub/youtube= is the native service's current directory and
   contains working-directory locks. =/var/lib/ytdl-sub= persists through Lux's
   existing =/mnt/main/storage= helper with owner =ytdl-sub:media=, mode =0750=.
@@ -30,7 +35,7 @@ use Lux's local media pool. No other host runs the downloader.
 - =/run/ytdl-sub/youtube= remains the native runtime directory, but does not
   hold video downloads.
 
-With subscriptions present, =RequiresMountsFor=/media= orders the service after
+=RequiresMountsFor=/media= orders the service after
 Lux's local Btrfs pool mount. =ProtectSystem=strict= remains enabled; only
 =/media/youtube/video= is added to the native writable paths. Systemd makes its
 state, cache, and runtime directories writable. A missing mount or missing
@@ -56,25 +61,8 @@ These are commissioning steps for Jon, not actions performed by the change.
    Lux's service uses =Group=media= and application/systemd umasks =002=/=0002=,
    so Jellyfin can traverse directories and read videos, artwork, and NFO files.
 
-2. Add one real subscription to =hosts/lux/configuration.nix=. The existing
-   commented examples show both forms:
-
-   #+begin_src nix
-   services.ytdl-sub.instances.youtube.subscriptions = {
-     "Channel name" = "https://www.youtube.com/@CHANNEL/videos";
-     "Playlist name" = {
-       overrides.url = "https://www.youtube.com/playlist?list=PLAYLIST_ID";
-       date_range.after = "today-7days";
-     };
-   };
-   #+end_src
-
-   Replace the example URLs. Names become show names. Per-subscription settings
-   override the shared =YouTube= preset without another configuration layer.
-   Keep names stable after downloads begin.
-
-3. Evaluate and build the generated native unit before deploying through the
-   usual approved workflow:
+2. Deploy the runtime-file configuration once through the usual approved
+   workflow. Evaluate and build the generated native unit beforehand:
 
    #+begin_src sh
    nix develop --command nix eval .#nixosConfigurations.lux.config.system.build.toplevel.outPath
@@ -84,7 +72,7 @@ These are commissioning steps for Jon, not actions performed by the change.
    Evaluation/building does not activate the configuration. No deployment or
    activation was performed for this implementation.
 
-4. After activation on Lux, check the real mounted storage and service access:
+3. After activation on Lux, check the real mounted storage and service access:
 
    #+begin_src sh
    stat /media/youtube/video
@@ -96,6 +84,52 @@ These are commissioning steps for Jon, not actions performed by the change.
    Expect Lux's Btrfs pool storage, not its root disk. Check the displayed service has
    =ReadWritePaths=/media/youtube/video= and a mount dependency. Do not trigger a
    download until this passes.
+
+4. Create the subscription file on Lux only if it does not already exist:
+
+   #+begin_src sh
+   sudo -u ytdl-sub -g media sh -c 'umask 077; set -C; : > /var/lib/ytdl-sub/subscriptions.yaml'
+   sudo -u ytdl-sub -g media nano /var/lib/ytdl-sub/subscriptions.yaml
+   #+end_src
+
+   The creation command refuses to overwrite an existing file. Use your
+   preferred terminal editor in place of =nano=. Paste this YAML structure,
+   replacing placeholders with your choices:
+
+   #+begin_src yaml
+   __preset__:
+     preset: "YouTube"
+
+   "Channel name":
+     overrides:
+       url: "https://www.youtube.com/@CHANNEL/videos"
+     date_range:
+       after: "today-7days"
+
+   # Optional playlist. Remove this example unless you select a real playlist.
+   # "Playlist name":
+   #   overrides:
+   #     url: "https://www.youtube.com/playlist?list=PLAYLIST_ID"
+   #   date_range:
+   #     after: "today-7days"
+   #+end_src
+
+   =__preset__= must be a mapping with =preset=, not a plain string. It selects
+   the public shared preset. Names become show names. Per-subscription settings
+   override shared defaults; omitting =date_range= uses the last 30 days.
+   Keep names stable after downloads begin. A file containing only =__preset__=
+   is a valid empty list. Do not save the placeholder channel as an active URL.
+
+   Check ownership and readability without printing your list:
+
+   #+begin_src sh
+   stat -c '%U:%G %a %n' /var/lib/ytdl-sub/subscriptions.yaml
+   sudo -u ytdl-sub -g media test -r /var/lib/ytdl-sub/subscriptions.yaml
+   #+end_src
+
+   Expect =ytdl-sub:media 600=. Preview with the dry-run procedure below, then
+   start a manual sync. No rebuild, deployment, or timer restart is needed
+   after changing subscriptions. Each run reads the file again.
 
 5. In Jellyfin on Lux, add a separate TV shows library named =YouTube= with
    folder =/media/youtube/video=. Prefer local NFO metadata and local artwork; disable
@@ -138,9 +172,11 @@ of rate limits, bot checks, unavailable videos, or extractor changes.
 ** Operation
 
 The native timer runs at 00:00, 06:00, 12:00, and 18:00 in Lux's local timezone.
-It does not replay missed calendar runs. Empty subscriptions skip through
-=ExecCondition= without requiring the media mount or contacting YouTube. No
-example channel is active in the committed configuration.
+It does not replay missed calendar runs. Valid empty subscriptions use
+the application's normal =No subscriptions ran= path without contacting YouTube.
+A missing or zero-byte file skips through =ExecCondition=. The fixed media
+mount dependency still applies and may mount the pool before that check.
+Malformed YAML fails the run. No real subscriptions are stored in this repository.
 
 After commissioning, run these commands on Lux:
 
@@ -161,8 +197,13 @@ sudo systemctl stop ytdl-sub-youtube.timer
 sudo systemctl start ytdl-sub-youtube.timer
 #+end_src
 
-Edit subscriptions in the flake, then deploy through the usual approved
-workflow. Do not edit generated YAML in the Nix store.
+Edit =/var/lib/ytdl-sub/subscriptions.yaml= directly on Lux as the service user.
+Stop the timer during substantial edits so it cannot read a half-written file;
+check for a running sync before editing. Restart the timer when finished.
+Do not edit generated public preset YAML in the Nix store. The local list is
+not encrypted at rest; root, backups, downloaded media and logs can still
+reveal subscriptions. Owner-only permissions prevent ordinary local users
+from reading the list, not from seeing show names in shared media.
 
 *** Dry-run
 
@@ -171,7 +212,7 @@ writing media or changing output archives. It is not an offline validator:
 it contacts YouTube and may create temporary files and working-directory locks.
 
 Use =systemctl cat ytdl-sub-youtube.service= to obtain its exact =ExecStart=
-command and generated config/subscription paths. Run that command with
+command, generated public config path, and local subscription path. Run that command with
 =--dry-run= added before =sub=, as =ytdl-sub:media=, with current directory
 =/var/lib/ytdl-sub/youtube=. For example, open a shell with
 =sudo -u ytdl-sub -g media sh=, change directory, then paste the adjusted command.
@@ -208,10 +249,14 @@ checks, and the pinned application's schema. Disposable local fixtures exercised
 NFO/tags/thumbnails/info JSON, two distinct same-day filenames, and archive
 reload/skip behavior. Fixture media was generated locally; it was not downloaded
 from YouTube. SponsorBlock options were checked, but no live SponsorBlock cut
-was performed. A separately named user-unit probe verified empty
-=ExecCondition= skips without executing the command.
+was performed. The initial implementation's separately named user-unit probe
+verified =ExecCondition= skips. Runtime-file probes tested missing/zero-byte
+file conditions, channel/playlist schema, repeated file reads, empty CLI runs
+and rejection of malformed YAML. They used disposable local paths, not Lux's
+production file or service. The native unit was syntax-checked under a probe name.
 
-Read-only SSH inspection of Lux failed with =Permission denied= and local
-sudo required a password. Actual media ownership and write access on Lux,
-the production systemd sandbox, live YouTube extraction, and Jellyfin
-scan/playback remain Jon's commissioning checks.
+Jon's post-deployment checks confirmed Lux's Btrfs pool and service-user
+write/traverse access to =/media/youtube/video=, owned by =jon:media= with
+mode =775=. No permission change was needed. The runtime-file change still
+needs deployment and local provisioning. Production sandbox access, live
+YouTube extraction, and Jellyfin scan/playback remain commissioning checks.

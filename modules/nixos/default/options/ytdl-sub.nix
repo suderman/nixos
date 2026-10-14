@@ -6,7 +6,8 @@
   ...
 }: let
   cfg = config.services.ytdl-sub;
-  hasSubscriptions = builtins.removeAttrs cfg.instances.youtube.subscriptions ["__preset__"] != {};
+  subscriptionsFile = "/var/lib/ytdl-sub/subscriptions.yaml";
+  configFile = (pkgs.formats.yaml {}).generate "config.yaml" cfg.instances.youtube.config;
 in {
   options.services.ytdl-sub.enable = lib.mkEnableOption "YouTube subscriptions for Jellyfin";
 
@@ -16,7 +17,7 @@ in {
       instances.youtube = {
         enable = true;
         schedule = lib.mkDefault "*-*-* 00/6:00:00";
-        readWritePaths = lib.optional hasSubscriptions "/media/youtube/video";
+        readWritePaths = ["/media/youtube/video"];
         config = {
           configuration = {
             # Upstream uses /run, a tmpfs too small for video downloads.
@@ -42,7 +43,6 @@ in {
             };
           };
         };
-        subscriptions.__preset__.preset = "YouTube";
       };
     };
 
@@ -56,14 +56,11 @@ in {
     ];
 
     systemd.services.ytdl-sub-youtube = {
-      # Skip without requiring media or contacting YouTube.
-      unitConfig.RequiresMountsFor = ["/var/lib/ytdl-sub"] ++ lib.optional hasSubscriptions "/media";
+      unitConfig.RequiresMountsFor = ["/var/lib/ytdl-sub" "/media"];
       serviceConfig = {
-        ExecCondition = "${pkgs.coreutils}/bin/${
-          if hasSubscriptions
-          then "true"
-          else "false"
-        }";
+        ExecCondition = "${pkgs.coreutils}/bin/test -s ${subscriptionsFile}";
+        # Upstream accepts only store-generated subscriptions, not a runtime file.
+        ExecStart = lib.mkForce "${lib.getExe cfg.package} --config ${configFile} sub ${subscriptionsFile}";
         CacheDirectory = "ytdl-sub";
         UMask = "0002";
       };
