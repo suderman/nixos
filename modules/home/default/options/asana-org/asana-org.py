@@ -7,6 +7,7 @@ import json
 import os
 import re
 import stat
+import sys
 import tempfile
 import urllib.error
 import urllib.parse
@@ -30,6 +31,8 @@ TASK_FIELDS = ",".join(
         "assignee_section.name",
     )
 )
+ATTACHMENT_FIELDS = "name,host,download_url,permanent_url,view_url,size"
+MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024
 WEEKDAYS = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 
 
@@ -211,7 +214,98 @@ def normalize_task(task):
         "permalink": permalink,
         "projects": projects,
         "sections": sections,
+        "attachments": [],
     }
+
+
+def https_url(value):
+    parsed = urllib.parse.urlparse(value or "")
+    return parsed.scheme == "https" and bool(parsed.netloc)
+
+
+def attachment_filename(name, gid):
+    name = re.sub(r"[/\x00\[\]]", "_", one_line(name))
+    if name.strip(".") == "":
+        return f"attachment-{gid}"
+    path = Path(name)
+    suffix = path.suffix if len(path.suffix) <= 16 else ""
+    stem = name[: len(name) - len(suffix)]
+    while len((stem + suffix).encode("utf-8")) > 200:
+        stem = stem[:-1]
+    return stem + suffix
+
+
+def normalize_attachments(raw_attachments, task_gid):
+    attachments = []
+    filenames = set()
+    for raw in raw_attachments:
+        if not isinstance(raw, dict):
+            raise SyncError(f"Task {task_gid} has an invalid attachment")
+        gid = raw.get("gid")
+        size = raw.get("size")
+        if not isinstance(gid, str) or not gid.isdigit():
+            raise SyncError(f"Task {task_gid} has an attachment with an invalid gid")
+        if size is not None and (type(size) is not int or size < 0):
+            raise SyncError(f"Attachment {gid} has an invalid size")
+        name = one_line(optional_string(raw, "name") or "") or f"attachment-{gid}"
+        filename = attachment_filename(name, gid)
+        if filename in filenames:
+            path = Path(filename)
+            filename = f"{path.stem}-{gid}{path.suffix}"
+        filenames.add(filename)
+        host = optional_string(raw, "host") or ""
+        download_url = optional_string(raw, "download_url")
+        link = optional_string(raw, "permanent_url") or optional_string(raw, "view_url")
+        attachments.append(
+            {
+                "gid": gid,
+                "name": name.replace("[", "(").replace("]", ")"),
+                "filename": filename,
+                "host": host,
+                "download_url": download_url if https_url(download_url) else None,
+                "link": link if https_url(link) else None,
+                "local": host == "asana"
+                and https_url(download_url)
+                and (size is None or size <= MAX_ATTACHMENT_BYTES),
+            }
+        )
+    return attachments
+
+
+def attachment_dir(attach_dir, gid):
+    # Mirror org-attach-id-uuid-folder-format for the heading's :ID:.
+    org_id = f"asana-{gid}"
+    return attach_dir / org_id[:2] / org_id[2:]
+
+
+def download_attachments(task, attach_dir):
+    directory = attachment_dir(attach_dir, task["gid"])
+    umask = os.umask(0)
+    os.umask(umask)
+    for attachment in task["attachments"]:
+        path = directory / attachment["filename"]
+        # Never replace an existing copy; it may hold local edits.
+        if not attachment["local"] or path.exists():
+            continue
+        request = urllib.request.Request(
+            attachment["download_url"], headers={"User-Agent": "asana-org/1"}
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=60) as response:
+                content = response.read(MAX_ATTACHMENT_BYTES + 1)
+        except (urllib.error.URLError, OSError) as error:
+            # Link it for now; the next sync retries the missing file.
+            print(
+                f"asana-org: could not download attachment {attachment['gid']}: {error}",
+                file=sys.stderr,
+            )
+            attachment["local"] = False
+            continue
+        if len(content) > MAX_ATTACHMENT_BYTES:
+            attachment["local"] = False
+            continue
+        directory.mkdir(parents=True, exist_ok=True)
+        atomic_write(path, content, 0o666 & ~umask)
 
 
 def org_date(value, brackets="<>"):
@@ -222,6 +316,9 @@ def org_date(value, brackets="<>"):
 def render_task(task, status, level):
     project = ", ".join(task["projects"])
     title = f"{project} > {task['name']}" if project else task["name"]
+    attachments = task.get("attachments", [])
+    if any(attachment["local"] for attachment in attachments):
+        title += " :ATTACH:"
     lines = [f"{'*' * level} {status} {title}"]
     if status == "DONE":
         completed = task["completed_datetime"].astimezone()
@@ -247,6 +344,15 @@ def render_task(task, status, level):
     if notes:
         lines.extend(("", "Description:"))
         lines.extend(f"  {line}" if line else "" for line in notes.splitlines())
+    if attachments:
+        lines.extend(("", "Attachments:"))
+    for attachment in attachments:
+        if attachment["local"]:
+            lines.append(f"- [[attachment:{attachment['filename']}]]")
+        elif attachment["link"]:
+            lines.append(f"- [[{attachment['link']}][{attachment['name']}]]")
+        else:
+            lines.append(f"- {attachment['name']}")
     return "\n".join(lines)
 
 
@@ -425,7 +531,7 @@ def atomic_write(path, content, mode):
             temporary.unlink(missing_ok=True)
 
 
-def sync(org_file, token_file, workspace):
+def sync(org_file, token_file, workspace, attach_dir):
     token = read_token(token_file)
     org_file = org_file.expanduser()
     try:
@@ -464,7 +570,19 @@ def sync(org_file, token_file, workspace):
                 return None
 
         asana = Asana(token)
-        active = fetch_active_tasks(asana, workspace)
+
+        def with_attachments(task):
+            raw_attachments = asana.paginated(
+                "/attachments",
+                {"parent": task["gid"], "limit": 100, "opt_fields": ATTACHMENT_FIELDS},
+            )
+            task["attachments"] = normalize_attachments(raw_attachments, task["gid"])
+            download_attachments(task, attach_dir)
+            return task
+
+        active = [
+            with_attachments(task) for task in fetch_active_tasks(asana, workspace)
+        ]
 
         def fetch_task(gid):
             try:
@@ -473,7 +591,8 @@ def sync(org_file, token_file, workspace):
                 if error.status in (403, 404):
                     return None
                 raise
-            return normalize_task(payload["data"])
+            task = normalize_task(payload["data"])
+            return with_attachments(task) if task["completed"] else task
 
         def complete_task(gid):
             if current_contents() != original:
@@ -485,7 +604,7 @@ def sync(org_file, token_file, workspace):
                 {"completed": True},
                 {"opt_fields": TASK_FIELDS},
             )
-            return normalize_task(payload["data"])
+            return with_attachments(normalize_task(payload["data"]))
 
         merged, todo_count, done_count, completed_count = merge_tasks(
             active, previous, fetch_task, complete_task, 1
@@ -653,6 +772,72 @@ def self_test():
         assert str(error) == "Managed Asana region contains unrecognized content"
     else:
         raise AssertionError("Unmanaged Org content was accepted")
+
+    attachments = normalize_attachments(
+        [
+            {
+                "gid": "10",
+                "name": "Report [final].xlsx",
+                "host": "asana",
+                "download_url": "https://s3.example/report",
+                "permanent_url": "https://app.asana.com/app/asana/-/get_asset?asset_id=10",
+                "size": 1024,
+            },
+            {
+                "gid": "11",
+                "name": "Report [final].xlsx",
+                "host": "asana",
+                "download_url": "https://s3.example/copy",
+                "size": None,
+            },
+            {
+                "gid": "12",
+                "name": "Huge.mov",
+                "host": "asana",
+                "download_url": "https://s3.example/huge",
+                "permanent_url": "https://app.asana.com/huge",
+                "size": MAX_ATTACHMENT_BYTES + 1,
+            },
+            {
+                "gid": "13",
+                "name": "Shared doc",
+                "host": "gdrive",
+                "download_url": None,
+                "view_url": "https://docs.google.com/d/13",
+            },
+            {"gid": "14", "name": "../..", "host": "asana", "download_url": None},
+        ],
+        "1",
+    )
+    assert [attachment["filename"] for attachment in attachments] == [
+        "Report _final_.xlsx",
+        "Report _final_-11.xlsx",
+        "Huge.mov",
+        "Shared doc",
+        ".._..",
+    ]
+    assert [attachment["local"] for attachment in attachments] == [
+        True,
+        True,
+        False,
+        False,
+        False,
+    ]
+    assert attachment_dir(Path("/a"), "1") == Path("/a/as/ana-1")
+    attached = render_task({**active, "attachments": attachments}, "TODO", 1)
+    assert attached.startswith("* TODO Site > Current task :ATTACH:\n")
+    assert "\n- [[attachment:Report _final_-11.xlsx]]\n" in attached
+    assert "\n- [[https://app.asana.com/huge][Huge.mov]]\n" in attached
+    assert "\n- [[https://docs.google.com/d/13][Shared doc]]\n" in attached
+    assert attached.endswith("\n- ../..")
+    retained = update_retained_block(attached.replace("TODO", "DONE", 1), 1)
+    assert retained.startswith("* DONE Site > Current task :ATTACH:\n")
+    assert (
+        ":ATTACH:"
+        not in render_task(
+            {**active, "attachments": attachments[2:]}, "TODO", 1
+        ).splitlines()[0]
+    )
     print("self-test passed")
 
 
@@ -663,16 +848,24 @@ def main():
     parser.add_argument("--org-file", type=Path)
     parser.add_argument("--token-file", type=Path)
     parser.add_argument("--workspace")
+    parser.add_argument("--attach-dir", type=Path)
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
         self_test()
         return
-    if not args.org_file or not args.token_file or not args.workspace:
-        parser.error("--org-file, --token-file, and --workspace are required")
+    if (
+        not args.org_file
+        or not args.token_file
+        or not args.workspace
+        or not args.attach_dir
+    ):
+        parser.error(
+            "--org-file, --token-file, --workspace, and --attach-dir are required"
+        )
     if not args.workspace.isdigit():
         parser.error("--workspace must be a numeric Asana gid")
-    sync(args.org_file, args.token_file, args.workspace)
+    sync(args.org_file, args.token_file, args.workspace, args.attach_dir.expanduser())
 
 
 if __name__ == "__main__":

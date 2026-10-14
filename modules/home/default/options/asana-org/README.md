@@ -38,6 +38,13 @@ secret values out of this shared module.
   parsing errors must leave the Org file unchanged.
 - Completion PUT requests must be safe to retry when an earlier request
   succeeds but a later request fails.
+- Download Asana-hosted attachments up to 25 MiB into the configured
+  `org-attach-id-dir`, at the folder Org derives from the task's `:ID:`
+  (`.attach/as/ana-<gid>/`), and tag the heading `:ATTACH:`. Link larger and
+  externally hosted files instead. Never replace or delete an existing local
+  copy, since it may hold edits.
+- A failed attachment download is rendered as a link with a warning so one
+  file cannot block the sync; the next run retries it.
 - Do not add an Asana SDK or other Python dependency. The standard library is
   enough for this script.
 

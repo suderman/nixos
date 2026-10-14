@@ -12,7 +12,8 @@
       exec ${lib.getExe pkgs.python3} ${./asana-org.py} \
         --org-file ${lib.escapeShellArg cfg.orgFile} \
         --token-file ${lib.escapeShellArg config.age.secrets.asana-org-token.path} \
-        --workspace ${lib.escapeShellArg cfg.workspace} "$@"
+        --workspace ${lib.escapeShellArg cfg.workspace} \
+        --attach-dir ${lib.escapeShellArg cfg.attachDir} "$@"
     '';
   };
 in {
@@ -33,6 +34,12 @@ in {
       type = lib.types.str;
       default = "${config.home.homeDirectory}/org/asana.org";
       description = "Dedicated Org file managed by the Asana task sync";
+    };
+
+    attachDir = lib.mkOption {
+      type = lib.types.str;
+      default = "${config.home.homeDirectory}/org/.attach";
+      description = "org-attach-id-dir that receives downloaded Asana attachments";
     };
   };
 
