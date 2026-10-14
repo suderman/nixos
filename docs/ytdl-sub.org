@@ -10,7 +10,9 @@ runs the downloader.
 
 ** Storage
 
-- Completed media goes to =/media/YouTube/<show>/Season <upload year>/=.
+- Completed media goes to =/media/youtube/video/<show>/Season <upload year>/=.
+  This reuses Lux's existing lowercase video directory; =/media/youtube/audio=
+  remains separate and untouched.
   Kit mounts Lux's existing =lux.home:/media= NFS export at =/media=.
   NFSv3 uses the existing export path without assuming an NFSv4 root layout.
   Lux's =/media= is its persistent pool storage, already snapshotted and backed up.
@@ -32,7 +34,7 @@ runs the downloader.
 
 With subscriptions present, =RequiresMountsFor=/media= orders the service after
 its NFS mount. =ProtectSystem=strict= remains enabled; only
-=/media/YouTube= is added to the native writable paths. Systemd makes its state,
+=/media/youtube/video= is added to the native writable paths. Systemd makes its state,
 cache, and runtime directories writable. A missing mount or missing YouTube
 directory must fail the run rather than write into a local fallback directory.
 
@@ -44,19 +46,20 @@ limit recovery time after an established NFS connection is lost.
 
 These are commissioning steps for Jon, not actions performed by the change.
 
-1. On Lux, confirm =/media= is mounted and create the library directory:
+1. On Lux, check the existing video directory and its permissions:
 
    #+begin_src sh
-   findmnt -T /media
-   sudo install -d -o root -g media -m 2775 /media/YouTube
-   stat -c '%u:%g %a %n' /media/YouTube
+   findmnt -T /media/youtube/video
+   stat -c '%u:%g %a %n' /media/youtube/video
    id jellyfin
    #+end_src
 
-   Check =media= is GID =901= and Jellyfin belongs to it. The setgid directory
-   preserves that group for new shows and seasons. Kit's service uses
-   =Group=media= and application/systemd umasks =002=/=0002=, so Jellyfin can
-   traverse directories and read videos, artwork, and NFO files.
+   Check =media= is GID =901= and Jellyfin belongs to it. The video directory
+   needs group write/traverse access for Kit's downloader. Setgid preserves
+   the media group for new shows and seasons. Check existing ownership before
+   changing permissions; do not recursively change the existing library.
+   Kit's service uses =Group=media= and application/systemd umasks =002=/=0002=,
+   so Jellyfin can traverse directories and read videos, artwork, and NFO files.
 
 2. Add one real subscription to =hosts/kit/configuration.nix=. The existing
    commented examples show both forms:
@@ -89,18 +92,18 @@ These are commissioning steps for Jon, not actions performed by the change.
 4. After activation on Kit, check the real mounted storage and service access:
 
    #+begin_src sh
-   stat /media/YouTube
-   findmnt -T /media/YouTube
-   sudo -u ytdl-sub -g media test -w /media/YouTube
+   stat /media/youtube/video
+   findmnt -T /media/youtube/video
+   sudo -u ytdl-sub -g media test -w /media/youtube/video
    systemctl cat ytdl-sub-youtube.service
    #+end_src
 
    Expect an NFS source, not Kit's root disk. Check the displayed service has
-   =ReadWritePaths=/media/YouTube= and a mount dependency. Do not trigger a
+   =ReadWritePaths=/media/youtube/video= and a mount dependency. Do not trigger a
    download until this passes.
 
 5. In Jellyfin on Lux, add a separate TV shows library named =YouTube= with
-   folder =/media/YouTube=. Prefer local NFO metadata and local artwork; disable
+   folder =/media/youtube/video=. Prefer local NFO metadata and local artwork; disable
    internet series matching for this library to avoid unrelated TV matches.
    Leave existing libraries alone. Scan after the first completed sync and
    check season/year, episode dates, descriptions, thumbnails, and playback.

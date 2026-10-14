@@ -16,7 +16,7 @@ in {
       instances.youtube = {
         enable = true;
         schedule = lib.mkDefault "*-*-* 00/6:00:00";
-        readWritePaths = lib.optional hasSubscriptions "/media/YouTube";
+        readWritePaths = lib.optional hasSubscriptions "/media/youtube/video";
         config = {
           configuration = {
             # Upstream uses /run, a tmpfs too small for video downloads.
@@ -25,7 +25,7 @@ in {
           };
           presets.YouTube = {
             preset = ["Jellyfin TV Show by Date" "Max 1080p"];
-            overrides.tv_show_directory = "/media/YouTube";
+            overrides.tv_show_directory = "/media/youtube/video";
             # A download window, not retention. Existing media is never aged out.
             date_range = {
               after = "today-30days";
