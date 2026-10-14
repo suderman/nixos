@@ -2,45 +2,24 @@
   config,
   lib,
   pkgs,
+  flake,
   ...
 }: let
   cfg = config.programs.pi-coding-agent;
   herdrPackage = config.programs.herdr.package;
+
+  # Source lives in suderman/agents under org/; prompts come from the same pin.
+  orgSource = "${flake.inputs.agents}/org";
 
   orgDispatch = pkgs.self.mkScript {
     name = "org-dispatch";
     path = [config.programs.emacs.finalPackage herdrPackage pkgs.git pkgs.util-linux];
     env = {
       TZDIR = "${pkgs.tzdata}/share/zoneinfo";
-      ORG_DISPATCH_EL = "${./org-dispatch.el}";
+      ORG_DISPATCH_EL = "${orgSource}/dispatch/org-dispatch.el";
+      ORG_DISPATCH_PROMPTS = "${orgSource}/prompts";
     };
-    text =
-      # bash
-      ''
-        # Run autonomous Org tasks with pi in Herdr.
-        #
-        #   org-dispatch [run]                 watch running tasks, then launch eligible ones
-        #   org-dispatch scan                  list tasks this host would launch now
-        #   org-dispatch finish ID STATE NOTE  end a task as EVAL, HOLD, or DONE
-        #   org-dispatch retry ID WHEN NOTE    return a task Jon allowed to retry to AUTO at WHEN
-        batch=(emacs -Q --batch -l "$ORG_DISPATCH_EL")
-
-        case ''${1:-run} in
-          run) exec flock -n "''${XDG_RUNTIME_DIR:-/tmp}/org-dispatch.lock" "''${batch[@]}" -f org-dispatch-run ;;
-          scan) exec "''${batch[@]}" -f org-dispatch-scan ;;
-          finish)
-            [[ $# -ge 3 ]] || { echo "usage: org-dispatch finish ID EVAL|HOLD|DONE [NOTE]" >&2; exit 2; }
-            shift
-            exec "''${batch[@]}" -f org-dispatch-finish "$@"
-            ;;
-          retry)
-            [[ $# -ge 4 ]] || { echo "usage: org-dispatch retry ID WHEN NOTE" >&2; exit 2; }
-            shift
-            exec "''${batch[@]}" -f org-dispatch-retry "$@"
-            ;;
-          *) echo "usage: org-dispatch [run|scan|finish ID STATE [NOTE]|retry ID WHEN NOTE]" >&2; exit 2 ;;
-        esac
-      '';
+    text = builtins.readFile "${orgSource}/dispatch/org-dispatch";
   };
 in {
   options.programs.pi-coding-agent.orgDispatch.enable = lib.mkEnableOption "pi runs for Org agenda AUTO headings tagged with this host";
