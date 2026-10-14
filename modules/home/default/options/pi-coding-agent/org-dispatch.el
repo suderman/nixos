@@ -5,8 +5,7 @@
 ;;   org-dispatch-scan     print the tasks this host would launch
 ;;   org-dispatch-finish   ID STATE [NOTE], used by the agent to end its task
 ;;
-;; A task is a TODO heading in Jon's Org agenda files with this host and :auto:
-;; in its own tags.
+;; A task is an AUTO heading in Jon's Org agenda files tagged with this host.
 ;; SCHEDULED delays it; a repeater makes it recur. Settings are properties:
 ;; REVIEW, DEPLOY, BRANCH, MODEL, DIR.
 
@@ -54,7 +53,8 @@
 ;; Calgary time regardless of the host's zone; date-only SCHEDULED is midnight.
 (set-time-zone-rule "America/Edmonton")
 
-(setq org-todo-keywords '((sequence "TODO" "PROG" "EVAL" "HOLD" "|" "DONE"))
+(setq org-todo-keywords '((sequence "TODO" "PROG" "EVAL" "HOLD" "|" "DONE")
+                          (sequence "AUTO" "|"))
       org-log-into-drawer t
       org-log-done 'time
       org-log-repeat nil
@@ -164,11 +164,11 @@ so a half-edited config does not stop dispatching."
                 files)))
 
 (defun org-dispatch--files (&optional agenda)
-  "AGENDA files, or Jon's agenda files, that mention :auto:."
+  "AGENDA files, or Jon's agenda files, with an AUTO heading."
   (seq-filter (lambda (file)
                 (with-temp-buffer
                   (insert-file-contents file)
-                  (search-forward ":auto:" nil t)))
+                  (re-search-forward "^\\*+ AUTO " nil t)))
               (or agenda (org-dispatch--agenda-files))))
 
 (defun org-dispatch--edit (file id function &optional heading)
@@ -331,7 +331,6 @@ to a run log heading for ID in archive.org beside this file, newest first."
           :id (org-entry-get nil "ID")
           :heading (org-get-heading t t t t)
           :todo (org-get-todo-state)
-          :auto (and (member "auto" tags) t)
           :hosts hosts
           :scheduled (org-get-scheduled-time (point))
           :repeat (org-get-repeat)
@@ -361,9 +360,7 @@ to a run log heading for ID in archive.org beside this file, newest first."
             (unless (string-empty-p text) text)))))))
 
 (defun org-dispatch--tasks (&optional agenda)
-  "TODO headings marked :auto: in AGENDA, or Jon's agenda files.
-Org's matcher selects candidates; `org-dispatch--task' then requires :auto:
-among the heading's own tags, so subsections never inherit it."
+  "AUTO headings in AGENDA, or Jon's agenda files."
   (let (tasks)
     (dolist (file (org-dispatch--files agenda))
       (let ((buffer (find-file-noselect file t)))
@@ -372,9 +369,9 @@ among the heading's own tags, so subsections never inherit it."
           (org-map-entries
            (lambda ()
              (let ((task (org-dispatch--task)))
-               (when (and (plist-get task :auto) (equal (plist-get task :todo) "TODO"))
+               (when (equal (plist-get task :todo) "AUTO")
                  (push task tasks))))
-           "+auto/TODO"))
+           "/AUTO"))
         (kill-buffer buffer)))
     (nreverse tasks)))
 
@@ -462,8 +459,10 @@ among the heading's own tags, so subsections never inherit it."
      (plist-get task :file) (plist-get task :id)
      (lambda ()
        (org-entry-put nil "ID" (plist-get task :id))
-       ;; Also trim here: a reviewed repeat is closed in Emacs, not by finish.
+       ;; Org resets a repeat to TODO, which is Jon's; keep it AUTO. Also trim
+       ;; here: a reviewed repeat is closed in Emacs, not by finish.
        (when (plist-get task :repeat)
+         (org-entry-put nil "REPEAT_TO_STATE" "AUTO")
          (org-dispatch--trim-log (plist-get task :id)))
        (org-todo "PROG")
        (unless (let ((section (org-dispatch--section-bounds "Sessions")))
@@ -564,7 +563,7 @@ among the heading's own tags, so subsections never inherit it."
      ((equal (plist-get state :status) "finished")
       ;; Close workspaces this dispatcher opened once their work is accepted.
       (unless (member status '("working" "blocked"))
-        (when (and (member todo '("DONE" "TODO"))
+        (when (and (member todo '("DONE" "AUTO"))
                    (not (string-empty-p (or (plist-get state :workspace) ""))))
           (ignore-errors (org-dispatch--herdr "workspace" "close" (plist-get state :workspace))))
         (org-dispatch--drop-state id)))
@@ -737,7 +736,7 @@ DRY-RUN marks waiting tasks with :waiting instead of recording progress."
     (org-dispatch--notify (format "%s · %s" todo (or (plist-get state :heading) id))
                           (if (string-empty-p note) "Finished." note))
     (princ (format "%s is now %s\n" id result))
-    (when (and (equal result "TODO"))
+    (when (equal result "AUTO")
       (princ "The repeat was logged and the next run is scheduled.\n"))))
 
 (provide 'org-dispatch)
