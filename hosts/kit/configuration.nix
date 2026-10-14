@@ -73,34 +73,6 @@
     ];
   };
 
-  # Lux owns persistent media and Jellyfin. Never write to a local fallback.
-  fileSystems."/media" = {
-    device = "lux.home:/media";
-    fsType = "nfs";
-    options = [
-      "noauto"
-      "nofail"
-      "x-systemd.automount"
-      "x-systemd.idle-timeout=5m"
-      "x-systemd.mount-timeout=30s"
-      "vers=3"
-      "hard"
-    ];
-  };
-
-  # Commissioning and operations: docs/ytdl-sub.org.
-  services.ytdl-sub = {
-    enable = true;
-    instances.youtube.subscriptions = {
-      # Add named channels or playlists here; defaults live in ytdl-sub.nix.
-      # "Channel name" = "https://www.youtube.com/@CHANNEL/videos";
-      # "Playlist name" = {
-      #   overrides.url = "https://www.youtube.com/playlist?list=PLAYLIST_ID";
-      #   date_range.after = "today-7days";
-      # };
-    };
-  };
-
   # Share the existing Hyprland desktop over LAN/Tailscale.
   services.sunshine = {
     enable = true;

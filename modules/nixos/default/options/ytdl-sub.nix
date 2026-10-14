@@ -56,7 +56,7 @@ in {
     ];
 
     systemd.services.ytdl-sub-youtube = {
-      # An empty configuration needs neither Lux nor YouTube.
+      # Skip without requiring media or contacting YouTube.
       unitConfig.RequiresMountsFor = ["/var/lib/ytdl-sub"] ++ lib.optional hasSubscriptions "/media";
       serviceConfig = {
         ExecCondition = "${pkgs.coreutils}/bin/${

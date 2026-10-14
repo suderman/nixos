@@ -71,6 +71,19 @@
   services.plex.enable = true;
   services.arr.enable = true;
 
+  # Commissioning and operations: docs/ytdl-sub.org.
+  services.ytdl-sub = {
+    enable = true;
+    instances.youtube.subscriptions = {
+      # Add named channels or playlists here; defaults live in ytdl-sub.nix.
+      # "Channel name" = "https://www.youtube.com/@CHANNEL/videos";
+      # "Playlist name" = {
+      #   overrides.url = "https://www.youtube.com/playlist?list=PLAYLIST_ID";
+      #   date_range.after = "today-7days";
+      # };
+    };
+  };
+
   services.immich = {
     enable = true;
     photosDir = "/data/photos/immich";

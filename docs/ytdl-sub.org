@@ -2,19 +2,17 @@
 
 * YouTube subscriptions for Jellyfin
 
-Kit runs the pinned nixpkgs =ytdl-sub= package through the native
+Lux runs the pinned nixpkgs =ytdl-sub= package through the native
 =services.ytdl-sub.instances.youtube= module. The local
 [[file:../modules/nixos/default/options/ytdl-sub.nix][module]] adds shared download settings, persistence, and disk-backed temporary
-storage. [[file:../hosts/kit/configuration.nix][Kit]] enables it and owns the subscriptions and media mount. No other host
-runs the downloader.
+storage. [[file:../hosts/lux/configuration.nix][Lux]] enables it and owns the subscriptions. Downloads and Jellyfin
+use Lux's local media pool. No other host runs the downloader.
 
 ** Storage
 
 - Completed media goes to =/media/youtube/video/<show>/Season <upload year>/=.
   This reuses Lux's existing lowercase video directory; =/media/youtube/audio=
   remains separate and untouched.
-  Kit mounts Lux's existing =lux.home:/media= NFS export at =/media=.
-  NFSv3 uses the existing export path without assuming an NFSv4 root layout.
   Lux's =/media= is its persistent pool storage, already snapshotted and backed up.
   Jellyfin reads those same files locally on Lux. No copying service is needed.
 - Each show contains its upstream
@@ -22,10 +20,10 @@ runs the downloader.
   the media. It prevents duplicate downloads and preserves episode numbering.
   Renaming a subscription changes its show directory and archive identity.
 - =/var/lib/ytdl-sub/youtube= is the native service's current directory and
-  contains working-directory locks. =/var/lib/ytdl-sub= persists through Kit's
+  contains working-directory locks. =/var/lib/ytdl-sub= persists through Lux's
   existing =/mnt/main/storage= helper with owner =ytdl-sub:media=, mode =0750=.
 - =/var/cache/ytdl-sub/<subscription name>= holds videos during downloads and
-  post-processing. Systemd creates the cache directory on Kit's main Btrfs
+  post-processing. Systemd creates the cache directory on Lux's main Btrfs
   disk. It is not =/run= tmpfs, not backed up, and disappears on a root reset.
   Upstream removes each subscription's temporary directory after a run,
   including on errors. An interrupted transfer may need to restart.
@@ -33,14 +31,11 @@ runs the downloader.
   hold video downloads.
 
 With subscriptions present, =RequiresMountsFor=/media= orders the service after
-its NFS mount. =ProtectSystem=strict= remains enabled; only
-=/media/youtube/video= is added to the native writable paths. Systemd makes its state,
-cache, and runtime directories writable. A missing mount or missing YouTube
-directory must fail the run rather than write into a local fallback directory.
-
-The export uses a hard mount. If Lux disappears during a write, the downloader
-can wait for Lux to return. Mount setup has a 30-second timeout; that does not
-limit recovery time after an established NFS connection is lost.
+Lux's local Btrfs pool mount. =ProtectSystem=strict= remains enabled; only
+=/media/youtube/video= is added to the native writable paths. Systemd makes its
+state, cache, and runtime directories writable. A missing mount or missing
+video directory must fail the run rather than write into a local fallback
+directory. No NFS client mount or transfer between hosts is needed.
 
 ** First subscription
 
@@ -55,13 +50,13 @@ These are commissioning steps for Jon, not actions performed by the change.
    #+end_src
 
    Check =media= is GID =901= and Jellyfin belongs to it. The video directory
-   needs group write/traverse access for Kit's downloader. Setgid preserves
+   needs group write/traverse access for Lux's downloader. Setgid preserves
    the media group for new shows and seasons. Check existing ownership before
    changing permissions; do not recursively change the existing library.
-   Kit's service uses =Group=media= and application/systemd umasks =002=/=0002=,
+   Lux's service uses =Group=media= and application/systemd umasks =002=/=0002=,
    so Jellyfin can traverse directories and read videos, artwork, and NFO files.
 
-2. Add one real subscription to =hosts/kit/configuration.nix=. The existing
+2. Add one real subscription to =hosts/lux/configuration.nix=. The existing
    commented examples show both forms:
 
    #+begin_src nix
@@ -82,14 +77,14 @@ These are commissioning steps for Jon, not actions performed by the change.
    usual approved workflow:
 
    #+begin_src sh
-   nix develop --command nix eval .#nixosConfigurations.kit.config.system.build.toplevel.outPath
-   nix develop --command nix build --no-link '.#nixosConfigurations.kit.config.systemd.units."ytdl-sub-youtube.service".unit'
+   nix develop --command nix eval .#nixosConfigurations.lux.config.system.build.toplevel.outPath
+   nix develop --command nix build --no-link '.#nixosConfigurations.lux.config.systemd.units."ytdl-sub-youtube.service".unit'
    #+end_src
 
    Evaluation/building does not activate the configuration. No deployment or
    activation was performed for this implementation.
 
-4. After activation on Kit, check the real mounted storage and service access:
+4. After activation on Lux, check the real mounted storage and service access:
 
    #+begin_src sh
    stat /media/youtube/video
@@ -98,7 +93,7 @@ These are commissioning steps for Jon, not actions performed by the change.
    systemctl cat ytdl-sub-youtube.service
    #+end_src
 
-   Expect an NFS source, not Kit's root disk. Check the displayed service has
+   Expect Lux's Btrfs pool storage, not its root disk. Check the displayed service has
    =ReadWritePaths=/media/youtube/video= and a mount dependency. Do not trigger a
    download until this passes.
 
@@ -142,12 +137,12 @@ of rate limits, bot checks, unavailable videos, or extractor changes.
 
 ** Operation
 
-The native timer runs at 00:00, 06:00, 12:00, and 18:00 in Kit's local timezone.
+The native timer runs at 00:00, 06:00, 12:00, and 18:00 in Lux's local timezone.
 It does not replay missed calendar runs. Empty subscriptions skip through
-=ExecCondition= without mounting Lux or contacting YouTube. No example channel
-is active in the committed configuration.
+=ExecCondition= without requiring the media mount or contacting YouTube. No
+example channel is active in the committed configuration.
 
-After commissioning:
+After commissioning, run these commands on Lux:
 
 #+begin_src sh
 systemctl list-unit-files 'ytdl-sub-*'
@@ -207,16 +202,16 @@ home directories; verify access after provisioning.
 
 ** Verification limits
 
-Implementation checks included Kit evaluation, kit-only enablement, generated
-YAML and unit builds, systemd syntax/calendar checks, and the pinned application's
-schema. Disposable local fixtures exercised format selection, date filters,
+Implementation checks included Lux and Kit evaluation, Lux-only enablement
+across all host configurations, native YAML/unit builds, systemd syntax/calendar
+checks, and the pinned application's schema. Disposable local fixtures exercised format selection, date filters,
 NFO/tags/thumbnails/info JSON, two distinct same-day filenames, and archive
 reload/skip behavior. Fixture media was generated locally; it was not downloaded
 from YouTube. SponsorBlock options were checked, but no live SponsorBlock cut
 was performed. A separately named user-unit probe verified empty
 =ExecCondition= skips without executing the command.
 
-Lux resolved to =10.1.0.5= and advertised the expected NFS export. SSH inspection
-failed with =Permission denied= and sudo required a password. The real NFS
-mount/write, media ownership on Lux, production systemd sandbox, live YouTube
-extraction, and Jellyfin scan/playback remain Jon's commissioning checks.
+Read-only SSH inspection of Lux failed with =Permission denied= and local
+sudo required a password. Actual media ownership and write access on Lux,
+the production systemd sandbox, live YouTube extraction, and Jellyfin
+scan/playback remain Jon's commissioning checks.
