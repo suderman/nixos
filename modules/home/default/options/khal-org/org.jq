@@ -4,6 +4,7 @@ def one: gsub("\\s+"; " ") | sub("^ "; "") | sub(" $"; "");
 def text:
   gsub("-::~[:~]*::-(?s:.*?)-::~[:~]*::-"; "")
   | gsub("<br\\s*/?>|</p>|</li>"; "\n"; "i") | gsub("<[^>]+>"; "")
+  | gsub("_{60,}\\s*Microsoft Teams meeting(?s:.*?)_{60,}"; "")
   | gsub("&nbsp;"; " ") | gsub("&lt;"; "<") | gsub("&gt;"; ">")
   | gsub("&quot;"; "\"") | gsub("&#39;"; "'") | gsub("&amp;"; "&")
   | gsub("\r"; "") | gsub("[ \t]+\n"; "\n") | gsub("\n{3,}"; "\n\n")
