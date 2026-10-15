@@ -7,12 +7,6 @@
     ]
     ++ flake.lib.ls ./.;
 
-  # Override home-assistant client with local instance
-  programs.home-assistant.url = "https://hass.cog";
-
-  # Override jellyfin client with local instance
-  programs.jellyfin.url = "https://jellyfin.cog";
-
   # Program
   programs.sparrow.enable = true;
   programs.nf.enable = true;
