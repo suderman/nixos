@@ -351,6 +351,9 @@ in {
           else lib.getExe openHerdr;
         on-click-right = lib.getExe openHerdr;
       };
+
+      # The agent window is kitty with its own class; give it kitty's shortcuts
+      services.keyd.windows.HerdrAgent = config.services.keyd.windows.kitty;
     }
 
     (mkIf cfg.popup.enable {

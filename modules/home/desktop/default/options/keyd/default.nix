@@ -27,7 +27,8 @@ in {
       default = true;
     };
     windows = mkOption {
-      type = types.anything;
+      # Lazy, so one window can reuse another's binds
+      type = types.lazyAttrsOf types.anything;
       default = {}; # firefox = { "alt.f" = "C-f"; };
     };
     layers = mkOption {
