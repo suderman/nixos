@@ -412,11 +412,11 @@
         "pins": "pins"
       },
       "locked": {
-        "lastModified": 1792085363,
-        "narHash": "sha256-TMPRqzLpqrn2N2SjJsPPQaHIHMfwf/Yc2aDoUhhGubI=",
+        "lastModified": 1792105223,
+        "narHash": "sha256-rhU64zULFTrDC0z8BkwK0kP2p+ULyZNEFYhnKvcbz+0=",
         "owner": "suderman",
         "repo": "emacs",
-        "rev": "a57920db75e02b12741a720d8f2bafca160daa8b",
+        "rev": "6796bd20288d55b5d9f6bb427338b729598b4837",
         "type": "github"
       },
       "original": {
