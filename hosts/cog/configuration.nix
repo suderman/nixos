@@ -20,6 +20,7 @@
     grub.enable = true;
     grub.efiSupport = true;
     grub.efiInstallAsRemovable = true;
+    grub.memtest86.enable = true;
   };
 
   # Mobile computing
