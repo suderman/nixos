@@ -27,6 +27,17 @@ in {
         "Ctrl+l" = "ab-loop";
       };
     };
+    # Cast from Jellyfin to mpv, sharing the config and bindings above
+    services.jellyfin-mpv-shim = {
+      enable = mkDefault config.programs.jellyfin.enable;
+      mpvConfig = cfg.config;
+      mpvBindings = cfg.bindings;
+    };
+    # Keep the Jellyfin login (cred.json)
+    persist.storage.directories = mkIf config.services.jellyfin-mpv-shim.enable [
+      ".config/jellyfin-mpv-shim"
+    ];
+
     # Make default application for videos
     xdg.mimeApps.defaultApplications = {
       # video
