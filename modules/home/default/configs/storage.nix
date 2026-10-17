@@ -38,6 +38,11 @@ in {
           default = null;
           description = "Syncthing devices to share this directory with; null shares it with all devices";
         };
+        syncIgnores = mkOption {
+          type = types.listOf types.str;
+          default = [];
+          description = "Extra Syncthing ignore patterns for this directory on this host";
+        };
         enable = mkOption {
           type = types.bool;
           default = false;

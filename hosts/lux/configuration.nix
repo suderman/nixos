@@ -29,7 +29,7 @@
       boot = {};
       main = {};
       data = {
-        mounts = ["/mnt/data" "/data"];
+        mounts = ["/mnt/data" "/data" "/home/jon/data"];
         services = ["docker-backblaze.service" "docker-immich-server.service"];
       };
       pool = {
@@ -41,6 +41,30 @@
       };
     };
   };
+
+  fileSystems."/home/jon/data" = {
+    device = "/mnt/data/storage";
+    fsType = "none";
+    depends = ["/mnt/data"];
+    options = [
+      "bind"
+      "noauto"
+      "nofail"
+      "x-systemd.automount"
+      "x-systemd.idle-timeout=5m"
+      "x-gvfs-trash"
+    ];
+  };
+
+  # Let jon write the top of ~/data; Immich and Backblaze keep their subdirectories.
+  tmpfiles.directories = [
+    {
+      target = "/mnt/data/storage";
+      mode = 755;
+      user = "jon";
+      group = "users";
+    }
+  ];
 
   # Snapshots and backups
   services.btrbk.volumes = {

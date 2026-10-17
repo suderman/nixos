@@ -101,11 +101,20 @@ in {
 
     # Syncthing does not sync .stignore, so install a regular copy for every folder.
     home.activation.syncthingIgnoreFiles = lib.hm.dag.entryAfter ["writeBoundary"] ''
-      ${lib.concatStringsSep "\n" (lib.mapAttrsToList (_: folder: let
+      ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: folder: let
           target = "${config.home.homeDirectory}/${folder.path}/.stignore";
+          # Host-specific patterns come first so they win over the template.
+          source =
+            if folder.syncIgnores == []
+            then ignoreFile
+            else
+              pkgs.concatText "stignore-${name}" [
+                (pkgs.writeText "stignore-${name}-extra" (lib.concatLines folder.syncIgnores))
+                ignoreFile
+              ];
         in ''
           $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -Dm0644 \
-            ${lib.escapeShellArg ignoreFile} \
+            ${lib.escapeShellArg source} \
             ${lib.escapeShellArg "${target}.tmp"}
           $DRY_RUN_CMD ${pkgs.coreutils}/bin/mv -fT \
             ${lib.escapeShellArg "${target}.tmp"} \
