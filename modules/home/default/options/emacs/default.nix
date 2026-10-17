@@ -187,7 +187,7 @@ in {
       # keyd's options exist only in the desktop layer, so mkIf cannot guard them.
       // lib.optionalAttrs config.desktop.enable {
         keyd.windows."emacs" = {
-          "super.w" = "macro(C-x 0)"; # close window or tab
+          "super.w" = "A-w"; # close window, tab, or frame
           "super.t" = "macro(C-x t 2)"; # new tab
           "super.r" = "f5"; # reload
         };
