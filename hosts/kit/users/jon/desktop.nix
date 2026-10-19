@@ -8,11 +8,11 @@ _: {
         {
           output = "DP-1";
           mode = "3840x2160@160.00Hz";
-          position = "0x440";
+          position = "0x940";
           scale = "1.33";
         }
         {
-          # ASUS PB278, rotated 90 degrees to the right of DP-1
+          # ASUS PB278, rotated 90 degrees to the right of DP-1, bottoms aligned
           output = "DP-3";
           mode = "2560x1440@59.95Hz";
           position = "2880x0";
