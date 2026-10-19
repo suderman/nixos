@@ -42,6 +42,10 @@ in {
             type = types.str;
             default = "1";
           };
+          transform = mkOption {
+            type = types.ints.between 0 7;
+            default = 0;
+          };
           disabled = mkOption {
             type = types.bool;
             default = false;
