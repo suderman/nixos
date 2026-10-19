@@ -320,11 +320,15 @@ def render_task(task, status, level):
     if any(attachment["local"] for attachment in attachments):
         title += " :ATTACH:"
     lines = [f"{'*' * level} {status} {title}"]
+    # Org reads planning only from one line directly under the heading.
+    planning = []
     if status == "DONE":
         completed = task["completed_datetime"].astimezone()
-        lines.append(f"CLOSED: {org_date(completed, '[]')[:-1]} {completed:%H:%M}]")
+        planning.append(f"CLOSED: {org_date(completed, '[]')[:-1]} {completed:%H:%M}]")
     if task["due_date"]:
-        lines.append(f"DEADLINE: {org_date(task['due_date'])}")
+        planning.append(f"DEADLINE: {org_date(task['due_date'])}")
+    if planning:
+        lines.append(" ".join(planning))
     completed = "true" if task["completed"] else "false"
     lines.extend(
         (
@@ -706,6 +710,11 @@ def self_test():
     assert todo_count == 0 and done_count == 1 and completed_count == 1
     assert "*** DONE Site > Current task" in completed_body
     assert ":ASANA_COMPLETED: true" in completed_body
+    assert re.search(
+        r"(?m)^\*\*\* DONE Site > Current task\nCLOSED: \[[^]\n]+\] "
+        r"DEADLINE: <2026-08-28 Fri>\n:PROPERTIES:$",
+        completed_body,
+    )
 
     reopened_body, todo_count, done_count, completed_count = merge_tasks(
         [active],
