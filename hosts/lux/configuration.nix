@@ -96,8 +96,11 @@
   services.arr.enable = true;
 
   # Commissioning and operations: docs/ytdl-sub.org.
-  # Private subscriptions: /var/lib/ytdl-sub/subscriptions.yaml on Lux.
-  services.ytdl-sub.enable = true;
+  services.ytdl-sub = {
+    enable = true;
+    # Tangled from subscriptions.org beside it; Syncthing delivers it to Lux.
+    subscriptionsFile = "/home/jon/profile/apps/ytdl-sub/subscriptions.yaml";
+  };
 
   services.immich = {
     enable = true;

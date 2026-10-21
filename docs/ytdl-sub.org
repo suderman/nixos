@@ -5,9 +5,10 @@
 Lux runs the pinned nixpkgs =ytdl-sub= package through the native
 =services.ytdl-sub.instances.youtube= module. The local
 [[file:../modules/nixos/default/options/ytdl-sub.nix][module]] adds shared download settings, persistence, and disk-backed temporary
-storage. [[file:../hosts/lux/configuration.nix][Lux]] enables it. Private subscriptions live only in a local YAML file
-on Lux, not in Git or the Nix store. Downloads and Jellyfin use Lux's local
-media pool. No other host runs the downloader.
+storage. [[file:../hosts/lux/configuration.nix][Lux]] enables it. Subscriptions live in Jon's =~/profile/apps/ytdl-sub/subscriptions.org=,
+tangled to =subscriptions.yaml= beside it and carried to Lux by Syncthing. They stay
+out of Git and the Nix store. Downloads and Jellyfin use Lux's local media
+pool. No other host runs the downloader.
 
 ** Storage
 
@@ -20,10 +21,12 @@ media pool. No other host runs the downloader.
   =.ytdl-sub-<subscription name>-download-archive.json=. Keep that file with
   the media. It prevents duplicate downloads and preserves episode numbering.
   Renaming a subscription changes its show directory and archive identity.
-- =/var/lib/ytdl-sub/subscriptions.yaml= is the private runtime subscription
-  list. Keep it owned by =ytdl-sub:media=, mode =0600=. The parent directory
-  already persists through the existing helper and is covered by Lux's backups.
-  Never import this file into Nix or copy it into the public repository.
+- =services.ytdl-sub.subscriptionsFile= names the runtime subscription list.
+  Lux sets =/home/jon/profile/apps/ytdl-sub/subscriptions.yaml=; the default is
+  =/var/lib/ytdl-sub/subscriptions.yaml=. Systemd copies it as root into the
+  unit's credentials directory on each start (=LoadCredential=), so Jon's
+  private home and file modes need no permission changes. Never import
+  this file into Nix or copy it into the public repository.
 - =/var/lib/ytdl-sub/youtube= is the native service's current directory and
   contains working-directory locks. =/var/lib/ytdl-sub= persists through Lux's
   existing =/mnt/main/storage= helper with owner =ytdl-sub:media=, mode =0750=.
@@ -85,51 +88,36 @@ These are commissioning steps for Jon, not actions performed by the change.
    =ReadWritePaths=/media/youtube/video= and a mount dependency. Do not trigger a
    download until this passes.
 
-4. Create the subscription file on Lux only if it does not already exist:
-
-   #+begin_src sh
-   sudo -u ytdl-sub -g media sh -c 'umask 077; set -C; : > /var/lib/ytdl-sub/subscriptions.yaml'
-   sudo -u ytdl-sub -g media nano /var/lib/ytdl-sub/subscriptions.yaml
-   #+end_src
-
-   The creation command refuses to overwrite an existing file. Use your
-   preferred terminal editor in place of =nano=. Paste this YAML structure,
-   replacing placeholders with your choices:
+4. Edit =~/profile/apps/ytdl-sub/subscriptions.org= in Emacs on any host and tangle it with
+   =C-c C-v t=. Its YAML block has this structure:
 
    #+begin_src yaml
-   __preset__:
-     preset: "YouTube"
+   YouTube:
+     "Channel name": "https://www.youtube.com/@CHANNEL/videos"
 
-   "Channel name":
-     overrides:
-       url: "https://www.youtube.com/@CHANNEL/videos"
-     date_range:
-       after: "today-7days"
+     # A leading ~ allows per-show settings, such as a shorter window.
+     "~Other channel":
+       url: "https://www.youtube.com/@OTHER/videos"
+       only_recent_date_range: "7days"
 
-   # Optional playlist. Remove this example unless you select a real playlist.
-   # "Playlist name":
-   #   overrides:
-   #     url: "https://www.youtube.com/playlist?list=PLAYLIST_ID"
-   #   date_range:
-   #     after: "today-7days"
+     # Playlist.
+     "Playlist name": "https://www.youtube.com/playlist?list=PLAYLIST_ID"
    #+end_src
 
-   =__preset__= must be a mapping with =preset=, not a plain string. It selects
-   the public shared preset. Names become show names. Per-subscription settings
-   override shared defaults; omitting =date_range= uses the last 30 days.
-   Keep names stable after downloads begin. A file containing only =__preset__=
-   is a valid empty list. Do not save the placeholder channel as an active URL.
+   The top-level =YouTube= key selects the public shared preset. Names become
+   show names; the =~= is not part of the name. Omitting
+   =only_recent_date_range= uses the last 30 days. Keep names stable after
+   downloads begin.
 
-   Check ownership and readability without printing your list:
+   Check Syncthing delivered the tangled file to Lux:
 
    #+begin_src sh
-   stat -c '%U:%G %a %n' /var/lib/ytdl-sub/subscriptions.yaml
-   sudo -u ytdl-sub -g media test -r /var/lib/ytdl-sub/subscriptions.yaml
+   ssh lux cat profile/apps/ytdl-sub/subscriptions.yaml
    #+end_src
 
-   Expect =ytdl-sub:media 600=. Preview with the dry-run procedure below, then
-   start a manual sync. No rebuild, deployment, or timer restart is needed
-   after changing subscriptions. Each run reads the file again.
+   Preview with the dry-run procedure below, then start a manual sync. No
+   rebuild, deployment, or timer restart is needed after changing
+   subscriptions. Each run reads the file again.
 
 5. In Jellyfin on Lux, add a separate TV shows library named =YouTube= with
    folder =/media/youtube/video=. Prefer local NFO metadata and local artwork; disable
@@ -156,9 +144,11 @@ self-promotion, and other categories are untouched. Upstream leaves
 less exact at keyframes, and SponsorBlock coverage is not guaranteed.
 
 Only uploads from the last 30 days qualify by default. This bounds download
-history, not disk usage or the number of videos in a busy channel. Override
-=date_range.after= per subscription to request a smaller window or a deliberate
-backfill. Date filtering does not delete existing files. No retention or
+history, not disk usage or the number of videos in a busy channel. Set
+=only_recent_date_range= on a =~= subscription, such as ="7days"= or
+="1years"=, to request a smaller window or a deliberate backfill. The shared
+preset uses upstream =Only Recent Archive=, not =Only Recent=, so date
+filtering does not delete existing files. No retention or
 maximum-file deletion policy is configured. An outage longer than the window
 needs an explicit backfill. Metadata inspection can traverse older playlist
 entries because playlists need not be ordered by upload date.
@@ -174,9 +164,9 @@ of rate limits, bot checks, unavailable videos, or extractor changes.
 The native timer runs at 00:00, 06:00, 12:00, and 18:00 in Lux's local timezone.
 It does not replay missed calendar runs. Valid empty subscriptions use
 the application's normal =No subscriptions ran= path without contacting YouTube.
-A missing or zero-byte file skips through =ExecCondition=. The fixed media
-mount dependency still applies and may mount the pool before that check.
-Malformed YAML fails the run. No real subscriptions are stored in this repository.
+A zero-byte file, such as an empty tangled block, skips through
+=ExecCondition=. A missing file fails the unit at start (status =243/CREDENTIALS=),
+which usually means Syncthing or tangling went wrong. Malformed YAML fails the run. No real subscriptions are stored in this repository.
 
 After commissioning, run these commands on Lux:
 
@@ -197,13 +187,10 @@ sudo systemctl stop ytdl-sub-youtube.timer
 sudo systemctl start ytdl-sub-youtube.timer
 #+end_src
 
-Edit =/var/lib/ytdl-sub/subscriptions.yaml= directly on Lux as the service user.
-Stop the timer during substantial edits so it cannot read a half-written file;
-check for a running sync before editing. Restart the timer when finished.
-Do not edit generated public preset YAML in the Nix store. The local list is
-not encrypted at rest; root, backups, downloaded media and logs can still
-reveal subscriptions. Owner-only permissions prevent ordinary local users
-from reading the list, not from seeing show names in shared media.
+Edit subscriptions only in =~/profile/apps/ytdl-sub/subscriptions.org=, never the tangled YAML.
+Tangling and Syncthing both replace the file whole, and a run copies it once at
+start, so edits cannot be read half-written or disturb a running sync. Do not
+edit generated public preset YAML in the Nix store.
 
 *** Dry-run
 
@@ -212,13 +199,19 @@ writing media or changing output archives. It is not an offline validator:
 it contacts YouTube and may create temporary files and working-directory locks.
 
 Use =systemctl cat ytdl-sub-youtube.service= to obtain its exact =ExecStart=
-command, generated public config path, and local subscription path. Run that command with
-=--dry-run= added before =sub=, as =ytdl-sub:media=, with current directory
-=/var/lib/ytdl-sub/youtube=. For example, open a shell with
-=sudo -u ytdl-sub -g media sh=, change directory, then paste the adjusted command.
+command and generated public config path. Run that command as =ytdl-sub:media=
+with =--dry-run= added before =sub=, current directory
+=/var/lib/ytdl-sub/youtube=, and =/dev/stdin= in place of
+=%d/subscriptions.yaml=. Feed the list from Jon's shell, which can read it:
+
+#+begin_src sh
+cd /var/lib/ytdl-sub/youtube
+sudo -u ytdl-sub -g media <ytdl-sub> --config <config.yaml> --dry-run sub /dev/stdin \
+  --match 'Show name' < ~/profile/apps/ytdl-sub/subscriptions.yaml
+#+end_src
+
 The application lock prevents overlapping runs that share this cache and
-current directory. Add =--match 'Show name'= after the subscription file argument
-to preview one show.
+current directory. Drop =--match= to preview every show.
 
 Never run the generated command as root or from an arbitrary current directory.
 Do not use =--update-with-info-json= as a validation command; it can rewrite
