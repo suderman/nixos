@@ -16,6 +16,7 @@
         package = null;
         portalPackage = null;
         systemd.enable = true;
+        quickshell.enable = lib.mkDefault true;
       };
       systemd.target = "hyprland-session.target";
     };

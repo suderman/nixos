@@ -56,7 +56,9 @@ prepared light/dark palettes, supported apps, and reload limits.
   the private clipboard without adding it to the configured Cliphist history.
 - Blezz retains the existing launcher and adds Appearance and Share entries.
 
-On Quickshell hosts, Super+backtick or Waybar's settings button opens quick settings
+Quickshell is enabled by default for Hyprland desktops. It provides the themed
+media OSD and quick settings without requiring agent or quota widgets; those
+remain opt-in. Super+backtick or Waybar's settings button opens quick settings
 on the focused monitor. The panel follows the current palette. Light/dark,
 notification silence, and night light keep it open. Theme choices sit in one row without an outer box; notification and night-light states appear beside their
 labels. Failed controls get a red border and an error tooltip, not footer text.
