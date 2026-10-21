@@ -29,6 +29,9 @@ in {
             # Upstream uses /run, a tmpfs too small for video downloads.
             working_directory = lib.mkForce "/var/cache/ytdl-sub";
             umask = "002";
+            # Allows sub --update-with-info-json to rename existing media
+            # after a naming change, without downloading it again.
+            experimental.enable_update_with_info_json = true;
           };
           presets.YouTube = {
             # Only Recent Archive is a download window, not retention.
@@ -37,6 +40,9 @@ in {
             overrides = {
               tv_show_directory = "/media/youtube/video";
               only_recent_date_range = "30days";
+              # Seasons stay per year; newer uploads get lower episode numbers,
+              # so Jellyfin lists them first.
+              tv_show_by_date_episode_ordering = "upload-month-day-reversed";
             };
             # Playlists need not be ordered by upload date.
             date_range.breaks = false;

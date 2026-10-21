@@ -133,6 +133,11 @@ archive, TV-show/episode NFO, MP4 tags, info JSON, episode thumbnails, and
 available channel avatar/banner artwork. Some playlists do not supply show
 artwork; missing source artwork is not synthesized.
 
+Seasons are upload years. Episodes use upstream
+=upload-month-day-reversed= numbering, so newer uploads get lower numbers and
+Jellyfin lists them first: 21 October becomes =e07299=, 4 October =e08999=.
+The last two digits order same-day uploads.
+
 The format sorter favors H264 video and AAC audio. MP4 merging and metadata
 writing copy streams rather than routinely encoding video. If H264/AAC is
 unavailable, other codecs can be selected within the 1080p cap; Jellyfin client
@@ -218,6 +223,59 @@ Do not use =--update-with-info-json= as a validation command; it can rewrite
 existing files. Pure Nix evaluation checks structure, not application schema
 or live extraction. An empty CLI run validates shared settings but does not
 validate a real URL.
+
+*** Renumbering existing downloads
+
+A naming change such as the episode ordering applies only to new downloads.
+=sub --update-with-info-json= (=-u=) reapplies current naming to existing
+media from each video's saved =.info.json=. It downloads nothing, rewrites
+NFOs and tags, then deletes the old paths. The module enables
+=experimental.enable_update_with_info_json= for this. Date windows and
+SponsorBlock cuts are yt-dlp filters and postprocessors, so this mode does not
+apply them and nothing is dropped or cut again. Throttle protection still
+sleeps 14-28 seconds per video.
+
+Renamed files are new items to Jellyfin, so watched state and resume points on
+those episodes reset.
+
+1. Pause the timer and check nothing is running:
+
+   #+begin_src sh
+   sudo systemctl stop ytdl-sub-youtube.timer
+   systemctl is-active ytdl-sub-youtube.service
+   #+end_src
+
+2. Take a Btrfs reflink copy. It shares extents, so it is instant and costs
+   almost no space:
+
+   #+begin_src sh
+   sudo cp -a --reflink=always /media/youtube/video /media/youtube/video.before-renumber
+   #+end_src
+
+3. Deploy the naming change, then run the update the same way as the
+   dry-run, first with =--dry-run= to read the transaction log, then without:
+
+   #+begin_src sh
+   cd /var/lib/ytdl-sub/youtube
+   sudo -u ytdl-sub -g media <ytdl-sub> --config <config.yaml> --dry-run sub -u /dev/stdin \
+     < ~/profile/apps/ytdl-sub/subscriptions.yaml
+   sudo -u ytdl-sub -g media <ytdl-sub> --config <config.yaml> sub -u /dev/stdin \
+     < ~/profile/apps/ytdl-sub/subscriptions.yaml
+   #+end_src
+
+   Each show should report equal additions and removals, such as =+36 -36=.
+
+4. Check the files, scan the Jellyfin =YouTube= library, then restart the
+   timer and remove the copy:
+
+   #+begin_src sh
+   find /media/youtube/video -name '*.mp4' | sort
+   sudo systemctl start ytdl-sub-youtube.timer
+   sudo rm -rf /media/youtube/video.before-renumber
+   #+end_src
+
+   To roll back instead, stop the timer, move =video= aside, move the copy back
+   to =/media/youtube/video=, and redeploy the previous naming.
 
 ** Optional authentication
 
