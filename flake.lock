@@ -50,11 +50,11 @@
         "llm-agents": "llm-agents"
       },
       "locked": {
-        "lastModified": 1792630887,
-        "narHash": "sha256-o0OPS89/wJEKsruZKeU9JVMmzEcvJD2BJSElKjmNIfE=",
+        "lastModified": 1792716250,
+        "narHash": "sha256-XjentBtIuBnXpFe7L5wPqdFfQOcnUAWyaWc2U3jm7lU=",
         "owner": "suderman",
         "repo": "agents",
-        "rev": "3f56f54d519f61be0a622e6f1f0e7ba2a519d935",
+        "rev": "201cbe0071632ba0929fca2433e3957b6c5359db",
         "type": "github"
       },
       "original": {
@@ -412,11 +412,11 @@
         "pins": "pins"
       },
       "locked": {
-        "lastModified": 1792721571,
-        "narHash": "sha256-cDe3kIIZaxIVHBh+N8fqgLOi8MaDBB0uq/KsrknaI0c=",
+        "lastModified": 1792723581,
+        "narHash": "sha256-VbsA0dw8p9OyWFJ9j+F1n6LE/DFT6bCF4Liia3CRxWM=",
         "owner": "suderman",
         "repo": "emacs",
-        "rev": "12b57928750de7048b9e016b300b5a5f87e8aa21",
+        "rev": "5aa89a4b644922d856719e48e6618aa86a3e1bad",
         "type": "github"
       },
       "original": {
@@ -847,11 +847,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1792491056,
-        "narHash": "sha256-6n1Dn+WYtD8lprnSi+0k4FjbKfIVNG8lblpJ5MiiqXs=",
+        "lastModified": 1792697326,
+        "narHash": "sha256-2UBK0jdmPANGaeAIoVOZY+hSPB2Gy13ZuZeSxP3vF8k=",
         "owner": "NixOS",
         "repo": "nixos-hardware",
-        "rev": "efb6d0d5e2394c3c5416a18652808aba206c0988",
+        "rev": "1b418b8f203e49a92f250f8babdd19af1b6f7a7f",
         "type": "github"
       },
       "original": {
@@ -1337,11 +1337,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1792620735,
-        "narHash": "sha256-5unRGvOzL3dWQqXbDP9VL3ndco8MtvCKYUVECDxHYvE=",
+        "lastModified": 1792708153,
+        "narHash": "sha256-WA8ApztLScSY330voQfUR28FS+erMCphfFMPy+/aIF0=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "8b5adae4ae8782171ff6aaef94e444525cdd023d",
+        "rev": "d026657ab1ee7ec8a7ca0509e17657d5247ddc42",
         "type": "github"
       },
       "original": {
@@ -1538,11 +1538,11 @@
     },
     "nixpkgs_11": {
       "locked": {
-        "lastModified": 1792503283,
-        "narHash": "sha256-vhe2jyvRCgufWPqDuDq1S3t3ypE+ka46IFutV02xKso=",
+        "lastModified": 1792615934,
+        "narHash": "sha256-MlvRfa1O5Cqc2/a+gG+l9TSuowEoCKCmrJ1d9oAVm0I=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "cd4ea8d57de16f4810bc5f14207bac45fbf19f67",
+        "rev": "da6dc0e7b26060f2f71ce3ef7088fb56ee44fa36",
         "type": "github"
       },
       "original": {
@@ -1715,11 +1715,11 @@
         "nixpkgs": "nixpkgs_12"
       },
       "locked": {
-        "lastModified": 1792628604,
-        "narHash": "sha256-6KpwJG6a5eHBJ5meJCvieH4mLeJ1jeIDyLmEIa5jOiU=",
+        "lastModified": 1792721581,
+        "narHash": "sha256-HZpM7CYbCwU21TmCo/rvItnSc/zq5B8Kbc/PlPI83Mk=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "74999bbfc6ef12091d549bdf12b9fb8a111f73fb",
+        "rev": "f0af4f7b498a4671f052c07505563a8ee40496ac",
         "type": "github"
       },
       "original": {
@@ -1795,11 +1795,11 @@
         "treefmt-nix": "treefmt-nix_4"
       },
       "locked": {
-        "lastModified": 1792716212,
-        "narHash": "sha256-GU/7eiYReRD+O1QCTsz1Jk2m6d79LtFQf1Cm0DTFZR0=",
+        "lastModified": 1792723509,
+        "narHash": "sha256-Z3ZBIWjPzDYCnenyqDt+buJSUN8mWLD8lYlpr4V5u+Q=",
         "owner": "suderman",
         "repo": "pins",
-        "rev": "7dee95b1fdb2a1d6acb9d882332395475f0bb080",
+        "rev": "860c9cd2dfc6046c1e4a3474c05f337fe5b15a2c",
         "type": "github"
       },
       "original": {
@@ -1817,11 +1817,11 @@
         "treefmt-nix": "treefmt-nix_6"
       },
       "locked": {
-        "lastModified": 1792629858,
-        "narHash": "sha256-xoZRi1iT1E++6KAtbwaYF/sFk2IHUE7O9pu8WSJe6Ac=",
+        "lastModified": 1792723509,
+        "narHash": "sha256-Z3ZBIWjPzDYCnenyqDt+buJSUN8mWLD8lYlpr4V5u+Q=",
         "owner": "suderman",
         "repo": "pins",
-        "rev": "79cdc418a3e4646f367d5cf22bd0775a4f0d27ed",
+        "rev": "860c9cd2dfc6046c1e4a3474c05f337fe5b15a2c",
         "type": "github"
       },
       "original": {
