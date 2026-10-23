@@ -47,6 +47,30 @@
     path = with pkgs; [cfg.package jq openssh procps gawk gnugrep gnused util-linux];
     text = builtins.readFile "${flake.inputs.agents}/org/bin/herdr-link";
   };
+
+  # A phone left attached (herdr-link attach) pins its pane to the phone's
+  # size. Take over briefly, which ends that client, then let go so the pane
+  # returns to its layout size.
+  herdrReclaim = pkgs.self.mkScript {
+    name = "herdr-reclaim";
+    path = [cfg.package pkgs.jq pkgs.coreutils pkgs.util-linux];
+    text =
+      # bash
+      ''
+        pane=''${1:-''${HERDR_ACTIVE_PANE_ID:-}}
+        [[ -n $pane ]] || { echo "usage: herdr-reclaim [PANE]" >&2; exit 2; }
+
+        terminal=$(herdr pane get "$pane" | jq -er .result.pane.terminal_id)
+        read -r rows cols < <(herdr pane layout --pane "$pane" |
+          jq -er --arg p "$pane" '[.. | objects | select(.pane_id? == $p) | .rect][0] | "\(.height) \(.width)"')
+
+        # The attach client needs a terminal and a stdin that stays open but
+        # silent; end of input would reach the agent. Keybinds get /dev/null.
+        sleep 5 | timeout 2 env -u HERDR_ENV -u HERDR_PANE_ID -u HERDR_TAB_ID -u HERDR_WORKSPACE_ID \
+          script -qec "stty rows $rows cols $cols; exec herdr terminal attach $terminal --takeover" /dev/null \
+          >/dev/null 2>&1 || true
+      '';
+  };
 in {
   # Avoid duplicate options when release-26.11 imports the upstream module.
   disabledModules = ["programs/herdr.nix"];
@@ -71,7 +95,7 @@ in {
   };
 
   config = mkIf cfg.enable {
-    home.packages = [herdr edger herdrLink];
+    home.packages = [herdr edger herdrLink herdrReclaim];
 
     # Herdr stores mutable local data beside Home Manager's generated config.toml.
     persist.storage.directories = [".config/herdr"];
@@ -145,7 +169,15 @@ in {
             command = "${lib.getExe edger} ${action} ${modifier}+${letter}";
             description = "Edger ${action}";
           })
-          binds.action;
+          binds.action
+          ++ [
+            {
+              key = "prefix+t";
+              type = "shell";
+              command = lib.getExe herdrReclaim;
+              description = "Take the pane back from a phone attach";
+            }
+          ];
       };
     };
 
