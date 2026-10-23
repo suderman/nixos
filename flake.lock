@@ -50,11 +50,11 @@
         "llm-agents": "llm-agents"
       },
       "locked": {
-        "lastModified": 1792716250,
-        "narHash": "sha256-XjentBtIuBnXpFe7L5wPqdFfQOcnUAWyaWc2U3jm7lU=",
+        "lastModified": 1792775360,
+        "narHash": "sha256-25Z1ZRmNZKxzw8WZ79m+I+LDqnV6f5VWc/gFxqTRbmQ=",
         "owner": "suderman",
         "repo": "agents",
-        "rev": "201cbe0071632ba0929fca2433e3957b6c5359db",
+        "rev": "9e0e9772f654dcb786eadf499266b09c4b5bccbc",
         "type": "github"
       },
       "original": {
@@ -412,11 +412,11 @@
         "pins": "pins"
       },
       "locked": {
-        "lastModified": 1792723581,
-        "narHash": "sha256-VbsA0dw8p9OyWFJ9j+F1n6LE/DFT6bCF4Liia3CRxWM=",
+        "lastModified": 1792785444,
+        "narHash": "sha256-GzYodENSCdx2nzlTu9poWF+fzk7sfaEQCk4pr0Yn4q0=",
         "owner": "suderman",
         "repo": "emacs",
-        "rev": "5aa89a4b644922d856719e48e6618aa86a3e1bad",
+        "rev": "2f9a304701305d9f5e3b18b2b773f930a9909214",
         "type": "github"
       },
       "original": {
