@@ -128,8 +128,8 @@ elif [[ ${HERDR_ENV-} == 1 || -n ${HERDR_PANE_ID-}${HERDR_SOCKET_PATH-}${HERDR_W
     '"((edger-herdr-pane-id . \($pane|tojson)) (edger-herdr-socket-path . \($socket|tojson)))"')
 fi
 
-# Outside a multiplexer, use the default daemon. Its systemd user service
-# normally runs it; start it here when the service has not.
+# Outside a multiplexer, use the default daemon, which the emacs.service user
+# unit owns. Starting it anywhere else would hold the socket and block the unit.
 name=server
 if [[ -n $identity ]]; then
   name=$(daemon_name "$socket" "$identity")
@@ -140,20 +140,27 @@ if ! "$EMACS_CLIENT" -s "$name" -e t >/dev/null 2>&1; then
   exec 9>"$runtime/$name.lock"
   flock 9
   if ! "$EMACS_CLIENT" -s "$name" -e t >/dev/null 2>&1; then
-    log=${XDG_STATE_HOME:-$HOME/.local/state}/emacs/startup.log
-    if [[ $name != server ]]; then
+    if [[ $name == server ]]; then
+      # Type=notify, so start returns once the daemon is ready. Clear an earlier
+      # start-limit failure so em can recover the unit.
+      systemctl --user reset-failed emacs.service 2>/dev/null || true
+      systemctl --user start emacs.service || {
+        echo 'em: emacs.service failed to start; see journalctl --user -u emacs' >&2
+        exit 1
+      }
+    else
       # State includes history, autosaves, backups, and Custom. Package data stays
       # shared, while the mutable per-daemon state lives outside the config tree.
       export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}/emacs-workspaces/$name"
       log=$XDG_STATE_HOME/startup.log
-    fi
-    install -d -m 700 "${log%/*}"
-    if ! "$EMACS_SERVER" --daemon="$name" >"$log" 2>&1; then
-      cat "$log" >&2
-      exit 1
-    fi
-    if [[ -n $server_pid ]]; then
-      setsid -f "$0" --watch-tmux "$server_pid" "$name" </dev/null >/dev/null 2>&1 9>&-
+      install -d -m 700 "${log%/*}"
+      if ! "$EMACS_SERVER" --daemon="$name" >"$log" 2>&1; then
+        cat "$log" >&2
+        exit 1
+      fi
+      if [[ -n $server_pid ]]; then
+        setsid -f "$0" --watch-tmux "$server_pid" "$name" </dev/null >/dev/null 2>&1 9>&-
+      fi
     fi
   fi
   flock -u 9
