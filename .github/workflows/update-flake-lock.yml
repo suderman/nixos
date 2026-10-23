@@ -72,10 +72,17 @@ jobs:
       - name: Update flake
         run: nix flake update
 
+      # One process per host. A single eval of every host exceeds the
+      # runner's 16 GB and the runner is killed mid-step.
       - name: Evaluate every host
         run: |
-          nix eval --json .#nixosConfigurations --apply \
-            'cs: builtins.mapAttrs (_: c: c.config.system.build.toplevel.drvPath) cs'
+          hosts="$(nix eval --raw .#nixosConfigurations --apply 'cs: toString (builtins.attrNames cs)')"
+          for host in $hosts; do
+            echo "::group::$host"
+            nix eval --raw ".#nixosConfigurations.$host.config.system.build.toplevel.drvPath"
+            echo
+            echo "::endgroup::"
+          done
 
       - name: Commit and push if flake.lock changed
         run: |
