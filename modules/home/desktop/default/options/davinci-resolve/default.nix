@@ -5,38 +5,118 @@
   ...
 }: let
   cfg = config.programs.davinci-resolve;
-  inherit (lib) mkIf;
+  inherit (lib) getExe mkIf mkOption types;
 
-  # Convert all h264 mp4 files in directory to av1_nvenc pcm audio to edit in Davinci Resolve
-  davinci-resolve-import = pkgs.self.mkScript {
-    inputs = [pkgs.ffmpeg];
-    name = "davinci-resolve-import";
-    text = ./davinci-resolve-import.sh;
+  # Remux AAC audio to PCM so Resolve on Linux can play it. Runs inside the
+  # package's FHS wrapper, where fusionscript.so finds its libraries.
+  davinci-resolve-aac = pkgs.self.mkScript {
+    name = "davinci-resolve-aac";
+    text = let
+      inner = cfg.package.davinci;
+    in
+      # bash
+      ''
+        caller=$PWD
+        cd "$HOME" # the FHS sandbox may not contain the caller's directory
+        exec ${getExe cfg.package} python3 -I ${./davinci-resolve-aac.py} \
+          --output-dir ${lib.escapeShellArg cfg.aacRepair.directory} \
+          --ffmpeg ${pkgs.ffmpeg}/bin/ffmpeg \
+          --ffprobe ${pkgs.ffmpeg}/bin/ffprobe \
+          --notify ${pkgs.libnotify}/bin/notify-send \
+          --script-api ${inner}/Developer/Scripting \
+          --script-lib ${inner}/libs/Fusion/fusionscript.so \
+          --cwd "$caller" \
+          "$@"
+      '';
   };
 
-  # Convert output video from Davinci Resolve to x264 mp4 with aac audio
+  # Make Resolve renders web-friendly: H.264/AAC MP4, copying video Resolve
+  # already encoded as H.264 or HEVC. Linux Resolve cannot encode AAC.
   davinci-resolve-export = pkgs.self.mkScript {
-    inputs = [pkgs.ffmpeg];
     name = "davinci-resolve-export";
-    text = ./davinci-resolve-export.sh;
+    path = [pkgs.ffmpeg];
+    text =
+      # bash
+      ''
+        if [[ $# -eq 0 ]]; then
+          echo "Usage: davinci-resolve-export FILE..." >&2
+          exit 1
+        fi
+        for file in "$@"; do
+          output="''${file%.*}-final.mp4"
+          codec=$(ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of csv=p=0 "$file")
+          case "$codec" in
+            h264) video=(-c:v copy) ;;
+            hevc) video=(-c:v copy -tag:v hvc1) ;;
+            *) video=(-c:v libx264 -crf 20 -preset medium -pix_fmt yuv420p) ;;
+          esac
+          echo "$file ($codec) -> $output"
+          ffmpeg -nostdin -hide_banner -loglevel error -stats -n -i "$file" -map 0:v:0 -map 0:a? \
+            "''${video[@]}" -c:a aac -b:a 192k -movflags +faststart "$output"
+        done
+      '';
   };
 in {
   options.programs.davinci-resolve = {
     enable = lib.options.mkEnableOption "Davinci Resolve";
+
+    package = lib.mkPackageOption pkgs "davinci-resolve" {
+      example = "pkgs.unstable.davinci-resolve-studio";
+    };
+
+    aacRepair = {
+      enable = lib.options.mkEnableOption ''
+        a user service that remuxes AAC audio in the Media Pool to PCM and
+        relinks the clips. Requires external scripting set to Local in
+        Resolve Studio's preferences'';
+
+      directory = mkOption {
+        type = types.str;
+        default = "${config.xdg.dataHome}/DaVinciResolve/AAC";
+        description = ''
+          Persistent directory for repaired copies. Resolve projects link to
+          these files, so never point it at temporary storage.
+        '';
+      };
+    };
   };
 
   config = mkIf cfg.enable {
-    home.packages = with pkgs; [
-      # Video exiting software
-      davinci-resolve
-
-      # Import/export video conversion scripts
-      davinci-resolve-import
-      davinci-resolve-export
-
-      # Convert video from format to another
-      ffmpeg
+    assertions = [
+      {
+        assertion = !cfg.aacRepair.enable || cfg.package ? davinci;
+        message = "programs.davinci-resolve.aacRepair needs a nixpkgs Resolve package exposing passthru.davinci";
+      }
     ];
+
+    home.packages =
+      [
+        cfg.package
+        davinci-resolve-export
+
+        # Convert video from format to another
+        pkgs.ffmpeg
+      ]
+      ++ lib.optional cfg.aacRepair.enable davinci-resolve-aac;
+
+    # Projects, settings, and the Studio license; the wrapper binds license/
     persist.storage.directories = [".local/share/DaVinciResolve"];
+
+    # Downloadable AI models (Extras Download Manager) skip snapshots and backups
+    persist.scratch.directories = [".local/share/DaVinciResolve/Extras"];
+
+    systemd.user.services.davinci-resolve-aac = mkIf cfg.aacRepair.enable {
+      Unit = {
+        Description = "Repair AAC audio in the DaVinci Resolve Media Pool";
+        After = ["graphical-session.target"];
+      };
+      Service = {
+        ExecStart = "${getExe davinci-resolve-aac} watch";
+        Restart = "always";
+        RestartSec = 10;
+        Nice = 10;
+      };
+      Install.WantedBy = ["graphical-session.target"];
+    };
   };
 }

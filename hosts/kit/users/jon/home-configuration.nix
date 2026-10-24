@@ -2,6 +2,7 @@
   config,
   flake,
   lib,
+  pkgs,
   ...
 }: {
   imports =
@@ -22,7 +23,15 @@
   programs.emacs.archiveOrg = true;
 
   # Programs
-  programs.davinci-resolve.enable = true;
+  programs.davinci-resolve = {
+    enable = true;
+    package = pkgs.unstable.davinci-resolve-studio;
+    # Repaired copies sit beside Resolve's CacheClip on the backed-up data disk.
+    aacRepair = {
+      enable = true;
+      directory = "${config.home.homeDirectory}/${config.home.directories.DATA.path}/media/AAC";
+    };
+  };
   programs.sparrow.enable = true;
   programs.zwift.enable = true;
   programs.nf.enable = true;
