@@ -5,8 +5,9 @@ AAC audio that Resolve on Linux cannot decode.
 
 ## Files
 
-- `default.nix` defines the options, the `davinci-resolve-aac` and
-  `davinci-resolve-export` commands, and the user service.
+- `default.nix` defines the options, the `davinci-resolve-aac`,
+  `davinci-resolve-mcp`, and `davinci-resolve-export` commands, and the user
+  service.
 - `davinci-resolve-aac.py` is the standard-library Media Pool watcher and
   remuxer.
 
@@ -20,6 +21,7 @@ Kit's settings live in `hosts/kit/users/jon/home-configuration.nix`.
 | `package`             | `pkgs.davinci-resolve`              | Resolve package; kit uses `pkgs.unstable.davinci-resolve-studio` |
 | `aacRepair.enable`    | `false`                             | Run the Media Pool watcher                                       |
 | `aacRepair.directory` | `~/.local/share/DaVinciResolve/AAC` | Where repaired copies go; kit uses `~/data/media/AAC`            |
+| `mcp.enable`          | `false`                             | Install `davinci-resolve-mcp`                                    |
 
 `~/.local/share/DaVinciResolve` is persisted to storage, including the project
 library and the `license` directory that the Studio wrapper binds into the
@@ -103,6 +105,21 @@ Keep the directory on persistent, backed-up storage. On kit it sits beside
 Resolve's `CacheClip` on the data disk, which btrbk backs up to pow. Back up
 or move the directory together with the projects that use it. Before removing
 old repairs, check which projects still link to them.
+
+## MCP server
+
+Resolve 21.1 and later bundle an MCP server, `ResolveMCP`, which runs
+Resolve's own Python. `mcp.enable` installs `davinci-resolve-mcp`, which starts
+it inside the package's FHS wrapper from your home directory. It needs Studio
+with external scripting set to Local, like the AAC watcher.
+
+The `suderman/agents` repository declares the server for Pi and Claude Code as
+`davinci-resolve`. It deploys only on hosts where `davinci-resolve-mcp` is on
+`PATH`, so run `agents apply` after enabling or disabling this option.
+
+Ignore Resolve's "AI Assistants" setup. It writes the package's store path
+into `~/.claude.json`, which fails outside the FHS wrapper and goes stale after
+every Resolve update.
 
 ## Export
 

@@ -30,6 +30,18 @@
       '';
   };
 
+  # Resolve 21.1+'s own MCP server, at a stable name for agent configuration
+  # (the agents repo declares it). Its bundled Python needs the FHS wrapper.
+  davinci-resolve-mcp = pkgs.self.mkScript {
+    name = "davinci-resolve-mcp";
+    text =
+      # bash
+      ''
+        cd "$HOME" # agents start servers in project directories the sandbox may lack
+        exec ${getExe cfg.package} ${cfg.package.davinci}/bin/ResolveMCP "$@"
+      '';
+  };
+
   # Make Resolve renders web-friendly: H.264/AAC MP4, copying video Resolve
   # already encoded as H.264 or HEVC. Linux Resolve cannot encode AAC.
   davinci-resolve-export = pkgs.self.mkScript {
@@ -79,6 +91,10 @@ in {
         '';
       };
     };
+
+    mcp.enable = lib.options.mkEnableOption ''
+      the davinci-resolve-mcp command, which runs the MCP server bundled with
+      Resolve 21.1 and later. Requires external scripting set to Local'';
   };
 
   config = mkIf cfg.enable {
@@ -86,6 +102,10 @@ in {
       {
         assertion = !cfg.aacRepair.enable || cfg.package ? davinci;
         message = "programs.davinci-resolve.aacRepair needs a nixpkgs Resolve package exposing passthru.davinci";
+      }
+      {
+        assertion = !cfg.mcp.enable || cfg.package ? davinci;
+        message = "programs.davinci-resolve.mcp needs a nixpkgs Resolve package exposing passthru.davinci";
       }
     ];
 
@@ -97,7 +117,8 @@ in {
         # Convert video from format to another
         pkgs.ffmpeg
       ]
-      ++ lib.optional cfg.aacRepair.enable davinci-resolve-aac;
+      ++ lib.optional cfg.aacRepair.enable davinci-resolve-aac
+      ++ lib.optional cfg.mcp.enable davinci-resolve-mcp;
 
     # Projects, settings, and the Studio license; the wrapper binds license/
     persist.storage.directories = [".local/share/DaVinciResolve"];

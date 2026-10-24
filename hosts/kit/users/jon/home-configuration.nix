@@ -31,6 +31,7 @@
       enable = true;
       directory = "${config.home.homeDirectory}/${config.home.directories.DATA.path}/media/AAC";
     };
+    mcp.enable = true;
   };
   programs.sparrow.enable = true;
   programs.zwift.enable = true;
