@@ -21,6 +21,18 @@
     };
     text = builtins.readFile "${orgSource}/dispatch/org-dispatch";
   };
+
+  # Agents set TODO states and dates through Org rather than editing text.
+  orgEdit = pkgs.self.mkScript {
+    name = "org-edit";
+    path = [config.programs.emacs.finalPackage];
+    env = {
+      TZDIR = "${pkgs.tzdata}/share/zoneinfo";
+      ORG_EDIT_EL = "${orgSource}/edit/org-edit.el";
+      ORG_DISPATCH_EL = "${orgSource}/dispatch/org-dispatch.el";
+    };
+    text = builtins.readFile "${orgSource}/edit/org-edit";
+  };
 in {
   options.programs.pi-coding-agent.orgDispatch.enable = lib.mkEnableOption "pi runs for Org agenda AUTO headings tagged with this host";
 
@@ -32,8 +44,8 @@ in {
       }
     ];
 
-    # Agents call org-dispatch finish, so it must be on PATH in Herdr panes.
-    home.packages = [orgDispatch];
+    # Agents call org-dispatch finish and org-edit, so both must be on PATH in Herdr panes.
+    home.packages = [orgDispatch orgEdit];
 
     # Running tasks and settling headings must survive the root reset at boot.
     persist.scratch.directories = [".local/state/org-dispatch"];
