@@ -119,7 +119,8 @@ The `suderman/agents` repository declares the server for Pi and Claude Code as
 
 Ignore Resolve's "AI Assistants" setup. It writes the package's store path
 into `~/.claude.json`, which fails outside the FHS wrapper and goes stale after
-every Resolve update.
+every Resolve update. If someone presses it, the next `agents apply` removes
+that entry, and `agents doctor` reports it until then.
 
 ## Export
 
