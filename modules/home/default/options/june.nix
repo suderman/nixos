@@ -8,12 +8,20 @@
 }: let
   cfg = config.programs.june;
   home = config.home.homeDirectory;
+  # Run a writable checkout when one is installed, as the Emacs wrapper does, so
+  # code changes need only a restart; otherwise run the pinned package.
+  # JUNE_SOURCE=none forces the package.
   wrapper = pkgs.self.mkScript {
     name = "june";
+    path = [pkgs.ripgrep pkgs.openssh];
     text =
       # bash
       ''
         export JUNE_CONFIG_PATH="''${JUNE_CONFIG_PATH:-${lib.concatStringsSep ":" cfg.configDirs}}"
+        source="''${JUNE_SOURCE:-${home}/src/suderman/june}"
+        if [[ -f $source/src/cli.ts && -d $source/node_modules ]]; then
+          exec ${pkgs.nodejs_22}/bin/node --disable-warning=ExperimentalWarning "$source/src/cli.ts" "$@"
+        fi
         exec ${perSystem.june.default}/bin/june "$@"
       '';
   };
