@@ -123,6 +123,9 @@
   # ChatGPT/Codex account load balancer for OpenCode.
   services.codex-lb.enable = true;
 
+  # Parallel alternative for ChatGPT and Claude subscription accounts.
+  services.cliproxyapi.enable = true;
+
   # Garmin fenix 6 pro
   hardware.garmin.deviceId = "091e:4cda";
 
