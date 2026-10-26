@@ -1,5 +1,17 @@
-{pkgs, ...}: {
+{
+  config,
+  pkgs,
+  ...
+}: {
   programs.herdr.enable = true;
+
+  # Herdr only plays mp3; the tivo mp3s are converted from their wavs.
+  programs.herdr.settings.ui.sound = let
+    dir = "${config.home.homeDirectory}/profile/apps/herdr";
+  in {
+    done_path = "${dir}/tivo-up.mp3";
+    request_path = "${dir}/tivo-down.mp3";
+  };
 
   home.packages = with pkgs; [
     yo # example script
