@@ -4,6 +4,8 @@
     camofoxUrl = config.services.camofox-browser.apiUrls.hermes;
   };
 
+  programs.june.daemon.enable = true;
+
   services.camofox-browser = {
     enable = true;
     enableVnc = true;

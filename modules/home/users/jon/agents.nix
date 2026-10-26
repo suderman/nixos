@@ -28,6 +28,9 @@
 
   programs.hermes.apiKeys = ./apikeys-env.age;
 
+  # June's client everywhere; ~/profile/june names the host that runs her daemon.
+  programs.june.enable = true;
+
   # Self-hosted webapps running from my kit desktop
   xdg = lib.optionalAttrs config.desktop.enable {
     desktopEntries = config.lib.chromium.mkWebApp {

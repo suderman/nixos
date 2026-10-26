@@ -113,6 +113,11 @@
     # Recall capture and archive CLI.
     recall.url = "github:suderman/recall/main";
 
+    # June personal assistant
+    # <https://github.com/suderman/june>
+    june.url = "github:suderman/june";
+    june.inputs.nixpkgs.follows = "nixpkgs";
+
     # Tmux replacement
     # <https://github.com/herdrdev/herdr-nix>
     herdr.url = "github:herdrdev/herdr-nix";

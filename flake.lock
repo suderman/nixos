@@ -1312,6 +1312,26 @@
         "type": "github"
       }
     },
+    "june": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792974248,
+        "narHash": "sha256-31V0j6NJqpKzTSL47KwoAPt5r4Q1Cf3LVPtfSuso9Rc=",
+        "owner": "suderman",
+        "repo": "june",
+        "rev": "b73e45d6a4c3644cc23a7d50061d1bdbeb9fc371",
+        "type": "github"
+      },
+      "original": {
+        "owner": "suderman",
+        "repo": "june",
+        "type": "github"
+      }
+    },
     "kitty-graphics": {
       "flake": false,
       "locked": {
@@ -1914,6 +1934,7 @@
         "hyprland": "hyprland",
         "hyprland-plugins": "hyprland-plugins",
         "impermanence": "impermanence",
+        "june": "june",
         "neovim": "neovim",
         "nf": "nf",
         "nix-flatpak": "nix-flatpak",
