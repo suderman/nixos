@@ -50,11 +50,11 @@
         "llm-agents": "llm-agents"
       },
       "locked": {
-        "lastModified": 1792974260,
-        "narHash": "sha256-jvF0DU04i/GugZDxd2VFxo62lrcFAWG+RvQglRsKYgE=",
+        "lastModified": 1792989713,
+        "narHash": "sha256-upw2v+m/JecxBHiF7X5VukqTJfhPl939DBGkSohKUUo=",
         "owner": "suderman",
         "repo": "agents",
-        "rev": "32eb85f8dd853df6e04a5a33dbc9675329556d3b",
+        "rev": "3fd9abafa3b52d39b725ffcd2409c17a40a0ba7f",
         "type": "github"
       },
       "original": {
