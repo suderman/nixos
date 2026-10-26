@@ -120,6 +120,8 @@ in {
         bootstrap-retries = lib.mkDefault 1;
       };
       observability.usage.usage-statistics-enabled = lib.mkDefault true;
+      # Adds gpt-6.1-terra until the official catalog lists it; see catalog.nix.
+      models.catalog = lib.mkDefault (toString (pkgs.callPackage ./catalog.nix {}));
     };
 
     environment.systemPackages = [cfg.package];
