@@ -9,7 +9,7 @@
 in {
   config = mkIf cfg.enable {
     programs.git = {
-      ignores = ["*~" "*.swp"];
+      ignores = ["*~" "*.swp" ".unipi/"];
       settings = {
         core = {
           autocrlf = "input";
