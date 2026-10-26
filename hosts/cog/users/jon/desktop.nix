@@ -20,9 +20,8 @@
       ];
     };
     hyprbars.enable = true;
-    waybar.codex-lb.enable = true;
+    waybar.cliproxyapi.enable = true;
     waybar.minimax-quota.enable = true;
-    waybar.claude-quota.enable = true;
     waybar.herdr.enable = true;
   };
 

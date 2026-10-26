@@ -80,12 +80,19 @@ tooltip {
   padding-right: 5px;
 }
 
-.modules-right #custom-codex-lb,
+.modules-right #custom-cliproxyapi,
 .modules-right #custom-minimax-quota,
-.modules-right #custom-claude-quota,
 .modules-right #custom-herdr {
   padding-left: 10px;
   padding-right: 10px;
+}
+
+.modules-right #custom-cliproxyapi.stale {
+  color: @base09;
+}
+
+.modules-right #custom-cliproxyapi.critical {
+  color: @base08;
 }
 
 .modules-right #custom-herdr.blocked,

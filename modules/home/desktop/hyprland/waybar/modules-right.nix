@@ -9,14 +9,11 @@
       [
         "group/tray"
       ]
-      ++ lib.optionals config.wayland.windowManager.hyprland.waybar.codex-lb.enable [
-        "custom/codex-lb"
+      ++ lib.optionals config.wayland.windowManager.hyprland.waybar.cliproxyapi.enable [
+        "custom/cliproxyapi"
       ]
       ++ lib.optionals config.wayland.windowManager.hyprland.waybar.minimax-quota.enable [
         "custom/minimax-quota"
-      ]
-      ++ lib.optionals config.wayland.windowManager.hyprland.waybar.claude-quota.enable [
-        "custom/claude-quota"
       ]
       ++ lib.optionals config.wayland.windowManager.hyprland.waybar.herdr.enable [
         "custom/herdr"

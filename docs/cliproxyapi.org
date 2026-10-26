@@ -60,6 +60,21 @@ A manual or early upstream quota reset may leave a credential in local cooldown.
 
 Use the management key to call =GET /v8/management/credentials= and find the affected credential's =auth_index=. Then call =POST /v8/management/routing/cooldown/reset= with JSON body ={"auth_index":"the-affected-index"}=. This clears the credential's in-memory and saved cooldowns. See [[https://github.com/router-for-me/CLIProxyAPI/issues/5639][upstream issue 5639]] and the [[https://github.com/router-for-me/CLIProxyAPI/blob/v8.0.25/docs/management-api-v8.md][v8 management API guide]].
 
+** Read-only desktop quota view
+Kit enables =services.cliproxyapi.quota.enable=. The =cliproxyapi-quota.timer= samples enrolled Codex and Claude subscription accounts 30 seconds after boot and 120 seconds after each collection finishes. It uses the management API with a systemd-loaded credential; desktop clients never read management keys or provider tokens. Paused accounts stay visible without usage polling. HTTP 429 responses honor =Retry-After=, with a five-minute default backoff. Failed requests retain the last successful quota and its timestamp.
+
+The private endpoint is =https://cliproxyapi-quota.kit/quota.json=. It publishes account labels, remaining percentages, reset times and availability, without authentication beyond the LAN/Tailscale IP allowlist. It contains no keys or tokens, but account labels may include email addresses. Nginx serves only this JSON file on loopback port 8320; it does not expose the internal cache or a management forwarding endpoint. Snapshot and backoff state live under =/run/cliproxyapi-quota= and reset at reboot.
+
+Kit and Cog enable =wayland.windowManager.hyprland.waybar.cliproxyapi.enable=. The bar shows mean remaining percentages per provider, labelled =5h= and =wk=. Each window is averaged independently across accounts that report it: if three of four Codex accounts have a five-hour limit, only those three contribute to =5h=, while all four can contribute to =wk=. Missing windows do not count as zero and are not inferred from plan names. Paused accounts and stale data are excluded; fresh exhausted or temporarily unavailable accounts still contribute, so depletion does not inflate the averages. These are equal-account averages, not capacity-weighted pooled allowance. The tooltip shows contributing account counts for each window. Click for every account and its quota windows. Right-click or choose Open management in the popup to open =https://cliproxyapi.kit/management.html= in the default browser. Account changes stay in management; the popup is read-only. The separate MiniMax widget remains unchanged.
+
+A tick on each quota bar marks remaining allowance under even use across the reset window. Data older than five minutes, failed usage fetches and unavailable snapshots are marked stale. Refresh reads the shared snapshot; it does not bypass the server polling interval or rate-limit backoff.
+
+#+begin_src sh
+curl --fail https://cliproxyapi-quota.kit/quota.json
+systemctl status cliproxyapi-quota.timer cliproxyapi-quota.service
+journalctl -u cliproxyapi-quota.service -b
+#+end_src
+
 ** Check and use
 After login, list models using the separate client API key:
 

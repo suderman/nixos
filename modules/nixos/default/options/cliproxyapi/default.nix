@@ -25,6 +25,8 @@ in {
 
     package = lib.mkPackageOption pkgs.unstable "cliproxyapi" {};
 
+    quota.enable = lib.mkEnableOption "private read-only Codex and Claude quota snapshots";
+
     name = lib.mkOption {
       type = lib.types.str;
       default = "cliproxyapi";
@@ -209,6 +211,68 @@ in {
         ];
         UMask = "0077";
       };
+    };
+
+    systemd.services.cliproxyapi-quota = lib.mkIf cfg.quota.enable {
+      description = "Read-only CLIProxyAPI subscription quota snapshot";
+      after = ["cliproxyapi.service"];
+      serviceConfig = {
+        Type = "oneshot";
+        # DynamicUser hides preserved runtime directories behind /run/private from nginx.
+        User = cfg.user;
+        Group = cfg.group;
+        RuntimeDirectory = "cliproxyapi-quota";
+        RuntimeDirectoryMode = "0755";
+        RuntimeDirectoryPreserve = true;
+        LoadCredential = ["management-key:${cfg.settings.management.secret-key._secret}"];
+        ExecStart = "${pkgs.python3}/bin/python3 ${./quota.py} http://127.0.0.1:${toString cfg.settings.server.port}";
+        TimeoutStartSec = 180;
+        UMask = "0077";
+        NoNewPrivileges = true;
+        ProtectSystem = "strict";
+        ProtectHome = true;
+        PrivateTmp = true;
+        PrivateDevices = true;
+        ProtectKernelTunables = true;
+        ProtectKernelModules = true;
+        ProtectControlGroups = true;
+        RestrictAddressFamilies = ["AF_INET" "AF_INET6"];
+        CapabilityBoundingSet = "";
+      };
+    };
+
+    systemd.timers.cliproxyapi-quota = lib.mkIf cfg.quota.enable {
+      wantedBy = ["timers.target"];
+      timerConfig = {
+        OnBootSec = "30s";
+        OnUnitInactiveSec = "120s";
+      };
+    };
+
+    services.nginx = lib.mkIf cfg.quota.enable {
+      enable = true;
+      virtualHosts.cliproxyapi-quota = {
+        listen = [
+          {
+            addr = "127.0.0.1";
+            port = 8320;
+          }
+        ];
+        locations."= /quota.json" = {
+          alias = "/run/cliproxyapi-quota/quota.json";
+          extraConfig = ''
+            default_type application/json;
+            add_header Cache-Control "no-store" always;
+            limit_except GET { deny all; }
+          '';
+        };
+        locations."/".return = "404";
+      };
+    };
+
+    services.traefik.proxy."${cfg.name}-quota" = lib.mkIf cfg.quota.enable {
+      url = "http://127.0.0.1:8320";
+      public = false;
     };
 
     networking.firewall = lib.mkIf cfg.openFirewall {
