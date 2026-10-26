@@ -108,12 +108,12 @@ in {
       part = {
         size = "100%";
         content =
-          automount "/mnt/data" "1ms"
+          automount "/mnt/data" "60s"
           // {
             type = "btrfs";
             extraArgs = ["-fL data"];
             subvolumes = {
-              storage = automount "/data" "1ms";
+              storage = automount "/data" "60s";
               snapshots = {};
               backups = {};
             };
