@@ -35,6 +35,11 @@ in {
       default = ["${home}/.agents/june" "${home}/profile/june" "${config.xdg.configHome}/june"];
       description = "June's configuration layers, least specific first.";
     };
+    envFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+      description = "Agenix secret of KEY=value lines for June alone, such as her Telegram bot token.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -48,19 +53,25 @@ in {
       }
     ];
 
+    age.secrets.june-env = lib.mkIf (cfg.daemon.enable && cfg.envFile != null) {
+      rekeyFile = cfg.envFile;
+    };
+
     systemd.user.services.june = lib.mkIf cfg.daemon.enable {
       Unit = {
         Description = "June personal assistant";
-        # June uses Pi's provider definitions and its agenix-generated keys.
+        # June uses Pi's provider definitions and its agenix-generated keys, plus her own secret.
         Wants = ["network-online.target" "pi-coding-agent-env.service"];
-        After = ["network-online.target" "pi-coding-agent-env.service"];
+        Requires = lib.optional (cfg.envFile != null) "agenix.service";
+        After = ["network-online.target" "pi-coding-agent-env.service"] ++ lib.optional (cfg.envFile != null) "agenix.service";
         StartLimitIntervalSec = 300;
         StartLimitBurst = 5;
       };
       Service = {
         Type = "simple";
         ExecStart = "${lib.getExe wrapper} serve";
-        EnvironmentFile = "-${home}/.pi/agent/.env";
+        # June's own secret loads last, so its keys win over the shared ones.
+        EnvironmentFile = ["-${home}/.pi/agent/.env"] ++ lib.optional (cfg.envFile != null) config.age.secrets.june-env.path;
         # Herdr, org-dispatch, Emacs, and ssh come from the profile and system.
         Environment = [
           "PATH=${config.home.profileDirectory}/bin:/run/current-system/sw/bin"
