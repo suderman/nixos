@@ -5,8 +5,7 @@
     # Nix Packages
     # <https://search.nixos.org/packages>
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
-    # Pin until nixos-unstable builds diff-cover (for sqlfluff) and khal again.
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/fe13242281a67641c0102cdb1087f0ebe586c7df";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     # Home Manager
     # <https://mipmip.github.io/home-manager-option-search>
