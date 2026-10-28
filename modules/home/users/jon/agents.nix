@@ -29,7 +29,9 @@
   programs.june = {
     enable = true;
     daemonHost = "kit";
-    dataDir = "${config.home.homeDirectory}/org/june";
+    # My checkout runs in place of the pinned package wherever it is cloned.
+    source = "${config.xdg.userDirs.extraConfig.SOURCE}/suderman/june";
+    dataDir = "${config.xdg.userDirs.extraConfig.ORG}/june";
   };
 
   # Self-hosted webapps running from my kit desktop

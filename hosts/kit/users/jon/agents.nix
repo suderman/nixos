@@ -6,7 +6,7 @@
 
   programs.june = {
     daemon.enable = true;
-    envFile = ./june-env.age;
+    apiKeys = ./june-env.age;
   };
 
   services.camofox-browser = {
