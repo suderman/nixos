@@ -28,8 +28,12 @@
 
   programs.hermes.apiKeys = ./apikeys-env.age;
 
-  # June's client everywhere; ~/profile/june names the host that runs her daemon.
-  programs.june.enable = true;
+  # June's client everywhere, her daemon on kit, and her own files kept with my Org files.
+  programs.june = {
+    enable = true;
+    daemonHost = "kit";
+    dataDir = "${config.home.homeDirectory}/org/june";
+  };
 
   # Self-hosted webapps running from my kit desktop
   xdg = lib.optionalAttrs config.desktop.enable {
