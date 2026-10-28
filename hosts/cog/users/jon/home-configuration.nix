@@ -26,6 +26,9 @@
   programs.pi-coding-agent.enable = true;
   programs.mmx-cli.enable = true;
 
+  # June runs AUTO Org headings tagged with this host.
+  programs.june.dispatch.enable = true;
+
   # User services
   services.handy.enable = true;
   services.syncthing.enable = true;

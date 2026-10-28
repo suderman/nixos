@@ -4,10 +4,45 @@
   lib,
   perSystem,
   pkgs,
+  flake,
   ...
 }: let
   cfg = config.programs.june;
   home = config.home.homeDirectory;
+  herdrPackage = config.programs.herdr.package;
+
+  # June owns the Org agent system: the dispatcher, org-edit, herdr-link, and their prompts, all from the same pin.
+  orgSource = "${flake.inputs.june}/org";
+
+  orgDispatch = pkgs.self.mkScript {
+    name = "org-dispatch";
+    path = [config.programs.emacs.finalPackage herdrPackage pkgs.git pkgs.util-linux];
+    env = {
+      TZDIR = "${pkgs.tzdata}/share/zoneinfo";
+      ORG_DISPATCH_EL = "${orgSource}/dispatch/org-dispatch.el";
+      ORG_DISPATCH_PROMPTS = "${orgSource}/prompts";
+    };
+    text = builtins.readFile "${orgSource}/dispatch/org-dispatch";
+  };
+
+  # Agents set TODO states and dates through Org rather than editing text.
+  orgEdit = pkgs.self.mkScript {
+    name = "org-edit";
+    path = [config.programs.emacs.finalPackage];
+    env = {
+      TZDIR = "${pkgs.tzdata}/share/zoneinfo";
+      ORG_EDIT_EL = "${orgSource}/edit/org-edit.el";
+      ORG_DISPATCH_EL = "${orgSource}/dispatch/org-dispatch.el";
+    };
+    text = builtins.readFile "${orgSource}/edit/org-edit";
+  };
+
+  # Org links to agent sessions; jump expects Hyprland and kitty on the desktop.
+  herdrLink = pkgs.self.mkScript {
+    name = "herdr-link";
+    path = with pkgs; [herdrPackage jq openssh procps gawk gnugrep gnused util-linux];
+    text = builtins.readFile "${orgSource}/bin/herdr-link";
+  };
   # The client finds the daemon's host here; a shell can still override it.
   daemonHostLine = lib.optionalString (cfg.daemonHost != null) "export JUNE_DAEMON_HOST=\"\${JUNE_DAEMON_HOST:-${cfg.daemonHost}}\"";
   # Run a writable checkout when one is installed, as the Emacs wrapper does, so
@@ -31,6 +66,7 @@ in {
   options.programs.june = {
     enable = lib.mkEnableOption "the june client";
     daemon.enable = lib.mkEnableOption "the June daemon on this host";
+    dispatch.enable = lib.mkEnableOption "pi runs for Org agenda AUTO headings tagged with this host";
     daemonHost = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
       default = null;
@@ -55,7 +91,19 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = [wrapper];
+    # June works through pi agents in Herdr, and Org's own Emacs sets task states and dates. A client-only
+    # host needs Herdr for herdr-link but no pi.
+    programs.pi-coding-agent.enable = lib.mkIf (cfg.daemon.enable || cfg.dispatch.enable) true;
+    programs.herdr.enable = true;
+    assertions = [
+      {
+        assertion = herdrPackage != null && config.programs.emacs.enable;
+        message = "programs.june needs a Herdr package and programs.emacs";
+      }
+    ];
+
+    # Agents call org-edit, herdr-link, and org-dispatch finish, so they must be on PATH in Herdr panes.
+    home.packages = [wrapper orgEdit herdrLink] ++ lib.optional cfg.dispatch.enable orgDispatch;
 
     # config.json and AGENTS.md reach ~/.config/june through agents apply; her own files are data.
     xdg.dataFile.june = lib.mkIf (cfg.dataDir != null) {
@@ -112,6 +160,26 @@ in {
         # store-owned files look owned by nobody, and ssh then refuses ~/.ssh/config.
       };
       Install.WantedBy = ["default.target"];
+    };
+
+    # Running tasks and settling headings must survive the root reset at boot.
+    persist.scratch.directories = lib.mkIf cfg.dispatch.enable [".local/state/org-dispatch"];
+
+    systemd.user.services.org-dispatch = lib.mkIf cfg.dispatch.enable {
+      Unit.Description = "Dispatch autonomous Org tasks to pi in Herdr";
+      Service = {
+        Type = "oneshot";
+        ExecStart = "${lib.getExe orgDispatch} run";
+      };
+    };
+
+    systemd.user.timers.org-dispatch = lib.mkIf cfg.dispatch.enable {
+      Unit.Description = "Check Org for autonomous tasks every minute";
+      Timer = {
+        OnCalendar = "minutely";
+        Persistent = true;
+      };
+      Install.WantedBy = ["timers.target"];
     };
   };
 }

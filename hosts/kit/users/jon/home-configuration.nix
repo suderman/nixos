@@ -45,6 +45,9 @@
   programs.pi-coding-agent.enable = true;
   programs.mmx-cli.enable = true;
 
+  # June runs AUTO Org headings tagged with this host.
+  programs.june.dispatch.enable = true;
+
   # Gaming
   programs.steam.enable = true;
   programs.dolphin-emu.enable = true;

@@ -90,8 +90,6 @@
       '';
   };
 in {
-  imports = [./org-dispatch.nix];
-
   options.programs.pi-coding-agent = {
     enable = lib.mkEnableOption "pi-coding-agent";
 

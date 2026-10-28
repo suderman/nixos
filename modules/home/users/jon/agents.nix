@@ -20,11 +20,8 @@
   # Preload mmx-cli with my API keys
   programs.mmx-cli.apiKeys = ./apikeys-env.age;
 
-  # Preload pi with my API keys, and run AUTO Org headings tagged with this host.
-  programs.pi-coding-agent = {
-    apiKeys = ./apikeys-env.age;
-    orgDispatch.enable = true;
-  };
+  # Preload pi with my API keys.
+  programs.pi-coding-agent.apiKeys = ./apikeys-env.age;
 
   programs.hermes.apiKeys = ./apikeys-env.age;
 

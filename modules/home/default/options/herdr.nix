@@ -41,13 +41,6 @@
       '';
   };
 
-  # Org links to agent sessions; jump expects Hyprland and kitty on the desktop.
-  herdrLink = pkgs.self.mkScript {
-    name = "herdr-link";
-    path = with pkgs; [cfg.package jq openssh procps gawk gnugrep gnused util-linux];
-    text = builtins.readFile "${flake.inputs.agents}/org/bin/herdr-link";
-  };
-
   # A phone left attached (herdr-link attach) pins its pane to the phone's
   # size. Take over briefly, which ends that client, then let go so the pane
   # returns to its layout size.
@@ -95,7 +88,7 @@ in {
   };
 
   config = mkIf cfg.enable {
-    home.packages = [herdr edger herdrLink herdrReclaim];
+    home.packages = [herdr edger herdrReclaim];
 
     # Herdr stores mutable local data beside Home Manager's generated config.toml.
     persist.storage.directories = [".config/herdr"];
