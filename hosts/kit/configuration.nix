@@ -96,8 +96,8 @@
     models = "/data/models/ollama"; # model storage on separate disk
   };
 
-  # https://chat.kit/
-  services.open-webui.enable = true;
+  # Disabled while fpdf2 fails its PDF image comparison test.
+  services.open-webui.enable = false;
 
   services.nojoin = {
     enable = true;
