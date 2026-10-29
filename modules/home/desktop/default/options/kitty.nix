@@ -49,7 +49,7 @@ in {
 
     programs.kitty.keybindings = {
       "ctrl+insert" = "copy_to_clipboard";
-      "shift+insert" = "paste_from_clipboard";
+      "shift+insert" = "kitten smart-paste.py";
       "ctrl+shift+q" = "close_window";
       "ctrl+shift+n" = "new_os_window_with_cwd";
       "ctrl+shift+t" = "new_tab";
@@ -60,6 +60,43 @@ in {
     };
 
     programs.kitty.shellIntegration.mode = "enabled";
+
+    xdg.configFile."kitty/smart-paste.py".text =
+      # python
+      ''
+        import os
+
+        from kittens.tui.handler import result_handler
+
+
+        def main(args):
+            pass
+
+
+        @result_handler(no_ui=True)
+        def handle_result(args, answer, target_window_id, boss):
+            window = boss.window_id_map.get(target_window_id)
+            if window is None:
+                return
+            # Check the foreground job, including an agent waiting on a tool.
+            is_agent = False
+            for process in window.child.foreground_processes:
+                cmdline = process["cmdline"] or []
+                program = os.path.basename(cmdline[0]) if cmdline else ""
+                if program in {"pi", "opencode", "june", "herdr"} or (
+                    program == "node"
+                    and any(arg.endswith("/june/src/cli.ts") for arg in cmdline[1:])
+                ):
+                    is_agent = True
+                    break
+            if is_agent and any(
+                mime.startswith("image/")
+                for mime in boss.clipboard.get_available_mime_types_for_paste()
+            ):
+                window.send_key("ctrl+v")
+            else:
+                boss.combine("paste_from_clipboard", window)
+      '';
 
     # keyboard shortcuts
     services.keyd.windows = {
@@ -102,10 +139,6 @@ in {
     programs.kitty.extraConfig =
       # sh
       ''
-        # Let agent TUIs handle Shift+Insert themselves so image clipboard paste works.
-        # Kitty's paste_from_clipboard only pastes text, so remap to each TUI's Ctrl+V paste action there.
-        map --when-focus-on "cmdline:pi or cmdline:opencode or cmdline:june" shift+insert send_key ctrl+v
-
         # Seti-UI + Custom
         symbol_map U+E5FA-U+E6AC Symbols Nerd Font
 
