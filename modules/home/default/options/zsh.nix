@@ -43,9 +43,31 @@ in {
           dd if="$1" skip=1 bs=$extractposition of="$(basename -s .jpg $1).mp4"
         }
 
-        # Unless run with sudo, run "systemctl --user" and "journalclt --user" by default
+        # Unless run with sudo, run "systemctl --user" and "journalctl --user" by default
         systemctl() { [ $EUID -eq 0 ] && command systemctl "$@" || command systemctl --user "$@"; }
-        journalctl() { [ $EUID -eq 0 ] && command journalctl "$@" || command journalctl --user "$@"; }
+
+        # journalctl keeps an explicit scope, and reads the system journal when
+        # a -u unit is not a user unit (journalctl -u cliproxyapi just works)
+        journalctl() {
+          (( EUID == 0 )) && { command journalctl "$@"; return; }
+          local arg take= unit
+          local -a units
+          for arg in "$@"; do
+            if [[ -n $take ]]; then units+=("$arg"); take=; continue; fi
+            case $arg in
+              --system|--user|--machine*|--directory*|--file*|--root*|--image*|-[DM]*)
+                command journalctl "$@"; return ;;
+              --unit=*) units+=("''${arg#--unit=}") ;;
+              --unit) take=1 ;;
+              --*) ;;
+              *) [[ $arg =~ '^-[aefklmNqrx]*u(.*)$' ]] && { [[ -n $match[1] ]] && units+=("$match[1]") || take=1; } ;;
+            esac
+          done
+          for unit in "''${units[@]}"; do
+            command systemctl --user cat -- "$unit" &>/dev/null || { command journalctl "$@"; return; }
+          done
+          command journalctl --user "$@"
+        }
 
         # Fix tab completion (disabled because this makes # useless)
         # setopt EXTENDED_GLOB
