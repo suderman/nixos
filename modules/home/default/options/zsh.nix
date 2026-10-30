@@ -44,7 +44,27 @@ in {
         }
 
         # Unless run with sudo, run "systemctl --user" and "journalctl --user" by default
-        systemctl() { [ $EUID -eq 0 ] && command systemctl "$@" || command systemctl --user "$@"; }
+
+        # systemctl keeps an explicit scope, and uses the system manager when a
+        # named unit is a system unit but not a user unit (systemctl status cliproxyapi)
+        systemctl() {
+          (( EUID == 0 )) && { command systemctl "$@"; return; }
+          local arg verb=
+          for arg in "$@"; do
+            case $arg in
+              --system|--user|--global|--machine*|--host*|--root*|--image*|-[HM]*)
+                command systemctl "$@"; return ;;
+              -*) ;;
+              *)
+                if [[ -z $verb ]]; then
+                  verb=$arg
+                elif ! command systemctl --user cat -- "$arg" &>/dev/null && command systemctl cat -- "$arg" &>/dev/null; then
+                  command systemctl "$@"; return
+                fi ;;
+            esac
+          done
+          command systemctl --user "$@"
+        }
 
         # journalctl keeps an explicit scope, and reads the system journal when
         # a -u unit is not a user unit (journalctl -u cliproxyapi just works)
