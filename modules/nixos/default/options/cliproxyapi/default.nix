@@ -124,7 +124,54 @@ in {
       models.catalog = lib.mkDefault (toString (pkgs.callPackage ./catalog.nix {}));
     };
 
-    environment.systemPackages = [cfg.package];
+    environment.systemPackages = [
+      cfg.package
+      (pkgs.self.mkScript {
+        name = "cliproxyapi-logs";
+        path = [config.systemd.package pkgs.gawk];
+        text =
+          # bash
+          ''
+            usage() {
+              cat <<'EOF'
+            Usage: cliproxyapi-logs              follow routing decisions live
+                   cliproxyapi-logs SINCE        routing decisions since SINCE (3h, today, "2026-10-30 09:00")
+                   cliproxyapi-logs count [SINCE] requests per account (default 3h)
+                   cliproxyapi-logs raw [ARGS]   unfiltered log; ARGS go to journalctl (-f, -n 50, ...)
+            EOF
+            }
+
+            # One line per request: time, routing outcome, provider, account, model.
+            # "new" binds a session, "same" reuses its account, "failover" moves it
+            # off an unavailable account. Upstream failures show their HTTP status.
+            # shellcheck disable=SC2016
+            filter='
+              function account(file) { sub(/^[a-z]+-[0-9a-f]+-/, "", file); sub(/(-[a-z]+)?\.json$/, "", file); return file }
+              function provider(file) { sub(/-.*/, "", file); return file }
+              match($0, /^\[[0-9-]+ ([0-9:]+)\].*session-affinity: ([^|]+)\|.* auth=([^ ]+).* model=([^ ]+)/, m) {
+                event = m[2] ~ /unavailable/ ? "failover" : m[2] ~ /hit|inherited/ ? "same" : "new"
+                if (mode == "count") { n[provider(m[3]) "  " account(m[3])]++; next }
+                printf "%s  %-8s  %-6s %-24s %s\n", m[1], event, provider(m[3]), account(m[3]), m[4]; fflush(); next
+              }
+              mode != "count" && match($0, /^\[[0-9-]+ ([0-9:]+)\].* ([0-9]{3}) \|.*upstream execution failed: .*model=([^ ]+) .*auth_file=([^ ]+)/, m) {
+                printf "%s  HTTP %s  %-6s %-24s %s\n", m[1], m[2], provider(m[4]), account(m[4]), m[3]; fflush()
+              }
+              END { for (a in n) printf "%6d  %s\n", n[a], a }
+            '
+
+            logs() { journalctl --system --unit=cliproxyapi.service --output=cat --no-pager "$@"; }
+            since() { if [[ $1 =~ ^[0-9]+[a-z]+$ ]]; then echo "-$1"; else echo "$1"; fi; }
+
+            case "''${1-}" in
+              "") logs --lines=200 --follow | gawk "$filter" ;;
+              count) logs --since="$(since "''${2-3h}")" | gawk -v mode=count "$filter" | sort -rn ;;
+              raw) shift; logs "$@" ;;
+              -h | --help) usage ;;
+              *) logs --since="$(since "$1")" | gawk "$filter" ;;
+            esac
+          '';
+      })
+    ];
 
     persist.storage.directories = [
       {

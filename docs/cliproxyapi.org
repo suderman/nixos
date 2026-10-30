@@ -44,7 +44,7 @@ Routing uses round-robin for new sessions and keeps established sessions on the 
 ** Policy compared with codex-lb
 The module approximates codex-lb's sticky routing, not its quota planner:
 
-- New sessions use equal round-robin. Weighted round-robin in CLIProxyAPI uses static credential weights, not remaining quota, so it is not a replacement for codex-lb's capacity-weighted policy.
+- New sessions use equal round-robin within the highest available priority tier; see [[*Reserve account][Reserve account]]. Weighted round-robin in CLIProxyAPI uses static credential weights, not remaining quota, so it is not a replacement for codex-lb's capacity-weighted policy.
 - Sessions stay on one account with a =30m= binding TTL. Subagents inherit the parent's credential. This resembles codex-lb's sticky threads and 1800-second prompt-cache window, but the binding TTL does not control OpenAI's cache lifetime.
 - Quota or authentication failures rebind a session to another usable credential. Transient failures may fail over for one request without permanently moving the session. Cooldown status is saved beside OAuth files and survives restarts; session bindings are not promised to survive.
 - Requests allow three additional credential retry rounds after the first round, considering all available credentials in each round. The cooldown-wait setting is 30 seconds. This is not a three-attempt cap or a 30-second total request deadline.
@@ -59,6 +59,19 @@ Both proxies spend the same upstream quota when they use the same ChatGPT accoun
 A manual or early upstream quota reset may leave a credential in local cooldown. Saved cooldowns survive service restarts, so restarting does not clear them. Confirm the account has usable quota before clearing its cooldown.
 
 Use the management key to call =GET /v8/management/credentials= and find the affected credential's =auth_index=. Then call =POST /v8/management/routing/cooldown/reset= with JSON body ={"auth_index":"the-affected-index"}=. This clears the credential's in-memory and saved cooldowns. See [[https://github.com/router-for-me/CLIProxyAPI/issues/5639][upstream issue 5639]] and the [[https://github.com/router-for-me/CLIProxyAPI/blob/v8.0.25/docs/management-api-v8.md][v8 management API guide]].
+
+** Reserve account
+The =jon@suderman.net= Codex credential has no five-hour limit, so it is held in reserve. Its auth file carries ="priority": -1=; the other Codex credentials use the default priority 0. New sessions, and sessions rebound after a quota or authentication failure, only use the highest-priority tier that has an available credential. The reserve therefore takes traffic only while every priority-0 Codex credential is in cooldown, such as when all of them have hit their five-hour limit. An established binding outranks priority: a session that failed over to the reserve stays there until its 30-minute affinity binding expires, even after the other accounts recover.
+
+Priority is runtime state in the OAuth file, not Nix configuration, so it survives restarts but not a fresh login that replaces the file. Set or check it through the management API:
+
+#+begin_src sh
+key() { printf 'Authorization: Bearer %s' "$(sudo cat /var/lib/cliproxyapi/management-key)"; }
+curl --fail-with-body -X PATCH -H @<(key) -H 'Content-Type: application/json' \
+  -d '{"name":"codex-c6cfbd56-jon@suderman.net-plus.json","priority":-1}' \
+  http://127.0.0.1:8317/v8/management/credentials/fields
+curl --fail-with-body -H @<(key) http://127.0.0.1:8317/v8/management/credentials | jq '.files[] | {name, priority}'
+#+end_src
 
 ** Read-only desktop quota view
 Kit enables =services.cliproxyapi.quota.enable=. The =cliproxyapi-quota.timer= samples enrolled Codex and Claude subscription accounts 30 seconds after boot and 120 seconds after each collection finishes. It uses the management API with a systemd-loaded credential; desktop clients never read management keys or provider tokens. Paused accounts stay visible without usage polling. HTTP 429 responses honor =Retry-After=, with a five-minute default backoff. Failed requests retain the last successful quota and its timestamp.
