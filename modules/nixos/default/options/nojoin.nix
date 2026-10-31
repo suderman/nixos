@@ -301,8 +301,9 @@ in {
       description = "Nojoin Compose stack";
       wantedBy = ["multi-user.target"];
       wants = ["network-online.target"];
-      after = ["docker.service" "network-online.target"];
-      requires = ["docker.service"];
+      # Docker resolves nvidia.com/gpu=all from the generated CDI spec.
+      after = ["docker.service" "network-online.target" "nvidia-container-toolkit-cdi-generator.service"];
+      requires = ["docker.service" "nvidia-container-toolkit-cdi-generator.service"];
       restartTriggers = [config.identityRotation.hexPath composeOverride openaiOverride];
       unitConfig.RequiresMountsFor = [cfg.dataDir cfg.cacheDir];
       preStart = ''
