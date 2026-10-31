@@ -38,8 +38,10 @@ in {
 
     (lib.mkIf cfg.daemon.enable {
       # Conversation state; never synced, since Syncthing would copy a live SQLite WAL.
+      # config.json and AGENTS.md from agents apply, which replaces them by rename, so the directory persists, not the files.
       persist.storage.directories =
         [
+          ".config/june"
           {
             directory = ".local/state/june";
             mode = "0700";
