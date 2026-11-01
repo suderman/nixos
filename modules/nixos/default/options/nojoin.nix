@@ -89,6 +89,9 @@
         volumes: !override
           - ${source}/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
           - ${cfg.dataDir}/nginx:/etc/nginx/certs
+          # nginx.conf includes these from the certs directory since 3.0.0.
+          - ${source}/nginx/access-log.conf:/etc/nginx/certs/access-log.conf:ro
+          - ${source}/nginx/hsts.conf:/etc/nginx/certs/hsts.conf:ro
           - ${source}/docker/init-ssl.sh:/docker-entrypoint.d/99-init-ssl.sh:ro
     volumes: !override {}
   '';
