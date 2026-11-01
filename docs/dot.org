@@ -101,7 +101,7 @@ umask 077
 WORK=$(mktemp -d "${TMPDIR:-/tmp}/dot-bootstrap.XXXXXXXX")
 chmod 700 "$WORK"
 STAGING="$WORK/staging"
-mkdir -m700 "$STAGING"
+mkdir -m755 "$STAGING"
 ssh-keygen -q -t ed25519 -N '' -C dot-temporary-installer -f "$WORK/installer-login"
 BOOTSTRAP_KEY="$WORK/installer-login"
 KNOWN_HOSTS="$WORK/known_hosts"
@@ -134,6 +134,8 @@ budget. Attach a Cloud Firewall before boot. Allow SSH only from the operator's
 verified source IP, required DHCP traffic for the chosen interface model, IPv6
 router advertisements/neighbor discovery and essential ICMP. Allow outbound DNS,
 HTTPS, Nix downloads and Tailscale connectivity. Do not open TCP 12345.
+
+Use =linode-cli --no-defaults= for these operations. Saved CLI defaults can silently add an image and authorized users, even when the command omits them. Confirm the empty instance is offline and has no disks or profiles before creating the raw layout. Disk creation/deletion is asynchronous; wait for completion before the next disk operation and allow for briefly stale reads.
 
 Create two raw disks. Size the ISO disk from step 3's actual bytes plus at least
 64 MiB margin, rounding up to provider MiB units. The system disk needs the
@@ -235,11 +237,26 @@ dd if=/root/installer.iso of="$INSTALLER_DEVICE" bs=4M conv=fsync status=progres
 sync
 #+end_src
 
+If rescue RAM cannot hold the ISO, omit the =scp= and file-based write. After the same device-mapping confirmation, stream the official HTTPS URL directly to the installer disk. Set =ISO_BYTES= from the release metadata, check the actual guest disk capacity rather than only the provider's advertised size, and verify the written bytes against the independently obtained release checksum before booting. A failed transfer or checksum means stop; never boot that partial installer.
+
+#+begin_src sh
+: "${ISO_URL:?Set the official HTTPS release URL}"
+: "${ISO_BYTES:?Set the verified ISO byte count}"
+test "$(lsblk -bdno SIZE "$INSTALLER_DEVICE")" -ge "$((ISO_BYTES + 64*1024*1024))"
+curl --fail --location --proto '=https' "$ISO_URL" |
+  dd of="$INSTALLER_DEVICE" bs=4M iflag=fullblock conv=fsync status=progress
+sync
+ACTUAL_SHA256=$(head -c "$ISO_BYTES" "$INSTALLER_DEVICE" | sha256sum | cut -d ' ' -f1)
+test "$ACTUAL_SHA256" = "$ISO_SHA256"
+#+end_src
+
 Expected result: verified ISO on the positively identified installer disk. The
 system disk is untouched. Provider: shut down rescue and explicitly boot the
 =installer= profile with =/dev/sdb= as root and Direct Disk.
 
 *** 4. Secure the running installer
+
+The standard BIOS ISO defaults to a graphical-console entry. Through LISH, interrupt Syslinux with Escape and enter =boot-serial= at the =boot:= prompt. Reconnect the per-instance console if a provider reboot returns LISH to its command prompt. The verified 26.05 ISO uses =ttyS0,115200n8= for this installer entry; the installed system uses =19200n8=. The installer may auto-login as =nixos=; run =sudo -i= for the commands below.
 
 NixOS installer console, as root through LISH (=sudo -i= if necessary):
 
@@ -253,11 +270,18 @@ ip -6 route
 lspci -nnk
 #+end_src
 
-Confirm raw system disk is =/dev/sda=, ISO disk =/dev/sdb=, network is =eth0= and
-the detected storage drivers match =hardware-configuration.nix=. If not, correct
-the host hardware module and rebuild before formatting. Hardware detection must
-not add duplicate filesystem declarations. Confirm DHCP, IPv4 connectivity,
-IPv6 SLAAC, DNS and firewall attachment. Verify console belongs to =LINODE_ID=.
+Confirm raw system disk is =/dev/sda=, ISO disk =/dev/sdb= and detected storage drivers match =hardware-configuration.nix=. The standard ISO can name the network =ens3=; Dot deliberately uses =net.ifnames=0= and =eth0=. If disk mappings or required drivers differ, correct the host hardware module and rebuild before formatting. Hardware detection must not add duplicate filesystem declarations. Confirm DHCP, IPv4 connectivity, IPv6 SLAAC, DNS and firewall attachment. Verify console belongs to =LINODE_ID=.
+
+The ISO NetworkManager default produced unroutable privacy addresses during real commissioning. If its global IPv6 address differs from the provider-assigned address, set EUI-64 and disable privacy on the observed installer connection. Reapply without changing IPv4, then wait for router advertisement and duplicate-address detection before checking IPv6 HTTPS. These changes affect only the temporary installer.
+
+#+begin_src sh
+: "${INSTALLER_INTERFACE:?Set the observed installer network interface}"
+CONNECTION=$(nmcli -g GENERAL.CONNECTION device show "$INSTALLER_INTERFACE")
+nmcli connection modify "$CONNECTION" ipv6.addr-gen-mode eui64 ipv6.ip6-privacy 0
+nmcli device reapply "$INSTALLER_INTERFACE"
+ip -6 address show dev "$INSTALLER_INTERFACE"
+curl -6 --fail --head --max-time 20 https://cache.nixos.org/nix-cache-info
+#+end_src
 
 Paste *only* the operator's temporary =installer-login.pub= into the console.
 Do not paste the final private host key. Command template, installer console:
@@ -324,7 +348,9 @@ with output redirected to =HOST_KEY=. Do not print the root or key:
 
 #+begin_src sh
 HOST_KEY="$STAGING/mnt/main/storage/etc/ssh/ssh_host_ed25519_key"
-install -d -m700 "$(dirname "$HOST_KEY")"
+install -d -m755 "$STAGING/mnt" "$STAGING/mnt/main" \
+  "$STAGING/mnt/main/storage" "$STAGING/mnt/main/storage/etc" \
+  "$(dirname "$HOST_KEY")"
 sudo bash -c '"$1" hex dot </run/agenix/hex' bash "$(command -v derive)" \
   | derive ssh >"$HOST_KEY"
 chmod 600 "$HOST_KEY"
@@ -333,6 +359,8 @@ test "$(cut -d ' ' -f 1,2 "$WORK/final-host.pub")" = \
   "$(cut -d ' ' -f 1,2 hosts/dot/ssh_host_ed25519_key.pub)"
 ssh-keygen -lf "$WORK/final-host.pub"
 #+end_src
+
+Keep =WORK= mode =0700= and the host private key =0600=, but use =0755= for every staged directory. =--extra-files= preserves directory modes, and impermanence copies persisted parent modes onto live paths. Staging =storage/etc= as =0700= made live =/etc= inaccessible to non-root services on the real first boot. Correct affected parent modes, start D-Bus and restart logind if needed, then activate the installed closure. Do not change private key modes.
 
 Do not stage a random machine ID or a host-specific password hash. Activation
 derives machine ID and hashes the normal fleet root/Jon passwords. Keep those
@@ -531,6 +559,8 @@ file on =/=. Reboot through the final profile. Verify persistent markers,
 unchanged key/ID, journal from previous boot and renewed tailnet SSH; root-only
 file must disappear. Remove all markers. Do not mark commissioning done until
 backup/restore and cold rollback below also pass.
+
+On the real Direct Disk/fullvirt instance with Lassie disabled, =systemctl reboot= left the provider reporting =offline=. An explicit provider boot of the final =nixos= profile restored Dot and passed the persistence checks. Use the provider's explicit final-profile reboot/boot operation and poll instance status for planned maintenance. Do not rely on guest-only reboot or enable watchdog recovery without reviewing the behavior.
 
 *** 10. Configure normal fleet backups and prove a restore
 

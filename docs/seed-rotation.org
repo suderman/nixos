@@ -66,13 +66,8 @@ work.
 - Derive /Derive Seeds (BIP-85) > 32-bytes hex > Index Number 0/ from the new
   mnemonic twice, ideally on two devices, and confirm the results match. The
   software cannot tell which mnemonic produced the hex you enter.
-- Rotate before provisioning Dot. Dot has never booted, so it holds no keys to
-  rotate: skip it with =--skip dot= and provision it afterwards from the new
-  root using [[file:dot.org][its runbook]]. Do not provision Dot during a rotation.
-- Every other host must be reachable over SSH from the operator machine and
-  deployable from it. Plan the rotation for one sitting; hosts upgrade
-  themselves from GitHub =main= at 04:00, so push a phase only when you mean to
-  deploy it.
+- Dot was installed on 2026-11-01 with the current fleet root. Include it in every deployment and readiness check; do not use the former =--skip dot= plan. Complete its Tailscale enrolment and verify operator SSH before starting this rotation. Do not provision hosts during a rotation.
+- Every host must be reachable over SSH from the operator machine and deployable from it. Plan the rotation for one sitting. Hosts with automatic upgrades pull GitHub =main= at 04:00, so push a phase only when you mean to deploy it; Dot has automatic upgrades disabled and needs an explicit deployment.
 - Start from an up-to-date, clean =main= in =nix develop=, with
   =nix flake check --no-build= passing.
 
@@ -88,7 +83,7 @@ command refuses the current root. Review the staged diff: =state.json=,
 key, and regenerated ciphertext including one =hex-next= per host. Commit and
 push.
 
-Deploy every host except Dot, then check:
+Deploy every host, including Dot, then check:
 
 #+begin_src sh
 nixos rotation status
@@ -101,11 +96,10 @@ activation output on that host before going further.
 ** 2. Switch
 
 #+begin_src sh
-nixos rotation switch --skip dot
+nixos rotation switch
 #+end_src
 
-The command stops unless every host except Dot is ready. Review the staged
-diff: =state.json= and ciphertext regenerated for next keys. Commit and push.
+The command stops unless every host is ready. Review the staged diff: =state.json= and ciphertext regenerated for next keys. Commit and push.
 
 Deploy every host with =nixos-rebuild boot= and reboot it. A reboot proves the
 host boots with the next machine ID and identities; =switch= without a reboot
@@ -124,11 +118,10 @@ rotation entirely.
 ** 3. Finalize
 
 #+begin_src sh
-nixos rotation finalize --skip dot
+nixos rotation finalize
 #+end_src
 
-The command stops unless every host except Dot is ready in the switch phase.
-It asks for a passphrase for the new master identity, then stages:
+The command stops unless every host is ready in the switch phase. It asks for a passphrase for the new master identity, then stages:
 
 - every source secret re-encrypted to the new master, and =secrets/hex.age= as
   the new root
@@ -151,7 +144,4 @@ After every host runs the finalized generation:
 
 ** Afterwards
 
-Provision Dot from the new root with [[file:dot.org][its runbook]]. A host that
-was skipped for any other reason never received the next keys and cannot
-decrypt the finalized configuration; restore it like a new host, staging its
-host key derived from the new root with =sshed send=.
+A host deliberately skipped during rotation never received the next keys and cannot decrypt the finalized configuration. Restore it like a new host, staging its host key derived from the new root with =sshed send=. Dot is no longer a planned exception.
