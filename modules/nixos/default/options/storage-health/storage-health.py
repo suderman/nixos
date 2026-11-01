@@ -402,9 +402,14 @@ def check(cfg, state):
             "--grep",
             ERROR,
         ],
-        2,
+        5,  # Boot-time I/O stalls exceeded 2 seconds; the unit allows 12.
     )
-    events = [line for line in journal.splitlines() if re.search(ERROR, line)]
+    # A timeout message quotes the pattern itself; never treat it as a kernel event.
+    events = (
+        []
+        if journal.startswith("unavailable:")
+        else [line for line in journal.splitlines() if re.search(ERROR, line)]
+    )
     fresh = [line for line in events if line not in state.get("seen", [])]
     state["seen"] = events
     if fresh:
@@ -697,7 +702,7 @@ def rearm(cfg, state, name):
 
 def main():
     cfg = json.loads(Path(sys.argv[1]).read_text())
-    action = sys.argv[2]
+    action = sys.argv[2] if len(sys.argv) > 2 else "status"
     if action == "status" and os.geteuid() != 0:
         print(read(PUBLIC / "status.txt"), end="")
         return
