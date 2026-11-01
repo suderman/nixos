@@ -1,6 +1,7 @@
 {
   # VPN: Tailscale <https://login.tailscale.com/admin/machines>
   cog = "100.99.91.44";
+  dot = "100.112.209.22";
   eve = "100.69.75.29";
   pow = "100.122.127.88";
   hub = "100.97.117.105";

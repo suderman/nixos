@@ -36,7 +36,6 @@
     PermitRootLogin = lib.mkForce "prohibit-password";
     KbdInteractiveAuthentication = false;
   };
-  systemd.services."serial-getty@ttyS0".enable = true;
   systemd.enableEmergencyMode = true;
   services.journald.extraConfig = ''
     Storage=persistent
