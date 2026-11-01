@@ -36,6 +36,13 @@ function M.apply(host)
 				ignore_opacity = true,
 				special = true,
 				xray = true,
+				variant = "frost",
+			},
+			wobble = {
+				enabled = true,
+				intensity = 0.1,
+				stiffness = 300,
+				damping = 18,
 			},
 		},
 		misc = {
@@ -77,6 +84,22 @@ function M.apply(host)
 		style = "slidefadevert -50%",
 	})
 	hl.animation({ leaf = "layers", enabled = true, speed = 0.1, bezier = "default", style = "fade" })
+
+	-- Blur variant is global: animated drops behind an open special workspace,
+	-- frost otherwise. Recheck on reload, which restores the configured frost.
+	local function special_open()
+		for _, monitor in ipairs(hl.get_monitors()) do
+			if hl.get_active_special_workspace(monitor) then
+				return true
+			end
+		end
+		return false
+	end
+	local function sync_blur()
+		hl.config({ decoration = { blur = { variant = special_open() and "drops" or "frost" } } })
+	end
+	hl.on("workspace.special_active", sync_blur)
+	hl.on("config.reloaded", sync_blur)
 end
 
 return M
