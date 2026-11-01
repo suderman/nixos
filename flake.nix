@@ -73,11 +73,9 @@
 
     # Hyprland
     # <https://wiki.hypr.land/Nix/>
-    hyprland.url = "github:hyprwm/Hyprland/v0.56.2";
-    # v0.56.2 needs glaze <8 and wayland-protocols >=1.49.
-    hyprland.inputs.nixpkgs.url = "github:NixOS/nixpkgs/61b7c44c4073f0b827768aff0049561b5110ea5a";
+    hyprland.url = "github:hyprwm/Hyprland/v0.57.0";
     # <https://github.com/hyprwm/hyprland-plugins>
-    hyprland-plugins.url = "github:hyprwm/hyprland-plugins/v0.56.0";
+    hyprland-plugins.url = "github:hyprwm/hyprland-plugins/v0.57.0";
     hyprland-plugins.inputs.hyprland.follows = "hyprland";
     # <https://github.com/VirtCode/hypr-dynamic-cursors>
     hypr-dynamic-cursors.url = "github:VirtCode/hypr-dynamic-cursors";

@@ -1,4 +1,5 @@
 {
+  lib,
   pkgs,
   perSystem,
   flake,
@@ -25,7 +26,24 @@
     # The one and only
     programs.hyprland = {
       enable = true;
-      package = perSystem.hyprland.default;
+      # Same Hyprland without the uwsm-managed session, which is never used.
+      # The NixOS module calls .override, so forward it to the real package.
+      package = let
+        withoutUwsm = hyprland:
+          pkgs.symlinkJoin {
+            inherit (hyprland) pname version;
+            meta = removeAttrs hyprland.meta ["outputsToInstall"];
+            paths = [hyprland] ++ lib.optional (hyprland ? man) hyprland.man;
+            postBuild = "rm $out/share/wayland-sessions/hyprland-uwsm.desktop";
+            passthru =
+              hyprland.passthru
+              // {
+                providedSessions = ["hyprland"];
+                override = lib.setFunctionArgs (args: withoutUwsm (hyprland.override args)) (lib.functionArgs hyprland.override);
+              };
+          };
+      in
+        withoutUwsm perSystem.hyprland.default;
       portalPackage = perSystem.hyprland.xdg-desktop-portal-hyprland;
     };
 

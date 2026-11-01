@@ -25,6 +25,7 @@ _: {
         __GLX_VENDOR_LIBRARY_NAME = "nvidia";
       };
     };
+    dynamicCursors.enable = true;
     hyprbars = {
       enable = true;
       barBlur = false;

@@ -19,6 +19,7 @@
         }
       ];
     };
+    dynamicCursors.enable = true;
     hyprbars.enable = true;
     waybar.cliproxyapi.enable = true;
     waybar.minimax-quota.enable = true;

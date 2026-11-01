@@ -78,7 +78,7 @@ function M.toggle_group_or_lock(direction)
 		hl.dispatch(hl.dsp.group.next())
 	end
 	if grouped then
-		hl.dispatch(hl.dsp.group.lock_active({ action = "toggle" }))
+		hl.dispatch(hl.dsp.group.lock({ action = "toggle" }))
 	else
 		hl.dispatch(hl.dsp.group.toggle())
 	end

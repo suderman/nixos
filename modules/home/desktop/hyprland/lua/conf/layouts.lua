@@ -9,7 +9,6 @@ function M.apply()
 		dwindle = {
 			preserve_split = true,
 			smart_split = false,
-			special_scale_factor = 0.9,
 			split_width_multiplier = 1.35,
 		},
 		master = {
@@ -27,6 +26,9 @@ function M.apply()
 			fullscreen_on_one_column = true,
 		},
 	})
+
+	-- Inset special workspaces; replaces dwindle's deprecated special_scale_factor.
+	hl.workspace_rule({ workspace = "s[true]", gaps_out = 80 })
 end
 
 return M

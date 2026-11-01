@@ -8,6 +8,7 @@
   # Hyprland on AMD desktop
   wayland.windowManager.hyprland = {
     lua.execOnce = ["freetube" "zwift"];
+    dynamicCursors.enable = true;
     hyprbars.enable = true;
   };
 
