@@ -54,6 +54,14 @@ in {
     # Set your time zone
     time.timeZone = mkDefault "America/Edmonton";
 
+    # libstdc++ std::chrono (waybar's clock) ignores TZDIR and reads /usr/share/zoneinfo, else its own stale built-in tzdata
+    tmpfiles.symlinks = [
+      {
+        target = "/usr/share/zoneinfo";
+        source = "/etc/zoneinfo";
+      }
+    ];
+
     # Editable hosts file
     system.activationScripts.hosts = let
       inherit (config.networking) hostName domain;
