@@ -50,11 +50,11 @@
         "llm-agents": "llm-agents"
       },
       "locked": {
-        "lastModified": 1793583131,
-        "narHash": "sha256-C8blfO8yr10/E6HDfeDFZEMc3Y74t2fuKkWXmiJ/YqQ=",
+        "lastModified": 1793587850,
+        "narHash": "sha256-4von9n4ToZHHlmgyO58I+HrzGm7X4fp4gmGdMF119k4=",
         "owner": "suderman",
         "repo": "agents",
-        "rev": "93817cb63585e759d30cc502af26968bf1faef73",
+        "rev": "118f1c98856b2b5472f1bf26d982a91680a4edb7",
         "type": "github"
       },
       "original": {
@@ -1336,11 +1336,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793572818,
-        "narHash": "sha256-2mqwRqLfZ1aM/UOgQArejaDhUeq2DgT9xMFUSTVTgHY=",
+        "lastModified": 1793587842,
+        "narHash": "sha256-JT8ytpHqcJ2Bd7F8YRNnUlerQsS8uY1SFWwuy/4zQNU=",
         "owner": "suderman",
         "repo": "june",
-        "rev": "0378a9bc6c0699799c92a0f3212e29c32feab7dd",
+        "rev": "4056bc835c86a908f190bfd655f1eb220d7c4a25",
         "type": "github"
       },
       "original": {
