@@ -17,7 +17,16 @@ in {
   };
 
   config = mkIf cfg.enable {
-    home.packages = [pkgs.slack];
+    home.packages = [
+      (pkgs.slack.overrideAttrs (old: {
+        # Temporary UTC-6 workaround until Slack updates its Edmonton timezone rules.
+        postFixup =
+          (old.postFixup or "")
+          + ''
+            wrapProgram "$out/bin/slack" --set TZ America/Regina
+          '';
+      }))
+    ];
 
     # keyboard shortcuts
     services.keyd.windows."${mkClass class}" = {};
