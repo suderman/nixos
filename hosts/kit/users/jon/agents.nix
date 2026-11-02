@@ -7,6 +7,7 @@
   programs.june = {
     daemon.enable = true;
     apiKeys = ./june-env.age;
+    telegram.enable = true;
   };
 
   services.camofox-browser = {
