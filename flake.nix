@@ -81,6 +81,10 @@
     hypr-dynamic-cursors.url = "github:VirtCode/hypr-dynamic-cursors";
     hypr-dynamic-cursors.inputs.hyprland.follows = "hyprland";
 
+    # Boom Boom Baby high scores
+    bbbscores.url = "github:suderman/bbbscores";
+    bbbscores.inputs.nixpkgs.follows = "nixpkgs";
+
     # nonfiction studios
     # <https://github.com/nonfiction/nf>
     nf.url = "github:nonfiction/nf";

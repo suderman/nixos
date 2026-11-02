@@ -9,6 +9,7 @@
     ./hardware-configuration.nix
     ./disk-configuration.nix
     flake.nixosModules.default
+    flake.nixosModules.boomboombaby
   ];
 
   system.stateVersion = lib.mkForce "26.05";
@@ -26,10 +27,10 @@
 
   # Keep shared monitoring on Tailscale, not the public interface.
   networking.firewall = {
-    allowedTCPPorts = lib.mkForce [22];
+    allowedTCPPorts = lib.mkForce [];
     allowedUDPPorts = lib.mkForce [41641];
     interfaces.tailscale0.allowedTCPPorts =
-      lib.optional config.services.beszel.enableAgent config.services.beszel.agentPort;
+      [22] ++ lib.optional config.services.beszel.enableAgent config.services.beszel.agentPort;
   };
 
   services.openssh.settings = {
@@ -43,8 +44,20 @@
     MaxRetentionSec=7day
   '';
 
-  # No public applications during commissioning. Use normal fleet snapshots;
-  # choose and verify off-host destinations before declaring backups ready.
+  services.boomboombaby.enable = true;
+  services.btrbk.volumes."${config.persist.path}" = ["ssh://eve/mnt/pool/backups/dot"];
+  # Resolve backup peers through Tailscale without accepting home subnet routes
+  # or replacing public DNS. Keep OpenSSH's fleet host-key verification.
+  programs.ssh.extraConfig = ''
+    Host eve
+      ProxyCommand ${lib.getExe config.services.tailscale.package} nc %h %p
+      BatchMode yes
+      ConnectTimeout 15
+      ServerAliveInterval 15
+      ServerAliveCountMax 2
+    Host *
+  '';
+
   services.blocky.enable = false;
   services.traefik.enable = false;
   services.whoami.enable = false;

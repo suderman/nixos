@@ -52,7 +52,8 @@
 
   # Add each flake input as a registry
   # To make nix3 commands consistent with the flake
-  nix.registry = lib.mapAttrs (_: value: {flake = value;}) flake.inputs;
+  # bbbscores is a private, Dot-only input, not a fleet registry entry.
+  nix.registry = lib.mapAttrs (_: value: {flake = value;}) (builtins.removeAttrs flake.inputs ["bbbscores"]);
 
   # Map registries to channels
   nix.nixPath = ["nixpkgs=${flake.inputs.nixpkgs}"];

@@ -164,6 +164,26 @@
         "type": "github"
       }
     },
+    "bbbscores": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793561760,
+        "narHash": "sha256-VI4ldtR5UqBp8/SnueSN9uRDO6yVq1Af/CcMuJiBQHI=",
+        "owner": "suderman",
+        "repo": "bbbscores",
+        "rev": "b730faa636eee6a9a05529a5a6e272d0a87623ef",
+        "type": "github"
+      },
+      "original": {
+        "owner": "suderman",
+        "repo": "bbbscores",
+        "type": "github"
+      }
+    },
     "blueprint": {
       "inputs": {
         "nixpkgs": [
@@ -1917,6 +1937,7 @@
         "agenix": "agenix",
         "agenix-rekey": "agenix-rekey",
         "agents": "agents",
+        "bbbscores": "bbbscores",
         "blueprint": "blueprint",
         "buzz": "buzz",
         "devshell": "devshell_2",
