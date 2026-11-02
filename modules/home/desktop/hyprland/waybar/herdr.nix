@@ -14,12 +14,17 @@
 
   icon = "󰚩";
 
+  # This host first, then the other workers.
+  self = config.networking.hostName;
+  hosts = [self] ++ lib.remove self config.programs.herdr.workers;
+
   bridge = pkgs.self.mkScript {
     name = "herdr-status-bridge";
-    path = with pkgs; [coreutils jq];
+    path = with pkgs; [coreutils jq openssh];
     env = {
       HERDR_STATUS_HERDR = herdr;
       HERDR_STATUS_INTERVAL = toString cfg.interval;
+      HERDR_STATUS_HOSTS = toString hosts;
     };
     text =
       # bash
@@ -28,6 +33,7 @@
         umask 077
 
         state_file="''${XDG_RUNTIME_DIR:?}/herdr-status.json"
+        read -ra hosts <<<"$HERDR_STATUS_HOSTS"
 
         publish() {
           local tmp
@@ -36,30 +42,36 @@
           mv -f "$tmp" "$state_file"
         }
 
-        error_state() {
-          local message="$1"
-          jq -cn \
-            --arg message "$message" \
-            '{
-              ok: false,
-              class: "offline",
-              message: $message,
-              generatedAt: (now | floor),
-              generatedAtText: (now | localtime | strftime("%-I:%M:%S%P")),
-              counts: {total: 0, blocked: 0, done: 0, working: 0, idle: 0, unknown: 0},
-              agents: []
-            }'
+        # One host's result: {host, ok, message} or {host, ok, agents}.
+        host_error() {
+          jq -cn --arg host "$1" --arg message "$2" '{host: $host, ok: false, message: $message}'
         }
 
-        update() {
-          local raw normalized
+        # Short reasons for the usual SSH failures; anything else keeps its first line.
+        ssh_reason() {
+          case "$1" in
+          *"Permission denied"*) echo "SSH key locked" ;;
+          *"timed out"* | *"No route"* | *"Could not resolve"* | *"Connection refused"* | *"Network is unreachable"*) echo "unreachable" ;;
+          *"command not found"*) echo "herdr not installed" ;;
+          *"herdr"*"socket"* | *"server"*"not running"*) echo "herdr server not running" ;;
+          *) tr -d '\r' <<<"$1" | head -n 1 ;;
+          esac
+        }
 
-          if ! raw="$("$HERDR_STATUS_HERDR" api snapshot 2>&1)"; then
-            error_state "$raw" | publish
+        poll() {
+          local host="$1" rank="$2" raw normalized
+
+          if [[ $host == "''${hosts[0]}" ]]; then
+            raw="$("$HERDR_STATUS_HERDR" api snapshot 2>&1)"
+          else
+            # Reuses the ControlMaster from ~/.ssh/config, so a warm poll is cheap.
+            raw="$(timeout 10 ssh -o BatchMode=yes -o ConnectTimeout=3 "$host" herdr api snapshot 2>&1)"
+          fi || {
+            host_error "$host" "$(ssh_reason "$raw")"
             return
-          fi
+          }
 
-          if ! normalized="$(printf '%s\n' "$raw" | jq -c '
+          if ! normalized="$(printf '%s\n' "$raw" | jq -c --arg host "$host" --argjson rank "$rank" '
             def text($value; $fallback):
               if $value == null or ($value | tostring | length) == 0
               then $fallback
@@ -77,38 +89,67 @@
             .result.snapshot as $snapshot |
             ($snapshot.workspaces | map({key: .workspace_id, value: .}) | from_entries) as $workspaces |
             ($snapshot.tabs | map({key: .tab_id, value: .}) | from_entries) as $tabs |
-            ($snapshot.agents | map(
-              . as $agent |
-              ($agent.agent_status // "unknown") as $status |
-              ($workspaces[$agent.workspace_id] // {}) as $workspace |
-              ($tabs[$agent.tab_id] // {}) as $tab |
-              (($agent.cwd // "") | split("/") | map(select(length > 0)) | last // "home") as $cwd_label |
-              {
-                paneId: ($agent.pane_id // ""),
-                terminalId: ($agent.terminal_id // ""),
-                workspaceId: ($agent.workspace_id // ""),
-                workspace: text($workspace.label; $cwd_label),
-                tabId: ($agent.tab_id // ""),
-                tab: text($tab.label; text($tab.number; "tab")),
-                agentLabel: text($agent.display_agent; text($agent.agent; "agent")),
-                status: $status,
-                statusLabel: text($agent.state_labels[$status]; $status),
-                title: text($agent.title; text($agent.terminal_title_stripped; "")),
-                cwd: ($agent.foreground_cwd // $agent.cwd // ""),
-                focused: ($agent.focused // false),
-                stateChangeSeq: ($agent.state_change_seq // 0),
-                priority: priority($status)
-              }
-            ) | sort_by([.priority, (.workspace | ascii_downcase), (.tab | ascii_downcase), .paneId])) as $agents |
+            {
+              host: $host,
+              ok: true,
+              agents: ($snapshot.agents | map(
+                . as $agent |
+                ($agent.agent_status // "unknown") as $status |
+                ($workspaces[$agent.workspace_id] // {}) as $workspace |
+                ($tabs[$agent.tab_id] // {}) as $tab |
+                (($agent.cwd // "") | split("/") | map(select(length > 0)) | last // "home") as $cwd_label |
+                {
+                  host: $host,
+                  hostRank: $rank,
+                  paneId: ($agent.pane_id // ""),
+                  terminalId: ($agent.terminal_id // ""),
+                  workspaceId: ($agent.workspace_id // ""),
+                  workspace: text($workspace.label; $cwd_label),
+                  tabId: ($agent.tab_id // ""),
+                  tab: text($tab.label; text($tab.number; "tab")),
+                  agentLabel: text($agent.display_agent; text($agent.agent; "agent")),
+                  status: $status,
+                  statusLabel: text($agent.state_labels[$status]; $status),
+                  title: text($agent.title; text($agent.terminal_title_stripped; "")),
+                  cwd: ($agent.foreground_cwd // $agent.cwd // ""),
+                  focused: ($agent.focused // false),
+                  stateChangeSeq: ($agent.state_change_seq // 0),
+                  priority: priority($status)
+                }
+              ))
+            }
+          ' 2>&1)"; then
+            host_error "$host" "$normalized"
+            return
+          fi
+
+          printf '%s\n' "$normalized"
+        }
+
+        update() {
+          local dir rank
+          dir="$(mktemp -d)"
+
+          # Poll every host at once so an unreachable one costs its timeout, not a turn.
+          for rank in "''${!hosts[@]}"; do
+            poll "''${hosts[$rank]}" "$rank" >"$dir/$rank.json" &
+          done
+          wait
+
+          jq -cs '
+            (map(.agents // []) | add // []
+              | sort_by([.hostRank, .priority, (.workspace | ascii_downcase), (.tab | ascii_downcase), .paneId])) as $agents |
             ($agents | map(select(.status == "blocked")) | length) as $blocked |
             ($agents | map(select(.status == "done")) | length) as $done |
             ($agents | map(select(.status == "working")) | length) as $working |
             ($agents | map(select(.status == "idle")) | length) as $idle |
             ($agents | map(select(.status == "unknown")) | length) as $unknown |
             {
-              ok: true,
+              ok: any(.[]; .ok),
+              message: (map(select(.ok | not) | .host + ": " + .message) | join("\n")),
               class: (
-                if $blocked > 0 then "blocked"
+                if all(.[]; .ok | not) then "offline"
+                elif $blocked > 0 then "blocked"
                 elif $done > 0 then "done"
                 elif $working > 0 then "working"
                 elif $unknown > 0 and $idle == 0 then "unknown"
@@ -117,6 +158,7 @@
               ),
               generatedAt: (now | floor),
               generatedAtText: (now | localtime | strftime("%-I:%M:%S%P")),
+              hosts: map({host, ok, message: (.message // ""), count: ((.agents // []) | length)}),
               counts: {
                 total: ($agents | length),
                 blocked: $blocked,
@@ -127,12 +169,9 @@
               },
               agents: $agents
             }
-          ' 2>&1)"; then
-            error_state "$normalized" | publish
-            return
-          fi
+          ' "$dir"/*.json | publish
 
-          printf '%s\n' "$normalized" | publish
+          rm -rf "$dir"
         }
 
         update
@@ -216,7 +255,11 @@
                 + ", working " + (($counts.working // 0) | tostring)
                 + ", idle " + (($counts.idle // 0) | tostring)
                 + (if ($counts.unknown // 0) > 0 then ", unknown " + ($counts.unknown | tostring) else "" end),
-              (.agents[:10][]? | marker(.status) + " " + .workspace + " / " + .tab + " · " + .agentLabel),
+              ((.hosts // []) as $hosts | if ($hosts | length) > 1 then
+                ($hosts | map(.host + " " + (if .ok then (.count | tostring) else .message end)) | join(" · "))
+              else empty end),
+              (((.hosts // []) | length) > 1) as $many |
+              (.agents[:10][]? | marker(.status) + " " + (if $many then .host + ": " else "" end) + .workspace + " / " + .tab + " · " + .agentLabel),
               if (.agents | length) > 10 then "… " + (((.agents | length) - 10) | tostring) + " more" else empty end
             ] | join("\n")) as $tooltip |
             {text: $text, tooltip: $tooltip, class: (.class // "idle")}
@@ -233,16 +276,29 @@
 
   jump = pkgs.self.mkScript {
     name = "herdr-agent-open";
-    path = with pkgs; [coreutils jq kitty];
-    env.HERDR_STATUS_HERDR = herdr;
+    path = with pkgs; [coreutils jq kitty openssh];
+    env = {
+      HERDR_STATUS_HERDR = herdr;
+      HERDR_STATUS_SELF = self;
+    };
     text =
       # bash
       ''
-        target="''${1:?Usage: herdr-agent-open PANE_ID}"
-        "$HERDR_STATUS_HERDR" agent focus "$target" >/dev/null
+        host="''${1:?Usage: herdr-agent-open HOST PANE_ID}"
+        target="''${2:?Usage: herdr-agent-open HOST PANE_ID}"
+
+        # Remote attach runs over SSH; Herdr does not forward interactive attach.
+        if [[ $host == "$HERDR_STATUS_SELF" ]]; then
+          attach=("$HERDR_STATUS_HERDR" agent attach "$target")
+          "$HERDR_STATUS_HERDR" agent focus "$target" >/dev/null
+        else
+          attach=(ssh -t "$host" herdr agent attach "$target")
+          ssh -o BatchMode=yes -o ConnectTimeout=3 "$host" herdr agent focus "$target" >/dev/null
+        fi
 
         # Direct attach is exclusive. Reuse its Kitty instead of opening an
-        # attachment that immediately exits.
+        # attachment that immediately exits. Pane IDs repeat across hosts, so
+        # match the whole attach command.
         window="$(
           hyprctl -j clients | jq -r '
             .[]
@@ -251,12 +307,11 @@
             | @tsv
           ' | while IFS=$'\t' read -r address workspace pid; do
             [[ -r "/proc/$pid/cmdline" ]] || continue
-            while IFS= read -r -d "" arg; do
-              if [[ "$arg" == "$target" ]]; then
-                printf '%s\t%s\n' "$address" "$workspace"
-                break 2
-              fi
-            done <"/proc/$pid/cmdline"
+            mapfile -d "" args <"/proc/$pid/cmdline"
+            if [[ " ''${args[*]} " == *" ''${attach[*]} "* ]]; then
+              printf '%s\t%s\n' "$address" "$workspace"
+              break
+            fi
           done
         )"
 
@@ -267,9 +322,7 @@
           exit 0
         fi
 
-        nohup kitty --class=HerdrAgent --title="Herdr agent" \
-          "$HERDR_STATUS_HERDR" agent attach "$target" \
-          >/dev/null 2>&1 &
+        nohup kitty --class=HerdrAgent --title="Herdr agent $host" "''${attach[@]}" >/dev/null 2>&1 &
       '';
   };
 
@@ -332,6 +385,8 @@ in {
         };
         Service = {
           ExecStart = lib.getExe bridge;
+          # Remote hosts need the same agent as June's SSH calls.
+          Environment = ["SSH_AUTH_SOCK=%t/ssh-agent"];
           Restart = "always";
           RestartSec = 3;
         };

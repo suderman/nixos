@@ -50,6 +50,17 @@ in {
       description = "The Herdr package to use.";
     };
 
+    workers = mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      example = ["kit" "cog" "lux"];
+      description = ''
+        Hosts whose Herdr servers run agents. The desktop agent roster polls
+        each one over SSH, and always includes this host. Headless workers
+        start their server at boot.
+      '';
+    };
+
     settings = mkOption {
       inherit (tomlFormat) type;
       default = {};
@@ -72,7 +83,8 @@ in {
     };
 
     # Run the server at login so it survives reboots and closed clients. Clients
-    # and the Org dispatcher attach to it.
+    # and the Org dispatcher attach to it. Headless workers start it at boot
+    # through user lingering; other headless hosts start it on first attach.
     systemd.user.services.herdr = let
       # Skip when a client already started a server outside this unit.
       notRunning = pkgs.self.mkScript {
@@ -86,7 +98,7 @@ in {
     in {
       Unit = {
         Description = "Herdr server";
-        After = ["graphical-session.target"];
+        After = lib.optional config.desktop.enable "graphical-session.target";
         # Restarting kills every pane and agent; new versions wait for login.
         X-RestartIfChanged = false;
       };
@@ -97,7 +109,10 @@ in {
         Restart = "on-failure";
         RestartSec = 5;
       };
-      Install.WantedBy = ["graphical-session.target"];
+      Install.WantedBy =
+        if config.desktop.enable
+        then ["graphical-session.target"]
+        else lib.optional (lib.elem config.networking.hostName cfg.workers) "default.target";
     };
   };
 }

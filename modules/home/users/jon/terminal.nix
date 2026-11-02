@@ -5,6 +5,9 @@
 }: {
   programs.herdr.enable = true;
 
+  # Hosts running agents, shown together in the desktop roster. Adding lux starts its server at boot.
+  programs.herdr.workers = ["kit" "cog"];
+
   # Herdr only plays mp3; the tivo mp3s are converted from their wavs.
   programs.herdr.settings.ui.sound = let
     dir = "${config.home.homeDirectory}/profile/apps/herdr";

@@ -11,6 +11,37 @@ Scope {
   property bool panelHovered: false
   property var data: ({ ok: false, class: "offline", message: "Open the popup to read Herdr state.", counts: {}, agents: [] })
   readonly property var agents: data.agents || []
+  readonly property var hosts: data.hosts || []
+  readonly property bool manyHosts: hosts.length > 1
+  // The tab shown; falls back to the first host (this one) when unset or gone.
+  property string selectedHost: ""
+  readonly property var currentHost: {
+    for (var i = 0; i < hosts.length; i++)
+      if (hosts[i].host === selectedHost) return hosts[i];
+    return hosts.length > 0 ? hosts[0] : ({ host: "", ok: true, message: "" });
+  }
+  readonly property var shownAgents: manyHosts
+    ? agents.filter(function (a) { return a.host === currentHost.host; })
+    : agents
+
+  function selectHost(host) {
+    selectedHost = host;
+    roster.contentY = 0;
+  }
+
+  function stepHost(delta) {
+    if (!manyHosts) return;
+    var i = hosts.findIndex(function (h) { return h.host === currentHost.host; });
+    selectHost(hosts[(i + delta + hosts.length) % hosts.length].host);
+  }
+
+  function hostCount(host) {
+    return agents.filter(function (a) { return a.host === host; }).length;
+  }
+
+  function hostAttention(host) {
+    return agents.some(function (a) { return a.host === host && (a.status === "blocked" || a.status === "done"); });
+  }
 
   readonly property string icon: "@ICON@"
   readonly property string base00: Theme.colors.base00
@@ -116,9 +147,9 @@ Scope {
     if (!fetch.running) fetch.running = true;
   }
 
-  function jumpToAgent(paneId) {
-    if (jump.running || !paneId) return;
-    jump.command = ["@JUMP_COMMAND@", String(paneId)];
+  function jumpToAgent(host, paneId) {
+    if (jump.running || !host || !paneId) return;
+    jump.command = ["@JUMP_COMMAND@", String(host), String(paneId)];
     jump.running = true;
     hide();
   }
@@ -217,6 +248,9 @@ Scope {
       focus: true
 
       Keys.onEscapePressed: root.hide()
+      Keys.onLeftPressed: root.stepHost(-1)
+      Keys.onRightPressed: root.stepHost(1)
+      Keys.onTabPressed: root.stepHost(1)
 
       HoverHandler {
         onHoveredChanged: {
@@ -335,11 +369,53 @@ Scope {
           }
         }
 
+        Row {
+          id: hostTabs
+          width: parent.width
+          spacing: 8
+          visible: root.data.ok === true && root.manyHosts
+
+          Repeater {
+            model: root.hosts
+
+            Rectangle {
+              id: tab
+              readonly property bool selected: modelData.host === root.currentHost.host
+              implicitWidth: tabText.implicitWidth + 28
+              implicitHeight: 32
+              radius: 16
+              color: selected ? root.base0D : (tabArea.containsMouse ? root.alpha(root.base05, "33") : root.alpha(root.base05, "22"))
+              border.color: !modelData.ok ? root.alpha(root.base09, "aa")
+                : root.hostAttention(modelData.host) && !selected ? root.alpha(root.base0A, "aa")
+                : "transparent"
+
+              Text {
+                id: tabText
+                anchors.centerIn: parent
+                color: tab.selected ? Theme.selectedText : (modelData.ok ? Theme.detailText : root.base09)
+                text: modelData.host + "  " + (modelData.ok ? root.hostCount(modelData.host) : "offline")
+                font.pixelSize: 13
+                font.bold: true
+              }
+
+              MouseArea {
+                id: tabArea
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.selectHost(modelData.host)
+              }
+            }
+          }
+        }
+
         Text {
           width: parent.width
-          color: Theme.mutedText
-          text: "No agents are connected to the local Herdr session."
-          visible: root.data.ok === true && root.agents.length === 0
+          color: root.currentHost.ok ? Theme.mutedText : root.base09
+          text: root.currentHost.ok
+            ? "No agents on " + (root.manyHosts ? root.currentHost.host : "this host") + "."
+            : root.currentHost.host + ": " + root.currentHost.message
+          visible: root.data.ok === true && root.shownAgents.length === 0
           wrapMode: Text.WordWrap
           font.pixelSize: 13
         }
@@ -347,12 +423,12 @@ Scope {
         Flickable {
           id: roster
           width: parent.width
-          height: parent.height - header.height - parent.spacing
+          height: parent.height - header.height - parent.spacing - (hostTabs.visible ? hostTabs.height + parent.spacing : 0)
           clip: true
           boundsBehavior: Flickable.StopAtBounds
           contentWidth: width
           contentHeight: agentList.implicitHeight
-          visible: root.data.ok === true && root.agents.length > 0
+          visible: root.data.ok === true && root.shownAgents.length > 0
 
           Column {
             id: agentList
@@ -360,7 +436,7 @@ Scope {
             spacing: 8
 
             Repeater {
-              model: root.agents
+              model: root.shownAgents
 
               AgentRow {
                 width: agentList.width
@@ -459,7 +535,7 @@ Scope {
       anchors.fill: parent
       hoverEnabled: true
       cursorShape: Qt.PointingHandCursor
-      onClicked: root.jumpToAgent(card.agent.paneId)
+      onClicked: root.jumpToAgent(card.agent.host, card.agent.paneId)
     }
   }
 }
