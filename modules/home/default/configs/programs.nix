@@ -20,7 +20,6 @@
     pkgs.lame # mp3 codec
     pkgs.lazydocker # docker tui
     pkgs.lf # yazi/ranger alternative in go
-    pkgs.linode-cli # control linode virtual servers
     pkgs.lsd # ls alternative
     pkgs.mosh # ssh despite bad networks
     pkgs.nano # text editor
@@ -44,6 +43,7 @@
   programs.btop.enable = lib.mkDefault true;
   programs.cachix.enable = lib.mkDefault true;
   programs.direnv.enable = lib.mkDefault true;
+  programs.doctl.enable = lib.mkDefault true;
   programs.fastfetch.enable = lib.mkDefault true;
   programs.fish.enable = lib.mkDefault false; # shell
   programs.fzf.enable = lib.mkDefault true;
@@ -52,6 +52,7 @@
   programs.lazygit.enable = lib.mkDefault true;
   programs.less.enable = lib.mkDefault true;
   programs.lesspipe.enable = lib.mkDefault true;
+  programs.linode-cli.enable = lib.mkDefault true;
   programs.lsd.enable = lib.mkDefault true;
   programs.micro.enable = lib.mkDefault true; # easy text editor
   programs.neovim.enable = lib.mkDefault false; # using personal neovim flake instead
