@@ -39,6 +39,7 @@ in {
   config.wayland.windowManager.hyprland.lua.features.hypridle =
     # lua
     ''
-      util.exec("num_lock", "sleep 1 && hyprctl dispatch 'hl.dsp.dpms({ action = \"off\" })'")
+      -- NumLock itself contributes MOD2 while held in Hyprland 0.57.
+      util.exec("num_lock", "sleep 1 && hyprctl dispatch 'hl.dsp.dpms({ action = \"off\" })'", { ignore_mods = true })
     '';
 }
