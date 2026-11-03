@@ -73,7 +73,7 @@
 
     # Hyprland
     # <https://wiki.hypr.land/Nix/>
-    hyprland.url = "github:hyprwm/Hyprland/v0.57.0";
+    hyprland.url = "github:hyprwm/Hyprland/v0.57.1";
     # <https://github.com/hyprwm/hyprland-plugins>
     hyprland-plugins.url = "github:hyprwm/hyprland-plugins/v0.57.0";
     hyprland-plugins.inputs.hyprland.follows = "hyprland";
