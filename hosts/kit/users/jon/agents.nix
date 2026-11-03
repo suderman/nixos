@@ -8,6 +8,7 @@
     daemon.enable = true;
     apiKeys = ./june-env.age;
     telegram.enable = true;
+    remote.enable = true;
   };
 
   services.camofox-browser = {

@@ -125,6 +125,9 @@
 
   services.attic.enable = true;
 
+  # Jon's June remote interface.
+  services.traefik.proxy.june = "http://127.0.0.1:7347";
+
   # ChatGPT/Codex account load balancer for OpenCode.
   services.codex-lb.enable = true;
 
