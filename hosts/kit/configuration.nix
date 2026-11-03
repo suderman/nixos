@@ -103,8 +103,13 @@
     enable = true;
     apiKeys = ./apikeys-env.age;
     openai = {
-      baseUrl = "https://codex-lb.kit/v1";
-      apiKeyEnv = "CODEX_LB_API_KEY";
+      baseUrl = "https://cliproxyapi.kit/v1";
+      apiKeyEnv = "CLIPROXYAPI_API_KEY";
+    };
+    settings = {
+      openai_model = "gpt-6.1-terra";
+      openai_live_model = "gpt-6-luna";
+      enable_meeting_edge = true;
     };
   };
 

@@ -16,6 +16,7 @@
   containerCaBundle = "/etc/ssl/certs/nojoin-ca-bundle.crt";
   secretDir = "/run/nojoin";
   openaiEnabled = cfg.apiKeys != null && cfg.openai.baseUrl != null;
+  settingsFile = pkgs.writeText "nojoin-settings.json" (builtins.toJSON cfg.settings);
   secretSpecs = [
     {
       name = "FIRST_RUN_PASSWORD";
@@ -193,6 +194,12 @@ in {
       description = "Encrypted environment file containing the OpenAI-compatible API key.";
     };
 
+    settings = lib.mkOption {
+      type = (pkgs.formats.json {}).type;
+      default = {};
+      description = "Non-secret settings merged into data/config.json at each service start, overriding matching UI settings.";
+    };
+
     openai = {
       baseUrl = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
@@ -307,11 +314,27 @@ in {
       # Docker resolves nvidia.com/gpu=all from the generated CDI spec.
       after = ["docker.service" "network-online.target" "nvidia-container-toolkit-cdi-generator.service"];
       requires = ["docker.service" "nvidia-container-toolkit-cdi-generator.service"];
-      restartTriggers = [config.identityRotation.hexPath composeOverride openaiOverride];
+      restartTriggers = [config.identityRotation.hexPath composeOverride openaiOverride settingsFile];
       unitConfig.RequiresMountsFor = [cfg.dataDir cfg.cacheDir];
-      preStart = ''
-        ${pkgs.coreutils}/bin/install -d -m 0750 -o 1000 -g 1000 ${lib.escapeShellArg cfg.cacheDir}
-      '';
+      path = [pkgs.jq];
+      preStart =
+        ''
+          ${pkgs.coreutils}/bin/install -d -m 0750 -o 1000 -g 1000 ${lib.escapeShellArg cfg.cacheDir}
+        ''
+        + lib.optionalString (cfg.settings != {}) ''
+          # Nojoin has no environment overrides for model choices.
+          config_file=${lib.escapeShellArg "${cfg.dataDir}/data/config.json"}
+          tmp="$(mktemp "$config_file.XXXXXX")"
+          trap 'rm -f "$tmp"' EXIT
+          if [[ -e "$config_file" ]]; then
+            jq --slurpfile settings ${settingsFile} '. * $settings[0]' "$config_file" > "$tmp"
+          else
+            cp ${settingsFile} "$tmp"
+          fi
+          chown 1000:1000 "$tmp"
+          chmod 0600 "$tmp"
+          mv -fT "$tmp" "$config_file"
+        '';
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
