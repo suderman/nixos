@@ -26,8 +26,9 @@
   programs.pi-coding-agent.enable = true;
   programs.mmx-cli.enable = true;
 
-  # June runs AUTO Org headings tagged with this host.
+  # June runs AUTO Org headings tagged with this host, and her overlay is on Alt.
   programs.june.dispatch.enable = true;
+  programs.june.overlay.enable = true;
 
   # User services
   services.handy.enable = true;
