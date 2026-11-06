@@ -108,5 +108,10 @@ After activation, start a new =claude= session and use =/status= to confirm the 
 
 If CLIProxyAPI is unavailable, run =claude-direct=. Home Manager installs this separate launcher whenever Claude Code is enabled. It clears inherited =ANTHROPIC_BASE_URL=, =ANTHROPIC_AUTH_TOKEN=, =ANTHROPIC_API_KEY=, =CLAUDE_CODE_OAUTH_TOKEN=, =ANTHROPIC_MODEL=, gateway discovery and the cloud-connector override, then launches the stock package using Claude's saved login and model preferences. It does not read the proxy key file or contact the proxy. CLI arguments pass through unchanged. Confirm =/status= shows the intended Claude Pro account before sending work. Normal =claude= stays on the proxy; neither command automatically switches routes.
 
+** Pi direct launcher
+Home Manager installs =pi-direct= whenever Pi is enabled. It reuses the normal Pi launcher for setup and key loading, then selects built-in =openai/gpt-6.1-sol= with model cycling scoped to that direct model. CLI arguments follow those defaults, so =--model <id>= and =--models <patterns>= can override them. It shares Pi's writable settings, extensions and saved credentials without changing startup defaults. Normal =pi= keeps its configured proxy route; there is no automatic failover.
+
+For initial setup, run =pi-direct=, use =/login openai= and choose Sign in with ChatGPT. This Pi version stores that login under =openai=, and stored credentials take precedence over =OPENAI_API_KEY=. The login callback needs local port =1455=; free it before signing in if codex-lb or another login owns it. Restart =pi-direct= after login to resolve its authenticated model scope. Confirm the provider is =openai= before sending work. Do not save a new global default through the model picker unless normal =pi= should change too.
+
 ** Durable configuration
 Keep durable settings in =services.cliproxyapi.settings=. The module regenerates =config.yaml= at each service start, so management-panel configuration changes do not survive a restart. OAuth token files do survive. Arbitrary secrets can still use upstream's =._secret = "/path/to/file";= syntax; =environmentFile= remains available.

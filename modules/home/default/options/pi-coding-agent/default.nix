@@ -70,6 +70,14 @@ in {
     # Put the wrapper at the conventional user-bin path without exposing the
     # implementation package name to callers.
     home.file.".local/bin/pi".source = "${cfg.package}/bin/pi";
+    home.file.".local/bin/pi-direct".source = lib.getExe (pkgs.self.mkScript {
+      name = "pi-direct";
+      text =
+        # bash
+        ''
+          exec ${cfg.package}/bin/pi --provider openai --model gpt-6.1-sol --models openai/gpt-6.1-sol "$@"
+        '';
+    });
 
     home.activation.piHerdrIntegration = lib.mkIf (config.programs.herdr.enable && herdrPackage != null) (
       lib.hm.dag.entryAfter ["writeBoundary"] ''
