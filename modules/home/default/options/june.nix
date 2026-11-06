@@ -34,6 +34,16 @@ in {
       programs.pi-coding-agent.enable = lib.mkIf (cfg.daemon.enable || cfg.dispatch.enable) true;
       programs.herdr.enable = true;
       programs.emacs.enable = true;
+
+      # adb's host key, which the phone authorized, and the debug keystore June's `nix run .#android-install` signs
+      # with. Every host that installs June's app must hold the same keystore: copy it between hosts once, since an
+      # app signed with another key cannot be updated, only uninstalled.
+      persist.storage.directories = [
+        {
+          directory = ".android";
+          mode = "0700";
+        }
+      ];
     }
 
     (lib.mkIf cfg.daemon.enable {
