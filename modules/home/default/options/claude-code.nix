@@ -19,7 +19,7 @@
 
         export ANTHROPIC_BASE_URL=https://cliproxyapi.kit
         export ANTHROPIC_AUTH_TOKEN="''${CLIPROXYAPI_API_KEY:?Missing CLIPROXYAPI_API_KEY in Claude environment file}"
-        export ANTHROPIC_MODEL=claude-opus-5
+        export ANTHROPIC_MODEL=claude-opus-5-5
         export CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1
         export ENABLE_CLAUDEAI_MCP_SERVERS=false
         unset ANTHROPIC_API_KEY CLAUDE_CODE_OAUTH_TOKEN
@@ -51,5 +51,18 @@ in {
     home.file.".local/bin/claude" = lib.mkIf (cfg.environmentFile != null) {
       source = "${wrapper}/bin/claude";
     };
+
+    home.file.".local/bin/claude-direct".source = lib.getExe (pkgs.self.mkScript {
+      name = "claude-direct";
+      text =
+        # bash
+        ''
+          unset ANTHROPIC_BASE_URL ANTHROPIC_AUTH_TOKEN ANTHROPIC_API_KEY \
+            CLAUDE_CODE_OAUTH_TOKEN ANTHROPIC_MODEL \
+            CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY ENABLE_CLAUDEAI_MCP_SERVERS
+
+          exec ${lib.getExe cfg.package} "$@"
+        '';
+    });
   };
 }
