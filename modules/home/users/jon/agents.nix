@@ -23,6 +23,9 @@
   # Preload pi with my API keys.
   programs.pi-coding-agent.apiKeys = ./apikeys-env.age;
 
+  # Reuse the decrypted shared keys without depending on Pi's generated .env.
+  programs.claude-code.environmentFile = config.age.secrets.pi-coding-agent-env.path;
+
   programs.hermes.apiKeys = ./apikeys-env.age;
 
   # June's client everywhere, her daemon on kit, and her own files kept with my Org files.
