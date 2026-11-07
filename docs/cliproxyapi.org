@@ -99,17 +99,30 @@ journalctl -u cliproxyapi.service -b
 
 Use =https://cliproxyapi.kit/v1= and the client API key in an OpenAI-compatible client. Use model IDs returned by =/v1/models=. Client routing is configured separately.
 
-** Claude Code launcher
-Jon's Home Manager configuration sets =programs.claude-code.environmentFile= to the existing shared agenix dotenv. The module installs =~/.local/bin/claude= ahead of the stock package on the user PATH. It reads the decrypted file at launch, requires =CLIPROXYAPI_API_KEY= and sets =ANTHROPIC_AUTH_TOKEN=. No key enters the Nix store, and launch fails if the file or key is missing. It does not depend on Pi's generated dotenv or change Claude's saved login and writable settings. Harness preferences and local MCP servers remain owned by =~/.agents= and Claude.
+** Claude Code account selection
+Normal =claude= launches direct subscription auth through either =claude-home= or =claude-work=. Home Manager owns =~/.local/bin/claude=, which follows the writable =~/.local/state/claude/current= symlink. That directory persists with mode =0700=. First activation selects work only when no selector exists; later activations and reboots keep the selection. Change it through =claude-toggle=, not by replacing Home Manager's outer link.
 
-The launcher uses =ANTHROPIC_BASE_URL=https://cliproxyapi.kit= without =/v1=, enables gateway model discovery and selects =claude-opus-5-5= through =ANTHROPIC_MODEL=. CLI arguments pass through unchanged, so =claude --model <id>= overrides that default. It unsets =ANTHROPIC_API_KEY= and =CLAUDE_CODE_OAUTH_TOKEN= and sets =ENABLE_CLAUDEAI_MCP_SERVERS=false= to avoid fetching cloud connectors with gateway auth. Local MCP servers remain enabled. The proxy selects among eligible Claude credentials; the launcher does not pin an account.
+#+begin_src sh
+claude-toggle --status   # Print home or work without changing it.
+claude-toggle work       # Explicit and idempotent, suitable for agents.
+claude                  # Start a new direct work session.
+claude-toggle home      # Select direct home for subsequent launches.
+claude-toggle           # Flip to the other account.
+#+end_src
 
-After activation, start a new =claude= session and use =/status= to confirm the base URL, token source and model. Claude Code labels token-based gateway auth as "API Usage Billing"; that label does not identify the proxy's upstream account or prove per-token API charges. The enrolled upstream account determines quota use.
+Selection changes only future launches. Running sessions, logins and histories are untouched. There is no automatic quota-based switching, retry or fallback to the proxy. To move a job to the other account, finish or stop that session and start a new process. Other jobs can keep running on their original accounts. Each account has separate session history, so =--continue= or =--resume= after a switch searches the newly selected profile, not the previous account's history. Use an explicit account argument in automation rather than blindly flipping the global selection.
 
-If CLIProxyAPI is unavailable, run =claude-direct=. Home Manager installs this separate launcher whenever Claude Code is enabled. It clears inherited =ANTHROPIC_BASE_URL=, =ANTHROPIC_AUTH_TOKEN=, =ANTHROPIC_API_KEY=, =CLAUDE_CODE_OAUTH_TOKEN=, =ANTHROPIC_MODEL=, gateway discovery and the cloud-connector override, then launches the stock package using Claude's saved login and model preferences. It does not read the proxy key file or contact the proxy. CLI arguments pass through unchanged. Confirm =/status= shows the intended Claude Pro account before sending work. Normal =claude= stays on the proxy; neither command automatically switches routes.
+** Pooled Claude launcher
+Jon's Home Manager configuration sets =programs.claude-code.environmentFile= to the existing shared agenix dotenv. The module installs explicit =claude-pool= alongside the direct launchers. It reads the decrypted file at launch, requires =CLIPROXYAPI_API_KEY= and sets =ANTHROPIC_AUTH_TOKEN=. No key enters the Nix store, and launch fails if the file or key is missing. It does not depend on Pi's generated dotenv or change Claude's saved login and writable settings. Harness preferences and local MCP servers remain owned by =~/.agents= and Claude.
+
+The launcher uses =ANTHROPIC_BASE_URL=https://cliproxyapi.kit= without =/v1=, enables gateway model discovery and selects =claude-opus-5-5= through =ANTHROPIC_MODEL=. CLI arguments pass through unchanged, so =claude-pool --model <id>= overrides that default. It unsets =ANTHROPIC_API_KEY= and =CLAUDE_CODE_OAUTH_TOKEN= and sets =ENABLE_CLAUDEAI_MCP_SERVERS=false= to avoid fetching cloud connectors with gateway auth. Local MCP servers remain enabled. The proxy selects among eligible Claude credentials; the launcher does not pin an account.
+
+For explicit pooled use, start a new =claude-pool= session and use =/status= to confirm the base URL, token source and model. Claude Code labels token-based gateway auth as "API Usage Billing"; that label does not identify the proxy's upstream account or prove per-token API charges. The enrolled upstream account determines quota use.
+
+If CLIProxyAPI is unavailable, run =claude-direct=. Home Manager installs this separate launcher whenever Claude Code is enabled. It clears inherited =ANTHROPIC_BASE_URL=, =ANTHROPIC_AUTH_TOKEN=, =ANTHROPIC_API_KEY=, =CLAUDE_CODE_OAUTH_TOKEN=, =ANTHROPIC_MODEL=, gateway discovery and the cloud-connector override, then launches the stock package using Claude's saved login and model preferences. It does not read the proxy key file or contact the proxy. CLI arguments pass through unchanged. Confirm =/status= shows the intended Claude Pro account before sending work. Normal =claude= uses the selected isolated home/work profile; =claude-direct= preserves the older default profile. Neither automatically switches routes.
 
 ** Separate home and work logins
-Home Manager also installs =claude-home= and =claude-work= whenever Claude Code is enabled. Both launch the stock package directly with =claude-opus-5-5= as the default model; =--model <id>= can override it. They clear inherited gateway URL/auth, API key, OAuth token, gateway discovery, cloud-connector override and Bedrock/Vertex/Foundry selectors. Neither reads the proxy dotenv nor changes pooled =claude= or existing =claude-direct=.
+Home Manager also installs =claude-home= and =claude-work= whenever Claude Code is enabled. Both launch the stock package directly with =claude-opus-5-5= as the default model; =--model <id>= can override it. They clear inherited gateway URL/auth, API key, OAuth token, gateway discovery, cloud-connector override and Bedrock/Vertex/Foundry selectors. Neither reads the proxy dotenv nor changes =claude-pool= or existing =claude-direct=.
 
 =claude-home= uses =CLAUDE_CONFIG_DIR=$HOME/.claude-home= for =jon@suderman.net=. =claude-work= uses =$HOME/.claude-work= for =jon@nonfiction.ca=. Both directories persist with mode =0700=. Each has its own login, settings, plugins, user-level MCP configuration and session history. Nothing is copied from =~/.claude= or the proxy's credentials. Existing shared user configuration is not automatically applied to these new directories; project-local configuration still applies. See [[https://code.claude.com/docs/en/authentication#log-in-with-multiple-accounts][Claude Code multiple-account authentication]].
 
@@ -124,14 +137,51 @@ claude-work auth status --text
 
 The email flag only pre-fills the login page; it does not lock the wrapper to that identity. Confirm the intended account in the browser and in =auth status= or =/status= before sending work. A logout affects only that wrapper's login directory. These direct sessions use the same subscription allowance as the matching account in the pool, not separate capacity.
 
+** Claude quota command
+=claude-quota= prints each enrolled Claude account's remaining quota, reset times and sample age. =claude-quota --json= returns only Claude accounts, with per-account =stale=, =error= and =ageSeconds= fields. It reads =https://cliproxyapi-quota.kit/quota.json=, so it requires access to Kit over LAN or Tailscale. It does not read management keys, refresh OAuth tokens, send inference, or force an upstream usage poll. The existing server timer owns polling and backoff.
+
+#+begin_src sh
+claude-quota
+claude-quota --json
+#+end_src
+
+Data is stale after five minutes, if its last successful fetch is missing, or if the account or sampler reports an error. A failed or stale snapshot is not evidence of usable quota. Network and JSON parsing failures exit nonzero. Valid snapshots exit zero even if allowance is exhausted; automation must inspect the windows. For Opus, check the five-hour, shared weekly and any reported Opus-specific weekly limit. A missing window is unknown, not zero. Reset times are UTC in text output and epoch seconds in JSON.
+
+Labels identify enrolled proxy accounts, not the identity currently logged in to a direct wrapper. Confirm =claude-home auth status --text= and =claude-work auth status --text= separately. JSON =proxyDisabled= and =proxyUnavailable= describe proxy enrollment/routing state, not whether direct Claude can run. The same account's direct usage should appear in its account-level quota snapshot, subject to polling delay. Keeping it enrolled retains third-party OAuth access and polling even when all inference is direct.
+
+An agent can read =claude-quota --json=, verify fresh quota for the intended account, then run =claude-toggle work= or =claude-toggle home= before launching a new process. Do not change the global selection to retry another running job silently. Direct and pooled use share the same allowance. Claude OAuth enrollment and all OpenAI routing remain unchanged.
+
+** Automatic direct account launcher
+Use =claude-auto= for new dispatcher jobs. It reads =claude-quota --json= once, chooses a direct account and execs its store-pinned =claude-home= or =claude-work= wrapper with the original arguments. It never calls =claude-toggle=, changes the manual selection, retries a job on another account or falls back to the pool. It prints its chosen account and score on stderr, leaving Claude's stdout usable for machine output. =claude-auto --explain= emits the selection, eligibility reasons and window scores as JSON without launching Claude. =--help= describes the launcher; use =-- --help= for Claude's help.
+
+#+begin_src sh
+claude-auto --explain
+claude-auto --print 'Run the assigned task'
+#+end_src
+
+Eligibility uses the account labels =jon@nonfiction.ca= for work and =jon@suderman.net= for home. Each must have a successful sample at most five minutes old, a five-hour window and a shared weekly window. A reported Opus weekly window also constrains eligibility. Duplicate labels/windows, invalid percentages, stale/error samples and reset times that have already passed are rejected. A reset does not restore quota locally; wait for the sampler to report it. Unknown reset times receive no urgency bonus. Proxy routing flags are ignored because the job uses direct auth. Sign in to the intended direct profiles before using auto selection; the launcher does not verify or repair logins.
+
+Low-quota cutoffs leave room to start a job:
+
+| Window | Normal minimum remaining | Near-reset exception |
+|--------+--------------------------+----------------------|
+| Five-hour | 10% | At least 2% if reset is within 15 minutes |
+| Shared and Opus weekly | 5% | At least 1% if reset is within 6 hours |
+
+For each eligible window, =pace = min(100, remaining_percent * window_duration / max(time_to_reset, floor))=. The time floor is 30 minutes for five-hour quota and 24 hours for weekly quota. This favors spending quota closer to reset without an unbounded last-minute bonus. Unknown reset uses the full window duration. The weekly pace is the lower of shared and reported Opus weekly pace. The final score is the weighted harmonic mean, =1 / (0.65 / five_hour_pace + 0.35 / weekly_pace)=. Five-hour quota has 65% weight and weekly quota 35%; the harmonic mean penalizes a weak window instead of letting abundant quota in the other hide it. Highest score wins, with exact ties going to work regardless of snapshot order.
+
+For example, 5% five-hour quota with reset three hours away is ineligible. The same 5% with reset ten minutes away is eligible with a five-hour pace of 50, but can still lose to a healthier account after both windows are scored. Zero remaining never qualifies, even immediately before reset. These are scheduling heuristics, not Anthropic quota rules or a prediction of job size.
+
+Failure to fetch or find an eligible account exits 1 without launching. =--explain= also exits 1 when neither account qualifies. All other arguments pass through unchanged; =--= ends launcher-option handling. Use explicit =claude-home= or =claude-work= for resuming account-specific history. Concurrent jobs can choose the same account from the same two-minute snapshot; there is no reservation, live-usage estimator or guarantee a job will finish before exhaustion. Dispatcher retry/backoff remains the dispatcher's responsibility. No dispatcher configuration changes are made by installing this command.
+
 ** Claude prompt caching
-Claude Code treats =ANTHROPIC_AUTH_TOKEN= gateway auth differently from native subscription OAuth. Its default main-conversation cache is five minutes through the gateway, versus one hour on included subscription usage. The proxy launcher defaults =CLAUDE_CODE_PROMPT_CACHE_TTL= to =1h= to restore that behavior. An explicit environment value takes precedence, so =CLAUDE_CODE_PROMPT_CACHE_TTL=5m claude= requests five minutes. Start a new process after activating the launcher change.
+Claude Code treats =ANTHROPIC_AUTH_TOKEN= gateway auth differently from native subscription OAuth. Its default main-conversation cache is five minutes through the gateway, versus one hour on included subscription usage. The proxy launcher defaults =CLAUDE_CODE_PROMPT_CACHE_TTL= to =1h= to restore that behavior. An explicit environment value takes precedence, so =CLAUDE_CODE_PROMPT_CACHE_TTL=5m claude-pool= requests five minutes. Start a new process after activating the launcher change.
 
 =promptCacheTtl= and =subagentPromptCacheTtl= are supported Claude Code settings, with separate environment overrides =CLAUDE_CODE_PROMPT_CACHE_TTL= and =CLAUDE_CODE_SUBAGENT_PROMPT_CACHE_TTL=. The launcher changes only the main bucket. Subagents and helpers keep their normal five-minute default unless configured separately. =FORCE_PROMPT_CACHING_5M=1= overrides the one-hour choice. See [[https://code.claude.com/docs/en/prompt-caching][Claude Code prompt caching]].
 
 CLIProxyAPI =8.0.48= preserves explicit one-hour markers and the required beta header, including subagent requests. A beta header alone does not select a one-hour cache. Cache reads, writes and uncached input are separate usage counters; total input context includes all three. One-hour API writes cost more than five-minute writes, so neither the API price table nor a large context count proves how Anthropic charged a Pro quota window. See [[https://platform.claude.com/docs/en/build-with-claude/prompt-caching][Anthropic prompt caching]].
 
-Prompt caches are account-specific. The proxy's =30m= affinity binding refreshes during active use, but a longer idle gap can select another account while a one-hour cache remains valid on the old one. Quota failover and service restarts can also lose account affinity. The binding setting is global; changing it would also change OpenAI routing. =claude-direct= avoids pooled account changes. No cache keepalive requests, fork-only cache-statistics settings or global routing changes are enabled here.
+Prompt caches are account-specific. The proxy's =30m= affinity binding refreshes during active use, but a longer idle gap can select another account while a one-hour cache remains valid on the old one. Quota failover and service restarts can also lose account affinity. The binding setting is global; changing it would also change OpenAI routing. The direct launchers, including normal selected =claude=, avoid pooled account changes and leave native cache defaults unchanged. No cache keepalive requests, fork-only cache-statistics settings or global routing changes are enabled here.
 
 ** Pi direct launcher
 Home Manager installs =pi-direct= whenever Pi is enabled. It reuses the normal Pi launcher for setup and key loading, then selects built-in =openai/gpt-6.1-sol= with model cycling scoped to that direct model. CLI arguments follow those defaults, so =--model <id>= and =--models <patterns>= can override them. It shares Pi's writable settings, extensions and saved credentials without changing startup defaults. Normal =pi= keeps its configured proxy route; there is no automatic failover.
