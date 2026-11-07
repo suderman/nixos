@@ -108,6 +108,31 @@ After activation, start a new =claude= session and use =/status= to confirm the 
 
 If CLIProxyAPI is unavailable, run =claude-direct=. Home Manager installs this separate launcher whenever Claude Code is enabled. It clears inherited =ANTHROPIC_BASE_URL=, =ANTHROPIC_AUTH_TOKEN=, =ANTHROPIC_API_KEY=, =CLAUDE_CODE_OAUTH_TOKEN=, =ANTHROPIC_MODEL=, gateway discovery and the cloud-connector override, then launches the stock package using Claude's saved login and model preferences. It does not read the proxy key file or contact the proxy. CLI arguments pass through unchanged. Confirm =/status= shows the intended Claude Pro account before sending work. Normal =claude= stays on the proxy; neither command automatically switches routes.
 
+** Separate home and work logins
+Home Manager also installs =claude-home= and =claude-work= whenever Claude Code is enabled. Both launch the stock package directly with =claude-opus-5-5= as the default model; =--model <id>= can override it. They clear inherited gateway URL/auth, API key, OAuth token, gateway discovery, cloud-connector override and Bedrock/Vertex/Foundry selectors. Neither reads the proxy dotenv nor changes pooled =claude= or existing =claude-direct=.
+
+=claude-home= uses =CLAUDE_CONFIG_DIR=$HOME/.claude-home= for =jon@suderman.net=. =claude-work= uses =$HOME/.claude-work= for =jon@nonfiction.ca=. Both directories persist with mode =0700=. Each has its own login, settings, plugins, user-level MCP configuration and session history. Nothing is copied from =~/.claude= or the proxy's credentials. Existing shared user configuration is not automatically applied to these new directories; project-local configuration still applies. See [[https://code.claude.com/docs/en/authentication#log-in-with-multiple-accounts][Claude Code multiple-account authentication]].
+
+After activation, sign in to each account separately:
+
+#+begin_src sh
+claude-home auth login --claudeai --email jon@suderman.net
+claude-work auth login --claudeai --email jon@nonfiction.ca
+claude-home auth status --text
+claude-work auth status --text
+#+end_src
+
+The email flag only pre-fills the login page; it does not lock the wrapper to that identity. Confirm the intended account in the browser and in =auth status= or =/status= before sending work. A logout affects only that wrapper's login directory. These direct sessions use the same subscription allowance as the matching account in the pool, not separate capacity.
+
+** Claude prompt caching
+Claude Code treats =ANTHROPIC_AUTH_TOKEN= gateway auth differently from native subscription OAuth. Its default main-conversation cache is five minutes through the gateway, versus one hour on included subscription usage. The proxy launcher defaults =CLAUDE_CODE_PROMPT_CACHE_TTL= to =1h= to restore that behavior. An explicit environment value takes precedence, so =CLAUDE_CODE_PROMPT_CACHE_TTL=5m claude= requests five minutes. Start a new process after activating the launcher change.
+
+=promptCacheTtl= and =subagentPromptCacheTtl= are supported Claude Code settings, with separate environment overrides =CLAUDE_CODE_PROMPT_CACHE_TTL= and =CLAUDE_CODE_SUBAGENT_PROMPT_CACHE_TTL=. The launcher changes only the main bucket. Subagents and helpers keep their normal five-minute default unless configured separately. =FORCE_PROMPT_CACHING_5M=1= overrides the one-hour choice. See [[https://code.claude.com/docs/en/prompt-caching][Claude Code prompt caching]].
+
+CLIProxyAPI =8.0.48= preserves explicit one-hour markers and the required beta header, including subagent requests. A beta header alone does not select a one-hour cache. Cache reads, writes and uncached input are separate usage counters; total input context includes all three. One-hour API writes cost more than five-minute writes, so neither the API price table nor a large context count proves how Anthropic charged a Pro quota window. See [[https://platform.claude.com/docs/en/build-with-claude/prompt-caching][Anthropic prompt caching]].
+
+Prompt caches are account-specific. The proxy's =30m= affinity binding refreshes during active use, but a longer idle gap can select another account while a one-hour cache remains valid on the old one. Quota failover and service restarts can also lose account affinity. The binding setting is global; changing it would also change OpenAI routing. =claude-direct= avoids pooled account changes. No cache keepalive requests, fork-only cache-statistics settings or global routing changes are enabled here.
+
 ** Pi direct launcher
 Home Manager installs =pi-direct= whenever Pi is enabled. It reuses the normal Pi launcher for setup and key loading, then selects built-in =openai/gpt-6.1-sol= with model cycling scoped to that direct model. CLI arguments follow those defaults, so =--model <id>= and =--models <patterns>= can override them. It shares Pi's writable settings, extensions and saved credentials without changing startup defaults. Normal =pi= keeps its configured proxy route; there is no automatic failover.
 
