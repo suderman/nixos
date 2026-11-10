@@ -432,11 +432,11 @@
         "pins": "pins"
       },
       "locked": {
-        "lastModified": 1794283828,
-        "narHash": "sha256-VqZ3qOgOgmfVNf2lUwySGBmEbsStsQFQ79LIHt++50c=",
+        "lastModified": 1794294239,
+        "narHash": "sha256-k9Uddgy6Qp4HHzAE3LTB9ARjo+GaynA+Ojnzbm0jUKY=",
         "owner": "suderman",
         "repo": "emacs",
-        "rev": "405bfbf936a1cb915aee315be65f02952a0cfbf7",
+        "rev": "f9fa22d39b539dd1b7333de6389b0496c7fbe5aa",
         "type": "github"
       },
       "original": {
@@ -1336,11 +1336,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794281758,
-        "narHash": "sha256-NilN0qwsstW3kIzq7Z/Ea/FoVz/Q8qTXDlVPToQnhwA=",
+        "lastModified": 1794343531,
+        "narHash": "sha256-hRIMOwVvV054GYbZ0qDZ9+/4QIp2CahQbRE7jyUggFs=",
         "owner": "suderman",
         "repo": "june",
-        "rev": "da9d6bac6aa31ee83cf6b6c5ce86250cdbc0cc06",
+        "rev": "02987ab8f5e3690677bc2d5e1db87ef6f54f0edf",
         "type": "github"
       },
       "original": {
