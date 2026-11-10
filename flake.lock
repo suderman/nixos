@@ -50,11 +50,11 @@
         "llm-agents": "llm-agents"
       },
       "locked": {
-        "lastModified": 1794188758,
-        "narHash": "sha256-s/cD3Y5AMxzcdiXBnkbKGkALMc/pVoRowy5Jh/Brvbc=",
+        "lastModified": 1794254455,
+        "narHash": "sha256-ZjaAO+cmihRex3nXriPHx8xsm73Gj8wPpuUurctDP1o=",
         "owner": "suderman",
         "repo": "agents",
-        "rev": "2102d96e292d89f5b0db86d697f4575ba73056b1",
+        "rev": "7db428ed24b1e37ff6e45e580c02dd9b04f997b4",
         "type": "github"
       },
       "original": {
@@ -432,11 +432,11 @@
         "pins": "pins"
       },
       "locked": {
-        "lastModified": 1794188883,
-        "narHash": "sha256-KZig9M79cIuRtDayMh8j2qWVnAb4IjWVj3JgiPKLXOc=",
+        "lastModified": 1794264850,
+        "narHash": "sha256-0HEKgH6XDrb/ieUOdvjrXp/seRfAZNY6Sx+nWVDobZE=",
         "owner": "suderman",
         "repo": "emacs",
-        "rev": "608cc1654afd36ef174708eb3692d645f3d25af9",
+        "rev": "3f021b35c5a297c2b2878eb65d1c625879a00b88",
         "type": "github"
       },
       "original": {
@@ -1336,11 +1336,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794252623,
-        "narHash": "sha256-t/A75OLdLulYCq8Nz0rKzhzqqOK7U2HEbHucCvEn3+U=",
+        "lastModified": 1794268593,
+        "narHash": "sha256-sM5ugTY0Ba+4RH86FylNQVmCqmymf8DkKh901/pULnc=",
         "owner": "suderman",
         "repo": "june",
-        "rev": "3f1280c66a47a9295cf73514387c2696f75b11ce",
+        "rev": "936454bd8a0e2dbd83c6c198540a5669984f30a2",
         "type": "github"
       },
       "original": {
