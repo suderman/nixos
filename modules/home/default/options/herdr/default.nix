@@ -18,6 +18,22 @@
     text =
       # bash
       ''
+        # Restart under systemd even when a client started the running server,
+        # so panes get the desktop session's environment. Stopping ends the pane
+        # this may run in, so a transient unit does the work.
+        if [[ $# -eq 2 && $1 == server && $2 == restart ]]; then
+          echo 'herdr: restarting the server through systemd; run herdr to reattach'
+          # shellcheck disable=SC2016 # expanded by the transient unit's bash
+          exec systemd-run --user --quiet --collect --setenv=PATH="$PATH" -- ${pkgs.bash}/bin/bash -c '
+            "$1" server stop || true
+            for _ in $(seq 100); do
+              "$2" status server 2>/dev/null | grep -qx "status: running" || break
+              sleep 0.1
+            done
+            systemctl --user start herdr.service
+          ' _ "$(readlink -f "$0")" ${lib.getExe cfg.package}
+        fi
+
         if [[ $# -eq 2 && $1 == server && $2 == stop ]]; then
           socket=$(${lib.getExe cfg.package} status server | awk '$1 == "socket:" {print $2}')
           [[ -n $socket ]] || { echo 'herdr: cannot find server socket; refusing to stop' >&2; exit 1; }
