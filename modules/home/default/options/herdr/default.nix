@@ -14,7 +14,7 @@
   # wrapped herdr to own workspace emacs servers
   herdr = pkgs.self.mkScript {
     name = "herdr";
-    path = with pkgs; [coreutils gawk gnugrep procps];
+    path = with pkgs; [coreutils gawk gnugrep procps systemd];
     text =
       # bash
       ''
@@ -28,6 +28,18 @@
             grep -zEq '^(TMUX|TMUX_PANE)=' "/proc/$pid/environ" 2>/dev/null && continue
             grep -zEq '^--daemon=em-[[:xdigit:]]{24}$' "/proc/$pid/cmdline" 2>/dev/null || continue
             kill "$pid" 2>/dev/null || true
+          done
+        fi
+
+        # A bare client that finds no server starts one with this shell's
+        # environment. Over SSH that means SSH_CONNECTION and no WAYLAND_DISPLAY,
+        # so image paste fails in every pane. Start the user unit instead, which
+        # carries the desktop session's environment, and wait for it.
+        running() { ${lib.getExe cfg.package} status server 2>/dev/null | grep -qx 'status: running'; }
+        if [[ $# -eq 0 ]] && ! running && systemctl --user start herdr.service 2>/dev/null; then
+          for _ in $(seq 50); do
+            running && break
+            sleep 0.1
           done
         fi
 
