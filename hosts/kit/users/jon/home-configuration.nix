@@ -22,6 +22,9 @@
   # Only kit writes the SSH hosts Termux reads from the synced profile.
   programs.ssh.exportHosts = true;
 
+  # Only kit writes the portable Herdr settings Termux links from the synced profile.
+  programs.herdr.exportSettings = true;
+
   # Only kit archives old finished Org headings, so Syncthing sees one writer.
   programs.emacs.archiveOrg = true;
 
