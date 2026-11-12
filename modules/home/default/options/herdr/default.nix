@@ -59,6 +59,24 @@
           done
         fi
 
+        # Another host's Herdr (gem, kit, cog) attaches through this bridge, and
+        # the bridge starts a missing server with the SSH session's environment.
+        # After a reboot that happens before login. Start the unit instead, which
+        # on a desktop waits for the graphical session, and refuse until then so
+        # the remote client retries rather than owning the server.
+        if [[ ''${1-} == remote-client-bridge ]] && ! running; then
+          if systemctl --user start herdr.service 2>/dev/null; then
+            for _ in $(seq 50); do
+              running && break
+              sleep 0.1
+            done
+          fi
+          if ! running; then
+            echo "herdr: no server on $HOSTNAME yet; desktop hosts start it at login" >&2
+            exit 1
+          fi
+        fi
+
         exec ${lib.getExe cfg.package} "$@"
       '';
   };
@@ -102,8 +120,9 @@ in {
   config = mkIf cfg.enable {
     home.packages = [herdr];
 
-    # Herdr stores mutable local data beside Home Manager's generated config.toml.
-    persist.storage.directories = [".config/herdr"];
+    # Herdr stores mutable local data beside Home Manager's generated config.toml,
+    # and saved SSH machines under its state directory.
+    persist.storage.directories = [".config/herdr" ".local/state/herdr/client"];
 
     xdg.configFile."herdr/config.toml" = mkIf (cfg.settings != {}) {
       source = tomlFormat.generate "herdr-config.toml" cfg.settings;
@@ -127,6 +146,8 @@ in {
       Unit = {
         Description = "Herdr server";
         After = lib.optional config.desktop.enable "graphical-session.target";
+        # Panes need the desktop's environment, so never start before login.
+        Requisite = lib.optional config.desktop.enable "graphical-session.target";
         # Restarting kills every pane and agent; new versions wait for login.
         X-RestartIfChanged = false;
       };
