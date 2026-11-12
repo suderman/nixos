@@ -38,7 +38,15 @@
   };
 in {
   config = lib.mkIf cfg.enable {
+    # Editors still call the edger executable to cross into Herdr.
     home.packages = [edger herdrReclaim];
+
+    # The keybindings below call this plugin; Termux installs it from GitHub.
+    home.activation.edgerHerdrPlugin = lib.mkIf (cfg.package != null) (
+      lib.hm.dag.entryAfter ["writeBoundary"] ''
+        $DRY_RUN_CMD ${lib.getExe cfg.package} plugin link ${flake.inputs.edger} >/dev/null
+      ''
+    );
 
     # Home Manager owns config.toml, so Herdr cannot record onboarding itself.
     programs.herdr.settings = {
@@ -75,8 +83,9 @@ in {
         focus_pane_up = "prefix+k";
         focus_pane_right = "prefix+l";
 
+        # Edger's plugin actions carry no Nix-store paths, so the phone shares
+        # these bindings. They forward Alt keys, edger's default modifier.
         command = let
-          modifier = "alt";
           binds.direction = {
             left = "h";
             down = "j";
@@ -88,27 +97,19 @@ in {
             vertical = "i";
             close = "w";
           };
+          edgerAction = key: action: description: {
+            inherit key description;
+            type = "plugin_action";
+            command = "edger.${action}";
+          };
         in
-          lib.mapAttrsToList (direction: letter: {
-            key = "${modifier}+${letter}";
-            type = "shell";
-            command = "${lib.getExe edger} ${direction} ${modifier}+${letter}";
-            description = "Navigate ${direction} across editor, pane, and outer layer";
-          })
+          lib.mapAttrsToList (direction: letter:
+            edgerAction "alt+${letter}" direction "Navigate ${direction} across editor, pane, and outer layer")
           binds.direction
-          ++ lib.mapAttrsToList (direction: letter: {
-            key = "${modifier}+shift+${letter}";
-            type = "shell";
-            command = "${lib.getExe edger} resize ${direction} ${modifier}+shift+${letter}";
-            description = "Navigate ${direction} across editor, pane, and outer layer";
-          })
+          ++ lib.mapAttrsToList (direction: letter:
+            edgerAction "alt+shift+${letter}" "resize-${direction}" "Resize ${direction} across editor and pane")
           binds.direction
-          ++ lib.mapAttrsToList (action: letter: {
-            key = "${modifier}+${letter}";
-            type = "shell";
-            command = "${lib.getExe edger} ${action} ${modifier}+${letter}";
-            description = "Edger ${action}";
-          })
+          ++ lib.mapAttrsToList (action: letter: edgerAction "alt+${letter}" action "Edger ${action}")
           binds.action
           ++ [
             {

@@ -7,11 +7,15 @@
   cfg = config.programs.herdr;
   tomlFormat = pkgs.formats.toml {};
 
-  # Settings any Herdr client can use. keys.command calls Nix-store scripts,
-  # which a server advertises and runs itself, and ui.sound names local files.
+  # Settings any Herdr client can use. Plugin actions travel because the phone
+  # installs the same plugins; other custom commands name local executables,
+  # and ui.sound names local files.
+  pluginActions = lib.filter (command: command.type or "" == "plugin_action") (cfg.settings.keys.command or []);
   portable =
     cfg.settings
-    // lib.optionalAttrs (cfg.settings ? keys) {keys = removeAttrs cfg.settings.keys ["command"];}
+    // lib.optionalAttrs (cfg.settings ? keys) {
+      keys = removeAttrs cfg.settings.keys ["command"] // lib.optionalAttrs (pluginActions != []) {command = pluginActions;};
+    }
     // lib.optionalAttrs (cfg.settings ? ui) {ui = removeAttrs cfg.settings.ui ["sound"];};
 
   exported = pkgs.runCommand "herdr-portable.toml" {} ''
