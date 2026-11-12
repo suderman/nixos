@@ -386,7 +386,7 @@ in {
         Service = {
           ExecStart = lib.getExe bridge;
           # Remote hosts need the same agent as June's SSH calls.
-          Environment = ["SSH_AUTH_SOCK=%t/ssh-agent"];
+          Environment = ["SSH_AUTH_SOCK=%t/${config.programs.ssh.agentSocket}"];
           Restart = "always";
           RestartSec = 3;
         };

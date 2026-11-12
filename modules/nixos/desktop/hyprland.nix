@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   perSystem,
@@ -104,6 +105,21 @@
     # https://www.reddit.com/r/NixOS/comments/199dm3j/how_do_i_retain_nextcloud_session_on_hyprland/
     services.gnome.gnome-keyring.enable = true;
     programs.seahorse.enable = true; # gui to manage keyring
+
+    # ly's pam_gnome_keyring starts the daemon with the login password, but that
+    # daemon exits after 120 seconds unless the session sends `--start`, which
+    # GNOME does through XDG autostart and Hyprland never does. A locked daemon
+    # is then D-Bus activated and prompts, and gcr-ssh-agent cannot unlock keys.
+    systemd.user.services.gnome-keyring-start = {
+      description = "Finish starting the GNOME Keyring unlocked at login";
+      wantedBy = ["graphical-session.target"];
+      partOf = ["graphical-session.target"];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = "${config.security.wrapperDir}/gnome-keyring-daemon --start --components=secrets";
+      };
+    };
 
     # https://home-manager-options.extranix.com/?query=hyprlock&release=release-25.05
     security.pam.services.hyprlock = {};

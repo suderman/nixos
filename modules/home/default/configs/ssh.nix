@@ -1,11 +1,13 @@
 {
   config,
+  osConfig,
   lib,
   flake,
   pkgs,
   ...
 }: let
   cfg = config.programs.ssh;
+  gcr = osConfig.services.gnome.gcr-ssh-agent.enable or false;
 
   inherit (builtins) filter listToAttrs;
   inherit (lib) head nameValuePair;
@@ -212,11 +214,29 @@ in {
       };
   };
 
-  # Start a user ssh-agent everywhere this shared module is imported. Keep the
+  # Hosts with GNOME Keyring (Hyprland and GNOME desktops) use its gcr-ssh-agent,
+  # which unlocks the key with the passphrase saved in the login keyring, so
+  # logging in is enough. Everywhere else, start a plain ssh-agent. Keep its
   # default identity lifetime aligned with the `Host *` AddKeysToAgent value.
+  options.programs.ssh.agentSocket = lib.mkOption {
+    type = lib.types.str;
+    readOnly = true;
+    default =
+      if gcr
+      then "gcr/ssh"
+      else config.services.ssh-agent.socket;
+    description = "The SSH agent's socket relative to $XDG_RUNTIME_DIR, for user services that need SSH_AUTH_SOCK.";
+  };
+
   config.services.ssh-agent = {
-    enable = true;
+    enable = !gcr;
     defaultMaximumIdentityLifetime = 28800; # 8h
+  };
+
+  config.sshAuthSock.initialization = lib.mkIf gcr {
+    bash = ''export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/gcr/ssh"'';
+    fish = ''set -x SSH_AUTH_SOCK "$XDG_RUNTIME_DIR/gcr/ssh"'';
+    nushell = ''$env.SSH_AUTH_SOCK = $"($env.XDG_RUNTIME_DIR)/gcr/ssh"'';
   };
 
   # Termux reads these through ~/profile, which Syncthing carries to the phone.

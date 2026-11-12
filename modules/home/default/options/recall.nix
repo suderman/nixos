@@ -88,8 +88,8 @@ in {
           recall-bluebubbles-tunnel = {
             Unit = {
               Description = "Recall BlueBubbles loopback SSH tunnel";
-              After = ["network-online.target" "ssh-agent.service" "recall-bluebubbles.service"];
-              Wants = ["network-online.target" "ssh-agent.service" "recall-bluebubbles.service"];
+              After = ["network-online.target" "recall-bluebubbles.service"] ++ lib.optional config.services.ssh-agent.enable "ssh-agent.service";
+              Wants = ["network-online.target" "recall-bluebubbles.service"] ++ lib.optional config.services.ssh-agent.enable "ssh-agent.service";
               StartLimitIntervalSec = 60;
               StartLimitBurst = 5;
             };
@@ -97,7 +97,7 @@ in {
               hardening
               // {
                 Type = "simple";
-                Environment = "SSH_AUTH_SOCK=%t/ssh-agent";
+                Environment = "SSH_AUTH_SOCK=%t/${config.programs.ssh.agentSocket}";
                 ExecStart = "${pkgs.openssh}/bin/ssh -F /dev/null -i %h/.ssh/id_ed25519 -i %h/.ssh/id_rsa -o IdentitiesOnly=yes -S none -o ControlMaster=no -o BatchMode=yes -o StrictHostKeyChecking=yes -o RemoteCommand=none -o ExitOnForwardFailure=yes -o ConnectTimeout=10 -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -N -R 127.0.0.1:8042:127.0.0.1:8042 bub";
                 Restart = "on-failure";
                 RestartSec = 15;

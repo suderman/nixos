@@ -79,7 +79,7 @@ in {
             lib.optional piKeys "pi-coding-agent-env.service"
             ++ lib.optional (cfg.apiKeys != null) "agenix.service";
         };
-        Service.Environment = ["SSH_AUTH_SOCK=%t/ssh-agent"];
+        Service.Environment = ["SSH_AUTH_SOCK=%t/${config.programs.ssh.agentSocket}"];
       };
     })
 
