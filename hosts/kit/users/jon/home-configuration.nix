@@ -19,6 +19,9 @@
   # Only kit writes the shared appearance file; other machines consume it.
   programs.emacs.exportStyle = true;
 
+  # Only kit writes the SSH hosts Termux reads from the synced profile.
+  programs.ssh.exportHosts = true;
+
   # Only kit archives old finished Org headings, so Syncthing sees one writer.
   programs.emacs.archiveOrg = true;
 
