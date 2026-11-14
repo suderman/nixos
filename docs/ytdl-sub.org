@@ -138,10 +138,17 @@ Seasons are upload years. Episodes use upstream
 Jellyfin lists them first: 21 October becomes =e07299=, 4 October =e08999=.
 The last two digits order same-day uploads.
 
-The format sorter favors H264 video and AAC audio. MP4 merging and metadata
+The format sorter takes the highest resolution within the 1080p cap, then
+favors H264 video and AAC audio. Resolution must come first: YouTube still
+offers format 18, a single 360p H264/AAC file, and codec keys ahead of
+resolution rank it above 1080p video-only streams. The low-resolution assertion
+then stops every run as if throttled. MP4 merging and metadata
 writing copy streams rather than routinely encoding video. If H264/AAC is
 unavailable, other codecs can be selected within the 1080p cap; Jellyfin client
 support still determines whether playback needs transcoding.
+
+yt-dlp keeps its cache, including solved YouTube player functions, in
+=/var/cache/ytdl-sub/.yt-dlp=, because the service user's home is read-only.
 
 SponsorBlock requests and removes only =sponsor= segments. Intros, outros,
 self-promotion, and other categories are untouched. Upstream leaves

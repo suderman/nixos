@@ -47,8 +47,13 @@ in {
             # Playlists need not be ordered by upload date.
             date_range.breaks = false;
             ytdl_options = {
-              format_sort = ["vcodec:h264" "acodec:aac"];
+              # Resolution first: codec keys ahead of it rank the muxed
+              # 360p H264/AAC format 18 above 1080p video-only streams.
+              format_sort = ["res" "vcodec:h264" "acodec:aac"];
               merge_output_format = "mp4";
+              # The service user's home is read-only /var/empty. Subscription
+              # temporary directories here are per-name and unaffected.
+              cachedir = "/var/cache/ytdl-sub/.yt-dlp";
             };
             chapters = {
               sponsorblock_categories = ["sponsor"];
