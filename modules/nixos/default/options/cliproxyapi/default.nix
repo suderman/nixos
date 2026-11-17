@@ -122,8 +122,6 @@ in {
       observability.usage.usage-statistics-enabled = lib.mkDefault true;
       # Only offer image generation when the client explicitly requests it.
       multimedia.disable-image-generation = lib.mkDefault "passthrough";
-      # Adds gpt-6.1-terra until the official catalog lists it; see catalog.nix.
-      models.catalog = lib.mkDefault (toString (pkgs.callPackage ./catalog.nix {}));
     };
 
     environment.systemPackages = [
