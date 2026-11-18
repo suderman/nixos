@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  osConfig,
   pkgs,
   ...
 }: let
@@ -18,6 +19,11 @@
   self = config.networking.hostName;
   hosts = [self] ++ lib.remove self config.programs.herdr.workers;
 
+  tailscale =
+    if osConfig.services.tailscale.enable or false
+    then lib.getExe osConfig.services.tailscale.package
+    else "";
+
   bridge = pkgs.self.mkScript {
     name = "herdr-status-bridge";
     path = with pkgs; [coreutils jq openssh];
@@ -25,6 +31,7 @@
       HERDR_STATUS_HERDR = herdr;
       HERDR_STATUS_INTERVAL = toString cfg.interval;
       HERDR_STATUS_HOSTS = toString hosts;
+      HERDR_STATUS_TAILSCALE = tailscale;
     };
     text =
       # bash
@@ -60,6 +67,12 @@
 
         poll() {
           local host="$1" rank="$2" raw normalized
+
+          # A sleeping host would otherwise cost a failed SSH connection every poll.
+          if [[ " $offline " == *" $host "* ]]; then
+            host_error "$host" "offline"
+            return
+          fi
 
           if [[ $host == "''${hosts[0]}" ]]; then
             raw="$("$HERDR_STATUS_HERDR" api snapshot 2>&1)"
@@ -129,6 +142,14 @@
         update() {
           local dir rank
           dir="$(mktemp -d)"
+
+          # Hosts Tailscale reports offline, by the first label of their MagicDNS name.
+          # If Tailscale can't answer, every host is polled over SSH as before.
+          offline=""
+          if [[ -n $HERDR_STATUS_TAILSCALE ]]; then
+            offline="$("$HERDR_STATUS_TAILSCALE" status --json 2>/dev/null |
+              jq -r '[.Peer[]? | select(.Online == false) | .DNSName | split(".")[0]] | join(" ")')" || offline=""
+          fi
 
           # Poll every host at once so an unreachable one costs its timeout, not a turn.
           for rank in "''${!hosts[@]}"; do
