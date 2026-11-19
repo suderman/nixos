@@ -42,6 +42,17 @@
         dim = hex "base04";
       };
     };
+  # Stylix fonts: sans for the app's own interface, mono for terminals.
+  # Stylix sizes are points; the app's are pixels at zoom 1. The interface
+  # has no size setting of its own.
+  fonts = let
+    inherit (config.stylix) fonts;
+  in
+    lib.optionalAttrs (config.stylix.enable or false) {
+      font = fonts.monospace.name;
+      ui_font = fonts.sansSerif.name;
+      font_size = fonts.sizes.terminal * 4.0 / 3;
+    };
   layouts = pkgs.runCommand "herdr-app-stylix-layouts" {nativeBuildInputs = [pkgs.jq];} ''
     mkdir "$out"
     jq '. + {window_blur: true, terminal_opacity: 0.40, theme: {light: "stylix-light", dark: "stylix-dark"}}' \
@@ -167,7 +178,7 @@ in {
 
       # The app writes both files, so leave them writable and update only managed entries.
       home.activation.hcAppSettings = let
-        settings = json.generate "hc-app-settings.json" ({core = lib.getExe core;} // cfg.app.settings);
+        settings = json.generate "hc-app-settings.json" ({core = lib.getExe core;} // fonts // cfg.app.settings);
         configure = perSystem.self.mkScript {
           name = "hc-app-settings";
           path = [pkgs.jq];

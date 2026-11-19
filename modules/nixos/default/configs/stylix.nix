@@ -82,9 +82,11 @@ in {
         name = "CommitMono";
       };
 
+      # Inter: a neutral grotesque like CommitMono, made for interface sizes,
+      # leaving reading to Literata.
       sansSerif = mkDefault {
-        package = pkgs.dejavu_fonts;
-        name = "DejaVu Sans";
+        package = pkgs.inter;
+        name = "Inter";
       };
 
       serif = mkDefault {
