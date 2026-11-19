@@ -168,12 +168,40 @@ in {
               "alt-shift-j" = "edger.resize-down";
               "alt-shift-k" = "edger.resize-up";
               "alt-shift-l" = "edger.resize-right";
+
+              # Super, not Ctrl, so programs in panes keep every Ctrl key.
+              # These match kitty's Super keys where it has them.
+              "super-=" = "app.zoom_in";
+              "super-+" = "app.zoom_in";
+              "super--" = "app.zoom_out";
+              "super-0" = "app.zoom_reset";
+              "super-[" = "tab.prev";
+              "super-]" = "tab.next";
+              "super-t" = "tab.new";
+              "super-shift-p" = "app.palette";
+              "super-?" = "app.help";
+              "super-shift-/" = "app.help";
+              "super-shift-?" = "app.help";
             }
-            // builtins.listToAttrs (map (n: lib.nameValuePair "alt-z ${toString n}" "tab.select:${toString n}") (lib.range 1 9));
+            // builtins.listToAttrs (map (n: lib.nameValuePair "alt-z ${toString n}" "tab.select:${toString n}") (lib.range 1 9))
+            // builtins.listToAttrs (map (n: lib.nameValuePair "super-${toString n}" "tab.select:${toString n}") (lib.range 1 9));
+          terminal = {
+            "super-c" = "terminal.copy";
+            "super-v" = "terminal.paste";
+            "super-g" = "terminal.search";
+          };
         };
       in
         pkgs.runCommand "herdr-app-keys.json" {nativeBuildInputs = [pkgs.jq];} ''
-          jq -s '.[0] * .[1]' ${app.src}/defaults/keys.json ${overrides} > "$out"
+          # Drop the app's Ctrl keys, so programs get Ctrl+digits, Ctrl+arrows
+          # and the rest unchanged. Ctrl+V stays: it pastes only an image and
+          # otherwise reaches the program.
+          jq -s '
+            (.[0]
+              | .global |= with_entries(select(.key | test("ctrl") | not))
+              | .terminal |= with_entries(select(.key == "ctrl-v" or (.key | test("ctrl") | not))))
+            * .[1]
+          ' ${app.src}/defaults/keys.json ${overrides} > "$out"
         '';
 
       # The app writes both files, so leave them writable and update only managed entries.
