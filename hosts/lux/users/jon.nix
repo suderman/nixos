@@ -11,6 +11,8 @@
   # The data disk supplies this bind mount, not main-disk impermanence storage.
   home.directories.DATA.persist = lib.mkForce null;
 
+  programs.hc.enable = true;
+
   # Music daemon
   services.mpd = {
     enable = true;

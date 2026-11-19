@@ -2,19 +2,24 @@
   config,
   pkgs,
   ...
-}: {
+}: let
+  herdrSounds = let
+    dir = "${config.home.homeDirectory}/profile/apps/herdr";
+  in {
+    done = "${dir}/tivo-up.mp3";
+    blocked = "${dir}/tivo-down.mp3";
+  };
+in {
   programs.herdr.enable = true;
 
   # Hosts running agents, shown together in the desktop roster. Adding lux starts its server at boot.
   programs.herdr.workers = ["kit" "cog"];
 
-  # Herdr only plays mp3; the tivo mp3s are converted from their wavs.
-  programs.herdr.settings.ui.sound = let
-    dir = "${config.home.homeDirectory}/profile/apps/herdr";
-  in {
-    done_path = "${dir}/tivo-up.mp3";
-    request_path = "${dir}/tivo-down.mp3";
+  programs.herdr.settings.ui.sound = {
+    done_path = herdrSounds.done;
+    request_path = herdrSounds.blocked;
   };
+  programs.hc.app.settings.sounds = herdrSounds;
 
   home.packages = with pkgs; [
     yo # example script

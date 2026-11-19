@@ -11,6 +11,7 @@
   programs.sparrow.enable = true;
   programs.nf.enable = true;
   programs.buzz.enable = true;
+  programs.hc.app.enable = true;
 
   # Gaming
   programs.steam.enable = true;

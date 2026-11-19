@@ -43,6 +43,7 @@
   programs.zwift.enable = true;
   programs.nf.enable = true;
   programs.buzz.enable = true;
+  programs.hc.app.enable = true;
 
   # Agents
   programs.agents.enable = true;

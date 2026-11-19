@@ -123,6 +123,10 @@
     # <https://github.com/herdrdev/herdr-nix>
     herdr.url = "github:herdrdev/herdr-nix";
 
+    # Herdr Core and desktop app
+    # <https://github.com/kevinpita/herdr-nix>
+    herdr-nix.url = "github:kevinpita/herdr-nix";
+
     # Buzz desktop client
     # <https://github.com/mulatta/buzz.nix>
     buzz.url = "github:mulatta/buzz.nix";
@@ -150,7 +154,16 @@
       ;
 
     # Packages and checks (without helper packages)
-    packages = lib.mapAttrs (_: flake.lib.removeHelperPackages) blueprint.packages;
+    packages =
+      lib.mapAttrs (
+        system: packages:
+          flake.lib.removeHelperPackages packages
+          // lib.optionalAttrs (inputs.herdr-nix.packages ? ${system}) {
+            inherit (inputs.herdr-nix.packages.${system}) herdr-core;
+            herdr-app = inputs.herdr-nix.packages.${system}.herdr;
+          }
+      )
+      blueprint.packages;
     checks =
       lib.mapAttrs (
         system: checks: flake.lib.removeHelperChecks (blueprint.packages.${system} or {}) checks

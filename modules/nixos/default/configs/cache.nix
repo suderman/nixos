@@ -15,6 +15,11 @@
       url = "https://herdr.cachix.org?priority=50";
       key = "herdr.cachix.org-1:3nH7IStRsS0ASfdonA0DCRR2ZrSCeWitZ7Kwew0cR4I=";
     }
+    # kevinpita/herdr-nix
+    {
+      url = "https://kevinpita.cachix.org?priority=50";
+      key = "kevinpita.cachix.org-1:Cu9UtCDSfDq3/WDnI7N1N/LzAh90SPS+1R+nWao/hz0=";
+    }
     # mulatta
     {
       url = "https://cache.mulatta.io?priority=50";
