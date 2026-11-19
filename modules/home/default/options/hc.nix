@@ -110,11 +110,12 @@ in {
               "alt-z z" = "pane.zoom";
               "alt-z b" = "layout.toggle:sidebar";
 
-              # These resize in Edger. The app defaults would swap panes instead.
-              "alt-shift-h" = "terminal";
-              "alt-shift-j" = "terminal";
-              "alt-shift-k" = "terminal";
-              "alt-shift-l" = "terminal";
+              # Edger resizes editor windows first, then Herdr panes. The app
+              # defaults would swap panes instead.
+              "alt-shift-h" = "edger.resize-left";
+              "alt-shift-j" = "edger.resize-down";
+              "alt-shift-k" = "edger.resize-up";
+              "alt-shift-l" = "edger.resize-right";
             }
             // builtins.listToAttrs (map (n: lib.nameValuePair "alt-z ${toString n}" "tab.select:${toString n}") (lib.range 1 9));
         };
