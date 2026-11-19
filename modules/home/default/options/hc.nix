@@ -53,6 +53,43 @@
       ui_font = fonts.sansSerif.name;
       font_size = fonts.sizes.terminal * 4.0 / 3;
     };
+  # Alt+Z, then one of these keys, through Edger's prefix popup, which waits
+  # for the key and shows this list. Values are keys.json actions. Release
+  # Alt first: Alt+U and the like are Edger's own keys.
+  prefix =
+    {
+      "?" = "app.help";
+      "s" = "app.settings";
+      "." = "space.rename";
+      "shift-d" = "space.close";
+      "d" = "window.close";
+      "," = "tab.rename";
+      "shift-x" = "tab.close";
+      "[" = "tab.prev";
+      "]" = "tab.next";
+      "{" = {
+        command = "tab.move";
+        args.by = -1;
+      };
+      "}" = {
+        command = "tab.move";
+        args.by = 1;
+      };
+      "m" = "terminal.select";
+      "u" = "pane.split:down";
+      "i" = "pane.split:right";
+      "h" = "pane.go:left";
+      "j" = "pane.go:down";
+      "k" = "pane.go:up";
+      "l" = "pane.go:right";
+      "shift-h" = "pane.swap:left";
+      "shift-j" = "pane.swap:down";
+      "shift-k" = "pane.swap:up";
+      "shift-l" = "pane.swap:right";
+      "z" = "pane.zoom";
+      "b" = "layout.toggle:sidebar";
+    }
+    // builtins.listToAttrs (map (n: lib.nameValuePair (toString n) "tab.select:${toString n}") (lib.range 1 9));
   layouts = pkgs.runCommand "herdr-app-stylix-layouts" {nativeBuildInputs = [pkgs.jq];} ''
     mkdir "$out"
     jq '. + {window_blur: true, terminal_opacity: 0.40, theme: {light: "stylix-light", dark: "stylix-dark"}}' \
@@ -113,6 +150,7 @@ in {
 
       # Link the whole directory so the app accepts the mod's relative imports.
       xdg.configFile."herdr-app/mods/edger".source = edgerMod;
+      xdg.configFile."herdr-app/edger.json".source = json.generate "herdr-app-edger.json" {inherit prefix;};
       xdg.configFile."herdr-app/keys.json".source = let
         overrides = json.generate "hc-key-overrides.json" {
           global =
@@ -125,42 +163,12 @@ in {
               "alt-i" = "edger.vertical";
               "alt-w" = "edger.close";
 
-              "alt-z ?" = "app.help";
-              "alt-z s" = "app.settings";
+              # Alt+Z opens Edger's prefix popup (edger.json).
+              "alt-z" = "edger.prefix";
               "alt-shift-n" = "space.new";
-              "alt-z ." = "space.rename";
-              "alt-z shift-d" = "space.close";
-              "alt-a" = "mod.open:picker";
-              "alt-z d" = "window.close";
-
               "alt-shift-t" = "tab.new";
-              "alt-z ," = "tab.rename";
-              "alt-z shift-x" = "tab.close";
-              "alt-z [" = "tab.prev";
-              "alt-z ]" = "tab.next";
-              "alt-z {" = {
-                command = "tab.move";
-                args.by = -1;
-              };
-              "alt-z }" = {
-                command = "tab.move";
-                args.by = 1;
-              };
-              "alt-z m" = "terminal.select";
-
-              "alt-z u" = "pane.split:down";
-              "alt-z i" = "pane.split:right";
               "alt-shift-w" = "pane.close";
-              "alt-z h" = "pane.go:left";
-              "alt-z j" = "pane.go:down";
-              "alt-z k" = "pane.go:up";
-              "alt-z l" = "pane.go:right";
-              "alt-z shift-h" = "pane.swap:left";
-              "alt-z shift-j" = "pane.swap:down";
-              "alt-z shift-k" = "pane.swap:up";
-              "alt-z shift-l" = "pane.swap:right";
-              "alt-z z" = "pane.zoom";
-              "alt-z b" = "layout.toggle:sidebar";
+              "alt-a" = "mod.open:picker";
 
               # Edger resizes editor windows first, then Herdr panes. The app
               # defaults would swap panes instead.
@@ -183,7 +191,6 @@ in {
               "super-shift-/" = "app.help";
               "super-shift-?" = "app.help";
             }
-            // builtins.listToAttrs (map (n: lib.nameValuePair "alt-z ${toString n}" "tab.select:${toString n}") (lib.range 1 9))
             // builtins.listToAttrs (map (n: lib.nameValuePair "super-${toString n}" "tab.select:${toString n}") (lib.range 1 9));
           terminal = {
             "super-c" = "terminal.copy";
