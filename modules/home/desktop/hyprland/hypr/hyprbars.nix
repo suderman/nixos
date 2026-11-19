@@ -72,6 +72,8 @@ in {
 
         if hyprbars and hyprbars.add_button then
           configure_hyprbars()
+          -- The Herdr app draws its own title row and drag area.
+          hl.window_rule({ name = "herdr-app-no-bar", match = { class = "herdr-app" }, ["hyprbars:no_bar"] = true })
         end
 
         util.exec("ESCAPE", "hypr-toggletitlebars", { non_consuming = true, long_press = true })

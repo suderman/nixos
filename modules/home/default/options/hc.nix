@@ -2,6 +2,7 @@
   config,
   flake,
   lib,
+  osConfig,
   perSystem,
   pkgs,
   ...
@@ -11,6 +12,41 @@
   app = perSystem.herdr-nix.herdr;
   edgerMod = "${flake.inputs.edger}/herdr-app/mods/edger";
   json = pkgs.formats.json {};
+
+  # Herdr app themes from the same Stylix light/dark pair as the desktop
+  # theme, and a see-through copy of the app's own main layout that uses them.
+  pair = osConfig.programs.stylix-theme-toggle or {enable = false;};
+  stylix = config.stylix.enable && pair.enable;
+  theme = mode: let
+    colors = (config.stylix.base16.mkSchemeAttrs pair."${mode}Scheme").override config.stylix.override;
+    hex = name: "#${colors.${name}}";
+  in
+    json.generate "herdr-app-stylix-${mode}.json" {
+      # Kitty's base16 mapping, so terminals match the TUI in kitty.
+      background = hex "base00";
+      foreground = hex "base05";
+      selection = hex "base03";
+      cursor = hex "base05";
+      ansi = map hex ["base00" "base08" "base0B" "base0A" "base0D" "base0E" "base0C" "base05" "base02" "base08" "base0B" "base0A" "base0D" "base0E" "base0C" "base07"];
+      # The app paints several of these layers over each other. These alphas,
+      # with the layout's terminal_opacity, put terminals and the sidebar at
+      # about kitty's 0.85 over Hyprland's blur, and pane headers at 0.7
+      # (measured in a sandbox).
+      colors = {
+        canvas = hex "base00" + "4d";
+        chrome = hex "base00" + "8a";
+        background = hex "base00" + "40";
+        # Secondary text one palette step up, to stay readable over a busy
+        # wallpaper; the app's own mixes fade toward the translucent panels.
+        muted = hex "base05";
+        dim = hex "base04";
+      };
+    };
+  layouts = pkgs.runCommand "herdr-app-stylix-layouts" {nativeBuildInputs = [pkgs.jq];} ''
+    mkdir "$out"
+    jq '. + {window_blur: true, terminal_opacity: 0.40, theme: {light: "stylix-light", dark: "stylix-dark"}}' \
+      ${app.src}/defaults/layouts/main.json > "$out/stylix.json"
+  '';
 in {
   options.programs.hc = {
     enable = lib.mkEnableOption "Herdr Core (hc)";
@@ -58,6 +94,11 @@ in {
           mode = "0700";
         }
       ];
+
+      # Select it once with `herdr-app do layout.switch --name stylix`.
+      xdg.configFile."herdr-app/themes/stylix-dark.json" = lib.mkIf stylix {source = theme "dark";};
+      xdg.configFile."herdr-app/themes/stylix-light.json" = lib.mkIf stylix {source = theme "light";};
+      xdg.configFile."herdr-app/layouts/stylix.json" = lib.mkIf stylix {source = "${layouts}/stylix.json";};
 
       # Link the whole directory so the app accepts the mod's relative imports.
       xdg.configFile."herdr-app/mods/edger".source = edgerMod;
@@ -146,7 +187,7 @@ in {
 
             # The app opens kept windows on startup and on layout changes.
             layouts=()
-            for layout in ${app.src}/defaults/layouts/*.json "$dir"/layouts/*.json; do
+            for layout in ${app.src}/defaults/layouts/*.json ${lib.optionalString stylix "${layouts}/*.json"} "$dir"/layouts/*.json; do
               [[ ! -f "$layout" ]] || layouts+=("$(basename "$layout" .json)")
             done
             update "$dir/windows.json" --slurpfile mod ${edgerMod}/mod.json \
