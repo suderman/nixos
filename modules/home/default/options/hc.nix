@@ -75,7 +75,7 @@
         command = "tab.move";
         args.by = 1;
       };
-      "m" = "terminal.select";
+      "m" = "edger.copy";
       "u" = "pane.split:down";
       "i" = "pane.split:right";
       "h" = "pane.go:left";
