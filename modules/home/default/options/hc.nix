@@ -1,5 +1,6 @@
 {
   config,
+  flake,
   lib,
   perSystem,
   pkgs,
@@ -8,6 +9,7 @@
   cfg = config.programs.hc;
   core = perSystem.herdr-nix.herdr-core;
   app = perSystem.herdr-nix.herdr;
+  edgerMod = "${flake.inputs.edger}/herdr-app/mods/edger";
   json = pkgs.formats.json {};
 in {
   options.programs.hc = {
@@ -24,7 +26,14 @@ in {
 
   config = lib.mkMerge [
     (lib.mkIf cfg.enable {
-      home.packages = [core];
+      # The TUI module already installs Edger when both stacks are enabled.
+      home.packages =
+        [core]
+        ++ lib.optional (!config.programs.herdr.enable) (pkgs.self.mkScript {
+          name = "edger";
+          path = [core];
+          text = builtins.readFile "${flake.inputs.edger}/bin/edger";
+        });
       persist.storage.directories = [
         {
           directory = ".config/herdr-core";
@@ -50,10 +59,20 @@ in {
         }
       ];
 
+      # Link the whole directory so the app accepts the mod's relative imports.
+      xdg.configFile."herdr-app/mods/edger".source = edgerMod;
       xdg.configFile."herdr-app/keys.json".source = let
         overrides = json.generate "hc-key-overrides.json" {
           global =
             {
+              "alt-h" = "edger.left";
+              "alt-j" = "edger.down";
+              "alt-k" = "edger.up";
+              "alt-l" = "edger.right";
+              "alt-u" = "edger.horizontal";
+              "alt-i" = "edger.vertical";
+              "alt-w" = "edger.close";
+
               "alt-z ?" = "app.help";
               "alt-z s" = "app.settings";
               "alt-shift-n" = "space.new";
@@ -104,28 +123,39 @@ in {
           jq -s '.[0] * .[1]' ${app.src}/defaults/keys.json ${overrides} > "$out"
         '';
 
-      # The app also writes this file, for example when changing zoom.
+      # The app writes both files, so leave them writable and update only managed entries.
       home.activation.hcAppSettings = let
         settings = json.generate "hc-app-settings.json" ({core = lib.getExe core;} // cfg.app.settings);
-        merge = perSystem.self.mkScript {
+        configure = perSystem.self.mkScript {
           name = "hc-app-settings";
           path = [pkgs.jq];
           text = ''
-            file="$1"
-            mkdir -p -m 700 "$(dirname "$file")"
-            tmp=$(mktemp "$file.XXXXXX")
-            trap 'rm -f "$tmp"' EXIT
-            if [[ -e "$file" ]]; then
-              jq -se '.[0] * .[1]' "$file" ${settings} > "$tmp"
-            else
-              cp ${settings} "$tmp"
-            fi
-            mv -T "$tmp" "$file"
+            dir="$1"
+            mkdir -p -m 700 "$dir"
+            update() (
+              file="$1"
+              shift
+              tmp=$(mktemp "$file.XXXXXX")
+              trap 'rm -f "$tmp"' EXIT
+              { if [[ -e "$file" ]]; then cat "$file"; else printf '{}\n'; fi; } |
+                jq -se "$@" > "$tmp"
+              mv -T "$tmp" "$file"
+            )
+            update "$dir/settings.json" --slurpfile settings ${settings} '.[0] * $settings[0]'
+
+            # The app opens kept windows on startup and on layout changes.
+            layouts=()
+            for layout in ${app.src}/defaults/layouts/*.json "$dir"/layouts/*.json; do
+              [[ ! -f "$layout" ]] || layouts+=("$(basename "$layout" .json)")
+            done
+            update "$dir/windows.json" --slurpfile mod ${edgerMod}/mod.json \
+              'reduce $ARGS.positional[] as $layout (.[0]; .kept[$layout].edger = ($mod[0].overlay + {mod: "edger"}))' \
+              --args "''${layouts[@]}"
           '';
         };
       in
         lib.hm.dag.entryAfter ["writeBoundary"] ''
-          run ${lib.getExe merge} ${lib.escapeShellArg "${config.xdg.configHome}/herdr-app/settings.json"}
+          run ${lib.getExe configure} ${lib.escapeShellArg "${config.xdg.configHome}/herdr-app"}
         '';
     })
   ];

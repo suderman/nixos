@@ -13,6 +13,7 @@
             (lib.mapAttrsToList
               (_: directory: "${user.home.homeDirectory}/${directory.path}")
               (lib.filterAttrs (_: directory: directory.enable && directory.sync && directory.persist != null) (user.home.directories or {})))
+            ++ lib.optionals (user.programs.hc.app.enable or false) ["${user.xdg.configHome}/herdr-app"]
             ++ lib.optionals (user.programs.hermes.enable or false) ["${user.home.homeDirectory}/.hermes"]
             ++ lib.optionals (user.services.recall.enable or false) ["${user.home.homeDirectory}/${user.services.recall.dataDir}"];
         })
