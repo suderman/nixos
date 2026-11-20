@@ -10,7 +10,19 @@
 }: let
   cfg = config.programs.hc;
   core = perSystem.herdr-nix.herdr-core;
-  app = perSystem.herdr-nix.herdr;
+  # Focus follows the mouse between panes, as in Hyprland: herdr-app PR #837,
+  # pinned to its head commit. Drop the patch once a release includes it; the
+  # settings below keep it on.
+  app = perSystem.herdr-nix.herdr.overrideAttrs (old: {
+    patches =
+      (old.patches or [])
+      ++ [
+        (pkgs.fetchpatch {
+          url = "https://github.com/herdrdev/herdr-app/compare/b67715e8985e6097f83f8120fc9b9e52e6596f50...0ff0474e14d316f35666c28611d0b74ca4019d76.diff";
+          hash = "sha256-GMQXhjgAdcB8aEcQ4yunpFO/xF40CKe3NL+O+RgSRhM=";
+        })
+      ];
+  });
   edgerMod = "${flake.inputs.edger}/herdr-app/mods/edger";
   json = pkgs.formats.json {};
 
@@ -214,7 +226,13 @@ in {
 
       # The app writes both files, so leave them writable and update only managed entries.
       home.activation.hcAppSettings = let
-        settings = json.generate "hc-app-settings.json" ({core = lib.getExe core;} // fonts // cfg.app.settings);
+        # The app's 150 ms focus delay lets the pointer sweep across panes.
+        settings = json.generate "hc-app-settings.json" ({
+            core = lib.getExe core;
+            focus_follows_mouse = true;
+          }
+          // fonts
+          // cfg.app.settings);
         configure = perSystem.self.mkScript {
           name = "hc-app-settings";
           path = [pkgs.jq];
