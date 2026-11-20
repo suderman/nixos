@@ -12,7 +12,7 @@
   # Without a terminal to ask in, machine add never installs or replaces a
   # server. Saved machines are skipped, so later runs need no SSH.
   saveMachines = pkgs.self.mkScript {
-    name = "herdr-machines";
+    name = "herdr-tui-machines";
     path = [cfg.package pkgs.jq];
     text = ''
       saved=$(herdr machine list --json)
@@ -29,7 +29,7 @@ in {
   # Each worker lists the others; hosts outside the worker list keep none.
   config = lib.mkIf (cfg.enable && cfg.package != null && lib.elem self cfg.workers && machines != []) {
     # An asleep or offline worker retries later instead of blocking activation.
-    systemd.user.services.herdr-machines = {
+    systemd.user.services.herdr-tui-machines = {
       Unit = {
         Description = "Save the other Herdr workers as machines";
         StartLimitIntervalSec = 0;

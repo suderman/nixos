@@ -30,7 +30,7 @@
               "$2" status server 2>/dev/null | grep -qx "status: running" || break
               sleep 0.1
             done
-            systemctl --user start herdr.service
+            systemctl --user start herdr-tui.service
           ' _ "$(readlink -f "$0")" ${lib.getExe cfg.package}
         fi
 
@@ -52,7 +52,7 @@
         # so image paste fails in every pane. Start the user unit instead, which
         # carries the desktop session's environment, and wait for it.
         running() { ${lib.getExe cfg.package} status server 2>/dev/null | grep -qx 'status: running'; }
-        if [[ $# -eq 0 ]] && ! running && systemctl --user start herdr.service 2>/dev/null; then
+        if [[ $# -eq 0 ]] && ! running && systemctl --user start herdr-tui.service 2>/dev/null; then
           for _ in $(seq 50); do
             running && break
             sleep 0.1
@@ -65,7 +65,7 @@
         # on a desktop waits for the graphical session, and refuse until then so
         # the remote client retries rather than owning the server.
         if [[ ''${1-} == remote-client-bridge ]] && ! running; then
-          if systemctl --user start herdr.service 2>/dev/null; then
+          if systemctl --user start herdr-tui.service 2>/dev/null; then
             for _ in $(seq 50); do
               running && break
               sleep 0.1
@@ -131,7 +131,7 @@ in {
     # Run the server at login so it survives reboots and closed clients. Clients
     # and the Org dispatcher attach to it. Headless workers start it at boot
     # through user lingering; other headless hosts start it on first attach.
-    systemd.user.services.herdr = let
+    systemd.user.services.herdr-tui = let
       # Skip when a client already started a server outside this unit.
       notRunning = pkgs.self.mkScript {
         name = "herdr-not-running";
@@ -143,7 +143,7 @@ in {
       };
     in {
       Unit = {
-        Description = "Herdr server";
+        Description = "Herdr TUI server";
         After = lib.optional config.desktop.enable "graphical-session.target";
         # Panes need the desktop's environment, so never start before login.
         Requisite = lib.optional config.desktop.enable "graphical-session.target";

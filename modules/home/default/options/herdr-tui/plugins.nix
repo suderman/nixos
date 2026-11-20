@@ -8,10 +8,10 @@
 in {
   config = lib.mkIf cfg.enable {
     # Plugin downloads must not block Home Manager activation during boot.
-    systemd.user.services.herdr-plugins = let
+    systemd.user.services.herdr-tui-plugins = let
       herdr = lib.getExe cfg.package;
       installPlugins = pkgs.self.mkScript {
-        name = "herdr-plugins";
+        name = "herdr-tui-plugins";
         path = [pkgs.git pkgs.coreutils];
         text = ''
           export GIT_TERMINAL_PROMPT=0

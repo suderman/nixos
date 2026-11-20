@@ -15,7 +15,7 @@
   # Add each listed host once; saved machines are skipped, so later runs need
   # no SSH. machine add never installs hc there without a terminal to ask in.
   addMachines = pkgs.self.mkScript {
-    name = "herdr-core-machines";
+    name = "herdr-machines";
     path = [pkgs.jq];
     text = ''
       saved=$(${hc} machine ls --json)
@@ -74,7 +74,7 @@ in {
     # from the login session, after the desktop's environment is imported.
     # The core itself runs in a transient unit of hc's own, so stopping or
     # renaming this one leaves it and its terminals alone.
-    systemd.user.services.herdr-core = {
+    systemd.user.services.herdr = {
       Unit = {
         Description = "Start herdr-core with the login session's environment";
         After = lib.optional desktop "graphical-session.target";
@@ -88,10 +88,10 @@ in {
     };
 
     # An asleep or offline host retries later instead of blocking login.
-    systemd.user.services.herdr-core-machines = lib.mkIf (cfg.machines != []) {
+    systemd.user.services.herdr-machines = lib.mkIf (cfg.machines != []) {
       Unit = {
         Description = "Add the other hosts as hc machines";
-        After = ["herdr-core.service"];
+        After = ["herdr.service"];
         StartLimitIntervalSec = 0;
       };
       Service = {
