@@ -175,6 +175,9 @@ in {
               "alt-u" = "edger.horizontal";
               "alt-i" = "edger.vertical";
               "alt-w" = "edger.close";
+              # Always a Herdr split, even with an editor focused.
+              "alt-shift-u" = "pane.split:down";
+              "alt-shift-i" = "pane.split:right";
 
               # Alt+Z opens Edger's prefix popup (edger.json).
               "alt-z" = "edger.prefix";
