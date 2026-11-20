@@ -10,7 +10,7 @@
   cfg = config.programs.pi-coding-agent;
 
   agentDir = ".pi/agent";
-  herdrPackage = config.programs.herdr.package;
+  herdrPackage = config.programs.herdr-tui.package;
 
   piDcpPackageFix = pkgs.self.mkScript {
     name = "pi-fix-dcp-package";
@@ -79,7 +79,7 @@ in {
         '';
     });
 
-    home.activation.piHerdrIntegration = lib.mkIf (config.programs.herdr.enable && herdrPackage != null) (
+    home.activation.piHerdrIntegration = lib.mkIf (config.programs.herdr-tui.enable && herdrPackage != null) (
       lib.hm.dag.entryAfter ["writeBoundary"] ''
         $DRY_RUN_CMD env \
           PI_CODING_AGENT_DIR=${config.home.homeDirectory}/${agentDir} \

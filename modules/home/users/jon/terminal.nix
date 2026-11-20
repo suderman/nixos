@@ -10,16 +10,16 @@
     blocked = "${dir}/tivo-down.mp3";
   };
 in {
-  programs.herdr.enable = true;
+  programs.herdr-tui.enable = true;
 
   # Hosts running agents, shown together in the desktop roster. Adding lux starts its server at boot.
-  programs.herdr.workers = ["kit" "cog"];
+  programs.herdr-tui.workers = ["kit" "cog"];
 
-  programs.herdr.settings.ui.sound = {
+  programs.herdr-tui.settings.ui.sound = {
     done_path = herdrSounds.done;
     request_path = herdrSounds.blocked;
   };
-  programs.hc.app.settings.sounds = herdrSounds;
+  programs.herdr.settings.sounds = herdrSounds;
 
   home.packages = with pkgs; [
     yo # example script

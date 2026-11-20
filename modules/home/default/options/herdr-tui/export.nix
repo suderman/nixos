@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  cfg = config.programs.herdr;
+  cfg = config.programs.herdr-tui;
   tomlFormat = pkgs.formats.toml {};
 
   # Settings any Herdr client can use. Plugin actions travel because the phone
@@ -45,7 +45,7 @@
     '';
   };
 in {
-  options.programs.herdr.exportSettings = lib.mkEnableOption "exporting the portable Herdr settings to the synced profile for Termux (enable on one host only)";
+  options.programs.herdr-tui.exportSettings = lib.mkEnableOption "exporting the portable Herdr settings to the synced profile for Termux (enable on one host only)";
 
   # Termux reads this through ~/profile, which Syncthing carries to the phone.
   config.home.activation.exportHerdrSettings = lib.mkIf (cfg.enable && cfg.exportSettings) (

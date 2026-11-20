@@ -1,167 +1,266 @@
+# The Herdr desktop app, a client of herdr-core (services.herdr, in core.nix
+# beside this file). The Herdr TUI it replaces is programs.herdr-tui.
 {
   config,
-  lib,
-  pkgs,
-  perSystem,
   flake,
+  lib,
+  options,
+  osConfig,
+  perSystem,
+  pkgs,
   ...
 }: let
-  inherit (lib) mkIf mkOption;
-
   cfg = config.programs.herdr;
-  tomlFormat = pkgs.formats.toml {};
+  core = config.services.herdr.package;
+  # Focus follows the mouse between panes, as in Hyprland: herdr-app PR #837,
+  # pinned to its head commit. Drop the patch once a release includes it; the
+  # settings below keep it on.
+  app = perSystem.herdr-nix.herdr.overrideAttrs (old: {
+    patches =
+      (old.patches or [])
+      ++ [
+        (pkgs.fetchpatch {
+          url = "https://github.com/herdrdev/herdr-app/compare/b67715e8985e6097f83f8120fc9b9e52e6596f50...0ff0474e14d316f35666c28611d0b74ca4019d76.diff";
+          hash = "sha256-GMQXhjgAdcB8aEcQ4yunpFO/xF40CKe3NL+O+RgSRhM=";
+        })
+      ];
+  });
+  edgerMod = "${flake.inputs.edger}/herdr-app/mods/edger";
+  json = pkgs.formats.json {};
 
-  # wrapped herdr to own workspace emacs servers
-  herdr = pkgs.self.mkScript {
-    name = "herdr";
-    path = with pkgs; [coreutils gawk gnugrep procps systemd];
-    text =
-      # bash
-      ''
-        # Restart under systemd even when a client started the running server,
-        # so panes get the desktop session's environment. Stopping ends the pane
-        # this may run in, so a transient unit does the work.
-        if [[ $# -eq 2 && $1 == server && $2 == restart ]]; then
-          echo 'herdr: restarting the server through systemd; run herdr to reattach'
-          # shellcheck disable=SC2016 # expanded by the transient unit's bash
-          exec systemd-run --user --quiet --collect --setenv=PATH="$PATH" -- ${pkgs.bash}/bin/bash -c '
-            "$1" server stop || true
-            for _ in $(seq 100); do
-              "$2" status server 2>/dev/null | grep -qx "status: running" || break
-              sleep 0.1
-            done
-            systemctl --user start herdr.service
-          ' _ "$(readlink -f "$0")" ${lib.getExe cfg.package}
-        fi
-
-        if [[ $# -eq 2 && $1 == server && $2 == stop ]]; then
-          socket=$(${lib.getExe cfg.package} status server | awk '$1 == "socket:" {print $2}')
-          [[ -n $socket ]] || { echo 'herdr: cannot find server socket; refusing to stop' >&2; exit 1; }
-
-          # The pane exits during stop, so terminate its detached Emacs daemons first.
-          for pid in $(pgrep -u "$(id -u)" -f -- '--daemon=em-' || true); do
-            grep -zFxq "HERDR_SOCKET_PATH=$socket" "/proc/$pid/environ" 2>/dev/null || continue
-            grep -zEq '^(TMUX|TMUX_PANE)=' "/proc/$pid/environ" 2>/dev/null && continue
-            grep -zEq '^--daemon=em-[[:xdigit:]]{24}$' "/proc/$pid/cmdline" 2>/dev/null || continue
-            kill "$pid" 2>/dev/null || true
-          done
-        fi
-
-        # A bare client that finds no server starts one with this shell's
-        # environment. Over SSH that means SSH_CONNECTION and no WAYLAND_DISPLAY,
-        # so image paste fails in every pane. Start the user unit instead, which
-        # carries the desktop session's environment, and wait for it.
-        running() { ${lib.getExe cfg.package} status server 2>/dev/null | grep -qx 'status: running'; }
-        if [[ $# -eq 0 ]] && ! running && systemctl --user start herdr.service 2>/dev/null; then
-          for _ in $(seq 50); do
-            running && break
-            sleep 0.1
-          done
-        fi
-
-        # Another host's Herdr (gem, kit, cog) attaches through this bridge, and
-        # the bridge starts a missing server with the SSH session's environment.
-        # After a reboot that happens before login. Start the unit instead, which
-        # on a desktop waits for the graphical session, and refuse until then so
-        # the remote client retries rather than owning the server.
-        if [[ ''${1-} == remote-client-bridge ]] && ! running; then
-          if systemctl --user start herdr.service 2>/dev/null; then
-            for _ in $(seq 50); do
-              running && break
-              sleep 0.1
-            done
-          fi
-          if ! running; then
-            echo "herdr: no server on $HOSTNAME yet; desktop hosts start it at login" >&2
-            exit 1
-          fi
-        fi
-
-        exec ${lib.getExe cfg.package} "$@"
-      '';
-  };
+  # Herdr app themes from the same Stylix light/dark pair as the desktop
+  # theme, and a see-through copy of the app's own main layout that uses them.
+  pair = osConfig.programs.stylix-theme-toggle or {enable = false;};
+  stylix = config.stylix.enable && pair.enable;
+  theme = mode: let
+    colors = (config.stylix.base16.mkSchemeAttrs pair."${mode}Scheme").override config.stylix.override;
+    hex = name: "#${colors.${name}}";
+  in
+    json.generate "herdr-app-stylix-${mode}.json" {
+      # Kitty's base16 mapping, so terminals match the TUI in kitty.
+      background = hex "base00";
+      foreground = hex "base05";
+      selection = hex "base03";
+      cursor = hex "base05";
+      ansi = map hex ["base00" "base08" "base0B" "base0A" "base0D" "base0E" "base0C" "base05" "base02" "base08" "base0B" "base0A" "base0D" "base0E" "base0C" "base07"];
+      # The app paints several of these layers over each other. These alphas,
+      # with the layout's terminal_opacity, put terminals and the sidebar at
+      # about kitty's 0.85 over Hyprland's blur, and pane headers at 0.7
+      # (measured in a sandbox).
+      colors = {
+        canvas = hex "base00" + "4d";
+        chrome = hex "base00" + "8a";
+        background = hex "base00" + "40";
+        # Secondary text one palette step up, to stay readable over a busy
+        # wallpaper; the app's own mixes fade toward the translucent panels.
+        muted = hex "base05";
+        dim = hex "base04";
+      };
+    };
+  # Stylix fonts: sans for the app's own interface, mono for terminals.
+  # Stylix sizes are points; the app's are pixels at zoom 1. The interface
+  # has no size setting of its own.
+  fonts = let
+    inherit (config.stylix) fonts;
+  in
+    lib.optionalAttrs (config.stylix.enable or false) {
+      font = fonts.monospace.name;
+      ui_font = fonts.sansSerif.name;
+      font_size = fonts.sizes.terminal * 4.0 / 3;
+    };
+  # Alt+Z, then one of these keys, through Edger's prefix popup, which waits
+  # for the key and shows this list. Values are keys.json actions. Release
+  # Alt first: Alt+U and the like are Edger's own keys.
+  prefix =
+    {
+      "?" = "app.help";
+      "s" = "app.settings";
+      "." = "space.rename";
+      "shift-d" = "space.close";
+      "d" = "window.close";
+      "," = "tab.rename";
+      "shift-x" = "tab.close";
+      "[" = "tab.prev";
+      "]" = "tab.next";
+      "{" = {
+        command = "tab.move";
+        args.by = -1;
+      };
+      "}" = {
+        command = "tab.move";
+        args.by = 1;
+      };
+      "m" = "edger.copy";
+      "u" = "pane.split:down";
+      "i" = "pane.split:right";
+      "h" = "pane.go:left";
+      "j" = "pane.go:down";
+      "k" = "pane.go:up";
+      "l" = "pane.go:right";
+      "shift-h" = "pane.swap:left";
+      "shift-j" = "pane.swap:down";
+      "shift-k" = "pane.swap:up";
+      "shift-l" = "pane.swap:right";
+      "z" = "pane.zoom";
+      "b" = "layout.toggle:sidebar";
+    }
+    // builtins.listToAttrs (map (n: lib.nameValuePair (toString n) "tab.select:${toString n}") (lib.range 1 9));
+  layouts = pkgs.runCommand "herdr-app-stylix-layouts" {nativeBuildInputs = [pkgs.jq];} ''
+    mkdir "$out"
+    jq '. + {window_blur: true, terminal_opacity: 0.40, theme: {light: "stylix-light", dark: "stylix-dark"}}' \
+      ${app.src}/defaults/layouts/main.json > "$out/stylix.json"
+  '';
 in {
-  # Keybindings and plugins each have their own file beside this one.
-  imports = flake.lib.ls ./.;
+  imports = [./core.nix];
 
-  # Avoid duplicate options when release-26.11 imports the upstream module.
+  # Avoid duplicate options when a Home Manager release brings its own
+  # programs.herdr, which configures the TUI.
   disabledModules = ["programs/herdr.nix"];
 
   options.programs.herdr = {
-    enable = lib.mkEnableOption "Herdr";
-
-    package = mkOption {
-      type = lib.types.nullOr lib.types.package;
-      default = perSystem.herdr.default;
-      description = "The Herdr package to use.";
-    };
-
-    workers = mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [];
-      example = ["kit" "cog" "lux"];
-      description = ''
-        Hosts whose Herdr servers run agents. The desktop agent roster polls
-        each one over SSH, and always includes this host. Headless workers
-        start their server at boot.
-      '';
-    };
-
-    settings = mkOption {
-      inherit (tomlFormat) type;
+    enable = lib.mkEnableOption "the Herdr desktop app, with herdr-core";
+    settings = lib.mkOption {
+      inherit (json) type;
       default = {};
-      description = ''
-        Configuration written to {file}`$XDG_CONFIG_HOME/herdr/config.toml`.
-        See <https://herdr.dev/docs/configuration/> for the full list of options.
-      '';
+      description = "Herdr app settings to merge into its writable settings.json.";
     };
   };
 
-  config = mkIf cfg.enable {
-    home.packages = [herdr];
+  config = lib.mkMerge [
+    (lib.mkIf cfg.enable {
+      # A window app; a headless host runs herdr-core alone (services.herdr).
+      assertions = [
+        {
+          assertion = config.desktop.enable or false;
+          message = "programs.herdr is the Herdr desktop app; enable services.herdr alone on a host without a desktop";
+        }
+      ];
+      services.herdr.enable = true;
+      home.packages = [app];
+      persist.storage.directories = [
+        {
+          directory = ".config/herdr-app";
+          mode = "0700";
+        }
+      ];
 
-    # Herdr stores mutable local data beside Home Manager's generated config.toml,
-    # and saved SSH machines under its state directory.
-    persist.storage.directories = [".config/herdr" ".local/state/herdr/client"];
+      # Select it once with `herdr-app do layout.switch --name stylix`.
+      xdg.configFile."herdr-app/themes/stylix-dark.json" = lib.mkIf stylix {source = theme "dark";};
+      xdg.configFile."herdr-app/themes/stylix-light.json" = lib.mkIf stylix {source = theme "light";};
+      xdg.configFile."herdr-app/layouts/stylix.json" = lib.mkIf stylix {source = "${layouts}/stylix.json";};
 
-    xdg.configFile."herdr/config.toml" = mkIf (cfg.settings != {}) {
-      source = tomlFormat.generate "herdr-config.toml" cfg.settings;
-      onChange = "${cfg.package} server reload-config || true";
-    };
+      # Link the whole directory so the app accepts the mod's relative imports.
+      xdg.configFile."herdr-app/mods/edger".source = edgerMod;
+      xdg.configFile."herdr-app/edger.json".source = json.generate "herdr-app-edger.json" {inherit prefix;};
+      xdg.configFile."herdr-app/keys.json".source = let
+        overrides = json.generate "hc-key-overrides.json" {
+          global =
+            {
+              "alt-h" = "edger.left";
+              "alt-j" = "edger.down";
+              "alt-k" = "edger.up";
+              "alt-l" = "edger.right";
+              "alt-u" = "edger.horizontal";
+              "alt-i" = "edger.vertical";
+              "alt-w" = "edger.close";
+              # Always a Herdr split, even with an editor focused.
+              "alt-shift-u" = "pane.split:down";
+              "alt-shift-i" = "pane.split:right";
 
-    # Run the server at login so it survives reboots and closed clients. Clients
-    # and the Org dispatcher attach to it. Headless workers start it at boot
-    # through user lingering; other headless hosts start it on first attach.
-    systemd.user.services.herdr = let
-      # Skip when a client already started a server outside this unit.
-      notRunning = pkgs.self.mkScript {
-        name = "herdr-not-running";
-        path = [cfg.package pkgs.gnugrep];
-        text = ''
-          status=$(herdr status server)
-          ! grep -qx 'status: running' <<<"$status"
+              # Alt+Z opens Edger's prefix popup (edger.json).
+              "alt-z" = "edger.prefix";
+              "alt-shift-n" = "space.new";
+              "alt-shift-t" = "tab.new";
+              "alt-shift-w" = "pane.close";
+              "alt-a" = "mod.open:picker";
+
+              # Edger resizes editor windows first, then Herdr panes. The app
+              # defaults would swap panes instead.
+              "alt-shift-h" = "edger.resize-left";
+              "alt-shift-j" = "edger.resize-down";
+              "alt-shift-k" = "edger.resize-up";
+              "alt-shift-l" = "edger.resize-right";
+
+              # Super, not Ctrl, so programs in panes keep every Ctrl key.
+              # These match kitty's Super keys where it has them.
+              "super-=" = "app.zoom_in";
+              "super-+" = "app.zoom_in";
+              "super--" = "app.zoom_out";
+              "super-0" = "app.zoom_reset";
+              "super-[" = "tab.prev";
+              "super-]" = "tab.next";
+              "super-t" = "tab.new";
+              "super-shift-p" = "app.palette";
+              "super-?" = "app.help";
+              "super-shift-/" = "app.help";
+              "super-shift-?" = "app.help";
+            }
+            // builtins.listToAttrs (map (n: lib.nameValuePair "super-${toString n}" "tab.select:${toString n}") (lib.range 1 9));
+          terminal = {
+            "super-c" = "terminal.copy";
+            "super-v" = "terminal.paste";
+            "super-g" = "terminal.search";
+          };
+        };
+      in
+        pkgs.runCommand "herdr-app-keys.json" {nativeBuildInputs = [pkgs.jq];} ''
+          # Drop the app's Ctrl keys, so programs get Ctrl+digits, Ctrl+arrows
+          # and the rest unchanged. Ctrl+V stays: it pastes only an image and
+          # otherwise reaches the program.
+          jq -s '
+            (.[0]
+              | .global |= with_entries(select(.key | test("ctrl") | not))
+              | .terminal |= with_entries(select(.key == "ctrl-v" or (.key | test("ctrl") | not))))
+            * .[1]
+          ' ${app.src}/defaults/keys.json ${overrides} > "$out"
         '';
-      };
-    in {
-      Unit = {
-        Description = "Herdr server";
-        After = lib.optional config.desktop.enable "graphical-session.target";
-        # Panes need the desktop's environment, so never start before login.
-        Requisite = lib.optional config.desktop.enable "graphical-session.target";
-        # Restarting kills every pane and agent; new versions wait for login.
-        X-RestartIfChanged = false;
-      };
-      Service = {
-        ExecCondition = lib.getExe notRunning;
-        ExecStart = "${lib.getExe herdr} server";
-        ExecStop = "${lib.getExe herdr} server stop";
-        Restart = "on-failure";
-        RestartSec = 5;
-      };
-      Install.WantedBy =
-        if config.desktop.enable
-        then ["graphical-session.target"]
-        else lib.optional (lib.elem config.networking.hostName cfg.workers) "default.target";
-    };
-  };
+
+      # The app writes both files, so leave them writable and update only managed entries.
+      home.activation.hcAppSettings = let
+        # The app's 150 ms focus delay lets the pointer sweep across panes.
+        settings = json.generate "hc-app-settings.json" ({
+            core = lib.getExe core;
+            focus_follows_mouse = true;
+          }
+          // fonts
+          // cfg.settings);
+        configure = perSystem.self.mkScript {
+          name = "hc-app-settings";
+          path = [pkgs.jq];
+          text = ''
+            dir="$1"
+            mkdir -p -m 700 "$dir"
+            update() (
+              file="$1"
+              shift
+              tmp=$(mktemp "$file.XXXXXX")
+              trap 'rm -f "$tmp"' EXIT
+              { if [[ -e "$file" ]]; then cat "$file"; else printf '{}\n'; fi; } |
+                jq -se "$@" > "$tmp"
+              mv -T "$tmp" "$file"
+            )
+            update "$dir/settings.json" --slurpfile settings ${settings} '.[0] * $settings[0]'
+
+            # The app opens kept windows on startup and on layout changes.
+            layouts=()
+            for layout in ${app.src}/defaults/layouts/*.json ${lib.optionalString stylix "${layouts}/*.json"} "$dir"/layouts/*.json; do
+              [[ ! -f "$layout" ]] || layouts+=("$(basename "$layout" .json)")
+            done
+            update "$dir/windows.json" --slurpfile mod ${edgerMod}/mod.json \
+              'reduce $ARGS.positional[] as $layout (.[0]; .kept[$layout].edger = ($mod[0].overlay + {mod: "edger"}))' \
+              --args "''${layouts[@]}"
+          '';
+        };
+      in
+        lib.hm.dag.entryAfter ["writeBoundary"] ''
+          run ${lib.getExe configure} ${lib.escapeShellArg "${config.xdg.configHome}/herdr-app"}
+        '';
+    })
+
+    # Hyprland's Super+W would close the whole app window. In the app it is
+    # Alt+W instead, so Edger closes the editor window, pane, tab or space.
+    (lib.optionalAttrs (options.services ? keyd) (lib.mkIf cfg.enable {
+      services.keyd.windows.herdr-app."super.w" = "A-w";
+    }))
+  ];
 }

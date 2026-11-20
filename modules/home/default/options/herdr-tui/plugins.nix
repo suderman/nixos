@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  cfg = config.programs.herdr;
+  cfg = config.programs.herdr-tui;
 in {
   config = lib.mkIf cfg.enable {
     # Plugin downloads must not block Home Manager activation during boot.

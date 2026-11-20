@@ -2,20 +2,19 @@
   config,
   lib,
   osConfig,
-  perSystem,
   pkgs,
   ...
 }: let
   cfg = config.wayland.windowManager.hyprland.waybar.herdr;
   # Agents run in herdr-core; the Herdr app shows them.
-  hc = "${perSystem.herdr-nix.herdr-core}/bin/hc";
+  hc = "${config.services.herdr.package}/bin/hc";
   inherit (lib) mkIf mkMerge mkOption types;
 
   icon = "󰚩";
 
   # This host first, then the other workers.
   self = config.networking.hostName;
-  hosts = [self] ++ lib.remove self config.programs.herdr.workers;
+  hosts = [self] ++ lib.remove self config.services.herdr.machines;
 
   tailscale =
     if osConfig.services.tailscale.enable or false
@@ -410,8 +409,8 @@ in {
     {
       assertions = [
         {
-          assertion = config.programs.hc.enable;
-          message = "waybar.herdr requires programs.hc (herdr-core)";
+          assertion = config.services.herdr.enable;
+          message = "waybar.herdr requires services.herdr (herdr-core)";
         }
       ];
 

@@ -5,7 +5,7 @@
   flake,
   ...
 }: let
-  cfg = config.programs.herdr;
+  cfg = config.programs.herdr-tui;
 
   edger = pkgs.self.mkScript {
     name = "edger";
@@ -49,7 +49,7 @@ in {
     );
 
     # Home Manager owns config.toml, so Herdr cannot record onboarding itself.
-    programs.herdr.settings = {
+    programs.herdr-tui.settings = {
       onboarding = false;
       ui = {
         toast.delivery = "herdr";

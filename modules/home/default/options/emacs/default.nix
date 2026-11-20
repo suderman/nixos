@@ -37,7 +37,7 @@
 
   workspaceClient = pkgs.self.mkScript {
     name = "em-workspace-client";
-    path = [cfg.finalPackage config.programs.herdr.package perSystem.herdr-nix.herdr-core pkgs.tmux pkgs.jq pkgs.coreutils pkgs.util-linux pkgs.procps pkgs.gnugrep];
+    path = [cfg.finalPackage config.programs.herdr-tui.package config.services.herdr.package pkgs.tmux pkgs.jq pkgs.coreutils pkgs.util-linux pkgs.procps pkgs.gnugrep];
     text = ''
       ${builtins.readFile ./terminal-setup.sh}
       EMACS_CLIENT=${lib.getBin cfg.finalPackage}/bin/emacsclient
@@ -126,22 +126,22 @@ in {
       '');
 
     # Relinking the same plugin ID replaces the previous store path.
-    home.activation.emHerdrPlugin = mkIf (config.programs.herdr.enable && config.programs.herdr.package != null) (
+    home.activation.emHerdrPlugin = mkIf (config.programs.herdr-tui.enable && config.programs.herdr-tui.package != null) (
       lib.hm.dag.entryAfter ["writeBoundary"] ''
-        $DRY_RUN_CMD ${lib.getExe config.programs.herdr.package} plugin link ${herdrPlugin} >/dev/null
+        $DRY_RUN_CMD ${lib.getExe config.programs.herdr-tui.package} plugin link ${herdrPlugin} >/dev/null
       ''
     );
 
     # The Herdr app's spaces have no close event in hc; stop the em daemon of a
     # space with no live terminals left.
-    systemd.user.services.em-sweep-hc = mkIf (config.programs.hc.enable or false) {
+    systemd.user.services.em-sweep-hc = mkIf config.services.herdr.enable {
       Unit.Description = "Stop Emacs daemons of closed Herdr app spaces";
       Service = {
         Type = "oneshot";
         ExecStart = "${lib.getExe workspaceClient} --sweep-hc";
       };
     };
-    systemd.user.timers.em-sweep-hc = mkIf (config.programs.hc.enable or false) {
+    systemd.user.timers.em-sweep-hc = mkIf config.services.herdr.enable {
       Unit.Description = "Look for closed Herdr app spaces every five minutes";
       Timer.OnCalendar = "*:0/5";
       Install.WantedBy = ["timers.target"];

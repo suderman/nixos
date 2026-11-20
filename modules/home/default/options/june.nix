@@ -5,7 +5,6 @@
   config,
   lib,
   flake,
-  perSystem,
   ...
 }: let
   cfg = config.programs.june;
@@ -33,8 +32,7 @@ in {
       # June works through pi and Claude agents in herdr-core (hc), and Org's own Emacs sets task states and dates for
       # her and her agents. A client-only host needs hc and Emacs for herdr-link and org-edit, but no pi.
       programs.pi-coding-agent.enable = lib.mkIf (cfg.daemon.enable || cfg.dispatch.enable) true;
-      programs.hc.enable = true;
-      programs.june.hcPackage = lib.mkDefault perSystem.herdr-nix.herdr-core;
+      services.herdr.enable = true;
       # The same ntfy topic the Herdr TUI's herdr-ntfy plugin posted to.
       programs.june.notify.url = lib.mkDefault "https://ntfy.hub/herdr";
       programs.emacs.enable = true;

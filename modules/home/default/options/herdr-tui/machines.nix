@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  cfg = config.programs.herdr;
+  cfg = config.programs.herdr-tui;
   self = config.networking.hostName;
   machines = lib.remove self cfg.workers;
 
