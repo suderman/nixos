@@ -37,7 +37,7 @@
 
   workspaceClient = pkgs.self.mkScript {
     name = "em-workspace-client";
-    path = [cfg.finalPackage config.programs.herdr.package pkgs.tmux pkgs.jq pkgs.coreutils pkgs.util-linux pkgs.procps pkgs.gnugrep];
+    path = [cfg.finalPackage config.programs.herdr.package perSystem.herdr-nix.herdr-core pkgs.tmux pkgs.jq pkgs.coreutils pkgs.util-linux pkgs.procps pkgs.gnugrep];
     text = ''
       ${builtins.readFile ./terminal-setup.sh}
       EMACS_CLIENT=${lib.getBin cfg.finalPackage}/bin/emacsclient
@@ -132,6 +132,21 @@ in {
       ''
     );
 
+    # The Herdr app's spaces have no close event in hc; stop the em daemon of a
+    # space with no live terminals left.
+    systemd.user.services.em-sweep-hc = mkIf (config.programs.hc.enable or false) {
+      Unit.Description = "Stop Emacs daemons of closed Herdr app spaces";
+      Service = {
+        Type = "oneshot";
+        ExecStart = "${lib.getExe workspaceClient} --sweep-hc";
+      };
+    };
+    systemd.user.timers.em-sweep-hc = mkIf (config.programs.hc.enable or false) {
+      Unit.Description = "Look for closed Herdr app spaces every five minutes";
+      Timer.OnCalendar = "*:0/5";
+      Install.WantedBy = ["timers.target"];
+    };
+
     # Stop a session's em daemon when tmux closes the session. setsid lets the
     # stop outlive a server that exits with its last session.
     programs.tmux.extraConfig = ''
@@ -171,7 +186,8 @@ in {
 
     # Every host keeps a shared default daemon: desktops start it with the
     # graphical session, headless hosts at boot through user lingering.
-    # tmux and Herdr sessions use em's per-workspace daemons instead.
+    # tmux sessions, Herdr workspaces and Herdr app spaces use em's
+    # per-workspace daemons instead.
     services =
       {
         emacs = {

@@ -83,7 +83,7 @@ in {
             for process in window.child.foreground_processes:
                 cmdline = process["cmdline"] or []
                 program = os.path.basename(cmdline[0]) if cmdline else ""
-                if program in {"pi", "opencode", "june", "herdr"} or (
+                if program in {"pi", "opencode", "june", "herdr", "hc"} or (
                     program == "node"
                     and any(arg.endswith("/june/src/cli.ts") for arg in cmdline[1:])
                 ):

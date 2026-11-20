@@ -28,6 +28,10 @@
   # Only kit archives old finished Org headings, so Syncthing sees one writer.
   programs.emacs.archiveOrg = true;
 
+  # Only kit follows hc events for agent notices; its core has cog and lux added.
+  programs.june.notify.watch = true;
+  programs.hc.machines = ["cog" "lux"];
+
   # Programs
   programs.davinci-resolve = {
     enable = true;

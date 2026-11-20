@@ -108,9 +108,34 @@
     jq '. + {window_blur: true, terminal_opacity: 0.40, theme: {light: "stylix-light", dark: "stylix-dark"}}' \
       ${app.src}/defaults/layouts/main.json > "$out/stylix.json"
   '';
+  hc = "${core}/bin/hc";
+  desktop = config.desktop.enable or false;
+
+  # Add each listed host once; saved machines are skipped, so later runs need
+  # no SSH. machine add never installs hc there without a terminal to ask in.
+  addMachines = pkgs.self.mkScript {
+    name = "hc-machines";
+    path = [pkgs.jq];
+    text = ''
+      saved=$(${hc} machine ls --json)
+      status=0
+      for machine in ${lib.escapeShellArgs cfg.machines}; do
+        if ! jq -e --arg name "$machine" 'any(.machines[]?; .name == $name)' <<<"$saved" >/dev/null; then
+          ${hc} machine add "$machine" </dev/null || status=1
+        fi
+      done
+      exit "$status"
+    '';
+  };
 in {
   options.programs.hc = {
     enable = lib.mkEnableOption "Herdr Core (hc)";
+    machines = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      example = ["cog" "lux"];
+      description = "Other hosts this core adds as hc machines, reached over SSH, so their terminals show here as HOST/t7.";
+    };
     app = {
       enable = lib.mkEnableOption "the Herdr desktop app and Herdr Core";
       settings = lib.mkOption {
@@ -144,6 +169,39 @@ in {
           mode = "0700";
         }
       ];
+
+      # Any hc command starts a core when none runs, and the core passes the
+      # environment of whoever started it to every terminal: an SSH session
+      # without WAYLAND_DISPLAY, or a service's narrow PATH. Start it here first,
+      # from the login session, after the desktop's environment is imported.
+      systemd.user.services.hc = {
+        Unit = {
+          Description = "Start herdr-core with the login session's environment";
+          After = lib.optional desktop "graphical-session.target";
+        };
+        Service = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          ExecStart = "${hc} server start";
+        };
+        Install.WantedBy = [(if desktop then "graphical-session.target" else "default.target")];
+      };
+
+      # An asleep or offline host retries later instead of blocking login.
+      systemd.user.services.hc-machines = lib.mkIf (cfg.machines != []) {
+        Unit = {
+          Description = "Add the other hosts as hc machines";
+          After = ["hc.service"];
+          StartLimitIntervalSec = 0;
+        };
+        Service = {
+          Type = "oneshot";
+          ExecStart = lib.getExe addMachines;
+          Restart = "on-failure";
+          RestartSec = 300;
+        };
+        Install.WantedBy = ["default.target"];
+      };
     })
 
     (lib.mkIf cfg.app.enable {

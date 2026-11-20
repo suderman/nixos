@@ -2,15 +2,13 @@
   config,
   lib,
   osConfig,
+  perSystem,
   pkgs,
   ...
 }: let
   cfg = config.wayland.windowManager.hyprland.waybar.herdr;
-  herdrPackage = config.programs.herdr.package;
-  herdr =
-    if herdrPackage == null
-    then "herdr"
-    else lib.getExe herdrPackage;
+  # Agents run in herdr-core; the Herdr app shows them.
+  hc = "${perSystem.herdr-nix.herdr-core}/bin/hc";
   inherit (lib) mkIf mkMerge mkOption types;
 
   icon = "󰚩";
@@ -28,7 +26,7 @@
     name = "herdr-status-bridge";
     path = with pkgs; [coreutils jq openssh];
     env = {
-      HERDR_STATUS_HERDR = herdr;
+      HERDR_STATUS_HC = hc;
       HERDR_STATUS_INTERVAL = toString cfg.interval;
       HERDR_STATUS_HOSTS = toString hosts;
       HERDR_STATUS_TAILSCALE = tailscale;
@@ -59,8 +57,7 @@
           case "$1" in
           *"Permission denied"*) echo "SSH key locked" ;;
           *"timed out"* | *"No route"* | *"Could not resolve"* | *"Connection refused"* | *"Network is unreachable"*) echo "unreachable" ;;
-          *"command not found"*) echo "herdr not installed" ;;
-          *"herdr"*"socket"* | *"server"*"not running"*) echo "herdr server not running" ;;
+          *"command not found"*) echo "hc not installed" ;;
           *) tr -d '\r' <<<"$1" | head -n 1 ;;
           esac
         }
@@ -74,17 +71,21 @@
             return
           fi
 
+          # This core lists its own terminals as t7 and an added, connected
+          # machine's as HOST/t7; any other host is asked over SSH.
           if [[ $host == "''${hosts[0]}" ]]; then
-            raw="$("$HERDR_STATUS_HERDR" api snapshot 2>&1)"
+            raw="$("$HERDR_STATUS_HC" ls --json 2>&1)" prefix=""
+          elif [[ " $machines " == *" $host "* ]]; then
+            raw="$("$HERDR_STATUS_HC" ls --json 2>&1)" prefix="$host/"
           else
             # Reuses the ControlMaster from ~/.ssh/config, so a warm poll is cheap.
-            raw="$(timeout 10 ssh -o BatchMode=yes -o ConnectTimeout=3 "$host" herdr api snapshot 2>&1)"
+            raw="$(timeout 10 ssh -o BatchMode=yes -o ConnectTimeout=3 "$host" hc ls --json 2>&1)" prefix=""
           fi || {
             host_error "$host" "$(ssh_reason "$raw")"
             return
           }
 
-          if ! normalized="$(printf '%s\n' "$raw" | jq -c --arg host "$host" --argjson rank "$rank" '
+          if ! normalized="$(printf '%s\n' "$raw" | jq -c --arg host "$host" --argjson rank "$rank" --arg prefix "$prefix" '
             def text($value; $fallback):
               if $value == null or ($value | tostring | length) == 0
               then $fallback
@@ -99,34 +100,35 @@
               else 4
               end;
 
-            .result.snapshot as $snapshot |
-            ($snapshot.workspaces | map({key: .workspace_id, value: .}) | from_entries) as $workspaces |
-            ($snapshot.tabs | map({key: .tab_id, value: .}) | from_entries) as $tabs |
             {
               host: $host,
               ok: true,
-              agents: ($snapshot.agents | map(
+              agents: ([.terminals[]
+                | select(.state == "live")
+                | select(if $prefix == "" then (.address | contains("/") | not) else (.address | startswith($prefix)) end)
+                | select((.agent // "" | test("^(pi|claude|claude-code|codex)$")) or .status != null)]
+                | map(
                 . as $agent |
-                ($agent.agent_status // "unknown") as $status |
-                ($workspaces[$agent.workspace_id] // {}) as $workspace |
-                ($tabs[$agent.tab_id] // {}) as $tab |
+                ($agent.status // "unknown") as $status |
+                (($agent.where // "") | split(" / ")) as $where |
                 (($agent.cwd // "") | split("/") | map(select(length > 0)) | last // "home") as $cwd_label |
                 {
                   host: $host,
                   hostRank: $rank,
-                  paneId: ($agent.pane_id // ""),
-                  terminalId: ($agent.terminal_id // ""),
-                  workspaceId: ($agent.workspace_id // ""),
-                  workspace: text($workspace.label; $cwd_label),
-                  tabId: ($agent.tab_id // ""),
-                  tab: text($tab.label; text($tab.number; "tab")),
-                  agentLabel: text($agent.display_agent; text($agent.agent; "agent")),
+                  # The hc terminal address on its own machine, as herdr: links write it.
+                  paneId: ($agent.address | ltrimstr($prefix)),
+                  terminalId: ($agent.address | ltrimstr($prefix)),
+                  workspaceId: text($where[0]; ""),
+                  workspace: text($where[0]; $cwd_label),
+                  tabId: text($where[1]; ""),
+                  tab: text($where[1]; "hidden"),
+                  agentLabel: text($agent.agent; "agent"),
                   status: $status,
-                  statusLabel: text($agent.state_labels[$status]; $status),
-                  title: text($agent.title; text($agent.terminal_title_stripped; "")),
-                  cwd: ($agent.foreground_cwd // $agent.cwd // ""),
-                  focused: ($agent.focused // false),
-                  stateChangeSeq: ($agent.state_change_seq // 0),
+                  statusLabel: $status,
+                  title: "",
+                  cwd: ($agent.cwd // ""),
+                  focused: false,
+                  stateChangeSeq: ($agent.turn // 0),
                   priority: priority($status)
                 }
               ))
@@ -150,6 +152,10 @@
             offline="$("$HERDR_STATUS_TAILSCALE" status --json 2>/dev/null |
               jq -r '[.Peer[]? | select(.Online == false) | .DNSName | split(".")[0]] | join(" ")')" || offline=""
           fi
+
+          # Machines this core reaches itself, read from its own list.
+          machines="$("$HERDR_STATUS_HC" machine ls --json 2>/dev/null |
+            jq -r '[.machines[]? | select(.state == "connected") | .name] | join(" ")')" || machines=""
 
           # Poll every host at once so an unreachable one costs its timeout, not a turn.
           for rank in "''${!hosts[@]}"; do
@@ -299,27 +305,39 @@
     name = "herdr-agent-open";
     path = with pkgs; [coreutils jq kitty openssh];
     env = {
-      HERDR_STATUS_HERDR = herdr;
+      HERDR_STATUS_HC = hc;
       HERDR_STATUS_SELF = self;
     };
     text =
       # bash
       ''
-        host="''${1:?Usage: herdr-agent-open HOST PANE_ID}"
-        target="''${2:?Usage: herdr-agent-open HOST PANE_ID}"
+        host="''${1:?Usage: herdr-agent-open HOST TERMINAL}"
+        target="''${2:?Usage: herdr-agent-open HOST TERMINAL}"
 
-        # Remote attach runs over SSH; Herdr does not forward interactive attach.
-        if [[ $host == "$HERDR_STATUS_SELF" ]]; then
-          attach=("$HERDR_STATUS_HERDR" agent attach "$target")
-          "$HERDR_STATUS_HERDR" agent focus "$target" >/dev/null
+        # This core's terminals, and an added machine's as HOST/t7, open in the
+        # Herdr app when it runs; anything else attaches in Kitty.
+        address=$target
+        if [[ $host != "$HERDR_STATUS_SELF" ]]; then
+          if "$HERDR_STATUS_HC" machine ls --json 2>/dev/null |
+            jq -e --arg host "$host" 'any(.machines[]?; .name == $host and .state == "connected")' >/dev/null; then
+            address="$host/$target"
+          else
+            address=
+          fi
+        fi
+        if [[ -n $address ]] && command -v herdr-app >/dev/null && herdr-app status >/dev/null 2>&1 &&
+          herdr-app 'do' agent.focus --terminal "$address" >/dev/null 2>&1; then
+          hyprctl dispatch 'hl.dsp.focus({ window = "class:herdr-app" })' >/dev/null 2>&1 || true
+          exit 0
+        fi
+        if [[ -n $address ]]; then
+          attach=("$HERDR_STATUS_HC" attach "$address")
         else
-          attach=(ssh -t "$host" herdr agent attach "$target")
-          ssh -o BatchMode=yes -o ConnectTimeout=3 "$host" herdr agent focus "$target" >/dev/null
+          attach=(ssh -t "$host" hc attach "$target")
         fi
 
-        # Direct attach is exclusive. Reuse its Kitty instead of opening an
-        # attachment that immediately exits. Pane IDs repeat across hosts, so
-        # match the whole attach command.
+        # Reuse a Kitty already attached to this terminal. Addresses repeat
+        # across hosts, so match the whole attach command.
         window="$(
           hyprctl -j clients | jq -r '
             .[]
@@ -349,12 +367,11 @@
 
   openHerdr = pkgs.self.mkScript {
     name = "herdr-open";
-    path = with pkgs; [coreutils kitty];
-    env.HERDR_STATUS_HERDR = herdr;
+    path = with pkgs; [coreutils];
     text =
       # bash
       ''
-        nohup kitty --class=Herdr --title=Herdr "$HERDR_STATUS_HERDR" >/dev/null 2>&1 &
+        nohup herdr-app >/dev/null 2>&1 &
       '';
   };
 
@@ -393,8 +410,8 @@ in {
     {
       assertions = [
         {
-          assertion = config.programs.herdr.enable && herdrPackage != null;
-          message = "waybar.herdr requires programs.herdr with a package";
+          assertion = config.programs.hc.enable;
+          message = "waybar.herdr requires programs.hc (herdr-core)";
         }
       ];
 

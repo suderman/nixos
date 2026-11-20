@@ -12,6 +12,8 @@
   programs.nf.enable = true;
   programs.buzz.enable = true;
   programs.hc.app.enable = true;
+  # cog shows kit's agents beside its own.
+  programs.hc.machines = ["kit"];
 
   # Gaming
   programs.steam.enable = true;

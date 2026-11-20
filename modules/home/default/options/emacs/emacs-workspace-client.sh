@@ -3,7 +3,7 @@
 # are supplied by its Nix wrapper.
 set -euo pipefail
 
-# Herdr and tmux reuse short IDs when their servers restart. Socket birth time
+# Herdr, hc and tmux can reuse short IDs when their servers restart. Socket birth time
 # and boot ID keep a surviving Emacs daemon from being mistaken for a new one.
 daemon_name() {
   local socket=$1 identity=$2 birth boot hash
@@ -71,6 +71,24 @@ case ${1-} in
   esac
   exit
   ;;
+--sweep-hc)
+  # The Herdr app's spaces have no close event in hc, so a timer stops the
+  # daemon of each space no live terminal shows any more. A daemon records its
+  # space and hc socket in its environment when em starts it.
+  for pid in $(pgrep -u "$(id -u)" -f -- '--daemon=em-' || true); do
+    space=$(grep -zoE '^EM_HC_SPACE=.+$' "/proc/$pid/environ" 2>/dev/null | tr -d '\0') || continue
+    space=${space#EM_HC_SPACE=}
+    socket=$(grep -zoE '^HC_TERMINAL_SOCKET=.+$' "/proc/$pid/environ" 2>/dev/null | tr -d '\0') || continue
+    socket=${socket#HC_TERMINAL_SOCKET=}
+    name=$(grep -zoE '^--daemon=em-[[:xdigit:]]{24}$' "/proc/$pid/cmdline" 2>/dev/null | tr -d '\0') || continue
+    name=${name#--daemon=}
+    # A core that does not answer is no evidence the space closed.
+    live=$(HC_SOCKET=$socket hc ls --json --label "herdr.space=$space" 2>/dev/null |
+      jq -r '[.terminals[]? | select(.state == "live")] | length') || continue
+    [[ $live == 0 ]] && stop_daemon "$name"
+  done
+  exit
+  ;;
 esac
 
 mode=--tty
@@ -126,6 +144,24 @@ elif [[ ${HERDR_ENV-} == 1 || -n ${HERDR_PANE_ID-}${HERDR_SOCKET_PATH-}${HERDR_W
   identity="herdr:$socket:$workspace"
   params=$(jq -nr --arg pane "$pane_id" --arg socket "$socket" \
     '"((edger-herdr-pane-id . \($pane|tojson)) (edger-herdr-socket-path . \($socket|tojson)))"')
+elif [[ -n ${HC_TERMINAL_ID-} ]]; then
+  # An hc terminal the Herdr app shows carries its space's ID. Each space gets
+  # its own daemon, as each Herdr workspace did; a hidden terminal uses the
+  # default one. Edger finds its pane through the terminal ID.
+  socket=${HC_TERMINAL_SOCKET:?em: HC_TERMINAL_SOCKET is required}
+  [[ -S $socket ]] || {
+    echo "em: hc socket is unavailable: $socket" >&2
+    exit 1
+  }
+  space=$(hc get --json "$HC_TERMINAL_ID" | jq -r '.labels["herdr.space"] // empty') || {
+    echo "em: cannot read hc terminal $HC_TERMINAL_ID" >&2
+    exit 1
+  }
+  params=$(jq -nr --arg terminal "$HC_TERMINAL_ID" '"((edger-hc-terminal-id . \($terminal|tojson)))"')
+  if [[ -n $space ]]; then
+    identity="hc:$socket:$space"
+    export EM_HC_SPACE=$space
+  fi
 fi
 
 # Outside a multiplexer, use the default daemon, which the emacs.service user
