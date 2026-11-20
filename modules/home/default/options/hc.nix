@@ -2,6 +2,7 @@
   config,
   flake,
   lib,
+  options,
   osConfig,
   perSystem,
   pkgs,
@@ -246,5 +247,11 @@ in {
           run ${lib.getExe configure} ${lib.escapeShellArg "${config.xdg.configHome}/herdr-app"}
         '';
     })
+
+    # Hyprland's Super+W would close the whole app window. In the app it is
+    # Alt+W instead, so Edger closes the editor window, pane, tab or space.
+    (lib.optionalAttrs (options.services ? keyd) (lib.mkIf cfg.app.enable {
+      services.keyd.windows.herdr-app."super.w" = "A-w";
+    }))
   ];
 }
