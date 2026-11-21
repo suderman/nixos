@@ -7,6 +7,20 @@
   ...
 }: let
   cfg = config.programs.claude-code;
+  launchClaude = ''
+    # Keep the daemon entrypoint and caller-selected permissions intact.
+    if [[ ''${1-} == daemon ]]; then
+      exec ${lib.getExe cfg.package} "$@"
+    fi
+    for arg in "$@"; do
+      case "$arg" in
+        --permission-mode|--permission-mode=*|--dangerously-skip-permissions|--allow-dangerously-skip-permissions)
+          exec ${lib.getExe cfg.package} "$@" ;;
+        --) break ;;
+      esac
+    done
+    exec ${lib.getExe cfg.package} --permission-mode bypassPermissions "$@"
+  '';
 
   directAccountWrapper = account:
     pkgs.self.mkScript {
@@ -21,7 +35,7 @@
           export CLAUDE_CONFIG_DIR="$HOME/.claude-${account}"
           export ANTHROPIC_MODEL=claude-opus-5-5
 
-          exec ${lib.getExe cfg.package} "$@"
+          ${launchClaude}
         '';
     };
 
@@ -43,7 +57,7 @@
         export ENABLE_CLAUDEAI_MCP_SERVERS=false
         unset ANTHROPIC_API_KEY CLAUDE_CODE_OAUTH_TOKEN
 
-        exec ${lib.getExe cfg.package} "$@"
+        ${launchClaude}
       '';
   };
 in {
@@ -316,7 +330,7 @@ in {
             CLAUDE_CODE_OAUTH_TOKEN ANTHROPIC_MODEL \
             CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY ENABLE_CLAUDEAI_MCP_SERVERS
 
-          exec ${lib.getExe cfg.package} "$@"
+          ${launchClaude}
         '';
     });
   };
