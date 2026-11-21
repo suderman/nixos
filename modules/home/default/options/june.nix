@@ -88,6 +88,12 @@ in {
     # Running tasks and settling headings must survive the root reset at boot.
     (lib.mkIf cfg.dispatch.enable {
       persist.scratch.directories = [".local/state/org-dispatch"];
+      # Each host where agents work tidies its own org-work folders weekly (june org-work --clean).
+      programs.june.orgWork = {
+        enable = lib.mkDefault true;
+        keep = ["%h/org/june/avatar" "%h/org/work/suderman/june/art.org"];
+        record = "%h/org/work/suderman/june/2026-11-21-org-work-cleanup/%H.org";
+      };
     })
   ]);
 }
