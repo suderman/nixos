@@ -1373,11 +1373,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795245897,
-        "narHash": "sha256-Ky1yooNvpQbWJsl1w3/0/GkNk7ONAbO253pzIfI5IUk=",
+        "lastModified": 1795246916,
+        "narHash": "sha256-XCTvjQca/G3wr8TMzRgANtdOScw1upfG2K7MOsgduL8=",
         "owner": "suderman",
         "repo": "june",
-        "rev": "1df38dd4f10d7fbb8736bca3861b77567ba2f1ff",
+        "rev": "1733d2f220e0429a05d6906720cc58eae2358f1b",
         "type": "github"
       },
       "original": {
