@@ -23,6 +23,7 @@
 
   # Agents
   programs.agents.enable = true;
+  programs.antigravity-cli.enable = true;
   programs.claude-code.enable = true;
   programs.opencode.enable = true;
   programs.pi-coding-agent.enable = true;
