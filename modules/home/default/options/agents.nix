@@ -1,22 +1,12 @@
 # programs.agents.enable = true;
 {
   config,
+  flake,
   lib,
   pkgs,
   ...
 }: let
   cfg = config.programs.agents;
-  command = pkgs.self.mkScript {
-    name = "agents";
-    path = with pkgs; [bash coreutils git jq python3 yq-go];
-    text = ''
-      if [[ ! -f "$HOME/.agents/agents" ]]; then
-        echo "Missing agents checkout at $HOME/.agents; start agents-checkout.service or clone https://github.com/suderman/agents.git there." >&2
-        exit 1
-      fi
-      exec python3 "$HOME/.agents/agents" "$@"
-    '';
-  };
   checkout = pkgs.self.mkScript {
     name = "agents-checkout";
     path = [pkgs.coreutils pkgs.git];
@@ -35,11 +25,10 @@
     '';
   };
 in {
-  options.programs.agents.enable = lib.mkEnableOption "the writable portable agents checkout and CLI";
+  imports = [flake.inputs.agents.homeManagerModules.agents];
 
   config = lib.mkIf cfg.enable {
     persist.storage.directories = [".agents"];
-    home.packages = [command];
 
     # Type=exec completes the start job before Git runs, so sd-switch does not wait.
     # Updating and deploying remain explicit CLI jobs.
