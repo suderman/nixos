@@ -151,6 +151,7 @@ Scope {
                   spacing: 8
                   Text {
                     text: modelData.icon
+                    visible: text.length > 0
                     color: Theme.colors.base0D
                     font.pixelSize: 18
                   }
@@ -204,12 +205,24 @@ Scope {
                         model: accountCard.modelData.windows
                         Column {
                           required property var modelData
+                          required property int index
                           width: accountContent.width
                           spacing: 5
+                          Text {
+                            width: parent.width
+                            visible: !!modelData.group && (index === 0 || accountCard.modelData.windows[index - 1].group !== modelData.group)
+                            topPadding: 4
+                            text: modelData.group || ""
+                            textFormat: Text.PlainText
+                            elide: Text.ElideRight
+                            color: Theme.headingText
+                            font.pixelSize: 12
+                            font.bold: true
+                          }
                           Row {
                             width: parent.width
                             spacing: 10
-                            Text { width: 115; text: modelData.name; color: Theme.detailText; font.pixelSize: 12 }
+                            Text { width: 115; text: modelData.name; textFormat: Text.PlainText; elide: Text.ElideRight; color: Theme.detailText; font.pixelSize: 12 }
                             Text {
                               width: 68
                               text: modelData.percentText + " left"

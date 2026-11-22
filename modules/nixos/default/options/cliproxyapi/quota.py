@@ -121,9 +121,114 @@ def normalize(provider, payload):
     return windows, str(plan)
 
 
+def fetch_usage(base_url, key, index, url, headers, now, data=None):
+    request = {"authIndex": index, "method": "GET", "url": url, "header": headers}
+    if data is not None:
+        request.update(method="POST", data=json.dumps(data))
+    result = management(base_url, key, "requests/api-call", request)
+    code = result.get("status_code")
+    if code == 429:
+        raise QuotaError(
+            "Usage rate limited", retry_time(result.get("header") or {}, now)
+        )
+    if not isinstance(code, int) or not 200 <= code < 300:
+        raise QuotaError(f"Usage HTTP {code}")
+    try:
+        return json.loads(result["body"])
+    except (ValueError, TypeError, KeyError):
+        raise QuotaError("Invalid usage response") from None
+
+
+def antigravity_windows(payload):
+    for group in payload.get("groups") or []:
+        title = group.get("displayName") or group.get("display_name")
+        if not title:
+            continue
+        for bucket in group.get("buckets") or []:
+            raw = bucket.get("remainingFraction", bucket.get("remaining_fraction"))
+            percent = isinstance(raw, str) and raw.strip().endswith("%")
+            remaining = number(raw.strip()[:-1] if percent else raw)
+            if remaining is None:
+                continue
+            period = (bucket.get("window") or "").strip().lower()
+            if period in ("5h", "five-hour", "five_hour"):
+                name, seconds = "5 hour", 18000
+            elif period in ("week", "weekly"):
+                name, seconds = "Weekly", 604800
+            else:
+                name = (
+                    bucket.get("displayName")
+                    or bucket.get("display_name")
+                    or period
+                    or "Quota"
+                )
+                seconds = None
+            reset = bucket.get("resetTime") or bucket.get("reset_time")
+            item = window(
+                name, 100 - remaining * (1 if percent else 100), reset, seconds
+            )
+            if item is not None:
+                bucket_id = bucket.get("bucketId") or bucket.get("bucket_id") or name
+                yield title, bucket_id, dict(item, group=title)
+
+
+def antigravity_usage(base_url, key, credential, headers, now):
+    project = credential.get("project_id")
+    if not project:
+        raise QuotaError("Antigravity credential has no project ID")
+    headers["User-Agent"] = "antigravity/hub/2.23.0 darwin/arm64"
+    groups = {}
+    error = QuotaError("Usage response has no quota windows")
+    # Match Management Center: some endpoints omit the Gemini buckets.
+    for host in (
+        "daily-cloudcode-pa.googleapis.com",
+        "daily-cloudcode-pa.sandbox.googleapis.com",
+        "cloudcode-pa.googleapis.com",
+    ):
+        try:
+            payload = fetch_usage(
+                base_url,
+                key,
+                credential["auth_index"],
+                f"https://{host}/v1internal:retrieveUserQuotaSummary",
+                headers,
+                now,
+                {"project": project},
+            )
+        except QuotaError as failure:
+            if failure.retry_at:
+                raise
+            error = failure
+            continue
+        has_gemini = False
+        for title, bucket_id, item in antigravity_windows(payload):
+            groups.setdefault(title, {}).setdefault(bucket_id, item)
+            has_gemini |= bucket_id.lower().startswith("gemini-")
+        if has_gemini:
+            break
+    if not groups:
+        raise error
+    return [
+        item
+        for buckets in groups.values()
+        for item in sorted(
+            buckets.values(), key=lambda item: item["seconds"] or math.inf
+        )
+    ], ""
+
+
 def usage(base_url, key, credential, now):
     provider = credential.get("provider") or credential.get("type")
     headers = {"Authorization": "Bearer $TOKEN$", "Content-Type": "application/json"}
+    try:
+        if provider == "antigravity":
+            return antigravity_usage(base_url, key, credential, headers, now)
+        return subscription_usage(base_url, key, credential, provider, headers, now)
+    except (ValueError, TypeError, KeyError, AttributeError):
+        raise QuotaError("Invalid usage response") from None
+
+
+def subscription_usage(base_url, key, credential, provider, headers, now):
     if provider == "codex":
         url = "https://chatgpt.com/backend-api/wham/usage"
         headers["User-Agent"] = "codex-tui/0.149.1"
@@ -141,29 +246,8 @@ def usage(base_url, key, credential, now):
                 "User-Agent": "claude-cli/2.1.280 (external, cli)",
             }
         )
-    result = management(
-        base_url,
-        key,
-        "requests/api-call",
-        {
-            "authIndex": credential["auth_index"],
-            "method": "GET",
-            "url": url,
-            "header": headers,
-        },
-    )
-    code = result.get("status_code")
-    if code == 429:
-        raise QuotaError(
-            "Usage rate limited", retry_time(result.get("header") or {}, now)
-        )
-    if not isinstance(code, int) or not 200 <= code < 300:
-        raise QuotaError(f"Usage HTTP {code}")
-    try:
-        payload = json.loads(result["body"])
-        return normalize(provider, payload)
-    except (ValueError, TypeError, KeyError, AttributeError):
-        raise QuotaError("Invalid usage response") from None
+    payload = fetch_usage(base_url, key, credential["auth_index"], url, headers, now)
+    return normalize(provider, payload)
 
 
 def collect(base_url, key, previous, now):
@@ -184,7 +268,7 @@ def collect(base_url, key, previous, now):
     accounts = {}
     for credential in files:
         provider = credential.get("provider") or credential.get("type")
-        if provider not in ("codex", "claude"):
+        if provider not in ("codex", "claude", "antigravity"):
             continue
         index = credential.get("auth_index")
         if not index:

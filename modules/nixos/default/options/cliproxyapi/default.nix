@@ -25,7 +25,7 @@ in {
 
     package = lib.mkPackageOption pkgs.unstable "cliproxyapi" {};
 
-    quota.enable = lib.mkEnableOption "private read-only Codex and Claude quota snapshots";
+    quota.enable = lib.mkEnableOption "private read-only Codex, Claude, and Antigravity quota snapshots";
 
     name = lib.mkOption {
       type = lib.types.str;

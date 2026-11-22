@@ -22,7 +22,11 @@ def account:
     stale: ((.error // "") != "" or (.fetched // 0) < now - 300),
     updatedText: (.fetched | age_text),
     windows: [.windows[] | metric],
-    score: ([.windows[] | select(.name == "5 hour" or .name == "Weekly") | .remaining] | min // -1)
+    score: (if .provider == "antigravity" then
+      ([.windows | group_by(.group)[] | map(.remaining) | min] | max // -1)
+    else
+      ([.windows[] | select(.name == "5 hour" or .name == "Weekly") | .remaining] | min // -1)
+    end)
   } |
   .status = (if .disabled then "Paused" elif .unavailable then "Unavailable" elif .stale then "Stale" elif (.windows | length) == 0 then "Unknown" else "Ready" end);
 def window_average($name; $label):
@@ -31,7 +35,9 @@ def window_average($name; $label):
   {name: $name, label: $label, remaining: (add / length), count: length};
 def provider($id; $title; $icon):
   [.accounts[] | select(.provider == $id) | account] as $accounts |
-  ($accounts | [window_average("5 hour"; "5h"), window_average("Weekly"; "wk")]) as $windows |
+  (if $id == "antigravity" then [] else
+    $accounts | [window_average("5 hour"; "5h"), window_average("Weekly"; "wk")]
+  end) as $windows |
   {
     id: $id, title: $title, icon: $icon,
     accounts: ($accounts | sort_by(.disabled, -.score, .label)),
@@ -42,7 +48,11 @@ def provider($id; $title; $icon):
       [$windows[] | "\(.label) \(.remaining | percent)"] | join(" · ") end)
   };
 {
-  providers: [provider("codex"; "Codex"; "󰊚"), provider("claude"; "Claude"; "✻")],
+  providers: [
+    provider("codex"; "Codex"; "󰊚"),
+    provider("claude"; "Claude"; "✻"),
+    (if $mode != "bar" then provider("antigravity"; "Antigravity"; "") | select(.count > 0) else empty end)
+  ],
   updatedText: (.fetched | age_text),
   message: (if $failure != "" then $failure elif (.error // "") != "" then .error elif .fetched == null then "Waiting for first quota snapshot." elif .fetched < now - 300 then "Snapshot is stale. Open management to check CLIProxyAPI." else "" end)
 } |
