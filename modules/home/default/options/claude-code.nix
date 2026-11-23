@@ -41,35 +41,7 @@
           ${launchClaude}
         '';
     };
-
-  wrapper = pkgs.self.mkScript {
-    name = "claude-pool";
-    text =
-      # bash
-      ''
-        set -a
-        . ${lib.escapeShellArg cfg.environmentFile}
-        set +a
-
-        export ANTHROPIC_BASE_URL=https://cliproxyapi.kit
-        export ANTHROPIC_AUTH_TOKEN="''${CLIPROXYAPI_API_KEY:?Missing CLIPROXYAPI_API_KEY in Claude environment file}"
-        export ANTHROPIC_MODEL=claude-opus-5-5
-        export CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1
-        # Gateway auth otherwise loses the subscription's one-hour main cache default.
-        export CLAUDE_CODE_PROMPT_CACHE_TTL="''${CLAUDE_CODE_PROMPT_CACHE_TTL:-1h}"
-        export ENABLE_CLAUDEAI_MCP_SERVERS=false
-        unset ANTHROPIC_API_KEY CLAUDE_CODE_OAUTH_TOKEN
-
-        ${launchClaude}
-      '';
-  };
 in {
-  options.programs.claude-code.environmentFile = lib.mkOption {
-    type = lib.types.nullOr lib.types.str;
-    default = null;
-    description = "Decrypted shell-compatible dotenv containing CLIPROXYAPI_API_KEY. Enables the CLIProxyAPI launcher when set.";
-  };
-
   config = lib.mkIf cfg.enable {
     programs.claude-code.package = lib.mkDefault perSystem.agents.claude-code;
 
@@ -112,10 +84,6 @@ in {
     # CLAUDE_CONFIG_DIR left to the wrapper.
     home.file.".local/libexec/june/claude" = lib.mkIf juneOwns {
       source = config.home.file.".local/bin/claude-direct".source;
-    };
-
-    home.file.".local/bin/claude-pool" = lib.mkIf (cfg.environmentFile != null) {
-      source = lib.getExe wrapper;
     };
 
     home.file.".local/bin/claude-home" = lib.mkIf (!juneOwns) {source = lib.getExe (directAccountWrapper "home");};

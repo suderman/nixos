@@ -46,7 +46,7 @@ in {
         # Unless run with sudo, run "systemctl --user" and "journalctl --user" by default
 
         # systemctl keeps an explicit scope, and uses the system manager when a
-        # named unit is a system unit but not a user unit (systemctl status cliproxyapi)
+        # named unit is a system unit but not a user unit (systemctl status sshd)
         systemctl() {
           (( EUID == 0 )) && { command systemctl "$@"; return; }
           local arg verb=
@@ -67,7 +67,7 @@ in {
         }
 
         # journalctl keeps an explicit scope, and reads the system journal when
-        # a -u unit is not a user unit (journalctl -u cliproxyapi just works)
+        # a -u unit is not a user unit (journalctl -u sshd just works)
         journalctl() {
           (( EUID == 0 )) && { command journalctl "$@"; return; }
           local arg take= unit

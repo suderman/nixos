@@ -77,8 +77,14 @@ in {
       ocr = "${oc} run";
     };
 
-    # Add opencode wrapper to user path (higher priority than npm)
-    home.file.".local/bin/opencode".source = "${cfg.package}/bin/opencode";
+    # Add opencode wrapper to user path (higher priority than npm). Where June
+    # keeps numbered logins she holds the opencode name there, and her wrappers
+    # run this launcher from libexec.
+    home.file.${
+      if config.programs.june.accounts.enable or false
+      then ".local/libexec/june/opencode"
+      else ".local/bin/opencode"
+    }.source = "${cfg.package}/bin/opencode";
 
     # Let agenix know about any secrets set
     age.secrets = lib.mkIf (cfg.apiKeys != null) {
