@@ -31,7 +31,7 @@ _: {
       barBlur = false;
       barPrecedenceOverBorder = true;
     };
-    waybar.cliproxyapi.enable = true;
+    waybar.quota.enable = true;
     waybar.minimax-quota.enable = true;
     waybar.herdr.enable = true;
   };

@@ -9,8 +9,8 @@
       [
         "group/tray"
       ]
-      ++ lib.optionals config.wayland.windowManager.hyprland.waybar.cliproxyapi.enable [
-        "custom/cliproxyapi"
+      ++ lib.optionals config.wayland.windowManager.hyprland.waybar.quota.enable [
+        "custom/quota"
       ]
       ++ lib.optionals config.wayland.windowManager.hyprland.waybar.minimax-quota.enable [
         "custom/minimax-quota"

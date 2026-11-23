@@ -37,11 +37,11 @@ Scope {
   }
   function applyData(text) {
     try { data = JSON.parse(text); }
-    catch (error) { data = { providers: [], message: "Cannot read quota snapshot. Open management to check CLIProxyAPI.", updatedText: "never" }; }
+    catch (error) { data = { providers: [], message: "Cannot read quota. Run june quota to see why.", updatedText: "never" }; }
   }
 
   IpcHandler {
-    target: "cliproxyapi"
+    target: "quota"
     function toggle(): void { root.toggle(); }
     function show(): void { root.show(); }
     function hide(): void { root.hide(); }
@@ -51,10 +51,6 @@ Scope {
     id: fetch
     command: ["@DATA_COMMAND@", "popup"]
     stdout: StdioCollector { onStreamFinished: root.applyData(this.text) }
-  }
-  Process {
-    id: openManagement
-    command: ["@OPEN_COMMAND@", "@MANAGEMENT_URL@"]
   }
   Timer { interval: 60000; repeat: true; running: root.open; onTriggered: root.refresh() }
   Timer { id: focusTimer; interval: 1; onTriggered: frame.forceActiveFocus() }
@@ -75,7 +71,7 @@ Scope {
     anchors { top: true; right: true }
     margins { top: 38; right: 12 }
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "quickshell-cliproxyapi"
+    WlrLayershell.namespace: "quickshell-quota"
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
     Rectangle {
@@ -102,7 +98,7 @@ Scope {
             spacing: 4
             Text { text: "AI quotas"; color: Theme.headingText; font.pixelSize: 22; font.bold: true }
             Text {
-              text: "CLIProxyAPI · updated " + root.data.updatedText
+              text: "June · updated " + root.data.updatedText
               color: Theme.mutedText
               font.pixelSize: 12
             }
@@ -165,7 +161,7 @@ Scope {
                 }
                 Text {
                   visible: modelData.count === 0
-                  text: "No enrolled accounts. Add one in management."
+                  text: "No accounts signed in here. Run june accounts login."
                   color: Theme.mutedText
                   font.pixelSize: 13
                 }
@@ -281,7 +277,6 @@ Scope {
         Row {
           width: parent.width
           spacing: 10
-          ActionButton { label: "Open management"; onClicked: openManagement.running = true }
           ActionButton { label: fetch.running ? "Loading…" : "Refresh"; enabled: !fetch.running; onClicked: root.refresh() }
           Text {
             text: "Ticks mark even-use pace"

@@ -21,7 +21,7 @@
     };
     dynamicCursors.enable = true;
     hyprbars.enable = true;
-    waybar.cliproxyapi.enable = true;
+    waybar.quota.enable = true;
     waybar.minimax-quota.enable = true;
     waybar.herdr.enable = true;
   };

@@ -54,7 +54,7 @@ def provider($id; $title; $icon):
     (if $mode != "bar" then provider("antigravity"; "Antigravity"; "") | select(.count > 0) else empty end)
   ],
   updatedText: (.fetched | age_text),
-  message: (if $failure != "" then $failure elif (.error // "") != "" then .error elif .fetched == null then "Waiting for first quota snapshot." elif .fetched < now - 300 then "Snapshot is stale. Open management to check CLIProxyAPI." else "" end)
+  message: (if $failure != "" then $failure elif (.error // "") != "" then .error elif .fetched == null then "Waiting for first quota snapshot." elif .fetched < now - 300 then "Quota is stale. Run june quota to see why." else "" end)
 } |
 .class = (if .message != "" or any(.providers[].accounts[]; .stale) then "stale"
   elif all(.providers[] | select(.count > 0); .ready == 0) then "critical" else "ok" end) |
@@ -62,12 +62,12 @@ if $mode == "bar" then {
   text: ([.providers[] | select(.count > 0) | "\(.icon) \(.short)"] | if length == 0 then "󰊚 quota" else join("  ") end) + (if .class == "stale" then " !" else "" end),
   class,
   tooltip: ([
-    "CLIProxyAPI quota. Equal-account averages per window, not pooled capacity. Paused and stale data excluded.",
+    "Subscription quota from june quota. Equal-account averages per window, not pooled capacity. Stale data excluded.",
     (.providers[] | select(.count > 0) | . as $provider |
       "\(.title): \(.ready)/\(.count) accounts with allowance" +
       (if (.windows | length) == 0 then "\nNo fresh quota data" else
         ([.windows[] | "\(.name): \(.remaining | percent) mean remaining (\(.count)/\($provider.count) accounts)"] | "\n" + join("\n")) end)),
     (if .message != "" then .message else empty end),
-    "Click for accounts. Right-click opens management."
+    "Click for accounts."
   ] | join("\n\n"))
 } else . end
