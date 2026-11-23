@@ -82,7 +82,15 @@ in {
       Service = {
         Type = "oneshot";
         RemainAfterExit = true;
-        ExecStart = "${hc} server start";
+        # Terminals inherit the core's environment for good, and at login systemd may not have the session's PATH yet:
+        # cog's core once started without ~/.local/bin, so June's harness wrappers were missing in every terminal.
+        # Load Home Manager's session variables first. Starting a core that already runs changes nothing.
+        ExecStart = toString (pkgs.writeShellScript "herdr-start" ''
+          export PATH="${pkgs.coreutils}/bin''${PATH:+:$PATH}"
+          unset __HM_SESS_VARS_SOURCED
+          . "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh"
+          exec ${hc} server start
+        '');
       };
       Install.WantedBy = [(if desktop then "graphical-session.target" else "default.target")];
     };
