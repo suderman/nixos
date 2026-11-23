@@ -16,5 +16,9 @@
         mode = "0700";
       }
     ];
+    # June's numbered logins (codex1, codex2, ...) run Codex from here, since she holds the codex name in ~/.local/bin.
+    home.file.".local/libexec/june/codex" = lib.mkIf (config.programs.june.accounts.enable or false) {
+      source = lib.getExe config.programs.codex.package;
+    };
   };
 }

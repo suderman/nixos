@@ -48,21 +48,24 @@ in {
       ];
     }
 
-    (lib.mkIf cfg.daemon.enable {
-      # Conversation state; never synced, since Syncthing would copy a live SQLite WAL.
-      # config.json and AGENTS.md from agents apply, which replaces them by rename, so the directory persists, not the files.
-      persist.storage.directories =
-        [
-          ".config/june"
-          {
-            directory = ".local/state/june";
-            mode = "0700";
-          }
-        ]
-        ++ lib.optional (cfg.dataDir == null) {
-          directory = ".local/share/june";
+    (lib.mkIf (cfg.daemon.enable || cfg.accounts.enable) {
+      # Conversation state, and on account hosts the numbered harness logins (june accounts); never synced, since
+      # Syncthing would copy a live SQLite WAL. config.json and AGENTS.md come from agents apply, which replaces them by
+      # rename, so the directory persists, not the files; the account counts are in config.json.
+      persist.storage.directories = [
+        ".config/june"
+        {
+          directory = ".local/state/june";
           mode = "0700";
-        };
+        }
+      ];
+    })
+
+    (lib.mkIf cfg.daemon.enable {
+      persist.storage.directories = lib.optional (cfg.dataDir == null) {
+        directory = ".local/share/june";
+        mode = "0700";
+      };
 
       age.secrets.june-env = lib.mkIf (cfg.apiKeys != null) {
         rekeyFile = cfg.apiKeys;

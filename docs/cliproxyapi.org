@@ -102,6 +102,8 @@ journalctl -u cliproxyapi.service -b
 Use =https://cliproxyapi.kit/v1= and the client API key in an OpenAI-compatible client. Use model IDs returned by =/v1/models=. Client routing is configured separately.
 
 ** Claude Code account selection
+On hosts with =programs.june.accounts.enable=, June's numbered logins replace this section and the four below it: =claude1= and =claude2= hold the logins, plain =claude= picks an account from quota (=june accounts pick=), and =june quota= reads usage directly. The Claude module there installs none of =claude-home=, =claude-work=, =claude-toggle=, =claude-quota=, =claude-auto= or the =~/.local/bin/claude= link, and hands =claude-direct= to June at =~/.local/libexec/june/claude=. See June's =docs/usage.org=, Harness accounts. The old =~/.claude-home= and =~/.claude-work= folders stay persisted for rollback.
+
 Normal =claude= launches direct subscription auth through either =claude-home= or =claude-work=. Home Manager owns =~/.local/bin/claude=, which follows the writable =~/.local/state/claude/current= symlink. That directory persists with mode =0700=. First activation selects work only when no selector exists; later activations and reboots keep the selection. Change it through =claude-toggle=, not by replacing Home Manager's outer link.
 
 #+begin_src sh

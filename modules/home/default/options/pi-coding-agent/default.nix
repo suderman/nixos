@@ -68,8 +68,13 @@ in {
     persist.scratch.directories = [".local/state/pi"];
 
     # Put the wrapper at the conventional user-bin path without exposing the
-    # implementation package name to callers.
-    home.file.".local/bin/pi".source = "${cfg.package}/bin/pi";
+    # implementation package name to callers. Where June keeps numbered logins
+    # she holds the pi name there, and her wrappers run this from libexec.
+    home.file.${
+      if config.programs.june.accounts.enable or false
+      then ".local/libexec/june/pi"
+      else ".local/bin/pi"
+    }.source = "${cfg.package}/bin/pi";
     home.file.".local/bin/pi-direct".source = lib.getExe (pkgs.self.mkScript {
       name = "pi-direct";
       text =

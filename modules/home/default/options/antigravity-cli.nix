@@ -11,8 +11,13 @@ in {
   config = lib.mkIf cfg.enable {
     programs.antigravity-cli.package = lib.mkDefault perSystem.agents.antigravity-cli;
 
-    # Prefer the managed CLI over an older nix profile install.
-    home.file.".local/bin/agy" = lib.mkIf (cfg.package != null) {
+    # Prefer the managed CLI over an older nix profile install. Where June keeps numbered logins she holds the agy name
+    # in ~/.local/bin, and her wrappers run this launcher from ~/.local/libexec/june.
+    home.file.${
+      if config.programs.june.accounts.enable or false
+      then ".local/libexec/june/agy"
+      else ".local/bin/agy"
+    } = lib.mkIf (cfg.package != null) {
       source = lib.getExe (pkgs.self.mkScript {
         name = "agy";
         text = ''
