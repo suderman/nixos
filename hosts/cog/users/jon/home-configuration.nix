@@ -32,6 +32,7 @@
 
   # June runs AUTO Org headings tagged with this host, and her desktop client is on Alt.
   programs.june.dispatch.enable = true;
+  programs.june.accounts.enable = true;
   programs.june.desktop.enable = true;
 
   # User services
