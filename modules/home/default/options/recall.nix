@@ -117,7 +117,7 @@ in {
         Service = {
           Type = "oneshot";
           UMask = "0077";
-          # Pi reads provider keys such as CODEX_LB_API_KEY from this file.
+          # Pi reads provider API keys from this file when configured.
           EnvironmentFile = "-${config.home.homeDirectory}/.pi/agent/.env";
           Environment =
             [

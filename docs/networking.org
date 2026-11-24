@@ -150,7 +150,7 @@ reachable from outside the LAN.
 
 Private records point to each fixed host's permanent LAN address. Remote access
 therefore depends on a Tailscale subnet router even when the destination host
-also runs Tailscale. For example, =kit= and =codex-lb.kit= resolve to =10.1.0.6=,
+also runs Tailscale. For example, =kit= and =june.kit= resolve to =10.1.0.6=,
 not =kit.tail=.
 
 Hub and Kit both advertise the exact =10.1.0.0/16= prefix. Tailscale keeps one

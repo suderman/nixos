@@ -103,11 +103,6 @@
 
   services.nojoin = {
     enable = true;
-    apiKeys = ./apikeys-env.age;
-    openai = {
-      baseUrl = "https://cliproxyapi.kit/v1";
-      apiKeyEnv = "CLIPROXYAPI_API_KEY";
-    };
     settings = {
       openai_model = "gpt-6.1-terra";
       openai_live_model = "gpt-6-luna";
@@ -129,15 +124,6 @@
 
   # Jon's June remote interface.
   services.traefik.proxy.june = "http://127.0.0.1:7347";
-
-  # ChatGPT/Codex account load balancer for OpenCode.
-  services.codex-lb.enable = true;
-
-  # Parallel alternative for ChatGPT and Claude subscription accounts.
-  services.cliproxyapi = {
-    enable = true;
-    quota.enable = true;
-  };
 
   # Garmin fenix 6 pro
   hardware.garmin.deviceId = "091e:4cda";
