@@ -20,8 +20,8 @@
       (old.patches or [])
       ++ [
         (pkgs.fetchpatch {
-          url = "https://github.com/herdrdev/herdr-app/compare/b67715e8985e6097f83f8120fc9b9e52e6596f50...0ff0474e14d316f35666c28611d0b74ca4019d76.diff";
-          hash = "sha256-GMQXhjgAdcB8aEcQ4yunpFO/xF40CKe3NL+O+RgSRhM=";
+          url = "https://github.com/herdrdev/herdr-app/compare/2d1464e02ddad5484eaaf9a5b59b594e3930aeba...0fcd2da58553024c533988a7f51f41279a97664a.diff";
+          hash = "sha256-Tog8GHYmXTUj6GJNcCOG3xVnDADhWqEA4ora6w9DPTI=";
         })
       ];
   });
