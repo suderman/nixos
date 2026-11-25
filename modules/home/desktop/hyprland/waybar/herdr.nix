@@ -7,7 +7,7 @@
 }: let
   cfg = config.wayland.windowManager.hyprland.waybar.herdr;
   # Agents run in herdr-core; the Herdr app shows them.
-  hc = "${config.services.herdr.package}/bin/hc";
+  hc = "${config.services.herdr.finalPackage}/bin/hc";
   inherit (lib) mkIf mkMerge mkOption types;
 
   icon = "󰚩";
@@ -418,7 +418,7 @@ in {
         Unit = {
           Description = "Herdr desktop status bridge";
           PartOf = [config.wayland.systemd.target];
-          After = [config.wayland.systemd.target];
+          After = [config.wayland.systemd.target "herdr.service"];
         };
         Service = {
           ExecStart = lib.getExe bridge;

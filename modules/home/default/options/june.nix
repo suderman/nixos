@@ -33,6 +33,7 @@ in {
       # her and her agents. A client-only host needs hc and Emacs for herdr-link and org-edit, but no pi.
       programs.pi-coding-agent.enable = lib.mkIf (cfg.daemon.enable || cfg.dispatch.enable) true;
       services.herdr.enable = true;
+      programs.june.hcPackage = lib.mkDefault config.services.herdr.finalPackage;
       # The same ntfy topic the Herdr TUI's herdr-ntfy plugin posted to.
       programs.june.notify.url = lib.mkDefault "https://ntfy.hub/herdr";
       programs.emacs.enable = true;
@@ -78,18 +79,27 @@ in {
 
       systemd.user.services.june = {
         Unit = {
-          Wants = lib.optional piKeys "pi-coding-agent-env.service";
+          Wants = ["herdr.service"] ++ lib.optional piKeys "pi-coding-agent-env.service";
           Requires = lib.optional (cfg.apiKeys != null) "agenix.service";
           After =
-            lib.optional piKeys "pi-coding-agent-env.service"
+            ["herdr.service"]
+            ++ lib.optional piKeys "pi-coding-agent-env.service"
             ++ lib.optional (cfg.apiKeys != null) "agenix.service";
         };
         Service.Environment = ["SSH_AUTH_SOCK=%t/${config.programs.ssh.agentSocket}"];
       };
     })
 
+    (lib.mkIf cfg.notify.watch {
+      systemd.user.services.herdr-notify.Unit = {
+        Wants = ["herdr.service"];
+        After = ["herdr.service"];
+      };
+    })
+
     # Running tasks and settling headings must survive the root reset at boot.
     (lib.mkIf cfg.dispatch.enable {
+      systemd.user.services.org-dispatch.Unit.After = ["herdr.service"];
       persist.scratch.directories = [".local/state/org-dispatch"];
       # Each host where agents work tidies its own org-work folders weekly (june org-work --clean).
       programs.june.orgWork = {

@@ -11,7 +11,7 @@
   ...
 }: let
   cfg = config.programs.herdr;
-  core = config.services.herdr.package;
+  core = config.services.herdr.finalPackage;
   # Focus follows the mouse between panes, as in Hyprland: herdr-app PR #837,
   # pinned to its head commit. Drop the patch once a release includes it; the
   # settings below keep it on.

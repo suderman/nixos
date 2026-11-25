@@ -37,7 +37,7 @@
 
   workspaceClient = pkgs.self.mkScript {
     name = "em-workspace-client";
-    path = [cfg.finalPackage config.programs.herdr-tui.package config.services.herdr.package pkgs.tmux pkgs.jq pkgs.coreutils pkgs.util-linux pkgs.procps pkgs.gnugrep];
+    path = [cfg.finalPackage config.programs.herdr-tui.package config.services.herdr.finalPackage pkgs.tmux pkgs.jq pkgs.coreutils pkgs.util-linux pkgs.procps pkgs.gnugrep];
     text = ''
       ${builtins.readFile ./terminal-setup.sh}
       EMACS_CLIENT=${lib.getBin cfg.finalPackage}/bin/emacsclient
@@ -135,7 +135,10 @@ in {
     # The Herdr app's spaces have no close event in hc; stop the em daemon of a
     # space with no live terminals left.
     systemd.user.services.em-sweep-hc = mkIf config.services.herdr.enable {
-      Unit.Description = "Stop Emacs daemons of closed Herdr app spaces";
+      Unit = {
+        Description = "Stop Emacs daemons of closed Herdr app spaces";
+        After = ["herdr.service"];
+      };
       Service = {
         Type = "oneshot";
         ExecStart = "${lib.getExe workspaceClient} --sweep-hc";
