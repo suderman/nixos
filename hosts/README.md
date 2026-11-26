@@ -16,6 +16,8 @@ nixos add host
 
 ## My current list
 
+- `bot`
+  Dell OptiPlex 5080 Micro, June's always-on desktop 🤖
 - `cog`
   [Framework laptop](https://github.com/suderman/nixos/tree/main/hosts/cog) ⚙
 - `dot`

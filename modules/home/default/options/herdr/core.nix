@@ -84,6 +84,7 @@
 
   # Add each listed host once; saved machines are skipped, so later runs need
   # no SSH. machine add never installs hc there without a terminal to ask in.
+  # A target such as jon@kit is saved under its host name, kit.
   addMachines = pkgs.self.mkScript {
     name = "herdr-machines";
     path = [pkgs.jq];
@@ -91,7 +92,8 @@
       saved=$(${hc} machine ls --json)
       status=0
       for machine in ${lib.escapeShellArgs cfg.machines}; do
-        if ! jq -e --arg name "$machine" 'any(.machines[]?; .name == $name)' <<<"$saved" >/dev/null; then
+        name=''${machine##*@}
+        if ! jq -e --arg name "$name" 'any(.machines[]?; .name == $name)' <<<"$saved" >/dev/null; then
           ${hc} machine add "$machine" </dev/null || status=1
         fi
       done
@@ -116,8 +118,8 @@ in {
     machines = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [];
-      example = ["cog" "lux"];
-      description = "Other hosts this core adds as hc machines, reached over SSH, so their terminals show here as HOST/t7.";
+      example = ["cog" "jon@lux"];
+      description = "Other hosts this core adds as hc machines, reached over SSH, so their terminals show here as HOST/t7. Prefix USER@ to reach another account there.";
     };
   };
 
