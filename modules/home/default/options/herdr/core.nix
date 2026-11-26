@@ -15,11 +15,15 @@
 
   # Terminals inherit the core's environment for good, and at boot or login systemd
   # may not have the session's PATH yet (e.g. ~/.local/bin for June's harness wrappers).
-  # Load Home Manager's session variables before starting or refreshing the core.
+  # Load Home Manager's session variables before starting or refreshing the core, then
+  # clear __HM_SESS_VARS_SOURCED: systemd omits __NIXOS_SET_ENVIRONMENT_DONE, so child
+  # zsh panes source /etc/set-environment (which overwrites PATH) and need ~/.zshenv's
+  # hm-session-vars.sh to run again to restore home.sessionPath.
   herdrStart = pkgs.writeShellScript "herdr-start" ''
     export PATH="''${PATH:+$PATH:}${pkgs.coreutils}/bin"
     unset __HM_SESS_VARS_SOURCED
     . "${hmSessionVars}"
+    unset __HM_SESS_VARS_SOURCED
     exec ${rawHc} server start
   '';
 
@@ -27,6 +31,7 @@
     export PATH="''${PATH:+$PATH:}${pkgs.coreutils}/bin"
     unset __HM_SESS_VARS_SOURCED
     . "${hmSessionVars}"
+    unset __HM_SESS_VARS_SOURCED
     exec ${rawHc} server restart --fresh
   '';
 
@@ -58,6 +63,7 @@
           if [[ -r "${hmSessionVars}" ]]; then
             export PATH="''${PATH:+$PATH:}${pkgs.coreutils}/bin"
             . "${hmSessionVars}" </dev/null >/dev/null 2>&1
+            unset __HM_SESS_VARS_SOURCED
           fi
         fi
       }
