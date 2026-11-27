@@ -7,8 +7,10 @@
 in {
   # June's desktop client on Hyprland. June's own module (programs.june.desktop) runs it as a user service with its "June"
   # launcher entry; this adds the daemon's address from daemonHost, a place for the device token that survives the
-  # root reset, and the bind. Tapping Alt (keyd's f13, XKB code 191) cycles live June, the strip, and hidden. Rofi
-  # takes the same key to switch modes, so the bind lets it through while Rofi is open.
+  # root reset, and the bind. Tapping Alt (keyd's f13, XKB code 191) turns live June, minimised, on and off; Tab in her
+  # compose bar opens the full strip, Tab there shrinks it back to her, and Esc puts either away (what `june-desktop
+  # cycle` does is June's: desktop/shell.qml). Rofi takes the same key to switch modes, so the bind lets it through while
+  # Rofi is open.
   config = lib.mkIf (cfg.enable && cfg.desktop.enable) {
     programs.june.desktop = {
       url = lib.mkIf (cfg.daemonHost != null) (lib.mkDefault "wss://june.${cfg.daemonHost}/");
@@ -33,7 +35,7 @@ in {
             end
           end
           hl.dispatch(hl.dsp.exec_cmd("june-desktop cycle"))
-        end, { description = "June: live June, the strip, hidden", non_consuming = true, ignore_mods = true })
+        end, { description = "June: live June on and off (Tab for the full strip)", non_consuming = true, ignore_mods = true })
       '';
   };
 }
