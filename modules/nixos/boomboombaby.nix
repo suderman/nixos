@@ -131,6 +131,37 @@ in {
     # A first switch must mount persistent content before tmpfiles seeds it.
     systemd.services.systemd-tmpfiles-resetup.unitConfig.RequiresMountsFor = ["/srv/www"];
 
+    # Release due comic strips hourly. boomboombaby's deploy script uploads the
+    # queue (schedule, every strip and the release script) outside the web root;
+    # only strips whose date and hour have passed reach /srv/www/boomboombaby/strips.
+    systemd.services.boomboombaby-strips = {
+      description = "Release due Boom Boom Baby comic strips";
+      unitConfig = {
+        ConditionPathExists = "/srv/www/boomboombaby-queue/release-strips.mjs";
+        RequiresMountsFor = ["/srv/www"];
+      };
+      serviceConfig = {
+        Type = "oneshot";
+        User = "jon";
+        Group = "users";
+        UMask = "0022";
+        ExecStart = "${lib.getExe pkgs.nodejs} /srv/www/boomboombaby-queue/release-strips.mjs --queue /srv/www/boomboombaby-queue --site /srv/www/boomboombaby";
+        ProtectSystem = "strict";
+        ReadWritePaths = ["/srv/www/boomboombaby"];
+        ProtectHome = true;
+        PrivateTmp = true;
+        PrivateNetwork = true;
+        NoNewPrivileges = true;
+      };
+    };
+    systemd.timers.boomboombaby-strips = {
+      wantedBy = ["timers.target"];
+      timerConfig = {
+        OnCalendar = "hourly";
+        Persistent = true;
+      };
+    };
+
     # Jon deploys from kit over ordinary tailnet SSH using each repo's rsync script.
     tmpfiles.directories = map (site: {
       target = "/srv/www/${site}";
