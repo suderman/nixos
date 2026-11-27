@@ -10,7 +10,8 @@ in {
   # root reset, and the binds. Tapping Alt (keyd's f13, XKB code 191) turns live June, minimised, on and off; Tab in her
   # compose bar opens the full strip, Tab there shrinks it back to her, and Esc puts either away (what `june-desktop
   # cycle` and `mini` do is June's: desktop/shell.qml). While June shows, a long press of Alt (input.repeat_delay)
-  # trades the two as Tab does. Rofi takes the same key to switch modes, so the tap is let through while Rofi is open.
+  # trades the two as Tab does, and Alt+Tab opens or closes the full strip from anywhere. Rofi takes the same key to
+  # switch modes, so the tap is let through while Rofi is open.
   config = lib.mkIf (cfg.enable && cfg.desktop.enable) {
     programs.june.desktop = {
       url = lib.mkIf (cfg.daemonHost != null) (lib.mkDefault "wss://june.${cfg.daemonHost}/");
@@ -49,6 +50,10 @@ in {
             hl.dispatch(hl.dsp.exec_cmd("june-desktop mini"))
           end
         end, { description = "June: hold Alt to trade live June and the full strip", long_press = true, non_consuming = true, ignore_mods = true })
+        -- Alt+Tab, from anywhere: the full strip, and away again (Super+Tab is the window switcher).
+        hl.bind("ALT + TAB", function()
+          hl.dispatch(hl.dsp.exec_cmd("june-desktop toggle"))
+        end, { description = "June: the full strip on and off" })
         hl.bind("code:191", function()
           for _, layer in ipairs(hl.get_layers()) do
             if layer.namespace == "rofi" then
