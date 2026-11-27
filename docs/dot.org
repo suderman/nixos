@@ -626,6 +626,17 @@ backups. Future state in scratch is not covered by storage snapshots.
 
 *** 11. Normal updates, rollback and repair
 
+Normal updates use the fleet deploy from Kit in =/etc/nixos=. Dot is a 1 GB Nanode and never builds: build its system on Kit first, then deploy, which copies the finished closure and switches.
+
+#+begin_src sh
+nix build .#nixosConfigurations.dot.config.system.build.toplevel --no-link
+nixos deploy  # choose dot; runs nixos-rebuild --target-host dot --sudo --ask-sudo-password --flake .#dot switch
+#+end_src
+
+=nixos deploy= asks for Jon's sudo password on dot, so an agent prepares and builds the change, then hands this step to Jon, for example as =! nixos deploy= in a Claude Code session. =nixos-rebuild --target-host= builds on Kit and copies over plain =ssh://=. After switching, check failed units, Caddy, bbbscores and Tailscale, free space on =/nix= and the new generation.
+
+Fallback for recovery, or when no sudo prompt is available: copy the closure as root and switch with =--store-path=. Copy over =ssh://=, never =ssh-ng://=. Dot sets =require-sigs=, and =nix copy= to an =ssh-ng://= store checks signatures and rejects paths built on Kit that no trusted key signed (seen 2026-11-26).
+
 Operator: use the reviewed checkout, locked tools and host-key-checked transport.
 Build locally and copy the closure, then switch on the installed host:
 
