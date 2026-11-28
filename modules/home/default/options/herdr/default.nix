@@ -1,5 +1,5 @@
 # The Herdr desktop app, a client of herdr-core (services.herdr, in core.nix
-# beside this file). The Herdr TUI it replaces is programs.herdr-tui.
+# beside this file).
 {
   config,
   flake,

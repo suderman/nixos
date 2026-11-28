@@ -3,7 +3,7 @@
 # are supplied by its Nix wrapper.
 set -euo pipefail
 
-# Herdr, hc and tmux can reuse short IDs when their servers restart. Socket birth time
+# hc and tmux can reuse short IDs when their servers restart. Socket birth time
 # and boot ID keep a surviving Emacs daemon from being mistaken for a new one.
 daemon_name() {
   local socket=$1 identity=$2 birth boot hash
@@ -40,35 +40,6 @@ case ${1-} in
     sleep 10
   done
   stop_daemon "$3"
-  exit
-  ;;
---herdr-plugin)
-  socket=${HERDR_SOCKET_PATH:?em: HERDR_SOCKET_PATH is required}
-  case ${HERDR_PLUGIN_EVENT-} in
-  workspace.closed)
-    name=$(daemon_name "$socket" "herdr:$socket:${HERDR_WORKSPACE_ID:?em: HERDR_WORKSPACE_ID is required}")
-    stop_daemon "$name"
-    ;;
-  startup)
-    # A new server socket renames every workspace's daemon, so stop daemons
-    # left by an earlier server. List daemons before workspaces: a daemon
-    # started meanwhile belongs to a workspace that is already listed.
-    pids=$(pgrep -u "$(id -u)" -f -- '--daemon=em-' || true)
-    workspaces=$(herdr workspace list | jq -r '.result.workspaces[].workspace_id')
-    keep=' '
-    for workspace in $workspaces; do
-      name=$(daemon_name "$socket" "herdr:$socket:$workspace")
-      keep+="$name "
-    done
-    for pid in $pids; do
-      grep -zFxq "HERDR_SOCKET_PATH=$socket" "/proc/$pid/environ" 2>/dev/null || continue
-      grep -zEq '^(TMUX|TMUX_PANE)=' "/proc/$pid/environ" 2>/dev/null && continue
-      name=$(grep -zoE '^--daemon=em-[[:xdigit:]]{24}$' "/proc/$pid/cmdline" 2>/dev/null | tr -d '\0') || continue
-      name=${name#--daemon=}
-      [[ $keep == *" $name "* ]] || stop_daemon "$name"
-    done
-    ;;
-  esac
   exit
   ;;
 --sweep-hc)
@@ -123,27 +94,6 @@ if [[ -n ${TMUX_PANE-}${TMUX-} ]]; then
   identity="tmux:$socket:$session"
   params=$(jq -nr --arg pane "$TMUX_PANE" --arg socket "$TMUX" \
     '"((edger-tmux-pane-id . \($pane|tojson)) (edger-tmux-socket . \($socket|tojson)))"')
-elif [[ ${HERDR_ENV-} == 1 || -n ${HERDR_PANE_ID-}${HERDR_SOCKET_PATH-}${HERDR_WORKSPACE_ID-} ]]; then
-  [[ -n ${HERDR_PANE_ID-} && -n ${HERDR_SOCKET_PATH-} && -S $HERDR_SOCKET_PATH ]] || {
-    echo 'em: Herdr pane or socket is missing' >&2
-    exit 1
-  }
-  pane=$(herdr pane current --current) || {
-    echo 'em: cannot resolve current Herdr pane' >&2
-    exit 1
-  }
-  workspace=$(jq -er '.result.pane.workspace_id | select(type == "string" and length > 0)' <<<"$pane") || {
-    echo 'em: Herdr returned no workspace for calling pane' >&2
-    exit 1
-  }
-  pane_id=$(jq -er '.result.pane.pane_id | select(type == "string" and length > 0)' <<<"$pane") || {
-    echo 'em: Herdr returned no calling pane ID' >&2
-    exit 1
-  }
-  socket=$HERDR_SOCKET_PATH
-  identity="herdr:$socket:$workspace"
-  params=$(jq -nr --arg pane "$pane_id" --arg socket "$socket" \
-    '"((edger-herdr-pane-id . \($pane|tojson)) (edger-herdr-socket-path . \($socket|tojson)))"')
 elif [[ -n ${HC_TERMINAL_ID-} ]]; then
   # An hc terminal the Herdr app shows carries its space's ID. Each space gets
   # its own daemon, as each Herdr workspace did; a hidden terminal uses the

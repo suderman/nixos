@@ -10,7 +10,6 @@
   cfg = config.programs.pi-coding-agent;
 
   agentDir = ".pi/agent";
-  herdrPackage = config.programs.herdr-tui.package;
 
   piDcpPackageFix = pkgs.self.mkScript {
     name = "pi-fix-dcp-package";
@@ -75,14 +74,6 @@ in {
       then ".local/libexec/june/pi"
       else ".local/bin/pi"
     }.source = "${cfg.package}/bin/pi";
-
-    home.activation.piHerdrIntegration = lib.mkIf (config.programs.herdr-tui.enable && herdrPackage != null) (
-      lib.hm.dag.entryAfter ["writeBoundary"] ''
-        $DRY_RUN_CMD env \
-          PI_CODING_AGENT_DIR=${config.home.homeDirectory}/${agentDir} \
-          ${lib.getExe herdrPackage} integration install pi
-      ''
-    );
 
     systemd.user.services.pi-extension-update = {
       Unit.Description = "Update Pi extensions";

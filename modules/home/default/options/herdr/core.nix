@@ -124,14 +124,14 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    # The TUI module already installs Edger when both are enabled.
-    home.packages =
-      [wrapped]
-      ++ lib.optional (!config.programs.herdr-tui.enable) (pkgs.self.mkScript {
+    home.packages = [
+      wrapped
+      (pkgs.self.mkScript {
         name = "edger";
         path = [wrapped];
         text = builtins.readFile "${flake.inputs.edger}/bin/edger";
-      });
+      })
+    ];
     persist.storage.directories = [
       {
         directory = ".config/herdr-core";

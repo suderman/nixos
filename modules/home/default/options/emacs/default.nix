@@ -37,7 +37,7 @@
 
   workspaceClient = pkgs.self.mkScript {
     name = "em-workspace-client";
-    path = [cfg.finalPackage config.programs.herdr-tui.package config.services.herdr.finalPackage pkgs.tmux pkgs.jq pkgs.coreutils pkgs.util-linux pkgs.procps pkgs.gnugrep];
+    path = [cfg.finalPackage config.services.herdr.finalPackage pkgs.tmux pkgs.jq pkgs.coreutils pkgs.util-linux pkgs.procps pkgs.gnugrep];
     text = ''
       ${builtins.readFile ./terminal-setup.sh}
       EMACS_CLIENT=${lib.getBin cfg.finalPackage}/bin/emacsclient
@@ -45,24 +45,6 @@
       ${builtins.readFile ./emacs-workspace-client.sh}
     '';
   };
-
-  # Stops a workspace's daemon when Herdr closes it, and sweeps daemons left
-  # by an earlier server when one starts.
-  herdrPlugin = pkgs.writeTextDir "herdr-plugin.toml" ''
-    id = "em"
-    name = "em"
-    version = "0.1.0"
-    min_herdr_version = "0.9.0"
-    description = "Stop each workspace's Emacs daemon with its workspace"
-    platforms = ["linux"]
-
-    [[startup]]
-    command = ["${lib.getExe workspaceClient}", "--herdr-plugin"]
-
-    [[events]]
-    on = "workspace.closed"
-    command = ["${lib.getExe workspaceClient}", "--herdr-plugin"]
-  '';
 
   # Archive with the checkout's own suderman/org-archive-old-done, so the timer
   # and SPC o A share one implementation. --dry-run lists without archiving.
@@ -124,13 +106,6 @@ in {
       mkIf (cfg.exportStyle && config.desktop.enable) (lib.hm.dag.entryAfter ["writeBoundary"] ''
         $DRY_RUN_CMD ${exportStyle}
       '');
-
-    # Relinking the same plugin ID replaces the previous store path.
-    home.activation.emHerdrPlugin = mkIf (config.programs.herdr-tui.enable && config.programs.herdr-tui.package != null) (
-      lib.hm.dag.entryAfter ["writeBoundary"] ''
-        $DRY_RUN_CMD ${lib.getExe config.programs.herdr-tui.package} plugin link ${herdrPlugin} >/dev/null
-      ''
-    );
 
     # The Herdr app's spaces have no close event in hc; stop the em daemon of a
     # space with no live terminals left.

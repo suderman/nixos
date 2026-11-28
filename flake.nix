@@ -119,10 +119,6 @@
     june.url = "github:suderman/june";
     june.inputs.nixpkgs.follows = "nixpkgs";
 
-    # Tmux replacement
-    # <https://github.com/herdrdev/herdr-nix>
-    herdr.url = "github:herdrdev/herdr-nix";
-
     # Herdr Core and desktop app
     # <https://github.com/kevinpita/herdr-nix>
     herdr-nix.url = "github:kevinpita/herdr-nix";

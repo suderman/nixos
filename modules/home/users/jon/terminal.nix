@@ -10,15 +10,6 @@
     blocked = "${dir}/tivo-down.mp3";
   };
 in {
-  programs.herdr-tui.enable = true;
-
-  # Hosts running agents, shown together in the desktop roster. Adding lux starts its server at boot.
-  programs.herdr-tui.workers = ["kit" "cog"];
-
-  programs.herdr-tui.settings.ui.sound = {
-    done_path = herdrSounds.done;
-    request_path = herdrSounds.blocked;
-  };
   programs.herdr.settings.sounds = herdrSounds;
 
   home.packages = with pkgs; [
@@ -29,8 +20,6 @@ in {
 
   # Aliases
   home.shellAliases = {
-    herdr-kit = "herdr --remote kit --remote-keybindings server";
-    herdr-cog = "herdr --remote cog --remote-keybindings server";
     neofetch = "fastfetch";
 
     # 5 second countdown until the clipboard gets typed out
