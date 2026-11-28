@@ -1,7 +1,14 @@
-{lib, ...}: {
+{
+  lib,
+  osConfig,
+  ...
+}: {
   programs.hyprlock = {
     enable = true;
     settings = {
+      # Fingerprint runs alongside the password; ly's password login unlocks the keyring.
+      auth."fingerprint:enabled" = osConfig.services.fprintd.enable or false;
+
       general = {
         disable_loading_bar = true;
         grace = 5;
@@ -66,7 +73,7 @@
         }
         {
           monitor = "";
-          text = "Type to unlock!";
+          text = "Type to unlock! $FPRINTPROMPT";
           font_size = 16;
           position = "0, 30";
           halign = "center";

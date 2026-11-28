@@ -121,8 +121,13 @@
       };
     };
 
+    # Only a typed password unlocks the login keyring, and pam_fprintd placed
+    # first makes ly wait for a finger before it tries the typed password.
+    security.pam.services.ly.fprintAuth = false;
+
     # https://home-manager-options.extranix.com/?query=hyprlock&release=release-25.05
-    security.pam.services.hyprlock = {};
+    # hyprlock checks fingerprints itself through fprintd, alongside the password.
+    security.pam.services.hyprlock.fprintAuth = false;
 
     # https://home-manager-options.extranix.com/?query=swaylock&release=release-25.05
     security.pam.services.swaylock = {};
